@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<robot name="gen3_lite_gen3_lite_2f" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!-- Arguments -->
+    <xacro:arg name="arm" default="gen3_lite" />
+
+    <!-- Those arguments are ignored for now on Gen3 lite because there is only one supported configuration -->
+    <xacro:arg name="dof" default="6" />
+    <xacro:arg name="vision" default="false" />
+
+    <xacro:arg name="gripper" default="gen3_lite_2f" />
+
+    <xacro:arg name="sim" default="false" />
+    <xacro:arg name="prefix" default="" />
+
+    <xacro:include filename="$(find kortex_description)/robots/kortex_robot.xacro" />
+    <xacro:load_robot arm="$(arg arm)" gripper="$(arg gripper)" dof="$(arg dof)" vision="false" sim="$(arg sim)"  prefix="$(arg prefix)" />
+
+</robot>

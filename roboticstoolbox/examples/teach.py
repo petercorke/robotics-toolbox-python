@@ -3,10 +3,10 @@
 @author Jesse Haviland
 """
 
-import roboticstoolbox as rp
+import roboticstoolbox as rtb
 
 # Make a panda robot
-panda = rp.models.DH.Panda()
+panda = rtb.models.DH.Panda()
 
 # Init joint to the 'ready' joint angles
 panda.q = panda.qr

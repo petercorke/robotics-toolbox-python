@@ -1,6 +1,5 @@
 from roboticstoolbox import Bicycle, RandomPath, VehiclePolygon, VehicleIcon
 from spatialmath import *   # lgtm [py/polluting-import]
-
 from math import pi
 
 dim = 10
@@ -8,7 +7,12 @@ dim = 10
 # v = VehiclePolygon()
 anim = VehicleIcon('greycar', scale=2)
 
-veh = Bicycle(animation=anim, control=RandomPath(dim=dim), dim=dim, verbose=False)
+veh = Bicycle(
+    animation=anim,
+    control=RandomPath(
+        dim=dim),
+    dim=dim,
+    verbose=False)
 print(veh)
 
 # odo = veh.step(1, 0.3)

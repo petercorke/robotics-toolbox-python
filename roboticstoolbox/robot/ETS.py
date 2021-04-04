@@ -10,12 +10,11 @@ from abc import ABC
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
-    issymbol, tr2jac, transl2, trot2, tr2jac2, removesmall, trinv, \
-    verifymatrix, iseye
+    issymbol, tr2jac, transl2, trot2, removesmall, trinv, \
+    verifymatrix, iseye, tr2jac2
 
 
 class BaseETS(UserList, ABC):
-
 
     # T is a NumPy array (4,4) or None
     # ets_tuple = namedtuple('ETS3', 'eta axis_func axis joint T jindex flip')
@@ -522,10 +521,10 @@ class BaseETS(UserList, ABC):
             T = SE3(T, check=False)
 
         # optionally do symbolic simplification
-        
+
         if T.A.dtype == 'O':
             T = T.simplify()
-        
+
         return T
 
     def compile(self):
@@ -650,7 +649,7 @@ class BaseETS(UserList, ABC):
                         _j = j
                     else:
                         _j = et.jindex
-                    qvar = q.format(_j, _j+1) # lgtm [py/str-format/surplus-argument]  # noqa
+                    qvar = q.format(_j, _j+1)  # lgtm [py/str-format/surplus-argument]  # noqa
                 else:
                     qvar = ""
                 if et.isflip:
@@ -1193,7 +1192,7 @@ class ETS(BaseETS):
         :math:`\mathbf{E}(q)`.
 
         .. math::
-        
+
             {}^0 T_e = \mathbf{E}(q) \in \mbox{SE}(3)
 
         The temporal derivative of this is the spatial
@@ -1436,6 +1435,7 @@ class ETS2(BaseETS):
 
     :seealso: :func:`r`, :func:`tx`, :func:`ty`
     """
+
     def __init__(self, *pos, **kwargs):
         super().__init__(*pos, **kwargs)
         self._ndims = 2
@@ -1524,12 +1524,11 @@ class ETS2(BaseETS):
 
     def jacob0(self, q, T=None):
 
-
         # very inefficient implementation, just put a 1 in last row
         # if its a rotation joint
         q = getvector(q)
 
-        E = np.zeros((3,3))
+        # E = np.zeros((3, 3))
         j = 0
         J = np.zeros((3, self.n))
         jindex = self.joints()
@@ -1542,31 +1541,31 @@ class ETS2(BaseETS):
                     [0, -1, 0],
                     [1,  0, 0],
                     [0,  0, 0]
-                    ]) @ self[i].eval(q[j]).A
+                ]) @ self[i].eval(q[j]).A
             elif axis == 'tx':
                 dTdq = np.array([
                     [0, 0, 1],
                     [0, 0, 0],
                     [0, 0, 0]
-                    ])
+                ])
             elif axis == 'ty':
                 dTdq = np.array([
                     [0, 0, 0],
                     [0, 0, 1],
                     [0, 0, 0]
-                    ])
+                ])
 
             E0 = self[:i]
             if len(E0) > 0:
                 dTdq = E0.eval(q).A @ dTdq
-            
+
             Ef = self[i+1:]
             if len(Ef) > 0:
                 dTdq = dTdq @ Ef.eval(q[j+1:]).A
 
             T = self.eval(q).A
-            dRdt = dTdq[:2,:2] @ T[:2,:2].T 
-            J[:,j] = np.r_[dTdq[:2,2].T, dRdt[1,0]]
+            dRdt = dTdq[:2, :2] @ T[:2, :2].T
+            J[:, j] = np.r_[dTdq[:2, 2].T, dRdt[1, 0]]
 
         return J
 
@@ -1598,6 +1597,7 @@ class ETS2(BaseETS):
 
         return tr2jac2(T.A.T) @ self.jacob0(q, T)
 
+
 if __name__ == "__main__":
 
     # print(ETS.rx(0.2))
@@ -1618,7 +1618,8 @@ if __name__ == "__main__":
 
     # theta, d = symbol('theta, d')
 
-    # e = ETS.rx(theta) * ETS.tx(2) * ETS.rx(45, 'deg') * ETS.ry(0.2) * ETS.ty(d)
+    # e = ETS.rx(theta) *
+    # ETS.tx(2) * ETS.rx(45, 'deg') * ETS.ry(0.2) * ETS.ty(d)
     # print(e)
 
     # e = ETS()
@@ -1639,8 +1640,10 @@ if __name__ == "__main__":
     # l5 = 0.0837
     # l6 = 0.4318
 
-    # e = ETS.tz(l1) * ETS.rz() * ETS.ry() * ETS.ty(l2) * ETS.tz(l3) * ETS.ry() \
-    #     * ETS.tx(l4) * ETS.ty(l5) * ETS.tz(l6) * ETS.rz() * ETS.ry() * ETS.rz()
+    # e = ETS.tz(l1) * ETS.rz() * ETS.ry() * ETS.ty(l2)
+    # * ETS.tz(l3) * ETS.ry() \
+    #     * ETS.tx(l4) * ETS.ty(l5) * ETS.tz(l6) * ETS.rz()
+    # * ETS.ry() * ETS.rz()
     # print(e.joints())
     # print(e.config)
     # print(e.eval(np.zeros(6)))
@@ -1683,16 +1686,27 @@ if __name__ == "__main__":
     # J = b.jacobe([1,0])
     # print(J)
 
+    # J = b.jacob0([0, 0])
+    # print(J)
 
-    from roboticstoolbox import ETS2 as ET
+    # J = b.jacobe([0, 0])
+    # print(J)
 
-    a1 = 1
-    E = ET.r() * ET.tx(a1)
+    # J = b.jacob0([1, 0])
+    # print(J)
 
-    v = E.eval( 30, unit='deg')
-    print(v)
+    # J = b.jacobe([1, 0])
+    # print(J)
+
+    # a1 = 1
+    # E = ET.r() * ET.tx(a1)
+
+    # v = E.eval(30, unit='deg')
+    # print(v)
 
     # b = ETS.ry(flip=True) * ETS.tx(1) * ETS.ry() * ETS.tx(1)
 
     # J = b.jacob0([1,0])
     # print(J)
+
+    pass

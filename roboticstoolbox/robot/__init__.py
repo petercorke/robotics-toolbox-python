@@ -12,7 +12,6 @@ from roboticstoolbox.robot.ELink import ELink
 from roboticstoolbox.robot.ELink2 import ELink2
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.Gripper import Gripper
-from roboticstoolbox.robot.Shape import Shape, Cylinder, Sphere, Box, Mesh
 
 __all__ = [
     'BaseRobot',
@@ -33,10 +32,5 @@ __all__ = [
     'ERobot2',
     'ETS',
     'ETS2',
-    'Gripper',
-    'Shape',
-    'Cylinder',
-    'Sphere',
-    'Box',
-    'Mesh'
-    ]
+    'Gripper'
+]

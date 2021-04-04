@@ -10,6 +10,7 @@ import roboticstoolbox as rtb
 from roboticstoolbox import ERobot, ELink, ETS
 import unittest
 import spatialmath as sm
+import spatialgeometry as gm
 from math import pi, sin, cos
 
 class TestERobot(unittest.TestCase):
@@ -280,7 +281,7 @@ class TestERobot(unittest.TestCase):
     def test_fkine_all(self):
         pm = rtb.models.DH.Panda()
         p = rtb.models.ETS.Panda()
-        q = [1, 2, 3, 4, 5, 6, 7]
+        q = np.array([1.0, 2, 3, 4, 5, 6, 7])
         p.q = q
         pm.q = q
 
@@ -288,11 +289,11 @@ class TestERobot(unittest.TestCase):
         r2 = pm.fkine_all(q)
 
         for i in range(7):
-            nt.assert_array_almost_equal(p.links[i]._fk.A, r2[i].A)
+            nt.assert_array_almost_equal(p.links[i]._fk, r2[i].A)
 
         p.fkine_all(q)
         for i in range(7):
-            nt.assert_array_almost_equal(p.links[i]._fk.A, r2[i].A)
+            nt.assert_array_almost_equal(p.links[i]._fk, r2[i].A)
 
     def test_jacob0(self):
         panda = rtb.models.ETS.Panda()
@@ -578,7 +579,7 @@ class TestERobot(unittest.TestCase):
 
     def test_dict(self):
         panda = rtb.models.Panda()
-        panda.grippers[0].links[0].collision.append(rtb.Box([1, 1, 1]))
+        panda.grippers[0].links[0].collision.append(gm.Box([1, 1, 1]))
         panda.to_dict()
 
         wx = rtb.models.wx250s()
@@ -586,7 +587,7 @@ class TestERobot(unittest.TestCase):
 
     def test_fkdict(self):
         panda = rtb.models.Panda()
-        panda.grippers[0].links[0].collision.append(rtb.Box([1, 1, 1]))
+        panda.grippers[0].links[0].collision.append(gm.Box([1, 1, 1]))
         panda.fk_dict()
 
     def test_elinks(self):
@@ -756,8 +757,8 @@ class TestERobot(unittest.TestCase):
     #     e2.close()
 
     def test_dist(self):
-        s0 = rtb.Box([1, 1, 1], sm.SE3(0, 0, 0))
-        s1 = rtb.Box([1, 1, 1], sm.SE3(3, 0, 0))
+        s0 = gm.Box([1, 1, 1], base=sm.SE3(0, 0, 0))
+        s1 = gm.Box([1, 1, 1], base=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
 
         d0, _, _ = p.closest_point(s0)
@@ -769,8 +770,8 @@ class TestERobot(unittest.TestCase):
         self.assertAlmostEqual(d2, None)
 
     def test_collided(self):
-        s0 = rtb.Box([1, 1, 1], sm.SE3(0, 0, 0))
-        s1 = rtb.Box([1, 1, 1], sm.SE3(3, 0, 0))
+        s0 = gm.Box([1, 1, 1], base=sm.SE3(0, 0, 0))
+        s1 = gm.Box([1, 1, 1], base=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
 
         c0 = p.collided(s0)

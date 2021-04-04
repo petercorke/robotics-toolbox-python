@@ -3,12 +3,12 @@
 @author: Jesse Haviland
 """
 
-# import numpy as np
 from spatialmath import SE3, SE2, BasePoseMatrix
-# from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
-import roboticstoolbox as rp
+from spatialgeometry import Shape
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
+import numpy as np
+import fknm
 
 
 class ELink(Link):
@@ -41,7 +41,7 @@ class ELink(Link):
 
     It inherits from the Link class which provides common functionality such
     as joint and link such as kinematics parameters,
-    
+
 
     The transform to the next link is given as an ETS with the joint
     variable, if present, as the last term.  This is preprocessed and
@@ -116,6 +116,93 @@ class ELink(Link):
 
         self._v = v
 
+        # Private variable, can be written to but never replaced!
+        # The c will adjust the inside of this array with a reference
+        # to this specific array. If replaced --> segfault
+        self._fk = np.eye(4)
+
+        self._init_fknm()
+
+    def _init_fknm(self):
+
+        isflip = False
+        axis = 0
+        jindex = 0
+
+        if self.isjoint:
+            isflip = self._v.isflip
+            jindex = self.jindex
+
+            if jindex is None:
+                jindex = 0
+
+            if self._v.axis == 'Rx':
+                axis = 0
+            elif self._v.axis == 'Ry':
+                axis = 1
+            elif self._v.axis == 'Rz':
+                axis = 2
+            elif self._v.axis == 'tx':
+                axis = 3
+            elif self._v.axis == 'ty':
+                axis = 4
+            elif self._v.axis == 'tz':
+                axis = 5
+
+        if self.parent is None:
+            parent = None
+        else:
+            parent = self.parent._fknm
+
+        self._fknm = fknm.link_init(
+            self.isjoint,
+            isflip,
+            axis,
+            jindex,
+            self._Ts,
+            self._fk,
+            parent)
+
+    def _update_fknm(self):
+        isflip = False
+        axis = 0
+        jindex = 0
+
+        if self.isjoint:
+            isflip = self._v.isflip
+            jindex = self.jindex
+
+            if jindex is None:
+                jindex = 0
+
+            if self._v.axis == 'Rx':
+                axis = 0
+            elif self._v.axis == 'Ry':
+                axis = 1
+            elif self._v.axis == 'Rz':
+                axis = 2
+            elif self._v.axis == 'tx':
+                axis = 3
+            elif self._v.axis == 'ty':
+                axis = 4
+            elif self._v.axis == 'tz':
+                axis = 5
+
+        if self.parent is None:
+            parent = None
+        else:
+            parent = self.parent._fknm
+
+        fknm.link_update(
+            self._fknm,
+            self.isjoint,
+            isflip,
+            axis,
+            jindex,
+            self._Ts,
+            self._fk,
+            parent)
+
     def _init_Ts(self):
         # Number of transforms in the ETS excluding the joint variable
         self._M = len(self._ets)
@@ -132,11 +219,8 @@ class ELink(Link):
                 if et.isjoint:
                     raise ValueError('The transforms in ets must be constant')
 
-                if first:
-                    T = et.T()
-                    first = False
-                else:
-                    T = T @ et.T()
+                T = T @ et.T()
+
             self._Ts = T
 
         elif isinstance(self._ets, SE3):
@@ -173,6 +257,16 @@ class ELink(Link):
             return f"{name}[{self.name}({parent}): {self.ets()}] "
 
     @property
+    def fk(self):
+        """
+        The forward kinemtics up to and including this link
+        This value can be accessed after calling fkine_all(q)
+        from the robot object.
+        """
+
+        return SE3(self._fk, check=False)
+
+    @property
     def v(self):
         """
         Variable part of link ETS
@@ -191,6 +285,14 @@ class ELink(Link):
             >>> print(link.v)
         """
         return self._v
+
+    @v.setter
+    def v(self, new):
+        if not isinstance(new, ETS) and new is not None:
+            raise TypeError("v must be an ETS object")
+
+        self._v = new
+        self._update_fknm()
 
     @property
     def Ts(self):
@@ -261,6 +363,7 @@ class ELink(Link):
     @jindex.setter
     def jindex(self, j):
         self._jindex = j
+        self._update_fknm()
 
     # def isrevolute(self):
     #     """
@@ -386,7 +489,13 @@ class ELink(Link):
     #         T = SE3(T)
     #     self._r = T
 
-    def A(self, q=None, fast=False):
+    # import numba
+
+# array(float64, 1d, C)
+
+    # @numba.jit(nopython=True)
+
+    def A(self, q=0.0, fast=False):
         """
         Link transform matrix
 
@@ -398,7 +507,7 @@ class ELink(Link):
         :return T: link frame transformation matrix
         :rtype T: SE3 or ndarray(4,4)
 
-        ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body 
+        ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body
           transformation from the previous to the current link frame to
           the next, which depends on the joint coordinate ``q``.
 
@@ -409,7 +518,15 @@ class ELink(Link):
 
         """
 
-        # we work with NumPy arrays for speed
+        # Use c extension
+        if fast:
+            if not np.isscalar(q):
+                q = 0.0
+            T = np.empty((4, 4))
+            fknm.link_A(q, self._fknm, T)
+            return T
+
+        # Otherwise use Python implementation
         if self.isjoint:
             # a variable joint
             if q is None:
@@ -439,7 +556,6 @@ class ELink(Link):
             elif self._ndims == 2:
                 return SE2(T, check=False)
 
-
     def ets(self):
         if self.v is None:
             return self._ets
@@ -452,11 +568,11 @@ class ELink(Link):
 
         if isinstance(coll, list):
             for gi in coll:
-                if isinstance(gi, rp.Shape):
+                if isinstance(gi, Shape):
                     new_coll.append(gi)
                 else:
                     raise TypeError('Collision must be of Shape class')
-        elif isinstance(coll, rp.Shape):
+        elif isinstance(coll, Shape):
             new_coll.append(coll)
         else:
             raise TypeError('Geometry must be of Shape class or list of Shape')
@@ -469,11 +585,11 @@ class ELink(Link):
 
         if isinstance(geom, list):
             for gi in geom:
-                if isinstance(gi, rp.Shape):
+                if isinstance(gi, Shape):
                     new_geom.append(gi)
                 else:
                     raise TypeError('Geometry must be of Shape class')
-        elif isinstance(geom, rp.Shape):
+        elif isinstance(geom, Shape):
             new_geom.append(geom)
         else:
             raise TypeError('Geometry must be of Shape class or list of Shape')

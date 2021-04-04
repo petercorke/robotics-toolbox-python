@@ -3,13 +3,15 @@
 @author Jesse Haviland
 """
 
+import swift
+import spatialgeometry as sg
 import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
 import qpsolvers as qp
 
 # Launch the simulator Swift
-env = rtb.backends.Swift()
+env = swift.Swift()
 env.launch()
 
 # Create a Panda robot object
@@ -22,13 +24,13 @@ panda.q = panda.qr
 n = 7
 
 # Make two obstacles with velocities
-s0 = rtb.Sphere(
+s0 = sg.Sphere(
     radius=0.05,
     base=sm.SE3(0.52, 0.4, 0.3)
 )
 s0.v = [0, -0.2, 0, 0, 0, 0]
 
-s1 = rtb.Sphere(
+s1 = sg.Sphere(
     radius=0.05,
     base=sm.SE3(0.1, 0.35, 0.65)
 )
@@ -37,7 +39,7 @@ s1.v = [0, -0.2, 0, 0, 0, 0]
 collisions = [s0, s1]
 
 # Make a target
-target = rtb.Sphere(
+target = sg.Sphere(
     radius=0.02,
     base=sm.SE3(0.6, -0.2, 0.0)
 )
@@ -64,7 +66,7 @@ while not arrived:
     eTep = Te.inv() * Tep
 
     # Spatial error
-    e = np.sum(np.abs(np.r_[eTep.t, eTep.rpy() * np.pi/180]))
+    e = np.sum(np.abs(np.r_[eTep.t, eTep.rpy() * np.pi / 180]))
 
     # Calulate the required end-effector spatial velocity for the robot
     # to approach the goal. Gain is set to 1.0

@@ -1,53 +1,48 @@
-# #!/usr/bin/env python
-# """
-# @author Jesse Haviland
-# """
+#!/usr/bin/env python
+"""
+@author Peter Corke
+@author Jesse Haviland
+"""
 
+import swift
 from math import pi
 import roboticstoolbox as rtb
+from spatialgeometry import Mesh
 from spatialmath import SO3, SE3
 import numpy as np
-import pathlib
-import os
-
-path = os.path.realpath('.')
 
 
 # TODO
-#  rotate the rings according to the rotation axis, so that the axles 
+#  rotate the rings according to the rotation axis, so that the axles
 #  point the right way
 
 # Launch the simulator Swift
-from roboticstoolbox.backends import Swift
-env = Swift.Swift()
+env = swift.Swift()
 env.launch()
 
 path = rtb.path_to_datafile('data')
 
 
-g1 = rtb.Mesh(
+g1 = Mesh(
     filename=str(path / 'gimbal-ring1.stl'),
     color=[34, 143, 201],
     scale=(1./3,) * 3
 )
-# g1.v = [0, 0, 0, 0.4, 0, 0]
 
-g2 = rtb.Mesh(
+g2 = Mesh(
     filename=str(path / 'gimbal-ring2.stl'),
     color=[31, 184, 72],
     scale=(1.1/3,) * 3
 
 )
-# g2.v = [0, 0, 0, 0.4, 0.0, 0]
 
-g3 = rtb.Mesh(
+g3 = Mesh(
     filename=str(path / 'gimbal-ring3.stl'),
     color=[240, 103, 103],
     scale=(1.1**2/3,) * 3
 )
-# g3.v = [0, 0, 0, 0.4, 0, 0]
 
-plane = rtb.Mesh(
+plane = Mesh(
     filename=str(path / 'spitfire_assy-gear_up.stl'),
     scale=(1./(180*3),) * 3,
     color=[240, 103, 103]
@@ -62,7 +57,6 @@ print('Supermarine Spitfire Mk VIII by Ed Morley @GRABCAD')
 print('Gimbal models by Peter Corke using OpenSCAD')
 
 # compute the three rotation matrices
-
 BASE = SE3(0, 0, 0.5)
 R1 = SO3()
 R2 = SO3()
@@ -76,7 +70,6 @@ def update_gimbals(theta, ring):
     global R1, R2, R3
 
     # update the relevant transform, depending on which ring's slider moved
-
     def Rxyz(theta, which):
         theta = np.radians(theta)
         if which == 'X':
@@ -95,7 +88,6 @@ def update_gimbals(theta, ring):
 
     # figure the transforms for each gimbal and the plane, and update their
     # pose
-
     def convert(R):
         return BASE * SE3.SO3(R)
 
@@ -104,32 +96,35 @@ def update_gimbals(theta, ring):
     g1.base = convert(R1 * R2 * R3 * SO3.Rx(pi/2))
     plane.base = convert(R1 * R2 * R3 * SO3.Ry(pi/2) * SO3.Rz(pi/2))
 
+
 # slider call backs, invoke the central handler
 def set_one(x):
     update_gimbals(float(x), 1)
 
+
 def set_two(x):
     update_gimbals(float(x), 2)
+
 
 def set_three(x):
     update_gimbals(float(x), 3)
 
 
-r_one = Swift.Slider(
+r_one = swift.Slider(
     set_one,
     min=-180, max=180,
     step=1, value=0,
     desc='Outer gimbal', unit='&#176;')
 
 
-r_two = Swift.Slider(
+r_two = swift.Slider(
     set_two,
     min=-180, max=180,
     step=1, value=0,
     desc='Middle gimbal', unit='&#176;')
 
 
-r_three = Swift.Slider(
+r_three = swift.Slider(
     set_three,
     min=-180, max=180,
     step=1, value=0,
@@ -137,36 +132,40 @@ r_three = Swift.Slider(
 
 
 # buttons to set a 3-angle sequence
-ZYX_button = Swift.Button(
+ZYX_button = swift.Button(
     lambda x: change_sequence('ZYX'),
     desc='ZYX (roll-pitch-yaw angles)'
 )
 
-XYZ_button = Swift.Button(
+XYZ_button = swift.Button(
     lambda x: change_sequence('XYZ'),
     desc='XYZ (roll-pitch-yaw angles)'
 )
 
-ZYZ_button = Swift.Button(
+ZYZ_button = swift.Button(
     lambda x: change_sequence('ZYZ'),
     desc='ZYZ (Euler angles)'
 )
 
-button = Swift.Button(
+button = swift.Button(
     lambda x: set('ZYX'),
     desc='Set to Zero'
 )
+
 
 # button to reset joint angles
 def reset(e):
     r_one.value = 0
     r_two.value = 0
     r_three.value = 0
+    # env.step(0)
 
-zero_button = Swift.Button(
+
+zero_button = swift.Button(
     reset,
     desc='Set to Zero'
 )
+
 
 def change_sequence(new):
     global sequence
@@ -179,7 +178,7 @@ def change_sequence(new):
     ring3_axis.checked = xyz.find(new[2])
 
     sequence = new
-    # print(sequence)
+
 
 # handle radio button on angle slider
 def angle(index, ring):
@@ -191,7 +190,8 @@ def angle(index, ring):
     s[ring] = xyz[int(index)]
     sequence = ''.join(s)
 
-ring1_axis = Swift.Radio(
+
+ring1_axis = swift.Radio(
     lambda x: angle(x, 0),
     options=[
         'X',
@@ -201,7 +201,7 @@ ring1_axis = Swift.Radio(
     checked=2
 )
 
-ring2_axis = Swift.Radio(
+ring2_axis = swift.Radio(
     lambda x: angle(x, 1),
     options=[
         'X',
@@ -211,7 +211,7 @@ ring2_axis = Swift.Radio(
     checked=1
 )
 
-ring3_axis = Swift.Radio(
+ring3_axis = swift.Radio(
     lambda x: angle(x, 2),
     options=[
         'X',
@@ -230,7 +230,8 @@ def check_fn(indices):
     else:
         print('Half marks')
 
-check = Swift.Checkbox(
+
+check = swift.Checkbox(
     check_fn,
     desc='Describe Jesse',
     options=[
@@ -248,7 +249,8 @@ def radio_fn(idx):
     else:
         print("You are correct :)")
 
-radio = Swift.Radio(
+
+radio = swift.Radio(
     radio_fn,
     desc='Gimbal axis',
     options=[
@@ -259,7 +261,7 @@ radio = Swift.Radio(
     checked=1
 )
 
-label = Swift.Label(
+label = swift.Label(
     desc='Triple angle'
 )
 
@@ -278,48 +280,9 @@ env.add(XYZ_button)
 env.add(ZYZ_button)
 env.add(zero_button)
 
-
-# env.add(check)
-# env.add(radio)
-
 update_gimbals(0, 1)
 update_gimbals(0, 2)
 update_gimbals(0, 3)
 
 while(True):
-    # env.process_events()
     env.step(0)
-
-# ring1_axis = Swift.Select(
-#     lambda x: angle(x, 0),
-#     desc='Outer gimbal axis',
-#     options=[
-#         'X',
-#         'Y',
-#         'Z'
-#     ],
-#     value=2
-# )
-
-
-# ring2_axis = Swift.Select(
-#     lambda x: angle(x, 1),
-#     desc='Middle gimbal axis',
-#     options=[
-#         'X',
-#         'Y',
-#         'Z'
-#     ],
-#     value=1
-# )
-
-# ring3_axis = Swift.Select(
-#     lambda x: angle(x, 2),
-#     desc='Inner gimbal axis',
-#     options=[
-#         'X',
-#         'Y',
-#         'Z'
-#     ],
-#     value=0
-# )

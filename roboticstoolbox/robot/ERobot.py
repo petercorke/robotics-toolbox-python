@@ -4,34 +4,30 @@ Created on Tue Apr 24 15:48:52 2020
 @author: Jesse Haviland
 """
 
-import sys
-import os
 from os.path import splitext
 import tempfile
 import subprocess
 import webbrowser
 import numpy as np
-# import spatialmath as sp
-from spatialmath import SE3, SE2
+from spatialmath import SE3
 from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix
-from roboticstoolbox.robot.BaseRobot import BaseRobot
+# from roboticstoolbox.robot.BaseRobot import BaseRobot
 
 from roboticstoolbox.robot.ELink import ELink
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.DHRobot import DHRobot
-# from roboticstoolbox.backends.PyPlot.functions import \
-#     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
-#     _plot2, _teach2
 from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.tools.data import path_to_datafile
 
-from pathlib import PurePath, PurePosixPath
+from pathlib import PurePosixPath
 from ansitable import ANSITable, Column
 from spatialmath import SpatialAcceleration, SpatialVelocity, \
     SpatialInertia, SpatialForce
+
+import fknm
 
 
 class ERobot(Robot):
@@ -128,8 +124,6 @@ class ERobot(Robot):
           J. Haviland and P. Corke
     """
 
-    # TODO do we need tool and base as well?
-
     def __init__(
             self,
             arg,
@@ -137,7 +131,7 @@ class ERobot(Robot):
             gripper_links=None,
             checkjindex=True,
             **kwargs
-            ):
+    ):
 
         self._ets = []
         self._linkdict = {}
@@ -153,7 +147,7 @@ class ERobot(Robot):
             # we're passed a DHRobot object
             # TODO handle dynamic parameters if given
             args = args.ets()
-        
+
         link_number = 0
         if isinstance(arg, ETS):
             # we're passed an ETS string
@@ -313,6 +307,21 @@ class ERobot(Robot):
         self.qdd = np.zeros(self.n)
         self.control_type = 'v'
 
+        # Set up qlim
+        qlim = np.zeros((2, self.n))
+        j = 0
+
+        for i in range(len(orlinks)):
+            if orlinks[i].isjoint:
+                qlim[:, j] = orlinks[i].qlim
+                j += 1
+        self._qlim = qlim
+
+        for i in range(self.n):
+            if np.any(qlim[:, i] != 0) and \
+                    not np.any(np.isnan(qlim[:, i])):
+                self._valid_qlim = True
+
         super().__init__(orlinks, **kwargs)
 
     @classmethod
@@ -328,6 +337,32 @@ class ERobot(Robot):
         links, name = ERobot.URDF_read(file_path)
 
         return cls(links, name=name)
+        # Cached paths through links
+        # TODO Add listners on setters to reset cache
+        self._reset_cache()
+
+    def _reset_cache(self):
+        self._path_cache = {}
+        self._path_cache_fknm = {}
+        self._cache_end = None
+        self._cache_start = None
+        self._cache_end_tool = None
+        self._eye_fknm = np.eye(4)
+
+        self._cache_links_fknm = []
+
+        self._cache_grippers = []
+
+        for link in self.elinks:
+            self._cache_links_fknm.append(link._fknm)
+
+        for gripper in self.grippers:
+            cache = []
+            for link in gripper.links:
+                cache.append(link._fknm)
+            self._cache_grippers.append(cache)
+
+        self._cache_m = len(self._cache_links_fknm)
 
     def dfs_links(self, start, func=None):
         """
@@ -375,105 +410,58 @@ class ERobot(Robot):
     #     path.reverse()
     #     return path
 
-    def to_dict(self):
-        ob = {
-            'links': [],
-            'name': self.name,
-            'n': self.n
-        }
+    def to_dict(self, show_robot=True, show_collision=False):
 
         self.fkine_all(self.q)
 
+        ob = []
+
         for link in self.links:
-            li = {
-                'axis': [],
-                'eta': [],
-                'geometry': [],
-                'collision': []
-            }
 
-            for et in link.ets():
-                li['axis'].append(et.axis)
-                li['eta'].append(et.eta)
-
-            if link.v is not None:
-                li['axis'].append(link.v.axis)
-                li['eta'].append(link.v.eta)
-
-            for gi in link.geometry:
-                li['geometry'].append(gi.to_dict())
-
-            for gi in link.collision:
-                li['collision'].append(gi.to_dict())
-
-            ob['links'].append(li)
+            if show_robot:
+                for gi in link.geometry:
+                    ob.append(gi.to_dict())
+            if show_collision:
+                for gi in link.collision:
+                    ob.append(gi.to_dict())
 
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
-                li = {
-                    'axis': [],
-                    'eta': [],
-                    'geometry': [],
-                    'collision': []
-                }
 
-                for et in link.ets():
-                    li['axis'].append(et.axis)
-                    li['eta'].append(et.eta)
-
-                if link.v is not None:
-                    li['axis'].append(link.v.axis)
-                    li['eta'].append(link.v.eta)
-
-                for gi in link.geometry:
-                    li['geometry'].append(gi.to_dict())
-
-                for gi in link.collision:
-                    li['collision'].append(gi.to_dict())
-
-                ob['links'].append(li)
+                if show_robot:
+                    for gi in link.geometry:
+                        ob.append(gi.to_dict())
+                if show_collision:
+                    for gi in link.collision:
+                        ob.append(gi.to_dict())
 
         return ob
 
-    def fk_dict(self):
-        ob = {
-            'links': []
-        }
+    def fk_dict(self, show_robot=True, show_collision=False):
+        ob = []
 
         self.fkine_all(self.q)
 
         # Do the robot
         for link in self.links:
 
-            li = {
-                'geometry': [],
-                'collision': []
-            }
-
-            for gi in link.geometry:
-                li['geometry'].append(gi.fk_dict())
-
-            for gi in link.collision:
-                li['collision'].append(gi.fk_dict())
-
-            ob['links'].append(li)
+            if show_robot:
+                for gi in link.geometry:
+                    ob.append(gi.fk_dict())
+            if show_collision:
+                for gi in link.collision:
+                    ob.append(gi.fk_dict())
 
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
-                li = {
-                    'geometry': [],
-                    'collision': []
-                }
-
-                for gi in link.geometry:
-                    li['geometry'].append(gi.fk_dict())
-
-                for gi in link.collision:
-                    li['collision'].append(gi.fk_dict())
-
-                ob['links'].append(li)
+                if show_robot:
+                    for gi in link.geometry:
+                        ob.append(gi.fk_dict())
+                if show_collision:
+                    for gi in link.collision:
+                        ob.append(gi.fk_dict())
 
         return ob
 
@@ -593,22 +581,19 @@ class ERobot(Robot):
 
     @property
     def qlim(self):
-        v = np.zeros((2, self.n))
-        j = 0
+        return self._qlim
 
-        for i in range(len(self.links)):
-            if self.links[i].isjoint:
-                v[:, j] = self.links[i].qlim
-                j += 1
+    @property
+    def valid_qlim(self):
 
-        return v
+        return self._valid_qlim
 
     # @property
     # def qdlim(self):
     #     return self.qdlim
 
     # def rne( robot, q, qd, qdd):
-    
+
     #     n = robot.n
 
     #     # allocate intermediate variables
@@ -629,7 +614,7 @@ class ERobot(Robot):
     #         s[j] = link.v.s
 
     #     a_grav = SpatialAcceleration(robot.gravity)
-        
+
     #     # forward recursion
     #     for j in range(0, n):
     #         vJ = SpatialVelocity(s[j] * qd[j])
@@ -648,7 +633,7 @@ class ERobot(Robot):
     #                 + v[j] @ vJ
 
     #         f[j] = I[j] * a[j] + v[j] @ (I[j] * v[j])
-        
+
     #     # backward recursion
     #     for j in reversed(range(0, n)):
     #         Q[j] = f[j].dot(s[j])
@@ -1069,7 +1054,9 @@ graph [rankdir=LR];
 
 # --------------------------------------------------------------------- #
 
-    def fkine(self, q, end=None, start=None, tool=None):
+    def fkine(
+            self, q, end=None, start=None, tool=None,
+            include_base=True, fast=False):
         '''
         Forward kinematics
 
@@ -1110,8 +1097,24 @@ graph [rankdir=LR];
 
         '''
 
-        # we work with NumPy arrays not SE2/3 classes for speed
+        # Use c extension to calculate fkine
+        if fast:
+            path, _, etool = self.get_path(end, start, _fknm=True)
+            m = len(path)
 
+            if tool is None:
+                tool = self._eye_fknm
+
+            T = np.empty((4, 4))
+            fknm.fkine(m, path, q, etool, tool, T)
+
+            if not include_base:
+                return T
+            else:
+                return self.base.A @ T
+
+        # Otherwise use Python method
+        # we work with NumPy arrays not SE2/3 classes for speed
         q = getmatrix(q, (None, self.n))
 
         end, start, etool = self._get_limit_links(end, start)
@@ -1150,9 +1153,9 @@ graph [rankdir=LR];
                     break
 
                 A = link.A(qk[link.jindex], fast=True)
-                
+
                 if A is not None:
-                    Tk =  A @ Tk
+                    Tk = A @ Tk
 
                 if link is start:
                     break
@@ -1193,20 +1196,20 @@ graph [rankdir=LR];
 
         '''
 
-        q = getvector(q, self.n)
+        fknm.fkine_all(
+            self._cache_m,
+            self._cache_links_fknm,
+            q,
+            self._base.A)
+
+        for i in range(len(self._cache_grippers)):
+            fknm.fkine_all(
+                len(self._cache_grippers[i]),
+                self._cache_grippers[i],
+                self.grippers[i].q,
+                self._base.A)
 
         for link in self.elinks:
-            if link.isjoint:
-                A = link.A(q[link.jindex])
-            else:
-                A = link.A()
-
-            # Update the links internal transform wrt the base frame
-            if A is not None:
-                if link.parent is None:
-                    link._fk = self.base * A
-                else:
-                    link._fk = link.parent._fk * A
 
             # Update the link model transforms as well
             for col in link.collision:
@@ -1218,12 +1221,6 @@ graph [rankdir=LR];
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
-                if link.isjoint:
-                    t = link.A(gripper.q[link.jindex])
-                else:
-                    t = link.A()
-
-                link._fk = link.parent._fk * t
 
                 # Update the link model transforms as well
                 for col in link.collision:
@@ -1235,83 +1232,7 @@ graph [rankdir=LR];
         # HACK, inefficient to convert back to SE3
         return [SE3(link._fk) for link in self.elinks]
 
-    # def jacob0(self, q=None):
-    #     """
-    #     J0 = jacob0(q) is the manipulator Jacobian matrix which maps joint
-    #     velocity to end-effector spatial velocity. v = J0*qd in the
-    #     base frame.
-
-    #     J0 = jacob0() as above except uses the stored q value of the
-    #     robot object.
-
-    #     :param q: The joint angles/configuration of the robot (Optional,
-    #         if not supplied will use the stored q values).
-    #     :type q: float ndarray(n)
-
-    #     :return J: The manipulator Jacobian in ee frame
-    #     :rtype: float ndarray(6,n)
-
-    #     :references:
-    #         - Kinematic Derivatives using the Elementary Transform
-    #           Sequence, J. Haviland and P. Corke
-    #     """
-
-    #     if q is None:
-    #         q = np.copy(self.q)
-    #     else:
-    #         q = getvector(q, self.n)
-
-    #     T = (self.base.inv() * self.fkine(q)).A
-    #     U = np.eye(4)
-    #     j = 0
-    #     J = np.zeros((6, self.n))
-
-    #     for link in self._fkpath:
-
-    #         for k in range(link.M):
-
-    #             if k != link.q_idx:
-    #                 U = U @ link.ets[k].T().A
-    #             else:
-    #                 # self._jacoblink(link, k, T)
-    #                 U = U @ link.ets[k].T(q[j]).A
-    #                 Tu = np.linalg.inv(U) @ T
-    #                 n = U[:3, 0]
-    #                 o = U[:3, 1]
-    #                 a = U[:3, 2]
-    #                 x = Tu[0, 3]
-    #                 y = Tu[1, 3]
-    #                 z = Tu[2, 3]
-
-    #                 if link.ets[k].axis == 'Rz':
-    #                     J[:3, j] = (o * x) - (n * y)
-    #                     J[3:, j] = a
-
-    #                 elif link.ets[k].axis == 'Ry':
-    #                     J[:3, j] = (n * z) - (a * x)
-    #                     J[3:, j] = o
-
-    #                 elif link.ets[k].axis == 'Rx':
-    #                     J[:3, j] = (a * y) - (o * z)
-    #                     J[3:, j] = n
-
-    #                 elif link.ets[k].axis == 'tx':
-    #                     J[:3, j] = n
-    #                     J[3:, j] = np.array([0, 0, 0])
-
-    #                 elif link.ets[k].axis == 'ty':
-    #                     J[:3, j] = o
-    #                     J[3:, j] = np.array([0, 0, 0])
-
-    #                 elif link.ets[k].axis == 'tz':
-    #                     J[:3, j] = a
-    #                     J[3:, j] = np.array([0, 0, 0])
-
-    #                 j += 1
-
-    #     return J
-
-    def get_path(self, end=None, start=None):
+    def get_path(self, end=None, start=None, _fknm=False):
         """
         Find a path from start to end. The end must come after
         the start (ie end must be further away from the base link
@@ -1331,7 +1252,20 @@ graph [rankdir=LR];
         path = []
         n = 0
 
-        end, start, _ = self._get_limit_links(end, start)
+        end, start, tool = self._get_limit_links(end, start)
+
+        # This is way faster than doing if x in y method
+        try:
+            if _fknm:
+                return self._path_cache_fknm[start.name][end.name]
+            else:
+                return self._path_cache[start.name][end.name]
+        except KeyError:
+            pass
+
+        if start.name not in self._path_cache:
+            self._path_cache[start.name] = {}
+            self._path_cache_fknm[start.name] = {}
 
         link = end
 
@@ -1350,8 +1284,18 @@ graph [rankdir=LR];
                 n += 1
 
         path.reverse()
+        path_fknm = [x._fknm for x in path]
 
-        return path, n
+        if tool is None:
+            tool = SE3()
+
+        self._path_cache[start.name][end.name] = (path, n, tool)
+        self._path_cache_fknm[start.name][end.name] = (path_fknm, n, tool.A)
+
+        if _fknm:
+            return path_fknm, n, tool.A
+        else:
+            return path, n, tool
 
     def _get_limit_links(self, end=None, start=None):
         """
@@ -1371,6 +1315,10 @@ graph [rankdir=LR];
         Helper method to find or validate an end-effector and base link.
         """
 
+        # Try cache
+        if self._cache_end is not None:
+            return self._cache_end, self._cache_start, self._cache_end_tool
+
         tool = None
         if end is None:
 
@@ -1388,6 +1336,10 @@ graph [rankdir=LR];
             else:
                 # if more than one EE, user must choose
                 raise ValueError('Must specify which end-effector')
+
+            # Cache result
+            self._cache_end = end
+            self._cache_end_tool = tool
         else:
 
             # Check if end corresponds to gripper
@@ -1401,6 +1353,8 @@ graph [rankdir=LR];
 
         if start is None:
             start = self.base_link
+            # Cache result
+            self._cache_start = start
         else:
             # start effector is specified
             start = self._getlink(start)
@@ -1447,7 +1401,9 @@ graph [rankdir=LR];
         else:
             raise TypeError('unknown argument')
 
-    def jacob0(self, q, end=None, start=None, tool=None, T=None, half=None, analytical=None):
+    def jacob0(
+            self, q, end=None, start=None, tool=None, T=None,
+            half=None, analytical=None, fast=False):
         r"""
         Manipulator geometric Jacobian in the base frame
 
@@ -1507,17 +1463,27 @@ graph [rankdir=LR];
         .. warning:: ``start`` and ``end`` must be on the same branch,
             with ``start`` closest to the base.
         """  # noqa
-            
+
+        # Use c extension
+        if fast:
+            path, n, etool = self.get_path(end, start, _fknm=True)
+            if tool is None:
+                tool = self._eye_fknm
+            J = np.empty((6, n))
+            fknm.jacob0(len(path), n, path, q, etool, tool, J)
+            return J
+
+        # Otherwise use Python
         if tool is None:
             tool = SE3()
 
-        path, n = self.get_path(end, start)
+        path, n, _ = self.get_path(end, start)
 
         q = getvector(q, self.n)
 
         if T is None:
-            T = self.base.inv() * \
-                self.fkine(q, end=end, start=start) * tool
+            T = self.fkine(q, end=end, start=start, include_base=False) * tool
+
         T = T.A
         U = np.eye(4)
         j = 0
@@ -1585,26 +1551,25 @@ graph [rankdir=LR];
             elif analytical == 'exp':
                 # TODO: move to SMTB.base, Horner form with skew(v)
                 (theta, v) = trlog(t2r(T))
-                A = np.eye(3,3) - (1 - math.cos(theta)) / theta * skew(v) \
+                A = np.eye(3, 3) - (1 - math.cos(theta)) / theta * skew(v) \
                     + (theta - math.sin(theta)) / theta * skew(v)**2
             else:
                 raise ValueError('bad order specified')
-        
-            J = block_diag(np.eye(3,3), np.linalg.inv(A)) @ J
+
+            J = block_diag(np.eye(3, 3), np.linalg.inv(A)) @ J
 
         # TODO optimize computation above if half matrix is returned
 
         # return top or bottom half if asked
         if half is not None:
             if half == 'trans':
-                J = J[:3,:]
+                J = J[:3, :]
             elif half == 'rot':
-                J = J[3:,:]
+                J = J[3:, :]
             else:
                 raise ValueError('bad half specified')
 
         return J
-
 
     def jacobe(self, q, end=None, start=None, tool=None, T=None):
         r"""
@@ -1678,7 +1643,7 @@ graph [rankdir=LR];
             z = a[0] * b[1] - a[1] * b[0]
             return np.array([x, y, z])
 
-        _, nl = self.get_path(end, start)
+        _, nl, _ = self.get_path(end, start)
 
         J = self.jacob0(q, end=end, start=start)
         H = self.hessian0(q, J, end, start)
@@ -1829,8 +1794,8 @@ graph [rankdir=LR];
         :return: The manipulator Hessian in 0 frame
         :rtype: float ndarray(6,n,n)
 
-        This method computes the manipulator Hessian in the base frame.  If we take the 
-        time derivative of the differential kinematic relationship
+        This method computes the manipulator Hessian in the base frame.  If
+        we take the time derivative of the differential kinematic relationship
 
         .. math::
 
@@ -1842,14 +1807,14 @@ graph [rankdir=LR];
         .. math::
 
             \dmat{J} = \mat{H} \dvec{q}
-        
+
         and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
         Hessian tensor.
 
         The elements of the Hessian are
 
         .. math::
-        
+
             \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
 
         where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
@@ -1858,7 +1823,7 @@ graph [rankdir=LR];
         Similarly, we can write
 
         .. math::
-        
+
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
         :references:
@@ -1867,7 +1832,7 @@ graph [rankdir=LR];
         """
 
         end, start, _ = self._get_limit_links(end, start)
-        path, n = self.get_path(end, start)
+        path, n, _ = self.get_path(end, start)
 
         def cross(a, b):
             x = a[1] * b[2] - a[2] * b[1]
@@ -1934,7 +1899,7 @@ graph [rankdir=LR];
         """
 
         end, start, _ = self._get_limit_links(end, start)
-        path, n = self.get_path(end, start)
+        path, n, _ = self.get_path(end, start)
 
         if axes == 'all':
             axes = [True, True, True, True, True, True]
@@ -2189,7 +2154,7 @@ graph [rankdir=LR];
         if end is None:
             end = self.ee_link
 
-        links, n = self.get_path(start=start, end=end)
+        links, n, _ = self.get_path(start=start, end=end)
 
         if q is None:
             q = np.copy(self.q)
@@ -2228,7 +2193,7 @@ graph [rankdir=LR];
 
             for link_col in link.collision:
                 l_Ain, l_bin, d, wTcp = indiv_calculation(
-                                                link, link_col, q)
+                    link, link_col, q)
 
                 if l_Ain is not None and l_bin is not None:
                     if Ain is None:

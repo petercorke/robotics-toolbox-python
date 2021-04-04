@@ -3,6 +3,7 @@
 @author Jesse Haviland
 """
 
+import swift
 import roboticstoolbox as rp
 import spatialmath as sm
 import numpy as np
@@ -14,15 +15,15 @@ panda.q = panda.qr
 
 ur3 = rp.models.UR3()
 ur3.base = sm.SE3.Tx(0) * sm.SE3.Ty(0.4)
-ur3.q = [0, -np.pi/2, np.pi/2, 0, 0, 0]
+ur3.q = [0, -np.pi / 2, np.pi / 2, 0, 0, 0]
 
 ur5 = rp.models.UR5()
 ur5.base = sm.SE3.Tx(0) * sm.SE3.Ty(0.8)
-ur5.q = [0, -np.pi/2, np.pi/2, 0, 0, 0]
+ur5.q = [0, -np.pi / 2, np.pi / 2, 0, 0, 0]
 
 ur10 = rp.models.UR10()
 ur10.base = sm.SE3.Tx(0) * sm.SE3.Ty(1.2)
-ur10.q = [0, -np.pi/2, np.pi/2, 0, 0, 0]
+ur10.q = [0, -np.pi / 2, np.pi / 2, 0, 0, 0]
 
 puma560 = rp.models.Puma560()
 puma560.base = sm.SE3.Ty(2.0)
@@ -53,7 +54,7 @@ wx250s.base = sm.SE3.Tx(0.7) * sm.SE3.Ty(2.4)
 # j2n4s300.q = j2n4s300.qr
 
 # Launch Sim
-env = rp.backends.Swift()
+env = swift.Swift()
 env.launch()
 
 # Add robots
@@ -74,3 +75,4 @@ env.add(wx250)
 env.add(wx250s)
 
 # env.add(j2n4s300)
+env.hold()

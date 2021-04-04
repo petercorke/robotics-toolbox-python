@@ -9,7 +9,7 @@ from roboticstoolbox.backends.VPython.common_functions import \
 from io import StringIO
 
 try:
-    from roboticstoolbox.tools.stdout_supress import pipes
+    from spatialgeometry.tools.stdout_supress import pipes
 except Exception:  # pragma nocover
     from contextlib import contextmanager
 

@@ -4,6 +4,7 @@
 """
 
 import roboticstoolbox as rtb
+import swift
 import spatialmath as sm
 import numpy as np
 
@@ -16,7 +17,7 @@ IEEE/ASME International Conference on Advanced Intelligent Mechatronics
 """
 
 # Launch the simulator Swift
-env = rtb.backends.Swift()
+env = swift.Swift()
 env.launch()
 
 # Create a Panda robot object

@@ -5,17 +5,24 @@
 # This is the code for the examples in the paper published at ICRA2021.
 #
 
+import swift.Swift
+import spatialmath.base.symbolic as sym
+from roboticstoolbox import ETS as ET
+from roboticstoolbox import *
+from spatialmath import *
+from spatialgeometry import *
 from math import pi
 import numpy as np
 
 # # III.SPATIAL MATHEMATICS
 
 from spatialmath.base import *
-T = transl(0.5, 0.0, 0.0) @ rpy2tr(0.1, 0.2, 0.3, order='xyz') @ trotx(-90, 'deg')
+T = transl(0.5, 0.0, 0.0) @ rpy2tr(0.1, 0.2,
+                                   0.3, order='xyz') @ trotx(-90, 'deg')
 print(T)
 
-from spatialmath import *
-T = SE3(0.5, 0.0, 0.0) * SE3.RPY([0.1, 0.2, 0.3], order='xyz') * SE3.Rx(-90, unit='deg')
+T = SE3(0.5, 0.0, 0.0) * SE3.RPY([0.1, 0.2, 0.3],
+                                 order='xyz') * SE3.Rx(-90, unit='deg')
 print(T)
 
 T.eul()
@@ -27,13 +34,12 @@ T.plot(color='red', label='2')
 UnitQuaternion.Rx(0.3)
 UnitQuaternion.AngVec(0.3, [1, 0, 0])
 
-R = SE3.Rx(np.linspace(0, pi/2, num=100))
+R = SE3.Rx(np.linspace(0, pi / 2, num=100))
 len(R)
 
 # # IV. ROBOTICS TOOLBOX
 # ## A. Robot models
 
-from roboticstoolbox import *
 # robot length values (metres)
 d1 = 0.352
 a1 = 0.070
@@ -42,10 +48,10 @@ d4 = 0.380
 d6 = 0.065
 
 robot = DHRobot([
-  RevoluteDH(d=d1, a=a1, alpha=-pi/2), 
-  RevoluteDH(a=a2), 
-  RevoluteDH(alpha=pi/2),
-  ], name="my IRB140")
+    RevoluteDH(d=d1, a=a1, alpha=-pi / 2),
+    RevoluteDH(a=a2),
+    RevoluteDH(alpha=pi / 2),
+], name="my IRB140")
 
 print(robot)
 
@@ -54,11 +60,10 @@ T = puma.fkine([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
 sol = puma.ikine_LM(T)
 print(sol)
 
-puma.plot(sol.q, block=False);
+puma.plot(sol.q, block=False)
 
 puma.ikine_a(T, config="lun")
 
-from roboticstoolbox import ETS as ET
 
 # Puma dimensions (m), see RVC2 Fig. 7.4 for details
 l1 = 0.672
@@ -94,11 +99,10 @@ sol.q.shape
 
 # ## C. Symbolic manipulation
 
-import spatialmath.base.symbolic as sym
 phi, theta, psi = sym.symbol('φ, ϴ, ψ')
 rpy2r(phi, theta, psi)
 
-q = sym.symbol("q_:6") # q = (q_1, q_2, ... q_5)
+q = sym.symbol("q_:6")  # q = (q_1, q_2, ... q_5)
 T = puma.fkine(q)
 
 puma = models.DH.Puma560(symbolic=True)
@@ -139,8 +143,9 @@ qdd = puma.accel(puma.qn, tau, np.zeros((6,)))
 # # V. NEW CAPABILITY
 # ## B. Collision checking
 
-obstacle = Box([1, 1, 1], SE3(1, 0, 0)) 
-iscollision = panda.collided(obstacle) # boolean
+
+obstacle = Box([1, 1, 1], base=SE3(1, 0, 0))
+iscollision = panda.collided(obstacle)  # boolean
 iscollision = panda.links[0].collided(obstacle)
 
 d, p1, p2 = panda.closest_point(obstacle)
@@ -152,13 +157,11 @@ print(d, p1, p2)
 
 panda.plot(panda.qr, block=False)
 
-from roboticstoolbox.backends.Swift import Swift
 backend = Swift()
 backend.launch()   # create graphical world
-backend.add(panda) # add robot to the world
+backend.add(panda)  # add robot to the world
 panda.q = panda.qr        # update the robot
 backend.step()    # display the world
-
 
 
 #
