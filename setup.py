@@ -82,7 +82,8 @@ fknm = Extension(
     sources=[
         './roboticstoolbox/core/fknm.c'],
     include_dirs=[
-        './roboticstoolbox/core/'
+        './roboticstoolbox/core/',
+        numpy.get_include()
     ])
 
 setup(
