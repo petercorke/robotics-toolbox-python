@@ -14,7 +14,7 @@ from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
     verifymatrix, iseye
 
 
-class SuperETS(UserList, ABC):
+class BaseETS(UserList, ABC):
 
 
     # T is a NumPy array (4,4) or None
@@ -909,7 +909,7 @@ class SuperETS(UserList, ABC):
         return inv
 
 
-class ETS(SuperETS):
+class ETS(BaseETS):
     """
     This class implements an elementary transform sequence (ETS) for 3D
 
@@ -1387,7 +1387,7 @@ class ETS(SuperETS):
         return H
 
 
-class ETS2(SuperETS):
+class ETS2(BaseETS):
     """
     This class implements an elementary transform sequence (ETS) for 2D
 

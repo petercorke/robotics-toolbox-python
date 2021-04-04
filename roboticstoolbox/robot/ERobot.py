@@ -17,7 +17,7 @@ from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix
 from roboticstoolbox.robot.BaseRobot import BaseRobot
 
 from roboticstoolbox.robot.ELink import ELink
-from roboticstoolbox.robot.ETS import ETS, ETS2, SuperETS
+from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.DHRobot import DHRobot
 # from roboticstoolbox.backends.PyPlot.functions import \
 #     _plot, _teach, _fellipse, _vellipse, _plot_ellipse, \
@@ -151,10 +151,11 @@ class ERobot(Robot):
 
         if isinstance(arg, DHRobot):
             # we're passed a DHRobot object
+            # TODO handle dynamic parameters if given
             args = args.ets()
         
         link_number = 0
-        if isinstance(arg, SuperETS):
+        if isinstance(arg, ETS):
             # we're passed an ETS string
             ets = arg
             links = []

@@ -7,7 +7,7 @@
 from spatialmath import SE3, SE2, BasePoseMatrix
 # from spatialmath.base.argcheck import getvector, verifymatrix, isscalar
 import roboticstoolbox as rp
-from roboticstoolbox.robot.ETS import ETS, SuperETS
+from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
 
 
@@ -70,7 +70,7 @@ class ELink(Link):
         super(ELink, self).__init__(**kwargs)
 
         # check we have an ETS
-        if not isinstance(ets, SuperETS):
+        if not isinstance(ets, ETS):
             raise TypeError(
                 'The ets argument must be of type ETS')
         self._ndims = ets._ndims
@@ -104,7 +104,7 @@ class ELink(Link):
         # Check the variable joint
         if v is None:
             self._joint = False
-        elif not isinstance(v, SuperETS):
+        elif not isinstance(v, ETS):
             raise TypeError('v must be of type ETS')
         elif not v[0].isjoint:
             raise ValueError('v must be a variable ETS')
@@ -123,7 +123,7 @@ class ELink(Link):
         # Compute the leading, constant, part of the ETS
         # TODO probably should use ETS.compile()
 
-        if isinstance(self._ets, SuperETS):
+        if isinstance(self._ets, ETS):
             first = True
             T = None
 
