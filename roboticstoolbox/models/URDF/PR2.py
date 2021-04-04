@@ -7,12 +7,17 @@ class PR2(ERobot):
 
     def __init__(self):
 
-        args = super().urdf_to_ets_args(
+        links, name = self.URDF_read(
             "pr2_description/robots/pr2.urdf.xacro",
             "pr2_description")
 
-        super(PR2, self).__init__(
-            args[0],
-            name=args[1])
+        super().__init__(
+            links,
+            name=name)
 
         self.manufacturer = 'Willow Garage'
+
+if __name__ == '__main__':   # pragma nocover
+
+    robot = PR2()
+    print(robot)

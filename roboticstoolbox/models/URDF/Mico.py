@@ -28,12 +28,12 @@ class Mico(ERobot):
     """
     def __init__(self):
 
-        args = super().urdf_to_ets_args(
+        links, name = self.URDF_read(
             "kinova_description/urdf/j2n4s300_standalone.xacro")
 
         super().__init__(
-                args[0],
-                name=args[1],
+                links,
+                name=name,
                 manufacturer='Kinova'
             )
 

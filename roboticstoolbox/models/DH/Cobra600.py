@@ -49,6 +49,7 @@ class Cobra600(DHRobot):
 
 
 if __name__ == '__main__':   # pragma nocover
-
+    deg = pi/180
+    a = RevoluteDH(d=0.387, a=0.325, qlim=[-50*deg, 50*deg])
     cobra = Cobra600()
     print(cobra)

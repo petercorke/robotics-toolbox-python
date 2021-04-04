@@ -31,12 +31,12 @@ class rx150(ERobot):
     """
     def __init__(self):
 
-        args = super().urdf_to_ets_args(
+        links, name = self.URDF_read(
             "interbotix_descriptions/urdf/rx150.urdf.xacro")
 
         super().__init__(
-                args[0],
-                name=args[1],
+                links,
+                name=name,
                 manufacturer='Interbotix'
             )
 

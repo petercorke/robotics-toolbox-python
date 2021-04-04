@@ -32,12 +32,12 @@ class Puma560(ERobot):
 
     def __init__(self):
 
-        args = super().urdf_to_ets_args(
+        links, name = self.URDF_read(
             "puma560_description/urdf/puma560_robot.urdf.xacro")
 
         super().__init__(
-            args[0],
-            name=args[1])
+            links,
+            name=name)
 
         self.manufacturer = "Unimation"
         # self.ee_link = self.ets[9]

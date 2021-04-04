@@ -29,13 +29,13 @@ class UR10(ERobot):
 
     def __init__(self):
 
-        args = super().urdf_to_ets_args(
+        links, name = self.URDF_read(
             "ur_description/urdf/ur10_joint_limited_robot.urdf.xacro"
         )
 
         super().__init__(
-                args[0],
-                name=args[1].upper(),
+                links,
+                name=name.upper(),
                 manufacturer='Universal Robotics'
             )
 

@@ -30,14 +30,14 @@ class Panda(ERobot):
     """
     def __init__(self):
 
-        elinks, name = super().urdf_to_ets_args(
+        links, name = self.URDF_read(
             "franka_description/robots/panda_arm_hand.urdf.xacro")
 
         super().__init__(
-            elinks,
+            links,
             name=name,
             manufacturer='Franka Emika',
-            gripper_links=elinks[9]
+            gripper_links=links[9]
         )
 
         self.qdlim = np.array([

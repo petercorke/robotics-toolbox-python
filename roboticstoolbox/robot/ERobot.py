@@ -252,6 +252,20 @@ class ERobot(Robot):
 
         super().__init__(orlinks, **kwargs)
 
+    @classmethod
+    def URDF(cls, file_path):
+        """
+        Construct an ERobot object from URDF file
+
+        :param file_path: [description]
+        :type file_path: [type]
+        :return: [description]
+        :rtype: [type]
+        """
+        links, name = ERobot.URDF_read(file_path)
+
+        return cls(links, name=name)
+
     def dfs_links(self, start, func=None):
         """
         Visit all links from start in depth-first order and will apply
@@ -413,9 +427,12 @@ class ERobot(Robot):
     #         name=urdf.name
     #     )
 
-    def urdf_to_ets_args(self, file_path, tld=None):
+
+
+    @staticmethod
+    def URDF_read(file_path, tld=None):
         """
-        [summary]
+        Read a URDF file as ELinks
 
         :param file_path: File path relative to the xacro folder
         :type file_path: str, in Posix file path fprmat
@@ -440,7 +457,11 @@ class ERobot(Robot):
             if tld is not None:
                 tld = base_path / PurePosixPath(tld)
             urdf_string = xacro.main(file_path, tld)
-            urdf = URDF.loadstr(urdf_string, file_path)
+            try:
+                urdf = URDF.loadstr(urdf_string, file_path)
+            except BaseException as e:
+                print('error parsing URDF file', file_path)
+                raise e
         else:  # pragma nocover
             urdf = URDF.loadstr(open(file_path).read(), file_path)
 
