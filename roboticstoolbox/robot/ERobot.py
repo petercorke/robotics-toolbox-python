@@ -88,8 +88,8 @@ class ERobot(Robot):
     The parent also can be specified as a string, and its name is mapped to the
     parent link by name in ``ERobot``.
 
-    If no ``parent`` arguments are given it is assumed the links are in 
-    sequential order, and the parent hierarchy will be automatically 
+    If no ``parent`` arguments are given it is assumed the links are in
+    sequential order, and the parent hierarchy will be automatically
     established.
 
     .. runblock:: pycon
@@ -157,7 +157,7 @@ class ERobot(Robot):
             # chop it up into segments, a link frame after every joint
             start = 0
             for j, k in enumerate(ets.joints()):
-                ets_j = ets[start:k+1]
+                ets_j = ets[start:k + 1]
                 start = k + 1
                 if j == 0:
                     parent = None
@@ -204,9 +204,9 @@ class ERobot(Robot):
 
             if all([link.parent is None for link in links]):
                 # no parent links were given, assume they are sequential
-                for i in range(len(links)-1):
+                for i in range(len(links) - 1):
                     links[i + 1]._parent = links[i]
-            
+
         else:
             raise TypeError('elinks must be a list of ELinks or an ETS')
 
@@ -324,6 +324,10 @@ class ERobot(Robot):
 
         super().__init__(orlinks, **kwargs)
 
+        # Cached paths through links
+        # TODO Add listners on setters to reset cache
+        self._reset_cache()
+
     @classmethod
     def URDF(cls, file_path, gripper=None):
         """
@@ -354,10 +358,8 @@ class ERobot(Robot):
             else:
                 raise TypeError('bad argument passed as gripper')
 
+
         return cls(links, name=name, gripper=gripper)
-        # Cached paths through links
-        # TODO Add listners on setters to reset cache
-        self._reset_cache()
 
     def _reset_cache(self):
         self._path_cache = {}
@@ -495,8 +497,6 @@ class ERobot(Robot):
     #         urdf.elinks,
     #         name=urdf.name
     #     )
-
-
 
     @staticmethod
     def URDF_read(file_path, tld=None):
@@ -1961,7 +1961,7 @@ graph [rankdir=LR];
 
     def __str__(self):
         """
-        Pretty prints the ETS Model of the robot. 
+        Pretty prints the ETS Model of the robot.
 
         :return: Pretty print of the robot model
         :rtype: str
@@ -1991,7 +1991,7 @@ graph [rankdir=LR];
             s = ets.__str__(f"q{link._jindex}")
             if len(s) > 0:
                 s = " \u2295 " + s
-            
+
             if link.isjoint:
                 if link._joint_name is not None:
                     jname = link._joint_name
@@ -2005,7 +2005,7 @@ graph [rankdir=LR];
                 jname,
                 parent_name,
                 f"{{{link.name}}} = {{{parent_name}}}{s}"
-                )
+            )
 
         s = self.name
         if self.manufacturer is None or len(self.manufacturer) == 0:
@@ -2048,7 +2048,7 @@ graph [rankdir=LR];
         def recurse(link, indent=0):
             print(' ' * indent * 2, link.name)
             for child in link.child:
-                recurse(child, indent+1)
+                recurse(child, indent + 1)
 
         recurse(self.base_link)
 

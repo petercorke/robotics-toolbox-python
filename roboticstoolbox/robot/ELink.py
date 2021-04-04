@@ -212,7 +212,8 @@ class ELink(Link):
 
         if isinstance(self._ets, ETS):
             first = True
-            T = None
+            # T = None
+            T = np.eye(4)
 
             for et in self._ets:
                 # constant transforms only
