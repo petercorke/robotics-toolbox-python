@@ -20,15 +20,15 @@ import roboticstoolbox as rtb
 class VehicleDriver(ABC):
 
     @abstractmethod
-    def demand():
+    def demand(self):
         pass
 
     @abstractmethod
-    def init():
+    def init(self):
         pass
 
     @abstractmethod
-    def vehicle():
+    def vehicle(self):
         pass    
 
 # ========================================================================= #
