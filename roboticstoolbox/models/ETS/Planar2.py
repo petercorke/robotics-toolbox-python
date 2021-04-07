@@ -2,11 +2,11 @@
 
 import numpy as np
 from roboticstoolbox.robot.ETS import ETS2
-from roboticstoolbox.robot.ERobot import ERobot
-from roboticstoolbox.robot.ELink import ELink
+from roboticstoolbox.robot.ERobot import ERobot2
+from roboticstoolbox.robot.ELink import ELink2
 
 
-class Planar2(ERobot):
+class Planar2(ERobot2):
     """
     Create model of a branched planar manipulator::
 
@@ -29,9 +29,9 @@ class Planar2(ERobot):
 
         # ets = ETS2.r() * ETS2.tx(a1) * ETS2.r() * ETS2.tx(a2)
 
-        l0 = ELink(ETS2.r(), name='link0')
-        l1 = ELink(ETS2.tx(a1) * ETS2.r(), name='link1', parent=l0)
-        l2 = ELink(ETS2.tx(a2), name='ee', parent=l1)
+        l0 = ELink2(ETS2.r(), name='link0')
+        l1 = ELink2(ETS2.tx(a1) * ETS2.r(), name='link1', parent=l0)
+        l2 = ELink2(ETS2.tx(a2), name='ee', parent=l1)
 
         super().__init__(
             [l0, l1, l2],

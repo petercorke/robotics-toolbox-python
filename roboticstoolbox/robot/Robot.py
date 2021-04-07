@@ -20,7 +20,6 @@ from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
-from roboticstoolbox.robot.BaseRobot import BaseRobot
 try:
     from matplotlib import colors
     from matplotlib import cm
@@ -33,7 +32,7 @@ except ImportError:    # pragma nocover
 # ikine functions need: fkine, jacobe, qlim methods from subclass
 
 
-class Robot(BaseRobot, DynamicsMixin, IKMixin):
+class Robot(DynamicsMixin, IKMixin):
 
     _color = True
 
