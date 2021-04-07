@@ -592,7 +592,7 @@ class TestERobot(unittest.TestCase):
 
     def test_elinks(self):
         panda = rtb.models.Panda()
-        self.assertEquals(
+        self.assertEqual(
             panda.elinks[0], panda.link_dict[panda.elinks[0].name])
 
     def test_base_link_setter(self):
