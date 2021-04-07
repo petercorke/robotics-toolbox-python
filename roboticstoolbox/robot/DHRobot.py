@@ -976,7 +976,7 @@ class DHRobot(Robot):
 
         return J
 
-    def jacob0(self, q=None, T=None, half=None, analytical=None):
+    def jacob0(self, q=None, T=None, half=None, analytical=None, start=None, end=None):
         r"""
         Manipulator Jacobian in world frame
 
@@ -1070,7 +1070,7 @@ class DHRobot(Robot):
         return J0
 
 
-    def hessian0(self, q=None, J0=None):
+    def hessian0(self, q=None, J0=None, start=None, end=None):
         r"""
         Manipulator Hessian in base frame
 
@@ -1125,6 +1125,12 @@ class DHRobot(Robot):
         """
 
         return self.ets().hessian0(q, J0)
+
+    def _get_limit_links(self, end=None, start=None):
+        # For compatibility with ERobot
+
+        return None, None, None
+
 # -------------------------------------------------------------------------- #
 
     def _init_rne(self):
