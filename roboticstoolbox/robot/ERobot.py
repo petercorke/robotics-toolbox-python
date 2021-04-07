@@ -354,241 +354,33 @@ class BaseERobot(Robot):
         s += str(table)
         s += self.configurations_str()
 
-    def _reset_cache(self):
-        self._path_cache = {}
-        self._path_cache_fknm = {}
-        self._cache_end = None
-        self._cache_start = None
-        self._cache_end_tool = None
-        self._eye_fknm = np.eye(4)
+        return s
 
-        self._cache_links_fknm = []
-
-        self._cache_grippers = []
-
-        for link in self.elinks:
-            self._cache_links_fknm.append(link._fknm)
-
-        for gripper in self.grippers:
-            cache = []
-            for link in gripper.links:
-                cache.append(link._fknm)
-            self._cache_grippers.append(cache)
-
-        self._cache_m = len(self._cache_links_fknm)
-
-    def dfs_links(self, start, func=None):
+    def hierarchy(self):
         """
-        Visit all links from start in depth-first order and will apply
-        func to each visited link
+        Pretty print the robot link hierachy
 
-        :param start: the link to start at
-        :type start: ELink
-        :param func: An optional function to apply to each link as it is found
-        :type func: function
+        :return: Pretty print of the robot model
+        :rtype: str
 
-        :returns: A list of links
-        :rtype: list of ELink
-        """
-        visited = []
+        Example:
 
-        def vis_children(link):
-            visited.append(link)
-            if func is not None:
-                func(link)
+        .. runblock:: pycon
 
-            for li in link.children:
-                if li not in visited:
-                    vis_children(li)
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.URDF.Panda()
+            >>> robot.hierarchy()
 
-        vis_children(start)
-
-        return visited
-
-    # def dfs_path(self, l1, l2):
-    #     path = []
-    #     visited = [l1]
-
-    #     def vis_children(link):
-    #         visited.append(link)
-
-    #         for li in link.child:
-    #             if li not in visited:
-
-    #                 if li == l2 or vis_children(li):
-    #                     path.append(li)
-    #                     return True
-    #     vis_children(l1)
-    #     path.append(l1)
-    #     path.reverse()
-    #     return path
-
-    def to_dict(self, show_robot=True, show_collision=False):
-
-        self.fkine_all(self.q)
-
-        ob = []
-
-        for link in self.links:
-
-            if show_robot:
-                for gi in link.geometry:
-                    ob.append(gi.to_dict())
-            if show_collision:
-                for gi in link.collision:
-                    ob.append(gi.to_dict())
-
-        # Do the grippers now
-        for gripper in self.grippers:
-            for link in gripper.links:
-
-                if show_robot:
-                    for gi in link.geometry:
-                        ob.append(gi.to_dict())
-                if show_collision:
-                    for gi in link.collision:
-                        ob.append(gi.to_dict())
-
-        return ob
-
-    def fk_dict(self, show_robot=True, show_collision=False):
-        ob = []
-
-        self.fkine_all(self.q)
-
-        # Do the robot
-        for link in self.links:
-
-            if show_robot:
-                for gi in link.geometry:
-                    ob.append(gi.fk_dict())
-            if show_collision:
-                for gi in link.collision:
-                    ob.append(gi.fk_dict())
-
-        # Do the grippers now
-        for gripper in self.grippers:
-            for link in gripper.links:
-                if show_robot:
-                    for gi in link.geometry:
-                        ob.append(gi.fk_dict())
-                if show_collision:
-                    for gi in link.collision:
-                        ob.append(gi.fk_dict())
-
-        return ob
-
-    # @classmethod
-    # def urdf_to_ets(cls, file_path):
-    #     name, ext = splitext(file_path)
-
-    #     if ext == '.xacro':
-    #         urdf_string = xacro.main(file_path)
-    #         urdf = URDF.loadstr(urdf_string, file_path)
-
-    #     return ERobot(
-    #         urdf.elinks,
-    #         name=urdf.name
-    #     )
-
-    @staticmethod
-    def URDF_read(file_path, tld=None):
-        """
-        Read a URDF file as ELinks
-
-        :param file_path: File path relative to the xacro folder
-        :type file_path: str, in Posix file path fprmat
-        :param tld: top-level directory, defaults to None
-        :type tld: str, optional
-        :return: Links and robot name
-        :rtype: tuple(ELink list, str)
-
-        File should be specified relative to ``RTBDATA/URDF/xacro``
         """
 
-        # get the path to the class that defines the robot
-        base_path = path_to_datafile('xacro')
-        # print("*** urdf_to_ets_args: ", classpath)
-        # add on relative path to get to the URDF or xacro file
-        # base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
-        file_path = base_path / PurePosixPath(file_path)
-        name, ext = splitext(file_path)
+        # link = self.base_link
 
-        if ext == '.xacro':
-            # it's a xacro file, preprocess it
-            if tld is not None:
-                tld = base_path / PurePosixPath(tld)
-            urdf_string = xacro.main(file_path, tld)
-            try:
-                urdf = URDF.loadstr(urdf_string, file_path)
-            except BaseException as e:
-                print('error parsing URDF file', file_path)
-                raise e
-        else:  # pragma nocover
-            urdf = URDF.loadstr(open(file_path).read(), file_path)
+        def recurse(link, indent=0):
+            print(' ' * indent * 2, link.name)
+            for child in link.child:
+                recurse(child, indent + 1)
 
-        return urdf.elinks, urdf.name
-
-    # @classmethod
-    # def dh_to_ets(cls, robot):
-    #     """
-    #     Converts a robot modelled with standard or modified DH parameters to
-    #     an ERobot representation
-
-    #     :param robot: The robot model to be converted
-    #     :type robot: SerialLink
-    #     :return: List of returned :class:`bluepy.btle.Characteristic` objects
-    #     :rtype: ets class
-    #     """
-    #     ets = []
-    #     q_idx = []
-    #     M = 0
-
-    #     for j in range(robot.n):
-    #         L = robot.links[j]
-
-    #         # Method for modified DH parameters
-    #         if robot.mdh:
-
-    #             # Append Tx(a)
-    #             if L.a != 0:
-    #                 ets.append(ET.Ttx(L.a))
-    #                 M += 1
-
-    #             # Append Rx(alpha)
-    #             if L.alpha != 0:
-    #                 ets.append(ET.TRx(L.alpha))
-    #                 M += 1
-
-    #             if L.is_revolute:
-    #                 # Append Tz(d)
-    #                 if L.d != 0:
-    #                     ets.append(ET.Ttz(L.d))
-    #                     M += 1
-
-    #                 # Append Rz(q)
-    #                 ets.append(ET.TRz(joint=j+1))
-    #                 q_idx.append(M)
-    #                 M += 1
-
-    #             else:
-    #                 # Append Tz(q)
-    #                 ets.append(ET.Ttz(joint=j+1))
-    #                 q_idx.append(M)
-    #                 M += 1
-
-    #                 # Append Rz(theta)
-    #                 if L.theta != 0:
-    #                     ets.append(ET.TRz(L.alpha))
-    #                     M += 1
-
-    #     return cls(
-    #         ets,
-    #         q_idx,
-    #         robot.name,
-    #         robot.manuf,
-    #         robot.base,
-    #         robot.tool)
+        recurse(self.base_link)
 
     @property
     def qlim(self):
@@ -598,62 +390,6 @@ class BaseERobot(Robot):
     def valid_qlim(self):
 
         return self._valid_qlim
-
-    # @property
-    # def qdlim(self):
-    #     return self.qdlim
-
-    # def rne( robot, q, qd, qdd):
-
-    #     n = robot.n
-
-    #     # allocate intermediate variables
-    #     Xup = SE3.Alloc(n)
-    #     Xtree = SE3.Alloc(n)
-
-    #     v = SpatialVelocity.Alloc(n)
-    #     a = SpatialAcceleration.Alloc(n)
-    #     f = SpatialForce.Alloc(n)
-    #     I = SpatialInertia.Alloc(n)
-    #     s = [None for i in range(n)]   # joint motion subspace
-    #     Q = np.zeros((n,))   # joint torque/force
-
-    #     # initialize intermediate variables
-    #     for j, link in enumerate(robot):
-    #         I[j] = SpatialInertia(link.m, link.r)
-    #         Xtree[j] = link.Ts
-    #         s[j] = link.v.s
-
-    #     a_grav = SpatialAcceleration(robot.gravity)
-
-    #     # forward recursion
-    #     for j in range(0, n):
-    #         vJ = SpatialVelocity(s[j] * qd[j])
-
-    #         # transform from parent(j) to j
-    #         Xup[j] = robot[j].A(q[j]).inv()
-
-    #         if robot[j].parent is None:
-    #             v[j] = vJ
-    #             a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qdd[j])
-    #         else:
-    #             jp = robot[j].parent.jindex
-    #             v[j] = Xup[j] * v[jp] + vJ
-    #             a[j] = Xup[j] * a[jp] \
-    #                 + SpatialAcceleration(s[j] * qdd[j]) \
-    #                 + v[j] @ vJ
-
-    #         f[j] = I[j] * a[j] + v[j] @ (I[j] * v[j])
-
-    #     # backward recursion
-    #     for j in reversed(range(0, n)):
-    #         Q[j] = f[j].dot(s[j])
-
-    #         if robot[j].parent is not None:
-    #             jp = robot[j].parent.jindex
-    #             f[jp] = f[jp] + Xup[j] * f[j]
-
-    #     return Q
 
 # --------------------------------------------------------------------- #
 
@@ -784,28 +520,6 @@ class BaseERobot(Robot):
 
 # --------------------------------------------------------------------- #
 
-    # def ets(self, ee=None):
-    #     if ee is None:
-    #         if len(self.ee_links) == 1:
-    #             link = self.ee_links[0]
-    #         else:
-    #             raise ValueError(
-    #                 'robot has multiple end-effectors, specify one')
-    #     # elif isinstance(ee, str) and ee in self._linkdict:
-    #     #     ee = self._linkdict[ee]
-    #     elif isinstance(ee, ELink) and ee in self._links:
-    #         link = ee
-    #     else:
-    #         raise ValueError('end-effector is not valid')
-
-    #     ets = ETS()
-
-    #     # build the ETS string from ee back to root
-    #     while link is not None:
-    #         ets = link.ets() * ets
-    #         link = link.parent
-
-    #     return ets
 
     def ets(self, start=None, end=None, explored=None, path=None):
         """
@@ -871,16 +585,6 @@ class BaseERobot(Robot):
                     return p
 
         return None
-
-    def config(self):
-        s = ''
-        for link in self.links:
-            if link.v is not None:
-                if link.v.isprismatic:
-                    s += 'P'
-                elif link.v.isrevolute:
-                    s += 'R'
-        return s
 
 # --------------------------------------------------------------------- #
 
@@ -1063,6 +767,397 @@ graph [rankdir=LR];
         if isinstance(filename, str):
             file.close()  # noqa
 
+    def dfs_links(self, start, func=None):
+        """
+        Visit all links from start in depth-first order and will apply
+        func to each visited link
+
+        :param start: the link to start at
+        :type start: ELink
+        :param func: An optional function to apply to each link as it is found
+        :type func: function
+
+        :returns: A list of links
+        :rtype: list of ELink
+        """
+        visited = []
+
+        def vis_children(link):
+            visited.append(link)
+            if func is not None:
+                func(link)
+
+            for li in link.children:
+                if li not in visited:
+                    vis_children(li)
+
+        vis_children(start)
+
+        return visited
+
+    def _get_limit_links(self, end=None, start=None):
+        """
+        Get and validate an end-effector, and a base link
+
+        :param end: end-effector or gripper to compute forward kinematics to
+        :type end: str or ELink or Gripper, optional
+        :param start: name or reference to a base link, defaults to None
+        :type start: str or ELink, optional
+        :raises ValueError: link not known or ambiguous
+        :raises ValueError: [description]
+        :raises TypeError: unknown type provided
+        :return: end-effector link, base link, and tool transform of gripper
+            if applicable
+        :rtype: ELink, Elink, SE3 or None
+
+        Helper method to find or validate an end-effector and base link.
+        """
+
+        # Try cache
+        if self._cache_end is not None:
+            return self._cache_end, self._cache_start, self._cache_end_tool
+
+        tool = None
+        if end is None:
+
+            # if we have a gripper, use it
+            if len(self.grippers) == 1:
+                end = self.grippers[0].links[0]
+                tool = self.grippers[0].tool
+            elif len(self.grippers) > 1:
+                # if more than one gripper, user must choose
+                raise ValueError('Must specify which gripper')
+
+            # no grippers, use ee link if just one
+            elif len(self.ee_links) == 1:
+                end = self.ee_links[0]
+            else:
+                # if more than one EE, user must choose
+                raise ValueError('Must specify which end-effector')
+
+            # Cache result
+            self._cache_end = end
+            self._cache_end_tool = tool
+        else:
+
+            # Check if end corresponds to gripper
+            for gripper in self.grippers:
+                if end == gripper or end == gripper.name:
+                    tool = gripper.tool
+                    end = gripper.links[0]
+
+            # otherwise check for end in the links
+            end = self._getlink(end)
+
+        if start is None:
+            start = self.base_link
+            # Cache result
+            self._cache_start = start
+        else:
+            # start effector is specified
+            start = self._getlink(start)
+
+        return end, start, tool
+
+    def _getlink(self, link, default=None):
+        """
+        Validate reference to ELink
+
+        :param link: link
+        :type link: ELink or str
+        :raises ValueError: link does not belong to this ERobot
+        :raises TypeError: bad argument
+        :return: link reference
+        :rtype: ELink
+
+        ``robot._getlink(link)`` is a validated reference to an ELink within
+        the ERobot ``robot``.  If ``link`` is:
+
+        -  an ``ELink`` reference it is validated as belonging to
+          ``robot``.
+        - a string, then it looked up in the robot's link name dictionary, and
+          an ELink reference returned.
+        """
+        if link is None:
+            link = default
+
+        if isinstance(link, str):
+            if link in self.link_dict:
+                return self.link_dict[link]
+
+            raise ValueError(f'no link named {link}')
+
+        elif isinstance(link, BaseELink):
+            if link in self.links:
+                return link
+            else:
+                for gripper in self.grippers:
+                    if link in gripper.links:
+                        return link
+
+                raise ValueError('link not in robot links')
+        else:
+            raise TypeError('unknown argument')
+
+
+    def fkine_path(self, q, old=None):
+        '''
+        Tall = robot.fkine_all(q) evaluates fkine for each joint within a
+        robot and returns a trajecotry of poses.
+
+        Tall = fkine_all() as above except uses the stored q value of the
+        robot object.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+
+        :param old: for compatibility with DHRobot version, ignored.
+        :return T: Homogeneous transformation trajectory
+        :rtype T: SE3 list
+
+        .. note::
+
+            - The robot's base transform, if present, are incorporated
+              into the result.
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+
+        '''
+        q = getvector(q)
+        T = self.base
+        linkframes = []
+        j = 0
+        for link in self.elinks:
+            if link.isjoint:
+                T *= link.A(q[j])
+                j += 1
+            else:
+                T *= link.A()
+            linkframes.append(T)
+
+            
+        return linkframes
+# =========================================================================== #
+
+class ERobot(BaseERobot):
+
+    def __init__(self, arg, **kwargs):
+
+
+        if isinstance(arg, DHRobot):
+            # we're passed a DHRobot object
+            # TODO handle dynamic parameters if given
+            arg = arg.ets()
+
+        link_number = 0
+        if isinstance(arg, ETS):
+            # we're passed an ETS string
+            ets = arg
+            links = []
+
+            # chop it up into segments, a link frame after every joint
+            start = 0
+            for j, k in enumerate(ets.joints()):
+                ets_j = ets[start:k + 1]
+                start = k + 1
+                if j == 0:
+                    parent = None
+                else:
+                    parent = links[-1]
+                elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
+                links.append(elink)
+            tail = arg[start:]
+            if len(tail) > 0:
+                elink = ELink(tail, parent=links[-1], name=f"link{j+1:d}")
+                links.append(elink)
+        elif islistof(arg, ELink):
+            links = arg
+        else:
+            raise TypeError('constructor argument must be ETS or list of ELink')
+
+        super().__init__(links, **kwargs)
+
+        # Cached paths through links
+        # TODO Add listners on setters to reset cache
+        self._reset_cache()
+
+    @classmethod
+    def URDF(cls, file_path, gripper=None):
+        """
+        Construct an ERobot object from URDF file
+
+        :param file_path: [description]
+        :type file_path: [type]
+        :param gripper: index or name of the gripper link
+        :type gripper: int or str
+        :return: [description]
+        :rtype: [type]
+
+        If ``gripper`` is specified, links from that link outward are removed
+        from the rigid-body tree and folded into a ``Gripper`` object.
+        """
+        links, name = ERobot.URDF_read(file_path)
+
+        if gripper is not None:
+            if isinstance(gripper, int):
+                gripper = links[gripper]
+            elif isinstance(gripper, str):
+                for link in links:
+                    if link.name == gripper:
+                        gripper = link
+                        break
+                else:
+                    raise ValueError(f"no link named {gripper}")
+            else:
+                raise TypeError('bad argument passed as gripper')
+
+
+        return cls(links, name=name, gripper=gripper)
+
+    def _reset_cache(self):
+        self._path_cache = {}
+        self._path_cache_fknm = {}
+        self._cache_end = None
+        self._cache_start = None
+        self._cache_end_tool = None
+        self._eye_fknm = np.eye(4)
+
+        self._cache_links_fknm = []
+
+        self._cache_grippers = []
+
+        for link in self.elinks:
+            self._cache_links_fknm.append(link._fknm)
+
+        for gripper in self.grippers:
+            cache = []
+            for link in gripper.links:
+                cache.append(link._fknm)
+            self._cache_grippers.append(cache)
+
+        self._cache_m = len(self._cache_links_fknm)
+
+
+
+    # def dfs_path(self, l1, l2):
+    #     path = []
+    #     visited = [l1]
+
+    #     def vis_children(link):
+    #         visited.append(link)
+
+    #         for li in link.child:
+    #             if li not in visited:
+
+    #                 if li == l2 or vis_children(li):
+    #                     path.append(li)
+    #                     return True
+    #     vis_children(l1)
+    #     path.append(l1)
+    #     path.reverse()
+    #     return path
+
+    def to_dict(self, show_robot=True, show_collision=False):
+
+        self.fkine_all(self.q)
+
+        ob = []
+
+        for link in self.links:
+
+            if show_robot:
+                for gi in link.geometry:
+                    ob.append(gi.to_dict())
+            if show_collision:
+                for gi in link.collision:
+                    ob.append(gi.to_dict())
+
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+
+                if show_robot:
+                    for gi in link.geometry:
+                        ob.append(gi.to_dict())
+                if show_collision:
+                    for gi in link.collision:
+                        ob.append(gi.to_dict())
+
+        return ob
+
+    def fk_dict(self, show_robot=True, show_collision=False):
+        ob = []
+
+        self.fkine_all(self.q)
+
+        # Do the robot
+        for link in self.links:
+
+            if show_robot:
+                for gi in link.geometry:
+                    ob.append(gi.fk_dict())
+            if show_collision:
+                for gi in link.collision:
+                    ob.append(gi.fk_dict())
+
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+                if show_robot:
+                    for gi in link.geometry:
+                        ob.append(gi.fk_dict())
+                if show_collision:
+                    for gi in link.collision:
+                        ob.append(gi.fk_dict())
+
+        return ob
+
+    @staticmethod
+    def URDF_read(file_path, tld=None):
+        """
+        Read a URDF file as ELinks
+
+        :param file_path: File path relative to the xacro folder
+        :type file_path: str, in Posix file path fprmat
+        :param tld: top-level directory, defaults to None
+        :type tld: str, optional
+        :return: Links and robot name
+        :rtype: tuple(ELink list, str)
+
+        File should be specified relative to ``RTBDATA/URDF/xacro``
+        """
+
+        # get the path to the class that defines the robot
+        base_path = path_to_datafile('xacro')
+        # print("*** urdf_to_ets_args: ", classpath)
+        # add on relative path to get to the URDF or xacro file
+        # base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
+        file_path = base_path / PurePosixPath(file_path)
+        name, ext = splitext(file_path)
+
+        if ext == '.xacro':
+            # it's a xacro file, preprocess it
+            if tld is not None:
+                tld = base_path / PurePosixPath(tld)
+            urdf_string = xacro.main(file_path, tld)
+            try:
+                urdf = URDF.loadstr(urdf_string, file_path)
+            except BaseException as e:
+                print('error parsing URDF file', file_path)
+                raise e
+        else:  # pragma nocover
+            urdf = URDF.loadstr(open(file_path).read(), file_path)
+
+        return urdf.elinks, urdf.name
+
+
+
+
+
+
 # --------------------------------------------------------------------- #
 
     def fkine(
@@ -1240,9 +1335,6 @@ graph [rankdir=LR];
                 for gi in link.geometry:
                     gi.wT = link._fk
 
-        # HACK, inefficient to convert back to SE3
-        return [SE3(link._fk) for link in self.elinks]
-
     def get_path(self, end=None, start=None, _fknm=False):
         """
         Find a path from start to end. The end must come after
@@ -1308,109 +1400,7 @@ graph [rankdir=LR];
         else:
             return path, n, tool
 
-    def _get_limit_links(self, end=None, start=None):
-        """
-        Get and validate an end-effector, and a base link
 
-        :param end: end-effector or gripper to compute forward kinematics to
-        :type end: str or ELink or Gripper, optional
-        :param start: name or reference to a base link, defaults to None
-        :type start: str or ELink, optional
-        :raises ValueError: link not known or ambiguous
-        :raises ValueError: [description]
-        :raises TypeError: unknown type provided
-        :return: end-effector link, base link, and tool transform of gripper
-            if applicable
-        :rtype: ELink, Elink, SE3 or None
-
-        Helper method to find or validate an end-effector and base link.
-        """
-
-        # Try cache
-        if self._cache_end is not None:
-            return self._cache_end, self._cache_start, self._cache_end_tool
-
-        tool = None
-        if end is None:
-
-            # if we have a gripper, use it
-            if len(self.grippers) == 1:
-                end = self.grippers[0].links[0]
-                tool = self.grippers[0].tool
-            elif len(self.grippers) > 1:
-                # if more than one gripper, user must choose
-                raise ValueError('Must specify which gripper')
-
-            # no grippers, use ee link if just one
-            elif len(self.ee_links) == 1:
-                end = self.ee_links[0]
-            else:
-                # if more than one EE, user must choose
-                raise ValueError('Must specify which end-effector')
-
-            # Cache result
-            self._cache_end = end
-            self._cache_end_tool = tool
-        else:
-
-            # Check if end corresponds to gripper
-            for gripper in self.grippers:
-                if end == gripper or end == gripper.name:
-                    tool = gripper.tool
-                    end = gripper.links[0]
-
-            # otherwise check for end in the links
-            end = self._getlink(end)
-
-        if start is None:
-            start = self.base_link
-            # Cache result
-            self._cache_start = start
-        else:
-            # start effector is specified
-            start = self._getlink(start)
-
-        return end, start, tool
-
-    def _getlink(self, link, default=None):
-        """
-        Validate reference to ELink
-
-        :param link: link
-        :type link: ELink or str
-        :raises ValueError: link does not belong to this ERobot
-        :raises TypeError: bad argument
-        :return: link reference
-        :rtype: ELink
-
-        ``robot._getlink(link)`` is a validated reference to an ELink within
-        the ERobot ``robot``.  If ``link`` is:
-
-        -  an ``ELink`` reference it is validated as belonging to
-          ``robot``.
-        - a string, then it looked up in the robot's link name dictionary, and
-          an ELink reference returned.
-        """
-        if link is None:
-            link = default
-
-        if isinstance(link, str):
-            if link in self.link_dict:
-                return self.link_dict[link]
-
-            raise ValueError(f'no link named {link}')
-
-        elif isinstance(link, ELink):
-            if link in self.links:
-                return link
-            else:
-                for gripper in self.grippers:
-                    if link in gripper.links:
-                        return link
-
-                raise ValueError('link not in robot links')
-        else:
-            raise TypeError('unknown argument')
 
     def jacob0(
             self, q, end=None, start=None, tool=None, T=None,
