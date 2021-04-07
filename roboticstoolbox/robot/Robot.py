@@ -2,7 +2,7 @@
 import copy
 import numpy as np
 import roboticstoolbox as rtb
-from spatialmath import SE3
+from spatialmath import SE3, SE2
 from spatialmath.base.argcheck import isvector, getvector, getmatrix, \
     getunit
 from roboticstoolbox.robot.Link import Link
@@ -20,7 +20,6 @@ from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
-from roboticstoolbox.robot.BaseRobot import BaseRobot
 try:
     from matplotlib import colors
     from matplotlib import cm
@@ -33,7 +32,7 @@ except ImportError:    # pragma nocover
 # ikine functions need: fkine, jacobe, qlim methods from subclass
 
 
-class Robot(BaseRobot, DynamicsMixin, IKMixin):
+class Robot(DynamicsMixin, IKMixin):
 
     _color = True
 
@@ -210,6 +209,25 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
 
         """
         return self._n
+
+    @property
+    def qrandom(self):
+        """
+        Return a random joint configuration
+
+        :return: Random joint configuration :rtype: ndarray(n)
+
+        The value for each joint is uniform randomly distributed  between the
+        limits set for the robot.
+
+        .. note:: The joint limit for all joints must be set.
+
+        :seealso: :func:`Robot.qlim`, :func:`Link.qlim`
+        """
+        qlim = self.qlim
+        if np.any(np.isnan(qlim)):
+            raise ValueError('some joint limits not defined')
+        return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
 
     def addconfiguration(self, name, q, unit='rad'):
         """
@@ -614,6 +632,88 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
             Jd += H[:, :, i] * qd[i]
 
         return Jd
+
+    def jacobm(self, q=None, J=None, H=None, end=None, start=None, axes='all'):
+        r"""
+        Calculates the manipulability Jacobian. This measure relates the rate
+        of change of the manipulability to the joint velocities of the robot.
+        One of J or q is required. Supply J and H if already calculated to
+        save computation time
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param J: The manipulator Jacobian in any frame
+        :type J: float ndarray(6,n)
+        :param H: The manipulator Hessian in any frame
+        :type H: float ndarray(6,n,n)
+        :param end: the final link or Gripper which the Hessian represents
+        :type end: str or ELink or Gripper
+        :param start: the first link which the Hessian represents
+        :type start: str or ELink
+
+        :return: The manipulability Jacobian
+        :rtype: float ndarray(n)
+
+        Yoshikawa's manipulability measure
+
+        .. math::
+
+            m(\vec{q}) = \sqrt{\mat{J}(\vec{q}) \mat{J}(\vec{q})^T}
+
+        This method returns its Jacobian with respect to configuration
+
+        .. math::
+
+            \frac{\partial m(\vec{q})}{\partial \vec{q}}
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        """
+
+        end, start, _ = self._get_limit_links(end, start)
+        # path, n, _ = self.get_path(end, start)
+
+        if axes == 'all':
+            axes = [True, True, True, True, True, True]
+        elif axes.startswith('trans'):
+            axes = [True, True, True, False, False, False]
+        elif axes.startswith('rot'):
+            axes = [False, False, False, True, True, True]
+        else:
+            raise ValueError('axes must be all, trans or rot')
+
+        if J is None:
+            if q is None:
+                q = np.copy(self.q)
+            else:
+                q = getvector(q, self.n)
+
+            J = self.jacob0(q, start=start, end=end)
+        else:
+            verifymatrix(J, (6, n))
+
+        if H is None:
+            H = self.hessian0(J0=J, start=start, end=end)
+        else:
+            verifymatrix(H, (6, n, n))
+
+        manipulability = self.manipulability(
+            q, J=J, start=start, end=end, axes=axes)
+
+        J = J[axes, :]
+        H = H[axes, :, :]
+
+        b = np.linalg.inv(J @ np.transpose(J))
+        Jm = np.zeros((n, 1))
+
+        for i in range(n):
+            c = J @ np.transpose(H[:, :, i])
+            Jm[i, 0] = manipulability * \
+                np.transpose(c.flatten('F')) @ b.flatten('F')
+
+        return Jm
 # --------------------------------------------------------------------- #
 
     @property
@@ -690,7 +790,10 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
             is an identity matrix.
         """
         if self._base is None:
-            self._base = SE3()
+            if isinstance(self, ERobot2):
+                self._base = SE2()
+            else:
+                self._base = SE3()
 
         return self._base
 
@@ -698,12 +801,23 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
     def base(self, T):
         # if not isinstance(T, SE3):
         #     T = SE3(T)
-        if T is None or isinstance(T, SE3):
+        if T is None:
             self._base = T
-        elif SE3.isvalid(T):
-            self._tool = SE3(T, check=False)
+        elif isinstance(self, rtb.ERobot2):
+            # 2D robot
+            if isinstance(T, SE2):
+                self._base = T
+            elif SE2.isvalid(T):
+                self._tool = SE2(T, check=True)
+        elif isinstance(self, rtb.Robot):
+            # all other 3D robots
+            if isinstance(T, SE3):
+                self._base = T
+            elif SE3.isvalid(T):
+                self._tool = SE3(T, check=True)
+
         else:
-            raise ValueError('base must be set to None (no tool) or an SE3')
+            raise ValueError('base must be set to None (no tool), SE2, or SE3')
 # --------------------------------------------------------------------- #
 
     @property
@@ -862,6 +976,35 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
                 'Control type must be one of \'p\', \'v\', or \'a\'')
 
 # --------------------------------------------------------------------- #
+
+    # TODO probably should be a static method
+    def _get_graphical_backend(self, backend):
+        #
+        # find the right backend, modules are imported here on an as needs basis
+        if backend.lower() == 'swift':  # pragma nocover
+            if isinstance(self, rtb.DHRobot):
+                raise NotImplementedError(
+                    'Plotting in Swift is not implemented for DHRobots yet')
+
+            from roboticstoolbox.backends.Swift import Swift
+            env = Swift()
+
+        elif backend.lower() == 'pyplot':
+            from roboticstoolbox.backends.PyPlot import PyPlot
+            env = PyPlot()
+
+        elif backend.lower() == 'pyplot2':
+            from roboticstoolbox.backends.PyPlot import PyPlot2
+            env = PyPlot2()
+
+        elif backend.lower() == 'vpython':
+            from roboticstoolbox.backends.VPython import VPython
+            env = VPython()
+
+        else:
+            raise ValueError('unknown backend', backend)
+
+        return env
 
     def plot(
             self, q, backend=None, block=False, dt=0.050,
@@ -1439,12 +1582,8 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
                   occurs.
         """
 
-        if isinstance(self, rtb.ERobot):  # pragma nocover
-            raise NotImplementedError(
-                "2D Plotting of ERobot's not implemented yet")
-
-        if q is not None:
-            self.q = q
+        if q is None:
+            q = np.zeros((self.n,))
 
         # Make an empty 3D figure
         env = self._get_graphical_backend(backend)
@@ -1455,7 +1594,7 @@ class Robot(BaseRobot, DynamicsMixin, IKMixin):
             self, readonly=True,
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
-        env._add_teach_panel(self)
+        env._add_teach_panel(self, q)
 
         # Keep the plot open
         if block:           # pragma: no cover

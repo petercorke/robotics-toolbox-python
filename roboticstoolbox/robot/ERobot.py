@@ -9,12 +9,13 @@ import tempfile
 import subprocess
 import webbrowser
 import numpy as np
-from spatialmath import SE3
-from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix
-# from roboticstoolbox.robot.BaseRobot import BaseRobot
+from spatialmath import SE3, SE2
+from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix, \
+    islistof
+from roboticstoolbox.robot.Robot import Robot
 
-from roboticstoolbox.robot.ELink import ELink
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ELink import ELink, ELink2, BaseELink
+from roboticstoolbox.robot.ETS import ETS, ETS2, BaseETS
 from roboticstoolbox.robot.DHRobot import DHRobot
 from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
@@ -30,10 +31,10 @@ from spatialmath import SpatialAcceleration, SpatialVelocity, \
 import fknm
 
 
-class ERobot(Robot):
+class BaseERobot(Robot):
+
     """
     Construct an ERobot object
-
     :param et_list: List of elementary transforms which represent the robot
         kinematics
     :type et_list: ET list
@@ -47,32 +48,22 @@ class ERobot(Robot):
     :type tool: SE3, optional
     :param gravity: The gravity vector
     :type n: ndarray(3)
-
     An ERobot represents the kinematics of a serial-link manipulator with
     one or more branches.
-
     From ETS
     --------
-
     Example:
-
     .. runblock:: pycon
-
         >>> from roboticstoolbox import ETS, ERobot
         >>> ets = ETS.rz() * ETS.ry() * ETS.tz(1) * ETS.ry() * ETS.tz(1)
         >>> robot = ERobot(ets)
         >>> print(robot)
-
     The ETS is partitioned such that a new link frame is created **after** every
     joint variable.
-
     From list of ELinks
     -------------------
-
     Example:
-
     .. runblock:: pycon
-
         >>> from roboticstoolbox import ETS, ERobot
         >>> link1 = ELink(ETS.rz(), name='link1')
         >>> link2 = ELink(ETS.ry(), name='link2', parent=link1)
@@ -80,20 +71,15 @@ class ERobot(Robot):
         >>> link4 = ELink(ETS.tz(1), name='ee', parent=link3)
         >>> robot = ERobot([link1, link2, link3, link4])
         >>> print(robot)
-
     A number of ``ELink`` objects are created, each has a transform with
     respect to the previous frame, and all except the first link have a parent.
     The implicit parent of the first link is the base.
-
     The parent also can be specified as a string, and its name is mapped to the
     parent link by name in ``ERobot``.
-
     If no ``parent`` arguments are given it is assumed the links are in
     sequential order, and the parent hierarchy will be automatically
     established.
-
     .. runblock:: pycon
-
         >>> from roboticstoolbox import ETS, ERobot
         >>> robot = ERobot([
         >>>     ELink(ETS.rz(), name='link1'),
@@ -102,14 +88,10 @@ class ERobot(Robot):
         >>>     ELink(ETS.tz(1), name='ee')
         >>>             ])
         >>> print(robot)
-
     Branched robots
     ---------------
-
     Example:
-
     .. runblock:: pycon
-
         >>> robot = ERobot([
         >>>    ELink(ETS.rz(), name='link1'),
         >>>    ELink(ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(), name='link2', parent='link1'),
@@ -118,15 +100,14 @@ class ERobot(Robot):
         >>>    ELink(ETS.tx(1), name='ee_2', parent='link3')
         >>>             ])
         >>> print(robot)
-
     :references:
         - Kinematic Derivatives using the Elementary Transform Sequence,
           J. Haviland and P. Corke
-    """
+    """  # noqa E501
 
     def __init__(
             self,
-            arg,
+            links,
             base_link=None,
             gripper_links=None,
             checkjindex=True,
@@ -143,72 +124,33 @@ class ERobot(Robot):
         # search order
         orlinks = []
 
-        if isinstance(arg, DHRobot):
-            # we're passed a DHRobot object
-            # TODO handle dynamic parameters if given
-            args = args.ets()
+        # check all the incoming ELink objects
+        n = 0
+        for link in links:
+            # if link has no name, give it one
+            if link.name is None:
+                link.name = f"link-{link_number}"
+                link_number += 1
 
-        link_number = 0
-        if isinstance(arg, ETS):
-            # we're passed an ETS string
-            ets = arg
-            links = []
+            # put it in the link dictionary, check for duplicates
+            if link.name in self._linkdict:
+                raise ValueError(
+                    f'link name {link.name} is not unique')
+            self._linkdict[link.name] = link
 
-            # chop it up into segments, a link frame after every joint
-            start = 0
-            for j, k in enumerate(ets.joints()):
-                ets_j = ets[start:k + 1]
-                start = k + 1
-                if j == 0:
-                    parent = None
-                else:
-                    parent = links[-1]
-                elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
-                links.append(elink)
+            if link.isjoint:
+                n += 1
 
-            n = len(ets.joints())
+        # resolve parents given by name, within the context of
+        # this set of links
+        for link in links:
+            if isinstance(link.parent, str):
+                link._parent = self._linkdict[link.parent]
 
-            tool = ets[start:]
-            if len(tool) > 0:
-                links.append(ELink(tool, parent=links[-1], name="ee"))
-
-        elif isinstance(arg, list):
-            # we're passed a list of ELinks
-
-            # check all the incoming ELink objects
-            n = 0
-            ndims = None
-            links = arg
-            for link in links:
-                if isinstance(link, ELink):
-                    # if link has no name, give it one
-                    if link.name is None:
-                        link.name = f"link-{link_number}"
-                        link_number += 1
-
-                    # put it in the link dictionary, check for duplicates
-                    if link.name in self._linkdict:
-                        raise ValueError(
-                            f'link name {link.name} is not unique')
-                    self._linkdict[link.name] = link
-                else:
-                    raise TypeError("Input can be only ELink")
-                if link.isjoint:
-                    n += 1
-
-            # resolve parents given by name, within the context of
-            # this set of links
-            for link in links:
-                if isinstance(link.parent, str):
-                    link._parent = self._linkdict[link.parent]
-
-            if all([link.parent is None for link in links]):
-                # no parent links were given, assume they are sequential
-                for i in range(len(links) - 1):
-                    links[i + 1]._parent = links[i]
-
-        else:
-            raise TypeError('elinks must be a list of ELinks or an ETS')
+        if all([link.parent is None for link in links]):
+            # no parent links were given, assume they are sequential
+            for i in range(len(links) - 1):
+                links[i + 1]._parent = links[i]
 
         self._n = n
 
@@ -324,277 +266,91 @@ class ERobot(Robot):
 
         super().__init__(orlinks, **kwargs)
 
-        # Cached paths through links
-        # TODO Add listners on setters to reset cache
-        self._reset_cache()
-
-    @classmethod
-    def URDF(cls, file_path, gripper=None):
+    def __str__(self):
         """
-        Construct an ERobot object from URDF file
-
-        :param file_path: [description]
-        :type file_path: [type]
-        :param gripper: index or name of the gripper link
-        :type gripper: int or str
-        :return: [description]
-        :rtype: [type]
-
-        If ``gripper`` is specified, links from that link outward are removed
-        from the rigid-body tree and folded into a ``Gripper`` object.
+        Pretty prints the ETS Model of the robot.
+        :return: Pretty print of the robot model
+        :rtype: str
+        .. note::
+            - Constant links are shown in blue.
+            - End-effector links are prefixed with an @
+            - Angles in degrees
+            - The robot base frame is denoted as ``BASE`` and is equal to the
+              robot's ``base`` attribute.
         """
-        links, name = ERobot.URDF_read(file_path)
-
-        if gripper is not None:
-            if isinstance(gripper, int):
-                gripper = links[gripper]
-            elif ininstance(gripper, str):
-                for link in links:
-                    if link.name == gripper:
-                        gripper = link
-                        break
-                else:
-                    raise ValueError(f"no link named {gripper}")
+        table = ANSITable(
+            Column("id", headalign="^", colalign=">"),
+            Column("link", headalign="^", colalign="<"),
+            Column("joint", headalign="^", colalign=">"),
+            Column("parent", headalign="^", colalign="<"),
+            Column("ETS", headalign="^", colalign="<"),
+            border="thin")
+        for k, link in enumerate(self):
+            color = "" if link.isjoint else "<<blue>>"
+            ee = "@" if link in self.ee_links else ""
+            ets = link.ets()
+            if link.parent is None:
+                parent_name = "BASE"
             else:
-                raise TypeError('bad argument passed as gripper')
+                parent_name = link.parent.name
+            s = ets.__str__(f"q{link._jindex}")
+            if len(s) > 0:
+                s = " \u2295 " + s
 
-        return cls(links, name=name, gripper=gripper)
+            if link.isjoint:
+                if link._joint_name is not None:
+                    jname = link._joint_name
+                else:
+                    jname = link.jindex
+            else:
+                jname = ''
+            table.row(
+                k,
+                color + ee + link.name,
+                jname,
+                parent_name,
+                f"{{{link.name}}} = {{{parent_name}}}{s}"
+            )
 
-    def _reset_cache(self):
-        self._path_cache = {}
-        self._path_cache_fknm = {}
-        self._cache_end = None
-        self._cache_start = None
-        self._cache_end_tool = None
-        self._eye_fknm = np.eye(4)
+        s = f"{self.__class__.__name__}: {self.name}"
+        if self.manufacturer is not None and len(self.manufacturer) > 0:
+            s += f" (by {self.manufacturer})"
+        s += f", {self.n} joints ({self.structure})"
+        if self.nbranches > 1:
+            s += f", {self.nbranches} branches"
+        if self._hasdynamics:
+            s += ", dynamics"
+        if any([len(link.geometry) > 0 for link in self.links]):
+            s += ", geometry"
+        if any([len(link.collision) > 0 for link in self.links]):
+            s += ", collision"
+        s += "\n"
 
-        self._cache_links_fknm = []
+        s += str(table)
+        s += self.configurations_str()
 
-        self._cache_grippers = []
+        return s
 
-        for link in self.elinks:
-            self._cache_links_fknm.append(link._fknm)
-
-        for gripper in self.grippers:
-            cache = []
-            for link in gripper.links:
-                cache.append(link._fknm)
-            self._cache_grippers.append(cache)
-
-        self._cache_m = len(self._cache_links_fknm)
-
-    def dfs_links(self, start, func=None):
+    def hierarchy(self):
         """
-        Visit all links from start in depth-first order and will apply
-        func to each visited link
-
-        :param start: the link to start at
-        :type start: ELink
-        :param func: An optional function to apply to each link as it is found
-        :type func: function
-
-        :returns: A list of links
-        :rtype: list of ELink
-        """
-        visited = []
-
-        def vis_children(link):
-            visited.append(link)
-            if func is not None:
-                func(link)
-
-            for li in link.children:
-                if li not in visited:
-                    vis_children(li)
-
-        vis_children(start)
-
-        return visited
-
-    # def dfs_path(self, l1, l2):
-    #     path = []
-    #     visited = [l1]
-
-    #     def vis_children(link):
-    #         visited.append(link)
-
-    #         for li in link.child:
-    #             if li not in visited:
-
-    #                 if li == l2 or vis_children(li):
-    #                     path.append(li)
-    #                     return True
-    #     vis_children(l1)
-    #     path.append(l1)
-    #     path.reverse()
-    #     return path
-
-    def to_dict(self, show_robot=True, show_collision=False):
-
-        self.fkine_links(self.q)
-
-        ob = []
-
-        for link in self.links:
-
-            if show_robot:
-                for gi in link.geometry:
-                    ob.append(gi.to_dict())
-            if show_collision:
-                for gi in link.collision:
-                    ob.append(gi.to_dict())
-
-        # Do the grippers now
-        for gripper in self.grippers:
-            for link in gripper.links:
-
-                if show_robot:
-                    for gi in link.geometry:
-                        ob.append(gi.to_dict())
-                if show_collision:
-                    for gi in link.collision:
-                        ob.append(gi.to_dict())
-
-        return ob
-
-    def fk_dict(self, show_robot=True, show_collision=False):
-        ob = []
-
-        # self.fkine_links(self.q)
-
-        # Do the robot
-        for link in self.links:
-
-            if show_robot:
-                for gi in link.geometry:
-                    ob.append(gi.fk_dict())
-            if show_collision:
-                for gi in link.collision:
-                    ob.append(gi.fk_dict())
-
-        # Do the grippers now
-        for gripper in self.grippers:
-            for link in gripper.links:
-                if show_robot:
-                    for gi in link.geometry:
-                        ob.append(gi.fk_dict())
-                if show_collision:
-                    for gi in link.collision:
-                        ob.append(gi.fk_dict())
-
-        return ob
-
-    # @classmethod
-    # def urdf_to_ets(cls, file_path):
-    #     name, ext = splitext(file_path)
-
-    #     if ext == '.xacro':
-    #         urdf_string = xacro.main(file_path)
-    #         urdf = URDF.loadstr(urdf_string, file_path)
-
-    #     return ERobot(
-    #         urdf.elinks,
-    #         name=urdf.name
-    #     )
-
-    @staticmethod
-    def URDF_read(file_path, tld=None):
-        """
-        Read a URDF file as ELinks
-
-        :param file_path: File path relative to the xacro folder
-        :type file_path: str, in Posix file path fprmat
-        :param tld: top-level directory, defaults to None
-        :type tld: str, optional
-        :return: Links and robot name
-        :rtype: tuple(ELink list, str)
-
-        File should be specified relative to ``RTBDATA/URDF/xacro``
+        Pretty print the robot link hierachy
+        :return: Pretty print of the robot model
+        :rtype: str
+        Example:
+        .. runblock:: pycon
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.URDF.Panda()
+            >>> robot.hierarchy()
         """
 
-        # get the path to the class that defines the robot
-        base_path = path_to_datafile('xacro')
-        # print("*** urdf_to_ets_args: ", classpath)
-        # add on relative path to get to the URDF or xacro file
-        # base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
-        file_path = base_path / PurePosixPath(file_path)
-        name, ext = splitext(file_path)
+        # link = self.base_link
 
-        if ext == '.xacro':
-            # it's a xacro file, preprocess it
-            if tld is not None:
-                tld = base_path / PurePosixPath(tld)
-            urdf_string = xacro.main(file_path, tld)
-            try:
-                urdf = URDF.loadstr(urdf_string, file_path)
-            except BaseException as e:
-                print('error parsing URDF file', file_path)
-                raise e
-        else:  # pragma nocover
-            urdf = URDF.loadstr(open(file_path).read(), file_path)
+        def recurse(link, indent=0):
+            print(' ' * indent * 2, link.name)
+            for child in link.child:
+                recurse(child, indent + 1)
 
-        return urdf.elinks, urdf.name
-
-    # @classmethod
-    # def dh_to_ets(cls, robot):
-    #     """
-    #     Converts a robot modelled with standard or modified DH parameters to
-    #     an ERobot representation
-
-    #     :param robot: The robot model to be converted
-    #     :type robot: SerialLink
-    #     :return: List of returned :class:`bluepy.btle.Characteristic` objects
-    #     :rtype: ets class
-    #     """
-    #     ets = []
-    #     q_idx = []
-    #     M = 0
-
-    #     for j in range(robot.n):
-    #         L = robot.links[j]
-
-    #         # Method for modified DH parameters
-    #         if robot.mdh:
-
-    #             # Append Tx(a)
-    #             if L.a != 0:
-    #                 ets.append(ET.Ttx(L.a))
-    #                 M += 1
-
-    #             # Append Rx(alpha)
-    #             if L.alpha != 0:
-    #                 ets.append(ET.TRx(L.alpha))
-    #                 M += 1
-
-    #             if L.is_revolute:
-    #                 # Append Tz(d)
-    #                 if L.d != 0:
-    #                     ets.append(ET.Ttz(L.d))
-    #                     M += 1
-
-    #                 # Append Rz(q)
-    #                 ets.append(ET.TRz(joint=j+1))
-    #                 q_idx.append(M)
-    #                 M += 1
-
-    #             else:
-    #                 # Append Tz(q)
-    #                 ets.append(ET.Ttz(joint=j+1))
-    #                 q_idx.append(M)
-    #                 M += 1
-
-    #                 # Append Rz(theta)
-    #                 if L.theta != 0:
-    #                     ets.append(ET.TRz(L.alpha))
-    #                     M += 1
-
-    #     return cls(
-    #         ets,
-    #         q_idx,
-    #         robot.name,
-    #         robot.manuf,
-    #         robot.base,
-    #         robot.tool)
+        recurse(self.base_link)
 
     @property
     def qlim(self):
@@ -605,72 +361,14 @@ class ERobot(Robot):
 
         return self._valid_qlim
 
-    # @property
-    # def qdlim(self):
-    #     return self.qdlim
-
-    # def rne( robot, q, qd, qdd):
-
-    #     n = robot.n
-
-    #     # allocate intermediate variables
-    #     Xup = SE3.Alloc(n)
-    #     Xtree = SE3.Alloc(n)
-
-    #     v = SpatialVelocity.Alloc(n)
-    #     a = SpatialAcceleration.Alloc(n)
-    #     f = SpatialForce.Alloc(n)
-    #     I = SpatialInertia.Alloc(n)
-    #     s = [None for i in range(n)]   # joint motion subspace
-    #     Q = np.zeros((n,))   # joint torque/force
-
-    #     # initialize intermediate variables
-    #     for j, link in enumerate(robot):
-    #         I[j] = SpatialInertia(link.m, link.r)
-    #         Xtree[j] = link.Ts
-    #         s[j] = link.v.s
-
-    #     a_grav = SpatialAcceleration(robot.gravity)
-
-    #     # forward recursion
-    #     for j in range(0, n):
-    #         vJ = SpatialVelocity(s[j] * qd[j])
-
-    #         # transform from parent(j) to j
-    #         Xup[j] = robot[j].A(q[j]).inv()
-
-    #         if robot[j].parent is None:
-    #             v[j] = vJ
-    #             a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qdd[j])
-    #         else:
-    #             jp = robot[j].parent.jindex
-    #             v[j] = Xup[j] * v[jp] + vJ
-    #             a[j] = Xup[j] * a[jp] \
-    #                 + SpatialAcceleration(s[j] * qdd[j]) \
-    #                 + v[j] @ vJ
-
-    #         f[j] = I[j] * a[j] + v[j] @ (I[j] * v[j])
-
-    #     # backward recursion
-    #     for j in reversed(range(0, n)):
-    #         Q[j] = f[j].dot(s[j])
-
-    #         if robot[j].parent is not None:
-    #             jp = robot[j].parent.jindex
-    #             f[jp] = f[jp] + Xup[j] * f[j]
-
-    #     return Q
-
 # --------------------------------------------------------------------- #
 
     @property
     def n(self):
         """
         Number of joints
-
         :return: number of variable joint in the robot's kinematic tree
         :rtype: int
-
         The sum of the number of revolute and prismatic joints.
         """
         return self._n
@@ -681,10 +379,8 @@ class ERobot(Robot):
     def nbranches(self):
         """
         Number of branches
-
         :return: number of branches in the robot's kinematic tree
         :rtype: int
-
         Computed as the number of links with zero children
         """
         return self._nbranches
@@ -742,20 +438,15 @@ class ERobot(Robot):
     def reach(self):
         r"""
         Reach of the robot
-
         :return: Maximum reach of the robot
         :rtype: float
-
         A conservative estimate of the reach of the robot. It is computed as
         the sum of the translational ETs that define the link transform.
-
         .. note::
-
             - Probably an overestimate of reach
             - Used by numerical inverse kinematics to scale translational
               error.
             - For a prismatic joint, uses ``qlim`` if it is set
-
         .. warning:: Computed on the first access. If kinematic parameters
               subsequently change this will not be reflected.
         """
@@ -790,33 +481,9 @@ class ERobot(Robot):
 
 # --------------------------------------------------------------------- #
 
-    # def ets(self, ee=None):
-    #     if ee is None:
-    #         if len(self.ee_links) == 1:
-    #             link = self.ee_links[0]
-    #         else:
-    #             raise ValueError(
-    #                 'robot has multiple end-effectors, specify one')
-    #     # elif isinstance(ee, str) and ee in self._linkdict:
-    #     #     ee = self._linkdict[ee]
-    #     elif isinstance(ee, ELink) and ee in self._links:
-    #         link = ee
-    #     else:
-    #         raise ValueError('end-effector is not valid')
-
-    #     ets = ETS()
-
-    #     # build the ETS string from ee back to root
-    #     while link is not None:
-    #         ets = link.ets() * ets
-    #         link = link.parent
-
-    #     return ets
-
     def ets(self, start=None, end=None, explored=None, path=None):
         """
         ERobot to ETS
-
         :param start: start of path, defaults to ``base_link``
         :type start: ELink or str, optional
         :param end: end of path, defaults to end-effector
@@ -825,20 +492,16 @@ class ERobot(Robot):
         :raises TypeError: a bad link argument
         :return: elementary transform sequence
         :rtype: ETS instance
-
         - ``robot.ets()`` is an ETS representing the kinematics from base to
           end-effector.
         - ``robot.ets(end=link)`` is an ETS representing the kinematics from
           base to the link ``link`` specified as an ELink reference or a name.
         - ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
           from link ``l1`` to link ``l2``.
-
         .. runblock:: pycon
-
             >>> import roboticstoolbox as rtb
             >>> panda = rtb.models.ETS.Panda()
             >>> panda.ets()
-
         """
         v = self._getlink(start, self.base_link)
         if end is None and len(self.ee_links) > 1:
@@ -878,59 +541,38 @@ class ERobot(Robot):
 
         return None
 
-    def config(self):
-        s = ''
-        for link in self.links:
-            if link.v is not None:
-                if link.v.isprismatic:
-                    s += 'P'
-                elif link.v.isrevolute:
-                    s += 'R'
-        return s
-
 # --------------------------------------------------------------------- #
 
     def showgraph(self, **kwargs):
         """
         Display a link transform graph in browser
-
         :param etsbox: Put the link ETS in a box, otherwise an edge label
         :type etsbox: bool
         :param jtype: Arrowhead to node indicates revolute or prismatic type
         :type jtype: bool
         :param static: Show static joints in blue and bold
         :type static: bool
-
         ``robot.showgraph()`` displays a graph of the robot's link frames
         and the ETS between them.  It uses GraphViz dot.
-
         The nodes are:
-
             - Base is shown as a grey square.  This is the world frame origin,
               but can be changed using the ``base`` attribute of the robot.
             - Link frames are indicated by circles
             - ETS transforms are indicated by rounded boxes
-
         The edges are:
-
             - an arrow if `jtype` is False or the joint is fixed
             - an arrow with a round head if `jtype` is True and the joint is
               revolute
             - an arrow with a box head if `jtype` is True and the joint is
               prismatic
-
         Edge labels or nodes in blue have a fixed transformation to the
         preceding link.
-
         Example::
-
             >>> import roboticstoolbox as rtb
             >>> panda = rtb.models.URDF.Panda()
             >>> panda.showgraph()
-
         .. image:: ../figs/panda-graph.svg
             :width: 600
-
         :seealso: :func:`dotfile`
         """
 
@@ -951,7 +593,6 @@ class ERobot(Robot):
     def dotfile(self, filename, etsbox=False, jtype=False, static=True):
         """
         Write a link transform graph as a GraphViz dot file
-
         :param file: Name of file to write to
         :type file: str or file
         :param etsbox: Put the link ETS in a box, otherwise an edge label
@@ -960,32 +601,23 @@ class ERobot(Robot):
         :type jtype: bool
         :param static: Show static joints in blue and bold
         :type static: bool
-
         The file can be processed using dot::
-
             % dot -Tpng -o out.png dotfile.dot
-
         The nodes are:
-
             - Base is shown as a grey square.  This is the world frame origin,
               but can be changed using the ``base`` attribute of the robot.
             - Link frames are indicated by circles
             - ETS transforms are indicated by rounded boxes
-
         The edges are:
-
             - an arrow if `jtype` is False or the joint is fixed
             - an arrow with a round head if `jtype` is True and the joint is
               revolute
             - an arrow with a box head if `jtype` is True and the joint is
               prismatic
-
         Edge labels or nodes in blue have a fixed transformation to the
         preceding link.
-
         .. note:: If ``filename`` is a file object then the file will *not*
             be closed after the GraphViz model is written.
-
         :seealso: :func:`showgraph`
         """
         if isinstance(filename, str):
@@ -994,9 +626,7 @@ class ERobot(Robot):
             file = filename
 
         header = r"""digraph G {
-
 graph [rankdir=LR];
-
 """
 
         def draw_edge(link, etsbox, jtype, static):
@@ -1069,6 +699,368 @@ graph [rankdir=LR];
         if isinstance(filename, str):
             file.close()  # noqa
 
+    def dfs_links(self, start, func=None):
+        """
+        Visit all links from start in depth-first order and will apply
+        func to each visited link
+        :param start: the link to start at
+        :type start: ELink
+        :param func: An optional function to apply to each link as it is found
+        :type func: function
+        :returns: A list of links
+        :rtype: list of ELink
+        """
+        visited = []
+
+        def vis_children(link):
+            visited.append(link)
+            if func is not None:
+                func(link)
+
+            for li in link.children:
+                if li not in visited:
+                    vis_children(li)
+
+        vis_children(start)
+
+        return visited
+
+    def _get_limit_links(self, end=None, start=None):
+        """
+        Get and validate an end-effector, and a base link
+        :param end: end-effector or gripper to compute forward kinematics to
+        :type end: str or ELink or Gripper, optional
+        :param start: name or reference to a base link, defaults to None
+        :type start: str or ELink, optional
+        :raises ValueError: link not known or ambiguous
+        :raises ValueError: [description]
+        :raises TypeError: unknown type provided
+        :return: end-effector link, base link, and tool transform of gripper
+            if applicable
+        :rtype: ELink, Elink, SE3 or None
+        Helper method to find or validate an end-effector and base link.
+        """
+
+        # Try cache
+        if self._cache_end is not None:
+            return self._cache_end, self._cache_start, self._cache_end_tool
+
+        tool = None
+        if end is None:
+
+            # if we have a gripper, use it
+            if len(self.grippers) == 1:
+                end = self.grippers[0].links[0]
+                tool = self.grippers[0].tool
+            elif len(self.grippers) > 1:
+                # if more than one gripper, user must choose
+                raise ValueError('Must specify which gripper')
+
+            # no grippers, use ee link if just one
+            elif len(self.ee_links) == 1:
+                end = self.ee_links[0]
+            else:
+                # if more than one EE, user must choose
+                raise ValueError('Must specify which end-effector')
+
+            # Cache result
+            self._cache_end = end
+            self._cache_end_tool = tool
+        else:
+
+            # Check if end corresponds to gripper
+            for gripper in self.grippers:
+                if end == gripper or end == gripper.name:
+                    tool = gripper.tool
+                    end = gripper.links[0]
+
+            # otherwise check for end in the links
+            end = self._getlink(end)
+
+        if start is None:
+            start = self.base_link
+            # Cache result
+            self._cache_start = start
+        else:
+            # start effector is specified
+            start = self._getlink(start)
+
+        return end, start, tool
+
+    def _getlink(self, link, default=None):
+        """
+        Validate reference to ELink
+        :param link: link
+        :type link: ELink or str
+        :raises ValueError: link does not belong to this ERobot
+        :raises TypeError: bad argument
+        :return: link reference
+        :rtype: ELink
+        ``robot._getlink(link)`` is a validated reference to an ELink within
+        the ERobot ``robot``.  If ``link`` is:
+        -  an ``ELink`` reference it is validated as belonging to
+          ``robot``.
+        - a string, then it looked up in the robot's link name dictionary, and
+          an ELink reference returned.
+        """
+        if link is None:
+            link = default
+
+        if isinstance(link, str):
+            if link in self.link_dict:
+                return self.link_dict[link]
+
+            raise ValueError(f'no link named {link}')
+
+        elif isinstance(link, BaseELink):
+            if link in self.links:
+                return link
+            else:
+                for gripper in self.grippers:
+                    if link in gripper.links:
+                        return link
+
+                raise ValueError('link not in robot links')
+        else:
+            raise TypeError('unknown argument')
+
+    def fkine_path(self, q, old=None):
+        '''
+        Tall = robot.fkine_all(q) evaluates fkine for each joint within a
+        robot and returns a trajecotry of poses.
+        Tall = fkine_all() as above except uses the stored q value of the
+        robot object.
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param old: for compatibility with DHRobot version, ignored.
+        :return T: Homogeneous transformation trajectory
+        :rtype T: SE3 list
+        .. note::
+            - The robot's base transform, if present, are incorporated
+              into the result.
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        '''
+        q = getvector(q)
+        T = self.base
+        linkframes = []
+        j = 0
+        for link in self.elinks:
+            if link.isjoint:
+                T *= link.A(q[j])
+                j += 1
+            else:
+                T *= link.A()
+            linkframes.append(T)
+
+        return linkframes
+# =========================================================================== #
+
+
+class ERobot(BaseERobot):
+
+    def __init__(self, arg, **kwargs):
+
+        if isinstance(arg, DHRobot):
+            # we're passed a DHRobot object
+            # TODO handle dynamic parameters if given
+            arg = arg.ets()
+
+        link_number = 0
+        if isinstance(arg, ETS):
+            # we're passed an ETS string
+            ets = arg
+            links = []
+
+            # chop it up into segments, a link frame after every joint
+            start = 0
+            for j, k in enumerate(ets.joints()):
+                ets_j = ets[start:k + 1]
+                start = k + 1
+                if j == 0:
+                    parent = None
+                else:
+                    parent = links[-1]
+                elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
+                links.append(elink)
+            tail = arg[start:]
+            if len(tail) > 0:
+                elink = ELink(tail, parent=links[-1], name=f"link{j+1:d}")
+                links.append(elink)
+        elif islistof(arg, ELink):
+            links = arg
+        else:
+            raise TypeError(
+                'constructor argument must be ETS or list of ELink')
+
+        super().__init__(links, **kwargs)
+
+        # Cached paths through links
+        # TODO Add listners on setters to reset cache
+        self._reset_cache()
+
+    @classmethod
+    def URDF(cls, file_path, gripper=None):
+        """
+        Construct an ERobot object from URDF file
+        :param file_path: [description]
+        :type file_path: [type]
+        :param gripper: index or name of the gripper link
+        :type gripper: int or str
+        :return: [description]
+        :rtype: [type]
+        If ``gripper`` is specified, links from that link outward are removed
+        from the rigid-body tree and folded into a ``Gripper`` object.
+        """
+        links, name = ERobot.URDF_read(file_path)
+
+        if gripper is not None:
+            if isinstance(gripper, int):
+                gripper = links[gripper]
+            elif isinstance(gripper, str):
+                for link in links:
+                    if link.name == gripper:
+                        gripper = link
+                        break
+                else:
+                    raise ValueError(f"no link named {gripper}")
+            else:
+                raise TypeError('bad argument passed as gripper')
+
+        return cls(links, name=name, gripper=gripper)
+
+    def _reset_cache(self):
+        self._path_cache = {}
+        self._path_cache_fknm = {}
+        self._cache_end = None
+        self._cache_start = None
+        self._cache_end_tool = None
+        self._eye_fknm = np.eye(4)
+
+        self._cache_links_fknm = []
+
+        self._cache_grippers = []
+
+        for link in self.elinks:
+            self._cache_links_fknm.append(link._fknm)
+
+        for gripper in self.grippers:
+            cache = []
+            for link in gripper.links:
+                cache.append(link._fknm)
+            self._cache_grippers.append(cache)
+
+        self._cache_m = len(self._cache_links_fknm)
+
+    # def dfs_path(self, l1, l2):
+    #     path = []
+    #     visited = [l1]
+
+    #     def vis_children(link):
+    #         visited.append(link)
+
+    #         for li in link.child:
+    #             if li not in visited:
+
+    #                 if li == l2 or vis_children(li):
+    #                     path.append(li)
+    #                     return True
+    #     vis_children(l1)
+    #     path.append(l1)
+    #     path.reverse()
+    #     return path
+
+    def to_dict(self, show_robot=True, show_collision=False):
+
+        self.fkine_links(self.q)
+
+        ob = []
+
+        for link in self.links:
+
+            if show_robot:
+                for gi in link.geometry:
+                    ob.append(gi.to_dict())
+            if show_collision:
+                for gi in link.collision:
+                    ob.append(gi.to_dict())
+
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+
+                if show_robot:
+                    for gi in link.geometry:
+                        ob.append(gi.to_dict())
+                if show_collision:
+                    for gi in link.collision:
+                        ob.append(gi.to_dict())
+
+        return ob
+
+    def fk_dict(self, show_robot=True, show_collision=False):
+        ob = []
+
+        # Do the robot
+        for link in self.links:
+
+            if show_robot:
+                for gi in link.geometry:
+                    ob.append(gi.fk_dict())
+            if show_collision:
+                for gi in link.collision:
+                    ob.append(gi.fk_dict())
+
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+                if show_robot:
+                    for gi in link.geometry:
+                        ob.append(gi.fk_dict())
+                if show_collision:
+                    for gi in link.collision:
+                        ob.append(gi.fk_dict())
+
+        return ob
+
+    @staticmethod
+    def URDF_read(file_path, tld=None):
+        """
+        Read a URDF file as ELinks
+        :param file_path: File path relative to the xacro folder
+        :type file_path: str, in Posix file path fprmat
+        :param tld: top-level directory, defaults to None
+        :type tld: str, optional
+        :return: Links and robot name
+        :rtype: tuple(ELink list, str)
+        File should be specified relative to ``RTBDATA/URDF/xacro``
+        """
+
+        # get the path to the class that defines the robot
+        base_path = path_to_datafile('xacro')
+        # print("*** urdf_to_ets_args: ", classpath)
+        # add on relative path to get to the URDF or xacro file
+        # base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
+        file_path = base_path / PurePosixPath(file_path)
+        name, ext = splitext(file_path)
+
+        if ext == '.xacro':
+            # it's a xacro file, preprocess it
+            if tld is not None:
+                tld = base_path / PurePosixPath(tld)
+            urdf_string = xacro.main(file_path, tld)
+            try:
+                urdf = URDF.loadstr(urdf_string, file_path)
+            except BaseException as e:
+                print('error parsing URDF file', file_path)
+                raise e
+        else:  # pragma nocover
+            urdf = URDF.loadstr(open(file_path).read(), file_path)
+
+        return urdf.elinks, urdf.name
+
 # --------------------------------------------------------------------- #
 
     def fkine(
@@ -1076,7 +1068,6 @@ graph [rankdir=LR];
             include_base=True, fast=False):
         '''
         Forward kinematics
-
         :param q: Joint coordinates
         :type q: ndarray(n) or ndarray(m,n)
         :param end: end-effector or gripper to compute forward kinematics to
@@ -1088,17 +1079,12 @@ graph [rankdir=LR];
         :return: The transformation matrix representing the pose of the
             end-effector
         :rtype: SE3 instance
-
         - ``T = robot.fkine(q)`` evaluates forward kinematics for the robot at
           joint configuration ``q``.
-
         **Trajectory operation**:
-
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is an ``SE3`` instance with ``m`` values.
-
         .. note::
-
             - For a robot with a single end-effector there is no need to
               specify ``end``
             - For a robot with multiple end-effectors, the ``end`` must
@@ -1107,11 +1093,9 @@ graph [rankdir=LR];
               into the result.
             - A tool transform, if provided, is incorporated into the result.
             - Works from the end-effector link to the base
-
         :references:
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
-
         '''
 
         # Use c extension to calculate fkine
@@ -1190,27 +1174,20 @@ graph [rankdir=LR];
         '''
         Tall = robot.fkine_all(q) evaluates fkine for each joint within a
         robot and returns a trajecotry of poses.
-
         Tall = fkine_all() as above except uses the stored q value of the
         robot object.
-
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
         :type q: float ndarray(n)
-
         :param old: for compatibility with DHRobot version, ignored.
         :return T: Homogeneous transformation trajectory
         :rtype T: SE3 list
-
         .. note::
-
             - The robot's base transform, if present, are incorporated
               into the result.
-
         :references:
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
-
         '''
 
         fknm.fkine_all(
@@ -1226,28 +1203,25 @@ graph [rankdir=LR];
                 self.grippers[i].q,
                 self._base.A)
 
-        for link in self.elinks:
+        # for link in self.elinks:
 
-            # Update the link model transforms as well
-            for col in link.collision:
-                col.wT = link._fk
+        #     # Update the link model transforms as well
+        #     for col in link.collision:
+        #         col.wT = link._fk
 
-            for gi in link.geometry:
-                gi.wT = link._fk
+        #     for gi in link.geometry:
+        #         gi.wT = link._fk
 
-        # Do the grippers now
-        for gripper in self.grippers:
-            for link in gripper.links:
+        # # Do the grippers now
+        # for gripper in self.grippers:
+        #     for link in gripper.links:
 
-                # Update the link model transforms as well
-                for col in link.collision:
-                    col.wT = link._fk
+        #         # Update the link model transforms as well
+        #         for col in link.collision:
+        #             col.wT = link._fk
 
-                for gi in link.geometry:
-                    gi.wT = link._fk
-
-        # HACK, inefficient to convert back to SE3
-        return [SE3(link._fk) for link in self.elinks]
+        #         for gi in link.geometry:
+        #             gi.wT = link._fk
 
     def fkine_links(self, q):
         '''
@@ -1289,7 +1263,6 @@ graph [rankdir=LR];
         must be a part of the same branch within the robot structure. This
         method is a work in progress while an approach which generalises
         to all applications is designed.
-
         :param end: end-effector or gripper to compute forward kinematics to
         :type end: str or ELink or Gripper, optional
         :param start: name or reference to a base link, defaults to None
@@ -1346,116 +1319,11 @@ graph [rankdir=LR];
         else:
             return path, n, tool
 
-    def _get_limit_links(self, end=None, start=None):
-        """
-        Get and validate an end-effector, and a base link
-
-        :param end: end-effector or gripper to compute forward kinematics to
-        :type end: str or ELink or Gripper, optional
-        :param start: name or reference to a base link, defaults to None
-        :type start: str or ELink, optional
-        :raises ValueError: link not known or ambiguous
-        :raises ValueError: [description]
-        :raises TypeError: unknown type provided
-        :return: end-effector link, base link, and tool transform of gripper
-            if applicable
-        :rtype: ELink, Elink, SE3 or None
-
-        Helper method to find or validate an end-effector and base link.
-        """
-
-        # Try cache
-        if self._cache_end is not None:
-            return self._cache_end, self._cache_start, self._cache_end_tool
-
-        tool = None
-        if end is None:
-
-            # if we have a gripper, use it
-            if len(self.grippers) == 1:
-                end = self.grippers[0].links[0]
-                tool = self.grippers[0].tool
-            elif len(self.grippers) > 1:
-                # if more than one gripper, user must choose
-                raise ValueError('Must specify which gripper')
-
-            # no grippers, use ee link if just one
-            elif len(self.ee_links) == 1:
-                end = self.ee_links[0]
-            else:
-                # if more than one EE, user must choose
-                raise ValueError('Must specify which end-effector')
-
-            # Cache result
-            self._cache_end = end
-            self._cache_end_tool = tool
-        else:
-
-            # Check if end corresponds to gripper
-            for gripper in self.grippers:
-                if end == gripper or end == gripper.name:
-                    tool = gripper.tool
-                    end = gripper.links[0]
-
-            # otherwise check for end in the links
-            end = self._getlink(end)
-
-        if start is None:
-            start = self.base_link
-            # Cache result
-            self._cache_start = start
-        else:
-            # start effector is specified
-            start = self._getlink(start)
-
-        return end, start, tool
-
-    def _getlink(self, link, default=None):
-        """
-        Validate reference to ELink
-
-        :param link: link
-        :type link: ELink or str
-        :raises ValueError: link does not belong to this ERobot
-        :raises TypeError: bad argument
-        :return: link reference
-        :rtype: ELink
-
-        ``robot._getlink(link)`` is a validated reference to an ELink within
-        the ERobot ``robot``.  If ``link`` is:
-
-        -  an ``ELink`` reference it is validated as belonging to
-          ``robot``.
-        - a string, then it looked up in the robot's link name dictionary, and
-          an ELink reference returned.
-        """
-        if link is None:
-            link = default
-
-        if isinstance(link, str):
-            if link in self.link_dict:
-                return self.link_dict[link]
-
-            raise ValueError(f'no link named {link}')
-
-        elif isinstance(link, ELink):
-            if link in self.links:
-                return link
-            else:
-                for gripper in self.grippers:
-                    if link in gripper.links:
-                        return link
-
-                raise ValueError('link not in robot links')
-        else:
-            raise TypeError('unknown argument')
-
     def jacob0(
             self, q, end=None, start=None, tool=None, T=None,
             half=None, analytical=None, fast=False):
         r"""
         Manipulator geometric Jacobian in the base frame
-
         :param q: Joint coordinate vector
         :type q: ndarray(n)
         :param end: the particular link or gripper whose velocity the Jacobian
@@ -1477,16 +1345,12 @@ graph [rankdir=LR];
         :type analytical: str
         :return J: Manipulator Jacobian in the base frame
         :rtype: ndarray(6,n)
-
         - ``robot.jacobo(q)`` is the manipulator Jacobian matrix which maps
           joint  velocity to end-effector spatial velocity expressed in the
           end-effector frame.
-
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
-
         ``analytical`` can be one of:
-
             =============  ==================================
             Value          Rotational representation
             =============  ==================================
@@ -1495,20 +1359,15 @@ graph [rankdir=LR];
             ``'eul'``      Euler angular rates in ZYZ order
             ``'exp'``      exponential coordinate rates
             =============  ==================================
-
         Example:
-
         .. runblock:: pycon
-
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.ETS.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
-
         .. warning:: This is the geometric Jacobian as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
-
         .. warning:: ``start`` and ``end`` must be on the same branch,
             with ``start`` closest to the base.
         """  # noqa
@@ -1623,7 +1482,6 @@ graph [rankdir=LR];
     def jacobe(self, q, end=None, start=None, tool=None, T=None):
         r"""
         Manipulator geometric Jacobian in the end-effector frame
-
         :param q: Joint coordinate vector
         :type q: ndarray(n)
         :param end: the particular link or Gripper whose velocity the Jacobian
@@ -1639,30 +1497,22 @@ graph [rankdir=LR];
         :type T: SE3, optional
         :return J: Manipulator Jacobian in the end-effector frame
         :rtype: ndarray(6,n)
-
         - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
           joint  velocity to end-effector spatial velocity expressed in the
           end-effector frame.
-
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
-
         Example:
-
         .. runblock:: pycon
-
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.ETS.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
-
         .. warning:: This is the **geometric Jacobian** as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a 
             velocity twist as per the text by Lynch & Park.
-
         .. warning:: ``start`` and ``end`` must be on the same branch,
             with ``start`` closest to the base.
-
         .. note:: ``T`` can be passed in to save the cost of computing forward
             kinematics which is needed to transform velocity from end-effector
             frame to world frame.
@@ -1824,12 +1674,10 @@ graph [rankdir=LR];
     def hessian0(self, q=None, J0=None, end=None, start=None):
         r"""
         Manipulator Hessian
-
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
         function calulcates this based on the ETS of the robot. One of J0 or q
         is required. Supply J0 if already calculated to save computation time
-
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
         :type q: float ndarray(n)
@@ -1839,42 +1687,26 @@ graph [rankdir=LR];
         :type end: str or ELink or Gripper
         :param start: the first link which the Hessian represents
         :type start: str or ELink
-
         :return: The manipulator Hessian in 0 frame
         :rtype: float ndarray(6,n,n)
-
         This method computes the manipulator Hessian in the base frame.  If
         we take the time derivative of the differential kinematic relationship
-
         .. math::
-
             \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
             \alpha &= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}
-
         where
-
         .. math::
-
             \dmat{J} = \mat{H} \dvec{q}
-
         and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
         Hessian tensor.
-
         The elements of the Hessian are
-
         .. math::
-
             \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
-
         where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
         of the spatial velocity vector.
-
         Similarly, we can write
-
         .. math::
-
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
-
         :references:
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
@@ -1908,181 +1740,6 @@ graph [rankdir=LR];
 
         return H
 
-    def jacobm(self, q=None, J=None, H=None, end=None, start=None, axes='all'):
-        r"""
-        Calculates the manipulability Jacobian. This measure relates the rate
-        of change of the manipulability to the joint velocities of the robot.
-        One of J or q is required. Supply J and H if already calculated to
-        save computation time
-
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param J: The manipulator Jacobian in any frame
-        :type J: float ndarray(6,n)
-        :param H: The manipulator Hessian in any frame
-        :type H: float ndarray(6,n,n)
-        :param end: the final link or Gripper which the Hessian represents
-        :type end: str or ELink or Gripper
-        :param start: the first link which the Hessian represents
-        :type start: str or ELink
-
-        :return: The manipulability Jacobian
-        :rtype: float ndarray(n)
-
-        Yoshikawa's manipulability measure
-
-        .. math::
-
-            m(\vec{q}) = \sqrt{\mat{J}(\vec{q}) \mat{J}(\vec{q})^T}
-
-        This method returns its Jacobian with respect to configuration
-
-        .. math::
-
-            \frac{\partial m(\vec{q})}{\partial \vec{q}}
-
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        """
-
-        end, start, _ = self._get_limit_links(end, start)
-        path, n, _ = self.get_path(end, start)
-
-        if axes == 'all':
-            axes = [True, True, True, True, True, True]
-        elif axes.startswith('trans'):
-            axes = [True, True, True, False, False, False]
-        elif axes.startswith('rot'):
-            axes = [False, False, False, True, True, True]
-        else:
-            raise ValueError('axes must be all, trans or rot')
-
-        if J is None:
-            if q is None:
-                q = np.copy(self.q)
-            else:
-                q = getvector(q, self.n)
-
-            J = self.jacob0(q, start=start, end=end)
-        else:
-            verifymatrix(J, (6, n))
-
-        if H is None:
-            H = self.hessian0(J0=J, start=start, end=end)
-        else:
-            verifymatrix(H, (6, n, n))
-
-        manipulability = self.manipulability(
-            q, J=J, start=start, end=end, axes=axes)
-
-        J = J[axes, :]
-        H = H[axes, :, :]
-
-        b = np.linalg.inv(J @ np.transpose(J))
-        Jm = np.zeros((n, 1))
-
-        for i in range(n):
-            c = J @ np.transpose(H[:, :, i])
-            Jm[i, 0] = manipulability * \
-                np.transpose(c.flatten('F')) @ b.flatten('F')
-
-        return Jm
-
-    def __str__(self):
-        """
-        Pretty prints the ETS Model of the robot.
-
-        :return: Pretty print of the robot model
-        :rtype: str
-
-        .. note::
-            - Constant links are shown in blue.
-            - End-effector links are prefixed with an @
-            - Angles in degrees
-            - The robot base frame is denoted as ``BASE`` and is equal to the
-              robot's ``base`` attribute.
-        """
-        table = ANSITable(
-            Column("id", headalign="^", colalign=">"),
-            Column("link", headalign="^", colalign="<"),
-            Column("joint", headalign="^", colalign=">"),
-            Column("parent", headalign="^", colalign="<"),
-            Column("ETS", headalign="^", colalign="<"),
-            border="thin")
-        for k, link in enumerate(self):
-            color = "" if link.isjoint else "<<blue>>"
-            ee = "@" if link in self.ee_links else ""
-            ets = link.ets()
-            if link.parent is None:
-                parent_name = "BASE"
-            else:
-                parent_name = link.parent.name
-            s = ets.__str__(f"q{link._jindex}")
-            if len(s) > 0:
-                s = " \u2295 " + s
-
-            if link.isjoint:
-                if link._joint_name is not None:
-                    jname = link._joint_name
-                else:
-                    jname = link.jindex
-            else:
-                jname = ''
-            table.row(
-                k,
-                color + ee + link.name,
-                jname,
-                parent_name,
-                f"{{{link.name}}} = {{{parent_name}}}{s}"
-            )
-
-        s = self.name
-        if self.manufacturer is None or len(self.manufacturer) == 0:
-            s += f" (by {self.manufacturer})"
-        s += f", {self.n} axes ({self.structure})"
-        if self.nbranches > 1:
-            s += f", {self.nbranches} branches"
-        if self._hasdynamics:
-            s += ", dynamics"
-        if any([len(link.geometry) > 0 for link in self.links]):
-            s += ", geometry"
-        if any([len(link.collision) > 0 for link in self.links]):
-            s += ", collision"
-        s += f", ETS model\n"
-
-        s += str(table)
-        s += self.configurations_str()
-
-        return s
-
-    def hierarchy(self):
-        """
-        Pretty print the robot link hierachy
-
-        :return: Pretty print of the robot model
-        :rtype: str
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.URDF.Panda()
-            >>> robot.hierarchy()
-
-        """
-
-        # link = self.base_link
-
-        def recurse(link, indent=0):
-            print(' ' * indent * 2, link.name)
-            for child in link.child:
-                recurse(child, indent + 1)
-
-        recurse(self.base_link)
-
     def jacobev(
             self, q, end=None, start=None,
             tool=None, T=None):
@@ -2090,7 +1747,6 @@ graph [rankdir=LR];
         Jv = jacobev(q) is the spatial velocity Jacobian, at joint
         configuration q, which relates the velocity in the base frame to the
         velocity in the end-effector frame.
-
         :param q: Joint coordinate vector
         :type q: ndarray(n)
         :param end: the final link or Gripper which the Jacobian represents
@@ -2105,10 +1761,8 @@ graph [rankdir=LR];
             avoid caluclating forward kinematics to save time, defaults
             to None
         :type T: SE3, optional
-
         :returns J: The velocity Jacobian in ee frame
         :rtype J: float ndarray(6,6)
-
         """
 
         end, start, _ = self._get_limit_links(end, start)
@@ -2133,7 +1787,6 @@ graph [rankdir=LR];
         Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
         configuration q, which relates the velocity in the end-effector frame
         to velocity in the base frame
-
         :param q: Joint coordinate vector
         :type q: ndarray(n)
         :param end: the final link or Gripper which the Jacobian represents
@@ -2148,10 +1801,8 @@ graph [rankdir=LR];
             avoid caluclating forward kinematics to save time, defaults
             to None
         :type T: SE3, optional
-
         :returns J: The velocity Jacobian in 0 frame
         :rtype J: float ndarray(6,6)
-
         """
 
         end, start, _ = self._get_limit_links(end, start)
@@ -2176,7 +1827,6 @@ graph [rankdir=LR];
         Formulates an inequality contraint which, when optimised for will
         make it impossible for the robot to run into a collision. Requires
         See examples/neo.py for use case
-
         :param ds: The minimum distance in which a joint is allowed to
             approach the collision object shape
         :type ds: float
@@ -2192,7 +1842,6 @@ graph [rankdir=LR];
             between from_link and to_link in the robot, defaults to the
             end-effector link
         :type to_link: ELink
-
         :returns: Ain, Bin as the inequality contraints for an omptimisor
         :rtype: ndarray(6), ndarray(6)
         '''
@@ -2320,6 +1969,227 @@ graph [rankdir=LR];
                 f[jp] = f[jp] + Xup[j] * f[j]
 
         return Q
+
+
+# =========================================================================== #
+
+class ERobot2(BaseERobot):
+
+    def __init__(self, arg, **kwargs):
+
+        link_number = 0
+        if isinstance(arg, ETS2):
+            # we're passed an ETS string
+            ets = arg
+            links = []
+
+            # chop it up into segments, a link frame after every joint
+            start = 0
+            for j, k in enumerate(ets.joints()):
+                ets_j = ets[start:k + 1]
+                start = k + 1
+                if j == 0:
+                    parent = None
+                else:
+                    parent = links[-1]
+                elink = ELink2(ets_j, parent=parent, name=f"link{j:d}")
+                links.append(elink)
+            tail = arg[start:]
+            if len(tail) > 0:
+                elink = ELink2(tail, parent=links[-1], name=f"link{j+1:d}")
+                links.append(elink)
+        elif islistof(arg, ELink2):
+            links = arg
+        else:
+            raise TypeError(
+                'constructor argument must be ETS2 or list of ELink2')
+
+        super().__init__(links, **kwargs)
+
+        # should just set it to None
+        self.base = SE2()  # override superclass
+
+    def jacob0(self, q):
+        return self.ets().jacob0(q)
+
+    def jacobe(self, q):
+        return self.ets().jacobe(q)
+
+    def fkine(self, q):
+        return self.ets().eval(q)
+# --------------------------------------------------------------------- #
+
+    def plot(
+            self, q, block=True, dt=0.05, limits=None,
+            vellipse=False, fellipse=False,
+            eeframe=True, name=False):
+        """
+        2D Graphical display and animation
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param dt: if q is a trajectory, this describes the delay in
+            milliseconds between frames
+        :type dt: int
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2, z1, z2]
+        :type limits: ndarray(6)
+        :param vellipse: (Plot Option) Plot the velocity ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param vellipse: (Plot Option) Plot the force ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
+        :return: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+        - ``robot.plot2(q)`` displays a 2D graphical view of a robot based on
+          the kinematic model and the joint configuration ``q``. This is a
+          stick figure polyline which joins the origins of the link coordinate
+          frames. The plot will autoscale with an aspect ratio of 1.
+        If ``q`` (m,n) representing a joint-space trajectory it will create an
+        animation with a pause of ``dt`` seconds between each frame.
+        .. note::
+            - By default this method will block until the figure is dismissed.
+              To avoid this set ``block=False``.
+            - The polyline joins the origins of the link frames, but for
+              some Denavit-Hartenberg models those frames may not actually
+              be on the robot, ie. the lines to not neccessarily represent
+              the links of the robot.
+        :seealso: :func:`teach2`
+        """
+
+        # Make an empty 2D figure
+        env = self._get_graphical_backend('pyplot2')
+
+        q = getmatrix(q, (None, self.n))
+        # q = getmatrix(q, (None, self.n))
+
+        # Add the self to the figure in readonly mode
+        if q.shape[0] == 1:
+            env.launch(self.name + ' Plot', limits)
+        else:
+            env.launch(self.name + ' Trajectory Plot', limits)
+
+        env.add(
+            self, readonly=True,
+            eeframe=eeframe, name=name)
+
+        if vellipse:
+            vell = self.vellipse(centre='ee')
+            env.add(vell)
+
+        if fellipse:
+            fell = self.fellipse(centre='ee')
+            env.add(fell)
+
+        for qk in q:
+            self.q = qk
+            env.step()
+
+        # Keep the plot open
+        if block:           # pragma: no cover
+            env.hold()
+
+        return env
+
+    def teach(
+            self,
+            q=None,
+            block=True,
+            limits=None,
+            vellipse=False,
+            fellipse=False,
+            eeframe=True,
+            name=False,
+            backend='pyplot2'):
+        """
+        2D Graphical teach pendant
+        :param block: Block operation of the code and keep the figure open
+        :type block: bool
+        :param q: The joint configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: float ndarray(n)
+        :param limits: Custom view limits for the plot. If not supplied will
+            autoscale, [x1, x2, y1, y2]
+        :type limits: array_like(4)
+        :param vellipse: (Plot Option) Plot the velocity ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param vellipse: (Plot Option) Plot the force ellipse at the
+            end-effector
+        :type vellipse: bool
+        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+            at the location of the end-effector. Uses three arrows, red,
+            green and blue to indicate the x, y, and z-axes.
+        :type eeframe: bool
+        :param name: (Plot Option) Plot the name of the robot near its base
+        :type name: bool
+        :return: A reference to the PyPlot object which controls the
+            matplotlib figure
+        :rtype: PyPlot
+        - ``robot.teach2(q)`` creates a 2D matplotlib plot which allows the
+          user to "drive" a graphical robot using a graphical slider panel.
+          The robot's inital joint configuration is ``q``. The plot will
+          autoscale with an aspect ratio of 1.
+        - ``robot.teach2()`` as above except the robot's stored value of ``q``
+          is used.
+        .. note::
+            - Program execution is blocked until the teach window is
+              dismissed.  If ``block=False`` the method is non-blocking but
+              you need to poll the window manager to ensure that the window
+              remains responsive.
+            - The slider limits are derived from the joint limit properties.
+              If not set then:
+                - For revolute joints they are assumed to be [-pi, +pi]
+                - For prismatic joint they are assumed unknown and an error
+                  occurs.
+              If not set then
+                - For revolute joints they are assumed to be [-pi, +pi]
+                - For prismatic joint they are assumed unknown and an error
+                  occurs.
+        """
+
+        if q is None:
+            q = np.zeros((self.n,))
+
+        # Make an empty 3D figure
+        env = self._get_graphical_backend(backend)
+
+        # Add the robot to the figure in readonly mode
+        env.launch('Teach ' + self.name, limits=limits)
+        env.add(
+            self, readonly=True,
+            eeframe=eeframe, name=name)
+
+        env._add_teach_panel(self, q)
+
+        if limits is None:
+            limits = np.r_[-1, 1, -1, 1] * self.reach * 1.5
+            env.ax.set_xlim([limits[0], limits[1]])
+            env.ax.set_ylim([limits[2], limits[3]])
+
+        if vellipse:
+            vell = self.vellipse(centre='ee', scale=0.5)
+            env.add(vell)
+
+        if fellipse:
+            fell = self.fellipse(centre='ee')
+            env.add(fell)
+
+        # Keep the plot open
+        if block:           # pragma: no cover
+            env.hold()
+
+        return env
 
 
 if __name__ == "__main__":  # pragma nocover

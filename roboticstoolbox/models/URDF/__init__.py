@@ -17,6 +17,7 @@ from roboticstoolbox.models.URDF.Mico import Mico
 from roboticstoolbox.models.URDF.PR2 import PR2
 from roboticstoolbox.models.URDF.LBR import LBR
 from roboticstoolbox.models.URDF.KinovaGen3 import KinovaGen3
+from roboticstoolbox.models.URDF.YuMi import YuMi
 
 __all__ = [
     'Panda',
@@ -37,5 +38,6 @@ __all__ = [
     'Mico',
     'PR2',
     'LBR',
-    'KinovaGen3'
+    'KinovaGen3',
+    'YuMi'
 ]

@@ -31,11 +31,11 @@ class LBR(ERobot):
 
     def __init__(self):
 
-        elinks, name = super().urdf_to_ets_args(
+        links, name = self.URDF_read(
             "kuka_description/kuka_lbr_iiwa/urdf/lbr_iiwa_14_r820.xacro")
 
         super().__init__(
-            elinks,
+            links,
             name=name,
             manufacturer='Kuka'
             # gripper_links=elinks[9]

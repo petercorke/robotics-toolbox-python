@@ -121,15 +121,12 @@ class DHRobot(Robot):
         :return: Pretty print of the robot model
         :rtype: str
         """
-        if self.mdh:
-            dh = "modified"
-        else:
-            dh = "standard"
-        if self.manufacturer is None:
-            manuf = ""
-        else:
-            manuf = f" (by {self.manufacturer})"
-        s = f"{self.name}{manuf}: {self.n} axes ({self.structure})"
+
+        s = f"DHRobot: {self.name}"
+
+        if self.manufacturer is not None and len(self.manufacturer) > 0:
+            s += f" (by {self.manufacturer})"
+        s += f", {self.n} joints ({self.structure})"
 
         deg = 180 / np.pi
 
@@ -138,6 +135,10 @@ class DHRobot(Robot):
         if any([link.mesh is not None for link in self.links]):
             s += ", geometry"
 
+        if self.mdh:
+            dh = "modified"
+        else:
+            dh = "standard"
         s += f", {dh} DH parameters\n"
 
         def qstr(j, link):
@@ -975,7 +976,7 @@ class DHRobot(Robot):
 
         return J
 
-    def jacob0(self, q=None, T=None, half=None, analytical=None):
+    def jacob0(self, q=None, T=None, half=None, analytical=None, start=None, end=None):
         r"""
         Manipulator Jacobian in world frame
 
@@ -1069,7 +1070,7 @@ class DHRobot(Robot):
         return J0
 
 
-    def hessian0(self, q=None, J0=None):
+    def hessian0(self, q=None, J0=None, start=None, end=None):
         r"""
         Manipulator Hessian in base frame
 
@@ -1124,6 +1125,12 @@ class DHRobot(Robot):
         """
 
         return self.ets().hessian0(q, J0)
+
+    def _get_limit_links(self, end=None, start=None):
+        # For compatibility with ERobot
+
+        return None, None, None
+
 # -------------------------------------------------------------------------- #
 
     def _init_rne(self):
@@ -1612,10 +1619,13 @@ class DHRobot(Robot):
 
             solutions.append(solution)
 
-        if len(solutions) == 1:
+        if len(T) == 1:
             return solutions[0]
         else:
-            return solutions
+            return iksol(
+                np.vstack([sol.q for sol in solutions]),
+                np.array([sol.success for sol in solutions]),
+                [sol.reason for sol in solutions])
 
     def config_validate(self, config, allowables):
         """

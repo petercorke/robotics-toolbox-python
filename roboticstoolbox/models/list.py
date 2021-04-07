@@ -1,6 +1,5 @@
-from roboticstoolbox.robot.BaseRobot import BaseRobot
 from roboticstoolbox.robot.Robot import Robot
-from roboticstoolbox.robot.Robot2 import Robot2
+from roboticstoolbox.robot.ERobot import ERobot2
 from ansitable import ANSITable, Column
 # import importlib
 
@@ -58,7 +57,7 @@ def list(keywords=None, dof=None, mtype=None):
         for category in categories:
             group = m.__dict__[category]
             for cls in group.__dict__.values():
-                if isinstance(cls, type) and issubclass(cls, BaseRobot):
+                if isinstance(cls, type) and issubclass(cls, Robot):
                     # we found a BaseRobot subclass, instantiate it
                     try:
                         robot = cls()
@@ -77,10 +76,11 @@ def list(keywords=None, dof=None, mtype=None):
                         continue     # pragma nocover
 
                     dims = 0
-                    if isinstance(robot, Robot):
-                        dims = 3
-                    elif isinstance(robot, Robot2):
+
+                    if isinstance(robot, ERobot2):
                         dims = 2
+                    else:
+                        dims = 3
                     # add the row
                     table.row(
                         cls.__name__,

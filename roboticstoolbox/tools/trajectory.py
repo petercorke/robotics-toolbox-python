@@ -670,7 +670,7 @@ def qplot(x, y=None, arm=False, block=False, labels=None):
 
 # -------------------------------------------------------------------------- #
 
-def ctraj(T0, T1, s):
+def ctraj(T0, T1, t=None, s=None):
     """
     Cartesian trajectory between two poses
 
@@ -678,6 +678,10 @@ def ctraj(T0, T1, s):
     :type T0: SE3
     :param T1: final pose
     :type T1: SE3
+    :param t: number of samples or time vector
+    :type t: int or ndarray(n)
+    :param s: array of distance along the path, in the interval [0, 1]
+    :type s: ndarray(s)
     :return T0: smooth path from ``T0`` to ``T1``
     :rtype: SE3
 
@@ -686,7 +690,10 @@ def ctraj(T0, T1, s):
     the path. The Cartesian trajectory is an SE3 instance containing ``n``
     values.
 
-    ``ctraj(T0, T1, s)`` as above but the elements of ``s`` specify the
+    ``ctraj(T0, T1, t)`` as above but the trajectory is sampled at
+    the  points in the array ``t``.
+
+    ``ctraj(T0, T1, s=s)`` as above but the elements of ``s`` specify the
     fractional distance  along the path, and these values are in the
     range [0 1]. The i'th point corresponds to a distance ``s[i]`` along
     the path.
@@ -713,8 +720,11 @@ def ctraj(T0, T1, s):
         :func:`~spatialmath.unitquaternion.interp`
     """
 
-    if isinstance(s, int):
-        s = lspb(0, 1, s).s
+    if isinstance(t, int):
+        s = lspb(0, 1, t).s
+    elif isvector(t):
+        t = getvector(t)
+        s = lspb(0, 1,  t / np.max(t)).s
     elif isvector(s):
         s = getvector(s)
     else:
