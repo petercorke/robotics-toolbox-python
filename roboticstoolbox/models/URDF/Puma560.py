@@ -26,6 +26,13 @@ class Puma560(ERobot):
     - qs, arm is stretched out in the x-direction
     - qn, arm is at a nominal non-singular configuration
 
+    .. warning:: This file has been modified so that the zero-angle pose is the
+        same as the DH model in the toolbox. ``j3`` rotation is changed from
+        -𝜋/2 to 𝜋/2.  Dimensions are also slightly different.  Both models
+        include the pedestal height.
+
+    .. note:: The original file is from https://github.com/nimasarli/puma560_description/blob/master/urdf/puma560_robot.urdf.xacro
+
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke
     """

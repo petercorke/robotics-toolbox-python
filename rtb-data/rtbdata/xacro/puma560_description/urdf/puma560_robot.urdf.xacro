@@ -93,7 +93,7 @@
   <joint name="j3" type="revolute">
     <parent link="link3"/>
     <child link="link4"/>
-    <origin xyz="${a_2} ${a_3} ${d_2}" rpy="0 0 ${-M_PI/2}"/>
+    <origin xyz="${a_2} ${a_3} ${d_2}" rpy="0 0 ${M_PI/2}"/>
     <axis xyz="0 0 1"/> <!-- This is descibed in child frame -->
     <limit effort="1000.0" lower="${-M_PI/2}" upper="${M_PI/2}" velocity="0"/>
   </joint>
