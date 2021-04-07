@@ -26,25 +26,25 @@ path = rtb.path_to_datafile('data')
 g1 = Mesh(
     filename=str(path / 'gimbal-ring1.stl'),
     color=[34, 143, 201],
-    scale=(1./3,) * 3
+    scale=(1. / 3,) * 3
 )
 
 g2 = Mesh(
     filename=str(path / 'gimbal-ring2.stl'),
     color=[31, 184, 72],
-    scale=(1.1/3,) * 3
+    scale=(1.1 / 3,) * 3
 
 )
 
 g3 = Mesh(
     filename=str(path / 'gimbal-ring3.stl'),
     color=[240, 103, 103],
-    scale=(1.1**2/3,) * 3
+    scale=(1.1**2 / 3,) * 3
 )
 
 plane = Mesh(
     filename=str(path / 'spitfire_assy-gear_up.stl'),
-    scale=(1./(180*3),) * 3,
+    scale=(1. / (180 * 3),) * 3,
     color=[240, 103, 103]
 )
 print(path / 'spitfire_assy-gear_up.stl')
@@ -89,12 +89,12 @@ def update_gimbals(theta, ring):
     # figure the transforms for each gimbal and the plane, and update their
     # pose
     def convert(R):
-        return BASE * SE3.SO3(R)
+        return BASE * SE3.Rt(R, t=[0, 0, 0])
 
-    g3.base = convert(R1 * SO3.Ry(pi/2))
-    g2.base = convert(R1 * R2 * SO3.Rz(pi/2))
-    g1.base = convert(R1 * R2 * R3 * SO3.Rx(pi/2))
-    plane.base = convert(R1 * R2 * R3 * SO3.Ry(pi/2) * SO3.Rz(pi/2))
+    g3.base = convert(R1 * SO3.Ry(pi / 2))
+    g2.base = convert(R1 * R2 * SO3.Rz(pi / 2))
+    g1.base = convert(R1 * R2 * R3 * SO3.Rx(pi / 2))
+    plane.base = convert(R1 * R2 * R3 * SO3.Ry(pi / 2) * SO3.Rz(pi / 2))
 
 
 # slider call backs, invoke the central handler
@@ -167,6 +167,12 @@ zero_button = swift.Button(
 )
 
 
+def update_all_sliders():
+    update_gimbals(float(r_one.value), 1)
+    update_gimbals(float(r_two.value), 2)
+    update_gimbals(float(r_three.value), 3)
+
+
 def change_sequence(new):
     global sequence
 
@@ -178,6 +184,7 @@ def change_sequence(new):
     ring3_axis.checked = xyz.find(new[2])
 
     sequence = new
+    update_all_sliders()
 
 
 # handle radio button on angle slider
@@ -189,6 +196,7 @@ def angle(index, ring):
     s = list(sequence)
     s[ring] = xyz[int(index)]
     sequence = ''.join(s)
+    update_all_sliders()
 
 
 ring1_axis = swift.Radio(
@@ -222,48 +230,31 @@ ring3_axis = swift.Radio(
 )
 
 
-def check_fn(indices):
-    if indices[1]:
-        print("YOU ARE WRONG")
-    elif indices[0] and indices[2]:
-        print("You are correct :)")
-    else:
-        print('Half marks')
-
-
-check = swift.Checkbox(
-    check_fn,
-    desc='Describe Jesse',
-    options=[
-        'Amazing',
-        'Bad',
-        'The Greatest'
-    ],
-    checked=[True, False, True]
-)
-
-
-def radio_fn(idx):
-    if idx == 0:
-        print("YOU ARE WRONG")
-    else:
-        print("You are correct :)")
-
-
-radio = swift.Radio(
-    radio_fn,
-    desc='Gimbal axis',
-    options=[
-        'X',
-        'Y',
-        'Z'
-    ],
-    checked=1
-)
-
 label = swift.Label(
     desc='Triple angle'
 )
+
+
+def chekked(e, el):
+    nlabel = 's: '
+
+    if e[0]:
+        nlabel += 'a'
+        r_one.value = 0
+
+    if e[1]:
+        nlabel += 'b'
+        r_two.value = 0
+
+    if e[2]:
+        nlabel += 'c'
+        r_three.value = 0
+
+    if e[3]:
+        el.value = 1
+
+    label.desc = nlabel
+
 
 env.add(label)
 env.add(r_one)
