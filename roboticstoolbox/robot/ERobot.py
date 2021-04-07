@@ -287,42 +287,72 @@ class BaseERobot(Robot):
 
         super().__init__(orlinks, **kwargs)
 
-        # Cached paths through links
-        # TODO Add listners on setters to reset cache
-        self._reset_cache()
 
-    @classmethod
-    def URDF(cls, file_path, gripper=None):
+
+    def __str__(self):
         """
-        Construct an ERobot object from URDF file
+        Pretty prints the ETS Model of the robot.
 
-        :param file_path: [description]
-        :type file_path: [type]
-        :param gripper: index or name of the gripper link
-        :type gripper: int or str
-        :return: [description]
-        :rtype: [type]
+        :return: Pretty print of the robot model
+        :rtype: str
 
-        If ``gripper`` is specified, links from that link outward are removed
-        from the rigid-body tree and folded into a ``Gripper`` object.
+        .. note::
+            - Constant links are shown in blue.
+            - End-effector links are prefixed with an @
+            - Angles in degrees
+            - The robot base frame is denoted as ``BASE`` and is equal to the
+              robot's ``base`` attribute.
         """
-        links, name = ERobot.URDF_read(file_path)
-
-        if gripper is not None:
-            if isinstance(gripper, int):
-                gripper = links[gripper]
-            elif ininstance(gripper, str):
-                for link in links:
-                    if link.name == gripper:
-                        gripper = link
-                        break
-                else:
-                    raise ValueError(f"no link named {gripper}")
+        table = ANSITable(
+            Column("id", headalign="^", colalign=">"),
+            Column("link", headalign="^", colalign="<"),
+            Column("joint", headalign="^", colalign=">"),
+            Column("parent", headalign="^", colalign="<"),
+            Column("ETS", headalign="^", colalign="<"),
+            border="thin")
+        for k, link in enumerate(self):
+            color = "" if link.isjoint else "<<blue>>"
+            ee = "@" if link in self.ee_links else ""
+            ets = link.ets()
+            if link.parent is None:
+                parent_name = "BASE"
             else:
-                raise TypeError('bad argument passed as gripper')
+                parent_name = link.parent.name
+            s = ets.__str__(f"q{link._jindex}")
+            if len(s) > 0:
+                s = " \u2295 " + s
 
+            if link.isjoint:
+                if link._joint_name is not None:
+                    jname = link._joint_name
+                else:
+                    jname = link.jindex
+            else:
+                jname = ''
+            table.row(
+                k,
+                color + ee + link.name,
+                jname,
+                parent_name,
+                f"{{{link.name}}} = {{{parent_name}}}{s}"
+            )
 
-        return cls(links, name=name, gripper=gripper)
+        s = f"{self.__class__.__name__}: {self.name}"
+        if self.manufacturer is not None and len(self.manufacturer) > 0:
+            s += f" (by {self.manufacturer})"
+        s += f", {self.n} joints ({self.structure})"
+        if self.nbranches > 1:
+            s += f", {self.nbranches} branches"
+        if self._hasdynamics:
+            s += ", dynamics"
+        if any([len(link.geometry) > 0 for link in self.links]):
+            s += ", geometry"
+        if any([len(link.collision) > 0 for link in self.links]):
+            s += ", collision"
+        s += "\n"
+
+        s += str(table)
+        s += self.configurations_str()
 
     def _reset_cache(self):
         self._path_cache = {}
