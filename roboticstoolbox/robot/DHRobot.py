@@ -121,15 +121,12 @@ class DHRobot(Robot):
         :return: Pretty print of the robot model
         :rtype: str
         """
-        if self.mdh:
-            dh = "modified"
-        else:
-            dh = "standard"
-        if self.manufacturer is None:
-            manuf = ""
-        else:
-            manuf = f" (by {self.manufacturer})"
-        s = f"{self.name}{manuf}: {self.n} axes ({self.structure})"
+
+        s = f"DHRobot: {self.name}"
+
+        if self.manufacturer is not None and len(self.manufacturer) > 0:
+            s += f" (by {self.manufacturer})"
+        s += f", {self.n} joints ({self.structure})"
 
         deg = 180 / np.pi
 
@@ -138,6 +135,10 @@ class DHRobot(Robot):
         if any([link.mesh is not None for link in self.links]):
             s += ", geometry"
 
+        if self.mdh:
+            dh = "modified"
+        else:
+            dh = "standard"
         s += f", {dh} DH parameters\n"
 
         def qstr(j, link):
