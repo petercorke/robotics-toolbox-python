@@ -12,10 +12,9 @@ import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix, \
     islistof
-from roboticstoolbox.robot.Robot import Robot
 
 from roboticstoolbox.robot.ELink import ELink, ELink2, BaseELink
-from roboticstoolbox.robot.ETS import ETS, ETS2, BaseETS
+from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.DHRobot import DHRobot
 from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
@@ -2194,7 +2193,7 @@ class ERobot2(BaseERobot):
 
 if __name__ == "__main__":  # pragma nocover
 
-    import roboticstoolbox as rtb
+    # import roboticstoolbox as rtb
     np.set_printoptions(precision=4, suppress=True)
 
     robot = ERobot([
