@@ -3,7 +3,8 @@
 @author: Jesse Haviland
 """
 
-from spatialmath import SE3, SE2, BasePoseMatrix
+# from numpy.core.fromnumeric import shape
+from spatialmath import SE3, SE2
 from spatialgeometry import Shape
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.Link import Link
@@ -123,8 +124,7 @@ class ELink(Link):
 
         self._init_fknm()
 
-    def _init_fknm(self):
-
+    def _get_fknm(self):
         isflip = False
         axis = 0
         jindex = 0
@@ -154,53 +154,49 @@ class ELink(Link):
         else:
             parent = self.parent._fknm
 
+        shape_base = []
+        shape_wT = []
+        shape_sT = []
+
+        for shap in self.geometry:
+            shape_base.append(shap._base)
+            shape_wT.append(shap._wT)
+            shape_sT.append(shap._sT)
+
+        for shap in self.collision:
+            shape_base.append(shap._base)
+            shape_wT.append(shap._wT)
+            shape_sT.append(shap._sT)
+
+        return isflip, axis, jindex, parent, shape_base, shape_wT, shape_sT
+
+    def _init_fknm(self):
+        isflip, axis, jindex, parent, \
+            shape_base, shape_wT, shape_sT = self._get_fknm()
+
         self._fknm = fknm.link_init(
-            self.isjoint,
-            isflip,
-            axis,
-            jindex,
-            self._Ts,
-            self._fk,
+            self.isjoint, isflip, axis, jindex, len(shape_base),
+            self._Ts, self._fk,
+            shape_base, shape_wT, shape_sT,
             parent)
 
     def _update_fknm(self):
-        isflip = False
-        axis = 0
-        jindex = 0
 
-        if self.isjoint:
-            isflip = self._v.isflip
-            jindex = self.jindex
+        # Check if not initialized yet
+        try:
+            if self._fknm is None:
+                return
+        except AttributeError:
+            return
 
-            if jindex is None:
-                jindex = 0
-
-            if self._v.axis == 'Rx':
-                axis = 0
-            elif self._v.axis == 'Ry':
-                axis = 1
-            elif self._v.axis == 'Rz':
-                axis = 2
-            elif self._v.axis == 'tx':
-                axis = 3
-            elif self._v.axis == 'ty':
-                axis = 4
-            elif self._v.axis == 'tz':
-                axis = 5
-
-        if self.parent is None:
-            parent = None
-        else:
-            parent = self.parent._fknm
+        isflip, axis, jindex, parent, \
+            shape_base, shape_wT, shape_sT = self._get_fknm()
 
         fknm.link_update(
             self._fknm,
-            self.isjoint,
-            isflip,
-            axis,
-            jindex,
-            self._Ts,
-            self._fk,
+            self.isjoint, isflip, axis, jindex, len(shape_base),
+            self._Ts, self._fk,
+            shape_base, shape_wT, shape_sT,
             parent)
 
     def _init_Ts(self):
@@ -213,12 +209,21 @@ class ELink(Link):
         if isinstance(self._ets, ETS):
             # first = True
             # T = None
+
+            # Ts can not be equal to None otherwise things seem
+            # to break everywhere, so initialise Ts np be identity
             T = np.eye(4)
 
             for et in self._ets:
                 # constant transforms only
                 if et.isjoint:
                     raise ValueError('The transforms in ets must be constant')
+
+                # if first:
+                #     T = et.T()
+                #     first = False
+                # else:
+                #     T = T @ et.T()
 
                 T = T @ et.T()
 
@@ -257,7 +262,7 @@ class ELink(Link):
                 parent = f" [{self.parent.name}]"
             return f"{name}[{self.name}({parent}): {self.ets()}] "
 
-    @property
+    @ property
     def fk(self):
         """
         The forward kinemtics up to and including this link
@@ -267,7 +272,7 @@ class ELink(Link):
 
         return SE3(self._fk, check=False)
 
-    @property
+    @ property
     def v(self):
         """
         Variable part of link ETS
@@ -287,7 +292,7 @@ class ELink(Link):
         """
         return self._v
 
-    @v.setter
+    @ v.setter
     def v(self, new):
         if not isinstance(new, ETS) and new is not None:
             raise TypeError("v must be an ETS object")
@@ -295,7 +300,7 @@ class ELink(Link):
         self._v = new
         self._update_fknm()
 
-    @property
+    @ property
     def Ts(self):
         """
         Constant part of link ETS
@@ -316,9 +321,10 @@ class ELink(Link):
             >>> link = ELink( ETS.rz() )
             >>> link.Ts
         """
+
         return self._Ts
 
-    @property
+    @ property
     def isjoint(self):
         """
         Test if link has joint
@@ -339,7 +345,7 @@ class ELink(Link):
         """
         return self._v is not None
 
-    @property
+    @ property
     def jindex(self):
         """
         Get/set joint index
@@ -361,7 +367,7 @@ class ELink(Link):
         """
         return self._jindex
 
-    @jindex.setter
+    @ jindex.setter
     def jindex(self, j):
         self._jindex = j
         self._update_fknm()
@@ -375,7 +381,7 @@ class ELink(Link):
     #     """
     #     return self.v.isrevolute
 
-    @property
+    @ property
     def isprismatic(self):
         """
         Checks if the joint is of prismatic type
@@ -385,7 +391,7 @@ class ELink(Link):
         """
         return self.isjoint and self.v.isprismatic
 
-    @property
+    @ property
     def isrevolute(self):
         """
         Checks if the joint is of revolute type
@@ -407,7 +413,7 @@ class ELink(Link):
     # def child_name(self):
     #     return self._child_name
 
-    @property
+    @ property
     def parent(self):
         """
         Parent link
@@ -426,7 +432,7 @@ class ELink(Link):
         """
         return self._parent
 
-    @property
+    @ property
     def children(self):
         """
         List of child links
@@ -438,7 +444,7 @@ class ELink(Link):
         """
         return self._children
 
-    @property
+    @ property
     def nchildren(self):
         """
         Number of child links
@@ -450,11 +456,11 @@ class ELink(Link):
         """
         return len(self._children)
 
-    @property
+    @ property
     def M(self):
         return self._M
 
-    @property
+    @ property
     def geometry(self):
         """
         Get/set joint visual geometry
@@ -468,7 +474,7 @@ class ELink(Link):
         """
         return self._geometry
 
-    @property
+    @ property
     def collision(self):
         """
         Get/set joint collision geometry
@@ -543,9 +549,6 @@ class ELink(Link):
             # a fixed joint
             T = self.Ts
 
-        if fast:
-            return T
-
         if T is None:
             if self._ndims == 3:
                 return SE3()
@@ -563,7 +566,7 @@ class ELink(Link):
         else:
             return self._ets * self.v
 
-    @collision.setter
+    @ collision.setter
     def collision(self, coll):
         new_coll = []
 
@@ -579,8 +582,9 @@ class ELink(Link):
             raise TypeError('Geometry must be of Shape class or list of Shape')
 
         self._collision = new_coll
+        self._update_fknm()
 
-    @geometry.setter
+    @ geometry.setter
     def geometry(self, geom):
         new_geom = []
 
@@ -596,3 +600,4 @@ class ELink(Link):
             raise TypeError('Geometry must be of Shape class or list of Shape')
 
         self._geometry = new_geom
+        self._update_fknm()

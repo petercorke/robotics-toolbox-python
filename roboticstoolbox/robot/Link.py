@@ -134,7 +134,6 @@ class Link(ABC):
         dynchange += dynpar(self, 'r', r, np.zeros((3,)))
         dynchange += dynpar(self, 'I', I, np.zeros((3, 3)))
 
-
         # Motor dynamic parameters
         dynchange += dynpar(self, 'Jm', Jm, 0.0)
         dynchange += dynpar(self, 'B', B, 0.0)

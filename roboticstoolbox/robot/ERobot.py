@@ -358,7 +358,6 @@ class ERobot(Robot):
             else:
                 raise TypeError('bad argument passed as gripper')
 
-
         return cls(links, name=name, gripper=gripper)
 
     def _reset_cache(self):
@@ -432,7 +431,7 @@ class ERobot(Robot):
 
     def to_dict(self, show_robot=True, show_collision=False):
 
-        self.fkine_all(self.q)
+        self.fkine_links(self.q)
 
         ob = []
 
@@ -461,7 +460,7 @@ class ERobot(Robot):
     def fk_dict(self, show_robot=True, show_collision=False):
         ob = []
 
-        self.fkine_all(self.q)
+        # self.fkine_links(self.q)
 
         # Do the robot
         for link in self.links:
@@ -1249,6 +1248,38 @@ graph [rankdir=LR];
 
         # HACK, inefficient to convert back to SE3
         return [SE3(link._fk) for link in self.elinks]
+
+    def fkine_links(self, q):
+        '''
+        robot.fkine_links(q) evaluates fkine for each link within a
+        robot and stores that pose within the link.
+
+        :param q: The joint angles/configuration of the robot
+        :type q: float ndarray(n)
+
+        .. note::
+
+            - The robot's base transform, if present, are incorporated
+              into the result.
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+
+        '''
+
+        fknm.fkine_all(
+            self._cache_m,
+            self._cache_links_fknm,
+            q,
+            self._base.A)
+
+        for i in range(len(self._cache_grippers)):
+            fknm.fkine_all(
+                len(self._cache_grippers[i]),
+                self._cache_grippers[i],
+                self.grippers[i].q,
+                self._base.A)
 
     def get_path(self, end=None, start=None, _fknm=False):
         """

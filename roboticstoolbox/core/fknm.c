@@ -85,9 +85,10 @@ PyMODINIT_FUNC PyInit_fknm(void)
 static PyObject *fkine_all(PyObject *self, PyObject *args)
 {
     Link *link;
-    npy_float64 *q, *base, *fk, *pfk;
+    npy_float64 *q, *base, *fk, *pfk, *ret;
+    npy_float64 *s_base;
     PyArrayObject *py_q, *py_base;
-    PyObject *links;
+    PyObject *links, *iter_links;
     int m;
 
     if (!PyArg_ParseTuple(
@@ -100,9 +101,10 @@ static PyObject *fkine_all(PyObject *self, PyObject *args)
 
     q = (npy_float64 *)PyArray_DATA(py_q);
     base = (npy_float64 *)PyArray_DATA(py_base);
-    PyObject *iter_links = PyObject_GetIter(links);
-    npy_float64 *ret = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    iter_links = PyObject_GetIter(links);
+    ret = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
 
+    // Loop through each link in links which is m long
     for (int i = 0; i < m; i++)
     {
         if (!(link = (Link *)PyCapsule_GetPointer(PyIter_Next(iter_links), "Link")))
@@ -110,17 +112,31 @@ static PyObject *fkine_all(PyObject *self, PyObject *args)
             return NULL;
         }
 
+        // Calculate the current link transform
         A(link, ret, q[link->jindex]);
+
+        // Get pointer to link._fk array
         fk = (npy_float64 *)PyArray_DATA(link->fk);
 
         if (link->parent)
         {
+            // Get pointer to link.parent._fk array
             pfk = (npy_float64 *)PyArray_DATA(link->parent->fk);
+
+            // Multiply parent._fk by link.A and store in link._fk
             mult(pfk, ret, fk);
         }
         else
         {
+            // Multiply base by link.A and store in link._fk
             mult(base, ret, fk);
+        }
+
+        // Set dependant shapes
+        for (int i = 0; i < link->n_shapes; i++)
+        {
+            copy(fk, link->shape_wT[i]);
+            mult(fk, link->shape_base[i], link->shape_sT[i]);
         }
     }
 
@@ -188,15 +204,24 @@ static PyObject *link_init(PyObject *self, PyObject *args)
     int jointtype;
     PyObject *ret, *py_parent;
 
+    PyObject *py_shape_base, *py_shape_wT, *py_shape_sT;
+    PyObject *iter_base, *iter_wT, *iter_sT;
+    PyArrayObject *pys_base, *pys_wT, *pys_sT;
+    npy_float64 *s_base, *s_wT, *s_sT;
+
     link = (Link *)PyMem_RawMalloc(sizeof(Link));
 
-    if (!PyArg_ParseTuple(args, "iiiiO!O!O",
+    if (!PyArg_ParseTuple(args, "iiiiiO!O!OOOO",
                           &link->isjoint,
                           &link->isflip,
                           &jointtype,
                           &link->jindex,
+                          &link->n_shapes,
                           &PyArray_Type, &link->A,
                           &PyArray_Type, &link->fk,
+                          &py_shape_base,
+                          &py_shape_wT,
+                          &py_shape_sT,
                           &py_parent))
         return NULL;
 
@@ -207,6 +232,28 @@ static PyObject *link_init(PyObject *self, PyObject *args)
     else if (!(parent = (Link *)PyCapsule_GetPointer(py_parent, "Link")))
     {
         return NULL;
+    }
+
+    // Set shape pointers
+    iter_base = PyObject_GetIter(py_shape_base);
+    iter_wT = PyObject_GetIter(py_shape_wT);
+    iter_sT = PyObject_GetIter(py_shape_sT);
+
+    link->shape_base = (npy_float64 *)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
+    link->shape_wT = (npy_float64 *)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
+    link->shape_sT = (npy_float64 *)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
+
+    for (int i = 0; i < link->n_shapes; i++)
+    {
+        if (
+            !(pys_base = (PyArrayObject *)PyIter_Next(iter_base)) ||
+            !(pys_wT = (PyArrayObject *)PyIter_Next(iter_wT)) ||
+            !(pys_sT = (PyArrayObject *)PyIter_Next(iter_sT)))
+            return NULL;
+
+        link->shape_base[i] = (npy_float64 *)PyArray_DATA(pys_base);
+        link->shape_wT[i] = (npy_float64 *)PyArray_DATA(pys_wT);
+        link->shape_sT[i] = (npy_float64 *)PyArray_DATA(pys_sT);
     }
 
     link->axis = jointtype;
@@ -245,19 +292,27 @@ static PyObject *link_update(PyObject *self, PyObject *args)
 {
     Link *link, *parent;
     int isjoint, isflip;
-    int jointtype;
-    int jindex;
+    int jointtype, jindex, n_shapes;
     PyObject *lo, *py_parent;
     PyArrayObject *A, *fk;
 
-    if (!PyArg_ParseTuple(args, "OiiiiO!O!O",
+    PyObject *py_shape_base, *py_shape_wT, *py_shape_sT;
+    PyObject *iter_base, *iter_wT, *iter_sT;
+    PyArrayObject *pys_base, *pys_wT, *pys_sT;
+    npy_float64 *s_base, *s_wT, *s_sT;
+
+    if (!PyArg_ParseTuple(args, "OiiiiiO!O!OOOO",
                           &lo,
                           &isjoint,
                           &isflip,
                           &jointtype,
                           &jindex,
+                          &n_shapes,
                           &PyArray_Type, &A,
                           &PyArray_Type, &fk,
+                          &py_shape_base,
+                          &py_shape_wT,
+                          &py_shape_sT,
                           &py_parent))
         return NULL;
 
@@ -274,6 +329,33 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     {
         return NULL;
     }
+
+    // Set shape pointers
+    iter_base = PyObject_GetIter(py_shape_base);
+    iter_wT = PyObject_GetIter(py_shape_wT);
+    iter_sT = PyObject_GetIter(py_shape_sT);
+
+    link->shape_base = (npy_float64 *)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
+    link->shape_wT = (npy_float64 *)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
+    link->shape_sT = (npy_float64 *)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
+
+    for (int i = 0; i < n_shapes; i++)
+    {
+        if (
+            !(pys_base = (PyArrayObject *)PyIter_Next(iter_base)) ||
+            !(pys_wT = (PyArrayObject *)PyIter_Next(iter_wT)) ||
+            !(pys_sT = (PyArrayObject *)PyIter_Next(iter_sT)))
+            return NULL;
+
+        link->shape_base[i] = (npy_float64 *)PyArray_DATA(pys_base);
+        link->shape_wT[i] = (npy_float64 *)PyArray_DATA(pys_wT);
+        link->shape_sT[i] = (npy_float64 *)PyArray_DATA(pys_sT);
+    }
+
+    // if (n_shapes > 2)
+    // {
+    //     copy(link->shape_base[0], link->shape_base[1]);
+    // }
 
     if (jointtype == 0)
     {
@@ -307,6 +389,7 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     link->jindex = jindex;
     link->axis = jointtype;
     link->parent = parent;
+    link->n_shapes = n_shapes;
 
     Py_RETURN_NONE;
 }
