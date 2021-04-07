@@ -210,6 +210,25 @@ class Robot(DynamicsMixin, IKMixin):
         """
         return self._n
 
+    @property
+    def qrandom(self):
+        """
+        Return a random joint configuration
+
+        :return: Random joint configuration :rtype: ndarray(n)
+
+        The value for each joint is uniform randomly distributed  between the
+        limits set for the robot.
+
+        .. note:: The joint limit for all joints must be set.
+
+        :seealso: :func:`Robot.qlim`, :func:`Link.qlim`
+        """
+        qlim = self.qlim
+        if np.any(np.isnan(qlim)):
+            raise ValueError('some joint limits not defined')
+        return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
+
     def addconfiguration(self, name, q, unit='rad'):
         """
         Add a named joint configuration (Robot superclass)
