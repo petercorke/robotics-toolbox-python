@@ -123,11 +123,11 @@ class BaseERobot(Robot):
     :references:
         - Kinematic Derivatives using the Elementary Transform Sequence,
           J. Haviland and P. Corke
-    """
+    """ # noqa E501
 
     def __init__(
             self,
-            arg,
+            links,
             base_link=None,
             gripper_links=None,
             checkjindex=True,
@@ -144,72 +144,34 @@ class BaseERobot(Robot):
         # search order
         orlinks = []
 
-        if isinstance(arg, DHRobot):
-            # we're passed a DHRobot object
-            # TODO handle dynamic parameters if given
-            args = args.ets()
 
-        link_number = 0
-        if isinstance(arg, ETS):
-            # we're passed an ETS string
-            ets = arg
-            links = []
+        # check all the incoming ELink objects
+        n = 0
+        for link in links:
+            # if link has no name, give it one
+            if link.name is None:
+                link.name = f"link-{link_number}"
+                link_number += 1
 
-            # chop it up into segments, a link frame after every joint
-            start = 0
-            for j, k in enumerate(ets.joints()):
-                ets_j = ets[start:k + 1]
-                start = k + 1
-                if j == 0:
-                    parent = None
-                else:
-                    parent = links[-1]
-                elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
-                links.append(elink)
+            # put it in the link dictionary, check for duplicates
+            if link.name in self._linkdict:
+                raise ValueError(
+                    f'link name {link.name} is not unique')
+            self._linkdict[link.name] = link
 
-            n = len(ets.joints())
+            if link.isjoint:
+                n += 1
 
-            tool = ets[start:]
-            if len(tool) > 0:
-                links.append(ELink(tool, parent=links[-1], name="ee"))
+        # resolve parents given by name, within the context of
+        # this set of links
+        for link in links:
+            if isinstance(link.parent, str):
+                link._parent = self._linkdict[link.parent]
 
-        elif isinstance(arg, list):
-            # we're passed a list of ELinks
-
-            # check all the incoming ELink objects
-            n = 0
-            ndims = None
-            links = arg
-            for link in links:
-                if isinstance(link, ELink):
-                    # if link has no name, give it one
-                    if link.name is None:
-                        link.name = f"link-{link_number}"
-                        link_number += 1
-
-                    # put it in the link dictionary, check for duplicates
-                    if link.name in self._linkdict:
-                        raise ValueError(
-                            f'link name {link.name} is not unique')
-                    self._linkdict[link.name] = link
-                else:
-                    raise TypeError("Input can be only ELink")
-                if link.isjoint:
-                    n += 1
-
-            # resolve parents given by name, within the context of
-            # this set of links
-            for link in links:
-                if isinstance(link.parent, str):
-                    link._parent = self._linkdict[link.parent]
-
-            if all([link.parent is None for link in links]):
-                # no parent links were given, assume they are sequential
-                for i in range(len(links) - 1):
-                    links[i + 1]._parent = links[i]
-
-        else:
-            raise TypeError('elinks must be a list of ELinks or an ETS')
+        if all([link.parent is None for link in links]):
+            # no parent links were given, assume they are sequential
+            for i in range(len(links) - 1):
+                links[i + 1]._parent = links[i]
 
         self._n = n
 
