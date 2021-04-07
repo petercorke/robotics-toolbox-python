@@ -1613,10 +1613,13 @@ class DHRobot(Robot):
 
             solutions.append(solution)
 
-        if len(solutions) == 1:
+        if len(T) == 1:
             return solutions[0]
         else:
-            return solutions
+            return iksol(
+                np.vstack([sol.q for sol in solutions]),
+                np.array([sol.success for sol in solutions]),
+                [sol.reason for sol in solutions])
 
     def config_validate(self, config, allowables):
         """
