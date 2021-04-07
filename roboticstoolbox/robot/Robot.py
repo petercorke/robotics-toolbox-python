@@ -708,7 +708,10 @@ class Robot(DynamicsMixin, IKMixin):
             is an identity matrix.
         """
         if self._base is None:
-            self._base = SE3()
+            if isinstance(self, ERobot2):
+                self._base = SE2()
+            else:
+                self._base = SE3()
 
         return self._base
 
@@ -880,6 +883,35 @@ class Robot(DynamicsMixin, IKMixin):
                 'Control type must be one of \'p\', \'v\', or \'a\'')
 
 # --------------------------------------------------------------------- #
+
+    # TODO probably should be a static method
+    def _get_graphical_backend(self, backend):
+        #
+        # find the right backend, modules are imported here on an as needs basis
+        if backend.lower() == 'swift':  # pragma nocover
+            if isinstance(self, rtb.DHRobot):
+                raise NotImplementedError(
+                    'Plotting in Swift is not implemented for DHRobots yet')
+
+            from roboticstoolbox.backends.Swift import Swift
+            env = Swift()
+
+        elif backend.lower() == 'pyplot':
+            from roboticstoolbox.backends.PyPlot import PyPlot
+            env = PyPlot()
+
+        elif backend.lower() == 'pyplot2':
+            from roboticstoolbox.backends.PyPlot import PyPlot2
+            env = PyPlot2()
+
+        elif backend.lower() == 'vpython':
+            from roboticstoolbox.backends.VPython import VPython
+            env = VPython()
+
+        else:
+            raise ValueError('unknown backend', backend)
+
+        return env
 
     def plot(
             self, q, backend=None, block=False, dt=0.050,
@@ -1457,12 +1489,8 @@ class Robot(DynamicsMixin, IKMixin):
                   occurs.
         """
 
-        if isinstance(self, rtb.ERobot):  # pragma nocover
-            raise NotImplementedError(
-                "2D Plotting of ERobot's not implemented yet")
-
-        if q is not None:
-            self.q = q
+        if q is None:
+            q = np.zeros((self.n,))
 
         # Make an empty 3D figure
         env = self._get_graphical_backend(backend)
@@ -1473,7 +1501,7 @@ class Robot(DynamicsMixin, IKMixin):
             self, readonly=True,
             jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
-        env._add_teach_panel(self)
+        env._add_teach_panel(self, q)
 
         # Keep the plot open
         if block:           # pragma: no cover
