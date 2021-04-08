@@ -13,16 +13,24 @@ import fknm
 
 class BaseELink(Link):
 
-    def __init__(self, name=None, joint_name=None):
+    def __init__(self, name=None, parent=None, joint_name=None):
 
         super().__init__()
 
         self._name = name
+
+        if parent is not None:
+            if isinstance(parent, (str, BaseELink)):
+                self._parent = parent
+            else:
+                raise ValueError('parent must be BaseELink subclass or str')
+        else:
+            self._parent = None
+
         self._joint_name = joint_name
 
         self._jindex = None
         self._children = []
-        self._parent = None
 
     def __repr__(self):
         name = self.__class__.__name__
@@ -327,7 +335,6 @@ class ELink(BaseELink):
             ets=ETS(),
             v=None,
             jindex=None,
-            parent=None,
             **kwargs):
 
         # process common options
@@ -346,14 +353,6 @@ class ELink(BaseELink):
                 v.jindex = jindex
             elif jindex is None and v.jindex is not None:
                 jindex = v.jindex
-
-        # TODO simplify this logic, can be ELink class or None
-        # if isinstance(parent, list):
-        #     raise TypeError(
-        #         'Only one parent link can be present')
-        if not isinstance(parent, (ELink, str)) and parent is not None:
-            raise TypeError(
-                'Parent must be of type ELink, str or None')
 
         # Initialise the static transform representing the constant
         # component of the ETS
@@ -624,7 +623,6 @@ class ELink2(BaseELink):
             ets=ETS2(),
             v=None,
             jindex=None,
-            parent=None,
             **kwargs):
 
         # process common options
@@ -643,14 +641,6 @@ class ELink2(BaseELink):
                 v.jindex = jindex
             elif jindex is None and v.jindex is not None:
                 jindex = v.jindex
-
-        # TODO simplify this logic, can be ELink class or None
-        # if isinstance(parent, list):
-        #     raise TypeError(
-        #         'Only one parent link can be present')
-        if not isinstance(parent, (ELink2, str)) and parent is not None:
-            raise TypeError(
-                'Parent must be of type ELink, str or None')
 
         # Initialise the static transform representing the constant
         # component of the ETS

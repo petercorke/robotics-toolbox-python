@@ -13,7 +13,6 @@ from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
     issymbol, tr2jac, transl2, trot2, removesmall, trinv, \
     verifymatrix, iseye, tr2jac2
 
-
 class BaseETS(UserList, ABC):
 
     # T is a NumPy array (4,4) or None
@@ -21,7 +20,7 @@ class BaseETS(UserList, ABC):
 
     def __init__(
             self, axis=None, eta=None, axis_func=None,
-            unit='rad', j=None, flip=False):
+            unit='rad', j=None, flip=False, qlim=None):
         """
         Elementary transform sequence (superclass)
 
@@ -148,7 +147,7 @@ class BaseETS(UserList, ABC):
         # Save all the params in a named tuple
         e = SimpleNamespace(
             eta=eta, axis_func=axis_func,
-            axis=axis, joint=joint, T=T, jindex=j, flip=flip)
+            axis=axis, joint=joint, T=T, jindex=j, flip=flip, qlim=qlim)
 
         # And make it the only value of this instance
         self.data = [e]
@@ -397,6 +396,10 @@ class BaseETS(UserList, ABC):
         return ''.join(
             ['R' if self.isrevolute else 'P' for i in self.joints()])
 
+    @property
+    def qlim(self):
+        return self.data[0].qlim
+
     def joints(self):
         """
         Get index of joint transforms
@@ -526,6 +529,25 @@ class BaseETS(UserList, ABC):
             T = T.simplify()
 
         return T
+
+    def split(self):
+        """
+        Split ETS into link segments
+
+        Returns a list of ETS, each one, apart from the last,
+        ends with a variable ET.
+        """
+        segments = []
+        start = 0
+        for j, k in enumerate(self.joints()):
+            ets_j = self[start:k + 1]
+            start = k + 1
+            segments.append(ets_j)
+        tail = self[start:]
+        if len(tail) > 0:
+            segments.append(tail)
+        
+        return segments
 
     def compile(self):
         """
@@ -907,6 +929,25 @@ class BaseETS(UserList, ABC):
             inv *= et
         return inv
 
+    def plot(self, *args, **kwargs):
+        from roboticstoolbox.robot.ERobot import ERobot, ERobot2
+
+        if isinstance(self, ETS):
+            robot = ERobot(self)
+        else:
+            robot = ERobot2(self)
+
+        robot.plot(*args, **kwargs)
+
+    def teach(self, *args, **kwargs):
+        from roboticstoolbox.robot.ERobot import ERobot, ERobot2
+
+        if isinstance(self, ETS):
+            robot = ERobot(self)
+        else:
+            robot = ERobot2(self)
+
+        robot.teach(*args, **kwargs)
 
 class ETS(BaseETS):
     """

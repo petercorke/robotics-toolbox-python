@@ -49,11 +49,12 @@ class DynamicsMixin:
         self.dynchanged()
 
 # --------------------------------------------------------------------- #
-    def dyntable(self):
+    def dynamics(self):
         """
         Pretty print the dynamic parameters (Robot superclass)
 
-        The dynamic parameters are printed in a table, with one row per link.
+        The dynamic parameters (inertial and friction) are printed in a table,
+        with one row per link.
 
         Example:
 
@@ -78,9 +79,9 @@ class DynamicsMixin:
             table.row(link.name, *link._dyn2list())
         print(table)
 
-    def printdyn(self):
+    def dynamics_list(self):
         """
-        Print dynamic parameters
+        Print dynamic parameters (Robot superclass)
 
         Display the kinematic and dynamic parameters to the console in
         reable format

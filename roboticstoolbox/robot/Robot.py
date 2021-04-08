@@ -126,9 +126,9 @@ class Robot(DynamicsMixin, IKMixin):
         """
         Get link (Robot superclass)
 
-        :param i: link number
-        :type i: int
-        :return: i'th link of robot
+        :param i: link number or name
+        :type i: int or str
+        :return: i'th link or named link
         :rtype: Link subclass
 
         This also supports iterating over each link in the robot object,
@@ -141,8 +141,18 @@ class Robot(DynamicsMixin, IKMixin):
             >>> print(robot[1]) # print the 2nd link
             >>> print([link.a for link in robot])  # print all the a_j values
 
+        .. note:: ``ERobot`` supports link lookup by name, 
+            eg. ``robot['link1']``
         """
-        return self._links[i]
+        if isinstance(i, str):
+            try:
+                return self.link_dict[i]
+            except KeyError:
+                raise KeyError(f"link {i} not in link dictionary")
+            except AttributeError:
+                raise AttributeError(f"robot has no link dictionary")
+        else:
+            return self._links[i]
 
     # URDF Parser Attempt
     # @staticmethod
@@ -318,6 +328,50 @@ class Robot(DynamicsMixin, IKMixin):
                 structure.append('P')
 
         return ''.join(structure)
+
+    def isrevolute(self):
+        """
+        Revolute joints as bool array
+
+        :return: array of joint type, True if revolute
+        :rtype: bool(n)
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.isrevolute()
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.isrevolute()
+
+        .. note:: Fixed joints, that maintain a constant link relative pose,
+            are not included.  ``len(self.structure) == self.n``.
+        """
+        return [link.isrevolute for link in self]
+
+    def isprismatic(self):
+        """
+        Revolute joints as bool array
+
+        :return: array of joint type, True if prismatic
+        :rtype: bool(n)
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.isprismatic()
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.isprismatic()
+
+        .. note:: Fixed joints, that maintain a constant link relative pose,
+            are not included.  ``len(self.structure) == self.n``.
+        """
+        return [link.isprismatic for link in self]
 
     def todegrees(self, q=None):
         """
@@ -1584,6 +1638,8 @@ class Robot(DynamicsMixin, IKMixin):
 
         if q is None:
             q = np.zeros((self.n,))
+        else:
+            q = getvector(q, self.n)
 
         # Make an empty 3D figure
         env = self._get_graphical_backend(backend)

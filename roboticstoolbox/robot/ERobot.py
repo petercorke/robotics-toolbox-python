@@ -311,8 +311,11 @@ class BaseERobot(Robot):
                 parent_name,
                 f"{{{link.name}}} = {{{parent_name}}}{s}"
             )
-
-        s = f"{self.__class__.__name__}: {self.name}"
+        if isinstance(self, ERobot):
+            classname = 'ERobot'
+        elif isinstance(self, ERobot2):
+            classname = 'ERobot2'
+        s = f"{classname}: {self.name}"
         if self.manufacturer is not None and len(self.manufacturer) > 0:
             s += f" (by {self.manufacturer})"
         s += f", {self.n} joints ({self.structure})"
@@ -872,22 +875,13 @@ class ERobot(BaseERobot):
             # we're passed an ETS string
             ets = arg
             links = []
-
             # chop it up into segments, a link frame after every joint
-            start = 0
-            for j, k in enumerate(ets.joints()):
-                ets_j = ets[start:k + 1]
-                start = k + 1
-                if j == 0:
-                    parent = None
-                else:
-                    parent = links[-1]
+            parent = None
+            for j, ets_j in enumerate(arg.split()):
                 elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
+                parent = elink
                 links.append(elink)
-            tail = arg[start:]
-            if len(tail) > 0:
-                elink = ELink(tail, parent=links[-1], name=f"link{j+1:d}")
-                links.append(elink)
+            
         elif islistof(arg, ELink):
             links = arg
         else:
@@ -1063,7 +1057,7 @@ class ERobot(BaseERobot):
 # --------------------------------------------------------------------- #
 
     def fkine(
-            self, q, end=None, start=None, tool=None,
+            self, q, unit='rad', end=None, start=None, tool=None,
             include_base=True, fast=False):
         '''
         Forward kinematics
@@ -1132,7 +1126,7 @@ class ERobot(BaseERobot):
         T = SE3.Empty()
 
         for k, qk in enumerate(q):
-
+            qk = self.toradians(qk)
             link = end  # start with last link
 
             # add tool if provided
@@ -1980,22 +1974,13 @@ class ERobot2(BaseERobot):
             # we're passed an ETS string
             ets = arg
             links = []
-
             # chop it up into segments, a link frame after every joint
-            start = 0
-            for j, k in enumerate(ets.joints()):
-                ets_j = ets[start:k + 1]
-                start = k + 1
-                if j == 0:
-                    parent = None
-                else:
-                    parent = links[-1]
+            parent = None
+            for j, ets_j in enumerate(arg.split()):
                 elink = ELink2(ets_j, parent=parent, name=f"link{j:d}")
+                parent = elink
                 links.append(elink)
-            tail = arg[start:]
-            if len(tail) > 0:
-                elink = ELink2(tail, parent=links[-1], name=f"link{j+1:d}")
-                links.append(elink)
+
         elif islistof(arg, ELink2):
             links = arg
         else:
@@ -2013,8 +1998,9 @@ class ERobot2(BaseERobot):
     def jacobe(self, q):
         return self.ets().jacobe(q)
 
-    def fkine(self, q):
-        return self.ets().eval(q)
+    def fkine(self, q, unit='rad'):
+
+        return self.ets().eval(q, unit=unit)
 # --------------------------------------------------------------------- #
 
     def plot(
@@ -2108,6 +2094,7 @@ class ERobot2(BaseERobot):
             fellipse=False,
             eeframe=True,
             name=False,
+            unit='rad',
             backend='pyplot2'):
         """
         2D Graphical teach pendant
@@ -2131,6 +2118,9 @@ class ERobot2(BaseERobot):
         :type eeframe: bool
         :param name: (Plot Option) Plot the name of the robot near its base
         :type name: bool
+        :param unit: angular units: 'rad' [default], or 'deg'
+        :type unit: str
+
         :return: A reference to the PyPlot object which controls the
             matplotlib figure
         :rtype: PyPlot
@@ -2158,6 +2148,11 @@ class ERobot2(BaseERobot):
 
         if q is None:
             q = np.zeros((self.n,))
+        else:
+            q = getvector(q, self.n)
+
+        if unit == 'deg':
+            q = self.toradians(q)
 
         # Make an empty 3D figure
         env = self._get_graphical_backend(backend)
