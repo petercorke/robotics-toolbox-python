@@ -13,7 +13,6 @@ from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
     issymbol, tr2jac, transl2, trot2, removesmall, trinv, \
     verifymatrix, iseye, tr2jac2
 
-
 class BaseETS(UserList, ABC):
 
     # T is a NumPy array (4,4) or None
@@ -21,7 +20,7 @@ class BaseETS(UserList, ABC):
 
     def __init__(
             self, axis=None, eta=None, axis_func=None,
-            unit='rad', j=None, flip=False):
+            unit='rad', j=None, flip=False, qlim=None):
         """
         Elementary transform sequence (superclass)
 
@@ -148,7 +147,7 @@ class BaseETS(UserList, ABC):
         # Save all the params in a named tuple
         e = SimpleNamespace(
             eta=eta, axis_func=axis_func,
-            axis=axis, joint=joint, T=T, jindex=j, flip=flip)
+            axis=axis, joint=joint, T=T, jindex=j, flip=flip, qlim=qlim)
 
         # And make it the only value of this instance
         self.data = [e]
@@ -396,6 +395,10 @@ class BaseETS(UserList, ABC):
         """
         return ''.join(
             ['R' if self.isrevolute else 'P' for i in self.joints()])
+
+    @property
+    def qlim(self):
+        return self.data[0].qlim
 
     def joints(self):
         """
