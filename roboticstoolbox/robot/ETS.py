@@ -10,7 +10,7 @@ from abc import ABC
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
-    issymbol, tr2jac, transl2, trot2, removesmall, trinv, \
+    issymbol, tr2jac, transl2, trot2, removesmall, trinv, trinv2, \
     verifymatrix, iseye, tr2jac2
 
 class BaseETS(UserList, ABC):
@@ -730,7 +730,7 @@ class BaseETS(UserList, ABC):
         return prod
 
     def __imul__(self, rest):
-        prod = ETS()
+        prod = self.__class__()
         prod.data = self.data + rest.data
         return prod
 
@@ -911,7 +911,7 @@ class BaseETS(UserList, ABC):
             the reversed order of the transforms.
         """  # noqa
 
-        inv = ETS()
+        inv = self.__class__()
         for ns in reversed(self.data):
             # get the namespace from the list
 
@@ -920,12 +920,12 @@ class BaseETS(UserList, ABC):
             if nsi.joint:
                 nsi.flip ^= True   # toggle flip status
             elif nsi.axis[0] == 'C':
-                nsi.T = trinv(nsi.T)
+                nsi.T = self._inverse(nsi.T)
             elif nsi.eta is not None:
-                nsi.T = trinv(nsi.T)
+                nsi.T = self._inverse(nsi.T)
                 nsi.eta = -nsi.eta
-            et = ETS()  # create a new ETS instance
-            et.data = [nsi]  # set it's data from the dict
+            et = self.__class__()  # create a new ETS instance
+            et.data = [nsi]  # set its data from the dict
             inv *= et
         return inv
 
@@ -1003,6 +1003,9 @@ class ETS(BaseETS):
     def __init__(self, *pos, **kwargs):
         super().__init__(*pos, **kwargs)
         self._ndims = 3
+
+    def _inverse(self, T):
+        return trinv(T)
 
     @property
     def s(self):
@@ -1480,6 +1483,9 @@ class ETS2(BaseETS):
     def __init__(self, *pos, **kwargs):
         super().__init__(*pos, **kwargs)
         self._ndims = 2
+
+    def _inverse(self, T):
+        return trinv2(T)
 
     @classmethod
     def r(cls, eta=None, unit='rad', **kwargs):

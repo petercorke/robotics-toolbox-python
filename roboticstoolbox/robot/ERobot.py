@@ -506,7 +506,7 @@ class BaseERobot(Robot):
             >>> panda = rtb.models.ETS.Panda()
             >>> panda.ets()
         """
-        v = self._getlink(start, self.base_link)
+        link = self._getlink(start, self.base_link)
         if end is None and len(self.ee_links) > 1:
             raise ValueError(
                 'ambiguous, specify which end-effector is required')
@@ -516,33 +516,37 @@ class BaseERobot(Robot):
             explored = set()
         toplevel = path is None
 
-        explored.add(v)
-        if v == end:
+        explored.add(link)
+        if link == end:
             return path
 
         # unlike regular DFS, the neighbours of the node are its children
         # and its parent.
 
-        # visit child nodes
+        # visit child nodes below start
         if toplevel:
-            path = v.ets()
-        for w in v.children:
-            if w not in explored:
-                p = self.ets(w, end, explored, path * w.ets())
-                if p:
+            path = link.ets()
+        for child in link.children:
+            if child not in explored:
+                p = self.ets(child, end, explored, path * child.ets())
+                if p is not None:
                     return p
 
-        # visit parent node
+        # we didn't find the node below, keep going up a level, and recursing
+        # down again
         if toplevel:
-            path = ETS()
-        if v.parent is not None:
-            w = v.parent
-            if w not in explored:
-                p = self.ets(w, end, explored, path * v.ets().inv())
-                if p:
+            path = None
+        if link.parent is not None:
+            parent = link.parent  # go up one level toward the root
+            if parent not in explored:
+                if path is None:
+                    p = self.ets(parent, end, explored, link.ets().inv())
+                else:
+                    p = self.ets(parent, end, explored, path * link.ets().inv())
+                if p is not None:
                     return p
-
         return None
+
 
 # --------------------------------------------------------------------- #
 
@@ -745,8 +749,8 @@ graph [rankdir=LR];
         """
 
         # Try cache
-        if self._cache_end is not None:
-            return self._cache_end, self._cache_start, self._cache_end_tool
+        # if self._cache_end is not None:
+        #     return self._cache_end, self._cache_start, self._cache_end_tool
 
         tool = None
         if end is None:
@@ -900,8 +904,8 @@ class ERobot(BaseERobot):
         Construct an ERobot object from URDF file
         :param file_path: [description]
         :type file_path: [type]
-        :param gripper: index or name of the gripper link
-        :type gripper: int or str
+        :param gripper: index or name of the gripper link(s)
+        :type gripper: int or str or list
         :return: [description]
         :rtype: [type]
         If ``gripper`` is specified, links from that link outward are removed
@@ -922,7 +926,9 @@ class ERobot(BaseERobot):
             else:
                 raise TypeError('bad argument passed as gripper')
 
-        return cls(links, name=name, gripper=gripper)
+        links, name = ERobot.URDF_read(file_path)
+
+        return cls(links, name=name, gripper_links=gripper)
 
     def _reset_cache(self):
         self._path_cache = {}
@@ -1126,7 +1132,8 @@ class ERobot(BaseERobot):
         T = SE3.Empty()
 
         for k, qk in enumerate(q):
-            qk = self.toradians(qk)
+            if unit == 'deg':
+                qk = self.toradians(qk)
             link = end  # start with last link
 
             # add tool if provided
@@ -1998,9 +2005,9 @@ class ERobot2(BaseERobot):
     def jacobe(self, q):
         return self.ets().jacobe(q)
 
-    def fkine(self, q, unit='rad'):
+    def fkine(self, q, unit='rad', end=None, start=None):
 
-        return self.ets().eval(q, unit=unit)
+        return self.ets(start, end).eval(q, unit=unit)
 # --------------------------------------------------------------------- #
 
     def plot(
@@ -2183,6 +2190,7 @@ class ERobot2(BaseERobot):
             env.hold()
 
         return env
+
 
 
 if __name__ == "__main__":  # pragma nocover

@@ -13,9 +13,9 @@ import fknm
 
 class BaseELink(Link):
 
-    def __init__(self, name=None, parent=None, joint_name=None):
+    def __init__(self, name=None, parent=None, joint_name=None, **kwargs):
 
-        super().__init__()
+        super().__init__(kwargs)
 
         self._name = name
 
@@ -256,6 +256,7 @@ class BaseELink(Link):
         if self.v is None:
             return self._ets
         else:
+            self.v.jindex = self.jindex
             return self._ets * self.v
 
     @collision.setter
