@@ -141,7 +141,7 @@ class Robot(DynamicsMixin, IKMixin):
             >>> print(robot[1]) # print the 2nd link
             >>> print([link.a for link in robot])  # print all the a_j values
 
-        .. note:: ``ERobot`` supports link lookup by name, 
+        .. note:: ``ERobot`` supports link lookup by name,
             eg. ``robot['link1']``
         """
         if isinstance(i, str):
@@ -237,7 +237,8 @@ class Robot(DynamicsMixin, IKMixin):
         qlim = self.qlim
         if np.any(np.isnan(qlim)):
             raise ValueError('some joint limits not defined')
-        return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
+        return np.random.uniform(
+            low=qlim[0, :], high=qlim[1, :], size=(self.n,))
 
     def addconfiguration(self, name, q, unit='rad'):
         """
@@ -848,6 +849,11 @@ class Robot(DynamicsMixin, IKMixin):
                 self._base = SE2()
             else:
                 self._base = SE3()
+        elif isinstance(self._base, np.ndarray):
+            # if isinstance(self, ERobot2):
+            #     self._base = SE2(self._base, check=False)
+            # else:
+            self._base = SE3(self._base, check=False)
 
         return self._base
 
@@ -1034,7 +1040,8 @@ class Robot(DynamicsMixin, IKMixin):
     # TODO probably should be a static method
     def _get_graphical_backend(self, backend):
         #
-        # find the right backend, modules are imported here on an as needs basis
+        # find the right backend, modules are imported here on an as needs
+        # basis
         if backend.lower() == 'swift':  # pragma nocover
             if isinstance(self, rtb.DHRobot):
                 raise NotImplementedError(

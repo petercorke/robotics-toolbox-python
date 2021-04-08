@@ -9,7 +9,7 @@ import spatialmath as sm
 import numpy as np
 import cProfile
 
-env = swift.Swift(_dev=False)
+env = swift.Swift(_dev=True)
 env.launch()
 
 
