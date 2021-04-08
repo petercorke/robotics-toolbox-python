@@ -1638,6 +1638,8 @@ class Robot(DynamicsMixin, IKMixin):
 
         if q is None:
             q = np.zeros((self.n,))
+        else:
+            q = getvector(q, self.n)
 
         # Make an empty 3D figure
         env = self._get_graphical_backend(backend)
