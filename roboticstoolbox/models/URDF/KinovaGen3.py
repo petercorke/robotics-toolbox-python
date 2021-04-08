@@ -31,7 +31,7 @@ class KinovaGen3(ERobot):
 
     def __init__(self):
 
-        elinks, name = super().urdf_to_ets_args(
+        elinks, name = self.URDF_read(
             "kortex_description/robots/gen3.xacro")
 
         super().__init__(
@@ -42,13 +42,13 @@ class KinovaGen3(ERobot):
         )
 
         # self.qdlim = np.array([
-        #     2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0])
+        # 2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0])
 
         self.addconfiguration("qz", np.array(
             [0, 0, 0, 0, 0, 0, 0]))
 
         self.addconfiguration("qr", np.array(
-            [np.pi, -0.3, 0, -1.6, 0, -1.0, np.pi/2]))
+            [np.pi, -0.3, 0, -1.6, 0, -1.0, np.pi / 2]))
 
 
 if __name__ == '__main__':   # pragma nocover
