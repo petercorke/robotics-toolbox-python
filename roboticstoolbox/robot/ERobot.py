@@ -287,8 +287,6 @@ class BaseERobot(Robot):
 
         super().__init__(orlinks, **kwargs)
 
-
-
     def __str__(self):
         """
         Pretty prints the ETS Model of the robot.
@@ -336,8 +334,11 @@ class BaseERobot(Robot):
                 parent_name,
                 f"{{{link.name}}} = {{{parent_name}}}{s}"
             )
-
-        s = f"{self.__class__.__name__}: {self.name}"
+        if isinstance(self, ERobot):
+            classname = 'ERobot'
+        elif isinstance(self, ERobot2):
+            classname = 'ERobot2'
+        s = f"{classname}: {self.name}"
         if self.manufacturer is not None and len(self.manufacturer) > 0:
             s += f" (by {self.manufacturer})"
         s += f", {self.n} joints ({self.structure})"
