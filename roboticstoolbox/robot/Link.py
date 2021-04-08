@@ -130,16 +130,16 @@ class Link(ABC):
                 return 1
 
         dynchange = 0
+        # link inertial parameters
         dynchange += dynpar(self, 'm', m, 0.0)
         dynchange += dynpar(self, 'r', r, np.zeros((3,)))
         dynchange += dynpar(self, 'I', I, np.zeros((3, 3)))
 
-
-        # Motor dynamic parameters
+        # Motor inertial and frictional parameters
         dynchange += dynpar(self, 'Jm', Jm, 0.0)
         dynchange += dynpar(self, 'B', B, 0.0)
         dynchange += dynpar(self, 'Tc', Tc, np.zeros((2,)))
-        dynchange += dynpar(self, 'G', G, 1.0)
+        dynchange += dynpar(self, 'G', G, 0.0)
 
         self.actuator = None  # reference to more advanced actuator model
 
