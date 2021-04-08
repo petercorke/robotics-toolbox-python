@@ -2129,8 +2129,9 @@ class ERobot2(BaseERobot):
     def jacobe(self, q):
         return self.ets().jacobe(q)
 
-    def fkine(self, q):
-        return self.ets().eval(q)
+    def fkine(self, q, unit='rad'):
+
+        return self.ets().eval(q, unit=unit)
 # --------------------------------------------------------------------- #
 
     def plot(
