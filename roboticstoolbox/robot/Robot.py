@@ -329,6 +329,50 @@ class Robot(DynamicsMixin, IKMixin):
 
         return ''.join(structure)
 
+    def isrevolute(self):
+        """
+        Revolute joints as bool array
+
+        :return: array of joint type, True if revolute
+        :rtype: bool(n)
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.isrevolute()
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.isrevolute()
+
+        .. note:: Fixed joints, that maintain a constant link relative pose,
+            are not included.  ``len(self.structure) == self.n``.
+        """
+        return [link.isrevolute for link in self]
+
+    def isprismatic(self):
+        """
+        Revolute joints as bool array
+
+        :return: array of joint type, True if prismatic
+        :rtype: bool(n)
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.isprismatic()
+            >>> stanford = rtb.models.DH.Stanford()
+            >>> stanford.isprismatic()
+
+        .. note:: Fixed joints, that maintain a constant link relative pose,
+            are not included.  ``len(self.structure) == self.n``.
+        """
+        return [link.isprismatic for link in self]
+
     def todegrees(self, q=None):
         """
         Convert joint angles to degrees
