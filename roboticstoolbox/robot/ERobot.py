@@ -1151,7 +1151,7 @@ class ERobot(BaseERobot):
 # --------------------------------------------------------------------- #
 
     def fkine(
-            self, q, end=None, start=None, tool=None,
+            self, q, unit='rad', end=None, start=None, tool=None,
             include_base=True, fast=False):
         '''
         Forward kinematics
@@ -1212,6 +1212,8 @@ class ERobot(BaseERobot):
         # Otherwise use Python method
         # we work with NumPy arrays not SE2/3 classes for speed
         q = getmatrix(q, (None, self.n))
+
+        q = self.toradians(q)
 
         end, start, etool = self._get_limit_links(end, start)
 
