@@ -2224,7 +2224,8 @@ class ERobot2(BaseERobot):
         
     def teach(
             self, q=None, block=True, limits=None,
-            vellipse=False, fellipse=False, eeframe=True, name=False, backend='pyplot2'):
+            vellipse=False, fellipse=False, eeframe=True, name=False, 
+            unit='rad', backend='pyplot2'):
         """
         2D Graphical teach pendant
 
@@ -2248,6 +2249,8 @@ class ERobot2(BaseERobot):
         :type eeframe: bool
         :param name: (Plot Option) Plot the name of the robot near its base
         :type name: bool
+        :param unit: angular units: 'rad' [default], or 'deg'
+        :type unit: str
 
         :return: A reference to the PyPlot object which controls the
             matplotlib figure
@@ -2280,6 +2283,11 @@ class ERobot2(BaseERobot):
 
         if q is None:
             q = np.zeros((self.n,))
+        else:
+            q = getvector(q, self.n)
+
+        if unit == 'deg':
+            q = self.toradians(q)
 
         # Make an empty 3D figure
         env =  self._get_graphical_backend(backend)          
