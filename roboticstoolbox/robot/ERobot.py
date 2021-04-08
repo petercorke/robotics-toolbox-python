@@ -946,33 +946,22 @@ class ERobot(BaseERobot):
 
     def __init__(self, arg, **kwargs):
 
-
         if isinstance(arg, DHRobot):
             # we're passed a DHRobot object
             # TODO handle dynamic parameters if given
             arg = arg.ets()
 
-        link_number = 0
         if isinstance(arg, ETS):
             # we're passed an ETS string
             ets = arg
             links = []
-
             # chop it up into segments, a link frame after every joint
-            start = 0
-            for j, k in enumerate(ets.joints()):
-                ets_j = ets[start:k + 1]
-                start = k + 1
-                if j == 0:
-                    parent = None
-                else:
-                    parent = links[-1]
+            parent = None
+            for j, ets_j in enumerate(arg.split()):
                 elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
+                parent = elink
                 links.append(elink)
-            tail = arg[start:]
-            if len(tail) > 0:
-                elink = ELink(tail, parent=links[-1], name=f"link{j+1:d}")
-                links.append(elink)
+            
         elif islistof(arg, ELink):
             links = arg
         else:
@@ -2114,22 +2103,13 @@ class ERobot2(BaseERobot):
             # we're passed an ETS string
             ets = arg
             links = []
-    
             # chop it up into segments, a link frame after every joint
-            start = 0
-            for j, k in enumerate(ets.joints()):
-                ets_j = ets[start:k + 1]
-                start = k + 1
-                if j == 0:
-                    parent = None
-                else:
-                    parent = links[-1]
+            parent = None
+            for j, ets_j in enumerate(arg.split()):
                 elink = ELink2(ets_j, parent=parent, name=f"link{j:d}")
+                parent = elink
                 links.append(elink)
-            tail = arg[start:]
-            if len(tail) > 0:
-                elink = ELink2(tail, parent=links[-1], name=f"link{j+1:d}")
-                links.append(elink)
+
         elif islistof(arg, ELink2):
             links = arg
         else:

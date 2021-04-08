@@ -530,6 +530,25 @@ class BaseETS(UserList, ABC):
 
         return T
 
+    def split(self):
+        """
+        Split ETS into link segments
+
+        Returns a list of ETS, each one, apart from the last,
+        ends with a variable ET.
+        """
+        segments = []
+        start = 0
+        for j, k in enumerate(self.joints()):
+            ets_j = self[start:k + 1]
+            start = k + 1
+            segments.append(ets_j)
+        tail = self[start:]
+        if len(tail) > 0:
+            segments.append(tail)
+        
+        return segments
+
     def compile(self):
         """
         Compile an ETS
