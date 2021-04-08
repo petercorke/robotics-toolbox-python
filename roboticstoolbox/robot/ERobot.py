@@ -1110,8 +1110,6 @@ class ERobot(BaseERobot):
         # we work with NumPy arrays not SE2/3 classes for speed
         q = getmatrix(q, (None, self.n))
 
-        q = self.toradians(q)
-
         end, start, etool = self._get_limit_links(end, start)
 
         if etool is not None and tool is not None:
@@ -1127,7 +1125,7 @@ class ERobot(BaseERobot):
         T = SE3.Empty()
 
         for k, qk in enumerate(q):
-
+            qk = self.toradians(qk)
             link = end  # start with last link
 
             # add tool if provided
