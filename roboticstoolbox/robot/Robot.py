@@ -126,9 +126,9 @@ class Robot(DynamicsMixin, IKMixin):
         """
         Get link (Robot superclass)
 
-        :param i: link number
-        :type i: int
-        :return: i'th link of robot
+        :param i: link number or name
+        :type i: int or str
+        :return: i'th link or named link
         :rtype: Link subclass
 
         This also supports iterating over each link in the robot object,
@@ -141,8 +141,18 @@ class Robot(DynamicsMixin, IKMixin):
             >>> print(robot[1]) # print the 2nd link
             >>> print([link.a for link in robot])  # print all the a_j values
 
+        .. note:: ``ERobot`` supports link lookup by name, 
+            eg. ``robot['link1']``
         """
-        return self._links[i]
+        if isinstance(i, str):
+            try:
+                return self.link_dict[i]
+            except KeyError:
+                raise KeyError(f"link {i} not in link dictionary")
+            except AttributeError:
+                raise AttributeError(f"robot has no link dictionary")
+        else:
+            return self._links[i]
 
     # URDF Parser Attempt
     # @staticmethod
