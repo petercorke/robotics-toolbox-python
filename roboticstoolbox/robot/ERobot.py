@@ -748,8 +748,8 @@ graph [rankdir=LR];
         """
 
         # Try cache
-        if self._cache_end is not None:
-            return self._cache_end, self._cache_start, self._cache_end_tool
+        # if self._cache_end is not None:
+        #     return self._cache_end, self._cache_start, self._cache_end_tool
 
         tool = None
         if end is None:
@@ -903,8 +903,8 @@ class ERobot(BaseERobot):
         Construct an ERobot object from URDF file
         :param file_path: [description]
         :type file_path: [type]
-        :param gripper: index or name of the gripper link
-        :type gripper: int or str
+        :param gripper: index or name of the gripper link(s)
+        :type gripper: int or str or list
         :return: [description]
         :rtype: [type]
         If ``gripper`` is specified, links from that link outward are removed
@@ -925,7 +925,9 @@ class ERobot(BaseERobot):
             else:
                 raise TypeError('bad argument passed as gripper')
 
-        return cls(links, name=name, gripper=gripper)
+        links, name = ERobot.URDF_read(file_path)
+
+        return cls(links, name=name, gripper_links=gripper)
 
     def _reset_cache(self):
         self._path_cache = {}
@@ -1129,7 +1131,8 @@ class ERobot(BaseERobot):
         T = SE3.Empty()
 
         for k, qk in enumerate(q):
-            qk = self.toradians(qk)
+            if unit == 'deg':
+                qk = self.toradians(qk)
             link = end  # start with last link
 
             # add tool if provided
@@ -2002,9 +2005,9 @@ class ERobot2(BaseERobot):
     def jacobe(self, q):
         return self.ets().jacobe(q)
 
-    def fkine(self, q, unit='rad'):
+    def fkine(self, q, unit='rad', end=None, start=None):
 
-        return self.ets().eval(q, unit=unit)
+        return self.ets(start, end).eval(q, unit=unit)
 # --------------------------------------------------------------------- #
 
     def plot(
@@ -2187,6 +2190,7 @@ class ERobot2(BaseERobot):
             env.hold()
 
         return env
+
 
 
 if __name__ == "__main__":  # pragma nocover
