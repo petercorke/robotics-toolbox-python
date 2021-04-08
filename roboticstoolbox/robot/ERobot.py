@@ -125,6 +125,7 @@ class BaseERobot(Robot):
 
         # check all the incoming ELink objects
         n = 0
+        link_number = 0
         for link in links:
             # if link has no name, give it one
             if link.name is None:
@@ -867,7 +868,6 @@ class ERobot(BaseERobot):
             # TODO handle dynamic parameters if given
             arg = arg.ets()
 
-        link_number = 0
         if isinstance(arg, ETS):
             # we're passed an ETS string
             ets = arg
@@ -1976,7 +1976,6 @@ class ERobot2(BaseERobot):
 
     def __init__(self, arg, **kwargs):
 
-        link_number = 0
         if isinstance(arg, ETS2):
             # we're passed an ETS string
             ets = arg
