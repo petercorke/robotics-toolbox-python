@@ -2198,9 +2198,13 @@ if __name__ == "__main__":  # pragma nocover
 
     robot = ERobot([
         ELink(ETS.rz(), name='link1'),
-        ELink(ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(), name='link2', parent='link1'),
+        ELink(
+            ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(),
+            name='link2', parent='link1'),
         ELink(ETS.tx(1), name='ee_1', parent='link2'),
-        ELink(ETS.tx(1) * ETS.ty(0.5) * ETS.rz(), name='link3', parent='link1'),
+        ELink(
+            ETS.tx(1) * ETS.ty(0.5) * ETS.rz(),
+            name='link3', parent='link1'),
         ELink(ETS.tx(1), name='ee_2', parent='link3')
     ])
     print(robot)
