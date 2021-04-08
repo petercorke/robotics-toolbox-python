@@ -505,7 +505,7 @@ class BaseERobot(Robot):
             >>> panda = rtb.models.ETS.Panda()
             >>> panda.ets()
         """
-        v = self._getlink(start, self.base_link)
+        link = self._getlink(start, self.base_link)
         if end is None and len(self.ee_links) > 1:
             raise ValueError(
                 'ambiguous, specify which end-effector is required')
@@ -515,33 +515,37 @@ class BaseERobot(Robot):
             explored = set()
         toplevel = path is None
 
-        explored.add(v)
-        if v == end:
+        explored.add(link)
+        if link == end:
             return path
 
         # unlike regular DFS, the neighbours of the node are its children
         # and its parent.
 
-        # visit child nodes
+        # visit child nodes below start
         if toplevel:
-            path = v.ets()
-        for w in v.children:
-            if w not in explored:
-                p = self.ets(w, end, explored, path * w.ets())
-                if p:
+            path = link.ets()
+        for child in link.children:
+            if child not in explored:
+                p = self.ets(child, end, explored, path * child.ets())
+                if p is not None:
                     return p
 
-        # visit parent node
+        # we didn't find the node below, keep going up a level, and recursing
+        # down again
         if toplevel:
-            path = ETS()
-        if v.parent is not None:
-            w = v.parent
-            if w not in explored:
-                p = self.ets(w, end, explored, path * v.ets().inv())
-                if p:
+            path = None
+        if link.parent is not None:
+            parent = link.parent  # go up one level toward the root
+            if parent not in explored:
+                if path is None:
+                    p = self.ets(parent, end, explored, link.ets().inv())
+                else:
+                    p = self.ets(parent, end, explored, path * link.ets().inv())
+                if p is not None:
                     return p
-
         return None
+
 
 # --------------------------------------------------------------------- #
 
