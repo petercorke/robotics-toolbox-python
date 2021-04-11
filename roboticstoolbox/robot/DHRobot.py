@@ -497,6 +497,28 @@ class DHRobot(Robot):
             self._reach = d
         return self._reach
 
+    @property
+    def nbranches(self):
+        """
+        Number of branches
+
+        :return: number of branches in the robot's kinematic tree
+        :rtype: int
+
+        Number of branches in this robot.  
+        
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Panda()
+            >>> robot.nbranches
+
+        :seealso: :func:`n`, :func:`nlinks`
+        """
+        return 1
+
     def A(self, j, q=None):
         """
         Link forward kinematics

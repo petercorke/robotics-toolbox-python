@@ -75,6 +75,8 @@ class Robot(DynamicsMixin, IKMixin):
 
         self._hasdynamics = False
         self._hasgeometry = False
+        self._hascollision = False
+
 
         for link in links:
             if not isinstance(link, Link):
@@ -83,13 +85,18 @@ class Robot(DynamicsMixin, IKMixin):
             # add link back to roboto
             link._robot = self
 
-            if link._hasdynamics:
+            if link.hasdynamics:
                 self._hasdynamics = True
+            if link.geometry:
+                self._hasgeometry = []
+            if link.collision:
+                self._hascollision = True
 
             if isinstance(link, rtb.ELink):
                 if len(link.geometry) > 0:
                     self._hasgeometry = True
         self._links = links
+        self._nlinks = len(links)
 
         # Current joint angles of the robot
         self.q = np.zeros(self.n)
@@ -217,8 +224,116 @@ class Robot(DynamicsMixin, IKMixin):
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.n
 
+        :seealso: :func:`nlinks`, :func:`nbranches`
         """
         return self._n
+
+    @property
+    def nlinks(self):
+        """
+        Number of links (Robot superclass)
+
+        :return: Number of links
+        :rtype: int
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.nlinks
+
+        :seealso: :func:`n`, :func:`nbranches`
+        """
+        return self._nlinks
+
+    @abstractproperty
+    def nbranches(self):
+        pass
+
+        """
+        Number of branches (Robot superclass)
+
+        :return: Number of branches
+        :rtype: int
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.nbranches
+
+        :seealso: :func:`n`, :func:`nlinks`
+        """
+        return self._n
+
+    @property
+    def hasdynamics(self):
+        """
+        Robot has dynamic parameters (Robot superclass)
+
+        :return: Robot has dynamic parameters
+        :rtype: bool
+
+        At least one link has associated dynamic parameters.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.hasdynamics:
+        """
+        return self._hasdynamics
+
+    @property
+    def hasgeometry(self):
+        """
+        Robot has geometry model (Robot superclass)
+
+        :return: Robot has geometry model
+        :rtype: bool
+
+        At least one link has associated mesh to describe its shape.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.hasgeometry
+        
+        :seealso: :func:`hascollision`
+        """
+        return self._hasgeometry
+
+    @property
+    def hascollision(self):
+        """
+        Robot has collision model (Robot superclass)
+
+        :return: Robot has collision model
+        :rtype: bool
+
+        At least one link has associated collision model.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.hascollision
+
+        :seealso: :func:`hasgeometry`
+        """
+        return self._hascollision
+
 
     @property
     def qrandom(self):
@@ -330,7 +445,8 @@ class Robot(DynamicsMixin, IKMixin):
 
         return ''.join(structure)
 
-    def isrevolute(self):
+    @property
+    def revolutejoints(self):
         """
         Revolute joints as bool array
 
@@ -343,16 +459,27 @@ class Robot(DynamicsMixin, IKMixin):
 
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
-            >>> puma.isrevolute()
+            >>> puma.revolutejoints()
             >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.isrevolute()
+            >>> stanford.revolutejoints()
 
         .. note:: Fixed joints, that maintain a constant link relative pose,
             are not included.  ``len(self.structure) == self.n``.
-        """
-        return [link.isrevolute for link in self]
 
-    def isprismatic(self):
+        :seealso: :func:`Link.isrevolute`, :func:`prismaticjoints` 
+        """
+        return [link.isrevolute for link in self if link.isjoint]
+
+    # TODO not very efficient
+    # TODO keep a mapping from joint to link
+    def isrevolute(self, j):
+        return self.revolutejoints[j]
+
+    def isprismatic(self, j):
+        return self.prismaticjoints[j]
+
+    @property
+    def prismaticjoints(self):
         """
         Revolute joints as bool array
 

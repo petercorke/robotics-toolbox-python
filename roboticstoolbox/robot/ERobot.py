@@ -382,11 +382,25 @@ class BaseERobot(Robot):
     def nbranches(self):
         """
         Number of branches
+
         :return: number of branches in the robot's kinematic tree
         :rtype: int
-        Computed as the number of links with zero children
+
+        Number of branches in this robot.  Computed as the number of links with
+        zero children
+        
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.ETS.Panda()
+            >>> robot.nbranches
+
+        :seealso: :func:`n`, :func:`nlinks`
         """
         return self._nbranches
+
 # --------------------------------------------------------------------- #
 
     @property
