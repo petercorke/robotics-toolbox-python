@@ -125,12 +125,11 @@ class BaseERobot(Robot):
 
         # check all the incoming ELink objects
         n = 0
-        link_number = 0
-        for link in links:
+        for k, link in enumerate(links):
             # if link has no name, give it one
             if link.name is None:
-                link.name = f"link-{link_number}"
-                link_number += 1
+                link.name = f"link-{k}"
+            link.number = k
 
             # put it in the link dictionary, check for duplicates
             if link.name in self._linkdict:
@@ -206,7 +205,7 @@ class BaseERobot(Robot):
 
         # assign the joint indices
         if all([link.jindex is None for link in links]):
-
+            # no joints have an index
             jindex = [0]  # "mutable integer" hack
 
             def visit_link(link, jindex):
@@ -223,7 +222,7 @@ class BaseERobot(Robot):
                 self.base_link, lambda link: visit_link(link, jindex))
 
         elif all([link.jindex is not None for link in links if link.isjoint]):
-            # jindex set on all, check they are unique and sequential
+            # jindex set on all, check they are unique and contiguous
             if checkjindex:
                 jset = set(range(self._n))
                 for link in links:
@@ -285,7 +284,7 @@ class BaseERobot(Robot):
             Column("parent", headalign="^", colalign="<"),
             Column("ETS", headalign="^", colalign="<"),
             border="thin")
-        for k, link in enumerate(self):
+        for link in self:
             color = "" if link.isjoint else "<<blue>>"
             ee = "@" if link in self.ee_links else ""
             ets = link.ets()
@@ -305,7 +304,7 @@ class BaseERobot(Robot):
             else:
                 jname = ''
             table.row(
-                k,
+                link.number,
                 color + ee + link.name,
                 jname,
                 parent_name,
