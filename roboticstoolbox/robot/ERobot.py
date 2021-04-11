@@ -760,7 +760,7 @@ class BaseERobot(Robot):
         :seealso: :func:`showgraph`
         """
         if isinstance(filename, str):
-            file = open(filename, 'w')
+            file = open(filename, 'w', encoding='utf-8')
         else:
             file = filename
 
