@@ -911,6 +911,8 @@ class ERobot(BaseERobot):
             parent = None
             for j, ets_j in enumerate(arg.split()):
                 elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
+                if elink.qlim is none and elink.v.qlim is not None:
+                    elink.qlim = elink.v.qlim
                 parent = elink
                 links.append(elink)
             
@@ -2014,6 +2016,8 @@ class ERobot2(BaseERobot):
             for j, ets_j in enumerate(arg.split()):
                 elink = ELink2(ets_j, parent=parent, name=f"link{j:d}")
                 parent = elink
+                if elink.qlim is none and elink.v.qlim is not None:
+                    elink.qlim = elink.v.qlim
                 links.append(elink)
 
         elif islistof(arg, ELink2):
