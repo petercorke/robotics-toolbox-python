@@ -48,7 +48,7 @@ class PyPlot2(Connector):
             s += f"\n  {robot.name}"
         return s
 
-    def launch(self, name=None, limits=None):
+    def launch(self, name=None, limits=None, **kwargs):
         '''
         env = launch() launchs a blank 2D matplotlib figure
 
@@ -78,7 +78,7 @@ class PyPlot2(Connector):
         if limits is not None:
             self.ax.set_xlim([limits[0], limits[1]])
             self.ax.set_ylim([limits[2], limits[3]])
-        
+
         self.ax.axis('equal')
 
         plt.ion()
@@ -149,7 +149,7 @@ class PyPlot2(Connector):
 
     def add(
             self, ob, readonly=False, display=True,
-            eeframe=True, name=False):
+            eeframe=True, name=False, **kwargs):
         '''
         id = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
@@ -282,7 +282,7 @@ class PyPlot2(Connector):
 
         # TODO maybe put EE name in here, possible issue with DH robot
         # TODO maybe display pose of all EEs, layout hassles though
-        
+
         if robot.nbranches == 0:
             header = "End-effector Pose"
         else:

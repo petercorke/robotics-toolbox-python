@@ -1191,6 +1191,16 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
     # TODO probably should be a static method
     def _get_graphical_backend(self, backend):
+
+        # figure out the right default
+        if backend is None:
+            if isinstance(self, rtb.DHRobot):
+                backend = 'pyplot'
+            elif isinstance(self, rtb.ERobot2):
+                backend = 'pyplot2'
+            else:
+                backend = 'swift'
+
         #
         # find the right backend, modules are imported here on an as needs
         # basis
@@ -1222,7 +1232,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     def plot(
             self, q, backend=None, block=False, dt=0.050,
             limits=None, vellipse=False, fellipse=False,
-            jointaxes=True, eeframe=True, shadow=True, name=True, fig=None,
+            jointaxes=True, jointlabels=False, eeframe=True, shadow=True, name=True, fig=None,
             movie=None, **bopts
     ):
         """
@@ -1294,39 +1304,21 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         env = None
 
-        if backend is None:
-            if isinstance(self, rtb.DHRobot):
-                backend = 'pyplot'
-            else:
-                backend = 'swift'
-
         env = self._get_graphical_backend(backend)
-
-        # if backend.lower() == 'swift':  # pragma nocover
-        #     if isinstance(self, rtb.ERobot):
-        #         env = self._plot_swift(q=q, block=block)
-        #     elif isinstance(self, rtb.DHRobot):
-        #         raise NotImplementedError(
-        #             'Plotting in Swift is not implemented for DHRobots yet')
-
-        # elif backend.lower() == 'pyplot':
-        #     # if isinstance(self, rtb.ERobot):  # pragma nocover
-        #     #     raise NotImplementedError(
-        #     #         'Plotting in PyPlot is not implemented for ERobots yet')
-        #     # elif isinstance(self, rtb.DHRobot):
-        #     env = self._plot_pyplot(
-        #         q=q, block=block, dt=dt, limits=limits, vellipse=vellipse,
-        #         fellipse=fellipse, jointaxes=jointaxes, eeframe=eeframe,
-        #         shadow=shadow, name=name, movie=movie)
 
         q = getmatrix(q, (None, self.n))
         self.q = q[0, :]
 
         # Add the self to the figure in readonly mode
-        env.launch(fig=fig, **bopts)
+        # Add the self to the figure in readonly mode
+        if q.shape[0] == 1:
+            env.launch(self.name + ' Plot', limits=limits, fig=fig)
+        else:
+            env.launch(self.name + ' Trajectory Plot', limits, fig=fig)
 
         env.add(
-            self, readonly=True)
+            self, readonly=True, jointaxes=jointaxes, jointlabels=jointlabels,
+            eeframe=eeframe, shadow=shadow, name=name)
 
         if vellipse:
             vell = self.vellipse(centre='ee')
@@ -1362,95 +1354,6 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             env.hold()
 
         return env
-
-    # def _plot_pyplot(
-    #         self, q, block, dt, limits,
-    #         vellipse, fellipse,
-    #         jointaxes, eeframe, shadow, name, movie):
-
-    #     # Make an empty 3D figure
-    #     env = PyPlot()
-
-    #     q = getmatrix(q, (None, self.n))
-
-    #     # Add the self to the figure in readonly mode
-    #     if q.shape[0] == 1:
-    #         env.launch(self.name + ' Plot', limits)
-    #     else:
-    #         env.launch(self.name + ' Trajectory Plot', limits)
-
-    #     env.add(
-    #         self, readonly=True,
-    #         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
-
-    #     if vellipse:
-    #         vell = self.vellipse(centre='ee')
-    #         env.add(vell)
-
-    #     if fellipse:
-    #         fell = self.fellipse(centre='ee')
-    #         env.add(fell)
-
-    #     # Stop lint error
-    #     images = []  # list of images saved from each plot
-
-    #     if movie is not None:   # pragma nocover
-    #         if not _pil_exists:
-    #             raise RuntimeError(
-    #                 'to save movies PIL must be installed:\npip3 install PIL')
-    #         # make the background white, looks better than grey stipple
-    #         env.ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-    #         env.ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-    #         env.ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-
-    #     for qk in q:
-    #         self.q = qk
-    #         env.step(dt)
-
-    #         if movie is not None:  # pragma nocover
-    #             # render the frame and save as a PIL image in the list
-    #             canvas = env.fig.canvas
-    #             img = PIL.Image.frombytes(
-    #                 'RGB', canvas.get_width_height(),
-    #                 canvas.tostring_rgb())
-    #             images.append(img)
-
-    #     if movie is not None:  # pragma nocover
-    #         # save it as an animated GIF
-    #         images[0].save(
-    #             movie,
-    #             save_all=True, append_images=images[1:], optimize=False,
-    #             duration=dt, loop=0)
-
-    #     # Keep the plot open
-    #     if block:           # pragma: no cover
-    #         env.hold()
-
-    #     return env
-
-    # def _plot_swift(self, q, block):   # pragma nocover
-
-    #     # Make an empty 3D figure
-    #     env = Swift()
-
-    #     q = getmatrix(q, (None, self.n))
-    #     self.q = q[0, :]
-
-    #     # Add the self to the figure in readonly mode
-    #     env.launch()
-
-    #     env.add(
-    #         self, readonly=True)
-
-    #     for qk in q:
-    #         self.q = qk
-    #         env.step()
-
-    #     # Keep the plot open
-    #     if block:           # pragma: no cover
-    #         env.hold()
-
-    #     return env
 
 # --------------------------------------------------------------------- #
 
@@ -1744,8 +1647,9 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
     def teach(
             self, q=None, block=True, order='xyz', limits=None,
-            jointaxes=True, eeframe=True, shadow=True, name=True,
-            backend='pyplot'):
+            jointaxes=True, jointlabels=False, 
+            vellipse=False, fellipse=False, eeframe=True, shadow=True, 
+            name=True, backend=None):
         """
         Graphical teach pendant
 
@@ -1807,9 +1711,19 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         env.launch('Teach ' + self.name, limits=limits)
         env.add(
             self, readonly=True,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+            jointaxes=jointaxes, jointlabels=jointlabels, eeframe=eeframe, 
+            shadow=shadow, name=name)
 
         env._add_teach_panel(self, q)
+
+        if vellipse:
+            vell = self.vellipse(centre='ee', scale=0.5)
+            env.add(vell)
+
+        if fellipse:
+            fell = self.fellipse(centre='ee')
+            env.add(fell)
+
 
         # Keep the plot open
         if block:           # pragma: no cover

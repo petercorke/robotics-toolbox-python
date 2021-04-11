@@ -142,6 +142,11 @@ class DHLink(Link):
         self.offset = offset
         self.id = None
 
+    @property
+    def isjoint(self):
+        # for compatibiity with ELink
+        return True
+
     def __add__(self, L):
         if isinstance(L, DHLink):
             return rp.DHRobot([self, L])

@@ -77,8 +77,10 @@ class DHRobot(Robot):
             if isinstance(link, DHLink):
                 # got a link
                 all_links.append(link)
+                link.number = self._n
+                link.jindex = self._n
                 self._n += 1
-                link.id = self._n
+
                 link.name = f"link{self._n}"
 
             elif isinstance(link, DHRobot):
@@ -88,13 +90,17 @@ class DHRobot(Robot):
                 rlinks = copy.copy(link.links)
                 for rlink in rlinks:
                     all_links.append(rlink)
+                    rlink.number = self._n
+                    rlink.jindex = self._n
                     self._n += 1
-                    rlink.id = self._n
+
                     rlink.name = f"link{self._n}"
             else:
                 raise TypeError("Input can be only DHLink or DHRobot")
 
         super().__init__(all_links, **kwargs)
+
+        self.ee_links = [self.links[-1]]
 
         # Check the DH convention
         self._mdh = self.links[0].mdh
@@ -519,6 +525,8 @@ class DHRobot(Robot):
         """
         return 1
 
+
+
     def A(self, j, q=None):
         """
         Link forward kinematics
@@ -808,21 +816,17 @@ class DHRobot(Robot):
 
         return ets
 
-    def fkine(self, q=None):
+    def fkine(self, q):
         """
         Forward kinematics
 
-        :param q: The joint configuration (Optional,
-            if not supplied will use the stored q values).
+        :param q: The joint configuration
         :type q: ndarray(n) or ndarray(m,n)
         :return: Forward kinematics as an SE(3) matrix
         :rtype: SE3 instance
 
         - ``robot.fkine(q)`` computes the forward kinematics for the robot at
           joint configuration ``q``.
-
-        - ``robot.fkine()`` as above except uses the stored ``q`` value of the
-          robot object.
 
         If q is a 2D array, the rows are interpreted as the generalized joint
         coordinates for a sequence of points along a trajectory. ``q[k,j]`` is
@@ -844,7 +848,6 @@ class DHRobot(Robot):
             - Joint offsets, if defined, are added to ``q`` before the forward
               kinematics are computed.
         """
-        q = self._getq(q)
 
         T = SE3.Empty()
         for qr in getmatrix(q, (None, self.n)):
@@ -864,6 +867,45 @@ class DHRobot(Robot):
             T.append(Tr)
 
         return T
+
+    def fkine_path(self, q, old=None):
+        '''
+        Compute the pose of every link frame
+
+        :param q: The joint configuration
+        :type q:  darray(n)
+        :return: Pose of all links
+        :rtype: SE3 instance
+
+        ``T = robot.fkine_path(q)`` is  an SE3 instance with ``robot.nlinks +
+        1`` values:
+
+        - ``T[0]`` is the base transform
+        - ``T[i+1]`` is the pose of link whose ``number`` is ``i``
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        '''
+        T = self.base
+        q = getvector(q)
+        Tj = T
+
+        for q, L in zip(q, self.links):
+            Tj *= L.A(q)
+            T.append(Tj)
+
+        if self._tool is not None:
+            T[-1] *= self._tool
+
+        return T
+
+    
+    def segments(self):
+
+        segments = [None]
+        segments.extend(self.links)
+        return [segments]
 
     def fkine_all(self, q=None, old=True):
         """

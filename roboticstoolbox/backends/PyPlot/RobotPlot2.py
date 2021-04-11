@@ -18,27 +18,6 @@ class RobotPlot2(RobotPlot):
             jointaxes=False, shadow=False, eeframe=eeframe, name=name
         )
 
-    def axes_calcs(self):
-        # Joint and ee poses
-        T = self.robot.fkine_path(self.robot.q)
-
-        # Joint and ee position matrix
-        # one column per frame
-
-        loc = T.t.T
-
-        # Joint axes position matrix
-        joints = np.zeros((3, self.robot.n))
-
-        # Axes arrow transforms
-
-
-        # ee axes arrows
-        Tex = T[-1] * Tjx
-        Tey = T[-1] * Tjy
-
-        return loc, joints, [Tex, Tey]
-
     def draw(self):
         if not self.display:
             return
@@ -47,15 +26,12 @@ class RobotPlot2(RobotPlot):
             self.init()
             return
 
-        # loc, joints, ee = self.axes_calcs()
-
-
-        # Update the robot links
+        ## Update the robot links
 
         # compute all link frames
         T = self.robot.fkine_path(self.robot.q)
         
-        # draw all the line segments for the noodle plog
+        # draw all the line segments for the noodle plot
         for i, segment in enumerate(self.segments):
             linkframes = []
             for link in segment:
@@ -68,7 +44,8 @@ class RobotPlot2(RobotPlot):
             self.links[i].set_xdata(points[:,0])
             self.links[i].set_ydata(points[:,1])
 
-        # draw the end-effectors
+        ## Draw the end-effectors
+
         # Remove old ee coordinate frame
         if self.eeframes:
             for quiver in self.eeframes:
@@ -81,7 +58,7 @@ class RobotPlot2(RobotPlot):
         red = '#F84752'  # '#EE9494'
         green = '#BADA55'  # '#93E7B0'
 
-        # Plot ee coordinate frame
+        # add new ee coordinate frame
         for link in self.robot.ee_links:
             Te = T[link.number + 1]
 
@@ -94,11 +71,13 @@ class RobotPlot2(RobotPlot):
 
             self.eeframes.extend([xaxis, yaxis])
 
-
-
     def init(self):
 
         self.drawn = True
+
+        limits = np.r_[-1, 1, -1, 1] * self.robot.reach * 1.5
+        self.ax.set_xlim([limits[0], limits[1]])
+        self.ax.set_ylim([limits[2], limits[3]])
 
         self.segments = self.robot.segments()
 
@@ -111,20 +90,10 @@ class RobotPlot2(RobotPlot):
             self.name = self.ax.text(
                 Tb.t[0] + 0.05, Tb.t[1], self.robot.name)
 
-        # # Plot ee coordinate frame
-        # if self.eeframe:
-        #     self.ee_axes.append(
-        #         self._plot_quiver(
-        #             loc[:, -1], ee[0].t, '#EE9494', 2))
-        #     self.ee_axes.append(
-        #         self._plot_quiver(
-        #             loc[:, -1], ee[1].t, '#93E7B0', 2))
-
         # Initialize the robot links
         self.links = []
         for i in range(len(self.segments)):
             line,  = self.ax.plot(
-                # loc[0, :], loc[1, :], linewidth=5, color='#E16F6D')
                 0, 0, linewidth=5, color='#778899')
             self.links.append(line)
         
@@ -139,5 +108,4 @@ class RobotPlot2(RobotPlot):
             linewidth=width,
             color=col
         )
-
         return qv
