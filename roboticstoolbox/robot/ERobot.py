@@ -355,14 +355,14 @@ class BaseERobot(Robot):
 
         recurse(self.base_link)
 
-    @property
-    def qlim(self):
-        return self._qlim
+    # @property
+    # def qlim(self):
+    #     return self._qlim
 
-    @property
-    def valid_qlim(self):
+    # @property
+    # def valid_qlim(self):
 
-        return self._valid_qlim
+    #     return self._valid_qlim
 
 # --------------------------------------------------------------------- #
 
