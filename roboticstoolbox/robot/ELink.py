@@ -163,7 +163,7 @@ class BaseELink(Link):
         :return: True if is prismatic
         :rtype: bool
         """
-        return self.isjoint and self.v.isprismatic
+        return self.isjoint and self.v.istranslation
 
     @property
     def isrevolute(self):
@@ -172,7 +172,7 @@ class BaseELink(Link):
         :return: True if is revolute
         :rtype: bool
         """
-        return self.isjoint and self.v.isrevolute
+        return self.isjoint and self.v.isrotation
 
     # @property
     # def ets(self):
