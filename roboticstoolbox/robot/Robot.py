@@ -1055,6 +1055,13 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         :return: Array of joint limit values
         :rtype: ndarray(2,n)
+        :exception ValueError: unset limits for a prismatic joint
+
+        Limits are extracted from the link objects.  If joints limits are 
+        not set for:
+        
+            - a revolute joint [-𝜋. 𝜋] is returned
+            - a prismatic joint an exception is raised
 
         Example:
 
@@ -1066,15 +1073,24 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         """
         # TODO tidy up
         limits = np.zeros((2, self.n))
-        for j, link in enumerate(self):
-            if link.qlim is None:
-                if link.isrevolute:
+        j = 0
+        for link in self:
+            if link.isrevolute:
+                if link.qlim is None:
                     v = np.r_[-np.pi, np.pi]
                 else:
+                    v = link.qlim
+            elif link.isprismatic:
+                if link.qlim is None:
                     raise ValueError('undefined prismatic joint limit')
+                else:
+                    v = link.qlim
             else:
-                v = link.qlim
+                # fixed link
+                continue
+
             limits[:, j] = v
+            j += 1
         return limits
 
 # TODO, the remaining functions, I have only a hazy understanding
