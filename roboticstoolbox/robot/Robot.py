@@ -493,31 +493,32 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
-            >>> puma.isprismatic()
+            >>> puma.prismaticjoints()
             >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.isprismatic()
+            >>> stanford.prismaticjoints()
 
         .. note:: Fixed joints, that maintain a constant link relative pose,
             are not included.  ``len(self.structure) == self.n``.
-        """
-        return [link.isprismatic for link in self]
 
-    def todegrees(self, q=None):
+        :seealso: :func:`Link.isprismatic`, :func:`revolutejoints`
+        """
+        return [link.isprismatic for link in self if link.isjoint]
+
+    def todegrees(self, q):
         """
         Convert joint angles to degrees
 
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values)
-        :type q: ndarray(n)
+        :param q: The joint configuration of the robot
+        :type q: ndarray(n) or ndarray(m,n)
         :return: a vector of joint coordinates in degrees and metres
-        :rtype: ndarray(n)
+        :rtype: ndarray(n)  or ndarray(m,n)
 
         ``robot.todegrees(q)`` converts joint coordinates ``q`` to degrees
         taking into account whether elements of ``q`` correspond to revolute
         or prismatic joints, ie. prismatic joint values are not converted.
 
-        ``robot.todegrees()`` as above except uses the stored q value of the
-        robot object.
+        If ``q`` is a matrix, with one column per joint, the conversion is
+        performed columnwise.
 
         Example:
 
@@ -529,30 +530,33 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             >>> stanford.todegrees([pi/4, pi/8, 2, -pi/4, pi/6, pi/3])
         """
 
-        q = self._getq(q)
-        revolute = self.isrevolute()
+        q = getmatrix(q, (None, self.n))
 
-        return np.array([
-            q[k] * 180.0 / np.pi if
-            revolute[k] else q[k] for k in range(len(q))
-        ])
+        j = 0
+        for k, revolute in enumerate(self.revolutejoints):
+            if revolute:
+                q[:,j] *= 180.0 / np.pi
+                j += 1
+        if q.shape[0] == 1:
+            return q[0]
+        else:
+            return q
 
     def toradians(self, q):
         """
         Convert joint angles to radians
 
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values)
-        :type q: ndarray(n)
+        :param q: The joint configuration of the robot
+        :type q: ndarray(n)  or ndarray(m,n)
         :return: a vector of joint coordinates in radians and metres
-        :rtype: ndarray(n)
+        :rtype: ndarray(n)  or ndarray(m,n)
 
         ``robot.toradians(q)`` converts joint coordinates ``q`` to radians
         taking into account whether elements of ``q`` correspond to revolute
         or prismatic joints, ie. prismatic joint values are not converted.
 
-        ``robot.toradians()`` as above except uses the stored q value of the
-        robot object.
+        If ``q`` is a matrix, with one column per joint, the conversion is
+        performed columnwise.
 
         Example:
 
@@ -563,13 +567,15 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             >>> stanford.toradians([10, 20, 2, 30, 40, 50])
         """
 
-        q = self._getq(q)
-        revolute = self.isrevolute()
+        q = getmatrix(q, (None, self.n))
 
-        return np.array([
-            q[k] * np.pi / 180.0
-            if revolute[k] else q[k] for k in range(len(q))
-        ])
+        for k, revolute in enumerate(self.revolutejoints):
+            if revolute:
+                q[:,k] *= np.pi / 180.0
+        if q.shape[0] == 1:
+            return q[0]
+        else:
+            return q
 
     def linkcolormap(self, linkcolors="viridis"):
         """
