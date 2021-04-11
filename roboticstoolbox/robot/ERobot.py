@@ -467,14 +467,29 @@ class BaseERobot(Robot):
               subsequently change this will not be reflected.
         """
         if self._reach is None:
-            d = 0
-            for link in self:
-                for et in link.ets():
-                    if et.isprismatic:
-                        d += abs(et.eta)
-                if link.isprismatic and link.qlim is not None:
-                    d += link.qlim[1]
-            self._reach = d
+            d_all = []
+            for link in self.ee_links:
+                d = 0
+                while True:
+                    for et in link.ets():
+                        if et.istranslation:
+                            if et.isjoint:
+                                # the length of a prismatic joint depends on the
+                                # joint limits.  They might be set in the ET
+                                # or in the Link depending on how the robot
+                                # was constructed
+                                if link.qlim is not None:
+                                    d += max(link.qlim)
+                                elif et.qlim is not None:
+                                    d += max(et.qlim)
+                            else:
+                                d += abs(et.eta)
+                    link = link.parent
+                    if link is None:
+                        d_all.append(d)
+                        break
+
+            self._reach = max(d_all)
         return self._reach
 
 # --------------------------------------------------------------------- #
