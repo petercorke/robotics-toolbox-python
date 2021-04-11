@@ -989,7 +989,9 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             # else:
             self._base = SE3(self._base, check=False)
 
-        return self._base
+        # return a copy, otherwise somebody with 
+        # reference to the base can change it
+        return self._base.copy()
 
     @base.setter
     def base(self, T):
