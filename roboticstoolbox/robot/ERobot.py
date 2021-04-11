@@ -515,6 +515,7 @@ class BaseERobot(Robot):
     def ets(self, start=None, end=None, explored=None, path=None):
         """
         ERobot to ETS
+
         :param start: start of path, defaults to ``base_link``
         :type start: ELink or str, optional
         :param end: end of path, defaults to end-effector
@@ -523,12 +524,15 @@ class BaseERobot(Robot):
         :raises TypeError: a bad link argument
         :return: elementary transform sequence
         :rtype: ETS instance
+
+
         - ``robot.ets()`` is an ETS representing the kinematics from base to
           end-effector.
         - ``robot.ets(end=link)`` is an ETS representing the kinematics from
           base to the link ``link`` specified as an ELink reference or a name.
         - ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
           from link ``l1`` to link ``l2``.
+
         .. runblock:: pycon
             >>> import roboticstoolbox as rtb
             >>> panda = rtb.models.ETS.Panda()
@@ -575,6 +579,106 @@ class BaseERobot(Robot):
                     return p
         return None
 
+# --------------------------------------------------------------------- #
+
+    def segments(self):
+        """
+        Segments of branched robot
+
+        :return: Segment list
+        :rtype: list of lists of Link
+
+        For a single-chain robot with structure::
+        
+            L1 - L2 - L3
+            
+        the return is ``[[None, L1, L2, L3]]``
+
+        For a robot with structure::
+
+            L1 - L2 +-  L3 - L4
+                    +- L5 - L6
+
+        the return is ``[[None, L1, L2], [L2, L3, L4], [L2, L5, L6]]``
+
+        .. note::
+            - the length of the list is the number of segments in the robot
+            - the first segment always starts with ``None`` which represents
+              the base transform (since there is no base link)
+            - the last link of one segment is also the first link of subsequent
+              segments
+        """
+
+        def recurse(link):
+
+            segs = [link.parent]
+            while True:
+                segs.append(link)
+                if link.nchildren == 0:
+                    return segs
+                elif link.nchildren == 1:
+                    link = link.children[0]
+                    continue
+                elif link.nchildren > 1:
+                    segs = [segs]
+
+                    for child in link.children:
+                        segs.append(recurse(child))
+
+                    return segs
+        
+        return recurse(self.links[0])
+
+# --------------------------------------------------------------------- #
+
+    def fkine_path(self, q, old=None):
+        '''
+        Compute the pose of every link frame
+
+        :param q: The joint configuration
+        :type q:  darray(n)
+        :return: Pose of all links
+        :rtype: SE3 instance
+
+        ``T = robot.fkine_path(q)`` is  an SE3 instance with ``robot.nlinks +
+        1`` values:
+
+        - ``T[0]`` is the base transform
+        - ``T[i+1]`` is the pose of link whose ``number`` is ``i``
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        '''
+        q = getvector(q)
+        Tbase = self.base  # add base, also sets the type
+        linkframes = Tbase.__class__.Alloc(self.nlinks + 1)
+        linkframes[0] = Tbase
+
+        def recurse(Tall, Tparent, q, link):
+            # if joint??
+            T = Tparent
+            while True:
+                T *= link.A(q[link.jindex])
+                Tall[link.number + 1] = T
+
+                if link.nchildren == 1:
+                    link = link.children[0]
+                    continue
+
+                elif link.nchildren == 0:
+                    return
+                    
+                else:
+                    # multiple children
+                    for child in link.children:
+                        recurse(Tall, T, q, child)
+                    return
+
+        recurse(linkframes,  Tbase, q, self.links[0])
+
+
+        return linkframes
 
 # --------------------------------------------------------------------- #
 
@@ -859,38 +963,7 @@ graph [rankdir=LR];
         else:
             raise TypeError('unknown argument')
 
-    def fkine_path(self, q, old=None):
-        '''
-        Tall = robot.fkine_all(q) evaluates fkine for each joint within a
-        robot and returns a trajecotry of poses.
-        Tall = fkine_all() as above except uses the stored q value of the
-        robot object.
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param old: for compatibility with DHRobot version, ignored.
-        :return T: Homogeneous transformation trajectory
-        :rtype T: SE3 list
-        .. note::
-            - The robot's base transform, if present, are incorporated
-              into the result.
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        '''
-        q = getvector(q)
-        T = self.base
-        linkframes = []
-        j = 0
-        for link in self.elinks:
-            if link.isjoint:
-                T *= link.A(q[j])
-                j += 1
-            else:
-                T *= link.A()
-            linkframes.append(T)
 
-        return linkframes
 # =========================================================================== #
 
 
@@ -2222,7 +2295,6 @@ class ERobot2(BaseERobot):
             env.hold()
 
         return env
-
 
 
 if __name__ == "__main__":  # pragma nocover
