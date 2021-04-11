@@ -1,4 +1,5 @@
 # import sys
+from abc import ABC, abstractmethod, abstractproperty
 import copy
 import numpy as np
 import roboticstoolbox as rtb
@@ -32,7 +33,7 @@ except ImportError:    # pragma nocover
 # ikine functions need: fkine, jacobe, qlim methods from subclass
 
 
-class Robot(DynamicsMixin, IKMixin):
+class Robot(ABC, DynamicsMixin, IKMixin):
 
     _color = True
 
