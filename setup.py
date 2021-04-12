@@ -1,6 +1,11 @@
 from setuptools import setup, find_packages, Extension
 import os
+
+# fmt: off
+import pip
+pip.main(['install', 'numpy>=1.18.0'])
 import numpy
+# fmt: on
 
 here = os.path.abspath(os.path.dirname(__file__))
 
