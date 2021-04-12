@@ -146,6 +146,9 @@ class BaseERobot(Robot):
         for link in links:
             if isinstance(link.parent, str):
                 link._parent = self._linkdict[link.parent]
+                # Update the fast kinematics object
+                if isinstance(self, ERobot):
+                    link._init_fknm()
 
         if all([link.parent is None for link in links]):
             # no parent links were given, assume they are sequential
@@ -1039,6 +1042,8 @@ class ERobot(BaseERobot):
 
         return cls(links, name=name, gripper_links=gripper)
 
+# --------------------------------------------------------------------- #
+
     def _reset_cache(self):
         self._path_cache = {}
         self._path_cache_fknm = {}
@@ -1080,9 +1085,9 @@ class ERobot(BaseERobot):
     #     path.reverse()
     #     return path
 
-    def to_dict(self, show_robot=True, show_collision=False):
+    def _to_dict(self, show_robot=True, show_collision=False):
 
-        self.fkine_links(self.q)
+        self._set_link_fk(self.q)
 
         ob = []
 
@@ -1108,7 +1113,7 @@ class ERobot(BaseERobot):
 
         return ob
 
-    def fk_dict(self, show_robot=True, show_collision=False):
+    def _fk_dict(self, show_robot=True, show_collision=False):
         ob = []
 
         # Do the robot
@@ -1132,6 +1137,47 @@ class ERobot(BaseERobot):
                         ob.append(gi.fk_dict())
 
         return ob
+
+    def _set_link_fk(self, q):
+        '''
+        robot._set_link_fk(q) evaluates fkine for each link within a
+        robot and stores that pose in a private variable within the link.
+
+        This method is not for general use.
+
+        :param q: The joint angles/configuration of the robot
+        :type q: float ndarray(n)
+
+        .. note::
+
+            - The robot's base transform, if present, are incorporated
+              into the result.
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+
+        '''
+
+        if self._base is None:
+            base = self._eye_fknm
+        else:
+            base = self._base.A
+
+        fknm.fkine_all(
+            self._cache_m,
+            self._cache_links_fknm,
+            q,
+            base)
+
+        for i in range(len(self._cache_grippers)):
+            fknm.fkine_all(
+                len(self._cache_grippers[i]),
+                self._cache_grippers[i],
+                self.grippers[i].q,
+                base)
+
+# --------------------------------------------------------------------- #
 
     @staticmethod
     def URDF_read(file_path, tld=None):
@@ -1278,38 +1324,6 @@ class ERobot(BaseERobot):
             T.append(T.__class__(Tk, check=False))
 
         return T
-
-    # def fkine_links(self, q):
-    #     '''
-    #     robot.fkine_links(q) evaluates fkine for each link within a
-    #     robot and stores that pose within the link.
-
-    #     :param q: The joint angles/configuration of the robot
-    #     :type q: float ndarray(n)
-
-    #     .. note::
-
-    #         - The robot's base transform, if present, are incorporated
-    #           into the result.
-
-    #     :references:
-    #         - Kinematic Derivatives using the Elementary Transform
-    #           Sequence, J. Haviland and P. Corke
-
-    #     '''
-
-    #     fknm.fkine_all(
-    #         self._cache_m,
-    #         self._cache_links_fknm,
-    #         q,
-    #         self._base.A)
-
-    #     for i in range(len(self._cache_grippers)):
-    #         fknm.fkine_all(
-    #             len(self._cache_grippers[i]),
-    #             self._cache_grippers[i],
-    #             self.grippers[i].q,
-    #             self._base.A)
 
     def get_path(self, end=None, start=None, _fknm=False):
         """
