@@ -152,6 +152,7 @@ setup(
     install_requires=req,
 
     extras_require={
+        'min': 'rtb-data==0.0.1',
         'collision': collision_req,
         'dev': dev_req,
         'docs': docs_req,
