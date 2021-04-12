@@ -60,6 +60,13 @@ class BaseELink(Link):
                 parent = f" [{self.parent.name}]"
             return f"{name}[{self.name}({parent}): {self.ets()}] "
 
+    def copy(self):
+        new = super().copy()
+        # invalidate references to parent, child
+        new._parent = None
+        new._children = []
+        return new
+
     @property
     def v(self):
         """
