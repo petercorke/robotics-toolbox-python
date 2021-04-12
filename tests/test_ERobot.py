@@ -112,9 +112,11 @@ class TestERobot(unittest.TestCase):
     def test_init_elink_branched(self):
         robot = ERobot([
             ELink(ETS.rz(), name='link1'),
-            ELink(ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(), name='link2', parent='link1'),
+            ELink(ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(),
+                  name='link2', parent='link1'),
             ELink(ETS.tx(1), name='ee_1', parent='link2'),
-            ELink(ETS.tx(1) * ETS.ty(0.5) * ETS.rz(), name='link3', parent='link1'),
+            ELink(ETS.tx(1) * ETS.ty(0.5) * ETS.rz(),
+                  name='link3', parent='link1'),
             ELink(ETS.tx(1), name='ee_2', parent='link3')
         ])
         self.assertEqual(robot.n, 3)
@@ -283,7 +285,7 @@ class TestERobot(unittest.TestCase):
     def test_fkine_all(self):
         a1 = 1
         a2 = 1
-        e = ETS2.r() * ETS2.tx(a1) * ETS2.r() * ETS2.tx(a2);
+        e = ETS2.r() * ETS2.tx(a1) * ETS2.r() * ETS2.tx(a2)
         robot = ERobot2(e)
 
         T = robot.fkine_all([0, 0])
@@ -297,9 +299,11 @@ class TestERobot(unittest.TestCase):
 
         robot = ERobot2([
             ELink2(ETS2.r(), name='link1'),
-            ELink2(ETS2.tx(1.2) * ETS2.ty(-0.5) * ETS2.r(), name='link2', parent='link1'),
+            ELink2(ETS2.tx(1.2) * ETS2.ty(-0.5) *
+                   ETS2.r(), name='link2', parent='link1'),
             ELink2(ETS2.tx(1), name='ee_1', parent='link2'),
-            ELink2(ETS2.tx(0.6) * ETS2.ty(0.5) * ETS2.r(), name='link3', parent='link1'),
+            ELink2(ETS2.tx(0.6) * ETS2.ty(0.5) * ETS2.r(),
+                   name='link3', parent='link1'),
             ELink2(ETS2.tx(1), name='ee_2', parent='link3')
         ])
         T = robot.fkine_all([0, 0, 0])
@@ -598,15 +602,15 @@ class TestERobot(unittest.TestCase):
     def test_dict(self):
         panda = rtb.models.Panda()
         panda.grippers[0].links[0].collision.append(gm.Box([1, 1, 1]))
-        panda.to_dict()
+        panda._to_dict()
 
         wx = rtb.models.wx250s()
-        wx.to_dict()
+        wx._to_dict()
 
     def test_fkdict(self):
         panda = rtb.models.Panda()
         panda.grippers[0].links[0].collision.append(gm.Box([1, 1, 1]))
-        panda.fk_dict()
+        panda._fk_dict()
 
     def test_elinks(self):
         panda = rtb.models.Panda()
@@ -779,12 +783,12 @@ class TestERobot(unittest.TestCase):
         s1 = gm.Box([1, 1, 1], base=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
 
-        d0, _, _ = p.closest_point(s0)
-        d1, _, _ = p.closest_point(s1, 5)
-        d2, _, _ = p.closest_point(s1)
+        d0, _, _ = p.closest_point(p.q, s0)
+        d1, _, _ = p.closest_point(p.q, s1, 5)
+        d2, _, _ = p.closest_point(p.q, s1)
 
         self.assertAlmostEqual(d0, -0.5599999999995913)
-        self.assertAlmostEqual(d1, 2.4275999999999995)
+        self.assertAlmostEqual(d1, 2.362147178773918)
         self.assertAlmostEqual(d2, None)
 
     def test_collided(self):
@@ -792,8 +796,8 @@ class TestERobot(unittest.TestCase):
         s1 = gm.Box([1, 1, 1], base=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
 
-        c0 = p.collided(s0)
-        c1 = p.collided(s1)
+        c0 = p.collided(p.q, s0)
+        c1 = p.collided(p.q, s1)
 
         self.assertTrue(c0)
         self.assertFalse(c1)
