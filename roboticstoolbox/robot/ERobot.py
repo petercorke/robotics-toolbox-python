@@ -985,13 +985,18 @@ class ERobot(BaseERobot):
             parent = None
             for j, ets_j in enumerate(arg.split()):
                 elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
-                if elink.qlim is none and elink.v.qlim is not None:
+                if elink.qlim is None and elink.v is not None and elink.v.qlim is not None:
                     elink.qlim = elink.v.qlim
                 parent = elink
                 links.append(elink)
             
         elif islistof(arg, ELink):
             links = arg
+
+        elif isinstance(arg, ERobot):
+            # we're passed an ERobot, clone it
+            links = [link.copy() for link in arg]
+
         else:
             raise TypeError(
                 'constructor argument must be ETS or list of ELink')
@@ -2038,7 +2043,7 @@ class ERobot2(BaseERobot):
             for j, ets_j in enumerate(arg.split()):
                 elink = ELink2(ets_j, parent=parent, name=f"link{j:d}")
                 parent = elink
-                if elink.qlim is none and elink.v.qlim is not None:
+                if elink.qlim is None and elink.v is not None and elink.v.qlim is not None:
                     elink.qlim = elink.v.qlim
                 links.append(elink)
 
@@ -2166,44 +2171,11 @@ class ERobot2(BaseERobot):
 
 if __name__ == "__main__":  # pragma nocover
 
-    # import roboticstoolbox as rtb
-    np.set_printoptions(precision=4, suppress=True)
+    e1 = ELink(ETS.rz(), jindex=0)
+    e2 = ELink(ETS.rz(), jindex=1, parent=e1)
+    e3 = ELink(ETS.rz(), jindex=2, parent=e2)
+    e4 = ELink(ETS.rz(), jindex=5, parent=e3)
 
-    robot = ERobot([
-        ELink(ETS.rz(), name='link1'),
-        ELink(
-            ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(),
-            name='link2', parent='link1'),
-        ELink(ETS.tx(1), name='ee_1', parent='link2'),
-        ELink(
-            ETS.tx(1) * ETS.ty(0.5) * ETS.rz(),
-            name='link3', parent='link1'),
-        ELink(ETS.tx(1), name='ee_2', parent='link3')
-    ])
-    print(robot)
+    ERobot([e1, e2, e3, e4])
 
-    # p = rtb.models.URDF.Puma560()
-    # p.fkine(p.qz)
-    # p.jacob0(p.qz)
-    # p.jacobe(p.qz)
-
-    # robot = rtb.models.ETS.Panda()
-    # print(robot)
-    # print(robot.base, robot.tool)
-    # print(robot.ee_links)
-    # ets = robot.ets()
-    # print(ets)
-    # print('n', ets.n)
-    # ets2 = ets.compile()
-    # print(ets2)
-
-    # q = np.random.rand(7)
-    # # print(ets.eval(q))
-    # # print(ets2.eval(q))
-
-    # J1 = robot.jacob0(q)
-    # J2 = ets2.jacob0(q)
-    # print(J1-J2)
-
-    # print(robot[2].v, robot[2].v.jindex)
-    # print(robot[2].Ts)
+    pass

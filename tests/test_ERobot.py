@@ -7,7 +7,8 @@ Created on Fri May 1 14:04:04 2020
 import numpy.testing as nt
 import numpy as np
 import roboticstoolbox as rtb
-from roboticstoolbox import ERobot, ELink, ETS
+from roboticstoolbox import ERobot, ELink, ELink2, ETS, ETS2, ERobot2
+from spatialmath import SE2, SE3
 import unittest
 import spatialmath as sm
 import spatialgeometry as gm
@@ -280,21 +281,37 @@ class TestERobot(unittest.TestCase):
         nt.assert_array_almost_equal(TT[3].A, ans)
 
     def test_fkine_all(self):
-        pm = rtb.models.DH.Panda()
-        p = rtb.models.ETS.Panda()
-        q = np.array([1.0, 2, 3, 4, 5, 6, 7])
-        p.q = q
-        pm.q = q
+        a1 = 1
+        a2 = 1
+        e = ETS2.r() * ETS2.tx(a1) * ETS2.r() * ETS2.tx(a2);
+        robot = ERobot2(e)
 
-        p.fkine_all(q)
-        r2 = pm.fkine_all(q)
+        T = robot.fkine_all([0, 0])
+        self.assertIsInstance(T, SE2)
+        self.assertEqual(len(T), 4)
 
-        for i in range(7):
-            nt.assert_array_almost_equal(p.links[i]._fk, r2[i].A)
+        nt.assert_array_almost_equal(T[0].A, SE2().A)
+        nt.assert_array_almost_equal(T[1].A, SE2().A)
+        nt.assert_array_almost_equal(T[2].A, SE2(1, 0).A)
+        nt.assert_array_almost_equal(T[3].A, SE2(2, 0).A)
 
-        p.fkine_all(q)
-        for i in range(7):
-            nt.assert_array_almost_equal(p.links[i]._fk, r2[i].A)
+        robot = ERobot2([
+            ELink2(ETS2.r(), name='link1'),
+            ELink2(ETS2.tx(1.2) * ETS2.ty(-0.5) * ETS2.r(), name='link2', parent='link1'),
+            ELink2(ETS2.tx(1), name='ee_1', parent='link2'),
+            ELink2(ETS2.tx(0.6) * ETS2.ty(0.5) * ETS2.r(), name='link3', parent='link1'),
+            ELink2(ETS2.tx(1), name='ee_2', parent='link3')
+        ])
+        T = robot.fkine_all([0, 0, 0])
+        self.assertIsInstance(T, SE2)
+        self.assertEqual(len(T), 6)
+
+        nt.assert_array_almost_equal(T[0].A, SE2().A)
+        nt.assert_array_almost_equal(T[1].A, SE2().A)
+        nt.assert_array_almost_equal(T[2].A, SE2(1.2, -0.5).A)
+        nt.assert_array_almost_equal(T[3].A, SE2(2.2, -0.5).A)
+        nt.assert_array_almost_equal(T[4].A, SE2(0.6, 0.5).A)
+        nt.assert_array_almost_equal(T[5].A, SE2(1.6, 0.5).A)
 
     def test_jacob0(self):
         panda = rtb.models.ETS.Panda()

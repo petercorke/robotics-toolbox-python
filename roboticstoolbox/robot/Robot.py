@@ -5,7 +5,7 @@ import numpy as np
 import roboticstoolbox as rtb
 from spatialmath import SE3, SE2
 from spatialmath.base.argcheck import isvector, getvector, getmatrix, \
-    getunit
+    getunit, verifymatrix
 from roboticstoolbox.robot.Link import Link
 # from spatialmath.base.transforms3d import tr2delta
 # from roboticstoolbox.tools import urdf
@@ -55,9 +55,10 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         self.symbolic = symbolic
         self.tool = tool
         self._reach = None
+        self._base = base
 
-        if base is None:
-            self.base = SE3()
+        # if base is None:
+        #     self.base = SE3()
 
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError('keywords must be a list or tuple')
@@ -532,11 +533,9 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         q = getmatrix(q, (None, self.n))
 
-        j = 0
-        for k, revolute in enumerate(self.revolutejoints):
+        for j, revolute in enumerate(self.revolutejoints):
             if revolute:
                 q[:,j] *= 180.0 / np.pi
-                j += 1
         if q.shape[0] == 1:
             return q[0]
         else:
@@ -569,9 +568,9 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         q = getmatrix(q, (None, self.n))
 
-        for k, revolute in enumerate(self.revolutejoints):
+        for j, revolute in enumerate(self.revolutejoints):
             if revolute:
-                q[:,k] *= np.pi / 180.0
+                q[:,j] *= np.pi / 180.0
         if q.shape[0] == 1:
             return q[0]
         else:
@@ -881,12 +880,12 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
             J = self.jacob0(q, start=start, end=end)
         else:
-            verifymatrix(J, (6, n))
+            verifymatrix(J, (6, self.n))
 
         if H is None:
             H = self.hessian0(J0=J, start=start, end=end)
         else:
-            verifymatrix(H, (6, n, n))
+            verifymatrix(H, (6, self.n, self.n))
 
         manipulability = self.manipulability(
             q, J=J, start=start, end=end, axes=axes)
@@ -895,9 +894,9 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         H = H[axes, :, :]
 
         b = np.linalg.inv(J @ np.transpose(J))
-        Jm = np.zeros((n, 1))
+        Jm = np.zeros((self.n, 1))
 
-        for i in range(n):
+        for i in range(self.n):
             c = J @ np.transpose(H[:, :, i])
             Jm[i, 0] = manipulability * \
                 np.transpose(c.flatten('F')) @ b.flatten('F')
@@ -979,7 +978,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             is an identity matrix.
         """
         if self._base is None:
-            if isinstance(self, ERobot2):
+            if isinstance(self, rtb.ERobot2):
                 self._base = SE2()
             else:
                 self._base = SE3()
@@ -1314,7 +1313,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         if q.shape[0] == 1:
             env.launch(self.name + ' Plot', limits=limits, fig=fig)
         else:
-            env.launch(self.name + ' Trajectory Plot', limits, fig=fig)
+            env.launch(self.name + ' Trajectory Plot', limits=limits, fig=fig)
 
         env.add(
             self, readonly=True, jointaxes=jointaxes, jointlabels=jointlabels,

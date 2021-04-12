@@ -21,7 +21,7 @@ class TestELink(unittest.TestCase):
 
         l0 = rp.ELink(rx * ry * tz)
 
-        ans = 'ELink[Rx(88.41°) * Ry(88.41°) * tz(1)] '
+        ans = 'ELink[Rx(88.41°) ⊕ Ry(88.41°) ⊕ tz(1)] '
 
         self.assertEqual(str(l0), ans)
 
