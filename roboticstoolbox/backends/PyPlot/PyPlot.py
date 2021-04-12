@@ -77,7 +77,7 @@ class PyPlot(Connector):
             s += f"\n  {robot.robot.name}"
         return s
 
-    def launch(self, name=None, fig=None, limits=None):
+    def launch(self, name=None, fig=None, limits=None, **kwargs):
         """
         Launch a graphical interface
 
@@ -235,7 +235,7 @@ class PyPlot(Connector):
 
     def add(
             self, ob, readonly=False, display=True,
-            jointaxes=True, eeframe=True, shadow=True, name=True):
+            jointaxes=True, jointlabels=False, eeframe=True, shadow=True, name=True):
         """
         Add a robot to the graphical scene
 
@@ -275,7 +275,7 @@ class PyPlot(Connector):
             self.robots.append(
                 RobotPlot(
                     ob, self.ax, readonly, display,
-                    jointaxes, eeframe, shadow, name))
+                    jointaxes, jointlabels, eeframe, shadow, name))
             self.robots[len(self.robots) - 1].draw()
             id = len(self.robots)
 
@@ -433,7 +433,7 @@ class PyPlot(Connector):
         self.ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
         self.ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
-    def _add_teach_panel(self, robot):
+    def _add_teach_panel(self, robot, q):
 
         if _isnotebook():
             raise RuntimeError('cannot use teach panel under Jupyter')
@@ -441,8 +441,8 @@ class PyPlot(Connector):
         fig = self.fig
 
         # Add text to the plots
-        def text_trans(text):  # pragma: no cover
-            T = robot.fkine()
+        def text_trans(text, q):  # pragma: no cover
+            T = robot.fkine(q)
             t = np.round(T.t, 3)
             r = np.round(T.rpy('deg'), 3)
             text[0].set_text("x: {0}".format(t[0]))
@@ -456,8 +456,7 @@ class PyPlot(Connector):
         def update(val, text, robot):  # pragma: no cover
             for i in range(robot.n):
                 robot.q[i] = self.sjoint[i].val * np.pi/180
-
-            text_trans(text)
+            text_trans(text, robot.q)
 
         fig.subplots_adjust(left=0.25)
         text = []
@@ -472,12 +471,15 @@ class PyPlot(Connector):
 
         qlim = np.copy(robot.qlim) * 180/np.pi
 
-        if np.all(qlim == 0):     # pragma: no cover
-            qlim[0, :] = -180
-            qlim[1, :] = 180
+        qlim[0, :] = np.where(np.isnan(qlim[0, :]), -180, qlim[0, :])
+        qlim[1, :] = np.where(np.isnan(qlim[1, :]), 180, qlim[1, :])
+
+        # if np.all(qlim == 0):     # pragma: no cover
+        #     qlim[0, :] = -180
+        #     qlim[1, :] = 180
 
         # Set the pose text
-        T = robot.fkine()
+        T = robot.fkine(q)
         t = np.round(T.t, 3)
         r = np.round(T.rpy(), 3)
 
@@ -508,12 +510,12 @@ class PyPlot(Connector):
 
         for i in range(robot.n):
             ymin = (1 - ym) - i * yh
-            self.axjoint.append(
-                fig.add_axes([x1, ymin, x2, 0.03], facecolor='#dbdbdb'))
+            ax = fig.add_axes([x1, ymin, x2, 0.03], facecolor='#dbdbdb')
+            self.axjoint.append(ax)
 
             self.sjoint.append(
                 Slider(
-                    self.axjoint[i], 'q' + str(i),
+                    ax, 'q' + str(i),
                     qlim[0, i], qlim[1, i], robot.q[i] * 180/np.pi))
 
             self.sjoint[i].on_changed(lambda x: update(x, text, robot))

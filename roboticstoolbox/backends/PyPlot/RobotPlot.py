@@ -6,13 +6,14 @@
 import numpy as np
 import roboticstoolbox as rp
 from spatialmath import SE3
+from spatialmath import base
 
 
-class RobotPlot(object):
+class RobotPlot():
 
     def __init__(
             self, robot, ax, readonly, display=True,
-            jointaxes=True, eeframe=True, shadow=True, name=True):
+            jointaxes=True, jointlabels=False, eeframe=True, shadow=True, name=True):
 
         super(RobotPlot, self).__init__()
 
@@ -47,72 +48,9 @@ class RobotPlot(object):
         # Display options
         self.eeframe = eeframe
         self.jointaxes = jointaxes
+        self.jointlabels = jointlabels
         self.shadow = shadow
         self.showname = name
-
-    def axes_calcs(self):
-        # Joint and ee poses
-        T = self.robot.fkine_all(self.robot.q)
-
-        try:
-            Te = self.robot.fkine(self.robot.q)
-        except ValueError:
-            print(
-                "\nError: Branched robot's not yet supported "
-                "with PyPlot backend\n")
-            raise
-
-        Tb = self.robot.base
-
-        # Joint and ee position matrix
-        loc = np.zeros([3, len(self.robot.links) + 1])
-        loc[:, 0] = Tb.t
-
-        # Joint axes position matrix
-        joints = np.zeros((3, self.robot.n))
-
-        # Axes arrow transforms
-        Tjx = SE3.Tx(0.06)
-        Tjy = SE3.Ty(0.06)
-        Tjz = SE3.Tz(0.06)
-
-        # ee axes arrows
-        Tex = Te * Tjx
-        Tey = Te * Tjy
-        Tez = Te * Tjz
-
-        # Joint axes arrow calcs
-        if isinstance(self.robot, rp.ERobot):
-            i = 0
-            j = 0
-            for link in self.robot.links:
-                loc[:, i + 1] = link._fk.t
-
-                if link.isjoint:
-                    if link.v.axis == 'Rz' or link.v.axis == 'tz':
-                        Tji = link._fk * Tjz
-
-                    elif link.v.axis == 'Ry' or link.v.axis == 'ty':
-                        Tji = link._fk * Tjy
-
-                    elif link.v.axis == 'Rx' or link.v.axis == 'tx':
-                        Tji = link._fk * Tjx
-
-                    joints[:, j] = Tji.t
-                    j += 1
-
-                i += 1
-            loc = np.c_[loc, loc[:, -1]]
-        else:
-            # End effector offset (tool of robot)
-            loc = np.c_[loc, Te.t]
-
-            for i in range(self.robot.n):
-                loc[:, i + 1] = T[i].t
-                Tji = T[i] * Tjz
-                joints[:, i] = Tji.t
-
-        return loc, joints, [Tex, Tey, Tez]
 
     def draw(self):
         if not self.display:
@@ -122,158 +60,138 @@ class RobotPlot(object):
             self.init()
             return
 
-        loc, joints, ee = self.axes_calcs()
+        ## Update the robot links
 
-        # Remove old ee coordinate frame
-        if self.eeframe:
-            self.ee_axes[0].remove()
-            self.ee_axes[1].remove()
-            self.ee_axes[2].remove()
+        # compute all link frames
+        T = self.robot.fkine_path(self.robot.q)
+        
+        # draw all the line segments for the noodle plot
+        for i, segment in enumerate(self.segments):
+            linkframes = []
+            for link in segment:
+                if link is None:
+                    linkframes.append(self.robot.base)
+                else:
+                    linkframes.append(T[link.number + 1])
+            points = np.array([linkframe.t for linkframe in linkframes])
 
-            # Plot ee coordinate frame
-            self.ee_axes[0] = \
-                self._plot_quiver(
-                    loc[:, -1], ee[0].t, '#EE9494', 2)
-            self.ee_axes[1] = \
-                self._plot_quiver(
-                    loc[:, -1], ee[1].t, '#93E7B0', 2)
-            self.ee_axes[2] = \
-                self._plot_quiver(
-                    loc[:, -1], ee[2].t, '#54AEFF', 2)
+            self.links[i].set_xdata(points[:, 0])
+            self.links[i].set_ydata(points[:,1 ])
+            self.links[0].set_3d_properties(points[:,2 ])
 
-        # Remove oldjoint z coordinates
-        if self.jointaxes:
-            j = 0
+            # Update the shadow of the robot links
+            if self.shadow:
+                self.sh_links[i].set_xdata(points[:, 0])
+                self.sh_links[i].set_ydata(points[:, 1])
+                self.sh_links[i].set_3d_properties(0)
 
+        ## Draw the end-effector coordinate frames
+
+        # remove old ee coordinate frame
+        if self.eeframes:
+            for quiver in self.eeframes:
+                quiver.remove()
+
+            self.eeframes = []
+
+        # Axes arrow transforms
+        Tjx = SE3([0.06, 0, 0])
+        Tjy = SE3([0, 0.06, 0])
+        Tjz = SE3([0, 0, 0.06])
+
+        red = '#F84752'  # '#EE9494'
+        green = '#BADA55'  # '#93E7B0'
+        blue = '#54AEFF'
+
+        # add new ee coordinate frame
+        for link in self.robot.ee_links:
+            Te = T[link.number + 1]
+
+            # ee axes arrows
+            Tex = Te * Tjx
+            Tey = Te * Tjy
+            Tez = Te * Tjz
+
+            xaxis = self._plot_quiver(Te.t, Tex.t, red, 2)
+            yaxis = self._plot_quiver(Te.t, Tey.t, green, 2)
+            zaxis = self._plot_quiver(Te.t, Tez.t, blue, 2)
+
+            self.eeframes.extend([xaxis, yaxis, zaxis])
+
+        ## Joint axes
+
+        # remove oldjoint z coordinates
+        if self.joints:
             for joint in self.joints:
-                self.ax.collections.remove(joint)
+                joint.remove()
 
-            del self.joints
+            # del self.joints
             self.joints = []
 
+        # add new joint axes
+        if self.jointaxes:
             # Plot joint z coordinates
-            for i in range(len(self.robot.links)):
-                if isinstance(self.robot, rp.DHRobot) or \
-                        self.robot.links[i].isjoint:
-                    self.joints.append(
-                        self._plot_quiver(
-                            loc[:, i+1], joints[:, j], '#8FC1E2', 2))
-                    j += 1
+            for link in self.robot:
 
-            # for i in range(len(self.robot.links)):
-            #     self.joints[i] = \
-            #         self._plot_quiver(loc[:, i+1], joints[:, i], '#8FC1E2', 2)
+                direction = None
+                if isinstance(self.robot, rp.DHRobot):
+                    # should test MDH I think
+                    Tj = T[link.number]
+                    R = Tj.R
+                    direction = R[:, 2]  # z direction
+                elif link.isjoint:
+                    Tj = T[link.number + 1]
+                    R = Tj.R
+                    if link.v.axis[1] == 'z':
+                        direction = R[:, 2]  # z direction
+                    elif link.v.axis[1] == 'y':
+                        direction = R[:, 1]  # y direction
+                    elif link.v.axis[1] == 'x':
+                        direction = R[:, 0]  #  direction
 
-        # Update the robot links
-        self.links[0].set_xdata(loc[0, :])
-        self.links[0].set_ydata(loc[1, :])
-        self.links[0].set_3d_properties(loc[2, :])
+                if direction is not None:
+                    arrow = self._plot_quiver2(Tj.t, direction, 0.2, link.jindex, '#8FC1E2', 2)
+                    self.joints.extend(arrow)
 
-        # Update the shadow of the robot links
-        if self.shadow:
-            self.sh_links[0].set_xdata(loc[0, :])
-            self.sh_links[0].set_ydata(loc[1, :])
-            self.sh_links[0].set_3d_properties(0)
-
-    def draw2(self):
-        if not self.display:
-            return
-
-        if not self.drawn:
-            self.init2()
-            return
-
-        loc, joints, ee = self.axes_calcs()
-
-        # Remove old ee coordinate frame
-        if self.eeframe:
-            self.ee_axes[0].remove()
-            self.ee_axes[1].remove()
-
-            # Plot ee coordinate frame
-            self.ee_axes[0] = \
-                self._plot_quiver2(
-                    loc[:, -1], ee[0].t, '#EE9494', 2)
-            self.ee_axes[1] = \
-                self._plot_quiver2(
-                    loc[:, -1], ee[1].t, '#93E7B0', 2)
-
-        # Update the robot links
-        self.links[0].set_xdata(loc[0, :])
-        self.links[0].set_ydata(loc[1, :])
 
     def init(self):
 
         self.drawn = True
 
+        limits = np.r_[-1, 1, -1, 1, -1, 1] * self.robot.reach * 1.5
+        self.ax.set_xlim3d([limits[0], limits[1]])
+        self.ax.set_ylim3d([limits[2], limits[3]])
+        self.ax.set_zlim3d([limits[4], limits[5]])
+
+        self.segments = self.robot.segments()
+
         # Joint and ee poses
         Tb = self.robot.base
-        loc, joints, ee = self.axes_calcs()
+        # loc, joints, ee = self.axes_calcs()
 
         # Plot robot name
         if self.showname:
             self.name = self.ax.text(
                 Tb.t[0], Tb.t[1], 0.05, self.robot.name)
 
-        # Plot ee coordinate frame
-        if self.eeframe:
-            self.ee_axes.append(
-                self._plot_quiver(
-                    loc[:, -1], ee[0].t, '#EE9494', 2))
-            self.ee_axes.append(
-                self._plot_quiver(
-                    loc[:, -1], ee[1].t, '#93E7B0', 2))
-            self.ee_axes.append(
-                self._plot_quiver(
-                    loc[:, -1], ee[2].t, '#54AEFF', 2))
+        # Initialize the robot links
+        self.links = []
+        self.sh_links = []
+        for i in range(len(self.segments)):
+            line,  = self.ax.plot(
+                0, 0, 0, linewidth=5, color='#E16F6D')
+            self.links.append(line)
 
-        # Plot joint z coordinates
-        if self.jointaxes:
-            j = 0
-            for i in range(len(self.robot.links)):
-                if isinstance(self.robot, rp.DHRobot) or \
-                        self.robot.links[i].isjoint:
-                    self.joints.append(
-                        self._plot_quiver(
-                            loc[:, i+1], joints[:, j], '#8FC1E2', 2))
-                    j += 1
+            # Plot the shadow of the robot links, draw first so robot is always
+            # in front
+            if self.shadow:
+                shadow, = self.ax.plot(
+                    0, 0,
+                    linewidth=3, color='lightgrey')
+                self.sh_links.append(shadow)
 
-        # Plot the shadow of the robot links, draw first so robot is always
-        # in front
-        if self.shadow:
-            self.sh_links = self.ax.plot(
-                loc[0, :], loc[1, :],
-                linewidth=3, color='lightgrey')
-
-        # Plot the robot links
-        self.links = self.ax.plot(
-            loc[0, :], loc[1, :], loc[2, :], linewidth=5, color='#E16F6D')
-
-    def init2(self):
-
-        self.drawn = True
-
-        # Joint and ee poses
-        Tb = self.robot.base
-        loc, joints, ee = self.axes_calcs()
-
-        # Plot robot name
-        if self.showname:
-            self.name = self.ax.text(
-                Tb.t[0] + 0.05, Tb.t[1], self.robot.name)
-
-        # Plot ee coordinate frame
-        if self.eeframe:
-            self.ee_axes.append(
-                self._plot_quiver2(
-                    loc[:, -1], ee[0].t, '#EE9494', 2))
-            self.ee_axes.append(
-                self._plot_quiver2(
-                    loc[:, -1], ee[1].t, '#93E7B0', 2))
-
-        # Plot the robot links
-        self.links = self.ax.plot(
-            loc[0, :], loc[1, :], linewidth=5, color='#E16F6D')
+        self.eeframes = []
+        self.joints = []
 
     def _plot_quiver(self, p0, p1, col, width):
         qv = self.ax.quiver(
@@ -284,16 +202,21 @@ class RobotPlot(object):
             linewidth=width,
             color=col
         )
-
         return qv
 
-    def _plot_quiver2(self, p0, p1, col, width):
+    def _plot_quiver2(self, p0, dir, len, j, col, width):
+        vec = dir * len
+        start = p0 - vec / 2
         qv = self.ax.quiver(
-            p0[0], p0[1],
-            p1[0] - p0[0],
-            p1[1] - p0[1],
+            start[0], start[1], start[2],
+            vec[0], vec[1], vec[2],
             linewidth=width,
             color=col
         )
 
-        return qv
+        if self.jointlabels:
+            pl = p0 + vec * 0.6
+            label = self.ax.text(pl[0], pl[1], pl[2], f'q{j}')
+            return [qv, label]
+        else:
+            return [qv]

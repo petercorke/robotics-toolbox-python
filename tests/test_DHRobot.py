@@ -52,7 +52,6 @@ class TestDHRobot(unittest.TestCase):
         ans = np.array([np.pi, 180, np.pi, 90])
 
         nt.assert_array_almost_equal(r0.todegrees(q), ans)
-        nt.assert_array_almost_equal(r0.todegrees(), np.zeros(4))
 
     def test_toradians(self):
         l0 = rp.PrismaticDH()
@@ -156,10 +155,8 @@ class TestDHRobot(unittest.TestCase):
         ])
 
         r0 = rp.DHRobot([l0, l1, l2, l3])
-        r0.q = q
 
         nt.assert_array_almost_equal(r0.fkine(q).A, T1)
-        nt.assert_array_almost_equal(r0.fkine().A, T1)
 
     def test_fkine_traj(self):
         l0 = rp.PrismaticDH()
@@ -1074,7 +1071,7 @@ class TestDHRobot(unittest.TestCase):
         # nt.assert_array_almost_equal(I1[0, :, :], Ir, decimal=4)
         # nt.assert_array_almost_equal(I1[1, :, :], Ir, decimal=4)
 
-    def test_cinertia(self):
+    def test_inertia_x(self):
         puma = rp.models.DH.Puma560()
         q = puma.qn
 
@@ -1086,8 +1083,8 @@ class TestDHRobot(unittest.TestCase):
             [0.2795, -0.0703, 0.2767, 0.0000, 0.1713, 0.0000],
             [0.0000, -0.9652, -0.0000, 0.1941, 0.0000, 0.5791]]
 
-        M0 = puma.inertia_x(q)
-        M1 = puma.inertia_x(np.c_[q, q].T)
+        M0 = puma.inertia_x(q, analytical=None)
+        M1 = puma.inertia_x(np.c_[q, q].T, analytical=None)
 
         nt.assert_array_almost_equal(M0, Mr, decimal=4)
         nt.assert_array_almost_equal(M1[0, :, :], Mr, decimal=4)
@@ -1192,14 +1189,21 @@ class TestDHRobot(unittest.TestCase):
         puma = rp.models.DH.Puma560()
         puma.q = puma.qr
         puma.qd = puma.qr
-        q = puma.qr
+        q = puma.qn
+        qd = [0.1, -0.2, 0.3, -0.4, 0.5, -0.6]
 
-        j0 = puma.jacob_dot(q, q)
+        from roboticstoolbox.tools import hessian_numerical
+
+        j0 = puma.jacob_dot(q, qd)
+
+        H = hessian_numerical(lambda q: puma.jacob0(q), q)
+        Jd = np.zeros((6, puma.n))
+        for i in range(puma.n):
+            Jd += H[:, :, i] * qd[i]
 
         res = [-0.0000, -1.0654, -0.3702,  2.4674, 0, 0]
 
-        nt.assert_array_almost_equal(j0, res, decimal=4)
-        nt.assert_array_almost_equal(j1, res, decimal=4)
+        nt.assert_array_almost_equal(j0, Jd, decimal=4)
 
     def test_yoshi(self):
         puma = rp.models.DH.Puma560()

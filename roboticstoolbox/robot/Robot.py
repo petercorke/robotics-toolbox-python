@@ -1,10 +1,11 @@
 # import sys
+from abc import ABC, abstractmethod, abstractproperty
 import copy
 import numpy as np
 import roboticstoolbox as rtb
 from spatialmath import SE3, SE2
 from spatialmath.base.argcheck import isvector, getvector, getmatrix, \
-    getunit
+    getunit, verifymatrix
 from roboticstoolbox.robot.Link import Link
 # from spatialmath.base.transforms3d import tr2delta
 # from roboticstoolbox.tools import urdf
@@ -32,7 +33,7 @@ except ImportError:    # pragma nocover
 # ikine functions need: fkine, jacobe, qlim methods from subclass
 
 
-class Robot(DynamicsMixin, IKMixin):
+class Robot(ABC, DynamicsMixin, IKMixin):
 
     _color = True
 
@@ -54,9 +55,10 @@ class Robot(DynamicsMixin, IKMixin):
         self.symbolic = symbolic
         self.tool = tool
         self._reach = None
+        self._base = base
 
-        if base is None:
-            self.base = SE3()
+        # if base is None:
+        #     self.base = SE3()
 
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError('keywords must be a list or tuple')
@@ -75,6 +77,8 @@ class Robot(DynamicsMixin, IKMixin):
 
         self._hasdynamics = False
         self._hasgeometry = False
+        self._hascollision = False
+
 
         for link in links:
             if not isinstance(link, Link):
@@ -83,13 +87,18 @@ class Robot(DynamicsMixin, IKMixin):
             # add link back to roboto
             link._robot = self
 
-            if link._hasdynamics:
+            if link.hasdynamics:
                 self._hasdynamics = True
+            if link.geometry:
+                self._hasgeometry = []
+            if link.collision:
+                self._hascollision = True
 
             if isinstance(link, rtb.ELink):
                 if len(link.geometry) > 0:
                     self._hasgeometry = True
         self._links = links
+        self._nlinks = len(links)
 
         # Current joint angles of the robot
         self.q = np.zeros(self.n)
@@ -217,8 +226,116 @@ class Robot(DynamicsMixin, IKMixin):
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.n
 
+        :seealso: :func:`nlinks`, :func:`nbranches`
         """
         return self._n
+
+    @property
+    def nlinks(self):
+        """
+        Number of links (Robot superclass)
+
+        :return: Number of links
+        :rtype: int
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.nlinks
+
+        :seealso: :func:`n`, :func:`nbranches`
+        """
+        return self._nlinks
+
+    @abstractproperty
+    def nbranches(self):
+        pass
+
+        """
+        Number of branches (Robot superclass)
+
+        :return: Number of branches
+        :rtype: int
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.nbranches
+
+        :seealso: :func:`n`, :func:`nlinks`
+        """
+        return self._n
+
+    @property
+    def hasdynamics(self):
+        """
+        Robot has dynamic parameters (Robot superclass)
+
+        :return: Robot has dynamic parameters
+        :rtype: bool
+
+        At least one link has associated dynamic parameters.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.hasdynamics:
+        """
+        return self._hasdynamics
+
+    @property
+    def hasgeometry(self):
+        """
+        Robot has geometry model (Robot superclass)
+
+        :return: Robot has geometry model
+        :rtype: bool
+
+        At least one link has associated mesh to describe its shape.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.hasgeometry
+        
+        :seealso: :func:`hascollision`
+        """
+        return self._hasgeometry
+
+    @property
+    def hascollision(self):
+        """
+        Robot has collision model (Robot superclass)
+
+        :return: Robot has collision model
+        :rtype: bool
+
+        At least one link has associated collision model.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.hascollision
+
+        :seealso: :func:`hasgeometry`
+        """
+        return self._hascollision
+
 
     @property
     def qrandom(self):
@@ -330,7 +447,8 @@ class Robot(DynamicsMixin, IKMixin):
 
         return ''.join(structure)
 
-    def isrevolute(self):
+    @property
+    def revolutejoints(self):
         """
         Revolute joints as bool array
 
@@ -343,16 +461,27 @@ class Robot(DynamicsMixin, IKMixin):
 
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
-            >>> puma.isrevolute()
+            >>> puma.revolutejoints()
             >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.isrevolute()
+            >>> stanford.revolutejoints()
 
         .. note:: Fixed joints, that maintain a constant link relative pose,
             are not included.  ``len(self.structure) == self.n``.
-        """
-        return [link.isrevolute for link in self]
 
-    def isprismatic(self):
+        :seealso: :func:`Link.isrevolute`, :func:`prismaticjoints` 
+        """
+        return [link.isrevolute for link in self if link.isjoint]
+
+    # TODO not very efficient
+    # TODO keep a mapping from joint to link
+    def isrevolute(self, j):
+        return self.revolutejoints[j]
+
+    def isprismatic(self, j):
+        return self.prismaticjoints[j]
+
+    @property
+    def prismaticjoints(self):
         """
         Revolute joints as bool array
 
@@ -365,31 +494,32 @@ class Robot(DynamicsMixin, IKMixin):
 
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
-            >>> puma.isprismatic()
+            >>> puma.prismaticjoints()
             >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.isprismatic()
+            >>> stanford.prismaticjoints()
 
         .. note:: Fixed joints, that maintain a constant link relative pose,
             are not included.  ``len(self.structure) == self.n``.
-        """
-        return [link.isprismatic for link in self]
 
-    def todegrees(self, q=None):
+        :seealso: :func:`Link.isprismatic`, :func:`revolutejoints`
+        """
+        return [link.isprismatic for link in self if link.isjoint]
+
+    def todegrees(self, q):
         """
         Convert joint angles to degrees
 
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values)
-        :type q: ndarray(n)
+        :param q: The joint configuration of the robot
+        :type q: ndarray(n) or ndarray(m,n)
         :return: a vector of joint coordinates in degrees and metres
-        :rtype: ndarray(n)
+        :rtype: ndarray(n)  or ndarray(m,n)
 
         ``robot.todegrees(q)`` converts joint coordinates ``q`` to degrees
         taking into account whether elements of ``q`` correspond to revolute
         or prismatic joints, ie. prismatic joint values are not converted.
 
-        ``robot.todegrees()`` as above except uses the stored q value of the
-        robot object.
+        If ``q`` is a matrix, with one column per joint, the conversion is
+        performed columnwise.
 
         Example:
 
@@ -401,30 +531,31 @@ class Robot(DynamicsMixin, IKMixin):
             >>> stanford.todegrees([pi/4, pi/8, 2, -pi/4, pi/6, pi/3])
         """
 
-        q = self._getq(q)
-        revolute = self.isrevolute()
+        q = getmatrix(q, (None, self.n))
 
-        return np.array([
-            q[k] * 180.0 / np.pi if
-            revolute[k] else q[k] for k in range(len(q))
-        ])
+        for j, revolute in enumerate(self.revolutejoints):
+            if revolute:
+                q[:,j] *= 180.0 / np.pi
+        if q.shape[0] == 1:
+            return q[0]
+        else:
+            return q
 
     def toradians(self, q):
         """
         Convert joint angles to radians
 
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values)
-        :type q: ndarray(n)
+        :param q: The joint configuration of the robot
+        :type q: ndarray(n)  or ndarray(m,n)
         :return: a vector of joint coordinates in radians and metres
-        :rtype: ndarray(n)
+        :rtype: ndarray(n)  or ndarray(m,n)
 
         ``robot.toradians(q)`` converts joint coordinates ``q`` to radians
         taking into account whether elements of ``q`` correspond to revolute
         or prismatic joints, ie. prismatic joint values are not converted.
 
-        ``robot.toradians()`` as above except uses the stored q value of the
-        robot object.
+        If ``q`` is a matrix, with one column per joint, the conversion is
+        performed columnwise.
 
         Example:
 
@@ -435,13 +566,15 @@ class Robot(DynamicsMixin, IKMixin):
             >>> stanford.toradians([10, 20, 2, 30, 40, 50])
         """
 
-        q = self._getq(q)
-        revolute = self.isrevolute()
+        q = getmatrix(q, (None, self.n))
 
-        return np.array([
-            q[k] * np.pi / 180.0
-            if revolute[k] else q[k] for k in range(len(q))
-        ])
+        for j, revolute in enumerate(self.revolutejoints):
+            if revolute:
+                q[:,j] *= np.pi / 180.0
+        if q.shape[0] == 1:
+            return q[0]
+        else:
+            return q
 
     def linkcolormap(self, linkcolors="viridis"):
         """
@@ -747,12 +880,12 @@ class Robot(DynamicsMixin, IKMixin):
 
             J = self.jacob0(q, start=start, end=end)
         else:
-            verifymatrix(J, (6, n))
+            verifymatrix(J, (6, self.n))
 
         if H is None:
             H = self.hessian0(J0=J, start=start, end=end)
         else:
-            verifymatrix(H, (6, n, n))
+            verifymatrix(H, (6, self.n, self.n))
 
         manipulability = self.manipulability(
             q, J=J, start=start, end=end, axes=axes)
@@ -761,9 +894,9 @@ class Robot(DynamicsMixin, IKMixin):
         H = H[axes, :, :]
 
         b = np.linalg.inv(J @ np.transpose(J))
-        Jm = np.zeros((n, 1))
+        Jm = np.zeros((self.n, 1))
 
-        for i in range(n):
+        for i in range(self.n):
             c = J @ np.transpose(H[:, :, i])
             Jm[i, 0] = manipulability * \
                 np.transpose(c.flatten('F')) @ b.flatten('F')
@@ -845,12 +978,14 @@ class Robot(DynamicsMixin, IKMixin):
             is an identity matrix.
         """
         if self._base is None:
-            if isinstance(self, ERobot2):
+            if isinstance(self, rtb.ERobot2):
                 self._base = SE2()
             else:
                 self._base = SE3()
 
-        return self._base
+        # return a copy, otherwise somebody with 
+        # reference to the base can change it
+        return self._base.copy()
 
     @base.setter
     def base(self, T):
@@ -916,6 +1051,13 @@ class Robot(DynamicsMixin, IKMixin):
 
         :return: Array of joint limit values
         :rtype: ndarray(2,n)
+        :exception ValueError: unset limits for a prismatic joint
+
+        Limits are extracted from the link objects.  If joints limits are 
+        not set for:
+        
+            - a revolute joint [-𝜋. 𝜋] is returned
+            - a prismatic joint an exception is raised
 
         Example:
 
@@ -927,15 +1069,24 @@ class Robot(DynamicsMixin, IKMixin):
         """
         # TODO tidy up
         limits = np.zeros((2, self.n))
-        for j, link in enumerate(self):
-            if link.qlim is None:
-                if link.isrevolute:
+        j = 0
+        for link in self:
+            if link.isrevolute:
+                if link.qlim is None:
                     v = np.r_[-np.pi, np.pi]
                 else:
+                    v = link.qlim
+            elif link.isprismatic:
+                if link.qlim is None:
                     raise ValueError('undefined prismatic joint limit')
+                else:
+                    v = link.qlim
             else:
-                v = link.qlim
+                # fixed link
+                continue
+
             limits[:, j] = v
+            j += 1
         return limits
 
 # TODO, the remaining functions, I have only a hazy understanding
@@ -1034,6 +1185,16 @@ class Robot(DynamicsMixin, IKMixin):
 
     # TODO probably should be a static method
     def _get_graphical_backend(self, backend):
+
+        # figure out the right default
+        if backend is None:
+            if isinstance(self, rtb.DHRobot):
+                backend = 'pyplot'
+            elif isinstance(self, rtb.ERobot2):
+                backend = 'pyplot2'
+            else:
+                backend = 'swift'
+
         #
         # find the right backend, modules are imported here on an as needs
         # basis
@@ -1065,7 +1226,7 @@ class Robot(DynamicsMixin, IKMixin):
     def plot(
             self, q, backend=None, block=False, dt=0.050,
             limits=None, vellipse=False, fellipse=False,
-            jointaxes=True, eeframe=True, shadow=True, name=True, fig=None,
+            jointaxes=True, jointlabels=False, eeframe=True, shadow=True, name=True, fig=None,
             movie=None, **bopts
     ):
         """
@@ -1137,39 +1298,21 @@ class Robot(DynamicsMixin, IKMixin):
 
         env = None
 
-        if backend is None:
-            if isinstance(self, rtb.DHRobot):
-                backend = 'pyplot'
-            else:
-                backend = 'swift'
-
         env = self._get_graphical_backend(backend)
-
-        # if backend.lower() == 'swift':  # pragma nocover
-        #     if isinstance(self, rtb.ERobot):
-        #         env = self._plot_swift(q=q, block=block)
-        #     elif isinstance(self, rtb.DHRobot):
-        #         raise NotImplementedError(
-        #             'Plotting in Swift is not implemented for DHRobots yet')
-
-        # elif backend.lower() == 'pyplot':
-        #     # if isinstance(self, rtb.ERobot):  # pragma nocover
-        #     #     raise NotImplementedError(
-        #     #         'Plotting in PyPlot is not implemented for ERobots yet')
-        #     # elif isinstance(self, rtb.DHRobot):
-        #     env = self._plot_pyplot(
-        #         q=q, block=block, dt=dt, limits=limits, vellipse=vellipse,
-        #         fellipse=fellipse, jointaxes=jointaxes, eeframe=eeframe,
-        #         shadow=shadow, name=name, movie=movie)
 
         q = getmatrix(q, (None, self.n))
         self.q = q[0, :]
 
         # Add the self to the figure in readonly mode
-        env.launch(fig=fig, **bopts)
+        # Add the self to the figure in readonly mode
+        if q.shape[0] == 1:
+            env.launch(self.name + ' Plot', limits=limits, fig=fig)
+        else:
+            env.launch(self.name + ' Trajectory Plot', limits=limits, fig=fig)
 
         env.add(
-            self, readonly=True)
+            self, readonly=True, jointaxes=jointaxes, jointlabels=jointlabels,
+            eeframe=eeframe, shadow=shadow, name=name)
 
         if vellipse:
             vell = self.vellipse(centre='ee')
@@ -1205,95 +1348,6 @@ class Robot(DynamicsMixin, IKMixin):
             env.hold()
 
         return env
-
-    # def _plot_pyplot(
-    #         self, q, block, dt, limits,
-    #         vellipse, fellipse,
-    #         jointaxes, eeframe, shadow, name, movie):
-
-    #     # Make an empty 3D figure
-    #     env = PyPlot()
-
-    #     q = getmatrix(q, (None, self.n))
-
-    #     # Add the self to the figure in readonly mode
-    #     if q.shape[0] == 1:
-    #         env.launch(self.name + ' Plot', limits)
-    #     else:
-    #         env.launch(self.name + ' Trajectory Plot', limits)
-
-    #     env.add(
-    #         self, readonly=True,
-    #         jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
-
-    #     if vellipse:
-    #         vell = self.vellipse(centre='ee')
-    #         env.add(vell)
-
-    #     if fellipse:
-    #         fell = self.fellipse(centre='ee')
-    #         env.add(fell)
-
-    #     # Stop lint error
-    #     images = []  # list of images saved from each plot
-
-    #     if movie is not None:   # pragma nocover
-    #         if not _pil_exists:
-    #             raise RuntimeError(
-    #                 'to save movies PIL must be installed:\npip3 install PIL')
-    #         # make the background white, looks better than grey stipple
-    #         env.ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-    #         env.ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-    #         env.ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-
-    #     for qk in q:
-    #         self.q = qk
-    #         env.step(dt)
-
-    #         if movie is not None:  # pragma nocover
-    #             # render the frame and save as a PIL image in the list
-    #             canvas = env.fig.canvas
-    #             img = PIL.Image.frombytes(
-    #                 'RGB', canvas.get_width_height(),
-    #                 canvas.tostring_rgb())
-    #             images.append(img)
-
-    #     if movie is not None:  # pragma nocover
-    #         # save it as an animated GIF
-    #         images[0].save(
-    #             movie,
-    #             save_all=True, append_images=images[1:], optimize=False,
-    #             duration=dt, loop=0)
-
-    #     # Keep the plot open
-    #     if block:           # pragma: no cover
-    #         env.hold()
-
-    #     return env
-
-    # def _plot_swift(self, q, block):   # pragma nocover
-
-    #     # Make an empty 3D figure
-    #     env = Swift()
-
-    #     q = getmatrix(q, (None, self.n))
-    #     self.q = q[0, :]
-
-    #     # Add the self to the figure in readonly mode
-    #     env.launch()
-
-    #     env.add(
-    #         self, readonly=True)
-
-    #     for qk in q:
-    #         self.q = qk
-    #         env.step()
-
-    #     # Keep the plot open
-    #     if block:           # pragma: no cover
-    #         env.hold()
-
-    #     return env
 
 # --------------------------------------------------------------------- #
 
@@ -1587,8 +1641,9 @@ class Robot(DynamicsMixin, IKMixin):
 
     def teach(
             self, q=None, block=True, order='xyz', limits=None,
-            jointaxes=True, eeframe=True, shadow=True, name=True,
-            backend='pyplot'):
+            jointaxes=True, jointlabels=False, 
+            vellipse=False, fellipse=False, eeframe=True, shadow=True, 
+            name=True, backend=None):
         """
         Graphical teach pendant
 
@@ -1650,9 +1705,19 @@ class Robot(DynamicsMixin, IKMixin):
         env.launch('Teach ' + self.name, limits=limits)
         env.add(
             self, readonly=True,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+            jointaxes=jointaxes, jointlabels=jointlabels, eeframe=eeframe, 
+            shadow=shadow, name=name)
 
         env._add_teach_panel(self, q)
+
+        if vellipse:
+            vell = self.vellipse(centre='ee', scale=0.5)
+            env.add(vell)
+
+        if fellipse:
+            fell = self.fellipse(centre='ee')
+            env.add(fell)
+
 
         # Keep the plot open
         if block:           # pragma: no cover

@@ -5,6 +5,7 @@ Created on Tue Apr 24 15:48:52 2020
 """
 
 from os.path import splitext
+import copy
 import tempfile
 import subprocess
 import webbrowser
@@ -125,12 +126,11 @@ class BaseERobot(Robot):
 
         # check all the incoming ELink objects
         n = 0
-        link_number = 0
-        for link in links:
+        for k, link in enumerate(links):
             # if link has no name, give it one
             if link.name is None:
-                link.name = f"link-{link_number}"
-                link_number += 1
+                link.name = f"link-{k}"
+            link.number = k + 1
 
             # put it in the link dictionary, check for duplicates
             if link.name in self._linkdict:
@@ -206,7 +206,7 @@ class BaseERobot(Robot):
 
         # assign the joint indices
         if all([link.jindex is None for link in links]):
-
+            # no joints have an index
             jindex = [0]  # "mutable integer" hack
 
             def visit_link(link, jindex):
@@ -223,7 +223,7 @@ class BaseERobot(Robot):
                 self.base_link, lambda link: visit_link(link, jindex))
 
         elif all([link.jindex is not None for link in links if link.isjoint]):
-            # jindex set on all, check they are unique and sequential
+            # jindex set on all, check they are unique and contiguous
             if checkjindex:
                 jset = set(range(self._n))
                 for link in links:
@@ -285,7 +285,7 @@ class BaseERobot(Robot):
             Column("parent", headalign="^", colalign="<"),
             Column("ETS", headalign="^", colalign="<"),
             border="thin")
-        for k, link in enumerate(self):
+        for link in self:
             color = "" if link.isjoint else "<<blue>>"
             ee = "@" if link in self.ee_links else ""
             ets = link.ets()
@@ -305,7 +305,7 @@ class BaseERobot(Robot):
             else:
                 jname = ''
             table.row(
-                k,
+                link.number,
                 color + ee + link.name,
                 jname,
                 parent_name,
@@ -355,14 +355,14 @@ class BaseERobot(Robot):
 
         recurse(self.base_link)
 
-    @property
-    def qlim(self):
-        return self._qlim
+    # @property
+    # def qlim(self):
+    #     return self._qlim
 
-    @property
-    def valid_qlim(self):
+    # @property
+    # def valid_qlim(self):
 
-        return self._valid_qlim
+    #     return self._valid_qlim
 
 # --------------------------------------------------------------------- #
 
@@ -382,11 +382,25 @@ class BaseERobot(Robot):
     def nbranches(self):
         """
         Number of branches
+
         :return: number of branches in the robot's kinematic tree
         :rtype: int
-        Computed as the number of links with zero children
+
+        Number of branches in this robot.  Computed as the number of links with
+        zero children
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.ETS.Panda()
+            >>> robot.nbranches
+
+        :seealso: :func:`n`, :func:`nlinks`
         """
         return self._nbranches
+
 # --------------------------------------------------------------------- #
 
     @property
@@ -454,14 +468,29 @@ class BaseERobot(Robot):
               subsequently change this will not be reflected.
         """
         if self._reach is None:
-            d = 0
-            for link in self:
-                for et in link.ets():
-                    if et.isprismatic:
-                        d += abs(et.eta)
-                if link.isprismatic and link.qlim is not None:
-                    d += link.qlim[1]
-            self._reach = d
+            d_all = []
+            for link in self.ee_links:
+                d = 0
+                while True:
+                    for et in link.ets():
+                        if et.istranslation:
+                            if et.isjoint:
+                                # the length of a prismatic joint depends on the
+                                # joint limits.  They might be set in the ET
+                                # or in the Link depending on how the robot
+                                # was constructed
+                                if link.qlim is not None:
+                                    d += max(link.qlim)
+                                elif et.qlim is not None:
+                                    d += max(et.qlim)
+                            else:
+                                d += abs(et.eta)
+                    link = link.parent
+                    if link is None:
+                        d_all.append(d)
+                        break
+
+            self._reach = max(d_all)
         return self._reach
 
 # --------------------------------------------------------------------- #
@@ -487,6 +516,7 @@ class BaseERobot(Robot):
     def ets(self, start=None, end=None, explored=None, path=None):
         """
         ERobot to ETS
+
         :param start: start of path, defaults to ``base_link``
         :type start: ELink or str, optional
         :param end: end of path, defaults to end-effector
@@ -495,12 +525,15 @@ class BaseERobot(Robot):
         :raises TypeError: a bad link argument
         :return: elementary transform sequence
         :rtype: ETS instance
+
+
         - ``robot.ets()`` is an ETS representing the kinematics from base to
           end-effector.
         - ``robot.ets(end=link)`` is an ETS representing the kinematics from
           base to the link ``link`` specified as an ELink reference or a name.
         - ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
           from link ``l1`` to link ``l2``.
+
         .. runblock:: pycon
             >>> import roboticstoolbox as rtb
             >>> panda = rtb.models.ETS.Panda()
@@ -548,6 +581,105 @@ class BaseERobot(Robot):
                     return p
         return None
 
+# --------------------------------------------------------------------- #
+
+    def segments(self):
+        """
+        Segments of branched robot
+
+        :return: Segment list
+        :rtype: list of lists of Link
+
+        For a single-chain robot with structure::
+
+            L1 - L2 - L3
+
+        the return is ``[[None, L1, L2, L3]]``
+
+        For a robot with structure::
+
+            L1 - L2 +-  L3 - L4
+                    +- L5 - L6
+
+        the return is ``[[None, L1, L2], [L2, L3, L4], [L2, L5, L6]]``
+
+        .. note::
+            - the length of the list is the number of segments in the robot
+            - the first segment always starts with ``None`` which represents
+              the base transform (since there is no base link)
+            - the last link of one segment is also the first link of subsequent
+              segments
+        """
+
+        def recurse(link):
+
+            segs = [link.parent]
+            while True:
+                segs.append(link)
+                if link.nchildren == 0:
+                    return [segs]
+                elif link.nchildren == 1:
+                    link = link.children[0]
+                    continue
+                elif link.nchildren > 1:
+                    segs = [segs]
+
+                    for child in link.children:
+                        segs.extend(recurse(child))
+
+                    return segs
+
+        return recurse(self.links[0])
+
+# --------------------------------------------------------------------- #
+
+    def fkine_all(self, q, old=None):
+        '''
+        Compute the pose of every link frame
+
+        :param q: The joint configuration
+        :type q:  darray(n)
+        :return: Pose of all links
+        :rtype: SE3 instance
+
+        ``T = robot.fkine_all(q)`` is  an SE3 instance with ``robot.nlinks +
+        1`` values:
+
+        - ``T[0]`` is the base transform
+        - ``T[i]`` is the pose of link whose ``number`` is ``i``
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        '''
+        q = getvector(q)
+        Tbase = self.base  # add base, also sets the type
+        linkframes = Tbase.__class__.Alloc(self.nlinks + 1)
+        linkframes[0] = Tbase
+
+        def recurse(Tall, Tparent, q, link):
+            # if joint??
+            T = Tparent
+            while True:
+                T *= link.A(q[link.jindex])
+                Tall[link.number] = T
+
+                if link.nchildren == 1:
+                    link = link.children[0]
+                    continue
+
+                elif link.nchildren == 0:
+                    return
+
+                else:
+                    # multiple children
+                    for child in link.children:
+                        recurse(Tall, T, q, child)
+                    return
+
+        recurse(linkframes, Tbase, q, self.links[0])
+
+        return linkframes
 
 # --------------------------------------------------------------------- #
 
@@ -832,38 +964,7 @@ graph [rankdir=LR];
         else:
             raise TypeError('unknown argument')
 
-    def fkine_path(self, q, old=None):
-        '''
-        Tall = robot.fkine_all(q) evaluates fkine for each joint within a
-        robot and returns a trajecotry of poses.
-        Tall = fkine_all() as above except uses the stored q value of the
-        robot object.
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param old: for compatibility with DHRobot version, ignored.
-        :return T: Homogeneous transformation trajectory
-        :rtype T: SE3 list
-        .. note::
-            - The robot's base transform, if present, are incorporated
-              into the result.
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        '''
-        q = getvector(q)
-        T = self.base
-        linkframes = []
-        j = 0
-        for link in self.elinks:
-            if link.isjoint:
-                T *= link.A(q[j])
-                j += 1
-            else:
-                T *= link.A()
-            linkframes.append(T)
 
-        return linkframes
 # =========================================================================== #
 
 
@@ -884,11 +985,18 @@ class ERobot(BaseERobot):
             parent = None
             for j, ets_j in enumerate(arg.split()):
                 elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
+                if elink.qlim is None and elink.v is not None and elink.v.qlim is not None:
+                    elink.qlim = elink.v.qlim
                 parent = elink
                 links.append(elink)
 
         elif islistof(arg, ELink):
             links = arg
+
+        elif isinstance(arg, ERobot):
+            # we're passed an ERobot, clone it
+            links = [link.copy() for link in arg]
+
         else:
             raise TypeError(
                 'constructor argument must be ETS or list of ELink')
@@ -1171,90 +1279,37 @@ class ERobot(BaseERobot):
 
         return T
 
-    def fkine_all(self, q, old=None):
-        '''
-        Tall = robot.fkine_all(q) evaluates fkine for each joint within a
-        robot and returns a trajecotry of poses.
-        Tall = fkine_all() as above except uses the stored q value of the
-        robot object.
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param old: for compatibility with DHRobot version, ignored.
-        :return T: Homogeneous transformation trajectory
-        :rtype T: SE3 list
-        .. note::
-            - The robot's base transform, if present, are incorporated
-              into the result.
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        '''
+    # def fkine_links(self, q):
+    #     '''
+    #     robot.fkine_links(q) evaluates fkine for each link within a
+    #     robot and stores that pose within the link.
 
-        fknm.fkine_all(
-            self._cache_m,
-            self._cache_links_fknm,
-            q,
-            self._base.A)
+    #     :param q: The joint angles/configuration of the robot
+    #     :type q: float ndarray(n)
 
-        for i in range(len(self._cache_grippers)):
-            fknm.fkine_all(
-                len(self._cache_grippers[i]),
-                self._cache_grippers[i],
-                self.grippers[i].q,
-                self._base.A)
+    #     .. note::
 
-        # for link in self.elinks:
+    #         - The robot's base transform, if present, are incorporated
+    #           into the result.
 
-        #     # Update the link model transforms as well
-        #     for col in link.collision:
-        #         col.wT = link._fk
+    #     :references:
+    #         - Kinematic Derivatives using the Elementary Transform
+    #           Sequence, J. Haviland and P. Corke
 
-        #     for gi in link.geometry:
-        #         gi.wT = link._fk
+    #     '''
 
-        # # Do the grippers now
-        # for gripper in self.grippers:
-        #     for link in gripper.links:
+    #     fknm.fkine_all(
+    #         self._cache_m,
+    #         self._cache_links_fknm,
+    #         q,
+    #         self._base.A)
 
-        #         # Update the link model transforms as well
-        #         for col in link.collision:
-        #             col.wT = link._fk
-
-        #         for gi in link.geometry:
-        #             gi.wT = link._fk
-
-    def fkine_links(self, q):
-        '''
-        robot.fkine_links(q) evaluates fkine for each link within a
-        robot and stores that pose within the link.
-
-        :param q: The joint angles/configuration of the robot
-        :type q: float ndarray(n)
-
-        .. note::
-
-            - The robot's base transform, if present, are incorporated
-              into the result.
-
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-
-        '''
-
-        fknm.fkine_all(
-            self._cache_m,
-            self._cache_links_fknm,
-            q,
-            self._base.A)
-
-        for i in range(len(self._cache_grippers)):
-            fknm.fkine_all(
-                len(self._cache_grippers[i]),
-                self._cache_grippers[i],
-                self.grippers[i].q,
-                self._base.A)
+    #     for i in range(len(self._cache_grippers)):
+    #         fknm.fkine_all(
+    #             len(self._cache_grippers[i]),
+    #             self._cache_grippers[i],
+    #             self.grippers[i].q,
+    #             self._base.A)
 
     def get_path(self, end=None, start=None, _fknm=False):
         """
@@ -2068,6 +2123,8 @@ class ERobot2(BaseERobot):
             for j, ets_j in enumerate(arg.split()):
                 elink = ELink2(ets_j, parent=parent, name=f"link{j:d}")
                 parent = elink
+                if elink.qlim is None and elink.v is not None and elink.v.qlim is not None:
+                    elink.qlim = elink.v.qlim
                 links.append(elink)
 
         elif islistof(arg, ELink2):
@@ -2092,228 +2149,113 @@ class ERobot2(BaseERobot):
         return self.ets(start, end).eval(q, unit=unit)
 # --------------------------------------------------------------------- #
 
-    def plot(
-            self, q, block=True, dt=0.05, limits=None,
-            vellipse=False, fellipse=False,
-            eeframe=True, name=False):
-        """
-        2D Graphical display and animation
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param dt: if q is a trajectory, this describes the delay in
-            milliseconds between frames
-        :type dt: int
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2, z1, z2]
-        :type limits: ndarray(6)
-        :param vellipse: (Plot Option) Plot the velocity ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param vellipse: (Plot Option) Plot the force ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-        - ``robot.plot2(q)`` displays a 2D graphical view of a robot based on
-          the kinematic model and the joint configuration ``q``. This is a
-          stick figure polyline which joins the origins of the link coordinate
-          frames. The plot will autoscale with an aspect ratio of 1.
-        If ``q`` (m,n) representing a joint-space trajectory it will create an
-        animation with a pause of ``dt`` seconds between each frame.
-        .. note::
-            - By default this method will block until the figure is dismissed.
-              To avoid this set ``block=False``.
-            - The polyline joins the origins of the link frames, but for
-              some Denavit-Hartenberg models those frames may not actually
-              be on the robot, ie. the lines to not neccessarily represent
-              the links of the robot.
-        :seealso: :func:`teach2`
-        """
+    # def teach(
+    #         self,
+    #         q=None,
+    #         block=True,
+    #         limits=None,
+    #         vellipse=False,
+    #         fellipse=False,
+    #         eeframe=True,
+    #         name=False,
+    #         unit='rad',
+    #         backend='pyplot2'):
+    #     """
+    #     2D Graphical teach pendant
+    #     :param block: Block operation of the code and keep the figure open
+    #     :type block: bool
+    #     :param q: The joint configuration of the robot (Optional,
+    #         if not supplied will use the stored q values).
+    #     :type q: float ndarray(n)
+    #     :param limits: Custom view limits for the plot. If not supplied will
+    #         autoscale, [x1, x2, y1, y2]
+    #     :type limits: array_like(4)
+    #     :param vellipse: (Plot Option) Plot the velocity ellipse at the
+    #         end-effector
+    #     :type vellipse: bool
+    #     :param vellipse: (Plot Option) Plot the force ellipse at the
+    #         end-effector
+    #     :type vellipse: bool
+    #     :param eeframe: (Plot Option) Plot the end-effector coordinate frame
+    #         at the location of the end-effector. Uses three arrows, red,
+    #         green and blue to indicate the x, y, and z-axes.
+    #     :type eeframe: bool
+    #     :param name: (Plot Option) Plot the name of the robot near its base
+    #     :type name: bool
+    #     :param unit: angular units: 'rad' [default], or 'deg'
+    #     :type unit: str
 
-        # Make an empty 2D figure
-        env = self._get_graphical_backend('pyplot2')
+    #     :return: A reference to the PyPlot object which controls the
+    #         matplotlib figure
+    #     :rtype: PyPlot
+    #     - ``robot.teach2(q)`` creates a 2D matplotlib plot which allows the
+    #       user to "drive" a graphical robot using a graphical slider panel.
+    #       The robot's inital joint configuration is ``q``. The plot will
+    #       autoscale with an aspect ratio of 1.
+    #     - ``robot.teach2()`` as above except the robot's stored value of ``q``
+    #       is used.
+    #     .. note::
+    #         - Program execution is blocked until the teach window is
+    #           dismissed.  If ``block=False`` the method is non-blocking but
+    #           you need to poll the window manager to ensure that the window
+    #           remains responsive.
+    #         - The slider limits are derived from the joint limit properties.
+    #           If not set then:
+    #             - For revolute joints they are assumed to be [-pi, +pi]
+    #             - For prismatic joint they are assumed unknown and an error
+    #               occurs.
+    #           If not set then
+    #             - For revolute joints they are assumed to be [-pi, +pi]
+    #             - For prismatic joint they are assumed unknown and an error
+    #               occurs.
+    #     """
 
-        q = getmatrix(q, (None, self.n))
-        # q = getmatrix(q, (None, self.n))
+    #     if q is None:
+    #         q = np.zeros((self.n,))
+    #     else:
+    #         q = getvector(q, self.n)
 
-        # Add the self to the figure in readonly mode
-        if q.shape[0] == 1:
-            env.launch(self.name + ' Plot', limits)
-        else:
-            env.launch(self.name + ' Trajectory Plot', limits)
+    #     if unit == 'deg':
+    #         q = self.toradians(q)
 
-        env.add(
-            self, readonly=True,
-            eeframe=eeframe, name=name)
+    #     # Make an empty 3D figure
+    #     env = self._get_graphical_backend(backend)
 
-        if vellipse:
-            vell = self.vellipse(centre='ee')
-            env.add(vell)
+    #     # Add the robot to the figure in readonly mode
+    #     env.launch('Teach ' + self.name, limits=limits)
+    #     env.add(
+    #         self, readonly=True,
+    #         eeframe=eeframe, name=name)
 
-        if fellipse:
-            fell = self.fellipse(centre='ee')
-            env.add(fell)
+    #     env._add_teach_panel(self, q)
 
-        for qk in q:
-            self.q = qk
-            env.step()
+    #     if limits is None:
+    #         limits = np.r_[-1, 1, -1, 1] * self.reach * 1.5
+    #         env.ax.set_xlim([limits[0], limits[1]])
+    #         env.ax.set_ylim([limits[2], limits[3]])
 
-        # Keep the plot open
-        if block:           # pragma: no cover
-            env.hold()
+    #     if vellipse:
+    #         vell = self.vellipse(centre='ee', scale=0.5)
+    #         env.add(vell)
 
-        return env
+    #     if fellipse:
+    #         fell = self.fellipse(centre='ee')
+    #         env.add(fell)
 
-    def teach(
-            self,
-            q=None,
-            block=True,
-            limits=None,
-            vellipse=False,
-            fellipse=False,
-            eeframe=True,
-            name=False,
-            unit='rad',
-            backend='pyplot2'):
-        """
-        2D Graphical teach pendant
-        :param block: Block operation of the code and keep the figure open
-        :type block: bool
-        :param q: The joint configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param limits: Custom view limits for the plot. If not supplied will
-            autoscale, [x1, x2, y1, y2]
-        :type limits: array_like(4)
-        :param vellipse: (Plot Option) Plot the velocity ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param vellipse: (Plot Option) Plot the force ellipse at the
-            end-effector
-        :type vellipse: bool
-        :param eeframe: (Plot Option) Plot the end-effector coordinate frame
-            at the location of the end-effector. Uses three arrows, red,
-            green and blue to indicate the x, y, and z-axes.
-        :type eeframe: bool
-        :param name: (Plot Option) Plot the name of the robot near its base
-        :type name: bool
-        :param unit: angular units: 'rad' [default], or 'deg'
-        :type unit: str
+    #     # Keep the plot open
+    #     if block:           # pragma: no cover
+    #         env.hold()
 
-        :return: A reference to the PyPlot object which controls the
-            matplotlib figure
-        :rtype: PyPlot
-        - ``robot.teach2(q)`` creates a 2D matplotlib plot which allows the
-          user to "drive" a graphical robot using a graphical slider panel.
-          The robot's inital joint configuration is ``q``. The plot will
-          autoscale with an aspect ratio of 1.
-        - ``robot.teach2()`` as above except the robot's stored value of ``q``
-          is used.
-        .. note::
-            - Program execution is blocked until the teach window is
-              dismissed.  If ``block=False`` the method is non-blocking but
-              you need to poll the window manager to ensure that the window
-              remains responsive.
-            - The slider limits are derived from the joint limit properties.
-              If not set then:
-                - For revolute joints they are assumed to be [-pi, +pi]
-                - For prismatic joint they are assumed unknown and an error
-                  occurs.
-              If not set then
-                - For revolute joints they are assumed to be [-pi, +pi]
-                - For prismatic joint they are assumed unknown and an error
-                  occurs.
-        """
-
-        if q is None:
-            q = np.zeros((self.n,))
-        else:
-            q = getvector(q, self.n)
-
-        if unit == 'deg':
-            q = self.toradians(q)
-
-        # Make an empty 3D figure
-        env = self._get_graphical_backend(backend)
-
-        # Add the robot to the figure in readonly mode
-        env.launch('Teach ' + self.name, limits=limits)
-        env.add(
-            self, readonly=True,
-            eeframe=eeframe, name=name)
-
-        env._add_teach_panel(self, q)
-
-        if limits is None:
-            limits = np.r_[-1, 1, -1, 1] * self.reach * 1.5
-            env.ax.set_xlim([limits[0], limits[1]])
-            env.ax.set_ylim([limits[2], limits[3]])
-
-        if vellipse:
-            vell = self.vellipse(centre='ee', scale=0.5)
-            env.add(vell)
-
-        if fellipse:
-            fell = self.fellipse(centre='ee')
-            env.add(fell)
-
-        # Keep the plot open
-        if block:           # pragma: no cover
-            env.hold()
-
-        return env
+    #     return env
 
 
 if __name__ == "__main__":  # pragma nocover
 
-    # import roboticstoolbox as rtb
-    np.set_printoptions(precision=4, suppress=True)
+    e1 = ELink(ETS.rz(), jindex=0)
+    e2 = ELink(ETS.rz(), jindex=1, parent=e1)
+    e3 = ELink(ETS.rz(), jindex=2, parent=e2)
+    e4 = ELink(ETS.rz(), jindex=5, parent=e3)
 
-    robot = ERobot([
-        ELink(ETS.rz(), name='link1'),
-        ELink(
-            ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(),
-            name='link2', parent='link1'),
-        ELink(ETS.tx(1), name='ee_1', parent='link2'),
-        ELink(
-            ETS.tx(1) * ETS.ty(0.5) * ETS.rz(),
-            name='link3', parent='link1'),
-        ELink(ETS.tx(1), name='ee_2', parent='link3')
-    ])
-    print(robot)
+    ERobot([e1, e2, e3, e4])
 
-    # p = rtb.models.URDF.Puma560()
-    # p.fkine(p.qz)
-    # p.jacob0(p.qz)
-    # p.jacobe(p.qz)
-
-    # robot = rtb.models.ETS.Panda()
-    # print(robot)
-    # print(robot.base, robot.tool)
-    # print(robot.ee_links)
-    # ets = robot.ets()
-    # print(ets)
-    # print('n', ets.n)
-    # ets2 = ets.compile()
-    # print(ets2)
-
-    # q = np.random.rand(7)
-    # # print(ets.eval(q))
-    # # print(ets2.eval(q))
-
-    # J1 = robot.jacob0(q)
-    # J2 = ets2.jacob0(q)
-    # print(J1-J2)
-
-    # print(robot[2].v, robot[2].v.jindex)
-    # print(robot[2].Ts)
+    pass

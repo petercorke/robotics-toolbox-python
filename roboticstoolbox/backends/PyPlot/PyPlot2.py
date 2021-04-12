@@ -48,7 +48,7 @@ class PyPlot2(Connector):
             s += f"\n  {robot.name}"
         return s
 
-    def launch(self, name=None, limits=None):
+    def launch(self, name=None, limits=None, **kwargs):
         '''
         env = launch() launchs a blank 2D matplotlib figure
 
@@ -74,12 +74,12 @@ class PyPlot2(Connector):
         self.ax.set_ylabel(labels[1])
 
         self.ax.autoscale(enable=True, axis='both', tight=False)
-        self.ax.axis('equal')
 
         if limits is not None:
             self.ax.set_xlim([limits[0], limits[1]])
             self.ax.set_ylim([limits[2], limits[3]])
-        
+
+        self.ax.axis('equal')
 
         plt.ion()
         plt.show()
@@ -149,7 +149,7 @@ class PyPlot2(Connector):
 
     def add(
             self, ob, readonly=False, display=True,
-            eeframe=True, name=False):
+            eeframe=True, name=False, **kwargs):
         '''
         id = add(robot) adds the robot to the external environment. robot must
         be of an appropriate class. This adds a robot object to a list of
@@ -159,12 +159,12 @@ class PyPlot2(Connector):
 
         super().add()
 
-        if isinstance(ob, rp.DHRobot) or isinstance(ob, rp.ERobot):
+        if isinstance(ob, rp.ERobot2):
             self.robots.append(
                 RobotPlot2(
                     ob, self.ax, readonly, display,
                     eeframe, name))
-            self.robots[len(self.robots) - 1].draw2()
+            self.robots[len(self.robots) - 1].draw()
 
 
         elif isinstance(ob, EllipsePlot):
@@ -217,7 +217,7 @@ class PyPlot2(Connector):
     def _draw_robots(self):
 
         for i in range(len(self.robots)):
-            self.robots[i].draw2()
+            self.robots[i].draw()
 
     def _draw_ellipses(self):
 
@@ -227,24 +227,36 @@ class PyPlot2(Connector):
     # def _plot_handler(self, sig, frame):
     #     plt.pause(0.001)
 
-    def _add_teach_panel(self, robot):
+    def _add_teach_panel(self, robot, q):
+        """
+        Add a teach panel
+
+        :param robot: Robot being taught
+        :type robot: ERobot class
+        :param q: inital joint angles in radians
+        :type q: array_like(n)
+        """
         fig = self.fig
 
         # Add text to the plots
-        def text_trans(text):  # pragma: no cover
-            T = robot.fkine()
+        def text_trans(text, q):  # pragma: no cover
+            # update displayed robot pose value
+            T = robot.fkine(q, end=robot.ee_links[0])
             t = np.round(T.t, 3)
-            r = np.round(T.rpy(), 3)
+            r = np.round(T.theta(), 3)
             text[0].set_text("x: {0}".format(t[0]))
             text[1].set_text("y: {0}".format(t[1]))
-            text[2].set_text("yaw: {0}".format(r[2]))
+            text[2].set_text("yaw: {0}".format(r))
 
         # Update the self state in mpl and the text
         def update(val, text, robot):  # pragma: no cover
-            for i in range(robot.n):
-                robot.q[i] = self.sjoint[i].val * np.pi/180
+            for j in range(robot.n):
+                if robot.isrevolute(j):
+                    robot.q[j] = self.sjoint[j].val * np.pi / 180
+                else:
+                    robot.q[j] = self.sjoint[j].val
 
-            text_trans(text)
+            text_trans(text, robot.q)
 
             # Step the environment
             self.step(0)
@@ -260,19 +272,23 @@ class PyPlot2(Connector):
         self.axjoint = []
         self.sjoint = []
 
-        qlim = np.copy(robot.qlim) * 180/np.pi
-
-        if np.all(qlim == 0):    # pragma nocover
-            qlim[0, :] = -180
-            qlim[1, :] = 180
+        qlim = robot.todegrees(robot.qlim)
 
         # Set the pose text
-        T = robot.fkine()
+        # if multiple EE, display only the first one
+        T = robot.fkine(q, end=robot.ee_links[0])
         t = np.round(T.t, 3)
-        r = np.round(T.rpy(), 3)
+        r = np.round(T.theta(), 3)
 
+        # TODO maybe put EE name in here, possible issue with DH robot
+        # TODO maybe display pose of all EEs, layout hassles though
+
+        if robot.nbranches == 0:
+            header = "End-effector Pose"
+        else:
+            header = "End-effector #0 Pose"
         fig.text(
-            0.02,  1 - ym + 0.25, "End-effector Pose",
+            0.02,  1 - ym + 0.25, header,
             fontsize=9, weight="bold", color="#4f4f4f")
         text.append(fig.text(
             0.03, 1 - ym + 0.20, "x: {0}".format(t[0]),
@@ -281,20 +297,30 @@ class PyPlot2(Connector):
             0.03, 1 - ym + 0.16, "y: {0}".format(t[1]),
             fontsize=9, color="#2b2b2b"))
         text.append(fig.text(
-            0.15, 1 - ym + 0.20, "yaw: {0}".format(r[0]),
+            0.15, 1 - ym + 0.20, "yaw: {0}".format(r),
             fontsize=9, color="#2b2b2b"))
         fig.text(
             0.02,  1 - ym + 0.06, "Joint angles",
             fontsize=9, weight="bold", color="#4f4f4f")
 
-        for i in range(robot.n):
-            ymin = (1 - ym) - i * yh
+        for j in range(robot.n):
+            # for each joint
+            ymin = (1 - ym) - j * yh
             self.axjoint.append(
                 fig.add_axes([x1, ymin, x2, 0.03], facecolor='#dbdbdb'))
 
-            self.sjoint.append(
-                Slider(
-                    self.axjoint[i], 'q' + str(i),
-                    qlim[0, i], qlim[1, i], robot.q[i] * 180/np.pi, "% .1f°"))
+            if robot.isrevolute(j):
+                slider = Slider(
+                    self.axjoint[j], 'q' + str(j),
+                    qlim[0, j], qlim[1, j], q[j] * 180/np.pi, "% .1f°")
+            else:
+                slider = Slider(
+                    self.axjoint[j], 'q' + str(j),
+                    qlim[0, j], qlim[1, j], q[j], "% .1f")
 
-            self.sjoint[i].on_changed(lambda x: update(x, text, robot))
+            slider.on_changed(lambda x: update(x, text, robot))
+            self.sjoint.append(slider)
+
+        
+        robot.q = q
+        self.step()

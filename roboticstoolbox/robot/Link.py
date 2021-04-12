@@ -129,6 +129,8 @@ class Link(ABC):
                 setattr(self, name, value)
                 return 1
 
+        self._hasdynamics = False
+
         dynchange = 0
         # link inertial parameters
         dynchange += dynpar(self, 'm', m, 0.0)
@@ -445,6 +447,26 @@ class Link(ABC):
             self._qlim = None
         else:
             self._qlim = getvector(qlim_new, 2)
+
+    @property
+    def hasdynamics(self):
+        """
+        Link has dynamic parameters (Link superclass)
+
+        :return: Link has dynamic parameters
+        :rtype: bool
+
+        Link has some assigned (non-default) dynamic parameters.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot[1].hasdynamics
+        """
+        return self._hasdynamics
 
 # -------------------------------------------------------------------------- #
 

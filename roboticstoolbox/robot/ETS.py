@@ -315,7 +315,7 @@ class BaseETS(UserList, ABC):
         self.data[0].jindex = j
 
     @property
-    def isrevolute(self):
+    def isrotation(self):
         """
         Test if ET is a rotation
 
@@ -328,14 +328,14 @@ class BaseETS(UserList, ABC):
 
             >>> from roboticstoolbox import ETS
             >>> e = ETS.tx(1)
-            >>> e.isrevolute
+            >>> e.isrotation
             >>> e = ETS.rx()
-            >>> e.isrevolute
+            >>> e.isrotation
         """
         return self.axis[0] == 'R'
 
     @property
-    def isprismatic(self):
+    def istranslation(self):
         """
         Test if ET is a translation
 
@@ -348,9 +348,9 @@ class BaseETS(UserList, ABC):
 
             >>> from roboticstoolbox import ETS
             >>> e = ETS.tx(1)
-            >>> e.isprismatic
+            >>> e.istranslation
             >>> e = ETS.rx()
-            >>> e.isprismatic
+            >>> e.istranslation
         """
         return self.axis[0] == 't'
 
@@ -394,7 +394,7 @@ class BaseETS(UserList, ABC):
 
         """
         return ''.join(
-            ['R' if self.isrevolute else 'P' for i in self.joints()])
+            ['R' if self.isrotation else 'P' for i in self.joints()])
 
     @property
     def qlim(self):
@@ -505,7 +505,7 @@ class BaseETS(UserList, ABC):
                     qj = q.pop(0)
                 else:
                     qj = q[et.jindex]
-                if et.isrevolute and unit == 'deg':
+                if et.isrotation and unit == 'deg':
                     qj *= np.pi / 180.0
 
                 Tk = et.T(qj)
@@ -680,13 +680,13 @@ class BaseETS(UserList, ABC):
                     s = f"{et.axis}({qvar})"
                 j += 1
 
-            elif et.isrevolute:
+            elif et.isrotation:
                 if issymbol(et.eta):
                     s = f"{et.axis}({et.eta:.4g})"
                 else:
                     s = f"{et.axis}({et.eta * 180 / np.pi:.4g}°)"
 
-            elif et.isprismatic:
+            elif et.istranslation:
                 s = f"{et.axis}({et.eta:.4g})"
 
             elif et.isconstant:
@@ -944,7 +944,7 @@ class BaseETS(UserList, ABC):
 
         if isinstance(self, ETS):
             robot = ERobot(self)
-        else:
+        elif isinstance(self, ETS2):
             robot = ERobot2(self)
 
         robot.teach(*args, **kwargs)
@@ -1047,7 +1047,7 @@ class ETS(BaseETS):
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        :seealso: :func:`ETS`, :func:`isrevolute`
+        :seealso: :func:`ETS`, :func:`isrotation`
         :SymPy: supported
         """
         return cls(axis='Rx', eta=eta, axis_func=trotx, unit=unit, **kwargs)
@@ -1074,7 +1074,7 @@ class ETS(BaseETS):
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        :seealso: :func:`ETS`, :func:`isrevolute`
+        :seealso: :func:`ETS`, :func:`isrotation`
         :SymPy: supported
         """
         return cls(axis='Ry', eta=eta, axis_func=troty, unit=unit, **kwargs)
@@ -1101,7 +1101,7 @@ class ETS(BaseETS):
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        :seealso: :func:`ETS`, :func:`isrevolute`
+        :seealso: :func:`ETS`, :func:`isrotation`
         :SymPy: supported
         """
         return cls(axis='Rz', eta=eta, axis_func=trotz, unit=unit, **kwargs)
@@ -1126,7 +1126,7 @@ class ETS(BaseETS):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        :seealso: :func:`ETS`, :func:`isprismatic`
+        :seealso: :func:`ETS`, :func:`istranslation`
         :SymPy: supported
         """
 
@@ -1161,7 +1161,7 @@ class ETS(BaseETS):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        :seealso: :func:`ETS`, :func:`isprismatic`
+        :seealso: :func:`ETS`, :func:`istranslation`
         :SymPy: supported
         """
         def axis_func(eta):
@@ -1196,7 +1196,7 @@ class ETS(BaseETS):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        :seealso: :func:`ETS`, :func:`isprismatic`
+        :seealso: :func:`ETS`, :func:`istranslation`
         :SymPy: supported
         """
         def axis_func(eta):
@@ -1511,7 +1511,7 @@ class ETS2(BaseETS):
         .. note:: In the 2D case this is rotation around the normal to the
             xy-plane.
 
-        :seealso: :func:`ETS`, :func:`isrevolute`
+        :seealso: :func:`ETS`, :func:`isrotation`
         """
         return cls(
             axis='R', eta=eta,
@@ -1537,7 +1537,7 @@ class ETS2(BaseETS):
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        :seealso: :func:`ETS`, :func:`isprismatic`
+        :seealso: :func:`ETS`, :func:`istranslation`
         """
         return cls(
             axis='tx', eta=eta,

@@ -15,7 +15,7 @@ class BaseELink(Link):
 
     def __init__(self, name=None, parent=None, joint_name=None, **kwargs):
 
-        super().__init__(kwargs)
+        super().__init__(**kwargs)
 
         self._name = name
 
@@ -23,7 +23,7 @@ class BaseELink(Link):
             if isinstance(parent, (str, BaseELink)):
                 self._parent = parent
             else:
-                raise ValueError('parent must be BaseELink subclass or str')
+                raise TypeError('parent must be BaseELink subclass or str')
         else:
             self._parent = None
 
@@ -59,6 +59,13 @@ class BaseELink(Link):
             else:
                 parent = f" [{self.parent.name}]"
             return f"{name}[{self.name}({parent}): {self.ets()}] "
+
+    def copy(self):
+        new = super().copy()
+        # invalidate references to parent, child
+        new._parent = None
+        new._children = []
+        return new
 
     @property
     def v(self):
@@ -163,7 +170,7 @@ class BaseELink(Link):
         :return: True if is prismatic
         :rtype: bool
         """
-        return self.isjoint and self.v.isprismatic
+        return self.isjoint and self.v.istranslation
 
     @property
     def isrevolute(self):
@@ -172,7 +179,7 @@ class BaseELink(Link):
         :return: True if is revolute
         :rtype: bool
         """
-        return self.isjoint and self.v.isrevolute
+        return self.isjoint and self.v.isrotation
 
     # @property
     # def ets(self):
@@ -253,10 +260,27 @@ class BaseELink(Link):
         return self._collision
 
     def ets(self):
+        """
+        Link transform in ETS form
+
+        :return: elementary transform sequence for link transform
+        :rtype: ETS or ETS2 instance
+
+        The sequence:
+        
+            - has at least one element
+            - may include zero or more constant transforms
+            - no more than one variable transform, which if present will
+              be last in the sequence
+        """
         if self.v is None:
+            # no variable transform, return the constant part
             return self._ets
         else:
-            self.v.jindex = self.jindex
+            if self.jindex is not None:
+                # inherit the jindex of the link if known
+                self.v.jindex = self.jindex
+            # return concatenation of constant and variable parts
             return self._ets * self.v
 
     @collision.setter
@@ -352,6 +376,7 @@ class ELink(BaseELink):
             v = ets.pop()
             if jindex is not None:
                 v.jindex = jindex
+                self.jindex = jindex
             elif jindex is None and v.jindex is not None:
                 jindex = v.jindex
 
@@ -724,3 +749,7 @@ class ELink2(BaseELink):
             return SE2()
         else:
             return SE2(T, check=False)
+
+
+l0 = ELink(qlim=[-1, 1])
+print(l0.qlim)
