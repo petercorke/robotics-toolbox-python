@@ -5,6 +5,7 @@ Created on Tue Apr 24 15:48:52 2020
 """
 
 from os.path import splitext
+import copy
 import tempfile
 import subprocess
 import webbrowser
@@ -129,7 +130,7 @@ class BaseERobot(Robot):
             # if link has no name, give it one
             if link.name is None:
                 link.name = f"link-{k}"
-            link.number = k
+            link.number = k + 1
 
             # put it in the link dictionary, check for duplicates
             if link.name in self._linkdict:
@@ -615,7 +616,7 @@ class BaseERobot(Robot):
             while True:
                 segs.append(link)
                 if link.nchildren == 0:
-                    return segs
+                    return [segs]
                 elif link.nchildren == 1:
                     link = link.children[0]
                     continue
@@ -623,7 +624,7 @@ class BaseERobot(Robot):
                     segs = [segs]
 
                     for child in link.children:
-                        segs.append(recurse(child))
+                        segs.extend(recurse(child))
 
                     return segs
         
@@ -631,7 +632,7 @@ class BaseERobot(Robot):
 
 # --------------------------------------------------------------------- #
 
-    def fkine_path(self, q, old=None):
+    def fkine_all(self, q, old=None):
         '''
         Compute the pose of every link frame
 
@@ -640,11 +641,11 @@ class BaseERobot(Robot):
         :return: Pose of all links
         :rtype: SE3 instance
 
-        ``T = robot.fkine_path(q)`` is  an SE3 instance with ``robot.nlinks +
+        ``T = robot.fkine_all(q)`` is  an SE3 instance with ``robot.nlinks +
         1`` values:
 
         - ``T[0]`` is the base transform
-        - ``T[i+1]`` is the pose of link whose ``number`` is ``i``
+        - ``T[i]`` is the pose of link whose ``number`` is ``i``
 
         :references:
             - Kinematic Derivatives using the Elementary Transform
@@ -660,7 +661,7 @@ class BaseERobot(Robot):
             T = Tparent
             while True:
                 T *= link.A(q[link.jindex])
-                Tall[link.number + 1] = T
+                Tall[link.number] = T
 
                 if link.nchildren == 1:
                     link = link.children[0]
@@ -1273,90 +1274,38 @@ class ERobot(BaseERobot):
 
         return T
 
-    def fkine_all(self, q, old=None):
-        '''
-        Tall = robot.fkine_all(q) evaluates fkine for each joint within a
-        robot and returns a trajecotry of poses.
-        Tall = fkine_all() as above except uses the stored q value of the
-        robot object.
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param old: for compatibility with DHRobot version, ignored.
-        :return T: Homogeneous transformation trajectory
-        :rtype T: SE3 list
-        .. note::
-            - The robot's base transform, if present, are incorporated
-              into the result.
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        '''
 
-        fknm.fkine_all(
-            self._cache_m,
-            self._cache_links_fknm,
-            q,
-            self._base.A)
+    # def fkine_links(self, q):
+    #     '''
+    #     robot.fkine_links(q) evaluates fkine for each link within a
+    #     robot and stores that pose within the link.
 
-        for i in range(len(self._cache_grippers)):
-            fknm.fkine_all(
-                len(self._cache_grippers[i]),
-                self._cache_grippers[i],
-                self.grippers[i].q,
-                self._base.A)
+    #     :param q: The joint angles/configuration of the robot
+    #     :type q: float ndarray(n)
 
-        # for link in self.elinks:
+    #     .. note::
 
-        #     # Update the link model transforms as well
-        #     for col in link.collision:
-        #         col.wT = link._fk
+    #         - The robot's base transform, if present, are incorporated
+    #           into the result.
 
-        #     for gi in link.geometry:
-        #         gi.wT = link._fk
+    #     :references:
+    #         - Kinematic Derivatives using the Elementary Transform
+    #           Sequence, J. Haviland and P. Corke
 
-        # # Do the grippers now
-        # for gripper in self.grippers:
-        #     for link in gripper.links:
+    #     '''
 
-        #         # Update the link model transforms as well
-        #         for col in link.collision:
-        #             col.wT = link._fk
+    #     fknm.fkine_all(
+    #         self._cache_m,
+    #         self._cache_links_fknm,
+    #         q,
+    #         self._base.A)
 
-        #         for gi in link.geometry:
-        #             gi.wT = link._fk
-
-    def fkine_links(self, q):
-        '''
-        robot.fkine_links(q) evaluates fkine for each link within a
-        robot and stores that pose within the link.
-
-        :param q: The joint angles/configuration of the robot
-        :type q: float ndarray(n)
-
-        .. note::
-
-            - The robot's base transform, if present, are incorporated
-              into the result.
-
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-
-        '''
-
-        fknm.fkine_all(
-            self._cache_m,
-            self._cache_links_fknm,
-            q,
-            self._base.A)
-
-        for i in range(len(self._cache_grippers)):
-            fknm.fkine_all(
-                len(self._cache_grippers[i]),
-                self._cache_grippers[i],
-                self.grippers[i].q,
-                self._base.A)
+    #     for i in range(len(self._cache_grippers)):
+    #         fknm.fkine_all(
+    #             len(self._cache_grippers[i]),
+    #             self._cache_grippers[i],
+    #             self.grippers[i].q,
+    #             self._base.A)
 
     def get_path(self, end=None, start=None, _fknm=False):
         """
