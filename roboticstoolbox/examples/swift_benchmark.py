@@ -10,7 +10,7 @@ import numpy as np
 import cProfile
 # import numpy.testing as nt
 
-env = swift.Swift(_dev=True)
+env = swift.Swift(_dev=False)
 env.launch()
 
 
