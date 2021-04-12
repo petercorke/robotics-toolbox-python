@@ -849,11 +849,6 @@ class Robot(DynamicsMixin, IKMixin):
                 self._base = SE2()
             else:
                 self._base = SE3()
-        elif isinstance(self._base, np.ndarray):
-            # if isinstance(self, ERobot2):
-            #     self._base = SE2(self._base, check=False)
-            # else:
-            self._base = SE3(self._base, check=False)
 
         return self._base
 

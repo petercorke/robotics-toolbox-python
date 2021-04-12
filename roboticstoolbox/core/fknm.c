@@ -16,6 +16,7 @@
 // forward defines
 static PyObject *fkine_all(PyObject *self, PyObject *args);
 static PyObject *jacob0(PyObject *self, PyObject *args);
+static PyObject *jacobe(PyObject *self, PyObject *args);
 static PyObject *fkine(PyObject *self, PyObject *args);
 static PyObject *link_init(PyObject *self, PyObject *args);
 static PyObject *link_A(PyObject *self, PyObject *args);
@@ -23,6 +24,7 @@ static PyObject *link_update(PyObject *self, PyObject *args);
 static PyObject *compose(PyObject *self, PyObject *args);
 
 void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J);
+void _jacobe(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J);
 void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *ret);
 void A(Link *link, npy_float64 *ret, double eta);
 void mult(npy_float64 *A, npy_float64 *B, npy_float64 *C);
@@ -61,6 +63,10 @@ static PyMethodDef fknmMethods[] = {
      (PyCFunction)jacob0,
      METH_VARARGS,
      "Link"},
+    {"jacobe",
+     (PyCFunction)jacobe,
+     METH_VARARGS,
+     "Link"},
     {"fkine_all",
      (PyCFunction)fkine_all,
      METH_VARARGS,
@@ -85,8 +91,7 @@ PyMODINIT_FUNC PyInit_fknm(void)
 static PyObject *fkine_all(PyObject *self, PyObject *args)
 {
     Link *link;
-    npy_float64 *q, *base, *fk, *pfk, *ret;
-    npy_float64 *s_base;
+    npy_float64 *q, *base, *ret;
     PyArrayObject *py_q, *py_base;
     PyObject *links, *iter_links;
     int m;
@@ -115,30 +120,52 @@ static PyObject *fkine_all(PyObject *self, PyObject *args)
         // Calculate the current link transform
         A(link, ret, q[link->jindex]);
 
-        // Get pointer to link._fk array
-        fk = (npy_float64 *)PyArray_DATA(link->fk);
-
         if (link->parent)
         {
-            // Get pointer to link.parent._fk array
-            pfk = (npy_float64 *)PyArray_DATA(link->parent->fk);
-
             // Multiply parent._fk by link.A and store in link._fk
-            mult(pfk, ret, fk);
+            mult(link->parent->fk, ret, link->fk);
         }
         else
         {
             // Multiply base by link.A and store in link._fk
-            mult(base, ret, fk);
+            mult(base, ret, link->fk);
         }
 
         // Set dependant shapes
         for (int i = 0; i < link->n_shapes; i++)
         {
-            copy(fk, link->shape_wT[i]);
-            mult(fk, link->shape_base[i], link->shape_sT[i]);
+            copy(link->fk, link->shape_wT[i]);
+            mult(link->fk, link->shape_base[i], link->shape_sT[i]);
         }
     }
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *jacobe(PyObject *self, PyObject *args)
+{
+    npy_float64 *J, *q, *etool, *tool;
+    PyArrayObject *py_J, *py_q, *py_tool, *py_etool;
+    PyObject *links;
+    int m, n;
+
+    if (!PyArg_ParseTuple(
+            args, "iiOO!O!O!O!",
+            &m,
+            &n,
+            &links,
+            &PyArray_Type, &py_q,
+            &PyArray_Type, &py_etool,
+            &PyArray_Type, &py_tool,
+            &PyArray_Type, &py_J))
+        return NULL;
+
+    q = (npy_float64 *)PyArray_DATA(py_q);
+    J = (npy_float64 *)PyArray_DATA(py_J);
+    tool = (npy_float64 *)PyArray_DATA(py_tool);
+    etool = (npy_float64 *)PyArray_DATA(py_etool);
+
+    _jacobe(links, m, n, q, etool, tool, J);
 
     Py_RETURN_NONE;
 }
@@ -207,7 +234,7 @@ static PyObject *link_init(PyObject *self, PyObject *args)
     PyObject *py_shape_base, *py_shape_wT, *py_shape_sT;
     PyObject *iter_base, *iter_wT, *iter_sT;
     PyArrayObject *pys_base, *pys_wT, *pys_sT;
-    npy_float64 *s_base, *s_wT, *s_sT;
+    PyArrayObject *py_A, *py_fk;
 
     link = (Link *)PyMem_RawMalloc(sizeof(Link));
 
@@ -217,8 +244,8 @@ static PyObject *link_init(PyObject *self, PyObject *args)
                           &jointtype,
                           &link->jindex,
                           &link->n_shapes,
-                          &PyArray_Type, &link->A,
-                          &PyArray_Type, &link->fk,
+                          &PyArray_Type, &py_A,
+                          &PyArray_Type, &py_fk,
                           &py_shape_base,
                           &py_shape_wT,
                           &py_shape_sT,
@@ -234,14 +261,17 @@ static PyObject *link_init(PyObject *self, PyObject *args)
         return NULL;
     }
 
+    link->A = (npy_float64 *)PyArray_DATA(py_A);
+    link->fk = (npy_float64 *)PyArray_DATA(py_fk);
+
     // Set shape pointers
     iter_base = PyObject_GetIter(py_shape_base);
     iter_wT = PyObject_GetIter(py_shape_wT);
     iter_sT = PyObject_GetIter(py_shape_sT);
 
-    link->shape_base = (npy_float64 *)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
-    link->shape_wT = (npy_float64 *)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
-    link->shape_sT = (npy_float64 *)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
+    link->shape_base = (npy_float64 **)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
+    link->shape_wT = (npy_float64 **)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
+    link->shape_sT = (npy_float64 **)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
 
     for (int i = 0; i < link->n_shapes; i++)
     {
@@ -294,12 +324,11 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     int isjoint, isflip;
     int jointtype, jindex, n_shapes;
     PyObject *lo, *py_parent;
-    PyArrayObject *A, *fk;
+    PyArrayObject *py_A, *py_fk;
 
     PyObject *py_shape_base, *py_shape_wT, *py_shape_sT;
     PyObject *iter_base, *iter_wT, *iter_sT;
     PyArrayObject *pys_base, *pys_wT, *pys_sT;
-    npy_float64 *s_base, *s_wT, *s_sT;
 
     if (!PyArg_ParseTuple(args, "OiiiiiO!O!OOOO",
                           &lo,
@@ -308,8 +337,8 @@ static PyObject *link_update(PyObject *self, PyObject *args)
                           &jointtype,
                           &jindex,
                           &n_shapes,
-                          &PyArray_Type, &A,
-                          &PyArray_Type, &fk,
+                          &PyArray_Type, &py_A,
+                          &PyArray_Type, &py_fk,
                           &py_shape_base,
                           &py_shape_wT,
                           &py_shape_sT,
@@ -335,9 +364,9 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     iter_wT = PyObject_GetIter(py_shape_wT);
     iter_sT = PyObject_GetIter(py_shape_sT);
 
-    link->shape_base = (npy_float64 *)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
-    link->shape_wT = (npy_float64 *)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
-    link->shape_sT = (npy_float64 *)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
+    link->shape_base = (npy_float64 **)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
+    link->shape_wT = (npy_float64 **)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
+    link->shape_sT = (npy_float64 **)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
 
     for (int i = 0; i < n_shapes; i++)
     {
@@ -351,11 +380,6 @@ static PyObject *link_update(PyObject *self, PyObject *args)
         link->shape_wT[i] = (npy_float64 *)PyArray_DATA(pys_wT);
         link->shape_sT[i] = (npy_float64 *)PyArray_DATA(pys_sT);
     }
-
-    // if (n_shapes > 2)
-    // {
-    //     copy(link->shape_base[0], link->shape_base[1]);
-    // }
 
     if (jointtype == 0)
     {
@@ -384,8 +408,8 @@ static PyObject *link_update(PyObject *self, PyObject *args)
 
     link->isjoint = isjoint;
     link->isflip = isflip;
-    link->A = A;
-    link->fk = fk;
+    link->A = (npy_float64 *)PyArray_DATA(py_A);
+    link->fk = (npy_float64 *)PyArray_DATA(py_fk);
     link->jindex = jindex;
     link->axis = jointtype;
     link->parent = parent;
@@ -433,6 +457,104 @@ static PyObject *compose(PyObject *self, PyObject *args)
     mult(A, B, C);
 
     Py_RETURN_NONE;
+}
+
+void _jacobe(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J)
+{
+    Link *link;
+    npy_float64 *T = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *U = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *temp = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *ret = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *invU = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    int j = n - 1;
+
+    _eye(U);
+    _fkine(links, m, q, etool, tool, T);
+
+    PyList_Reverse(links);
+    PyObject *iter_links = PyObject_GetIter(links);
+
+    mult(etool, U, temp);
+    copy(temp, U);
+    mult(tool, U, temp);
+    copy(temp, U);
+
+    for (int i = 0; i < m; i++)
+    {
+        if (!(link = (Link *)PyCapsule_GetPointer(PyIter_Next(iter_links), "Link")))
+            return;
+
+        if (link->isjoint)
+        {
+            if (link->axis == 0)
+            {
+                J[0 * n + j] = U[2 * 4 + 0] * U[1 * 4 + 3] - U[1 * 4 + 0] * U[2 * 4 + 3];
+                J[1 * n + j] = U[2 * 4 + 1] * U[1 * 4 + 3] - U[1 * 4 + 1] * U[2 * 4 + 3];
+                J[2 * n + j] = U[2 * 4 + 2] * U[1 * 4 + 3] - U[1 * 4 + 2] * U[2 * 4 + 3];
+                J[3 * n + j] = U[0 * 4 + 0];
+                J[4 * n + j] = U[0 * 4 + 1];
+                J[5 * n + j] = U[0 * 4 + 2];
+            }
+            else if (link->axis == 1)
+            {
+                J[0 * n + j] = U[0 * 4 + 0] * U[2 * 4 + 3] - U[2 * 4 + 0] * U[0 * 4 + 3];
+                J[1 * n + j] = U[0 * 4 + 1] * U[2 * 4 + 3] - U[2 * 4 + 1] * U[0 * 4 + 3];
+                J[2 * n + j] = U[0 * 4 + 2] * U[2 * 4 + 3] - U[2 * 4 + 2] * U[0 * 4 + 3];
+                J[3 * n + j] = U[1 * 4 + 0];
+                J[4 * n + j] = U[1 * 4 + 1];
+                J[5 * n + j] = U[1 * 4 + 2];
+            }
+            else if (link->axis == 2)
+            {
+                J[0 * n + j] = U[1 * 4 + 0] * U[0 * 4 + 3] - U[0 * 4 + 0] * U[1 * 4 + 3];
+                J[1 * n + j] = U[1 * 4 + 1] * U[0 * 4 + 3] - U[0 * 4 + 1] * U[1 * 4 + 3];
+                J[2 * n + j] = U[1 * 4 + 2] * U[0 * 4 + 3] - U[0 * 4 + 2] * U[1 * 4 + 3];
+                J[3 * n + j] = U[2 * 4 + 0];
+                J[4 * n + j] = U[2 * 4 + 1];
+                J[5 * n + j] = U[2 * 4 + 2];
+            }
+            else if (link->axis == 3)
+            {
+                J[0 * n + j] = U[0 * 4 + 0];
+                J[1 * n + j] = U[0 * 4 + 1];
+                J[2 * n + j] = U[0 * 4 + 2];
+                J[3 * n + j] = 0.0;
+                J[4 * n + j] = 0.0;
+                J[5 * n + j] = 0.0;
+            }
+            else if (link->axis == 4)
+            {
+                J[0 * n + j] = U[1 * 4 + 0];
+                J[1 * n + j] = U[1 * 4 + 1];
+                J[2 * n + j] = U[1 * 4 + 2];
+                J[3 * n + j] = 0.0;
+                J[4 * n + j] = 0.0;
+                J[5 * n + j] = 0.0;
+            }
+            else if (link->axis == 5)
+            {
+                J[0 * n + j] = U[2 * 4 + 0];
+                J[1 * n + j] = U[2 * 4 + 1];
+                J[2 * n + j] = U[2 * 4 + 2];
+                J[3 * n + j] = 0.0;
+                J[4 * n + j] = 0.0;
+                J[5 * n + j] = 0.0;
+            }
+
+            A(link, ret, q[link->jindex]);
+            mult(ret, U, temp);
+            copy(temp, U);
+            j--;
+        }
+        else
+        {
+            A(link, ret, q[link->jindex]);
+            mult(ret, U, temp);
+            copy(temp, U);
+        }
+    }
+    PyList_Reverse(links);
 }
 
 void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J)
@@ -571,12 +693,11 @@ void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_floa
 
 void A(Link *link, npy_float64 *ret, double eta)
 {
-    npy_float64 *A, *v;
-    A = (npy_float64 *)PyArray_DATA(link->A);
+    npy_float64 *v;
 
     if (!link->isjoint)
     {
-        copy(A, ret);
+        copy(link->A, ret);
         return;
     }
 
@@ -590,7 +711,7 @@ void A(Link *link, npy_float64 *ret, double eta)
     link->op(v, eta);
 
     // Multiply ret = A * v
-    mult(A, v, ret);
+    mult(link->A, v, ret);
 }
 
 void copy(npy_float64 *A, npy_float64 *B)

@@ -542,7 +542,8 @@ class BaseERobot(Robot):
                 if path is None:
                     p = self.ets(parent, end, explored, link.ets().inv())
                 else:
-                    p = self.ets(parent, end, explored, path * link.ets().inv())
+                    p = self.ets(
+                        parent, end, explored, path * link.ets().inv())
                 if p is not None:
                     return p
         return None
@@ -885,7 +886,7 @@ class ERobot(BaseERobot):
                 elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
                 parent = elink
                 links.append(elink)
-            
+
         elif islistof(arg, ELink):
             links = arg
         else:
@@ -1479,7 +1480,80 @@ class ERobot(BaseERobot):
 
         return J
 
-    def jacobe(self, q, end=None, start=None, tool=None, T=None):
+    def jacobe_new(
+            self, q, end=None, start=None, tool=None, T=None,
+            fast=False):
+
+        # # Use c extension
+        # if fast:
+        #     path, n, etool = self.get_path(end, start, _fknm=True)
+        #     if tool is None:
+        #         tool = self._eye_fknm
+        #     J = np.empty((6, n))
+        #     fknm.jacob0(len(path), n, path, q, etool, tool, J)
+        #     return J
+
+        # Otherwise use Python
+        if tool is None:
+            tool = SE3()
+
+        path, n, _ = self.get_path(end, start)
+
+        q = getvector(q, self.n)
+
+        U = np.eye(4)
+        j = n - 1
+        J = np.zeros((6, n))
+        zero = np.array([0, 0, 0])
+
+        U = tool.A
+
+        for link in reversed(path):
+
+            if link.isjoint:
+
+                n = U[0, :3]
+                o = U[1, :3]
+                a = U[2, :3]
+
+                x = U[0, 3]
+                y = U[1, 3]
+                z = U[2, 3]
+
+                if link.v.axis == 'Rz':
+                    J[:3, j] = (o * x) - (n * y)
+                    J[3:, j] = a
+
+                elif link.v.axis == 'Ry':
+                    J[:3, j] = (n * z) - (a * x)
+                    J[3:, j] = o
+
+                elif link.v.axis == 'Rx':
+                    J[:3, j] = (a * y) - (o * z)
+                    J[3:, j] = n
+
+                elif link.v.axis == 'tx':
+                    J[:3, j] = n
+                    J[3:, j] = zero
+
+                elif link.v.axis == 'ty':
+                    J[:3, j] = o
+                    J[3:, j] = zero
+
+                elif link.v.axis == 'tz':
+                    J[:3, j] = a
+                    J[3:, j] = zero
+
+                U = link.A(q[link.jindex], fast=True) @ U
+                j -= 1
+            else:
+                A = link.A(fast=True)
+                if A is not None:
+                    U = A @ U
+
+        return J
+
+    def jacobe(self, q, end=None, start=None, tool=None, T=None, fast=False):
         r"""
         Manipulator geometric Jacobian in the end-effector frame
         :param q: Joint coordinate vector
@@ -1517,6 +1591,14 @@ class ERobot(BaseERobot):
             kinematics which is needed to transform velocity from end-effector
             frame to world frame.
         """  # noqa
+
+        if fast:
+            path, n, etool = self.get_path(end, start, _fknm=True)
+            if tool is None:
+                tool = self._eye_fknm
+            J = np.empty((6, n))
+            fknm.jacobe(len(path), n, path, q, etool, tool, J)
+            return J
 
         q = getvector(q, self.n)
 
@@ -1873,7 +1955,7 @@ class ERobot(BaseERobot):
 
                 Je = self.jacobe(
                     q, start=self.base_link, end=link,
-                    tool=link_col.base)
+                    tool=link_col.base.A, fast=True)
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
                 l_Ain = np.zeros((1, n))
@@ -2190,7 +2272,6 @@ class ERobot2(BaseERobot):
             env.hold()
 
         return env
-
 
 
 if __name__ == "__main__":  # pragma nocover
