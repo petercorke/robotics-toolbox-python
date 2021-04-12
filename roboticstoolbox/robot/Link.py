@@ -759,8 +759,8 @@ class Link(ABC):
 
         :returns: d, p1, p2 where d is the distance between the shapes,
             p1 and p2 are the points in the world frame on the respective
-            shapes
-        :rtype: float, SE3, SE3
+            shapes. The points returned are homogeneous with [x, y, z, 1].
+        :rtype: float, ndarray(1x4), ndarray(1x4)
         '''
 
         d = 10000

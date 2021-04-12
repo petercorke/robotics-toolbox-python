@@ -79,7 +79,6 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         self._hasgeometry = False
         self._hascollision = False
 
-
         for link in links:
             if not isinstance(link, Link):
                 raise TypeError('links should all be Link subclass')
@@ -309,7 +308,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             >>> import roboticstoolbox as rtb
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.hasgeometry
-        
+
         :seealso: :func:`hascollision`
         """
         return self._hasgeometry
@@ -335,7 +334,6 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         :seealso: :func:`hasgeometry`
         """
         return self._hascollision
-
 
     @property
     def qrandom(self):
@@ -535,7 +533,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         for j, revolute in enumerate(self.revolutejoints):
             if revolute:
-                q[:,j] *= 180.0 / np.pi
+                q[:, j] *= 180.0 / np.pi
         if q.shape[0] == 1:
             return q[0]
         else:
@@ -570,7 +568,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         for j, revolute in enumerate(self.revolutejoints):
             if revolute:
-                q[:,j] *= np.pi / 180.0
+                q[:, j] *= np.pi / 180.0
         if q.shape[0] == 1:
             return q[0]
         else:
@@ -983,7 +981,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             else:
                 self._base = SE3()
 
-        # return a copy, otherwise somebody with 
+        # return a copy, otherwise somebody with
         # reference to the base can change it
         return self._base.copy()
 
@@ -1055,7 +1053,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         Limits are extracted from the link objects.  If joints limits are 
         not set for:
-        
+
             - a revolute joint [-𝜋. 𝜋] is returned
             - a prismatic joint an exception is raised
 
@@ -1641,8 +1639,8 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
     def teach(
             self, q=None, block=True, order='xyz', limits=None,
-            jointaxes=True, jointlabels=False, 
-            vellipse=False, fellipse=False, eeframe=True, shadow=True, 
+            jointaxes=True, jointlabels=False,
+            vellipse=False, fellipse=False, eeframe=True, shadow=True,
             name=True, backend=None):
         """
         Graphical teach pendant
@@ -1705,7 +1703,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         env.launch('Teach ' + self.name, limits=limits)
         env.add(
             self, readonly=True,
-            jointaxes=jointaxes, jointlabels=jointlabels, eeframe=eeframe, 
+            jointaxes=jointaxes, jointlabels=jointlabels, eeframe=eeframe,
             shadow=shadow, name=name)
 
         env._add_teach_panel(self, q)
@@ -1718,7 +1716,6 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             fell = self.fellipse(centre='ee')
             env.add(fell)
 
-
         # Keep the plot open
         if block:           # pragma: no cover
             env.hold()
@@ -1727,7 +1724,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
 # --------------------------------------------------------------------- #
 
-    def closest_point(self, shape, inf_dist=1.0):
+    def closest_point(self, q, shape, inf_dist=1.0, skip=False):
         '''
         closest_point(shape, inf_dist) returns the minimum euclidean
         distance between this robot and shape, provided it is less than
@@ -1739,14 +1736,20 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         :param inf_dist: The minimum distance within which to consider
             the shape
         :type inf_dist: float
+        :param skip: Skip setting all shape transforms based on q, use this
+            option if using this method in conjuction with Swift to save time
+        :type skip: boolean
         :returns: d, p1, p2 where d is the distance between the shapes,
             p1 and p2 are the points in the world frame on the respective
-            shapes
-        :rtype: float, SE3, SE3
+            shapes. The points returned are homogeneous with [x, y, z, 1].
+        :rtype: float, ndarray(1x4), ndarray(1x4)
         '''
 
+        if not skip:
+            self._set_link_fk(q)
+
         d = 10000
-        p1 = None,
+        p1 = None
         p2 = None
 
         for link in self.links:
@@ -1762,14 +1765,20 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         return d, p1, p2
 
-    def collided(self, shape):
+    def collided(self, q, shape, skip=False):
         '''
         collided(shape) checks if this robot and shape have collided
         :param shape: The shape to compare distance to
         :type shape: Shape
+        :param skip: Skip setting all shape transforms based on q, use this
+            option if using this method in conjuction with Swift to save time
+        :type skip: boolean
         :returns: True if shapes have collided
         :rtype: bool
         '''
+
+        if not skip:
+            self._set_link_fk(q)
 
         for link in self.links:
             if link.collided(shape):
