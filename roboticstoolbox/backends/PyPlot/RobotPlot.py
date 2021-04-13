@@ -94,29 +94,30 @@ class RobotPlot():
 
             self.eeframes = []
 
-        # Axes arrow transforms
-        Tjx = SE3([0.06, 0, 0])
-        Tjy = SE3([0, 0.06, 0])
-        Tjz = SE3([0, 0, 0.06])
+        if self.eeframe:
+            # Axes arrow transforms
+            Tjx = SE3([0.06, 0, 0])
+            Tjy = SE3([0, 0.06, 0])
+            Tjz = SE3([0, 0, 0.06])
 
-        red = '#F84752'  # '#EE9494'
-        green = '#BADA55'  # '#93E7B0'
-        blue = '#54AEFF'
+            red = '#F84752'  # '#EE9494'
+            green = '#BADA55'  # '#93E7B0'
+            blue = '#54AEFF'
 
-        # add new ee coordinate frame
-        for link in self.robot.ee_links:
-            Te = T[link.number + 1]
+            # add new ee coordinate frame
+            for link in self.robot.ee_links:
+                Te = T[link.number]
 
-            # ee axes arrows
-            Tex = Te * Tjx
-            Tey = Te * Tjy
-            Tez = Te * Tjz
+                # ee axes arrows
+                Tex = Te * Tjx
+                Tey = Te * Tjy
+                Tez = Te * Tjz
 
-            xaxis = self._plot_quiver(Te.t, Tex.t, red, 2)
-            yaxis = self._plot_quiver(Te.t, Tey.t, green, 2)
-            zaxis = self._plot_quiver(Te.t, Tez.t, blue, 2)
+                xaxis = self._plot_quiver(Te.t, Tex.t, red, 2)
+                yaxis = self._plot_quiver(Te.t, Tey.t, green, 2)
+                zaxis = self._plot_quiver(Te.t, Tez.t, blue, 2)
 
-            self.eeframes.extend([xaxis, yaxis, zaxis])
+                self.eeframes.extend([xaxis, yaxis, zaxis])
 
         ## Joint axes
 
@@ -136,11 +137,11 @@ class RobotPlot():
                 direction = None
                 if isinstance(self.robot, rp.DHRobot):
                     # should test MDH I think
-                    Tj = T[link.number]
+                    Tj = T[link.number - 1]
                     R = Tj.R
                     direction = R[:, 2]  # z direction
                 elif link.isjoint:
-                    Tj = T[link.number + 1]
+                    Tj = T[link.number]
                     R = Tj.R
                     if link.v.axis[1] == 'z':
                         direction = R[:, 2]  # z direction
