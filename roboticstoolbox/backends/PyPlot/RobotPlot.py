@@ -63,7 +63,7 @@ class RobotPlot():
         ## Update the robot links
 
         # compute all link frames
-        T = self.robot.fkine_path(self.robot.q)
+        T = self.robot.fkine_all(self.robot.q)
         
         # draw all the line segments for the noodle plot
         for i, segment in enumerate(self.segments):
@@ -72,7 +72,7 @@ class RobotPlot():
                 if link is None:
                     linkframes.append(self.robot.base)
                 else:
-                    linkframes.append(T[link.number + 1])
+                    linkframes.append(T[link.number])
             points = np.array([linkframe.t for linkframe in linkframes])
 
             self.links[i].set_xdata(points[:, 0])

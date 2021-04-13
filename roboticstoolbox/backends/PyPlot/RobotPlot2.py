@@ -29,7 +29,7 @@ class RobotPlot2(RobotPlot):
         ## Update the robot links
 
         # compute all link frames
-        T = self.robot.fkine_path(self.robot.q)
+        T = self.robot.fkine_all(self.robot.q)
         
         # draw all the line segments for the noodle plot
         for i, segment in enumerate(self.segments):
@@ -38,7 +38,7 @@ class RobotPlot2(RobotPlot):
                 if link is None:
                     linkframes.append(self.robot.base)
                 else:
-                    linkframes.append(T[link.number + 1])
+                    linkframes.append(T[link.number])
             points = np.array([linkframe.t for linkframe in linkframes])
 
             self.links[i].set_xdata(points[:,0])
@@ -60,7 +60,7 @@ class RobotPlot2(RobotPlot):
 
         # add new ee coordinate frame
         for link in self.robot.ee_links:
-            Te = T[link.number + 1]
+            Te = T[link.number]
 
             # ee axes arrows
             Tex = Te * Tjx
