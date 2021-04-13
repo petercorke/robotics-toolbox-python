@@ -1232,7 +1232,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             self, q, backend=None, block=False, dt=0.050,
             limits=None, vellipse=False, fellipse=False,
             jointaxes=True, jointlabels=False, eeframe=True, shadow=True, name=True, fig=None,
-            movie=None, **bopts
+            movie=None, loop=False, **bopts
     ):
         """
         Graphical display and animation
@@ -1330,23 +1330,29 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         # Stop lint error
         images = []  # list of images saved from each plot
 
-        for qk in q:
-            self.q = qk
-            if vellipse:
-                vell.q = qk
-            if fellipse:
-                fell.q = qk
-            env.step(dt)
+        if movie is not None:
+            loop = False
+            
+        while True:
+            for qk in q:
+                self.q = qk
+                if vellipse:
+                    vell.q = qk
+                if fellipse:
+                    fell.q = qk
+                env.step(dt)
+
+                if movie is not None:  # pragma nocover
+                    images.append(env.getframe())
 
             if movie is not None:  # pragma nocover
-                images.append(env.getframe())
-
-        if movie is not None:  # pragma nocover
-            # save it as an animated GIF
-            images[0].save(
-                movie,
-                save_all=True, append_images=images[1:], optimize=False,
-                duration=dt, loop=0)
+                # save it as an animated GIF
+                images[0].save(
+                    movie,
+                    save_all=True, append_images=images[1:], optimize=False,
+                    duration=dt, loop=0)
+            if not loop:
+                break
 
         # Keep the plot open
         if block:           # pragma: no cover
