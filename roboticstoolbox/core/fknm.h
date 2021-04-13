@@ -28,8 +28,8 @@ struct Link
     int jindex;
     int axis;
     int n_shapes;
-    PyArrayObject *A;  /* link static transform */
-    PyArrayObject *fk; /* link world transform */
+    npy_float64 *A;  /* link static transform */
+    npy_float64 *fk; /* link world transform */
     void (*op)(npy_float64 *data, double eta);
     Link *parent;
     npy_float64 **shape_base; /* link visual and collision geometries */

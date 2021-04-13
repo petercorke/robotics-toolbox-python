@@ -190,7 +190,7 @@ class DHRobot(Robot):
                 Column("dⱼ", headalign="^"),
                 *qlim_columns,
                 border="thick"
-                )
+            )
             for j, L in enumerate(self):
                 if has_qlim:
                     if L.isprismatic:
@@ -214,7 +214,7 @@ class DHRobot(Robot):
                 Column("⍺ⱼ", headalign="^"),
                 *qlim_columns,
                 border="thick"
-                )
+            )
             for j, L in enumerate(self):
                 if has_qlim:
                     if L.isprismatic:
@@ -227,7 +227,8 @@ class DHRobot(Robot):
                     table.row(
                         angle(L.theta), qstr(j, L), f"{L.a:.4g}", angle(L.alpha), *ql)
                 else:
-                    table.row(qstr(j, L), f"{L.d:.4g}", f"{L.a:.4g}", angle(L.alpha), *ql)
+                    table.row(qstr(j, L), f"{L.d:.4g}",
+                              f"{L.a:.4g}", angle(L.alpha), *ql)
 
         s += str(table)
 
@@ -301,6 +302,41 @@ class DHRobot(Robot):
     #     new.qdd = self.qdd
 
     #     return new
+
+# --------------------------------------------------------------------- #
+
+    def _set_link_fk(self, q):
+        '''
+        robot._set_link_fk(q) evaluates fkine for each link within a
+        robot and stores that pose in a private variable within the link.
+
+        This method is not for general use.
+
+        :param q: The joint angles/configuration of the robot
+        :type q: float ndarray(n)
+
+        .. note::
+
+            - The robot's base transform, if present, are incorporated
+              into the result.
+        '''
+
+        q = getvector(q, self.n)
+
+        t = self.base
+
+        tall = self.fkine_all(q, old=True)
+
+        for i, link in enumerate(self.links):
+
+            # Update the link model transforms
+            for col in link.collision:
+                col.wT = tall[i]
+
+            for gi in link.geometry:
+                gi.wT = tall[i]
+
+# --------------------------------------------------------------------- #
 
     @property
     def mdh(self):
@@ -512,7 +548,7 @@ class DHRobot(Robot):
         :rtype: int
 
         Number of branches in this robot.  
-        
+
         Example:
 
         .. runblock:: pycon
@@ -524,8 +560,6 @@ class DHRobot(Robot):
         :seealso: :func:`n`, :func:`nlinks`
         """
         return 1
-
-
 
     def A(self, j, q=None):
         """
@@ -631,7 +665,7 @@ class DHRobot(Robot):
                 (L[0].alpha == alpha[0] and L[1].alpha == alpha[1])
                 or
                 (L[0].alpha == alpha[1] and L[1].alpha == alpha[0])
-            ) \
+        ) \
             and L[0].sigma == 0 \
             and L[1].sigma == 0 \
             and L[2].sigma == 0
@@ -900,7 +934,6 @@ class DHRobot(Robot):
 
         return T
 
-    
     def segments(self):
 
         segments = [None]
@@ -1114,25 +1147,24 @@ class DHRobot(Robot):
             elif analytical == 'exp':
                 # TODO: move to SMTB.base, Horner form with skew(v)
                 (theta, v) = trlog(t2r(T))
-                A = np.eye(3,3) - (1 - math.cos(theta)) / theta * skew(v) \
+                A = np.eye(3, 3) - (1 - math.cos(theta)) / theta * skew(v) \
                     + (theta - math.sin(theta)) / theta * skew(v)**2
             else:
                 raise ValueError('bad order specified')
-        
-            J0 = block_diag(np.eye(3,3), np.linalg.inv(A)) @ J0
+
+            J0 = block_diag(np.eye(3, 3), np.linalg.inv(A)) @ J0
 
         # TODO optimize computation above if half matrix is returned
 
         # return top or bottom half if asked
         if half is not None:
             if half == 'trans':
-                J0 = J0[:3,:]
+                J0 = J0[:3, :]
             elif half == 'rot':
-                J0 = J0[3:,:]
+                J0 = J0[3:, :]
             else:
                 raise ValueError('bad half specified')
         return J0
-
 
     def hessian0(self, q=None, J0=None, start=None, end=None):
         r"""
@@ -1162,14 +1194,14 @@ class DHRobot(Robot):
         .. math::
 
             \dmat{J} = \mat{H} \dvec{q}
-        
+
         and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
         Hessian tensor.
 
         The elements of the Hessian are
 
         .. math::
-        
+
             \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
 
         where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
@@ -1178,7 +1210,7 @@ class DHRobot(Robot):
         Similarly, we can write
 
         .. math::
-        
+
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
         :references:
@@ -1489,7 +1521,7 @@ class DHRobot(Robot):
                             _cross(wd, pstar)
                             + _cross(w, _cross(w, pstar))
                             + vd
-                            ) \
+                        ) \
                             + 2 * _cross(Rt @ w, z0 * qd_k[j]) \
                             + z0 * qdd_k[j]
                     # trailing underscore means new value, update here
@@ -1734,6 +1766,8 @@ class DHRobot(Robot):
             if all([a not in config for a in allowable]):
                 config += allowable[0]
         return config
+
+
 class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
         warnings.warn(

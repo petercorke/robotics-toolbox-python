@@ -1,6 +1,11 @@
 from setuptools import setup, find_packages, Extension
 import os
+
+# fmt: off
+import pip
+pip.main(['install', 'numpy>=1.18.0'])
 import numpy
+# fmt: on
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -147,6 +152,7 @@ setup(
     install_requires=req,
 
     extras_require={
+        'min': 'rtb-data==0.0.1',
         'collision': collision_req,
         'dev': dev_req,
         'docs': docs_req,

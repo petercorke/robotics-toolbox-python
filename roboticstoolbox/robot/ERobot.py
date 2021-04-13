@@ -146,6 +146,9 @@ class BaseERobot(Robot):
         for link in links:
             if isinstance(link.parent, str):
                 link._parent = self._linkdict[link.parent]
+                # Update the fast kinematics object
+                if isinstance(self, ERobot):
+                    link._init_fknm()
 
         if all([link.parent is None for link in links]):
             # no parent links were given, assume they are sequential
@@ -388,7 +391,7 @@ class BaseERobot(Robot):
 
         Number of branches in this robot.  Computed as the number of links with
         zero children
-        
+
         Example:
 
         .. runblock:: pycon
@@ -575,7 +578,8 @@ class BaseERobot(Robot):
                 if path is None:
                     p = self.ets(parent, end, explored, link.ets().inv())
                 else:
-                    p = self.ets(parent, end, explored, path * link.ets().inv())
+                    p = self.ets(
+                        parent, end, explored, path * link.ets().inv())
                 if p is not None:
                     return p
         return None
@@ -590,9 +594,9 @@ class BaseERobot(Robot):
         :rtype: list of lists of Link
 
         For a single-chain robot with structure::
-        
+
             L1 - L2 - L3
-            
+
         the return is ``[[None, L1, L2, L3]]``
 
         For a robot with structure::
@@ -627,7 +631,7 @@ class BaseERobot(Robot):
                         segs.extend(recurse(child))
 
                     return segs
-        
+
         return recurse(self.links[0])
 
 # --------------------------------------------------------------------- #
@@ -669,15 +673,14 @@ class BaseERobot(Robot):
 
                 elif link.nchildren == 0:
                     return
-                    
+
                 else:
                     # multiple children
                     for child in link.children:
                         recurse(Tall, T, q, child)
                     return
 
-        recurse(linkframes,  Tbase, q, self.links[0])
-
+        recurse(linkframes, Tbase, q, self.links[0])
 
         return linkframes
 
@@ -989,7 +992,7 @@ class ERobot(BaseERobot):
                     elink.qlim = elink.v.qlim
                 parent = elink
                 links.append(elink)
-            
+
         elif islistof(arg, ELink):
             links = arg
 
@@ -1039,6 +1042,8 @@ class ERobot(BaseERobot):
 
         return cls(links, name=name, gripper_links=gripper)
 
+# --------------------------------------------------------------------- #
+
     def _reset_cache(self):
         self._path_cache = {}
         self._path_cache_fknm = {}
@@ -1080,9 +1085,9 @@ class ERobot(BaseERobot):
     #     path.reverse()
     #     return path
 
-    def to_dict(self, show_robot=True, show_collision=False):
+    def _to_dict(self, show_robot=True, show_collision=False):
 
-        self.fkine_links(self.q)
+        self._set_link_fk(self.q)
 
         ob = []
 
@@ -1108,7 +1113,7 @@ class ERobot(BaseERobot):
 
         return ob
 
-    def fk_dict(self, show_robot=True, show_collision=False):
+    def _fk_dict(self, show_robot=True, show_collision=False):
         ob = []
 
         # Do the robot
@@ -1132,6 +1137,47 @@ class ERobot(BaseERobot):
                         ob.append(gi.fk_dict())
 
         return ob
+
+    def _set_link_fk(self, q):
+        '''
+        robot._set_link_fk(q) evaluates fkine for each link within a
+        robot and stores that pose in a private variable within the link.
+
+        This method is not for general use.
+
+        :param q: The joint angles/configuration of the robot
+        :type q: float ndarray(n)
+
+        .. note::
+
+            - The robot's base transform, if present, are incorporated
+              into the result.
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+
+        '''
+
+        if self._base is None:
+            base = self._eye_fknm
+        else:
+            base = self._base.A
+
+        fknm.fkine_all(
+            self._cache_m,
+            self._cache_links_fknm,
+            q,
+            base)
+
+        for i in range(len(self._cache_grippers)):
+            fknm.fkine_all(
+                len(self._cache_grippers[i]),
+                self._cache_grippers[i],
+                self.grippers[i].q,
+                base)
+
+# --------------------------------------------------------------------- #
 
     @staticmethod
     def URDF_read(file_path, tld=None):
@@ -1278,39 +1324,6 @@ class ERobot(BaseERobot):
             T.append(T.__class__(Tk, check=False))
 
         return T
-
-
-    # def fkine_links(self, q):
-    #     '''
-    #     robot.fkine_links(q) evaluates fkine for each link within a
-    #     robot and stores that pose within the link.
-
-    #     :param q: The joint angles/configuration of the robot
-    #     :type q: float ndarray(n)
-
-    #     .. note::
-
-    #         - The robot's base transform, if present, are incorporated
-    #           into the result.
-
-    #     :references:
-    #         - Kinematic Derivatives using the Elementary Transform
-    #           Sequence, J. Haviland and P. Corke
-
-    #     '''
-
-    #     fknm.fkine_all(
-    #         self._cache_m,
-    #         self._cache_links_fknm,
-    #         q,
-    #         self._base.A)
-
-    #     for i in range(len(self._cache_grippers)):
-    #         fknm.fkine_all(
-    #             len(self._cache_grippers[i]),
-    #             self._cache_grippers[i],
-    #             self.grippers[i].q,
-    #             self._base.A)
 
     def get_path(self, end=None, start=None, _fknm=False):
         """
@@ -1536,7 +1549,80 @@ class ERobot(BaseERobot):
 
         return J
 
-    def jacobe(self, q, end=None, start=None, tool=None, T=None):
+    def jacobe_new(
+            self, q, end=None, start=None, tool=None, T=None,
+            fast=False):
+
+        # # Use c extension
+        # if fast:
+        #     path, n, etool = self.get_path(end, start, _fknm=True)
+        #     if tool is None:
+        #         tool = self._eye_fknm
+        #     J = np.empty((6, n))
+        #     fknm.jacob0(len(path), n, path, q, etool, tool, J)
+        #     return J
+
+        # Otherwise use Python
+        if tool is None:
+            tool = SE3()
+
+        path, n, _ = self.get_path(end, start)
+
+        q = getvector(q, self.n)
+
+        U = np.eye(4)
+        j = n - 1
+        J = np.zeros((6, n))
+        zero = np.array([0, 0, 0])
+
+        U = tool.A
+
+        for link in reversed(path):
+
+            if link.isjoint:
+
+                n = U[0, :3]
+                o = U[1, :3]
+                a = U[2, :3]
+
+                x = U[0, 3]
+                y = U[1, 3]
+                z = U[2, 3]
+
+                if link.v.axis == 'Rz':
+                    J[:3, j] = (o * x) - (n * y)
+                    J[3:, j] = a
+
+                elif link.v.axis == 'Ry':
+                    J[:3, j] = (n * z) - (a * x)
+                    J[3:, j] = o
+
+                elif link.v.axis == 'Rx':
+                    J[:3, j] = (a * y) - (o * z)
+                    J[3:, j] = n
+
+                elif link.v.axis == 'tx':
+                    J[:3, j] = n
+                    J[3:, j] = zero
+
+                elif link.v.axis == 'ty':
+                    J[:3, j] = o
+                    J[3:, j] = zero
+
+                elif link.v.axis == 'tz':
+                    J[:3, j] = a
+                    J[3:, j] = zero
+
+                U = link.A(q[link.jindex], fast=True) @ U
+                j -= 1
+            else:
+                A = link.A(fast=True)
+                if A is not None:
+                    U = A @ U
+
+        return J
+
+    def jacobe(self, q, end=None, start=None, tool=None, T=None, fast=False):
         r"""
         Manipulator geometric Jacobian in the end-effector frame
         :param q: Joint coordinate vector
@@ -1574,6 +1660,14 @@ class ERobot(BaseERobot):
             kinematics which is needed to transform velocity from end-effector
             frame to world frame.
         """  # noqa
+
+        if fast:
+            path, n, etool = self.get_path(end, start, _fknm=True)
+            if tool is None:
+                tool = self._eye_fknm
+            J = np.empty((6, n))
+            fknm.jacobe(len(path), n, path, q, etool, tool, J)
+            return J
 
         q = getvector(q, self.n)
 
@@ -1930,7 +2024,7 @@ class ERobot(BaseERobot):
 
                 Je = self.jacobe(
                     q, start=self.base_link, end=link,
-                    tool=link_col.base)
+                    tool=link_col.base.A, fast=True)
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
                 l_Ain = np.zeros((1, n))

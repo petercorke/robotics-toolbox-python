@@ -267,7 +267,7 @@ class BaseELink(Link):
         :rtype: ETS or ETS2 instance
 
         The sequence:
-        
+
             - has at least one element
             - may include zero or more constant transforms
             - no more than one variable transform, which if present will
@@ -453,6 +453,10 @@ class ELink(BaseELink):
         return isflip, axis, jindex, parent, shape_base, shape_wT, shape_sT
 
     def _init_fknm(self):
+        if isinstance(self.parent, str):
+            # Initialise later
+            return
+
         isflip, axis, jindex, parent, \
             shape_base, shape_wT, shape_sT = self._get_fknm()
 
@@ -467,6 +471,7 @@ class ELink(BaseELink):
         # Check if not initialized yet
         try:
             if self._fknm is None:
+                self._init_fknm()
                 return
         except AttributeError:
             return
@@ -751,5 +756,5 @@ class ELink2(BaseELink):
             return SE2(T, check=False)
 
 
-l0 = ELink(qlim=[-1, 1])
-print(l0.qlim)
+# l0 = ELink(qlim=[-1, 1])
+# print(l0.qlim)
