@@ -36,6 +36,7 @@ class PyPlot2(Connector):
         super(PyPlot2, self).__init__()
         self.robots = []
         self.ellipses = []
+        self.sim_time = 0
 
         if not _mpl:    # pragma nocover
             raise ImportError(
@@ -88,7 +89,7 @@ class PyPlot2(Connector):
         # signal.signal(signal.SIGALRM, self._plot_handler)
         # signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
 
-    def step(self, dt=50):
+    def step(self, dt=0.05):
         '''
         state = step(args) triggers the external program to make a time step
         of defined time updating the state of the environment as defined by
@@ -107,10 +108,18 @@ class PyPlot2(Connector):
 
         self._step_robots(dt)
 
-        plt.ioff()
+        # plt.ioff()
         self._draw_ellipses()
         self._draw_robots()
-        plt.ion()
+        # plt.ion()
+
+        if _isnotebook():
+            plt.draw()
+            self.fig.canvas.draw()
+            time.sleep(dt)
+        else:
+            plt.draw()
+            plt.pause(dt)
 
         self._update_robots()
 
@@ -324,3 +333,25 @@ class PyPlot2(Connector):
         
         robot.q = q
         self.step()
+
+def _isnotebook():
+    """
+    Determine if code is being run from a Jupyter notebook
+
+    ``_isnotebook`` is True if running Jupyter notebook, else False
+
+    :references:
+
+        - https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-
+        is-executed-in-the-ipython-notebook/39662359#39662359
+    """
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True   # Jupyter notebook or qtconsole
+        elif shell == 'TerminalInteractiveShell':
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False      # Probably standard Python interpreter
