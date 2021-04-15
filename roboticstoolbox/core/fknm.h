@@ -35,6 +35,7 @@ struct Link
     npy_float64 **shape_base; /* link visual and collision geometries */
     npy_float64 **shape_wT;   /* link visual and collision geometries */
     npy_float64 **shape_sT;   /* link visual and collision geometries */
+    npy_float64 **shape_sq;   /* link visual and collision geometries */
 };
 
 #endif
