@@ -22,6 +22,7 @@ static PyObject *link_init(PyObject *self, PyObject *args);
 static PyObject *link_A(PyObject *self, PyObject *args);
 static PyObject *link_update(PyObject *self, PyObject *args);
 static PyObject *compose(PyObject *self, PyObject *args);
+static PyObject *r2q(PyObject *self, PyObject *args);
 
 void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J);
 void _jacobe(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J);
@@ -37,6 +38,7 @@ void ty(npy_float64 *data, double eta);
 void tz(npy_float64 *data, double eta);
 void _eye(npy_float64 *data);
 int _inv(npy_float64 *m, npy_float64 *invOut);
+void _r2q(npy_float64 *r, npy_float64 *q);
 
 static PyMethodDef fknmMethods[] = {
     {"link_init",
@@ -57,6 +59,10 @@ static PyMethodDef fknmMethods[] = {
      "Link"},
     {"compose",
      (PyCFunction)compose,
+     METH_VARARGS,
+     "Link"},
+    {"r2q",
+     (PyCFunction)r2q,
      METH_VARARGS,
      "Link"},
     {"jacob0",
@@ -136,6 +142,7 @@ static PyObject *fkine_all(PyObject *self, PyObject *args)
         {
             copy(link->fk, link->shape_wT[i]);
             mult(link->fk, link->shape_base[i], link->shape_sT[i]);
+            _r2q(link->shape_sT[i], link->shape_sq[i]);
         }
     }
 
@@ -231,14 +238,14 @@ static PyObject *link_init(PyObject *self, PyObject *args)
     int jointtype;
     PyObject *ret, *py_parent;
 
-    PyObject *py_shape_base, *py_shape_wT, *py_shape_sT;
-    PyObject *iter_base, *iter_wT, *iter_sT;
-    PyArrayObject *pys_base, *pys_wT, *pys_sT;
+    PyObject *py_shape_base, *py_shape_wT, *py_shape_sT, *py_shape_sq;
+    PyObject *iter_base, *iter_wT, *iter_sT, *iter_sq;
+    PyArrayObject *pys_base, *pys_wT, *pys_sT, *pys_sq;
     PyArrayObject *py_A, *py_fk;
 
     link = (Link *)PyMem_RawMalloc(sizeof(Link));
 
-    if (!PyArg_ParseTuple(args, "iiiiiO!O!OOOO",
+    if (!PyArg_ParseTuple(args, "iiiiiO!O!OOOOO",
                           &link->isjoint,
                           &link->isflip,
                           &jointtype,
@@ -249,6 +256,7 @@ static PyObject *link_init(PyObject *self, PyObject *args)
                           &py_shape_base,
                           &py_shape_wT,
                           &py_shape_sT,
+                          &py_shape_sq,
                           &py_parent))
         return NULL;
 
@@ -268,22 +276,26 @@ static PyObject *link_init(PyObject *self, PyObject *args)
     iter_base = PyObject_GetIter(py_shape_base);
     iter_wT = PyObject_GetIter(py_shape_wT);
     iter_sT = PyObject_GetIter(py_shape_sT);
+    iter_sq = PyObject_GetIter(py_shape_sq);
 
     link->shape_base = (npy_float64 **)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
     link->shape_wT = (npy_float64 **)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
     link->shape_sT = (npy_float64 **)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
+    link->shape_sq = (npy_float64 **)PyMem_RawCalloc(link->n_shapes, sizeof(npy_float64));
 
     for (int i = 0; i < link->n_shapes; i++)
     {
         if (
             !(pys_base = (PyArrayObject *)PyIter_Next(iter_base)) ||
             !(pys_wT = (PyArrayObject *)PyIter_Next(iter_wT)) ||
-            !(pys_sT = (PyArrayObject *)PyIter_Next(iter_sT)))
+            !(pys_sT = (PyArrayObject *)PyIter_Next(iter_sT)) ||
+            !(pys_sq = (PyArrayObject *)PyIter_Next(iter_sq)))
             return NULL;
 
         link->shape_base[i] = (npy_float64 *)PyArray_DATA(pys_base);
         link->shape_wT[i] = (npy_float64 *)PyArray_DATA(pys_wT);
         link->shape_sT[i] = (npy_float64 *)PyArray_DATA(pys_sT);
+        link->shape_sq[i] = (npy_float64 *)PyArray_DATA(pys_sq);
     }
 
     link->axis = jointtype;
@@ -326,11 +338,11 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     PyObject *lo, *py_parent;
     PyArrayObject *py_A, *py_fk;
 
-    PyObject *py_shape_base, *py_shape_wT, *py_shape_sT;
-    PyObject *iter_base, *iter_wT, *iter_sT;
-    PyArrayObject *pys_base, *pys_wT, *pys_sT;
+    PyObject *py_shape_base, *py_shape_wT, *py_shape_sT, *py_shape_sq;
+    PyObject *iter_base, *iter_wT, *iter_sT, *iter_sq;
+    PyArrayObject *pys_base, *pys_wT, *pys_sT, *pys_sq;
 
-    if (!PyArg_ParseTuple(args, "OiiiiiO!O!OOOO",
+    if (!PyArg_ParseTuple(args, "OiiiiiO!O!OOOOO",
                           &lo,
                           &isjoint,
                           &isflip,
@@ -342,6 +354,7 @@ static PyObject *link_update(PyObject *self, PyObject *args)
                           &py_shape_base,
                           &py_shape_wT,
                           &py_shape_sT,
+                          &py_shape_sq,
                           &py_parent))
         return NULL;
 
@@ -363,22 +376,26 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     iter_base = PyObject_GetIter(py_shape_base);
     iter_wT = PyObject_GetIter(py_shape_wT);
     iter_sT = PyObject_GetIter(py_shape_sT);
+    iter_sq = PyObject_GetIter(py_shape_sq);
 
     link->shape_base = (npy_float64 **)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
     link->shape_wT = (npy_float64 **)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
     link->shape_sT = (npy_float64 **)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
+    link->shape_sq = (npy_float64 **)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
 
     for (int i = 0; i < n_shapes; i++)
     {
         if (
             !(pys_base = (PyArrayObject *)PyIter_Next(iter_base)) ||
             !(pys_wT = (PyArrayObject *)PyIter_Next(iter_wT)) ||
-            !(pys_sT = (PyArrayObject *)PyIter_Next(iter_sT)))
+            !(pys_sT = (PyArrayObject *)PyIter_Next(iter_sT)) ||
+            !(pys_sq = (PyArrayObject *)PyIter_Next(iter_sq)))
             return NULL;
 
         link->shape_base[i] = (npy_float64 *)PyArray_DATA(pys_base);
         link->shape_wT[i] = (npy_float64 *)PyArray_DATA(pys_wT);
         link->shape_sT[i] = (npy_float64 *)PyArray_DATA(pys_sT);
+        link->shape_sq[i] = (npy_float64 *)PyArray_DATA(pys_sq);
     }
 
     if (jointtype == 0)
@@ -459,6 +476,26 @@ static PyObject *compose(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static PyObject *r2q(PyObject *self, PyObject *args)
+{
+    // r is actually an SE3
+    npy_float64 *r, *q;
+    PyArrayObject *py_r, *py_q;
+
+    if (!PyArg_ParseTuple(
+            args, "O!O!",
+            &PyArray_Type, &py_r,
+            &PyArray_Type, &py_q))
+        return NULL;
+
+    r = (npy_float64 *)PyArray_DATA(py_r);
+    q = (npy_float64 *)PyArray_DATA(py_q);
+
+    _r2q(r, q);
+
+    Py_RETURN_NONE;
+}
+
 void _jacobe(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J)
 {
     Link *link;
@@ -466,7 +503,6 @@ void _jacobe(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, 
     npy_float64 *U = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
     npy_float64 *temp = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
     npy_float64 *ret = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
-    npy_float64 *invU = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
     int j = n - 1;
 
     _eye(U);
@@ -1039,4 +1075,37 @@ int _inv(npy_float64 *m, npy_float64 *invOut)
         invOut[i] = inv[i] * det;
 
     return 1;
+}
+
+void _r2q(npy_float64 *r, npy_float64 *q)
+{
+    double t12p, t13p, t23p;
+    double t12m, t13m, t23m;
+    double d1, d2, d3, d4;
+
+    t12p = pow((r[0 * 4 + 1] + r[1 * 4 + 0]), 2);
+    t13p = pow((r[0 * 4 + 2] + r[2 * 4 + 0]), 2);
+    t23p = pow((r[1 * 4 + 2] + r[2 * 4 + 1]), 2);
+
+    t12m = pow((r[0 * 4 + 1] - r[1 * 4 + 0]), 2);
+    t13m = pow((r[0 * 4 + 2] - r[2 * 4 + 0]), 2);
+    t23m = pow((r[1 * 4 + 2] - r[2 * 4 + 1]), 2);
+
+    d1 = pow(( r[0 * 4 + 0] + r[1 * 4 + 1] + r[2 * 4 + 2] + 1), 2);
+    d2 = pow(( r[0 * 4 + 0] - r[1 * 4 + 1] - r[2 * 4 + 2] + 1), 2);
+    d3 = pow((-r[0 * 4 + 0] + r[1 * 4 + 1] - r[2 * 4 + 2] + 1), 2);
+    d4 = pow((-r[0 * 4 + 0] - r[1 * 4 + 1] + r[2 * 4 + 2] + 1), 2);
+
+    q[3] = sqrt(d1 + t23m + t13m + t12m) / 4.0;
+    q[0] = sqrt(t23m + d2 + t12p + t13p) / 4.0;
+    q[1] = sqrt(t13m + t12p + d3 + t23p) / 4.0;
+    q[2] = sqrt(t12m + t13p + t23p + d4) / 4.0;
+
+    // transfer sign from rotation element differences
+    if (r[2 * 4 + 1] < r[1 * 4 + 2])
+        q[0] = -q[0];
+    if (r[0 * 4 + 2] < r[2 * 4 + 0])
+        q[1] = -q[1];
+    if (r[1 * 4 + 0] < r[0 * 4 + 1])
+        q[2] = -q[2];
 }

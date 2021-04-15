@@ -8,9 +8,20 @@ import numpy as np
 import roboticstoolbox as rtb
 import unittest
 import spatialmath as sm
+import fknm
 
 
 class Testfknm(unittest.TestCase):
+
+    def test_r2q(self):
+
+        q = np.empty(4)
+
+        for _ in range(100):
+            r = sm.SE3.Rand()
+            qr = sm.base.r2q(r.R, order='xyzs')
+            fknm.r2q(r.A, q)
+            nt.assert_array_almost_equal(qr, q)
 
     def test_fkine(self):
         r = rtb.models.Panda()
