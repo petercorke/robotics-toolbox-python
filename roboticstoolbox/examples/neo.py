@@ -9,6 +9,7 @@ import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
 import qpsolvers as qp
+import cProfile
 
 # Launch the simulator Swift
 env = swift.Swift()
@@ -55,10 +56,8 @@ Tep = panda.fkine(panda.q)
 Tep.A[:3, 3] = target.base.t
 Tep.A[2, 3] += 0.1
 
-arrived = False
 
-while not arrived:
-
+def step():
     # The pose of the Panda's end-effector
     Te = panda.fkine(panda.q)
 
@@ -136,4 +135,17 @@ while not arrived:
     panda.qd[:n] = qd[:n]
 
     # Step the simulator by 50 ms
-    env.step(0.05)
+    env.step(0.01)
+
+    return arrived
+
+
+def run():
+    arrived = False
+    while not arrived:
+        arrived = step()
+
+
+step()
+
+cProfile.run('run()')

@@ -2018,8 +2018,9 @@ class ERobot(BaseERobot):
             d, wTlp, wTcp = link_col.closest_point(shape, di)
 
             if d is not None:
-                lpTcp = wTlp.inv() * wTcp
-                norm = lpTcp.t / d
+                lpTcp = -wTlp[:3] + wTcp[:3]
+
+                norm = lpTcp / d
                 norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
 
                 Je = self.jacobe(

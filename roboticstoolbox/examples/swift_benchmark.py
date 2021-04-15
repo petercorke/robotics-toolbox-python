@@ -32,19 +32,3 @@ def stepper():
 
 
 cProfile.run('stepper()')
-
-# r = rtb.models.Frankie()
-# r.q = r.qr
-
-# for i in range(1000):
-#     q = np.round(np.random.random(9), 2)
-#     j1 = r.jacobe(q)
-#     # j2 = r.jacobe_new(q)
-#     j2 = r.jacobe(q, fast=True)
-
-#     print(np.round(j1, 2))
-#     print(np.round(j2, 2))
-#     print(q)
-#     print()
-
-#     nt.assert_almost_equal(j1, j2)
