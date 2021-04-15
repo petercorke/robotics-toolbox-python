@@ -439,18 +439,22 @@ class ELink(BaseELink):
         shape_base = []
         shape_wT = []
         shape_sT = []
+        shape_sq = []
 
         for shap in self.geometry:
             shape_base.append(shap._base)
             shape_wT.append(shap._wT)
             shape_sT.append(shap._sT)
+            shape_sq.append(shap._sq)
 
         for shap in self.collision:
             shape_base.append(shap._base)
             shape_wT.append(shap._wT)
             shape_sT.append(shap._sT)
+            shape_sq.append(shap._sq)
 
-        return isflip, axis, jindex, parent, shape_base, shape_wT, shape_sT
+        return isflip, axis, jindex, parent, shape_base, shape_wT, \
+            shape_sT, shape_sq
 
     def _init_fknm(self):
         if isinstance(self.parent, str):
@@ -458,12 +462,12 @@ class ELink(BaseELink):
             return
 
         isflip, axis, jindex, parent, \
-            shape_base, shape_wT, shape_sT = self._get_fknm()
+            shape_base, shape_wT, shape_sT, shape_sq = self._get_fknm()
 
         self._fknm = fknm.link_init(
             self.isjoint, isflip, axis, jindex, len(shape_base),
             self._Ts, self._fk,
-            shape_base, shape_wT, shape_sT,
+            shape_base, shape_wT, shape_sT, shape_sq,
             parent)
 
     def _update_fknm(self):
@@ -477,13 +481,13 @@ class ELink(BaseELink):
             return
 
         isflip, axis, jindex, parent, \
-            shape_base, shape_wT, shape_sT = self._get_fknm()
+            shape_base, shape_wT, shape_sT, shape_sq = self._get_fknm()
 
         fknm.link_update(
             self._fknm,
             self.isjoint, isflip, axis, jindex, len(shape_base),
             self._Ts, self._fk,
-            shape_base, shape_wT, shape_sT,
+            shape_base, shape_wT, shape_sT, shape_sq,
             parent)
 
     def _init_Ts(self):
