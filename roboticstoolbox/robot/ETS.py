@@ -1578,9 +1578,16 @@ class ETS2(BaseETS):
         # E = np.zeros((3, 3))
         j = 0
         J = np.zeros((3, self.n))
-        jindex = self.joints()
+        etjoints = self.joints()
+
+        if not all([self[i].jindex for i in etjoints]):
+            # not all joints have a jindex it is required, set them
+            for j in range(self.n):
+                i = etjoints[j]
+                self[i].jindex = j
+
         for j in range(self.n):
-            i = jindex[j]
+            i = etjoints[j]
 
             axis = self[i].axis
             if axis == 'R':
@@ -1588,7 +1595,7 @@ class ETS2(BaseETS):
                     [0, -1, 0],
                     [1,  0, 0],
                     [0,  0, 0]
-                ]) @ self[i].eval(q[j]).A
+                ]) @ self[i].eval(q).A  
             elif axis == 'tx':
                 dTdq = np.array([
                     [0, 0, 1],
@@ -1608,7 +1615,7 @@ class ETS2(BaseETS):
 
             Ef = self[i+1:]
             if len(Ef) > 0:
-                dTdq = dTdq @ Ef.eval(q[j+1:]).A
+                dTdq = dTdq @ Ef.eval(q).A
 
             T = self.eval(q).A
             dRdt = dTdq[:2, :2] @ T[:2, :2].T
