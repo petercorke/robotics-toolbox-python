@@ -123,8 +123,10 @@ class PyPlot(Connector):
             self.ax.set_ylim3d([limits[2], limits[3]])
             self.ax.set_zlim3d([limits[4], limits[5]])
 
+        self.limits = limits
+
         # disable the display of value under cursor
-        self.ax.format_coord = lambda x, y: ''
+        # self.ax.format_coord = lambda x, y: ''
 
         # add time display in top-right corner
         self.timer = plt.figtext(0.85, 0.95, '')
@@ -235,7 +237,7 @@ class PyPlot(Connector):
 
     def add(
             self, ob, readonly=False, display=True,
-            jointaxes=True, jointlabels=False, eeframe=True, shadow=True, name=True):
+            jointaxes=True, jointlabels=False, eeframe=True, shadow=True, name=True, options=None):
         """
         Add a robot to the graphical scene
 
@@ -274,8 +276,8 @@ class PyPlot(Connector):
         if isinstance(ob, rp.DHRobot) or isinstance(ob, rp.ERobot):
             self.robots.append(
                 RobotPlot(
-                    ob, self.ax, readonly, display,
-                    jointaxes, jointlabels, eeframe, shadow, name))
+                    ob, self, readonly, display,
+                    jointaxes, jointlabels, eeframe, shadow, name, options))
             self.robots[len(self.robots) - 1].draw()
             id = len(self.robots)
 
@@ -454,8 +456,11 @@ class PyPlot(Connector):
 
         # Update the self state in mpl and the text
         def update(val, text, robot):  # pragma: no cover
-            for i in range(robot.n):
-                robot.q[i] = self.sjoint[i].val * np.pi/180
+            for j in range(robot.n):
+                if robot.isrevolute(j):
+                    robot.q[j] = np.radians(self.sjoint[j].val)
+                else:
+                    robot.q[j] = self.sjoint[j].val
             text_trans(text, robot.q)
 
         fig.subplots_adjust(left=0.25)
@@ -469,10 +474,7 @@ class PyPlot(Connector):
         self.axjoint = []
         self.sjoint = []
 
-        qlim = np.copy(robot.qlim) * 180/np.pi
-
-        qlim[0, :] = np.where(np.isnan(qlim[0, :]), -180, qlim[0, :])
-        qlim[1, :] = np.where(np.isnan(qlim[1, :]), 180, qlim[1, :])
+        qlim = robot.todegrees(robot.qlim)
 
         # if np.all(qlim == 0):     # pragma: no cover
         #     qlim[0, :] = -180
@@ -508,18 +510,24 @@ class PyPlot(Connector):
             0.02,  1 - ym + 0.06, "Joint angles",
             fontsize=9, weight="bold", color="#4f4f4f")
 
-        for i in range(robot.n):
-            ymin = (1 - ym) - i * yh
+        for j in range(robot.n):
+            ymin = (1 - ym) - j * yh
             ax = fig.add_axes([x1, ymin, x2, 0.03], facecolor='#dbdbdb')
             self.axjoint.append(ax)
 
-            self.sjoint.append(
-                Slider(
-                    ax, 'q' + str(i),
-                    qlim[0, i], qlim[1, i], robot.q[i] * 180/np.pi))
+            if robot.isrevolute(j):
+                slider = Slider(
+                    ax, 'q' + str(j),
+                    qlim[0, j], qlim[1, j], np.degrees(q[j]), "% .1f°")
+            else:
+                slider = Slider(
+                    ax, 'q' + str(j),
+                    qlim[0, j], qlim[1, j], robot.q[j], "% .1f")
 
-            self.sjoint[i].on_changed(lambda x: update(x, text, robot))
-
+            slider.on_changed(lambda x: update(x, text, robot))
+            self.sjoint.append(slider)
+        robot.q = q
+        self.step()
 
 def _isnotebook():
     """

@@ -10,13 +10,26 @@ from spatialmath import SE2
 class RobotPlot2(RobotPlot):
 
     def __init__(
-            self, robot, ax, readonly, display=True,
-            eeframe=True, name=True):
+            self, robot, env, readonly, display=True,
+            eeframe=True, name=True, options=None):
 
         super().__init__(
-            robot, ax, readonly, display=display,
+            robot, env, readonly, display=display,
             jointaxes=False, shadow=False, eeframe=eeframe, name=name
         )
+
+        defaults = {
+            'robot': {'color': '#E16F6D', 'linewidth': 5},
+            'jointlabels': {},
+            'eex': {'color': '#F84752', 'linewidth': 2}, # '#EE9494'
+            'eey': {'color': '#BADA55', 'linewidth': 2}, # '#93E7B0'
+            'eelength': 0.06,
+        }
+
+        if options is not None:
+            for key, value in options.items():
+                defaults[key] = {**defaults[key], **options[key]}
+        self.options = defaults
 
     def draw(self):
         if not self.display:
@@ -53,23 +66,24 @@ class RobotPlot2(RobotPlot):
 
             self.eeframes = []
 
-        Tjx = SE2(0.06, 0)
-        Tjy = SE2(0, 0.06)
-        red = '#F84752'  # '#EE9494'
-        green = '#BADA55'  # '#93E7B0'
+        if self.eeframe:
+            len = self.options['eelength']
+            Tjx = SE2(len, 0)
+            Tjy = SE2(0, len)
 
-        # add new ee coordinate frame
-        for link in self.robot.ee_links:
-            Te = T[link.number]
 
-            # ee axes arrows
-            Tex = Te * Tjx
-            Tey = Te * Tjy
+            # add new ee coordinate frame
+            for link in self.robot.ee_links:
+                Te = T[link.number]
 
-            xaxis = self._plot_quiver(Te.t, Tex.t, red, 2)
-            yaxis = self._plot_quiver(Te.t, Tey.t, green, 2)
+                # ee axes arrows
+                Tex = Te * Tjx
+                Tey = Te * Tjy
 
-            self.eeframes.extend([xaxis, yaxis])
+                xaxis = self._plot_quiver(Te.t, Tex.t, self.options['eex'])
+                yaxis = self._plot_quiver(Te.t, Tey.t, self.options['eey'])
+
+                self.eeframes.extend([xaxis, yaxis])
 
     def init(self):
 
@@ -94,18 +108,17 @@ class RobotPlot2(RobotPlot):
         self.links = []
         for i in range(len(self.segments)):
             line,  = self.ax.plot(
-                0, 0, linewidth=5, color='#778899')
+                0, 0, **self.options['robot'])
             self.links.append(line)
         
         self.eeframes = []
 
-    def _plot_quiver(self, p0, p1, col, width):
+    def _plot_quiver(self, p0, p1, options):
         # draw arrow from p0 (tail) to p1 (head)
         qv = self.ax.quiver(
             p0[0], p0[1],
             p1[0] - p0[0],
             p1[1] - p0[1],
-            linewidth=width,
-            color=col
+            **options
         )
         return qv

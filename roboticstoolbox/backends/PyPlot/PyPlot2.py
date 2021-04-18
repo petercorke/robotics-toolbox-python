@@ -171,7 +171,7 @@ class PyPlot2(Connector):
         if isinstance(ob, rp.ERobot2):
             self.robots.append(
                 RobotPlot2(
-                    ob, self.ax, readonly, display,
+                    ob, self, readonly, display,
                     eeframe, name))
             self.robots[len(self.robots) - 1].draw()
 
@@ -187,12 +187,23 @@ class PyPlot2(Connector):
 
         '''
 
-        super().remove()
+        super().remove() # ???
 
     def hold(self):           # pragma: no cover
+        '''
+        hold() keeps the plot open i.e. stops the plot from closing once
+        the main script has finished.
+
+        '''
+
         # signal.setitimer(signal.ITIMER_REAL, 0)
         plt.ioff()
-        plt.show()
+
+        # keep stepping the environment while figure is open
+        while True:
+            if not plt.fignum_exists(self.fig.number):
+                break
+            self.step()
 
     #
     #  Private methods
@@ -261,14 +272,10 @@ class PyPlot2(Connector):
         def update(val, text, robot):  # pragma: no cover
             for j in range(robot.n):
                 if robot.isrevolute(j):
-                    robot.q[j] = self.sjoint[j].val * np.pi / 180
+                    robot.q[j] = np.radians(self.sjoint[j].val)
                 else:
                     robot.q[j] = self.sjoint[j].val
-
             text_trans(text, robot.q)
-
-            # Step the environment
-            self.step(0)
 
         fig.subplots_adjust(left=0.38)
         text = []
@@ -321,7 +328,7 @@ class PyPlot2(Connector):
             if robot.isrevolute(j):
                 slider = Slider(
                     self.axjoint[j], 'q' + str(j),
-                    qlim[0, j], qlim[1, j], q[j] * 180/np.pi, "% .1f°")
+                    qlim[0, j], qlim[1, j], np.degrees(q[j]), "% .1f°")
             else:
                 slider = Slider(
                     self.axjoint[j], 'q' + str(j),
@@ -329,8 +336,6 @@ class PyPlot2(Connector):
 
             slider.on_changed(lambda x: update(x, text, robot))
             self.sjoint.append(slider)
-
-        
         robot.q = q
         self.step()
 
