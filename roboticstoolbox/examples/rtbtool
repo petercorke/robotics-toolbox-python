@@ -132,16 +132,7 @@ if args.showassign:
 """,
         attr(0))
 
-# if args.script is not None:
-#     path = Path(args.script)
-#     if not path.exists():
-#         raise ValueError(f"script does not exist: {args.script}")
-#     exec(path.read_text())
-
-
 # drop into IPython
-
-
 class MyPrompt(Prompts):
     def in_prompt_tokens(self, cli=None):
         return [(Token.Prompt, args.prompt)]
@@ -169,6 +160,10 @@ c.InteractiveShell.prompts_class = MyPrompt
 if args.showassign:
     c.InteractiveShell.ast_node_interactivity = 'last_expr_or_assign'
 
+# set precision, same as %precision
+c.PlainTextFormatter.float_precision = "%.3f"
+
+# set up a script to be executed by IPython when we get there
 code = None
 if args.script is not None:
     path = Path(args.script)
@@ -176,9 +171,11 @@ if args.script is not None:
         raise ValueError(f"script does not exist: {args.script}")
     code = path.open('r').readlines()
 if code is None:
-    code = ["plt.ion()"]
+    code = [
+        "plt.ion()",
+        ]
+        
 else:
     code.append("plt.ion()")
-
 c.InteractiveShellApp.exec_lines = code
 IPython.start_ipython(config=c, user_ns=globals())
