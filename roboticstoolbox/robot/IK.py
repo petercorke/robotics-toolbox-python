@@ -245,7 +245,7 @@ class IKMixin:
         """  # noqa E501
 
         if not isinstance(T, SE3):
-            T = SE3(T)
+            raise TypeError('argument must be SE3')
 
         solutions = []
 
@@ -304,19 +304,7 @@ class IKMixin:
         tcount = 0    # Total iteration count
         rejcount = 0  # Rejected step count
         nm = 0
-
-        # bool vector indicating revolute joints
-        # revolutes = np.array([link.isrevolute for link in self])
-
-        revolutes = []
-
-        # This is a mixin class inherited by robot classes
-        # Therefore it will never be used on its own and the
-        # LGTM issue can be ignored
-        for link in self:  # lgtm [py/non-iterable-in-for-loop]
-            if isinstance(self, rtb.DHRobot) or link.isjoint:
-                revolutes.append(link.isrevolute)
-        revolutes = np.array(revolutes)
+        revolutes = self.revolutejoints
 
         q = q0
         for Tk in T:
@@ -523,7 +511,7 @@ class IKMixin:
         """  # noqa E501
 
         if not isinstance(T, SE3):
-            T = SE3(T)
+            raise TypeError('argument must be SE3')
 
         solutions = []
 
@@ -542,19 +530,7 @@ class IKMixin:
         W = np.diag(mask)
 
         tcount = 0  # Total iteration count
-
-        # bool vector indicating revolute joints
-        # joints = np.array([link.isjoint for link in self])
-        # revolutes = np.array([link.isrevolute for link in self])
-        revolutes = []
-
-        # This is a mixin class inherited by robot classes
-        # Therefore it will never be used on its own and the
-        # LGTM issue can be ignored
-        for link in self:  # lgtm [py/non-iterable-in-for-loop]
-            if isinstance(self, rtb.DHRobot) or link.isjoint:
-                revolutes.append(link.isrevolute)
-        revolutes = np.array(revolutes)
+        revolutes = self.revolutejoints
 
         q = q0
         for Tk in T:
@@ -590,8 +566,6 @@ class IKMixin:
                 # print(J)
 
                 # Wrap angles for revolute joints
-                print(revolutes)
-                print(q)
                 k = np.logical_and(q > np.pi, revolutes)
                 q[k] -= 2 * np.pi
 
@@ -729,7 +703,7 @@ class IKMixin:
         """  # noqa E501
 
         if not isinstance(T, SE3):
-            T = SE3(T)
+            raise TypeError('argument must be SE3')
 
         if q0 is None:
             q0 = np.zeros((self.n))
@@ -818,7 +792,7 @@ class IKMixin:
         # dual_annealing: bounds
 
         if not isinstance(T, SE3):
-            T = SE3(T)
+            raise TypeError('argument must be SE3')
 
         solutions = []
 
