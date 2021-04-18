@@ -77,7 +77,7 @@ class DHRobot(Robot):
             if isinstance(link, DHLink):
                 # got a link
                 all_links.append(link)
-                link.number = self._n
+                link.number = self._n + 1
                 link.jindex = self._n
                 self._n += 1
 
