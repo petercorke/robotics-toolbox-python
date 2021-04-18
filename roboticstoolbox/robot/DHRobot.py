@@ -1627,9 +1627,7 @@ class DHRobot(Robot):
             # get model specific solution for first 3 joints
             theta = ikfunc(self, Tk, config)
 
-            if theta is None or np.any(np.isnan(theta)):
-                solution = iksol(None, False, "")
-            else:
+            if isinstance(theta, np.ndarray):
                 # Solve for the wrist rotation
                 # We need to account for some random translations between the
                 # first and last 3 joints (d4) and also d6,a6,alpha6 in the
@@ -1660,6 +1658,13 @@ class DHRobot(Robot):
                 theta = theta - self.offset
 
                 solution = iksol(theta, True, "")
+
+            else:
+                # ikfunc can return None or a str reason
+                if theta is None:
+                    solution = iksol(None, False, "")
+                else:
+                    solution = iksol(None, False, theta)
 
             solutions.append(solution)
 
