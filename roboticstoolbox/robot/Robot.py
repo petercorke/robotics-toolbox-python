@@ -1182,39 +1182,64 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 # --------------------------------------------------------------------- #
 
     # TODO probably should be a static method
-    def _get_graphical_backend(self, backend):
+    def _get_graphical_backend(self, backend=None):
+
+        default = None
 
         # figure out the right default
         if backend is None:
             if isinstance(self, rtb.DHRobot):
-                backend = 'pyplot'
+                default = 'pyplot'
             elif isinstance(self, rtb.ERobot2):
-                backend = 'pyplot2'
+                default = 'pyplot2'
             else:
-                backend = 'swift'
+                default = 'swift'
 
-        #
+        if backend is not None:
+            backend = backend.lower()
+
         # find the right backend, modules are imported here on an as needs
         # basis
-        if backend.lower() == 'swift':  # pragma nocover
+        if  backend == 'swift' or default == 'swift':  # pragma nocover
+            # swift was requested, is it installed?
             if isinstance(self, rtb.DHRobot):
                 raise NotImplementedError(
                     'Plotting in Swift is not implemented for DHRobots yet')
+            try:
+                # yes, use it
+                from roboticstoolbox.backends.Swift import Swift
+                env = Swift()
+                return env
+            except ModuleNotFoundError:
+                if backend == 'swift':
+                    print('Swift is not installed, install it using pip or conda')
+                backend = 'pyplot'
 
-            from roboticstoolbox.backends.Swift import Swift
-            env = Swift()
+        elif backend == 'vpython' or default == 'vpython':  # pragma nocover
+            # vpython was requested, is it installed?
+            if not isinstance(self, rtb.DHRobot):
+                raise NotImplementedError(
+                    'Plotting in VPython is only implemented for DHRobots')
+            try:
+                # yes, use it
+                from roboticstoolbox.backends.VPython import VPython
+                env = VPython()
+                return env
+            except ModuleNotFoundError:
+                if backend == 'vpython':
+                    print('VPython is not installed, install it using pip or conda')
+                backend = 'pyplot'
 
-        elif backend.lower() == 'pyplot':
+        if backend is None:
+            backend = default
+
+        if backend == 'pyplot':
             from roboticstoolbox.backends.PyPlot import PyPlot
             env = PyPlot()
 
-        elif backend.lower() == 'pyplot2':
+        elif backend == 'pyplot2':
             from roboticstoolbox.backends.PyPlot import PyPlot2
             env = PyPlot2()
-
-        elif backend.lower() == 'vpython':
-            from roboticstoolbox.backends.VPython import VPython
-            env = VPython()
 
         else:
             raise ValueError('unknown backend', backend)
