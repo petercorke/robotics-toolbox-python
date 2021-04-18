@@ -53,6 +53,9 @@ class Trajectory:
         s = f"Trajectory created by {self.name}: {len(self)} time steps x {self.naxes} axes"
         return s
 
+    def __repr__(self):
+        return str(self)
+
     def __len__(self):
         """
         Length of trajectory
@@ -529,7 +532,7 @@ def jtraj(q0, qf, tv, qd0=None, qd1=None):
     # n = len(q0)
 
     tt = np.array([t**5, t**4, t**3, t**2, t, np.ones(t.shape)]).T
-    coeffs = np.array([A, B, C, np.zeros(A.shape), E, F])
+    coeffs = np.array([A, B, C, np.zeros(A.shape), E, F])  # 6xN
 
     qt = tt @ coeffs
 
