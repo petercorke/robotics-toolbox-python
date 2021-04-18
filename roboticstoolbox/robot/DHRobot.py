@@ -670,58 +670,6 @@ class DHRobot(Robot):
             and L[1].sigma == 0 \
             and L[2].sigma == 0
 
-    def isprismatic(self):
-        """
-        Identify prismatic joints
-
-        :return: a list of bool variables, one per joint, true if
-            the corresponding joint is prismatic, otherwise false.
-        :rtype: list of bool
-
-        ``robot.isprismatic()`` is a bool list identifying the prismatic joints
-        within the robot
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.DH.Puma560()
-            >>> puma.isprismatic()
-            >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.isprismatic()
-        """
-        return [link.isprismatic for link in self]
-
-    def isrevolute(self):
-        """
-        Identify revolute joints
-
-        :return: a list of bool variables, one per joint, true if
-            the corresponding joint is revolute, otherwise false.
-        :rtype: list of bool
-
-        ``robot.isrevolute()`` is a bool list identifying the revolute joints
-        within the robot
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.DH.Puma560()
-            >>> puma.isprismatic()
-            >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.isrevolute()
-        """
-
-        p = []
-
-        for i in range(self.n):
-            p.append(self.links[i].isrevolute)
-
-        return p
-
     def dhunique(self):
         """
         Print the unique DH parameters
