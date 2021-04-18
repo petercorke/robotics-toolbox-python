@@ -1249,9 +1249,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     def plot(
             self, q, backend=None, block=False, dt=0.050,
             limits=None, vellipse=False, fellipse=False,
-            jointaxes=True, jointlabels=False, eeframe=True, shadow=True, name=True, fig=None,
-            movie=None, loop=False, **bopts
-    ):
+            fig=None, movie=None, loop=False, **kwargs):
         """
         Graphical display and animation
 
@@ -1334,8 +1332,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             env.launch(self.name + ' Trajectory Plot', limits=limits, fig=fig)
 
         env.add(
-            self, readonly=True, jointaxes=jointaxes, jointlabels=jointlabels,
-            eeframe=eeframe, shadow=shadow, name=name)
+            self, readonly=True, **kwargs)
 
         if vellipse:
             vell = self.vellipse(centre='ee')
