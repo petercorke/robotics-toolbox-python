@@ -614,29 +614,43 @@ def mtraj(tfunc, q0, qf, t):
     return Trajectory('mtraj', x, y, yd, ydd, istime)
 
 
-def qplot(x, y=None, arm=False, block=False, labels=None):
+def qplot(x, y=None, wrist=False, unwrap=False, block=False, labels=None, 
+    loc=None, grid=True, stack=False, **kwargs):
     """
-    Plot robot joint angles
+    Plot trajectory data
 
-    :param q: joint angle trajectory
-    :type q: numpy ndarray, shape=(M,N)
+    :param q: trajectory, one row per timestep
+    :type q: ndarray(m,n)
     :param t: time vector, optional
     :type t: numpy ndarray, shape=(M,)
-    :param arm: distinguish arm and wrist joints with line styles, default False
-    :type arm: bool
+    :param wrist: distinguish arm and wrist joints with line styles
+    :type wrist: bool
+    :param unwrap: unwrap joint angles so that they smoothly increase or 
+        decrease when they pass through :math:`\pm \pi`
+    :type unwrap: bool
+    :param block: block until the plot is closed
+    :type block: bool
+    :param labels: legend labels
+    :type labels: list of str, or single string with space separated labels
+    :param kwargs: options passed to pyplot.plot
+    :param loc: legend location as per pyplot.legend
+    :type loc: str
 
-    This is a convenience function to plot joint angle trajectories (MxN) for
-    an N-axis robot, where each row represents one time step.
+    This is a convenience function to plot trajectories, where each row represents one time step.
 
     - ``qplot(q)`` plots the joint angles versus row number.  If N==6 a
       conventional 6-axis robot is assumed, and the first three joints are
       shown as solid lines, the last three joints (wrist) are shown as dashed
       lines. A legend is also displayed.
 
-    - ``qplot(q, t)`` as above but displays the joint angle trajectory versus
+    - ``qplot(t, q)`` as above but displays the joint angle trajectory versus
       time given the time vector T (Mx1).
 
-    :seealso: :func:`jtraj`
+    Example::
+
+        >>> qplot(q, x, labels='x y z')
+
+    :seealso: :func:`jtraj`, :func:`numpy.unwrap`
     """
     if y is None:
         q = x
@@ -648,28 +662,50 @@ def qplot(x, y=None, arm=False, block=False, labels=None):
     if t.ndim != 1 or q.shape[0] != t.shape[0]:
         raise ValueError('dimensions of arguments are not consistent')
 
+    if unwrap:
+        q = np.unwrap(q, axis=0)
+
     n = q.shape[1]
-    fig, ax = plt.subplots()
-    if n == 6 and arm:
-        plt.plot(t, q[:, 0:3])
-        plt.plot(t, q[:, 3:6], '--')
-    else:
-        plt.plot(t, q)
 
     if labels is None:
-        ax.legend([f"q{i+1}" for i in range(n)])
+        labels = [f"q{i}" for i in range(n)]
     elif isinstance(labels, str):
-        ax.legend(labels.split(' '))
-    elif isinstance(labels, (tuple, list)):
-        ax.legend(labels)
+        labels = labels.split(' ')
+    elif not isinstance(labels, (tuple, list)):
+        raise TypeError('wrong type for labels')
 
-    plt.grid(True)
-    ax.set_xlabel('Time (s)')
-    ax.set_ylabel('Joint coordinates (rad,m)')
-    ax.set_xlim(t[0], t[-1])
+
+    fig, ax = plt.subplots()
+
+    if stack:
+        for i in range(n):
+            ax = plt.subplot(n, 1, i + 1)
+
+            plt.plot(t, q[:, i], **kwargs)
+            
+            plt.grid(grid)
+            ax.set_ylabel(labels[i])
+            ax.set_xlim(t[0], t[-1])
+
+        ax.set_xlabel('Time (s)')
+
+    else:
+        if n == 6 and wrist:
+            plt.plot(t, q[:, 0:3], **kwargs)
+            plt.plot(t, q[:, 3:6], '--', **kwargs)
+        else:
+            plt.plot(t, q, **kwargs)
+
+        ax.legend(labels, loc=loc)
+        
+        plt.grid(grid)
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Joint coordinates (rad,m)')
+        ax.set_xlim(t[0], t[-1])
 
     plt.show(block=block)
 
+    return fig.get_axes()
 
 # -------------------------------------------------------------------------- #
 
