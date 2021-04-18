@@ -308,7 +308,7 @@ if __name__ == '__main__':    # pragma nocover
 
     puma = Puma560(symbolic=False)
     print(puma)
-    print(puma.dyntable())
+    print(puma.dynamics())
     # T = puma.fkine(puma.qn)
     # print(puma.ikine_a(T, 'lu').q)
     # print(puma.ikine_a(T, 'ru').q)
