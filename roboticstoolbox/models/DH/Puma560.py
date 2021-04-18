@@ -282,20 +282,22 @@ class Puma560(DHRobot):
 
             r = np.sqrt(V114**2 + Pz**2)
 
-            Psi = np.arccos(
-                (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2)
-                / (2.0 * a2 * r))
+            with np.errstate(invalid='raise'):
+                try:
+                    Psi = np.arccos(
+                        (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2)
+                        / (2.0 * a2 * r))
+                except FloatingPointError:
+                    return "Out of reach"
 
-            if np.isnan(Psi):
-                theta = None    # pragma nocover
-            else:
-                theta[1] = np.arctan2(Pz, V114) + n2 * Psi
 
-                # Solve for theta[2]
-                # theta[2] uses equation 57, p. 40.
-                num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2
-                den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
-                theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)
+            theta[1] = np.arctan2(Pz, V114) + n2 * Psi
+
+            # Solve for theta[2]
+            # theta[2] uses equation 57, p. 40.
+            num = np.cos(theta[1]) * V114 + np.sin(theta[1]) * Pz - a2
+            den = np.cos(theta[1]) * Pz - np.sin(theta[1]) * V114
+            theta[2] = np.arctan2(a3, d4) - np.arctan2(num, den)
 
             theta = base.angdiff(theta)
 
