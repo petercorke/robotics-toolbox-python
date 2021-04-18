@@ -301,10 +301,11 @@ class BaseERobot(Robot):
                 s = " \u2295 " + s
 
             if link.isjoint:
-                if link._joint_name is not None:
-                    jname = link._joint_name
-                else:
-                    jname = link.jindex
+                # if link._joint_name is not None:
+                #     jname = link._joint_name
+                # else:
+                #     jname = link.jindex
+                jname = link.jindex
             else:
                 jname = ''
             table.row(
