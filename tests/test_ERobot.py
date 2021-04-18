@@ -862,6 +862,49 @@ class TestERobot(unittest.TestCase):
         nt.assert_array_almost_equal(tau, np.r_[d11 + d12, d21 + d22])
 
 
+class TestERobot2(unittest.TestCase):
+    def test_plot(self):
+        robot = rtb.models.ETS.Planar2()
+        e = robot.plot(robot.qz, block=False, name=True)
+        e.close()
+
+    def test_teach(self):
+        robot = rtb.models.ETS.Planar2()
+        e = robot.teach(block=False, name=True)
+        e.close()
+
+        e = robot.teach(robot.qz, block=False, name=True)
+        e.close()
+
+    def test_plot_with_vellipse(self):
+        robot = rtb.models.ETS.Planar2()
+        e = robot.plot(robot.qz, block=False, name=True, vellipse=True, limits=[1, 2, 1, 2])
+        e.step()
+        e.close()
+
+
+    def test_plot_with_fellipse(self):
+        robot = rtb.models.ETS.Planar2()
+        e = robot.plot(robot.qz, block=False, name=True, dellipse=True, limits=[1, 2, 1, 2])
+        e.step()
+        e.close()
+
+    # def test_plot_with_vellipse2_fail(self):
+    #     panda = rtb.models.DH.Panda()
+    #     panda.q = panda.qr
+
+    #     from roboticstoolbox.backends.PyPlot import PyPlot2
+    #     e = PyPlot2()
+    #     e.launch()
+    #     e.add(panda.fellipse(
+    #             q=panda.qr, centre=[0, 1]))
+
+    #     with self.assertRaises(ValueError):
+    #         e.add(panda.fellipse(
+    #             q=panda.qr, centre='ee', opt='rot'))
+
+    #     e.close()
+
 if __name__ == '__main__':   # pragma nocover
 
     unittest.main()

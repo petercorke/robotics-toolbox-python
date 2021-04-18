@@ -16,7 +16,7 @@ class TestDHRobot(unittest.TestCase):
         l0 = rp.DHLink()
         rp.DHRobot([l0])
 
-    def test_isprismatic(self):
+    def test_prismaticjoints(self):
         l0 = rp.PrismaticDH()
         l1 = rp.RevoluteDH()
         l2 = rp.PrismaticDH()
@@ -26,7 +26,33 @@ class TestDHRobot(unittest.TestCase):
 
         ans = [True, False, True, False]
 
-        self.assertEqual(r0.isprismatic(), ans)
+        self.assertEqual(r0.prismaticjoints, ans)
+
+    def test_revolutejoints(self):
+        l0 = rp.PrismaticDH()
+        l1 = rp.RevoluteDH()
+        l2 = rp.PrismaticDH()
+        l3 = rp.RevoluteDH()
+
+        r0 = rp.DHRobot([l0, l1, l2, l3])
+
+        ans = [False, True, False, True]
+
+        self.assertEqual(r0.revolutejoints, ans)
+
+
+    def test_isprismatic(self):
+        l0 = rp.PrismaticDH()
+        l1 = rp.RevoluteDH()
+        l2 = rp.PrismaticDH()
+        l3 = rp.RevoluteDH()
+
+        r0 = rp.DHRobot([l0, l1, l2, l3])
+
+        self.assertEqual(r0.isprismatic(0), True)
+        self.assertEqual(r0.isprismatic(1), False)
+        self.assertEqual(r0.isprismatic(2), True)
+        self.assertEqual(r0.isprismatic(3), False)
 
     def test_isrevolute(self):
         l0 = rp.PrismaticDH()
@@ -38,7 +64,10 @@ class TestDHRobot(unittest.TestCase):
 
         ans = [False, True, False, True]
 
-        self.assertEqual(r0.isrevolute(), ans)
+        self.assertEqual(r0.isrevolute(0), False)
+        self.assertEqual(r0.isrevolute(1), True)
+        self.assertEqual(r0.isrevolute(2), False)
+        self.assertEqual(r0.isrevolute(3), True)
 
     def test_todegrees(self):
         l0 = rp.PrismaticDH()
@@ -596,43 +625,45 @@ class TestDHRobot(unittest.TestCase):
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
 
-        t0 = np.array([
+
+        t0 = np.eye(4)
+        t1 = np.array([
             [0.5403, -0.8415, 0, 0],
             [0.8415, 0.5403, 0, 0],
             [0, 0, 1, 0.333],
             [0, 0, 0, 1]
         ])
-        t1 = np.array([
+        t2 = np.array([
             [-0.2248, -0.4913, -0.8415, 0],
             [-0.3502, -0.7651, 0.5403, 0],
             [-0.9093, 0.4161, 0, 0.333],
             [0, 0, 0, 1]
         ])
-        t2 = np.array([
+        t3 = np.array([
             [0.1038, 0.8648, 0.4913, 0.1552],
             [0.4229, -0.4855, 0.7651, 0.2418],
             [0.9002, 0.1283, -0.4161, 0.2015],
             [0, 0, 0, 1]
         ])
-        t3 = np.array([
+        t4 = np.array([
             [-0.4397, -0.2425, -0.8648, 0.1638],
             [-0.8555, -0.1801, 0.4855, 0.2767],
             [-0.2735, 0.9533, -0.1283, 0.2758],
             [0, 0, 0, 1]
         ])
-        t4 = np.array([
+        t5 = np.array([
             [-0.9540, -0.1763, -0.2425, 0.107],
             [0.2229, -0.9581, -0.1801, 0.2781],
             [-0.2006, -0.2258, 0.9533, 0.6644],
             [0, 0, 0, 1]
         ])
-        t5 = np.array([
+        t6 = np.array([
             [-0.8482, -0.4994, 0.1763, 0.107],
             [0.2643, -0.1106, 0.9581, 0.2781],
             [-0.4590, 0.8593, 0.2258, 0.6644],
             [0, 0, 0, 1]
         ])
-        t6 = np.array([
+        t7 = np.array([
             [-0.5236, 0.6902, 0.4994, 0.08575],
             [0.8287, 0.5487, 0.1106, 0.3132],
             [-0.1977, 0.4718, -0.8593, 0.5321],
@@ -640,8 +671,7 @@ class TestDHRobot(unittest.TestCase):
         ])
 
         Tall = panda.fkine_all(q)
-        Tall2 = panda.fkine_all()
-        Tall3 = panda.fkine_all(old=False)
+
 
         nt.assert_array_almost_equal(Tall[0].A, t0, decimal=4)
         nt.assert_array_almost_equal(Tall[1].A, t1, decimal=4)
@@ -650,8 +680,8 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_almost_equal(Tall[4].A, t4, decimal=4)
         nt.assert_array_almost_equal(Tall[5].A, t5, decimal=4)
         nt.assert_array_almost_equal(Tall[6].A, t6, decimal=4)
-        nt.assert_array_almost_equal(Tall2[0].A, t0, decimal=4)
-        nt.assert_array_almost_equal(Tall3[0].A, panda.base.A, decimal=4)
+        nt.assert_array_almost_equal(Tall[7].A, t7, decimal=4)
+       
 
     # def test_gravjac(self):
     #     l0 = rp.RevoluteDH(d=2, B=3, G=2, Tc=[2, -1], alpha=0.4, a=0.2,
@@ -1345,7 +1375,6 @@ class TestDHRobot(unittest.TestCase):
 
     def test_teach(self):
         panda = rp.models.DH.Panda()
-        panda.q = panda.qr
         e = panda.teach(block=False)
         e.close()
 

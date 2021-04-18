@@ -137,7 +137,7 @@ class TestRobot(unittest.TestCase):
         #       -6.98000000e-02, 1.38978915e-02, 9.62104811e-01,
         #       7.84926515e-01]
 
-        sol1 = panda.ikine_min(T.A, qlim=True, q0=np.zeros(7))
+        sol1 = panda.ikine_min(T, qlim=True, q0=np.zeros(7))
         sol2 = panda.ikine_min(Tt, qlim=True)
 
         self.assertTrue(sol1.success)
@@ -160,7 +160,7 @@ class TestRobot(unittest.TestCase):
         Tt = sm.SE3([T, T])
 
         sol1 = puma.ikine_min(Tt)
-        sol2 = puma.ikine_min(T.A)
+        sol2 = puma.ikine_min(T)
         sol3 = puma.ikine_min(T)
 
         self.assertTrue(sol1[0].success)
