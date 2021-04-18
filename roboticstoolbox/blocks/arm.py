@@ -21,9 +21,9 @@ Robot blocks:
 
 # ------------------------------------------------------------------------ #
 @block
-class Forward_Kinematics(FunctionBlock):
+class FKine(FunctionBlock):
     """
-    :blockname:`FORWARD_KINEMATICS`
+    :blockname:`FKINE`
     
     .. table::
        :align: left
@@ -74,9 +74,9 @@ class Forward_Kinematics(FunctionBlock):
         return [self.robot.fkine(self.inputs[0], **self.args)]
 
 @block
-class Inverse_Kinematics(FunctionBlock):
+class IKine(FunctionBlock):
     """
-    :blockname:`INVERSE_KINEMATICS`
+    :blockname:`IKINE`
     
     .. table::
        :align: left
@@ -385,10 +385,59 @@ class Point2Tr(FunctionBlock):
         return [T]
 
 # ------------------------------------------------------------------------ #
+
 @block
-class Foward_Dynamics(TransferBlock):
+class TR2T(FunctionBlock):
     """
-    :blockname:`FORWARD_DYNAMICS`
+    :blockname:`TR2T`
+    
+    .. table::
+       :align: left
+    
+       +------------+----------+---------+
+       | inputs     | outputs  |  states |
+       +------------+----------+---------+
+       | 1          | 3        | 0       |
+       +------------+----------+---------+
+       | SE3        | float    |         | 
+       +------------+----------+---------+
+    """
+
+    def __init__(self, *inputs, **kwargs):
+        """
+        :param T: the transform
+        :type T: SE3
+        :param ``*inputs``: Optional incoming connections
+        :type ``*inputs``: Block or Plug
+        :param ``**kwargs``: common Block options
+        :return: a POINT2TR block
+        :rtype: Point2Tr instance
+        
+        The block has one input port:
+            
+            1. a 3D point as an ndarray(3)
+            
+        and one output port:
+            
+            1. T as an SE3 with its position part replaced by the input
+
+        :seealso: :func:`spatialmath.base.delta2tr`
+        """
+        super().__init__(nin=1, nout=3, inputs=inputs, **kwargs)
+        self.type = 'tr2t'
+           
+        self.inport_names(('T',))
+        self.outport_names(('x', 'y', 'z'))
+        
+    def output(self, t=None):
+        t = self.inputs[0].t
+        return list(t)
+
+# ------------------------------------------------------------------------ #
+@block
+class FDyn(TransferBlock):
+    """
+    :blockname:`FDYN`
     
     .. table::
        :align: left
@@ -468,9 +517,9 @@ class Foward_Dynamics(TransferBlock):
         return np.r_[qd, qdd]
 
 @block
-class Inverse_Dynamics(FunctionBlock):
+class IDyncs(FunctionBlock):
     """
-    :blockname:`INVERSE_DYNAMICS`
+    :blockname:`IDYN`
     
     .. table::
        :align: left
@@ -571,6 +620,7 @@ class ArmPlot(GraphicsBlock):
         """
         super().__init__(nin=1, inputs=inputs, **kwargs)
         self.type = 'armplot'
+        self.inport_names(('q',))
 
         if q0 is None:
             q0 = np.zeros((robot.n,))
@@ -592,7 +642,9 @@ class ArmPlot(GraphicsBlock):
         if self.bd.options.graphics:
             
             self.robot.q = self.inputs[0]
-            self.env.step()
+
+            if self.bd.options.animation:
+                self.env.step()
 
             super().step()
         
@@ -601,8 +653,6 @@ class ArmPlot(GraphicsBlock):
             plt.show(block=block)
             
             super().done()
-
-
 @block
 class Traj(FunctionBlock):
     """
@@ -708,6 +758,132 @@ class Traj(FunctionBlock):
 
         return [np.hstack(y), np.hstack(yd), np.hstack(ydd)]
 
+@block
+class JTraj(SourceBlock):
+    """
+    :blockname:`JTRAJ`
+    
+    .. table::
+       :align: left
+    
+       +------------+------------+---------+
+       | inputs     | outputs    |  states |
+       +------------+------------+---------+
+       | 0          | 3          | 0       |
+       +------------+------------+---------+
+       |            | ndarray(n) |         | 
+       +------------+------------+---------+
+    """
+
+    def __init__(self, q0, qf, qd0=None, qdf=None, T=None, *inputs, **kwargs):
+        """
+        Compute a joint-space trajectory
+
+        :param q0: initial joint coordinate
+        :type q0: array_like(n)
+        :param qf: final joint coordinate
+        :type qf: array_like(n)
+        :param tv: time vector or number of steps
+        :type tv: array_like or int
+        :param qd0: initial velocity, defaults to zero
+        :type qd0: array_like(n), optional
+        :param qd1: final velocity, defaults to zero
+        :type qd1: array_like(n), optional
+        :param ``*inputs``: Optional incoming connections
+        :type ``*inputs``: Block or Plug
+        :param ``**kwargs``: common Block options
+        :return: TRAJ block
+        :rtype: Traj instance
+
+        - ``tg = jtraj(q0, qf, N)`` is a joint space trajectory where the joint
+        coordinates vary from ``q0`` (M) to ``qf`` (M).  A quintic (5th order)
+        polynomial is used with default zero boundary conditions for velocity and
+        acceleration.  Time is assumed to vary from 0 to 1 in ``N`` steps.
+
+        - ``tg = jtraj(q0, qf, t)`` as above but ``t`` is a uniformly-spaced time
+        vector
+
+        The return value is an object that contains position, velocity and 
+        acceleration data.
+
+        Notes:
+
+        - The time vector, if given, scales the velocity and acceleration outputs
+        assuming that the time vector starts at zero and increases
+        linearly.
+
+        :seealso: :func:`ctraj`, :func:`qplot`, :func:`~SerialLink.jtraj`
+        """
+        super().__init__(nin=0, nout=3, **kwargs)
+        self.blockclass = 'jtraj'
+        self.type = 'source'
+        self.outport_names(('q', 'qd', 'qdd',))
+        self.T = T
+
+        q0 = base.getvector(q0)
+        qf = base.getvector(qf)
+
+        if not len(q0) == len(qf):
+            raise ValueError('q0 and q1 must be same size')
+
+        if qd0 is None:
+            qd0 = np.zeros(q0.shape)
+        else:
+            qd0 = getvector(qd0)
+            if not len(qd0) == len(q0):
+                raise ValueError('qd0 has wrong size')
+        if qdf is None:
+            qdf = np.zeros(q0.shape)
+        else:
+            qd1 = getvector(qdf)
+            if not len(qd1) == len(q0):
+                raise ValueError('qd1 has wrong size')
+
+        self.q0 = q0
+        self.qf = qf
+        self.qd0 = qd0
+        self.qdf = qf
+
+
+    def start(self):
+
+        if self.T is None:
+            self.T = self.bd.state.T
+        tscal = self.T
+
+        q0 = self.q0
+        qf = self.qf
+        qd0 = self.qd0
+        qdf = self.qdf
+
+        # compute the polynomial coefficients
+        A = 6 * (qf - q0) - 3 * (qdf + qd0) * tscal
+        B = -15 * (qf - q0) + (8 * qd0 + 7 * qdf) * tscal
+        C = 10 * (qf - q0) - (6 * qd0 + 4 * qdf) * tscal
+        E = qd0 * tscal
+        F = q0
+
+        self.coeffs = np.array([A, B, C, np.zeros(A.shape), E, F])
+        self.dcoeffs = np.array(
+            [np.zeros(A.shape), 5 * A, 4 * B, 3 * C, np.zeros(A.shape), E])
+        self.ddcoeffs = np.array([
+            np.zeros(A.shape), np.zeros(A.shape),
+            20 * A, 12 * B, 6 * C, np.zeros(A.shape)])
+
+    def output(self, t=None):
+
+        tscal = self.T
+        tt = np.array([t**5, t**4, t**3, t**2, t, 1]).T
+        
+        qt = tt @ self.coeffs
+
+        # compute  velocity
+        qdt = tt @ self.dcoeffs / tscal
+
+        # compute  acceleration
+        qddt = tt @ self.ddcoeffs / tscal ** 2
+
+        return [qt, qdt, qddt]
 @block
 class CirclePath(SourceBlock):
     """
