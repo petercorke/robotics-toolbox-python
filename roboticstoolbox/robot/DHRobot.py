@@ -926,25 +926,12 @@ class DHRobot(Robot):
         """
         q = self._getq(q)
 
-        if self._base is not None:
-            Tj = self._base
-        else:
-            Tj = SE3()
-        first = True
+        Tj = self.base.copy()
         Tall = Tj
 
         for q, L in zip(q, self.links):
-            if first:
-
-                Tj *= L.A(q)
-                if old:
-                    Tall = Tj
-                else:
-                    Tall.append(Tj)
-                first = False
-            else:
-                Tj *= L.A(q)
-                Tall.append(Tj)
+            Tj *= L.A(q)
+            Tall.append(Tj)
         return Tall
 
     def jacobe(self, q, half=None):
