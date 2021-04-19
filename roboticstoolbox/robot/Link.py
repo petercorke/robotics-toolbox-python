@@ -15,8 +15,12 @@ def _listen_dyn(func):
     Use this decorator for any property setter that updates a parameter that
     affects the result of inverse dynamics.  This allows the C version of the
     parameters only having to be updated when they change, rather than on
-    every call.  This decorator signals the change by invoking the
-    ``.dynchanged()`` method of the robot that owns the link.
+    every call.  This decorator signals the change by:
+    
+    - invoking the ``.dynchanged()`` method of the robot that owns the link.
+      This assumes that the Link object is owned by a robot, this happens
+      when the Link object is passed to a robot constructor.
+    - setting the ``._hasdynamics`` attribute of the Link
 
     Example::
 
@@ -31,6 +35,7 @@ def _listen_dyn(func):
     def wrapper_listen_dyn(*args):
         if args[0]._robot is not None:
             args[0]._robot.dynchanged()
+        args[0]._hasdynamics = True
         return func(*args)
     return wrapper_listen_dyn
 
@@ -456,7 +461,11 @@ class Link(ABC):
         :return: Link has dynamic parameters
         :rtype: bool
 
-        Link has some assigned (non-default) dynamic parameters.
+        Link has some assigned (non-default) dynamic parameters.  These could
+        have been assigned:
+
+        - at constructor time, eg. ``m=1.2``
+        - by invoking a setter method, eg. ``link.m = 1.2``
 
         Example:
 

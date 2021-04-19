@@ -636,10 +636,10 @@ class Inertial(URDFType):
     """
     _TAG = 'inertial'
 
-    def __init__(self, mass, inertia, origin=None):
-        self.mass = mass
-        self.inertia = inertia
-        self.origin = origin
+    def __init__(self, mass=None, inertia=None, origin=None):
+        self._mass = mass
+        self._inertia = inertia
+        self._origin = origin
 
     @property
     def mass(self):
@@ -1579,7 +1579,7 @@ class Link(URDFType):
             raise TypeError('Expected Inertial object')   # pragma nocover
         # Set default inertial
         if value is None:
-            value = Inertial(mass=0.0, inertia=np.eye(3))
+            value = Inertial()
         self._inertial = value
 
     @property
@@ -1696,14 +1696,16 @@ class URDF(URDFType):
 
         # build the list of links in URDF file order
         for link in self._links:
-            elink = rtb.ELink(name=link.name)
+            elink = rtb.ELink(name=link.name,
+                m=link.inertial.mass,
+                r=link.inertial.origin[:3, 3] if link.inertial.origin is not None else None,
+                I=link.inertial.inertia
+            )
             elinks.append(elink)
             elinkdict[link.name] = elink
 
             # add the inertial parameters
-            elink.r = link.inertial.origin[:3, 3]
-            elink.m = link.inertial.mass
-            elink.inertia = link.inertial.inertia
+
 
             # add the visuals to visual list
             try:
