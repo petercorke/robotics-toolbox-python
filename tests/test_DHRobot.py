@@ -344,7 +344,6 @@ class TestDHRobot(unittest.TestCase):
 
         nt.assert_array_almost_equal(panda.A(0, q).A, T1, decimal=4)
         nt.assert_array_almost_equal(panda.A([1, 4], q).A, T2, decimal=4)
-        nt.assert_array_almost_equal(panda.A([1, 4], q).A, T2, decimal=4)
 
     def test_A_error(self):
         panda = rp.models.DH.Panda()
