@@ -573,7 +573,7 @@ class DHRobot(Robot):
         :return T: The transform between link frames
         :rtype T: SE3
 
-        - ``robot.A(j, q)`` transform between link frames {0} and {n}.  ``q``
+        - ``robot.A(j, q)`` transform between link frames {0} and {j}.  ``q``
           is a vector (n) of joint variables.
         - ``robot.A([j1, j2], q)`` as above between link frames {j1} and {j2}.
         - ``robot.A(j)`` as above except uses the stored q value of the
