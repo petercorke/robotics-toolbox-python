@@ -622,6 +622,43 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             # assume it is a colormap name
             return cm.get_cmap(linkcolors, 6)
 
+    def jtraj(self, T1, T2, t, **kwargs):
+        """
+        Joint-space trajectory between SE(3) poses
+
+        :param T1: initial end-effector pose
+        :type T1: SE3 instance
+        :param T2: final end-effector pose
+        :type T2: SE3 instance
+        :param t: time vector or number of steps
+        :type t: ndarray(m) or int
+        :param kwargs: arguments passed to the IK solver
+        :return: trajectory
+        :rtype: Trajectory instance
+
+        ``traj = obot.jtraj(T1, T2, t)`` is a trajectory object whose
+        attribute ``traj.q`` is a row-wise joint-space trajectory.
+
+        The initial and final poses are mapped to joint space using inverse
+        kinematics:
+
+        - if the object has an analytic solution ``ikine_a`` that will be used,
+        - otherwise the general numerical algorithm ``ikine_min`` will be used.
+
+
+        """
+
+        if hasattr(self, 'ikine_a'):
+            ik = self.ikine_a
+        else:
+            ik = self.ikine_min
+        
+        q1 = ik(T1, **kwargs)
+        q2 = ik(T2, **kwargs)
+
+        return rtb.jtraj(q1.q, q2.q, t)
+
+
     def manipulability(
             self, q=None, J=None, method='yoshikawa',
             axes='all', **kwargs):
