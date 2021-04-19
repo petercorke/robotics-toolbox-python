@@ -191,7 +191,11 @@ class Trajectory:
         ax.set_xlim(0, max(self.t))
 
         if self.istime:
-            ax.set_ylabel('$s(t)$', **textopts)
+            if self.name in ('traj', 'mtraj', 'mstraj'):
+                symbol = 'q'
+            else:
+                symbol = 's'
+            ax.set_ylabel(f"${symbol}(t)$", **textopts)
         else:
             ax.set_ylabel('$s(k)$', **textopts)
 
@@ -202,7 +206,7 @@ class Trajectory:
         ax.set_xlim(0, max(self.t))
 
         if self.istime:
-            ax.set_ylabel('$ds/dt$', **textopts)
+            ax.set_ylabel(f"$\dot{{{symbol}}}(t)$", **textopts)
         else:
             ax.set_ylabel('$ds/dk$', **textopts)
 
@@ -213,7 +217,7 @@ class Trajectory:
         ax.set_xlim(0, max(self.t))
 
         if self.istime:
-            ax.set_ylabel('$ds^2/dt^2$', **textopts)
+            ax.set_ylabel(f"$\ddot{{{symbol}}}(t)$", **textopts)
             ax.set_xlabel('t (seconds)')
         else:
             ax.set_ylabel('$d^2s/dk^2$', **textopts)
@@ -459,7 +463,7 @@ def lspb_func(q0, qf, tf, V=None):
     return func
 # -------------------------------------------------------------------------- #
 
-def jtraj(q0, qf, tv, qd0=None, qd1=None):
+def jtraj(q0, qf, t, qd0=None, qd1=None):
     """
     Compute a joint-space trajectory
 
@@ -467,8 +471,8 @@ def jtraj(q0, qf, tv, qd0=None, qd1=None):
     :type q0: array_like(n)
     :param qf: final joint coordinate
     :type qf: array_like(n)
-    :param tv: time vector or number of steps
-    :type tv: array_like or int
+    :param t: time vector or number of steps
+    :type t: array_like or int
     :param qd0: initial velocity, defaults to zero
     :type qd0: array_like(n), optional
     :param qd1: final velocity, defaults to zero
@@ -496,12 +500,12 @@ def jtraj(q0, qf, tv, qd0=None, qd1=None):
     :seealso: :func:`ctraj`, :func:`qplot`, :func:`~SerialLink.jtraj`
     """
     # print(f"  --- jtraj: {q0} --> {q1} in {tv}")
-    if isinstance(tv, int):
+    if isinstance(t, int):
         tscal = 1.0
-        t = np.linspace(0, 1, tv)  # normalized time from 0 -> 1
+        ts = np.linspace(0, 1, t)  # normalized time from 0 -> 1
     else:
-        tscal = max(tv)
-        t = tv.flatten() / tscal
+        tscal = max(t)
+        ts = t.flatten() / tscal
 
     q0 = getvector(q0)
     qf = getvector(qf)
@@ -531,7 +535,7 @@ def jtraj(q0, qf, tv, qd0=None, qd1=None):
 
     # n = len(q0)
 
-    tt = np.array([t**5, t**4, t**3, t**2, t, np.ones(t.shape)]).T
+    tt = np.array([ts**5, ts**4, ts**3, ts**2, ts, np.ones(ts.shape)]).T
     coeffs = np.array([A, B, C, np.zeros(A.shape), E, F])  # 6xN
 
     qt = tt @ coeffs
@@ -547,7 +551,7 @@ def jtraj(q0, qf, tv, qd0=None, qd1=None):
         20 * A, 12 * B, 6 * C, np.zeros(A.shape)])
     qddt = tt @ coeffs / tscal ** 2
 
-    return Trajectory('jtraj', t, qt, qdt, qddt)
+    return Trajectory('jtraj', t, qt, qdt, qddt, istime=True)
 
 
 
