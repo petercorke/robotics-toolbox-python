@@ -933,11 +933,9 @@ def mstraj(
         and includes the final value unlike range() or np.arange()
         """
         ret = []
-        v = start
-        while v <= stop:
-            ret.append(v)
-            v += step
-        return np.r_[ret]
+        istart = round(start / step)
+        istop = round(stop / step)
+        return np.arange(istart, istop + 1) * step
 
     for seg in range(0, ns):
         q_next = viapoints[seg, :]    # current target
