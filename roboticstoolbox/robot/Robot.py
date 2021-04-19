@@ -466,7 +466,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         .. note:: Fixed joints, that maintain a constant link relative pose,
             are not included.  ``len(self.structure) == self.n``.
 
-        :seealso: :func:`Link.isrevolute`, :func:`prismaticjoints` 
+        :seealso: :func:`Link.isrevolute`, :func:`prismaticjoints`
         """
         return [link.isrevolute for link in self if link.isjoint]
 
@@ -1051,7 +1051,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         :rtype: ndarray(2,n)
         :exception ValueError: unset limits for a prismatic joint
 
-        Limits are extracted from the link objects.  If joints limits are 
+        Limits are extracted from the link objects.  If joints limits are
         not set for:
 
             - a revolute joint [-𝜋. 𝜋] is returned
@@ -1200,19 +1200,21 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         # find the right backend, modules are imported here on an as needs
         # basis
-        if  backend == 'swift' or default == 'swift':  # pragma nocover
+        if backend == 'swift' or default == 'swift':  # pragma nocover
             # swift was requested, is it installed?
             if isinstance(self, rtb.DHRobot):
                 raise NotImplementedError(
                     'Plotting in Swift is not implemented for DHRobots yet')
             try:
                 # yes, use it
-                from roboticstoolbox.backends.Swift import Swift
+                from roboticstoolbox.backends.swift import Swift
                 env = Swift()
                 return env
             except ModuleNotFoundError:
                 if backend == 'swift':
-                    print('Swift is not installed, install it using pip or conda')
+                    print(
+                        'Swift is not installed, '
+                        'install it using pip or conda')
                 backend = 'pyplot'
 
         elif backend == 'vpython' or default == 'vpython':  # pragma nocover
@@ -1227,7 +1229,9 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                 return env
             except ModuleNotFoundError:
                 if backend == 'vpython':
-                    print('VPython is not installed, install it using pip or conda')
+                    print(
+                        'VPython is not installed, '
+                        'install it using pip or conda')
                 backend = 'pyplot'
 
         if backend is None:
@@ -1347,7 +1351,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         if movie is not None:
             loop = False
-            
+
         while True:
             for qk in q:
                 self.q = qk
