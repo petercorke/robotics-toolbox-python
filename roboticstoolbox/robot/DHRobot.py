@@ -1034,8 +1034,8 @@ class DHRobot(Robot):
             =============  ==================================
             Value          Rotational representation
             =============  ==================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'rpy/xyz'``  RPY angular rates in XYZ order
+            ``'rpy/zyx'``  RPY angular rates in XYZ order
             ``'eul'``      Euler angular rates in ZYZ order
             ``'exp'``      exponential coordinate rates
             =============  ==================================
@@ -1070,10 +1070,10 @@ class DHRobot(Robot):
         # compute rotational transform if analytical Jacobian required
         if analytical is not None:
 
-            if analytical == 'rpy-xyz':
+            if analytical == 'rpy/xyz':
                 rpy = tr2rpy(T, 'xyz')
                 A = rpy2jac(rpy, 'xyz')
-            elif analytical == 'rpy-zyx':
+            elif analytical == 'rpy/zyx':
                 rpy = tr2rpy(T, 'zyx')
                 A = rpy2jac(rpy, 'zyx')
             elif analytical == 'eul':
@@ -1085,7 +1085,7 @@ class DHRobot(Robot):
                 A = np.eye(3, 3) - (1 - math.cos(theta)) / theta * skew(v) \
                     + (theta - math.sin(theta)) / theta * skew(v)**2
             else:
-                raise ValueError('bad order specified')
+                raise ValueError('bad analytical value specified')
 
             J0 = block_diag(np.eye(3, 3), np.linalg.inv(A)) @ J0
 

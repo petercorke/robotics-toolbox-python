@@ -1518,12 +1518,12 @@ class ERobot(BaseERobot):
         # compute rotational transform if analytical Jacobian required
         if analytical is not None and half != 'trans':
 
-            if analytical == 'rpy-xyz':
-                rpy = tr2rpy(T, 'xyz')
-                A = rpy2jac(rpy, 'xyz')
-            elif analytical == 'rpy-zyx':
-                rpy = tr2rpy(T, 'zyx')
-                A = rpy2jac(rpy, 'zyx')
+            if analytical == 'rpy/xyz':
+                rpy = tr2rpy(T, order='xyz')
+                A = rpy2jac(rpy, order='xyz')
+            elif analytical == 'rpy/zyx':
+                rpy = tr2rpy(T, order='zyx')
+                A = rpy2jac(rpy, order='zyx')
             elif analytical == 'eul':
                 eul = tr2eul(T)
                 A = eul2jac(eul)
@@ -1533,7 +1533,7 @@ class ERobot(BaseERobot):
                 A = np.eye(3, 3) - (1 - math.cos(theta)) / theta * skew(v) \
                     + (theta - math.sin(theta)) / theta * skew(v)**2
             else:
-                raise ValueError('bad order specified')
+                raise ValueError('bad analyical value specified')
 
             J = block_diag(np.eye(3, 3), np.linalg.inv(A)) @ J
 
