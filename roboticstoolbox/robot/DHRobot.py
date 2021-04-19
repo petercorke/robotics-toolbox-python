@@ -461,7 +461,7 @@ class DHRobot(Robot):
         """
         v = []
         for i in range(self.n):
-            v.append(self.links[i].theta)
+            v.append(self.links[i].alpha)
         return v
 
     @property

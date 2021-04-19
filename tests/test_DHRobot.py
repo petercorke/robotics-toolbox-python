@@ -8,6 +8,7 @@ import numpy as np
 import roboticstoolbox as rp
 import spatialmath as sm
 import unittest
+import math
 
 
 class TestDHRobot(unittest.TestCase):
@@ -1485,7 +1486,7 @@ class TestDHRobot(unittest.TestCase):
         r0 = rp.models.DH.Puma560()
 
         nt.assert_array_almost_equal(
-            r0.alpha, [0., 0., 0., 0., 0., 0.])
+            r0.alpha, np.r_[1, 0, -1, 1, -1, 0] * math.pi / 2)
 
     def test_ets(self):
         panda = rp.models.DH.Panda()
