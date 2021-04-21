@@ -5,10 +5,8 @@
 
 from roboticstoolbox.backends import swift
 import roboticstoolbox as rtb
-import spatialmath as sm
 import numpy as np
 import cProfile
-# import numpy.testing as nt
 
 env = swift.Swift(_dev=False)
 env.launch()

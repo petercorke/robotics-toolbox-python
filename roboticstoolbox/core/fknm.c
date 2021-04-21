@@ -723,7 +723,7 @@ void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_floa
     }
 
     mult(current, etool, ret);
-    copy(temp, current);
+    copy(ret, current);
     mult(current, tool, ret);
 }
 
@@ -1091,8 +1091,8 @@ void _r2q(npy_float64 *r, npy_float64 *q)
     t13m = pow((r[0 * 4 + 2] - r[2 * 4 + 0]), 2);
     t23m = pow((r[1 * 4 + 2] - r[2 * 4 + 1]), 2);
 
-    d1 = pow(( r[0 * 4 + 0] + r[1 * 4 + 1] + r[2 * 4 + 2] + 1), 2);
-    d2 = pow(( r[0 * 4 + 0] - r[1 * 4 + 1] - r[2 * 4 + 2] + 1), 2);
+    d1 = pow((r[0 * 4 + 0] + r[1 * 4 + 1] + r[2 * 4 + 2] + 1), 2);
+    d2 = pow((r[0 * 4 + 0] - r[1 * 4 + 1] - r[2 * 4 + 2] + 1), 2);
     d3 = pow((-r[0 * 4 + 0] + r[1 * 4 + 1] - r[2 * 4 + 2] + 1), 2);
     d4 = pow((-r[0 * 4 + 0] - r[1 * 4 + 1] + r[2 * 4 + 2] + 1), 2);
 

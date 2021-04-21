@@ -29,17 +29,18 @@ class YuMi(ERobot):
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke
     """
+
     def __init__(self):
 
         links, name = self.URDF_read(
             "yumi_description/urdf/yumi.urdf")
 
         super().__init__(
-                links,
-                name=name,
-                manufacturer='ABB',
-                # gripper_links=links[20]
-            )
+            links,
+            name=name,
+            manufacturer='ABB',
+            gripper_links=[links[20]]
+        )
 
         # self.addconfiguration(
         #     "qz", np.zeros((14,)))
@@ -51,4 +52,3 @@ if __name__ == '__main__':   # pragma nocover
 
     robot = YuMi()
     print(robot)
-

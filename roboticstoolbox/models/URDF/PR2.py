@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from roboticstoolbox.robot.ERobot import ERobot
+import numpy as np
 
 
 class PR2(ERobot):
@@ -13,11 +14,44 @@ class PR2(ERobot):
 
         super().__init__(
             links,
+            gripper_links=[links[53], links[73]],
             name=name)
+
+        self.grippers[0].tool = self.link_dict["r_gripper_tool_frame"].A()
+        self.grippers[1].tool = self.link_dict["l_gripper_tool_frame"].A()
 
         self.manufacturer = 'Willow Garage'
 
+        self.qz = np.zeros(31)
+
+
 if __name__ == '__main__':   # pragma nocover
 
-    robot = PR2()
-    print(robot)
+    r = PR2()
+
+    # i = 0
+
+    # for link in r.links:
+    #     if link.isjoint:
+    #         print(i, link.name)
+
+    #         i += 1
+
+    # path, n, t = r.get_path(end=r.grippers[0])
+
+    # print(n)
+    # print(t)
+
+    # for l in path[1:]:
+    #     if len(l.collision) > 0:
+    #         print(l.isjoint)
+    #         print(l.name)
+    #         print(l.parent.name)
+    #         print()
+
+    # for l in r.grippers[0].links:
+    #     if len(l.collision) > 0:
+    #         print(l.isjoint)
+    #         print(l.name)
+    #         print(l.parent.name)
+    #         print()
