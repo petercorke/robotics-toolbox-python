@@ -230,7 +230,13 @@
                 <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">You do not have matplotlib installed, do:</span><span class="se">\n</span><span class="s1">&#39;</span>
                 <span class="s1">&#39;pip install matplotlib</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PyPlot.launch"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.launch">[docs]</a>    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span>  <span class="sa">f</span><span class="s2">&quot;PyPlot3D backend, t = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sim_time</span><span class="si">}</span><span class="s2">, scene:&quot;</span>
+        <span class="k">for</span> <span class="n">robot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  </span><span class="si">{</span><span class="n">robot</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+<div class="viewcode-block" id="PyPlot.launch"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.launch">[docs]</a>    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Launch a graphical interface</span>
 
@@ -276,8 +282,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylim3d</span><span class="p">([</span><span class="n">limits</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">limits</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_zlim3d</span><span class="p">([</span><span class="n">limits</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">limits</span><span class="p">[</span><span class="mi">5</span><span class="p">]])</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="n">limits</span>
+
         <span class="c1"># disable the display of value under cursor</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">format_coord</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="s1">&#39;&#39;</span>
+        <span class="c1"># self.ax.format_coord = lambda x, y: &#39;&#39;</span>
 
         <span class="c1"># add time display in top-right corner</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figtext</span><span class="p">(</span><span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -388,7 +396,7 @@
 
 <div class="viewcode-block" id="PyPlot.add"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">ob</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">jointlabels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a robot to the graphical scene</span>
 
@@ -427,8 +435,8 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ob</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">RobotPlot</span><span class="p">(</span>
-                    <span class="n">ob</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="p">,</span> <span class="n">readonly</span><span class="p">,</span> <span class="n">display</span><span class="p">,</span>
-                    <span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+                    <span class="n">ob</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">readonly</span><span class="p">,</span> <span class="n">display</span><span class="p">,</span>
+                    <span class="n">jointaxes</span><span class="p">,</span> <span class="n">jointlabels</span><span class="p">,</span> <span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
             <span class="nb">id</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robots</span><span class="p">)</span>
 
@@ -586,7 +594,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylim3d</span><span class="p">([</span><span class="n">y_middle</span> <span class="o">-</span> <span class="n">plot_radius</span><span class="p">,</span> <span class="n">y_middle</span> <span class="o">+</span> <span class="n">plot_radius</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_zlim3d</span><span class="p">([</span><span class="n">z_middle</span> <span class="o">-</span> <span class="n">plot_radius</span><span class="p">,</span> <span class="n">z_middle</span> <span class="o">+</span> <span class="n">plot_radius</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">_add_teach_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_add_teach_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">_isnotebook</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;cannot use teach panel under Jupyter&#39;</span><span class="p">)</span>
@@ -594,8 +602,8 @@
         <span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span>
 
         <span class="c1"># Add text to the plots</span>
-        <span class="k">def</span> <span class="nf">text_trans</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">fkine</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">text_trans</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
             <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">rpy</span><span class="p">(</span><span class="s1">&#39;deg&#39;</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
             <span class="n">text</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="s2">&quot;x: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
@@ -607,10 +615,12 @@
 
         <span class="c1"># Update the self state in mpl and the text</span>
         <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">robot</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-                <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sjoint</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">val</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
-
-            <span class="n">text_trans</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">robot</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                    <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sjoint</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">val</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sjoint</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">val</span>
+            <span class="n">text_trans</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">)</span>
 
         <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
         <span class="n">text</span> <span class="o">=</span> <span class="p">[]</span>
@@ -623,14 +633,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">axjoint</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sjoint</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="n">qlim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">qlim</span><span class="p">)</span> <span class="o">*</span> <span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        <span class="n">qlim</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">todegrees</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">qlim</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">qlim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>     <span class="c1"># pragma: no cover</span>
-            <span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">180</span>
-            <span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">180</span>
+        <span class="c1"># if np.all(qlim == 0):     # pragma: no cover</span>
+        <span class="c1">#     qlim[0, :] = -180</span>
+        <span class="c1">#     qlim[1, :] = 180</span>
 
         <span class="c1"># Set the pose text</span>
-        <span class="n">T</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">fkine</span><span class="p">()</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">rpy</span><span class="p">(),</span> <span class="mi">3</span><span class="p">)</span>
 
@@ -659,18 +669,24 @@
             <span class="mf">0.02</span><span class="p">,</span>  <span class="mi">1</span> <span class="o">-</span> <span class="n">ym</span> <span class="o">+</span> <span class="mf">0.06</span><span class="p">,</span> <span class="s2">&quot;Joint angles&quot;</span><span class="p">,</span>
             <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#4f4f4f&quot;</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">ymin</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ym</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span> <span class="o">*</span> <span class="n">yh</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">axjoint</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">],</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;#dbdbdb&#39;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">ymin</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ym</span><span class="p">)</span> <span class="o">-</span> <span class="n">j</span> <span class="o">*</span> <span class="n">yh</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">],</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;#dbdbdb&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axjoint</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">sjoint</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">Slider</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">axjoint</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s1">&#39;q&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
-                    <span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">robot</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                <span class="n">slider</span> <span class="o">=</span> <span class="n">Slider</span><span class="p">(</span>
+                    <span class="n">ax</span><span class="p">,</span> <span class="s1">&#39;q&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">),</span>
+                    <span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span> <span class="s2">&quot;</span><span class="si">% .1f</span><span class="s2">°&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">slider</span> <span class="o">=</span> <span class="n">Slider</span><span class="p">(</span>
+                    <span class="n">ax</span><span class="p">,</span> <span class="s1">&#39;q&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">),</span>
+                    <span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">robot</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="s2">&quot;</span><span class="si">% .1f</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">sjoint</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">on_changed</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">update</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">robot</span><span class="p">))</span></div>
-
+            <span class="n">slider</span><span class="o">.</span><span class="n">on_changed</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">update</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">robot</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sjoint</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slider</span><span class="p">)</span>
+        <span class="n">robot</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span></div>
 
 <span class="k">def</span> <span class="nf">_isnotebook</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -706,7 +722,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 21-Mar-2021.
+        Last updated on 23-Apr-2021.
       </span>
 
     </p>

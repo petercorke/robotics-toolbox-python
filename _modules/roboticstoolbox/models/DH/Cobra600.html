@@ -208,7 +208,8 @@
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
-
+    <span class="n">deg</span> <span class="o">=</span> <span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mf">0.387</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.325</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">50</span><span class="o">*</span><span class="n">deg</span><span class="p">,</span> <span class="mi">50</span><span class="o">*</span><span class="n">deg</span><span class="p">])</span>
     <span class="n">cobra</span> <span class="o">=</span> <span class="n">Cobra600</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">cobra</span><span class="p">)</span>
 </pre></div>
@@ -224,7 +225,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 21-Mar-2021.
+        Last updated on 23-Apr-2021.
       </span>
 
     </p>

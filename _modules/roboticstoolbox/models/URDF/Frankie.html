@@ -189,14 +189,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">elinks</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">urdf_to_ets_args</span><span class="p">(</span>
+        <span class="n">links</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">URDF_read</span><span class="p">(</span>
             <span class="s2">&quot;franka_description/robots/frankie_arm_hand.urdf.xacro&quot;</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">elinks</span><span class="p">,</span>
+            <span class="n">links</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">manufacturer</span><span class="o">=</span><span class="s1">&#39;Franka Emika&#39;</span><span class="p">,</span>
-            <span class="n">gripper_links</span><span class="o">=</span><span class="n">elinks</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span>
+            <span class="n">gripper_links</span><span class="o">=</span><span class="n">links</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">qdlim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
@@ -228,7 +228,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 21-Mar-2021.
+        Last updated on 23-Apr-2021.
       </span>
 
     </p>

@@ -160,21 +160,56 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ERobot</span> <span class="kn">import</span> <span class="n">ERobot</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
 <div class="viewcode-block" id="PR2"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.URDF.PR2">[docs]</a><span class="k">class</span> <span class="nc">PR2</span><span class="p">(</span><span class="n">ERobot</span><span class="p">):</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">args</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">urdf_to_ets_args</span><span class="p">(</span>
-            <span class="s2">&quot;pr2_description/robots/pr2.urdf.xacro&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;pr2_description&quot;</span><span class="p">)</span>
+        <span class="n">links</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">URDF_read</span><span class="p">(</span>
+            <span class="s2">&quot;pr2_description/robots/pr2.urdf.xacro&quot;</span><span class="p">,</span> <span class="s2">&quot;pr2_description&quot;</span>
+        <span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">PR2</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">gripper_links</span><span class="o">=</span><span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="mi">53</span><span class="p">],</span> <span class="n">links</span><span class="p">[</span><span class="mi">73</span><span class="p">]],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span> <span class="o">=</span> <span class="s1">&#39;Willow Garage&#39;</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">link_dict</span><span class="p">[</span><span class="s2">&quot;r_gripper_tool_frame&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">link_dict</span><span class="p">[</span><span class="s2">&quot;l_gripper_tool_frame&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span> <span class="o">=</span> <span class="s2">&quot;Willow Garage&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">31</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">PR2</span><span class="p">()</span>
+
+    <span class="c1"># i = 0</span>
+
+    <span class="c1"># for link in r.links:</span>
+    <span class="c1">#     if link.isjoint:</span>
+    <span class="c1">#         print(i, link.name)</span>
+
+    <span class="c1">#         i += 1</span>
+
+    <span class="c1"># path, n, t = r.get_path(end=r.grippers[0])</span>
+
+    <span class="c1"># print(n)</span>
+    <span class="c1"># print(t)</span>
+
+    <span class="c1"># for l in path[1:]:</span>
+    <span class="c1">#     if len(l.collision) &gt; 0:</span>
+    <span class="c1">#         print(l.isjoint)</span>
+    <span class="c1">#         print(l.name)</span>
+    <span class="c1">#         print(l.parent.name)</span>
+    <span class="c1">#         print()</span>
+
+    <span class="c1"># for l in r.grippers[0].links:</span>
+    <span class="c1">#     if len(l.collision) &gt; 0:</span>
+    <span class="c1">#         print(l.isjoint)</span>
+    <span class="c1">#         print(l.name)</span>
+    <span class="c1">#         print(l.parent.name)</span>
+    <span class="c1">#         print()</span>
 </pre></div>
 
            </div>
@@ -188,7 +223,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 21-Mar-2021.
+        Last updated on 23-Apr-2021.
       </span>
 
     </p>

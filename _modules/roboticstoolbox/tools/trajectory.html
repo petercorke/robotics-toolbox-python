@@ -212,6 +212,9 @@
         <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Trajectory created by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2"> time steps x </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">naxes</span><span class="si">}</span><span class="s2"> axes&quot;</span>
         <span class="k">return</span> <span class="n">s</span></div>
 
+<div class="viewcode-block" id="Trajectory.__repr__"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="Trajectory.__len__"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.__len__">[docs]</a>    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Length of trajectory</span>
@@ -347,7 +350,11 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">istime</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$s(t)$&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;traj&#39;</span><span class="p">,</span> <span class="s1">&#39;mtraj&#39;</span><span class="p">,</span> <span class="s1">&#39;mstraj&#39;</span><span class="p">):</span>
+                <span class="n">symbol</span> <span class="o">=</span> <span class="s1">&#39;q&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">symbol</span> <span class="o">=</span> <span class="s1">&#39;s&#39;</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;$</span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="s2">(t)$&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$s(k)$&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
 
@@ -358,7 +365,7 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">istime</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$ds/dt$&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;$\dot</span><span class="se">{{</span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="se">}}</span><span class="s2">(t)$&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$ds/dk$&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
 
@@ -369,7 +376,7 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">istime</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$ds^2/dt^2$&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;$\ddot</span><span class="se">{{</span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="se">}}</span><span class="s2">(t)$&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;t (seconds)&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$d^2s/dk^2$&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
@@ -615,7 +622,7 @@
     <span class="k">return</span> <span class="n">func</span></div>
 <span class="c1"># -------------------------------------------------------------------------- #</span>
 
-<div class="viewcode-block" id="jtraj"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.jtraj">[docs]</a><span class="k">def</span> <span class="nf">jtraj</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">qf</span><span class="p">,</span> <span class="n">tv</span><span class="p">,</span> <span class="n">qd0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qd1</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="jtraj"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.jtraj">[docs]</a><span class="k">def</span> <span class="nf">jtraj</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">qf</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">qd0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qd1</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute a joint-space trajectory</span>
 
@@ -623,8 +630,8 @@
 <span class="sd">    :type q0: array_like(n)</span>
 <span class="sd">    :param qf: final joint coordinate</span>
 <span class="sd">    :type qf: array_like(n)</span>
-<span class="sd">    :param tv: time vector or number of steps</span>
-<span class="sd">    :type tv: array_like or int</span>
+<span class="sd">    :param t: time vector or number of steps</span>
+<span class="sd">    :type t: array_like or int</span>
 <span class="sd">    :param qd0: initial velocity, defaults to zero</span>
 <span class="sd">    :type qd0: array_like(n), optional</span>
 <span class="sd">    :param qd1: final velocity, defaults to zero</span>
@@ -652,12 +659,12 @@
 <span class="sd">    :seealso: :func:`ctraj`, :func:`qplot`, :func:`~SerialLink.jtraj`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># print(f&quot;  --- jtraj: {q0} --&gt; {q1} in {tv}&quot;)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tv</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">tscal</span> <span class="o">=</span> <span class="mf">1.0</span>
-        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tv</span><span class="p">)</span>  <span class="c1"># normalized time from 0 -&gt; 1</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>  <span class="c1"># normalized time from 0 -&gt; 1</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">tscal</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">tv</span><span class="p">)</span>
-        <span class="n">t</span> <span class="o">=</span> <span class="n">tv</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="o">/</span> <span class="n">tscal</span>
+        <span class="n">tscal</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="o">/</span> <span class="n">tscal</span>
 
     <span class="n">q0</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q0</span><span class="p">)</span>
     <span class="n">qf</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qf</span><span class="p">)</span>
@@ -687,8 +694,8 @@
 
     <span class="c1"># n = len(q0)</span>
 
-    <span class="n">tt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span><span class="o">**</span><span class="mi">5</span><span class="p">,</span> <span class="n">t</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span> <span class="n">t</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="n">t</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">)])</span><span class="o">.</span><span class="n">T</span>
-    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">E</span><span class="p">,</span> <span class="n">F</span><span class="p">])</span>
+    <span class="n">tt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ts</span><span class="o">**</span><span class="mi">5</span><span class="p">,</span> <span class="n">ts</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span> <span class="n">ts</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="n">ts</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">shape</span><span class="p">)])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">E</span><span class="p">,</span> <span class="n">F</span><span class="p">])</span>  <span class="c1"># 6xN</span>
 
     <span class="n">qt</span> <span class="o">=</span> <span class="n">tt</span> <span class="o">@</span> <span class="n">coeffs</span>
 
@@ -703,7 +710,7 @@
         <span class="mi">20</span> <span class="o">*</span> <span class="n">A</span><span class="p">,</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">B</span><span class="p">,</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">C</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)])</span>
     <span class="n">qddt</span> <span class="o">=</span> <span class="n">tt</span> <span class="o">@</span> <span class="n">coeffs</span> <span class="o">/</span> <span class="n">tscal</span> <span class="o">**</span> <span class="mi">2</span>
 
-    <span class="k">return</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;jtraj&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">qt</span><span class="p">,</span> <span class="n">qdt</span><span class="p">,</span> <span class="n">qddt</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;jtraj&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">qt</span><span class="p">,</span> <span class="n">qdt</span><span class="p">,</span> <span class="n">qddt</span><span class="p">,</span> <span class="n">istime</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 
@@ -770,29 +777,43 @@
     <span class="k">return</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;mtraj&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">yd</span><span class="p">,</span> <span class="n">ydd</span><span class="p">,</span> <span class="n">istime</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="qplot"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.qplot">[docs]</a><span class="k">def</span> <span class="nf">qplot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="qplot"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.qplot">[docs]</a><span class="k">def</span> <span class="nf">qplot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wrist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unwrap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stack</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plot robot joint angles</span>
+<span class="sd">    Plot trajectory data</span>
 
-<span class="sd">    :param q: joint angle trajectory</span>
-<span class="sd">    :type q: numpy ndarray, shape=(M,N)</span>
+<span class="sd">    :param q: trajectory, one row per timestep</span>
+<span class="sd">    :type q: ndarray(m,n)</span>
 <span class="sd">    :param t: time vector, optional</span>
 <span class="sd">    :type t: numpy ndarray, shape=(M,)</span>
-<span class="sd">    :param arm: distinguish arm and wrist joints with line styles, default False</span>
-<span class="sd">    :type arm: bool</span>
+<span class="sd">    :param wrist: distinguish arm and wrist joints with line styles</span>
+<span class="sd">    :type wrist: bool</span>
+<span class="sd">    :param unwrap: unwrap joint angles so that they smoothly increase or </span>
+<span class="sd">        decrease when they pass through :math:`\pm \pi`</span>
+<span class="sd">    :type unwrap: bool</span>
+<span class="sd">    :param block: block until the plot is closed</span>
+<span class="sd">    :type block: bool</span>
+<span class="sd">    :param labels: legend labels</span>
+<span class="sd">    :type labels: list of str, or single string with space separated labels</span>
+<span class="sd">    :param kwargs: options passed to pyplot.plot</span>
+<span class="sd">    :param loc: legend location as per pyplot.legend</span>
+<span class="sd">    :type loc: str</span>
 
-<span class="sd">    This is a convenience function to plot joint angle trajectories (MxN) for</span>
-<span class="sd">    an N-axis robot, where each row represents one time step.</span>
+<span class="sd">    This is a convenience function to plot trajectories, where each row represents one time step.</span>
 
 <span class="sd">    - ``qplot(q)`` plots the joint angles versus row number.  If N==6 a</span>
 <span class="sd">      conventional 6-axis robot is assumed, and the first three joints are</span>
 <span class="sd">      shown as solid lines, the last three joints (wrist) are shown as dashed</span>
 <span class="sd">      lines. A legend is also displayed.</span>
 
-<span class="sd">    - ``qplot(q, t)`` as above but displays the joint angle trajectory versus</span>
+<span class="sd">    - ``qplot(t, q)`` as above but displays the joint angle trajectory versus</span>
 <span class="sd">      time given the time vector T (Mx1).</span>
 
-<span class="sd">    :seealso: :func:`jtraj`</span>
+<span class="sd">    Example::</span>
+
+<span class="sd">        &gt;&gt;&gt; qplot(q, x, labels=&#39;x y z&#39;)</span>
+
+<span class="sd">    :seealso: :func:`jtraj`, :func:`numpy.unwrap`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">q</span> <span class="o">=</span> <span class="n">x</span>
@@ -804,32 +825,54 @@
     <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;dimensions of arguments are not consistent&#39;</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">unwrap</span><span class="p">:</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
     <span class="n">n</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">6</span> <span class="ow">and</span> <span class="n">arm</span><span class="p">:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span> <span class="s1">&#39;--&#39;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)])</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">labels</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">))</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;wrong type for labels&#39;</span><span class="p">)</span>
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (s)&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Joint coordinates (rad,m)&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 
+    <span class="k">if</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            
+            <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (s)&#39;</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">6</span> <span class="ow">and</span> <span class="n">wrist</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">loc</span><span class="p">)</span>
+        
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (s)&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Joint coordinates (rad,m)&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_axes</span><span class="p">()</span></div>
 
 <span class="c1"># -------------------------------------------------------------------------- #</span>
 
-<div class="viewcode-block" id="ctraj"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.ctraj">[docs]</a><span class="k">def</span> <span class="nf">ctraj</span><span class="p">(</span><span class="n">T0</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+<div class="viewcode-block" id="ctraj"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.ctraj">[docs]</a><span class="k">def</span> <span class="nf">ctraj</span><span class="p">(</span><span class="n">T0</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cartesian trajectory between two poses</span>
 
@@ -837,6 +880,10 @@
 <span class="sd">    :type T0: SE3</span>
 <span class="sd">    :param T1: final pose</span>
 <span class="sd">    :type T1: SE3</span>
+<span class="sd">    :param t: number of samples or time vector</span>
+<span class="sd">    :type t: int or ndarray(n)</span>
+<span class="sd">    :param s: array of distance along the path, in the interval [0, 1]</span>
+<span class="sd">    :type s: ndarray(s)</span>
 <span class="sd">    :return T0: smooth path from ``T0`` to ``T1``</span>
 <span class="sd">    :rtype: SE3</span>
 
@@ -845,7 +892,10 @@
 <span class="sd">    the path. The Cartesian trajectory is an SE3 instance containing ``n``</span>
 <span class="sd">    values.</span>
 
-<span class="sd">    ``ctraj(T0, T1, s)`` as above but the elements of ``s`` specify the</span>
+<span class="sd">    ``ctraj(T0, T1, t)`` as above but the trajectory is sampled at</span>
+<span class="sd">    the  points in the array ``t``.</span>
+
+<span class="sd">    ``ctraj(T0, T1, s=s)`` as above but the elements of ``s`` specify the</span>
 <span class="sd">    fractional distance  along the path, and these values are in the</span>
 <span class="sd">    range [0 1]. The i&#39;th point corresponds to a distance ``s[i]`` along</span>
 <span class="sd">    the path.</span>
@@ -872,8 +922,11 @@
 <span class="sd">        :func:`~spatialmath.unitquaternion.interp`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">lspb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">s</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">lspb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span><span class="o">.</span><span class="n">s</span>
+    <span class="k">elif</span> <span class="n">isvector</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">lspb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>  <span class="n">t</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="o">.</span><span class="n">s</span>
     <span class="k">elif</span> <span class="n">isvector</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1043,11 +1096,9 @@
 <span class="sd">        and includes the final value unlike range() or np.arange()</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="n">start</span>
-        <span class="k">while</span> <span class="n">v</span> <span class="o">&lt;=</span> <span class="n">stop</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-            <span class="n">v</span> <span class="o">+=</span> <span class="n">step</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">ret</span><span class="p">]</span>
+        <span class="n">istart</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">start</span> <span class="o">/</span> <span class="n">step</span><span class="p">)</span>
+        <span class="n">istop</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">stop</span> <span class="o">/</span> <span class="n">step</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">istart</span><span class="p">,</span> <span class="n">istop</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">step</span>
 
     <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ns</span><span class="p">):</span>
         <span class="n">q_next</span> <span class="o">=</span> <span class="n">viapoints</span><span class="p">[</span><span class="n">seg</span><span class="p">,</span> <span class="p">:]</span>    <span class="c1"># current target</span>
@@ -1185,7 +1236,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 21-Mar-2021.
+        Last updated on 23-Apr-2021.
       </span>
 
     </p>

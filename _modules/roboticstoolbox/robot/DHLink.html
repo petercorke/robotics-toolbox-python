@@ -172,6 +172,23 @@
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
 <span class="k">def</span> <span class="nf">_check_rne</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    @_check_rne decorator</span>
+
+<span class="sd">    Decorator applied to any method to calls to C RNE code.  Works in</span>
+<span class="sd">    conjunction with::</span>
+
+<span class="sd">        @_listen_dyn</span>
+<span class="sd">        def dyn_param_setter(self, value):</span>
+
+<span class="sd">    which marks the dynamic parameters as having changed using the robot&#39;s</span>
+<span class="sd">    ``.dynchanged()`` method.</span>
+
+<span class="sd">    If this is the case, then the parameters are re-serialized prior to</span>
+<span class="sd">    invoking inverse dynamics.</span>
+
+<span class="sd">    :seealso: :func:`Link._listen_dyn`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">wrapper_check_rne</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_rne_ob</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_dynchanged</span><span class="p">:</span>
@@ -283,6 +300,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span> <span class="o">=</span> <span class="n">mdh</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># for compatibiity with ELink</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">DHLink</span><span class="p">):</span>
@@ -637,9 +659,9 @@
             <span class="c1"># DH format: theta d a alpha</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
-                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
@@ -951,7 +973,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 21-Mar-2021.
+        Last updated on 23-Apr-2021.
       </span>
 
     </p>

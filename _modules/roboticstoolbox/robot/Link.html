@@ -167,13 +167,19 @@
 
 <span class="k">def</span> <span class="nf">_listen_dyn</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    @_listen_dyn</span>
+
 <span class="sd">    Decorator for property setters</span>
 
 <span class="sd">    Use this decorator for any property setter that updates a parameter that</span>
 <span class="sd">    affects the result of inverse dynamics.  This allows the C version of the</span>
 <span class="sd">    parameters only having to be updated when they change, rather than on</span>
-<span class="sd">    every call.  This decorator signals the change by invoking the</span>
-<span class="sd">    ``dynchanged()`` method of the robot that owns the link.</span>
+<span class="sd">    every call.  This decorator signals the change by:</span>
+<span class="sd">    </span>
+<span class="sd">    - invoking the ``.dynchanged()`` method of the robot that owns the link.</span>
+<span class="sd">      This assumes that the Link object is owned by a robot, this happens</span>
+<span class="sd">      when the Link object is passed to a robot constructor.</span>
+<span class="sd">    - setting the ``._hasdynamics`` attribute of the Link</span>
 
 <span class="sd">    Example::</span>
 
@@ -182,11 +188,13 @@
 <span class="sd">        def m(self, m_new):</span>
 <span class="sd">            self._m = m_new</span>
 
+<span class="sd">    :seealso: :func:`DHLink._dyn_changed`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">wrapper_listen_dyn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_robot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">dynchanged</span><span class="p">()</span>
+        <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_hasdynamics</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">wrapper_listen_dyn</span>
 
@@ -246,13 +254,13 @@
             <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">m</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">r</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,)),</span>
-            <span class="n">I</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>  <span class="c1"># noqa</span>
-            <span class="n">Jm</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">B</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">Tc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,)),</span>
-            <span class="n">G</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">m</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">I</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa</span>
+            <span class="n">Jm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">B</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">Tc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">G</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">mesh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">geometry</span><span class="o">=</span><span class="p">[],</span>
             <span class="n">collision</span><span class="o">=</span><span class="p">[],</span>
@@ -275,16 +283,33 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
 
         <span class="c1"># Link dynamic Parameters</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="n">m</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">r</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">I</span>  <span class="c1"># noqa</span>
 
-        <span class="c1"># Motor dynamic parameters</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Jm</span> <span class="o">=</span> <span class="n">Jm</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">B</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span> <span class="o">=</span> <span class="n">Tc</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="n">G</span>
+        <span class="k">def</span> <span class="nf">dynpar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">default</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasdynamics</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">dynchange</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># link inertial parameters</span>
+        <span class="n">dynchange</span> <span class="o">+=</span> <span class="n">dynpar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">dynchange</span> <span class="o">+=</span> <span class="n">dynpar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,)))</span>
+        <span class="n">dynchange</span> <span class="o">+=</span> <span class="n">dynpar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+
+        <span class="c1"># Motor inertial and frictional parameters</span>
+        <span class="n">dynchange</span> <span class="o">+=</span> <span class="n">dynpar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Jm&#39;</span><span class="p">,</span> <span class="n">Jm</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">dynchange</span> <span class="o">+=</span> <span class="n">dynpar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">dynchange</span> <span class="o">+=</span> <span class="n">dynpar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Tc&#39;</span><span class="p">,</span> <span class="n">Tc</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,)))</span>
+        <span class="n">dynchange</span> <span class="o">+=</span> <span class="n">dynpar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">actuator</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># reference to more advanced actuator model</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasdynamics</span> <span class="o">=</span> <span class="n">dynchange</span> <span class="o">&gt;</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="Link.copy"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.Link.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -406,13 +431,13 @@
         <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">isscalar</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">!=</span> <span class="n">ignorevalue</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">indices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">flat</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
                     <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[[</span><span class="n">flat</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]]</span>
-                <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">=[&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">v</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">=[&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">v</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
         <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 
@@ -586,6 +611,30 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_qlim</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_qlim</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qlim_new</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hasdynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Link has dynamic parameters (Link superclass)</span>
+
+<span class="sd">        :return: Link has dynamic parameters</span>
+<span class="sd">        :rtype: bool</span>
+
+<span class="sd">        Link has some assigned (non-default) dynamic parameters.  These could</span>
+<span class="sd">        have been assigned:</span>
+
+<span class="sd">        - at constructor time, eg. ``m=1.2``</span>
+<span class="sd">        - by invoking a setter method, eg. ``link.m = 1.2``</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">            &gt;&gt;&gt; robot = rtb.models.DH.Puma560()</span>
+<span class="sd">            &gt;&gt;&gt; robot[1].hasdynamics</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hasdynamics</span>
 
 <span class="c1"># -------------------------------------------------------------------------- #</span>
 
@@ -878,8 +927,8 @@
 
 <span class="sd">        :returns: d, p1, p2 where d is the distance between the shapes,</span>
 <span class="sd">            p1 and p2 are the points in the world frame on the respective</span>
-<span class="sd">            shapes</span>
-<span class="sd">        :rtype: float, SE3, SE3</span>
+<span class="sd">            shapes. The points returned are homogeneous with [x, y, z, 1].</span>
+<span class="sd">        :rtype: float, ndarray(1x4), ndarray(1x4)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="n">d</span> <span class="o">=</span> <span class="mi">10000</span>
@@ -942,7 +991,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 21-Mar-2021.
+        Last updated on 23-Apr-2021.
       </span>
 
     </p>

@@ -216,12 +216,12 @@ or a variable.  A variable amount corresponds to a joint.</p>
 <span class="go">tz(0.75)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-<span class="go">Rx(17.19°) * tz(0.75)</span>
+<span class="go">Rx(17.19°) ⊕ tz(0.75)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-<span class="go">SE3(array([[1.00000000000000, 0, 0, 0],</span>
-<span class="go">           [0, 0.955336489125606, -0.295520206661340, -0.221640154996005],</span>
-<span class="go">           [0, 0.295520206661340, 0.955336489125606, 0.716502366844205],</span>
-<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
+<span class="go">SE3(array([[ 1.    ,  0.    ,  0.    ,  0.    ],</span>
+<span class="go">           [ 0.    ,  0.9553, -0.2955, -0.2216],</span>
+<span class="go">           [ 0.    ,  0.2955,  0.9553,  0.7165],</span>
+<span class="go">           [ 0.    ,  0.    ,  0.    ,  1.    ]]))</span>
 </pre></div>
 </td></tr></table></div>
 <p>In lines 2-5 we defined two elementary transforms.  Line 2 defines a rotation
@@ -253,21 +253,21 @@ as shown in this example where we define a simple two link planar manipulator.</
 <span class="normal">18</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-<span class="go">Rz(q0) * tx(1) * Rz(q1) * tx(1)</span>
+<span class="go">Rz(q0) ⊕ tx(1) ⊕ Rz(q1) ⊕ tx(1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 <span class="go">4</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
-<span class="go">tx(1) * Rz(q)</span>
+<span class="go">tx(1) ⊕ Rz(q)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-<span class="go">SE3(array([[1.00000000000000, 0, 0, 2.00000000000000],</span>
-<span class="go">           [0, 1.00000000000000, 0, 0],</span>
-<span class="go">           [0, 0, 1.00000000000000, 0],</span>
-<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
+<span class="go">SE3(array([[1., 0., 0., 2.],</span>
+<span class="go">           [0., 1., 0., 0.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">],</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span>
-<span class="go">SE3(array([[1.00000000000000, 0, 0, 1.00000000000000],</span>
-<span class="go">           [0, 1.00000000000000, 0, 1.00000000000000],</span>
-<span class="go">           [0, 0, 1.00000000000000, 0],</span>
-<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
+<span class="go">SE3(array([[1., 0., 0., 1.],</span>
+<span class="go">           [0., 1., 0., 1.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
 </pre></div>
 </td></tr></table></div>
 <p>Line 2 succinctly describes the kinematics in terms of elementary transforms: a rotation around the z-axis by the
@@ -294,8 +294,8 @@ Peter I. Corke, IEEE Transactions on Robotics, 23(3), pp 590-594, June 2007.</p>
 <h2>ETS - 3D<a class="headerlink" href="#ets-3d" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="roboticstoolbox.robot.ETS.ETS">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></code><code class="sig-name descname"><span class="pre">ETS</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ETS.SuperETS</span></code></p>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></code><code class="sig-name descname"><span class="pre">ETS</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ETS.BaseETS</span></code></p>
 <p>This class implements an elementary transform sequence (ETS) for 3D</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -379,7 +379,7 @@ this case.</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.isrevolute" title="roboticstoolbox.robot.ETS.ETS.isrevolute"><code class="xref py py-func docutils literal notranslate"><span class="pre">isrevolute()</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">isrotation()</span></code></p>
 </dd>
 <dt class="field-even">SymPy</dt>
 <dd class="field-even"><p>supported</p>
@@ -416,7 +416,7 @@ this case.</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.isrevolute" title="roboticstoolbox.robot.ETS.ETS.isrevolute"><code class="xref py py-func docutils literal notranslate"><span class="pre">isrevolute()</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">isrotation()</span></code></p>
 </dd>
 <dt class="field-even">SymPy</dt>
 <dd class="field-even"><p>supported</p>
@@ -453,7 +453,7 @@ this case.</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.isrevolute" title="roboticstoolbox.robot.ETS.ETS.isrevolute"><code class="xref py py-func docutils literal notranslate"><span class="pre">isrevolute()</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">isrotation()</span></code></p>
 </dd>
 <dt class="field-even">SymPy</dt>
 <dd class="field-even"><p>supported</p>
@@ -489,7 +489,7 @@ can be set in this case.</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.isprismatic" title="roboticstoolbox.robot.ETS.ETS.isprismatic"><code class="xref py py-func docutils literal notranslate"><span class="pre">isprismatic()</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">istranslation()</span></code></p>
 </dd>
 <dt class="field-even">SymPy</dt>
 <dd class="field-even"><p>supported</p>
@@ -525,7 +525,7 @@ can be set in this case.</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.isprismatic" title="roboticstoolbox.robot.ETS.ETS.isprismatic"><code class="xref py py-func docutils literal notranslate"><span class="pre">isprismatic()</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">istranslation()</span></code></p>
 </dd>
 <dt class="field-even">SymPy</dt>
 <dd class="field-even"><p>supported</p>
@@ -561,7 +561,7 @@ can be set in this case.</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.isprismatic" title="roboticstoolbox.robot.ETS.ETS.isprismatic"><code class="xref py py-func docutils literal notranslate"><span class="pre">isprismatic()</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">istranslation()</span></code></p>
 </dd>
 <dt class="field-even">SymPy</dt>
 <dd class="field-even"><p>supported</p>
@@ -804,54 +804,6 @@ mix of rotations and translations.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ETS.ETS.isrevolute">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">isrevolute</span></code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.isrevolute" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test if ET is a rotation</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>True if a rotation</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>bool</p>
-</dd>
-</dl>
-<p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">isrevolute</span>
-<span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">isrevolute</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.ETS.ETS.isprismatic">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">isprismatic</span></code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.isprismatic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test if ET is a translation</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>True if a translation</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>bool</p>
-</dd>
-</dl>
-<p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">isprismatic</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">isprismatic</span>
-<span class="go">False</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.ETS.axis">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">axis</span></code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.axis" title="Permalink to this definition">¶</a></dt>
 <dd><p>The transform type and axis</p>
@@ -898,7 +850,7 @@ mix of rotations and translations.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 <span class="go">tx(1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
-<span class="go">tx(1) * Rz(q)</span>
+<span class="go">tx(1) ⊕ Rz(q)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -930,7 +882,7 @@ instance is modified.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tail</span>
 <span class="go">tx(1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span>
-<span class="go">Rz(q0) * tx(1) * Rz(q1)</span>
+<span class="go">Rz(q0) ⊕ tx(1) ⊕ Rz(q1)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1012,21 +964,21 @@ index, if provided, otherwise a sequential value.</p></li>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
-<span class="go">Rz(q) * tx(1)</span>
+<span class="go">Rz(q) ⊕ tx(1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-<span class="go">Rz(q0) * tx(1) * Rz(q1)</span>
+<span class="go">Rz(q0) ⊕ tx(1) ⊕ Rz(q1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
-<span class="go">Rz() * tx(1) * Rz()</span>
+<span class="go">Rz() ⊕ tx(1) ⊕ Rz()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;θ</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="p">))</span>  <span class="c1"># numbering from 0</span>
-<span class="go">Rz(θ0) * tx(1) * Rz(θ1)</span>
+<span class="go">Rz(θ0) ⊕ tx(1) ⊕ Rz(θ1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;θ</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="p">))</span>  <span class="c1"># numbering from 1</span>
-<span class="go">Rz(θ1) * tx(1) * Rz(θ2)</span>
+<span class="go">Rz(θ1) ⊕ tx(1) ⊕ Rz(θ2)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># explicit joint indices</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-<span class="go">Rz(q3) * tx(1) * Rz(q4)</span>
+<span class="go">Rz(q3) ⊕ tx(1) ⊕ Rz(q4)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;θ</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="p">))</span>
-<span class="go">Rz(θ3) * tx(1) * Rz(θ4)</span>
+<span class="go">Rz(θ3) ⊕ tx(1) ⊕ Rz(θ4)</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -1112,27 +1064,27 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-<span class="go">Rz(q0) * tx(1) * Rz(q1) * tx(1)</span>
+<span class="go">Rz(q0) ⊕ tx(1) ⊕ Rz(q1) ⊕ tx(1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 <span class="go">4</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
-<span class="go">tx(1) * Rz(q)</span>
+<span class="go">tx(1) ⊕ Rz(q)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-<span class="go">SE3(array([[1.00000000000000, 0, 0, 2.00000000000000],</span>
-<span class="go">           [0, 1.00000000000000, 0, 0],</span>
-<span class="go">           [0, 0, 1.00000000000000, 0],</span>
-<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
+<span class="go">SE3(array([[1., 0., 0., 2.],</span>
+<span class="go">           [0., 1., 0., 0.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">],</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span>
-<span class="go">SE3(array([[1.00000000000000, 0, 0, 1.00000000000000],</span>
-<span class="go">           [0, 1.00000000000000, 0, 1.00000000000000],</span>
-<span class="go">           [0, 0, 1.00000000000000, 0],</span>
-<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
+<span class="go">SE3(array([[1., 0., 0., 1.],</span>
+<span class="go">           [0., 1., 0., 1.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
 <span class="go">SE3(array([[1, 0, 0, 4],</span>
 <span class="go">           [0, 1, 0, 3],</span>
 <span class="go">           [0, 0, 1, 0],</span>
-<span class="go">           [0, 0, 0, 1]], dtype=object))</span>
+<span class="go">           [0, 0, 0, 1]]))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1198,7 +1150,7 @@ roll-pitch-yaw angles <code class="docutils literal notranslate"><span class="pr
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ETS</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">SE3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="go">tx(1) * ty(2) * tz(3)</span>
+<span class="go">tx(1) ⊕ ty(2) ⊕ tz(3)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ETS</span><span class="o">.</span><span class="n">SE3</span><span class="p">(</span><span class="n">SE3</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">))</span>
 <span class="go">Rx(90°)</span>
 </pre></div>
@@ -1224,8 +1176,8 @@ amounts of x- and z-axis rotation.</p>
 <h2>ETS - 2D<a class="headerlink" href="#ets-2d" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="roboticstoolbox.robot.ETS.ETS2">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></code><code class="sig-name descname"><span class="pre">ETS2</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ETS.SuperETS</span></code></p>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></code><code class="sig-name descname"><span class="pre">ETS2</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ETS.BaseETS</span></code></p>
 <p>This class implements an elementary transform sequence (ETS) for 2D</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1312,7 +1264,40 @@ xy-plane.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2.isrevolute" title="roboticstoolbox.robot.ETS.ETS2.isrevolute"><code class="xref py py-func docutils literal notranslate"><span class="pre">isrevolute()</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">isrotation()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ETS.ETS2.tx">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">tx</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.tx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.tx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pure translation along the x-axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>η</strong> (<em>float</em>) – translation distance along the z-axis</p></li>
+<li><p><strong>j</strong> (<em>int</em><em>, </em><em>optional</em>) – Explicit joint number within the robot</p></li>
+<li><p><strong>flip</strong> (<em>bool</em>) – Joint moves in opposite direction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An elementary transform</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ETS instance</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ETS.tx(η)</span></code> is an elementary translation along the x-axis by a
+distance constant η</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ETS.tx()</span></code> is an elementary translation along the x-axis by a
+variable distance, i.e. a prismatic robot joint. <code class="docutils literal notranslate"><span class="pre">j</span></code> or <code class="docutils literal notranslate"><span class="pre">flip</span></code>
+can be set in this case.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">istranslation()</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1448,54 +1433,6 @@ mix of rotations and translations.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ETS.ETS2.isrevolute">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">isrevolute</span></code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.isrevolute" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test if ET is a rotation</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>True if a rotation</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>bool</p>
-</dd>
-</dl>
-<p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">isrevolute</span>
-<span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">isrevolute</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.ETS.ETS2.isprismatic">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">isprismatic</span></code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.isprismatic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test if ET is a translation</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>True if a translation</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>bool</p>
-</dd>
-</dl>
-<p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">isprismatic</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">isprismatic</span>
-<span class="go">False</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.ETS.ETS2.axis">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">axis</span></code><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.axis" title="Permalink to this definition">¶</a></dt>
 <dd><p>The transform type and axis</p>
@@ -1542,7 +1479,7 @@ mix of rotations and translations.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 <span class="go">tx(1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
-<span class="go">tx(1) * Rz(q)</span>
+<span class="go">tx(1) ⊕ Rz(q)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1574,7 +1511,7 @@ instance is modified.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tail</span>
 <span class="go">tx(1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span>
-<span class="go">Rz(q0) * tx(1) * Rz(q1)</span>
+<span class="go">Rz(q0) ⊕ tx(1) ⊕ Rz(q1)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1656,21 +1593,21 @@ index, if provided, otherwise a sequential value.</p></li>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
-<span class="go">Rz(q) * tx(1)</span>
+<span class="go">Rz(q) ⊕ tx(1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-<span class="go">Rz(q0) * tx(1) * Rz(q1)</span>
+<span class="go">Rz(q0) ⊕ tx(1) ⊕ Rz(q1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
-<span class="go">Rz() * tx(1) * Rz()</span>
+<span class="go">Rz() ⊕ tx(1) ⊕ Rz()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;θ</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="p">))</span>  <span class="c1"># numbering from 0</span>
-<span class="go">Rz(θ0) * tx(1) * Rz(θ1)</span>
+<span class="go">Rz(θ0) ⊕ tx(1) ⊕ Rz(θ1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;θ</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="p">))</span>  <span class="c1"># numbering from 1</span>
-<span class="go">Rz(θ1) * tx(1) * Rz(θ2)</span>
+<span class="go">Rz(θ1) ⊕ tx(1) ⊕ Rz(θ2)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># explicit joint indices</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-<span class="go">Rz(q3) * tx(1) * Rz(q4)</span>
+<span class="go">Rz(q3) ⊕ tx(1) ⊕ Rz(q4)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="s2">&quot;θ</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="p">))</span>
-<span class="go">Rz(θ3) * tx(1) * Rz(θ4)</span>
+<span class="go">Rz(θ3) ⊕ tx(1) ⊕ Rz(θ4)</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -1756,27 +1693,27 @@ into the vector <code class="docutils literal notranslate"><span class="pre">q</
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-<span class="go">Rz(q0) * tx(1) * Rz(q1) * tx(1)</span>
+<span class="go">Rz(q0) ⊕ tx(1) ⊕ Rz(q1) ⊕ tx(1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 <span class="go">4</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
-<span class="go">tx(1) * Rz(q)</span>
+<span class="go">tx(1) ⊕ Rz(q)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-<span class="go">SE3(array([[1.00000000000000, 0, 0, 2.00000000000000],</span>
-<span class="go">           [0, 1.00000000000000, 0, 0],</span>
-<span class="go">           [0, 0, 1.00000000000000, 0],</span>
-<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
+<span class="go">SE3(array([[1., 0., 0., 2.],</span>
+<span class="go">           [0., 1., 0., 0.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">],</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span>
-<span class="go">SE3(array([[1.00000000000000, 0, 0, 1.00000000000000],</span>
-<span class="go">           [0, 1.00000000000000, 0, 1.00000000000000],</span>
-<span class="go">           [0, 0, 1.00000000000000, 0],</span>
-<span class="go">           [0, 0, 0, 1.00000000000000]], dtype=object))</span>
+<span class="go">SE3(array([[1., 0., 0., 1.],</span>
+<span class="go">           [0., 1., 0., 1.],</span>
+<span class="go">           [0., 0., 1., 0.],</span>
+<span class="go">           [0., 0., 0., 1.]]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">eval</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
 <span class="go">SE3(array([[1, 0, 0, 4],</span>
 <span class="go">           [0, 1, 0, 3],</span>
 <span class="go">           [0, 0, 1, 0],</span>
-<span class="go">           [0, 0, 0, 1]], dtype=object))</span>
+<span class="go">           [0, 0, 0, 1]]))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1808,39 +1745,6 @@ ETs are compounded, leading to a constant ET which is denoted by
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2.isconstant" title="roboticstoolbox.robot.ETS.ETS2.isconstant"><code class="xref py py-func docutils literal notranslate"><span class="pre">isconstant()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.ETS.ETS2.tx">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">tx</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.tx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.tx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pure translation along the x-axis</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>η</strong> (<em>float</em>) – translation distance along the z-axis</p></li>
-<li><p><strong>j</strong> (<em>int</em><em>, </em><em>optional</em>) – Explicit joint number within the robot</p></li>
-<li><p><strong>flip</strong> (<em>bool</em>) – Joint moves in opposite direction</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An elementary transform</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ETS instance</p>
-</dd>
-</dl>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ETS.tx(η)</span></code> is an elementary translation along the x-axis by a
-distance constant η</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ETS.tx()</span></code> is an elementary translation along the x-axis by a
-variable distance, i.e. a prismatic robot joint. <code class="docutils literal notranslate"><span class="pre">j</span></code> or <code class="docutils literal notranslate"><span class="pre">flip</span></code>
-can be set in this case.</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-func docutils literal notranslate"><span class="pre">ETS()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2.isprismatic" title="roboticstoolbox.robot.ETS.ETS2.isprismatic"><code class="xref py py-func docutils literal notranslate"><span class="pre">isprismatic()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1899,7 +1803,7 @@ can be set in this case.</p></li>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 21-Mar-2021.
+        Last updated on 23-Apr-2021.
       </span>
 
     </p>

@@ -164,7 +164,8 @@
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.tools.data</span> <span class="kn">import</span> <span class="n">path_to_datafile</span>
-
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Robot</span> <span class="kn">import</span> <span class="n">Robot</span>  <span class="c1"># DHLink</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ETS</span> <span class="kn">import</span> <span class="n">ETS</span>
@@ -220,37 +221,45 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">L</span><span class="p">,</span>
+            <span class="n">links</span><span class="p">,</span>
             <span class="n">meshdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="c1"># Verify L</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;The links L must be stored in a list.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;The links must be stored in a list.&#39;</span><span class="p">)</span>
 
-        <span class="n">links</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">all_links</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="c1"># TODO rewrite using extend</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">L</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">DHLink</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">DHLink</span><span class="p">):</span>
                 <span class="c1"># got a link</span>
-                <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">all_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+                <span class="n">link</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">link</span><span class="o">.</span><span class="n">jindex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span>
-                <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;link</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="si">}</span><span class="s2">&quot;</span>
 
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">DHRobot</span><span class="p">):</span>
-                <span class="c1"># got a robot</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-                    <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="n">link</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;link</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">DHRobot</span><span class="p">):</span>
+                <span class="c1"># link is actually a robot</span>
+
+                <span class="c1"># copy the links</span>
+                <span class="n">rlinks</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">links</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">rlink</span> <span class="ow">in</span> <span class="n">rlinks</span><span class="p">:</span>
+                    <span class="n">all_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rlink</span><span class="p">)</span>
+                    <span class="n">rlink</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span>
+                    <span class="n">rlink</span><span class="o">.</span><span class="n">jindex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span>
-                    <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;link</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="si">}</span><span class="s2">&quot;</span>
+
+                    <span class="n">rlink</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;link</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input can be only DHLink or DHRobot&quot;</span><span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">all_links</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
 
         <span class="c1"># Check the DH convention</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mdh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mdh</span>
@@ -263,9 +272,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">basemesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshdir</span> <span class="o">/</span> <span class="s2">&quot;link0.stl&quot;</span>
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
                 <span class="n">link</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshdir</span> <span class="o">/</span> <span class="s2">&quot;link</span><span class="si">{:d}</span><span class="s2">.stl&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_hasgeometry</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">basemesh</span> <span class="o">=</span> <span class="kc">None</span>
-
 
         <span class="c1"># rne parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rne_ob</span> <span class="o">=</span> <span class="kc">None</span>
@@ -277,16 +286,25 @@
 <span class="sd">        :return: Pretty print of the robot model</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DHRobot: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; (by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s2"> joints (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+        <span class="n">deg</span> <span class="o">=</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hasdynamics</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;, dynamics&quot;</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">mesh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">]):</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;, geometry&quot;</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span><span class="p">:</span>
             <span class="n">dh</span> <span class="o">=</span> <span class="s2">&quot;modified&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dh</span> <span class="o">=</span> <span class="s2">&quot;standard&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">manuf</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">manuf</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; (by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span><span class="si">}</span><span class="s2">)&quot;</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}{</span><span class="n">manuf</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s2"> axes (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="si">}</span><span class="s2">), </span><span class="si">{</span><span class="n">dh</span><span class="si">}</span><span class="s2"> DH parameters</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">deg</span> <span class="o">=</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, </span><span class="si">{</span><span class="n">dh</span><span class="si">}</span><span class="s2"> DH parameters</span><span class="se">\n</span><span class="s2">&quot;</span>
 
         <span class="k">def</span> <span class="nf">qstr</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">link</span><span class="p">):</span>
             <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -331,7 +349,7 @@
                 <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;dⱼ&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
                 <span class="o">*</span><span class="n">qlim_columns</span><span class="p">,</span>
                 <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thick&quot;</span>
-                <span class="p">)</span>
+            <span class="p">)</span>
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">has_qlim</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">L</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
@@ -355,7 +373,7 @@
                 <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;⍺ⱼ&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">),</span>
                 <span class="o">*</span><span class="n">qlim_columns</span><span class="p">,</span>
                 <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thick&quot;</span>
-                <span class="p">)</span>
+            <span class="p">)</span>
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">has_qlim</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">L</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
@@ -366,9 +384,10 @@
                     <span class="n">ql</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">if</span> <span class="n">L</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
                     <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span>
-                        <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">theta</span><span class="p">),</span> <span class="n">qstr</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">L</span><span class="p">),</span> <span class="n">L</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="o">*</span><span class="n">ql</span><span class="p">)</span>
+                        <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">theta</span><span class="p">),</span> <span class="n">qstr</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">L</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">L</span><span class="o">.</span><span class="n">a</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="o">*</span><span class="n">ql</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">qstr</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">L</span><span class="p">),</span> <span class="n">L</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="n">L</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="o">*</span><span class="n">ql</span><span class="p">)</span>
+                    <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">qstr</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">L</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">L</span><span class="o">.</span><span class="n">d</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                              <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">L</span><span class="o">.</span><span class="n">a</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">angle</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="o">*</span><span class="n">ql</span><span class="p">)</span>
 
         <span class="n">s</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 
@@ -442,6 +461,41 @@
     <span class="c1">#     new.qdd = self.qdd</span>
 
     <span class="c1">#     return new</span>
+
+<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="k">def</span> <span class="nf">_set_link_fk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        robot._set_link_fk(q) evaluates fkine for each link within a</span>
+<span class="sd">        robot and stores that pose in a private variable within the link.</span>
+
+<span class="sd">        This method is not for general use.</span>
+
+<span class="sd">        :param q: The joint angles/configuration of the robot</span>
+<span class="sd">        :type q: float ndarray(n)</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - The robot&#39;s base transform, if present, are incorporated</span>
+<span class="sd">              into the result.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span>
+
+        <span class="n">tall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fkine_all</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">):</span>
+
+            <span class="c1"># Update the link model transforms</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="p">:</span>
+                <span class="n">col</span><span class="o">.</span><span class="n">wT</span> <span class="o">=</span> <span class="n">tall</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">gi</span> <span class="ow">in</span> <span class="n">link</span><span class="o">.</span><span class="n">geometry</span><span class="p">:</span>
+                <span class="n">gi</span><span class="o">.</span><span class="n">wT</span> <span class="o">=</span> <span class="n">tall</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+<span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mdh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -566,7 +620,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">v</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">v</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
+            <span class="n">v</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span>
 
     <span class="nd">@property</span>
@@ -644,6 +698,28 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_reach</span> <span class="o">=</span> <span class="n">d</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reach</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nbranches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Number of branches</span>
+
+<span class="sd">        :return: number of branches in the robot&#39;s kinematic tree</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        Number of branches in this robot.  </span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">            &gt;&gt;&gt; robot = rtb.models.DH.Panda()</span>
+<span class="sd">            &gt;&gt;&gt; robot.nbranches</span>
+
+<span class="sd">        :seealso: :func:`n`, :func:`nlinks`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
 <div class="viewcode-block" id="DHRobot.A"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link forward kinematics</span>
@@ -656,7 +732,7 @@
 <span class="sd">        :return T: The transform between link frames</span>
 <span class="sd">        :rtype T: SE3</span>
 
-<span class="sd">        - ``robot.A(j, q)`` transform between link frames {0} and {n}.  ``q``</span>
+<span class="sd">        - ``robot.A(j, q)`` transform between link frames {0} and {j}.  ``q``</span>
 <span class="sd">          is a vector (n) of joint variables.</span>
 <span class="sd">        - ``robot.A([j1, j2], q)`` as above between link frames {j1} and {j2}.</span>
 <span class="sd">        - ``robot.A(j)`` as above except uses the stored q value of the</span>
@@ -748,62 +824,10 @@
                 <span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                 <span class="ow">or</span>
                 <span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="p">)</span> \
+        <span class="p">)</span> \
             <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span> \
             <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span> \
             <span class="ow">and</span> <span class="n">L</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span></div>
-
-<div class="viewcode-block" id="DHRobot.isprismatic"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.isprismatic">[docs]</a>    <span class="k">def</span> <span class="nf">isprismatic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Identify prismatic joints</span>
-
-<span class="sd">        :return: a list of bool variables, one per joint, true if</span>
-<span class="sd">            the corresponding joint is prismatic, otherwise false.</span>
-<span class="sd">        :rtype: list of bool</span>
-
-<span class="sd">        ``robot.isprismatic()`` is a bool list identifying the prismatic joints</span>
-<span class="sd">        within the robot</span>
-
-<span class="sd">        Example:</span>
-
-<span class="sd">        .. runblock:: pycon</span>
-
-<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
-<span class="sd">            &gt;&gt;&gt; puma = rtb.models.DH.Puma560()</span>
-<span class="sd">            &gt;&gt;&gt; puma.isprismatic()</span>
-<span class="sd">            &gt;&gt;&gt; stanford = rtb.models.DH.Stanford()</span>
-<span class="sd">            &gt;&gt;&gt; stanford.isprismatic()</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">isprismatic</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span></div>
-
-<div class="viewcode-block" id="DHRobot.isrevolute"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.isrevolute">[docs]</a>    <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Identify revolute joints</span>
-
-<span class="sd">        :return: a list of bool variables, one per joint, true if</span>
-<span class="sd">            the corresponding joint is revolute, otherwise false.</span>
-<span class="sd">        :rtype: list of bool</span>
-
-<span class="sd">        ``robot.isrevolute()`` is a bool list identifying the revolute joints</span>
-<span class="sd">        within the robot</span>
-
-<span class="sd">        Example:</span>
-
-<span class="sd">        .. runblock:: pycon</span>
-
-<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
-<span class="sd">            &gt;&gt;&gt; puma = rtb.models.DH.Puma560()</span>
-<span class="sd">            &gt;&gt;&gt; puma.isprismatic()</span>
-<span class="sd">            &gt;&gt;&gt; stanford = rtb.models.DH.Stanford()</span>
-<span class="sd">            &gt;&gt;&gt; stanford.isrevolute()</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">p</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">p</span></div>
 
 <div class="viewcode-block" id="DHRobot.dhunique"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.dhunique">[docs]</a>    <span class="k">def</span> <span class="nf">dhunique</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -933,21 +957,17 @@
 
         <span class="k">return</span> <span class="n">ets</span></div>
 
-<div class="viewcode-block" id="DHRobot.fkine"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DHRobot.fkine"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward kinematics</span>
 
-<span class="sd">        :param q: The joint configuration (Optional,</span>
-<span class="sd">            if not supplied will use the stored q values).</span>
+<span class="sd">        :param q: The joint configuration</span>
 <span class="sd">        :type q: ndarray(n) or ndarray(m,n)</span>
 <span class="sd">        :return: Forward kinematics as an SE(3) matrix</span>
 <span class="sd">        :rtype: SE3 instance</span>
 
 <span class="sd">        - ``robot.fkine(q)`` computes the forward kinematics for the robot at</span>
 <span class="sd">          joint configuration ``q``.</span>
-
-<span class="sd">        - ``robot.fkine()`` as above except uses the stored ``q`` value of the</span>
-<span class="sd">          robot object.</span>
 
 <span class="sd">        If q is a 2D array, the rows are interpreted as the generalized joint</span>
 <span class="sd">        coordinates for a sequence of points along a trajectory. ``q[k,j]`` is</span>
@@ -969,7 +989,6 @@
 <span class="sd">            - Joint offsets, if defined, are added to ``q`` before the forward</span>
 <span class="sd">              kinematics are computed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getq</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
 
         <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="o">.</span><span class="n">Empty</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">qr</span> <span class="ow">in</span> <span class="n">getmatrix</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)):</span>
@@ -989,6 +1008,44 @@
             <span class="n">T</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Tr</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">T</span></div>
+
+<div class="viewcode-block" id="DHRobot.fkine_path"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine_path">[docs]</a>    <span class="k">def</span> <span class="nf">fkine_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Compute the pose of every link frame</span>
+
+<span class="sd">        :param q: The joint configuration</span>
+<span class="sd">        :type q:  darray(n)</span>
+<span class="sd">        :return: Pose of all links</span>
+<span class="sd">        :rtype: SE3 instance</span>
+
+<span class="sd">        ``T = robot.fkine_path(q)`` is  an SE3 instance with ``robot.nlinks +</span>
+<span class="sd">        1`` values:</span>
+
+<span class="sd">        - ``T[0]`` is the base transform</span>
+<span class="sd">        - ``T[i+1]`` is the pose of link whose ``number`` is ``i``</span>
+
+<span class="sd">        :references:</span>
+<span class="sd">            - Kinematic Derivatives using the Elementary Transform</span>
+<span class="sd">              Sequence, J. Haviland and P. Corke</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">Tj</span> <span class="o">=</span> <span class="n">T</span>
+
+        <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">):</span>
+            <span class="n">Tj</span> <span class="o">*=</span> <span class="n">L</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Tj</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">T</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span>
+
+        <span class="k">return</span> <span class="n">T</span></div>
+
+<div class="viewcode-block" id="DHRobot.segments"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.segments">[docs]</a>    <span class="k">def</span> <span class="nf">segments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">segments</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+        <span class="n">segments</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">segments</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="DHRobot.fkine_all"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine_all">[docs]</a>    <span class="k">def</span> <span class="nf">fkine_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1028,25 +1085,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getq</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">Tj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">Tj</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">()</span>
-        <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">Tj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">Tall</span> <span class="o">=</span> <span class="n">Tj</span>
 
         <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">first</span><span class="p">:</span>
-
-                <span class="n">Tj</span> <span class="o">*=</span> <span class="n">L</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">old</span><span class="p">:</span>
-                    <span class="n">Tall</span> <span class="o">=</span> <span class="n">Tj</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">Tall</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Tj</span><span class="p">)</span>
-                <span class="n">first</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">Tj</span> <span class="o">*=</span> <span class="n">L</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-                <span class="n">Tall</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Tj</span><span class="p">)</span>
+            <span class="n">Tj</span> <span class="o">*=</span> <span class="n">L</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="n">Tall</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Tj</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Tall</span></div>
 
 <div class="viewcode-block" id="DHRobot.jacobe"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacobe">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1123,7 +1167,7 @@
 
         <span class="k">return</span> <span class="n">J</span></div>
 
-<div class="viewcode-block" id="DHRobot.jacob0"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacob0">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DHRobot.jacob0"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacob0">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Jacobian in world frame</span>
 
@@ -1149,8 +1193,8 @@
 <span class="sd">            =============  ==================================</span>
 <span class="sd">            Value          Rotational representation</span>
 <span class="sd">            =============  ==================================</span>
-<span class="sd">            ``&#39;rpy-xyz&#39;``  RPY angular rates in XYZ order</span>
-<span class="sd">            ``&#39;rpy-zyx&#39;``  RPY angular rates in XYZ order</span>
+<span class="sd">            ``&#39;rpy/xyz&#39;``  RPY angular rates in XYZ order</span>
+<span class="sd">            ``&#39;rpy/zyx&#39;``  RPY angular rates in XYZ order</span>
 <span class="sd">            ``&#39;eul&#39;``      Euler angular rates in ZYZ order</span>
 <span class="sd">            ``&#39;exp&#39;``      exponential coordinate rates</span>
 <span class="sd">            =============  ==================================</span>
@@ -1185,10 +1229,10 @@
         <span class="c1"># compute rotational transform if analytical Jacobian required</span>
         <span class="k">if</span> <span class="n">analytical</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
-            <span class="k">if</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;rpy-xyz&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;rpy/xyz&#39;</span><span class="p">:</span>
                 <span class="n">rpy</span> <span class="o">=</span> <span class="n">tr2rpy</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;xyz&#39;</span><span class="p">)</span>
                 <span class="n">A</span> <span class="o">=</span> <span class="n">rpy2jac</span><span class="p">(</span><span class="n">rpy</span><span class="p">,</span> <span class="s1">&#39;xyz&#39;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;rpy-zyx&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;rpy/zyx&#39;</span><span class="p">:</span>
                 <span class="n">rpy</span> <span class="o">=</span> <span class="n">tr2rpy</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;zyx&#39;</span><span class="p">)</span>
                 <span class="n">A</span> <span class="o">=</span> <span class="n">rpy2jac</span><span class="p">(</span><span class="n">rpy</span><span class="p">,</span> <span class="s1">&#39;zyx&#39;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;eul&#39;</span><span class="p">:</span>
@@ -1197,149 +1241,85 @@
             <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;exp&#39;</span><span class="p">:</span>
                 <span class="c1"># TODO: move to SMTB.base, Horner form with skew(v)</span>
                 <span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">=</span> <span class="n">trlog</span><span class="p">(</span><span class="n">t2r</span><span class="p">(</span><span class="n">T</span><span class="p">))</span>
-                <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">/</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">skew</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> \
+                <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">/</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">skew</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> \
                     <span class="o">+</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">/</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">skew</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad order specified&#39;</span><span class="p">)</span>
-        
-            <span class="n">J0</span> <span class="o">=</span> <span class="n">block_diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">A</span><span class="p">))</span> <span class="o">@</span> <span class="n">J0</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad analytical value specified&#39;</span><span class="p">)</span>
+
+            <span class="n">J0</span> <span class="o">=</span> <span class="n">block_diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">A</span><span class="p">))</span> <span class="o">@</span> <span class="n">J0</span>
 
         <span class="c1"># TODO optimize computation above if half matrix is returned</span>
 
         <span class="c1"># return top or bottom half if asked</span>
         <span class="k">if</span> <span class="n">half</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">half</span> <span class="o">==</span> <span class="s1">&#39;trans&#39;</span><span class="p">:</span>
-                <span class="n">J0</span> <span class="o">=</span> <span class="n">J0</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span>
+                <span class="n">J0</span> <span class="o">=</span> <span class="n">J0</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
             <span class="k">elif</span> <span class="n">half</span> <span class="o">==</span> <span class="s1">&#39;rot&#39;</span><span class="p">:</span>
-                <span class="n">J0</span> <span class="o">=</span> <span class="n">J0</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:]</span>
+                <span class="n">J0</span> <span class="o">=</span> <span class="n">J0</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="p">:]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad half specified&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">J0</span></div>
 
-<div class="viewcode-block" id="DHRobot.jacob_dot"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacob_dot">[docs]</a>    <span class="k">def</span> <span class="nf">jacob_dot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DHRobot.hessian0"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.hessian0">[docs]</a>    <span class="k">def</span> <span class="nf">hessian0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Derivative of Jacobian</span>
+<span class="sd">        Manipulator Hessian in base frame</span>
 
-<span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
-<span class="sd">            if not supplied will use the stored q values).</span>
-<span class="sd">        :type q: float ndarray(n)</span>
-<span class="sd">        :param qd: The joint configuration of the robot (Optional,</span>
-<span class="sd">            if not supplied will use the stored qd values).</span>
-<span class="sd">        :type qd: ndarray(n)</span>
-<span class="sd">        :return: The derivative of the manipulator Jacobian</span>
-<span class="sd">        :rtype:  ndarray(n)</span>
+<span class="sd">        :param q: joint coordinates</span>
+<span class="sd">        :type q: array_like</span>
+<span class="sd">        :param J0: Jacobian in {0} frame</span>
+<span class="sd">        :type J0: ndarray(6,n)</span>
+<span class="sd">        :return: Hessian matrix</span>
+<span class="sd">        :rtype: ndarray(6,n,n)</span>
 
-<span class="sd">        ``robot.jacob_dot(q, qd)`` computes the product (6) of the temporal</span>
-<span class="sd">        derivative of the manipulator Jacobian (in the world frame) and the</span>
-<span class="sd">        joint rates :math:`\frac{d}{dt} \dot{\mathbf{J}}(q) \dot{q}`.</span>
+<span class="sd">        This method calculcates the Hessisan in the base frame. One of ``J0`` or</span>
+<span class="sd">        ``q`` is required. If ``J0`` is already calculated for the joint</span>
+<span class="sd">        coordinates ``q`` it can be passed in to to save computation time.</span>
 
-<span class="sd">        .. note::</span>
-<span class="sd">            - This term appears in the formulation for operational space</span>
-<span class="sd">              control :math:`\ddot{x} = \mathbf{J}(q) \ddot{q} + \dot{\mathbf{J}}(q) \dot{q}`.</span>
-<span class="sd">            - Written as per the reference and not very efficient.</span>
+<span class="sd">        If we take the time derivative of the differential kinematic</span>
+<span class="sd">        relationship</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \nu    &amp;= \mat{J}(\vec{q}) \dvec{q} \\</span>
+<span class="sd">            \alpha &amp;= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}</span>
+
+<span class="sd">        where</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \dmat{J} = \mat{H} \dvec{q}</span>
+
+<span class="sd">        and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the</span>
+<span class="sd">        Hessian tensor.</span>
+
+<span class="sd">        The elements of the Hessian are</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}</span>
+
+<span class="sd">        where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements</span>
+<span class="sd">        of the spatial velocity vector.</span>
+
+<span class="sd">        Similarly, we can write</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \mat{J}_{i,j} = \frac{d u_i}{d q_j}</span>
 
 <span class="sd">        :references:</span>
-<span class="sd">            - Fundamentals of Robotics Mechanical Systems (2nd ed)</span>
-<span class="sd">              J. Angleles, Springer 2003.</span>
-<span class="sd">            - A unified approach for motion and force control of robot</span>
-<span class="sd">              manipulators: The operational space formulation</span>
-<span class="sd">              O Khatib, IEEE Journal on Robotics and Automation, 1987.</span>
+<span class="sd">            - Kinematic Derivatives using the Elementary Transform</span>
+<span class="sd">              Sequence, J. Haviland and P. Corke</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+<span class="sd">        :seealso: :func:`jacob0`, :func:`jacob_dot`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="n">hessian0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J0</span><span class="p">)</span></div>
 
-        <span class="k">if</span> <span class="n">qd</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">qd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qd</span>
+    <span class="k">def</span> <span class="nf">_get_limit_links</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># For compatibility with ERobot</span>
 
-        <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-        <span class="n">qd</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-
-        <span class="c1"># Using the notation of Angeles:</span>
-        <span class="c1">#   [Q,a] ~ [R,t] the per link transformation</span>
-        <span class="c1">#   P ~ R   the cumulative rotation t2r(Tj) in world frame</span>
-        <span class="c1">#   e       the last column of P, the local frame z axis in world</span>
-        <span class="c1">#           coordinates</span>
-        <span class="c1">#   w       angular velocity in base frame</span>
-        <span class="c1">#   ed      deriv of e</span>
-        <span class="c1">#   r       is distance from final frame</span>
-        <span class="c1">#   rd      deriv of r</span>
-        <span class="c1">#   ud      ??</span>
-
-        <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="n">ed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="n">rd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="n">ud</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-            <span class="n">Q</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">R</span>
-            <span class="n">a</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">t</span>
-
-        <span class="n">P</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="n">e</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">P</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">@</span> <span class="n">Q</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span>
-            <span class="n">e</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
-
-        <span class="c1"># Step 1</span>
-        <span class="n">w</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">qd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">e</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">w</span><span class="p">[:,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">qd</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">+</span>
-                <span class="n">Q</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">w</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
-
-        <span class="c1"># Step 2</span>
-        <span class="n">ed</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">ed</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">w</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">e</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
-
-        <span class="c1"># Step 3</span>
-        <span class="n">rd</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">w</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">a</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="n">rd</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">w</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">a</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="n">Q</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">@</span> <span class="n">rd</span><span class="p">[:,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-
-        <span class="n">r</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="n">r</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">Q</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">@</span> <span class="n">r</span><span class="p">[:,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-
-        <span class="n">ud</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">e</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">rd</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">ud</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> \
-                <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">ed</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">r</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">e</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">rd</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
-
-        <span class="c1"># Step 4</span>
-        <span class="c1"># Swap ud and ed</span>
-        <span class="n">v</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="n">qd</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">ud</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">ed</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]]</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="n">Ui</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">Q</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))],</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span> <span class="n">Q</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]]]</span>
-
-            <span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">ud</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">ed</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]]</span> <span class="o">+</span>
-                <span class="n">Ui</span> <span class="o">@</span> <span class="n">v</span><span class="p">[:,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
-
-        <span class="n">Jdot</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">Jdot</span></div>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
 <span class="c1"># -------------------------------------------------------------------------- #</span>
 
@@ -1363,7 +1343,8 @@
             <span class="n">L</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">21</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">B</span>
             <span class="n">L</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">22</span><span class="p">:</span><span class="n">j</span> <span class="o">+</span> <span class="mi">24</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Tc</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rne_ob</span> <span class="o">=</span> <span class="n">init</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
+        <span class="c1"># we negate gravity here, since the C code has the sign wrong</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rne_ob</span> <span class="o">=</span> <span class="n">init</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DHRobot.delete_rne"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.delete_rne">[docs]</a>    <span class="k">def</span> <span class="nf">delete_rne</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1440,7 +1421,8 @@
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trajn</span><span class="p">):</span>
             <span class="n">tau</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">frne</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_rne_ob</span><span class="p">,</span> <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">qdd</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">gravity</span><span class="p">,</span> <span class="n">fext</span><span class="p">)</span>
+                <span class="c1"># we negate gravity here, since the C code has the sign wrong</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_rne_ob</span><span class="p">,</span> <span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">qdd</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="o">-</span><span class="n">gravity</span><span class="p">,</span> <span class="n">fext</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">trajn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">tau</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
@@ -1560,12 +1542,17 @@
             <span class="n">Rm</span> <span class="o">=</span> <span class="p">[]</span>
 
             <span class="c1"># rotate base velocity and acceleration into L1 frame</span>
-            <span class="n">Rb</span> <span class="o">=</span> <span class="n">t2r</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
             <span class="c1"># base has zero angular velocity</span>
-            <span class="n">w</span> <span class="o">=</span> <span class="n">Rb</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
             <span class="c1"># base has zero angular acceleration</span>
-            <span class="n">wd</span> <span class="o">=</span> <span class="n">Rb</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-            <span class="n">vd</span> <span class="o">=</span> <span class="n">Rb</span> <span class="o">@</span> <span class="n">gravity</span>
+            <span class="n">wd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">vd</span> <span class="o">=</span> <span class="o">-</span><span class="n">gravity</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">Rb</span> <span class="o">=</span> <span class="n">t2r</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">Rb</span> <span class="o">@</span> <span class="n">wd</span>
+                <span class="n">wd</span> <span class="o">=</span> <span class="n">Rb</span> <span class="o">@</span> <span class="n">wdd</span>
+                <span class="n">vd</span> <span class="o">=</span> <span class="n">Rb</span> <span class="o">@</span> <span class="n">gravity</span>
 
             <span class="c1"># ----------------  initialize some variables ----------------- #</span>
 
@@ -1628,7 +1615,7 @@
                             <span class="n">_cross</span><span class="p">(</span><span class="n">wd</span><span class="p">,</span> <span class="n">pstar</span><span class="p">)</span>
                             <span class="o">+</span> <span class="n">_cross</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">_cross</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">pstar</span><span class="p">))</span>
                             <span class="o">+</span> <span class="n">vd</span>
-                            <span class="p">)</span> \
+                        <span class="p">)</span> \
                             <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">_cross</span><span class="p">(</span><span class="n">Rt</span> <span class="o">@</span> <span class="n">w</span><span class="p">,</span> <span class="n">z0</span> <span class="o">*</span> <span class="n">qd_k</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> \
                             <span class="o">+</span> <span class="n">z0</span> <span class="o">*</span> <span class="n">qdd_k</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
                     <span class="c1"># trailing underscore means new value, update here</span>
@@ -1786,9 +1773,7 @@
             <span class="c1"># get model specific solution for first 3 joints</span>
             <span class="n">theta</span> <span class="o">=</span> <span class="n">ikfunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Tk</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">theta</span><span class="p">)):</span>
-                <span class="n">solution</span> <span class="o">=</span> <span class="n">iksol</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
                 <span class="c1"># Solve for the wrist rotation</span>
                 <span class="c1"># We need to account for some random translations between the</span>
                 <span class="c1"># first and last 3 joints (d4) and also d6,a6,alpha6 in the</span>
@@ -1820,12 +1805,22 @@
 
                 <span class="n">solution</span> <span class="o">=</span> <span class="n">iksol</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># ikfunc can return None or a str reason</span>
+                <span class="k">if</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">solution</span> <span class="o">=</span> <span class="n">iksol</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">solution</span> <span class="o">=</span> <span class="n">iksol</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+
             <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">solutions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">solutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">solutions</span></div>
+            <span class="k">return</span> <span class="n">iksol</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">sol</span><span class="o">.</span><span class="n">q</span> <span class="k">for</span> <span class="n">sol</span> <span class="ow">in</span> <span class="n">solutions</span><span class="p">]),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sol</span><span class="o">.</span><span class="n">success</span> <span class="k">for</span> <span class="n">sol</span> <span class="ow">in</span> <span class="n">solutions</span><span class="p">]),</span>
+                <span class="p">[</span><span class="n">sol</span><span class="o">.</span><span class="n">reason</span> <span class="k">for</span> <span class="n">sol</span> <span class="ow">in</span> <span class="n">solutions</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="DHRobot.config_validate"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.config_validate">[docs]</a>    <span class="k">def</span> <span class="nf">config_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">allowables</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1870,9 +1865,14 @@
             <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">a</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">allowable</span><span class="p">]):</span>
                 <span class="n">config</span> <span class="o">+=</span> <span class="n">allowable</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">config</span></div></div>
+
+
 <span class="k">class</span> <span class="nc">SerialLink</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SerialLink is deprecated, use DHRobot instead&#39;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s1">&#39;SerialLink is deprecated, use DHRobot instead&#39;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span>
+        <span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 
@@ -1926,7 +1926,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 21-Mar-2021.
+        Last updated on 23-Apr-2021.
       </span>
 
     </p>

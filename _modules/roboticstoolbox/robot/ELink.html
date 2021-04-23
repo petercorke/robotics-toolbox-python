@@ -162,24 +162,328 @@
 <span class="sd">@author: Jesse Haviland</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="c1"># import numpy as np</span>
-<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
-<span class="c1"># from spatialmath.base.argcheck import getvector, verifymatrix, isscalar</span>
-<span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rp</span>
-<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ETS</span> <span class="kn">import</span> <span class="n">ETS</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">SE2</span>
+<span class="kn">from</span> <span class="nn">spatialgeometry</span> <span class="kn">import</span> <span class="n">Shape</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ETS</span> <span class="kn">import</span> <span class="n">ETS</span><span class="p">,</span> <span class="n">ETS2</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Link</span> <span class="kn">import</span> <span class="n">Link</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">fknm</span>
 
 
-<div class="viewcode-block" id="ELink"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink">[docs]</a><span class="k">class</span> <span class="nc">ELink</span><span class="p">(</span><span class="n">Link</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseELink"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.BaseELink">[docs]</a><span class="k">class</span> <span class="nc">BaseELink</span><span class="p">(</span><span class="n">Link</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">joint_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseELink</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;parent must be BaseELink subclass or str&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_joint_name</span> <span class="o">=</span> <span class="n">joint_name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_jindex</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ets=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, ets=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, parent=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_params</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pretty prints the ETS Model of the link. Will output angles in degrees</span>
+<span class="sd">        :return: Pretty print of the robot link</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">] &quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]&quot;</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">] &quot;</span>
+
+<div class="viewcode-block" id="BaseELink.copy"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.BaseELink.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># invalidate references to parent, child</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">new</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Variable part of link ETS</span>
+<span class="sd">        :return: joint variable transform</span>
+<span class="sd">        :rtype: ETS instance</span>
+<span class="sd">        The ETS for each ELink comprises a constant part (possible the</span>
+<span class="sd">        identity) followed by an optional joint variable transform.</span>
+<span class="sd">        This property returns the latter.</span>
+<span class="sd">        .. runblock:: pycon</span>
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import ELink, ETS</span>
+<span class="sd">            &gt;&gt;&gt; link = ELink( ETS.tz(0.333) * ETS.rx(90, &#39;deg&#39;) * ETS.rz() )</span>
+<span class="sd">            &gt;&gt;&gt; print(link.v)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span>
+
+    <span class="nd">@v</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">ETS</span><span class="p">)</span> <span class="ow">and</span> <span class="n">new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;v must be an ETS object&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v</span> <span class="o">=</span> <span class="n">new</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_fknm</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Ts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constant part of link ETS</span>
+<span class="sd">        :return: constant part of link transform</span>
+<span class="sd">        :rtype: SE3 instance</span>
+<span class="sd">        The ETS for each ELink comprises a constant part (possible the</span>
+<span class="sd">        identity) followed by an optional joint variable transform.</span>
+<span class="sd">        This property returns the constant part.  If no constant part</span>
+<span class="sd">        is given, this returns an identity matrix.</span>
+<span class="sd">        .. runblock:: pycon</span>
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import ELink, ETS</span>
+<span class="sd">            &gt;&gt;&gt; link = ELink( ETS.tz(0.333) * ETS.rx(90, &#39;deg&#39;) * ETS.rz() )</span>
+<span class="sd">            &gt;&gt;&gt; link.Ts</span>
+<span class="sd">            &gt;&gt;&gt; link = ELink( ETS.rz() )</span>
+<span class="sd">            &gt;&gt;&gt; link.Ts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test if link has joint</span>
+<span class="sd">        :return: test if link has a joint</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        The ETS for each ELink comprises a constant part (possible the</span>
+<span class="sd">        identity) followed by an optional joint variable transform.</span>
+<span class="sd">        This property returns the whether the</span>
+<span class="sd">        .. runblock:: pycon</span>
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import models</span>
+<span class="sd">            &gt;&gt;&gt; robot = models.URDF.Panda()</span>
+<span class="sd">            &gt;&gt;&gt; robot[1].isjoint  # link with joint</span>
+<span class="sd">            &gt;&gt;&gt; robot[8].isjoint  # static link</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">jindex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set joint index</span>
+<span class="sd">        - ``link.jindex`` is the joint index</span>
+<span class="sd">            :return: joint index</span>
+<span class="sd">            :rtype: int</span>
+<span class="sd">        - ``link.jindex = ...`` checks and sets the joint index</span>
+<span class="sd">        For a serial-link manipulator the joints are numbered starting at zero</span>
+<span class="sd">        and increasing sequentially toward the end-effector.  For branched</span>
+<span class="sd">        mechanisms this is not so straightforward.</span>
+<span class="sd">        The link&#39;s ``jindex`` property specifies the index of its joint</span>
+<span class="sd">        variable within a vector of joint coordinates.</span>
+<span class="sd">        .. note:: ``jindex`` values must be a sequence of integers starting</span>
+<span class="sd">            at zero.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jindex</span>
+
+    <span class="nd">@jindex</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">jindex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_jindex</span> <span class="o">=</span> <span class="n">j</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_fknm</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="c1"># ELink2 doesnt have this</span>
+            <span class="k">pass</span>
+
+    <span class="c1"># def isrevolute(self):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Checks if the joint is of revolute type</span>
+
+    <span class="c1">#     :return: Ture if is revolute</span>
+    <span class="c1">#     :rtype: bool</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     return self.v.isrevolute</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isprismatic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the joint is of prismatic type</span>
+<span class="sd">        :return: True if is prismatic</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">istranslation</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the joint is of revolute type</span>
+<span class="sd">        :return: True if is revolute</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">isrotation</span>
+
+    <span class="c1"># @property</span>
+    <span class="c1"># def ets(self):</span>
+    <span class="c1">#     return self._ets</span>
+
+    <span class="c1"># @property</span>
+    <span class="c1"># def parent_name(self):</span>
+    <span class="c1">#     return self._parent_name</span>
+
+    <span class="c1"># @property</span>
+    <span class="c1"># def child_name(self):</span>
+    <span class="c1">#     return self._child_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parent link</span>
+<span class="sd">        :return: Link&#39;s parent</span>
+<span class="sd">        :rtype: ELink instance</span>
+<span class="sd">        This is a reference to</span>
+<span class="sd">        .. runblock:: pycon</span>
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import models</span>
+<span class="sd">            &gt;&gt;&gt; robot = models.URDF.Panda()</span>
+<span class="sd">            &gt;&gt;&gt; robot[0].parent  # base link has no parent</span>
+<span class="sd">            &gt;&gt;&gt; robot[1].parent  # second link&#39;s parent</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List of child links</span>
+<span class="sd">        :return: child links</span>
+<span class="sd">        :rtype: list of ``ELink`` instances</span>
+<span class="sd">        The list will be empty for a end-effector link</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nchildren</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Number of child links</span>
+<span class="sd">        :return: number of child links</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        Will be zero for an end-effector link</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">M</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_M</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set joint visual geometry</span>
+<span class="sd">        - ``link.geometry`` is the list of the visual geometries which</span>
+<span class="sd">            represent the shape of the link</span>
+<span class="sd">            :return: the visual geometries</span>
+<span class="sd">            :rtype: list of Shape</span>
+<span class="sd">        - ``link.geometry = ...`` checks and sets the geometry</span>
+<span class="sd">        - ``link.geometry.append(...)`` add geometry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">collision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get/set joint collision geometry</span>
+<span class="sd">        - ``link.collision`` is the list of the collision geometries which</span>
+<span class="sd">            represent the collidable shape of the link.</span>
+<span class="sd">            :return: the collision geometries</span>
+<span class="sd">            :rtype: list of Shape</span>
+<span class="sd">        - ``link.collision = ...`` checks and sets the collision geometry</span>
+<span class="sd">        - ``link.collision.append(...)`` add collision geometry</span>
+<span class="sd">        The collision geometries are what is used to check for collisions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span>
+
+<div class="viewcode-block" id="BaseELink.ets"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.BaseELink.ets">[docs]</a>    <span class="k">def</span> <span class="nf">ets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Link transform in ETS form</span>
+
+<span class="sd">        :return: elementary transform sequence for link transform</span>
+<span class="sd">        :rtype: ETS or ETS2 instance</span>
+
+<span class="sd">        The sequence:</span>
+
+<span class="sd">            - has at least one element</span>
+<span class="sd">            - may include zero or more constant transforms</span>
+<span class="sd">            - no more than one variable transform, which if present will</span>
+<span class="sd">              be last in the sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># no variable transform, return the constant part</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">jindex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># inherit the jindex of the link if known</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">jindex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jindex</span>
+            <span class="c1"># return concatenation of constant and variable parts</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span></div>
+
+    <span class="nd">@collision</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">collision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coll</span><span class="p">):</span>
+        <span class="n">new_coll</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">gi</span> <span class="ow">in</span> <span class="n">coll</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
+                    <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Collision must be of Shape class&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
+            <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coll</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span> <span class="o">=</span> <span class="n">new_coll</span>
+
+    <span class="nd">@geometry</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom</span><span class="p">):</span>
+        <span class="n">new_geom</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">gi</span> <span class="ow">in</span> <span class="n">geom</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
+                    <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
+            <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">new_geom</span></div>
+
+
+<div class="viewcode-block" id="ELink"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink">[docs]</a><span class="k">class</span> <span class="nc">ELink</span><span class="p">(</span><span class="n">BaseELink</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ETS link class</span>
-
 <span class="sd">    :param ets: kinematic - The elementary transforms which make up the link</span>
 <span class="sd">    :type ets: ETS</span>
-
 <span class="sd">    :param qlim: joint variable limits [min max]</span>
 <span class="sd">    :type qlim: float ndarray(2)</span>
-
 <span class="sd">    :param m: dynamic - link mass</span>
 <span class="sd">    :type m: float</span>
 <span class="sd">    :param r: dynamic - position of COM with respect to link frame</span>
@@ -194,18 +498,19 @@
 <span class="sd">    :type Tc: float ndarray(2)</span>
 <span class="sd">    :param G: dynamic - gear ratio</span>
 <span class="sd">    :type G: float</span>
-
 <span class="sd">    The ELink object holds all information related to a robot link and can form</span>
 <span class="sd">    a serial-connected chain or a rigid-body tree.</span>
-
 <span class="sd">    It inherits from the Link class which provides common functionality such</span>
 <span class="sd">    as joint and link such as kinematics parameters,</span>
-<span class="sd">    .</span>
-
+<span class="sd">    The transform to the next link is given as an ETS with the joint</span>
+<span class="sd">    variable, if present, as the last term.  This is preprocessed and</span>
+<span class="sd">    the object stores:</span>
+<span class="sd">        * ``Ts`` the constant part as a NumPy array, or None</span>
+<span class="sd">        * ``v`` a pointer to an ETS object representing the joint variable.</span>
+<span class="sd">          or None</span>
 <span class="sd">    :references:</span>
 <span class="sd">        - Kinematic Derivatives using the Elementary Transform Sequence,</span>
 <span class="sd">          J. Haviland and P. Corke</span>
-
 <span class="sd">    :seealso: :class:`Link`, :class:`DHLink`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -213,39 +518,26 @@
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">ets</span><span class="o">=</span><span class="n">ETS</span><span class="p">(),</span>
             <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">jindex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="c1"># process common options</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ELink</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># check we have an ETS</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">ETS</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span> <span class="o">=</span> <span class="n">ets</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">ETS</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                 <span class="s1">&#39;The ets argument must be of type ETS&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span> <span class="o">=</span> <span class="n">ets</span>
 
         <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">ets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">jindex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">v</span><span class="o">.</span><span class="n">jindex</span> <span class="o">=</span> <span class="n">jindex</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">jindex</span> <span class="o">=</span> <span class="n">jindex</span>
             <span class="k">elif</span> <span class="n">jindex</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">jindex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">jindex</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">jindex</span>
-
-        <span class="c1"># TODO simplify this logic, can be ELink class or None</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s1">&#39;Only one parent link can be present&#39;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">ELink</span><span class="p">)</span> <span class="ow">and</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s1">&#39;Parent must be of type ELink&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_child</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_joint_name</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_jindex</span> <span class="o">=</span> <span class="n">jindex</span>
 
         <span class="c1"># Initialise the static transform representing the constant</span>
         <span class="c1"># component of the ETS</span>
@@ -266,217 +558,135 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_v</span> <span class="o">=</span> <span class="n">v</span>
 
+        <span class="c1"># Private variable, can be written to but never replaced!</span>
+        <span class="c1"># The c will adjust the inside of this array with a reference</span>
+        <span class="c1"># to this specific array. If replaced --&gt; segfault</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_fknm</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_fknm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">isflip</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">jindex</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
+            <span class="n">isflip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">isflip</span>
+            <span class="n">jindex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jindex</span>
+
+            <span class="k">if</span> <span class="n">jindex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">jindex</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;Rx&#39;</span><span class="p">:</span>
+                <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;Ry&#39;</span><span class="p">:</span>
+                <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;Rz&#39;</span><span class="p">:</span>
+                <span class="n">axis</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;tx&#39;</span><span class="p">:</span>
+                <span class="n">axis</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;ty&#39;</span><span class="p">:</span>
+                <span class="n">axis</span> <span class="o">=</span> <span class="mi">4</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;tz&#39;</span><span class="p">:</span>
+                <span class="n">axis</span> <span class="o">=</span> <span class="mi">5</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">_fknm</span>
+
+        <span class="n">shape_base</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">shape_wT</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">shape_sT</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">shape_sq</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">shap</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">:</span>
+            <span class="n">shape_base</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shap</span><span class="o">.</span><span class="n">_base</span><span class="p">)</span>
+            <span class="n">shape_wT</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shap</span><span class="o">.</span><span class="n">_wT</span><span class="p">)</span>
+            <span class="n">shape_sT</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shap</span><span class="o">.</span><span class="n">_sT</span><span class="p">)</span>
+            <span class="n">shape_sq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shap</span><span class="o">.</span><span class="n">_sq</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">shap</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collision</span><span class="p">:</span>
+            <span class="n">shape_base</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shap</span><span class="o">.</span><span class="n">_base</span><span class="p">)</span>
+            <span class="n">shape_wT</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shap</span><span class="o">.</span><span class="n">_wT</span><span class="p">)</span>
+            <span class="n">shape_sT</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shap</span><span class="o">.</span><span class="n">_sT</span><span class="p">)</span>
+            <span class="n">shape_sq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shap</span><span class="o">.</span><span class="n">_sq</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">isflip</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">jindex</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">shape_base</span><span class="p">,</span> <span class="n">shape_wT</span><span class="p">,</span> \
+            <span class="n">shape_sT</span><span class="p">,</span> <span class="n">shape_sq</span>
+
+    <span class="k">def</span> <span class="nf">_init_fknm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="c1"># Initialise later</span>
+            <span class="k">return</span>
+
+        <span class="n">isflip</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">jindex</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> \
+            <span class="n">shape_base</span><span class="p">,</span> <span class="n">shape_wT</span><span class="p">,</span> <span class="n">shape_sT</span><span class="p">,</span> <span class="n">shape_sq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fknm</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fknm</span> <span class="o">=</span> <span class="n">fknm</span><span class="o">.</span><span class="n">link_init</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span><span class="p">,</span> <span class="n">isflip</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">jindex</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape_base</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fk</span><span class="p">,</span>
+            <span class="n">shape_base</span><span class="p">,</span> <span class="n">shape_wT</span><span class="p">,</span> <span class="n">shape_sT</span><span class="p">,</span> <span class="n">shape_sq</span><span class="p">,</span>
+            <span class="n">parent</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_fknm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># Check if not initialized yet</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fknm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_init_fknm</span><span class="p">()</span>
+                <span class="k">return</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">isflip</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">jindex</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> \
+            <span class="n">shape_base</span><span class="p">,</span> <span class="n">shape_wT</span><span class="p">,</span> <span class="n">shape_sT</span><span class="p">,</span> <span class="n">shape_sq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fknm</span><span class="p">()</span>
+
+        <span class="n">fknm</span><span class="o">.</span><span class="n">link_update</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fknm</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span><span class="p">,</span> <span class="n">isflip</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">jindex</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape_base</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fk</span><span class="p">,</span>
+            <span class="n">shape_base</span><span class="p">,</span> <span class="n">shape_wT</span><span class="p">,</span> <span class="n">shape_sT</span><span class="p">,</span> <span class="n">shape_sq</span><span class="p">,</span>
+            <span class="n">parent</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_init_Ts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Number of transforms in the ETS excluding the joint variable</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_M</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">)</span>
 
-        <span class="c1"># Initialise joints</span>
+        <span class="c1"># Compute the leading, constant, part of the ETS</span>
+        <span class="c1"># TODO probably should use ETS.compile()</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">,</span> <span class="n">ETS</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">M</span><span class="p">):</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
+            <span class="c1"># first = True</span>
+            <span class="c1"># T = None</span>
+
+            <span class="c1"># Ts can not be equal to None otherwise things seem</span>
+            <span class="c1"># to break everywhere, so initialise Ts np be identity</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">et</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">:</span>
+                <span class="c1"># constant transforms only</span>
+                <span class="k">if</span> <span class="n">et</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The transforms in ets must be constant&#39;</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">(),</span> <span class="n">SE3</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span> <span class="o">*=</span> <span class="n">SE3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">())</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">()</span>
+                <span class="c1"># if first:</span>
+                <span class="c1">#     T = et.T()</span>
+                <span class="c1">#     first = False</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     T = T @ et.T()</span>
+
+                <span class="n">T</span> <span class="o">=</span> <span class="n">T</span> <span class="o">@</span> <span class="n">et</span><span class="o">.</span><span class="n">T</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span> <span class="o">=</span> <span class="n">T</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span>
-
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ets=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, ets=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, parent=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">+</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_params</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Pretty prints the ETS Model of the link. Will output angles in degrees</span>
-
-<span class="sd">        :return: Pretty print of the robot link</span>
-<span class="sd">        :rtype: str</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">] &quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">parent</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">parent</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]&quot;</span>
-            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">parent</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="si">}</span><span class="s2">] &quot;</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Variable part of link ETS</span>
-
-<span class="sd">        :return: joint variable transform</span>
-<span class="sd">        :rtype: ETS instance</span>
-
-<span class="sd">        The ETS for each ELink comprises a constant part (possible the</span>
-<span class="sd">        identity) followed by an optional joint variable transform.</span>
-<span class="sd">        This property returns the latter.</span>
-
-<span class="sd">        .. runblock:: pycon</span>
-
-<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import ELink, ETS</span>
-<span class="sd">            &gt;&gt;&gt; link = ELink( ETS.tz(0.333) * ETS.rx(90, &#39;deg&#39;) * ETS.rz() )</span>
-<span class="sd">            &gt;&gt;&gt; print(link.v)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">Ts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Constant part of link ETS</span>
-
-<span class="sd">        :return: constant part of link transform</span>
-<span class="sd">        :rtype: SE3 instance</span>
-
-<span class="sd">        The ETS for each ELink comprises a constant part (possible the</span>
-<span class="sd">        identity) followed by an optional joint variable transform.</span>
-<span class="sd">        This property returns the constant part.  If no constant part</span>
-<span class="sd">        is given, this returns an identity matrix.</span>
-
-<span class="sd">        .. runblock:: pycon</span>
-
-<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import ELink, ETS</span>
-<span class="sd">            &gt;&gt;&gt; link = ELink( ETS.tz(0.333) * ETS.rx(90, &#39;deg&#39;) * ETS.rz() )</span>
-<span class="sd">            &gt;&gt;&gt; link.Ts</span>
-<span class="sd">            &gt;&gt;&gt; link = ELink( ETS.rz() )</span>
-<span class="sd">            &gt;&gt;&gt; link.Ts</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">isjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Test if link has joint</span>
-
-<span class="sd">        :return: test if link has a joint</span>
-<span class="sd">        :rtype: bool</span>
-
-<span class="sd">        The ETS for each ELink comprises a constant part (possible the</span>
-<span class="sd">        identity) followed by an optional joint variable transform.</span>
-<span class="sd">        This property returns the whether the</span>
-
-<span class="sd">        .. runblock:: pycon</span>
-
-<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import models</span>
-<span class="sd">            &gt;&gt;&gt; robot = models.URDF.Panda()</span>
-<span class="sd">            &gt;&gt;&gt; robot[1].isjoint  # link with joint</span>
-<span class="sd">            &gt;&gt;&gt; robot[8].isjoint  # static link</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">jindex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get/set joint index</span>
-
-<span class="sd">        - ``link.jindex`` is the joint index</span>
-<span class="sd">            :return: joint index</span>
-<span class="sd">            :rtype: int</span>
-<span class="sd">        - ``link.jindex = ...`` checks and sets the joint index</span>
-
-<span class="sd">        For a serial-link manipulator the joints are numbered starting at zero</span>
-<span class="sd">        and increasing sequentially toward the end-effector.  For branched</span>
-<span class="sd">        mechanisms this is not so straightforward.</span>
-
-<span class="sd">        The link&#39;s ``jindex`` property specifies the index of its joint</span>
-<span class="sd">        variable within a vector of joint coordinates.</span>
-
-<span class="sd">        .. note:: ``jindex`` values must be a sequence of integers starting</span>
-<span class="sd">            at zero.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jindex</span>
-
-    <span class="nd">@jindex</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">jindex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_jindex</span> <span class="o">=</span> <span class="n">j</span>
-
-    <span class="c1"># def isrevolute(self):</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     Checks if the joint is of revolute type</span>
-
-    <span class="c1">#     :return: Ture if is revolute</span>
-    <span class="c1">#     :rtype: bool</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     return self.v.isrevolute</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">isprismatic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Checks if the joint is of prismatic type</span>
-
-<span class="sd">        :return: True if is prismatic</span>
-<span class="sd">        :rtype: bool</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">isprismatic</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Checks if the joint is of revolute type</span>
-
-<span class="sd">        :return: True if is revolute</span>
-<span class="sd">        :rtype: bool</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">isrevolute</span>
-
-    <span class="c1"># @property</span>
-    <span class="c1"># def ets(self):</span>
-    <span class="c1">#     return self._ets</span>
-
-    <span class="c1"># @property</span>
-    <span class="c1"># def parent_name(self):</span>
-    <span class="c1">#     return self._parent_name</span>
-
-    <span class="c1"># @property</span>
-    <span class="c1"># def child_name(self):</span>
-    <span class="c1">#     return self._child_name</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parent link</span>
-
-<span class="sd">        :return: Link&#39;s parent</span>
-<span class="sd">        :rtype: ELink instance</span>
-
-<span class="sd">        This is a reference to</span>
-
-<span class="sd">        .. runblock:: pycon</span>
-
-<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import models</span>
-<span class="sd">            &gt;&gt;&gt; robot = models.URDF.Panda()</span>
-<span class="sd">            &gt;&gt;&gt; robot[0].parent  # base link has no parent</span>
-<span class="sd">            &gt;&gt;&gt; robot[1].parent  # second link&#39;s parent</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">child</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_child</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">M</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_M</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;this shouldnt happen&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set joint visual geometry</span>
-
 <span class="sd">        - ``link.geometry`` is the list of the visual geometries which</span>
 <span class="sd">            represent the shape of the link</span>
 <span class="sd">            :return: the visual geometries</span>
@@ -490,28 +700,68 @@
     <span class="k">def</span> <span class="nf">collision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set joint collision geometry</span>
-
 <span class="sd">        - ``link.collision`` is the list of the collision geometries which</span>
 <span class="sd">            represent the collidable shape of the link.</span>
 <span class="sd">            :return: the collision geometries</span>
 <span class="sd">            :rtype: list of Shape</span>
 <span class="sd">        - ``link.collision = ...`` checks and sets the collision geometry</span>
 <span class="sd">        - ``link.collision.append(...)`` add collision geometry</span>
-
 <span class="sd">        The collision geometries are what is used to check for collisions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span>
 
-    <span class="c1"># @r.setter</span>
-    <span class="c1"># def r(self, T):</span>
-    <span class="c1">#     if not isinstance(T, SE3):</span>
-    <span class="c1">#         T = SE3(T)</span>
-    <span class="c1">#     self._r = T</span>
+    <span class="nd">@collision</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">collision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coll</span><span class="p">):</span>
+        <span class="c1"># Different from BaseELink due to self._update_fknm() required</span>
 
-<div class="viewcode-block" id="ELink.A"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fast</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">new_coll</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">gi</span> <span class="ow">in</span> <span class="n">coll</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
+                    <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Collision must be of Shape class&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
+            <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coll</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span> <span class="o">=</span> <span class="n">new_coll</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_fknm</span><span class="p">()</span>
+
+    <span class="nd">@geometry</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom</span><span class="p">):</span>
+        <span class="c1"># Different from BaseELink due to self._update_fknm() required</span>
+        <span class="n">new_geom</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">gi</span> <span class="ow">in</span> <span class="n">geom</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
+                    <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
+            <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">new_geom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_fknm</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The forward kinemtics up to and including this link</span>
+<span class="sd">        This value can be accessed after calling fkine_all(q)</span>
+<span class="sd">        from the robot object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">SE3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fk</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ELink.A"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">fast</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link transform matrix</span>
-
 <span class="sd">        :param q: Joint coordinate (radians or metres). Not required for links</span>
 <span class="sd">            with no variable</span>
 <span class="sd">        :type q: float</span>
@@ -519,66 +769,158 @@
 <span class="sd">        :type param: bool</span>
 <span class="sd">        :return T: link frame transformation matrix</span>
 <span class="sd">        :rtype T: SE3 or ndarray(4,4)</span>
-
-<span class="sd">        ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body </span>
+<span class="sd">        ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body</span>
 <span class="sd">          transformation from the previous to the current link frame to</span>
 <span class="sd">          the next, which depends on the joint coordinate ``q``.</span>
+<span class="sd">        If ``fast`` is True return a NumPy array, either SE(2) or SE(3).</span>
+<span class="sd">        A value of None means that it is the identity matrix.</span>
+<span class="sd">        If ``fast`` is False return an ``SE2`` or ``SE3`` instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Use c extension</span>
+        <span class="k">if</span> <span class="n">fast</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+            <span class="n">fknm</span><span class="o">.</span><span class="n">link_A</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fknm</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">T</span>
+
+        <span class="c1"># Otherwise use Python implementation</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
+            <span class="c1"># a variable joint</span>
+            <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;q is required for variable joints&quot;</span><span class="p">)</span>
+
+            <span class="c1"># premultiply variable part by constant part if present</span>
+            <span class="n">Ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ts</span>
+            <span class="k">if</span> <span class="n">Ts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">T</span> <span class="o">=</span> <span class="n">Ts</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># a fixed joint</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ts</span>
+
+        <span class="k">if</span> <span class="n">fast</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">T</span>
+
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SE3</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ELink2"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink2">[docs]</a><span class="k">class</span> <span class="nc">ELink2</span><span class="p">(</span><span class="n">BaseELink</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">ets</span><span class="o">=</span><span class="n">ETS2</span><span class="p">(),</span>
+            <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">jindex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c1"># process common options</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># check we have an ETS</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">ETS2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s1">&#39;The ets argument must be of type ETS2&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span> <span class="o">=</span> <span class="n">ets</span>
+
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">ets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">jindex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">v</span><span class="o">.</span><span class="n">jindex</span> <span class="o">=</span> <span class="n">jindex</span>
+            <span class="k">elif</span> <span class="n">jindex</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">jindex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">jindex</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">jindex</span>
+
+        <span class="c1"># Initialise the static transform representing the constant</span>
+        <span class="c1"># component of the ETS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_Ts</span><span class="p">()</span>
+
+        <span class="c1"># Check the variable joint</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_joint</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">ETS2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;v must be of type ETS2&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;v must be a variable ETS&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;An elementary link can only have one joint variable&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_joint</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v</span> <span class="o">=</span> <span class="n">v</span>
+
+    <span class="k">def</span> <span class="nf">_init_Ts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Number of transforms in the ETS excluding the joint variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_M</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">)</span>
+
+        <span class="c1"># Compute the leading, constant, part of the ETS</span>
+        <span class="c1"># TODO probably should use ETS.compile()</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">,</span> <span class="n">ETS2</span><span class="p">):</span>
+            <span class="c1"># first = True</span>
+            <span class="c1"># T = None</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">et</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">:</span>
+                <span class="c1"># constant transforms only</span>
+                <span class="k">if</span> <span class="n">et</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The transforms in ets must be constant&#39;</span><span class="p">)</span>
+
+                <span class="n">T</span> <span class="o">=</span> <span class="n">T</span> <span class="o">@</span> <span class="n">et</span><span class="o">.</span><span class="n">T</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span> <span class="o">=</span> <span class="n">T</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;this shouldnt happen&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ELink2.A"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink2.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Link transform matrix</span>
+<span class="sd">        :param q: Joint coordinate (radians or metres). Not required for links</span>
+<span class="sd">            with no variable</span>
+<span class="sd">        :type q: float</span>
+<span class="sd">        :param fast: return NumPy array instead of ``SE3``</span>
+<span class="sd">        :type param: bool</span>
+<span class="sd">        :return T: link frame transformation matrix</span>
+<span class="sd">        :rtype T: SE3 or ndarray(4,4)</span>
+<span class="sd">        ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body</span>
+<span class="sd">          transformation from the previous to the current link frame to</span>
+<span class="sd">          the next, which depends on the joint coordinate ``q``.</span>
+<span class="sd">        If ``fast`` is True return a NumPy array, either SE(2) or SE(3).</span>
+<span class="sd">        A value of None means that it is the identity matrix.</span>
+<span class="sd">        If ``fast`` is False return an ``SE2`` or ``SE3`` instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
             <span class="c1"># a variable joint</span>
             <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;q is required for variable joints&quot;</span><span class="p">)</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ts</span><span class="o">.</span><span class="n">A</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+            <span class="c1"># premultiply variable part by constant part if present</span>
+            <span class="n">Ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ts</span>
+            <span class="k">if</span> <span class="n">Ts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">T</span> <span class="o">=</span> <span class="n">Ts</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># a fixed joint</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ts</span><span class="o">.</span><span class="n">A</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ts</span>
 
-        <span class="k">if</span> <span class="n">fast</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">T</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SE2</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="n">SE2</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div></div>
 
-<div class="viewcode-block" id="ELink.ets"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink.ets">[docs]</a>    <span class="k">def</span> <span class="nf">ets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span></div>
 
-    <span class="nd">@collision</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">collision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coll</span><span class="p">):</span>
-        <span class="n">new_coll</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">gi</span> <span class="ow">in</span> <span class="n">coll</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
-                    <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Collision must be of Shape class&#39;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
-            <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coll</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span> <span class="o">=</span> <span class="n">new_coll</span>
-
-    <span class="nd">@geometry</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom</span><span class="p">):</span>
-        <span class="n">new_geom</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">gi</span> <span class="ow">in</span> <span class="n">geom</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
-                    <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class&#39;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">Shape</span><span class="p">):</span>
-            <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">new_geom</span></div>
+<span class="c1"># l0 = ELink(qlim=[-1, 1])</span>
+<span class="c1"># print(l0.qlim)</span>
 </pre></div>
 
            </div>
@@ -592,7 +934,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 21-Mar-2021.
+        Last updated on 23-Apr-2021.
       </span>
 
     </p>

@@ -1,0 +1,11 @@
+<map id="inheritance04c26cb51d" name="inheritance04c26cb51d">
+<area shape="rect" id="node1" title="A link superclass for all robots defined using Denavit&#45;Hartenberg notation." alt="" coords="261,104,381,129"/>
+<area shape="rect" id="node3" href="arm_dh.html#roboticstoolbox.robot.DHLink.PrismaticDH" target="_top" title="Class for prismatic link using standard DH convention" alt="" coords="439,5,594,31"/>
+<area shape="rect" id="node4" href="arm_dh.html#roboticstoolbox.robot.DHLink.PrismaticMDH" target="_top" title="Class for prismatic link using modified DH convention" alt="" coords="433,55,600,80"/>
+<area shape="rect" id="node5" href="arm_dh.html#roboticstoolbox.robot.DHLink.RevoluteDH" target="_top" title="Class for revolute links using standard DH convention" alt="" coords="441,104,592,129"/>
+<area shape="rect" id="node6" href="arm_dh.html#roboticstoolbox.robot.DHLink.RevoluteMDH" target="_top" title="Class for revolute links using modified DH convention" alt="" coords="435,153,598,179"/>
+<area shape="rect" id="node2" href="#roboticstoolbox.robot.Link.Link" target="_top" title="Link superclass" alt="" coords="129,129,209,155"/>
+<area shape="rect" id="node7" href="arm_erobot.html#roboticstoolbox.robot.ELink.BaseELink" target="_top" title="ELink.BaseELink" alt="" coords="257,179,385,204"/>
+<area shape="rect" id="node8" href="arm_erobot.html#roboticstoolbox.robot.ELink.ELink" target="_top" title="ETS link class" alt="" coords="469,203,565,228"/>
+<area shape="rect" id="node9" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,129,81,155"/>
+</map>
