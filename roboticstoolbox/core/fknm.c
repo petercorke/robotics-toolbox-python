@@ -146,6 +146,8 @@ static PyObject *fkine_all(PyObject *self, PyObject *args)
         }
     }
 
+    free(ret);
+
     Py_RETURN_NONE;
 }
 
@@ -591,6 +593,11 @@ void _jacobe(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, 
         }
     }
     PyList_Reverse(links);
+
+    free(T);
+    free(U);
+    free(temp);
+    free(ret);
 }
 
 void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J)
@@ -693,6 +700,12 @@ void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, 
             copy(temp, U);
         }
     }
+
+    free(T);
+    free(U);
+    free(temp);
+    free(ret);
+    free(invU);
 }
 
 void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *ret)
@@ -725,6 +738,9 @@ void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_floa
     mult(current, etool, ret);
     copy(ret, current);
     mult(current, tool, ret);
+
+    free(temp);
+    free(current);
 }
 
 void A(Link *link, npy_float64 *ret, double eta)
@@ -748,6 +764,7 @@ void A(Link *link, npy_float64 *ret, double eta)
 
     // Multiply ret = A * v
     mult(link->A, v, ret);
+    free(v);
 }
 
 void copy(npy_float64 *A, npy_float64 *B)
@@ -1074,6 +1091,7 @@ int _inv(npy_float64 *m, npy_float64 *invOut)
     for (i = 0; i < 16; i++)
         invOut[i] = inv[i] * det;
 
+    free(inv);
     return 1;
 }
 
