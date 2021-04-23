@@ -95,12 +95,7 @@ def list(keywords=None, dof=None, mtype=None):
                         ', '.join(robot.keywords)
                     )
 
-        print(str(table))
-
-    try:
-        make_table('thin')
-    except UnicodeEncodeError:
-        make_table('ascii')
+        table.print()
 
 
 if __name__ == "__main__":   # pragma nocover
