@@ -20,41 +20,39 @@ import numpy as np
 env = swift.Swift()
 env.launch()
 
-path = rtb.path_to_datafile('data')
+path = rtb.path_to_datafile("data")
 
 
 g1 = Mesh(
-    filename=str(path / 'gimbal-ring1.stl'),
-    color=[34, 143, 201],
-    scale=(1. / 3,) * 3
+    filename=str(path / "gimbal-ring1.stl"), color=[34, 143, 201], scale=(1.0 / 3,) * 3
 )
+g1.v = [0, 0, 0, 0, 0.5, 0]
 
 g2 = Mesh(
-    filename=str(path / 'gimbal-ring2.stl'),
-    color=[31, 184, 72],
-    scale=(1.1 / 3,) * 3
-
+    filename=str(path / "gimbal-ring2.stl"), color=[31, 184, 72], scale=(1.1 / 3,) * 3
 )
+g2.v = [0, 0, 0, 0.5, 0, 0]
 
 g3 = Mesh(
-    filename=str(path / 'gimbal-ring3.stl'),
+    filename=str(path / "gimbal-ring3.stl"),
     color=[240, 103, 103],
-    scale=(1.1**2 / 3,) * 3
+    scale=(1.1 ** 2 / 3,) * 3,
 )
+g3.v = [0, 0, 0, 0, 0, 0.5]
 
 plane = Mesh(
-    filename=str(path / 'spitfire_assy-gear_up.stl'),
-    scale=(1. / (180 * 3),) * 3,
-    color=[240, 103, 103]
+    filename=str(path / "spitfire_assy-gear_up.stl"),
+    scale=(1.0 / (180 * 3),) * 3,
+    color=[240, 103, 103],
 )
-print(path / 'spitfire_assy-gear_up.stl')
+print(path / "spitfire_assy-gear_up.stl")
 env.add(g1)
 env.add(g2)
 env.add(g3)
 env.add(plane)
 
-print('Supermarine Spitfire Mk VIII by Ed Morley @GRABCAD')
-print('Gimbal models by Peter Corke using OpenSCAD')
+print("Supermarine Spitfire Mk VIII by Ed Morley @GRABCAD")
+print("Gimbal models by Peter Corke using OpenSCAD")
 
 # compute the three rotation matrices
 BASE = SE3(0, 0, 0.5)
@@ -72,11 +70,11 @@ def update_gimbals(theta, ring):
     # update the relevant transform, depending on which ring's slider moved
     def Rxyz(theta, which):
         theta = np.radians(theta)
-        if which == 'X':
+        if which == "X":
             return SO3.Rx(theta)
-        elif which == 'Y':
+        elif which == "Y":
             return SO3.Ry(theta)
-        elif which == 'Z':
+        elif which == "Z":
             return SO3.Rz(theta)
 
     if ring == 1:
@@ -111,46 +109,32 @@ def set_three(x):
 
 
 r_one = swift.Slider(
-    set_one,
-    min=-180, max=180,
-    step=1, value=0,
-    desc='Outer gimbal', unit='&#176;')
+    set_one, min=-180, max=180, step=1, value=0, desc="Outer gimbal", unit="&#176;"
+)
 
 
 r_two = swift.Slider(
-    set_two,
-    min=-180, max=180,
-    step=1, value=0,
-    desc='Middle gimbal', unit='&#176;')
+    set_two, min=-180, max=180, step=1, value=0, desc="Middle gimbal", unit="&#176;"
+)
 
 
 r_three = swift.Slider(
-    set_three,
-    min=-180, max=180,
-    step=1, value=0,
-    desc='Inner gimbal', unit='&#176;')
+    set_three, min=-180, max=180, step=1, value=0, desc="Inner gimbal", unit="&#176;"
+)
 
 
 # buttons to set a 3-angle sequence
 ZYX_button = swift.Button(
-    lambda x: change_sequence('ZYX'),
-    desc='ZYX (roll-pitch-yaw angles)'
+    lambda x: change_sequence("ZYX"), desc="ZYX (roll-pitch-yaw angles)"
 )
 
 XYZ_button = swift.Button(
-    lambda x: change_sequence('XYZ'),
-    desc='XYZ (roll-pitch-yaw angles)'
+    lambda x: change_sequence("XYZ"), desc="XYZ (roll-pitch-yaw angles)"
 )
 
-ZYZ_button = swift.Button(
-    lambda x: change_sequence('ZYZ'),
-    desc='ZYZ (Euler angles)'
-)
+ZYZ_button = swift.Button(lambda x: change_sequence("ZYZ"), desc="ZYZ (Euler angles)")
 
-button = swift.Button(
-    lambda x: set('ZYX'),
-    desc='Set to Zero'
-)
+button = swift.Button(lambda x: set("ZYX"), desc="Set to Zero")
 
 
 # button to reset joint angles
@@ -161,10 +145,7 @@ def reset(e):
     # env.step(0)
 
 
-zero_button = swift.Button(
-    reset,
-    desc='Set to Zero'
-)
+zero_button = swift.Button(reset, desc="Set to Zero")
 
 
 def update_all_sliders():
@@ -176,7 +157,7 @@ def update_all_sliders():
 def change_sequence(new):
     global sequence
 
-    xyz = 'XYZ'
+    xyz = "XYZ"
 
     # update the state of the ring_axis dropdowns
     ring1_axis.checked = xyz.find(new[0])
@@ -192,62 +173,36 @@ def angle(index, ring):
     global sequence
 
     # print('angle', index, ring)
-    xyz = 'XYZ'
+    xyz = "XYZ"
     s = list(sequence)
     s[ring] = xyz[int(index)]
-    sequence = ''.join(s)
+    sequence = "".join(s)
     update_all_sliders()
 
 
-ring1_axis = swift.Radio(
-    lambda x: angle(x, 0),
-    options=[
-        'X',
-        'Y',
-        'Z'
-    ],
-    checked=2
-)
+ring1_axis = swift.Radio(lambda x: angle(x, 0), options=["X", "Y", "Z"], checked=2)
 
-ring2_axis = swift.Radio(
-    lambda x: angle(x, 1),
-    options=[
-        'X',
-        'Y',
-        'Z'
-    ],
-    checked=1
-)
+ring2_axis = swift.Radio(lambda x: angle(x, 1), options=["X", "Y", "Z"], checked=1)
 
-ring3_axis = swift.Radio(
-    lambda x: angle(x, 2),
-    options=[
-        'X',
-        'Y',
-        'Z'
-    ],
-    checked=0
-)
+ring3_axis = swift.Radio(lambda x: angle(x, 2), options=["X", "Y", "Z"], checked=0)
 
 
-label = swift.Label(
-    desc='Triple angle'
-)
+label = swift.Label(desc="Triple angle")
 
 
 def chekked(e, el):
-    nlabel = 's: '
+    nlabel = "s: "
 
     if e[0]:
-        nlabel += 'a'
+        nlabel += "a"
         r_one.value = 0
 
     if e[1]:
-        nlabel += 'b'
+        nlabel += "b"
         r_two.value = 0
 
     if e[2]:
-        nlabel += 'c'
+        nlabel += "c"
         r_three.value = 0
 
     if e[3]:
@@ -275,5 +230,5 @@ update_gimbals(0, 1)
 update_gimbals(0, 2)
 update_gimbals(0, 3)
 
-while(True):
-    env.step(0)
+while True:
+    env.step(0.05)

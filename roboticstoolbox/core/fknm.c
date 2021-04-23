@@ -146,6 +146,9 @@ static PyObject *fkine_all(PyObject *self, PyObject *args)
         }
     }
 
+    Py_DECREF(iter_links);
+    free(ret);
+
     Py_RETURN_NONE;
 }
 
@@ -326,6 +329,11 @@ static PyObject *link_init(PyObject *self, PyObject *args)
         link->op = tz;
     }
 
+    Py_DECREF(iter_base);
+    Py_DECREF(iter_wT);
+    Py_DECREF(iter_sT);
+    Py_DECREF(iter_sq);
+
     ret = PyCapsule_New(link, "Link", NULL);
     return ret;
 }
@@ -377,6 +385,20 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     iter_wT = PyObject_GetIter(py_shape_wT);
     iter_sT = PyObject_GetIter(py_shape_sT);
     iter_sq = PyObject_GetIter(py_shape_sq);
+
+    if (link->shape_base != 0)
+        free(link->shape_base);
+    if (link->shape_wT != 0)
+        free(link->shape_wT);
+    if (link->shape_sT != 0)
+        free(link->shape_sT);
+    if (link->shape_sq != 0)
+        free(link->shape_sq);
+
+    link->shape_base = 0;
+    link->shape_wT = 0;
+    link->shape_sT = 0;
+    link->shape_sq = 0;
 
     link->shape_base = (npy_float64 **)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
     link->shape_wT = (npy_float64 **)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
@@ -431,6 +453,11 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     link->axis = jointtype;
     link->parent = parent;
     link->n_shapes = n_shapes;
+
+    Py_DECREF(iter_base);
+    Py_DECREF(iter_wT);
+    Py_DECREF(iter_sT);
+    Py_DECREF(iter_sq);
 
     Py_RETURN_NONE;
 }
@@ -591,6 +618,13 @@ void _jacobe(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, 
         }
     }
     PyList_Reverse(links);
+
+    Py_DECREF(iter_links);
+
+    free(T);
+    free(U);
+    free(temp);
+    free(ret);
 }
 
 void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J)
@@ -693,6 +727,14 @@ void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, 
             copy(temp, U);
         }
     }
+
+    Py_DECREF(iter_links);
+
+    free(T);
+    free(U);
+    free(temp);
+    free(ret);
+    free(invU);
 }
 
 void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *ret)
@@ -723,8 +765,13 @@ void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_floa
     }
 
     mult(current, etool, ret);
-    copy(temp, current);
+    copy(ret, current);
     mult(current, tool, ret);
+
+    Py_DECREF(iter_links);
+
+    free(temp);
+    free(current);
 }
 
 void A(Link *link, npy_float64 *ret, double eta)
@@ -748,6 +795,7 @@ void A(Link *link, npy_float64 *ret, double eta)
 
     // Multiply ret = A * v
     mult(link->A, v, ret);
+    free(v);
 }
 
 void copy(npy_float64 *A, npy_float64 *B)
@@ -1074,6 +1122,7 @@ int _inv(npy_float64 *m, npy_float64 *invOut)
     for (i = 0; i < 16; i++)
         invOut[i] = inv[i] * det;
 
+    free(inv);
     return 1;
 }
 
@@ -1091,8 +1140,8 @@ void _r2q(npy_float64 *r, npy_float64 *q)
     t13m = pow((r[0 * 4 + 2] - r[2 * 4 + 0]), 2);
     t23m = pow((r[1 * 4 + 2] - r[2 * 4 + 1]), 2);
 
-    d1 = pow(( r[0 * 4 + 0] + r[1 * 4 + 1] + r[2 * 4 + 2] + 1), 2);
-    d2 = pow(( r[0 * 4 + 0] - r[1 * 4 + 1] - r[2 * 4 + 2] + 1), 2);
+    d1 = pow((r[0 * 4 + 0] + r[1 * 4 + 1] + r[2 * 4 + 2] + 1), 2);
+    d2 = pow((r[0 * 4 + 0] - r[1 * 4 + 1] - r[2 * 4 + 2] + 1), 2);
     d3 = pow((-r[0 * 4 + 0] + r[1 * 4 + 1] - r[2 * 4 + 2] + 1), 2);
     d4 = pow((-r[0 * 4 + 0] - r[1 * 4 + 1] + r[2 * 4 + 2] + 1), 2);
 

@@ -182,6 +182,8 @@ class BaseERobot(Robot):
         # Make a gripper object for each gripper
         for link in gripper_links:
             g_links = self.dfs_links(link)
+            # for g in g_links:
+            #     print(g)
 
             # Remove gripper links from the robot
             for g_link in g_links:
@@ -2006,10 +2008,10 @@ class ERobot(BaseERobot):
 
         links, n, _ = self.get_path(start=start, end=end)
 
-        if q is None:
-            q = np.copy(self.q)
-        else:
-            q = getvector(q, n)
+        # if q is None:
+        #     q = np.copy(self.q)
+        # else:
+        #     q = getvector(q, n)
 
         j = 0
         Ain = None

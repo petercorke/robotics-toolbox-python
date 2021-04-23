@@ -5,10 +5,8 @@
 
 from roboticstoolbox.backends import swift
 import roboticstoolbox as rtb
-import spatialmath as sm
 import numpy as np
 import cProfile
-# import numpy.testing as nt
 
 env = swift.Swift(_dev=False)
 env.launch()
@@ -27,8 +25,10 @@ env.step(0.001)
 def stepper():
     for i in range(10000):
         panda.qd = np.linalg.pinv(panda.jacob0(panda.q, fast=True)) @ ev
+        # panda.jacob0(panda.q, fast=True)
+
         # panda.fkine_all_fast(panda.q)
         env.step(0.001)
 
 
-cProfile.run('stepper()')
+cProfile.run("stepper()")
