@@ -146,6 +146,7 @@ static PyObject *fkine_all(PyObject *self, PyObject *args)
         }
     }
 
+    Py_DECREF(iter_links);
     free(ret);
 
     Py_RETURN_NONE;
@@ -328,6 +329,11 @@ static PyObject *link_init(PyObject *self, PyObject *args)
         link->op = tz;
     }
 
+    Py_DECREF(iter_base);
+    Py_DECREF(iter_wT);
+    Py_DECREF(iter_sT);
+    Py_DECREF(iter_sq);
+
     ret = PyCapsule_New(link, "Link", NULL);
     return ret;
 }
@@ -379,6 +385,20 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     iter_wT = PyObject_GetIter(py_shape_wT);
     iter_sT = PyObject_GetIter(py_shape_sT);
     iter_sq = PyObject_GetIter(py_shape_sq);
+
+    if (link->shape_base != 0)
+        free(link->shape_base);
+    if (link->shape_wT != 0)
+        free(link->shape_wT);
+    if (link->shape_sT != 0)
+        free(link->shape_sT);
+    if (link->shape_sq != 0)
+        free(link->shape_sq);
+
+    link->shape_base = 0;
+    link->shape_wT = 0;
+    link->shape_sT = 0;
+    link->shape_sq = 0;
 
     link->shape_base = (npy_float64 **)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
     link->shape_wT = (npy_float64 **)PyMem_RawCalloc(n_shapes, sizeof(npy_float64));
@@ -433,6 +453,11 @@ static PyObject *link_update(PyObject *self, PyObject *args)
     link->axis = jointtype;
     link->parent = parent;
     link->n_shapes = n_shapes;
+
+    Py_DECREF(iter_base);
+    Py_DECREF(iter_wT);
+    Py_DECREF(iter_sT);
+    Py_DECREF(iter_sq);
 
     Py_RETURN_NONE;
 }
@@ -594,6 +619,8 @@ void _jacobe(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, 
     }
     PyList_Reverse(links);
 
+    Py_DECREF(iter_links);
+
     free(T);
     free(U);
     free(temp);
@@ -701,6 +728,8 @@ void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, 
         }
     }
 
+    Py_DECREF(iter_links);
+
     free(T);
     free(U);
     free(temp);
@@ -738,6 +767,8 @@ void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_floa
     mult(current, etool, ret);
     copy(ret, current);
     mult(current, tool, ret);
+
+    Py_DECREF(iter_links);
 
     free(temp);
     free(current);
