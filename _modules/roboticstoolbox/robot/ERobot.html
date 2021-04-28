@@ -170,8 +170,7 @@
 <span class="kn">import</span> <span class="nn">webbrowser</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">SE2</span>
-<span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> <span class="n">getvector</span><span class="p">,</span> <span class="n">verifymatrix</span><span class="p">,</span> <span class="n">getmatrix</span><span class="p">,</span> \
-    <span class="n">islistof</span>
+<span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> <span class="n">getvector</span><span class="p">,</span> <span class="n">verifymatrix</span><span class="p">,</span> <span class="n">getmatrix</span><span class="p">,</span> <span class="n">islistof</span>
 
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ELink</span> <span class="kn">import</span> <span class="n">ELink</span><span class="p">,</span> <span class="n">ELink2</span><span class="p">,</span> <span class="n">BaseELink</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ETS</span> <span class="kn">import</span> <span class="n">ETS</span><span class="p">,</span> <span class="n">ETS2</span>
@@ -184,8 +183,12 @@
 
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">PurePosixPath</span>
 <span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
-<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SpatialAcceleration</span><span class="p">,</span> <span class="n">SpatialVelocity</span><span class="p">,</span> \
-    <span class="n">SpatialInertia</span><span class="p">,</span> <span class="n">SpatialForce</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SpatialAcceleration</span><span class="p">,</span>
+    <span class="n">SpatialVelocity</span><span class="p">,</span>
+    <span class="n">SpatialInertia</span><span class="p">,</span>
+    <span class="n">SpatialForce</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">fknm</span>
 
@@ -265,12 +268,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa E501</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">links</span><span class="p">,</span>
-            <span class="n">base_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">gripper_links</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">checkjindex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">base_link</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gripper_links</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">checkjindex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span> <span class="o">=</span> <span class="p">[]</span>
@@ -293,8 +291,7 @@
 
             <span class="c1"># put it in the link dictionary, check for duplicates</span>
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linkdict</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;link name </span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> is not unique&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;link name </span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is not unique&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_linkdict</span><span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">link</span>
 
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
@@ -321,7 +318,7 @@
             <span class="c1"># is this a base link?</span>
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_link</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Multiple base links&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Multiple base links&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_base_link</span> <span class="o">=</span> <span class="n">link</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># no, update children of this link&#39;s parent</span>
@@ -383,8 +380,7 @@
                     <span class="n">orlinks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
 
             <span class="c1"># visit all links in DFS order</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dfs_links</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">link</span><span class="p">:</span> <span class="n">visit_link</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">jindex</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dfs_links</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">link</span><span class="p">:</span> <span class="n">visit_link</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">jindex</span><span class="p">))</span>
 
         <span class="k">elif</span> <span class="nb">all</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span><span class="p">]):</span>
             <span class="c1"># jindex set on all, check they are unique and contiguous</span>
@@ -393,16 +389,15 @@
                 <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="n">link</span><span class="o">.</span><span class="n">jindex</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">jset</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s1">&#39;joint index </span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="si">}</span><span class="s1"> was &#39;</span>
-                            <span class="s1">&#39;repeated or out of range&#39;</span><span class="p">)</span>
+                            <span class="sa">f</span><span class="s2">&quot;joint index </span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="si">}</span><span class="s2"> was &quot;</span> <span class="s2">&quot;repeated or out of range&quot;</span>
+                        <span class="p">)</span>
                     <span class="n">jset</span> <span class="o">-=</span> <span class="nb">set</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="p">])</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">jset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># pragma nocover  # is impossible</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;joints </span><span class="si">{</span><span class="n">jset</span><span class="si">}</span><span class="s1"> were not assigned&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;joints </span><span class="si">{</span><span class="n">jset</span><span class="si">}</span><span class="s2"> were not assigned&quot;</span><span class="p">)</span>
             <span class="n">orlinks</span> <span class="o">=</span> <span class="n">links</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># must be a mixture of ELinks with/without jindex</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;all links must have a jindex, or none have a jindex&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;all links must have a jindex, or none have a jindex&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_nbranches</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">nchildren</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">])</span>
 
@@ -411,7 +406,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qdd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">control_type</span> <span class="o">=</span> <span class="s1">&#39;v&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">control_type</span> <span class="o">=</span> <span class="s2">&quot;v&quot;</span>
 
         <span class="c1"># Set up qlim</span>
         <span class="n">qlim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
@@ -424,8 +419,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_qlim</span> <span class="o">=</span> <span class="n">qlim</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">qlim</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> \
-                    <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">qlim</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">qlim</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">qlim</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_valid_qlim</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">orlinks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -448,7 +442,8 @@
             <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;joint&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&gt;&quot;</span><span class="p">),</span>
             <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">),</span>
             <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;ETS&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">),</span>
-            <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span><span class="p">)</span>
+            <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span> <span class="k">else</span> <span class="s2">&quot;&lt;&lt;blue&gt;&gt;&quot;</span>
             <span class="n">ee</span> <span class="o">=</span> <span class="s2">&quot;@&quot;</span> <span class="k">if</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
@@ -468,18 +463,18 @@
                 <span class="c1">#     jname = link.jindex</span>
                 <span class="n">jname</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">jindex</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">jname</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">jname</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
             <span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="p">(</span>
                 <span class="n">link</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>
                 <span class="n">color</span> <span class="o">+</span> <span class="n">ee</span> <span class="o">+</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">jname</span><span class="p">,</span>
                 <span class="n">parent_name</span><span class="p">,</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">}}</span><span class="s2"> = </span><span class="se">{{</span><span class="si">{</span><span class="n">parent_name</span><span class="si">}</span><span class="se">}}</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">}}</span><span class="s2"> = </span><span class="se">{{</span><span class="si">{</span><span class="n">parent_name</span><span class="si">}</span><span class="se">}}</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ERobot</span><span class="p">):</span>
-            <span class="n">classname</span> <span class="o">=</span> <span class="s1">&#39;ERobot&#39;</span>
+            <span class="n">classname</span> <span class="o">=</span> <span class="s2">&quot;ERobot&quot;</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ERobot2</span><span class="p">):</span>
-            <span class="n">classname</span> <span class="o">=</span> <span class="s1">&#39;ERobot2&#39;</span>
+            <span class="n">classname</span> <span class="o">=</span> <span class="s2">&quot;ERobot2&quot;</span>
         <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">classname</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; (by </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span><span class="si">}</span><span class="s2">)&quot;</span>
@@ -514,7 +509,7 @@
         <span class="c1"># link = self.base_link</span>
 
         <span class="k">def</span> <span class="nf">recurse</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">indent</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">indent</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">link</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>
                 <span class="n">recurse</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">indent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
@@ -529,7 +524,7 @@
 
     <span class="c1">#     return self._valid_qlim</span>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -541,7 +536,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nbranches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -566,18 +561,20 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nbranches</span>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">elinks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># return self._linkdict</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_links</span>
-<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">link_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linkdict</span>
-<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">base_link</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -589,9 +586,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_base_link</span> <span class="o">=</span> <span class="n">link</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># self._base_link = self.links[link]</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Must be an ELink&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Must be an ELink&quot;</span><span class="p">)</span>
         <span class="c1"># self._reset_fk_path()</span>
-<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="c1"># --------------------------------------------------------------------- #</span>
     <span class="c1"># TODO  get configuration string</span>
 
     <span class="nd">@property</span>
@@ -609,11 +607,10 @@
     <span class="k">def</span> <span class="nf">ee_links</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">link</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">ELink</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ee_links</span> <span class="o">=</span> <span class="p">[</span><span class="n">link</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> \
-                <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ELink</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">link</span><span class="p">]):</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ELink</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">link</span><span class="p">]):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ee_links</span> <span class="o">=</span> <span class="n">link</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;expecting an ELink or list of ELinks&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;expecting an ELink or list of ELinks&quot;</span><span class="p">)</span>
         <span class="c1"># self._reset_fk_path()</span>
 
     <span class="nd">@property</span>
@@ -658,25 +655,25 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_reach</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">d_all</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reach</span>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="c1"># @property</span>
     <span class="c1"># def ets(self):</span>
     <span class="c1">#     return self._ets</span>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="c1"># @property</span>
     <span class="c1"># def M(self):</span>
     <span class="c1">#     return self._M</span>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="c1"># @property</span>
     <span class="c1"># def q_idx(self):</span>
     <span class="c1">#     return self._q_idx</span>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="BaseERobot.ets"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.ets">[docs]</a>    <span class="k">def</span> <span class="nf">ets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">explored</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -706,8 +703,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">link</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getlink</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;ambiguous, specify which end-effector is required&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ambiguous, specify which end-effector is required&quot;</span><span class="p">)</span>
         <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getlink</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">explored</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -740,13 +736,12 @@
                 <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">explored</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">(</span>
-                        <span class="n">parent</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">explored</span><span class="p">,</span> <span class="n">path</span> <span class="o">*</span> <span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span>
+                    <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">explored</span><span class="p">,</span> <span class="n">path</span> <span class="o">*</span> <span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span>
                 <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">p</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="BaseERobot.segments"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.segments">[docs]</a>    <span class="k">def</span> <span class="nf">segments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -796,10 +791,10 @@
 
         <span class="k">return</span> <span class="n">recurse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="BaseERobot.fkine_all"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.fkine_all">[docs]</a>    <span class="k">def</span> <span class="nf">fkine_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the pose of every link frame</span>
 
 <span class="sd">        :param q: The joint configuration</span>
@@ -816,7 +811,7 @@
 <span class="sd">        :references:</span>
 <span class="sd">            - Kinematic Derivatives using the Elementary Transform</span>
 <span class="sd">              Sequence, J. Haviland and P. Corke</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
         <span class="n">Tbase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span>  <span class="c1"># add base, also sets the type</span>
         <span class="n">linkframes</span> <span class="o">=</span> <span class="n">Tbase</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nlinks</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
@@ -846,7 +841,7 @@
 
         <span class="k">return</span> <span class="n">linkframes</span></div>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="BaseERobot.showgraph"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.showgraph">[docs]</a>    <span class="k">def</span> <span class="nf">showgraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -926,7 +921,7 @@
 <span class="sd">        :seealso: :func:`showgraph`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">file</span> <span class="o">=</span> <span class="n">filename</span>
 
@@ -938,18 +933,16 @@
             <span class="c1"># draw the edge</span>
             <span class="k">if</span> <span class="n">jtype</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
-                    <span class="n">edge_options</span> <span class="o">=</span> \
-                        <span class="s1">&#39;arrowhead=&quot;box&quot;, arrowtail=&quot;inv&quot;, dir=&quot;both&quot;&#39;</span>
+                    <span class="n">edge_options</span> <span class="o">=</span> <span class="s1">&#39;arrowhead=&quot;box&quot;, arrowtail=&quot;inv&quot;, dir=&quot;both&quot;&#39;</span>
                 <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
-                    <span class="n">edge_options</span> <span class="o">=</span> \
-                        <span class="s1">&#39;arrowhead=&quot;dot&quot;, arrowtail=&quot;inv&quot;, dir=&quot;both&quot;&#39;</span>
+                    <span class="n">edge_options</span> <span class="o">=</span> <span class="s1">&#39;arrowhead=&quot;dot&quot;, arrowtail=&quot;inv&quot;, dir=&quot;both&quot;&#39;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">edge_options</span> <span class="o">=</span> <span class="s1">&#39;arrowhead=&quot;normal&quot;&#39;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">edge_options</span> <span class="o">=</span> <span class="s1">&#39;arrowhead=&quot;normal&quot;&#39;</span>
 
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">parent</span> <span class="o">=</span> <span class="s1">&#39;BASE&#39;</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="s2">&quot;BASE&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">parent</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span>
 
@@ -958,48 +951,54 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="n">static</span><span class="p">:</span>
                     <span class="n">node_options</span> <span class="o">=</span> <span class="s1">&#39;, fontcolor=&quot;blue&quot;&#39;</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">node_options</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="n">node_options</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
                 <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
-                    <span class="s1">&#39;  </span><span class="si">{}</span><span class="s1">_ets [shape=box, style=rounded, &#39;</span>
+                    <span class="s2">&quot;  </span><span class="si">{}</span><span class="s2">_ets [shape=box, style=rounded, &quot;</span>
                     <span class="s1">&#39;label=&quot;</span><span class="si">{}</span><span class="s1">&quot;</span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span>
-                            <span class="n">q</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">node_options</span><span class="p">))</span>
-                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> -&gt; </span><span class="si">{}</span><span class="s1">_ets;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1">_ets -&gt; </span><span class="si">{}</span><span class="s1"> [</span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">edge_options</span><span class="p">))</span>
+                        <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">node_options</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">{}</span><span class="s2"> -&gt; </span><span class="si">{}</span><span class="s2">_ets;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="s2">&quot;  </span><span class="si">{}</span><span class="s2">_ets -&gt; </span><span class="si">{}</span><span class="s2"> [</span><span class="si">{}</span><span class="s2">];</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">edge_options</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># put the ets fragment as an edge label</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span> <span class="ow">and</span> <span class="n">static</span><span class="p">:</span>
                     <span class="n">edge_options</span> <span class="o">+=</span> <span class="s1">&#39;fontcolor=&quot;blue&quot;&#39;</span>
-                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> -&gt; </span><span class="si">{}</span><span class="s1"> [label=&quot;</span><span class="si">{}</span><span class="s1">&quot;, </span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">parent</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span>
-                        <span class="n">q</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">edge_options</span><span class="p">))</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> -&gt; </span><span class="si">{}</span><span class="s1"> [label=&quot;</span><span class="si">{}</span><span class="s1">&quot;, </span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">parent</span><span class="p">,</span>
+                        <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
+                        <span class="n">edge_options</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
 
         <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
 
         <span class="c1"># add the base link</span>
-        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  BASE [shape=square, style=filled, fillcolor=gray]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  BASE [shape=square, style=filled, fillcolor=gray]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># add the links</span>
         <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="c1"># draw the link frame node (circle) or ee node (doublecircle)</span>
             <span class="k">if</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span><span class="p">:</span>
                 <span class="c1"># end-effector</span>
-                <span class="n">node_options</span> <span class="o">=</span> \
-                    <span class="s1">&#39;shape=&quot;doublecircle&quot;, color=&quot;blue&quot;, fontcolor=&quot;blue&quot;&#39;</span>
+                <span class="n">node_options</span> <span class="o">=</span> <span class="s1">&#39;shape=&quot;doublecircle&quot;, color=&quot;blue&quot;, fontcolor=&quot;blue&quot;&#39;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">node_options</span> <span class="o">=</span> <span class="s1">&#39;shape=&quot;circle&quot;&#39;</span>
 
-            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> [</span><span class="si">{}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">node_options</span><span class="p">))</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">{}</span><span class="s2"> [</span><span class="si">{}</span><span class="s2">];</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">node_options</span><span class="p">))</span>
 
             <span class="n">draw_edge</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">etsbox</span><span class="p">,</span> <span class="n">jtype</span><span class="p">,</span> <span class="n">static</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">gripper</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">gripper</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
-                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> [shape=cds];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">{}</span><span class="s2"> [shape=cds];</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
                 <span class="n">draw_edge</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">etsbox</span><span class="p">,</span> <span class="n">jtype</span><span class="p">,</span> <span class="n">static</span><span class="p">)</span>
 
-        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># noqa</span></div>
@@ -1059,14 +1058,14 @@
                 <span class="n">tool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tool</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># if more than one gripper, user must choose</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Must specify which gripper&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Must specify which gripper&quot;</span><span class="p">)</span>
 
             <span class="c1"># no grippers, use ee link if just one</span>
             <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># if more than one EE, user must choose</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Must specify which end-effector&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Must specify which end-effector&quot;</span><span class="p">)</span>
 
             <span class="c1"># Cache result</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cache_end</span> <span class="o">=</span> <span class="n">end</span>
@@ -1115,7 +1114,7 @@
             <span class="k">if</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">link_dict</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">link_dict</span><span class="p">[</span><span class="n">link</span><span class="p">]</span>
 
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;no link named </span><span class="si">{</span><span class="n">link</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no link named </span><span class="si">{</span><span class="n">link</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">BaseELink</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
@@ -1125,16 +1124,15 @@
                     <span class="k">if</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">gripper</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
                         <span class="k">return</span> <span class="n">link</span>
 
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;link not in robot links&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;link not in robot links&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;unknown argument&#39;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;unknown argument&quot;</span><span class="p">)</span></div>
 
 
 <span class="c1"># =========================================================================== #</span>
 
 
 <div class="viewcode-block" id="ERobot"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot">[docs]</a><span class="k">class</span> <span class="nc">ERobot</span><span class="p">(</span><span class="n">BaseERobot</span><span class="p">):</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">DHRobot</span><span class="p">):</span>
@@ -1150,7 +1148,11 @@
             <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">ets_j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
                 <span class="n">elink</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span><span class="n">ets_j</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;link</span><span class="si">{</span><span class="n">j</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">elink</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">elink</span><span class="o">.</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">elink</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">elink</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="n">elink</span><span class="o">.</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="n">elink</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="p">):</span>
                     <span class="n">elink</span><span class="o">.</span><span class="n">qlim</span> <span class="o">=</span> <span class="n">elink</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">qlim</span>
                 <span class="n">parent</span> <span class="o">=</span> <span class="n">elink</span>
                 <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elink</span><span class="p">)</span>
@@ -1163,8 +1165,7 @@
             <span class="n">links</span> <span class="o">=</span> <span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">]</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s1">&#39;constructor argument must be ETS or list of ELink&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;constructor argument must be ETS or list of ELink&quot;</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -1198,13 +1199,13 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no link named </span><span class="si">{</span><span class="n">gripper</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bad argument passed as gripper&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;bad argument passed as gripper&quot;</span><span class="p">)</span>
 
         <span class="n">links</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">ERobot</span><span class="o">.</span><span class="n">URDF_read</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">gripper_links</span><span class="o">=</span><span class="n">gripper</span><span class="p">)</span></div>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="k">def</span> <span class="nf">_reset_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_path_cache</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1301,7 +1302,7 @@
         <span class="k">return</span> <span class="n">ob</span>
 
     <span class="k">def</span> <span class="nf">_set_link_fk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        robot._set_link_fk(q) evaluates fkine for each link within a</span>
 <span class="sd">        robot and stores that pose in a private variable within the link.</span>
 
@@ -1319,27 +1320,24 @@
 <span class="sd">            - Kinematic Derivatives using the Elementary Transform</span>
 <span class="sd">              Sequence, J. Haviland and P. Corke</span>
 
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eye_fknm</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">A</span>
 
-        <span class="n">fknm</span><span class="o">.</span><span class="n">fkine_all</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_cache_m</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_cache_links_fknm</span><span class="p">,</span>
-            <span class="n">q</span><span class="p">,</span>
-            <span class="n">base</span><span class="p">)</span>
+        <span class="n">fknm</span><span class="o">.</span><span class="n">fkine_all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_links_fknm</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_grippers</span><span class="p">)):</span>
             <span class="n">fknm</span><span class="o">.</span><span class="n">fkine_all</span><span class="p">(</span>
                 <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_grippers</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_cache_grippers</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">q</span><span class="p">,</span>
-                <span class="n">base</span><span class="p">)</span>
+                <span class="n">base</span><span class="p">,</span>
+            <span class="p">)</span>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="ERobot.URDF_read"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.URDF_read">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">URDF_read</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">tld</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1355,14 +1353,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># get the path to the class that defines the robot</span>
-        <span class="n">base_path</span> <span class="o">=</span> <span class="n">path_to_datafile</span><span class="p">(</span><span class="s1">&#39;xacro&#39;</span><span class="p">)</span>
+        <span class="n">base_path</span> <span class="o">=</span> <span class="n">path_to_datafile</span><span class="p">(</span><span class="s2">&quot;xacro&quot;</span><span class="p">)</span>
         <span class="c1"># print(&quot;*** urdf_to_ets_args: &quot;, classpath)</span>
         <span class="c1"># add on relative path to get to the URDF or xacro file</span>
         <span class="c1"># base_path = PurePath(classpath).parent.parent / &#39;URDF&#39; / &#39;xacro&#39;</span>
         <span class="n">file_path</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">/</span> <span class="n">PurePosixPath</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
         <span class="n">name</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.xacro&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.xacro&quot;</span><span class="p">:</span>
             <span class="c1"># it&#39;s a xacro file, preprocess it</span>
             <span class="k">if</span> <span class="n">tld</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">tld</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">/</span> <span class="n">PurePosixPath</span><span class="p">(</span><span class="n">tld</span><span class="p">)</span>
@@ -1370,19 +1368,26 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">urdf</span> <span class="o">=</span> <span class="n">URDF</span><span class="o">.</span><span class="n">loadstr</span><span class="p">(</span><span class="n">urdf_string</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error parsing URDF file&#39;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;error parsing URDF file&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="n">e</span>
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="n">urdf</span> <span class="o">=</span> <span class="n">URDF</span><span class="o">.</span><span class="n">loadstr</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">file_path</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">urdf</span><span class="o">.</span><span class="n">elinks</span><span class="p">,</span> <span class="n">urdf</span><span class="o">.</span><span class="n">name</span></div>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="ERobot.fkine"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">include_base</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fast</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">q</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;rad&quot;</span><span class="p">,</span>
+        <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">include_base</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">fast</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward kinematics</span>
 <span class="sd">        :param q: Joint coordinates</span>
 <span class="sd">        :type q: ndarray(n) or ndarray(m,n)</span>
@@ -1412,7 +1417,7 @@
 <span class="sd">        :references:</span>
 <span class="sd">            - Kinematic Derivatives using the Elementary Transform</span>
 <span class="sd">              Sequence, J. Haviland and P. Corke</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Use c extension to calculate fkine</span>
         <span class="k">if</span> <span class="n">fast</span><span class="p">:</span>
@@ -1449,7 +1454,7 @@
         <span class="n">T</span> <span class="o">=</span> <span class="n">SE3</span><span class="o">.</span><span class="n">Empty</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">qk</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;deg&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;deg&quot;</span><span class="p">:</span>
                 <span class="n">qk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">toradians</span><span class="p">(</span><span class="n">qk</span><span class="p">)</span>
             <span class="n">link</span> <span class="o">=</span> <span class="n">end</span>  <span class="c1"># start with last link</span>
 
@@ -1531,8 +1536,8 @@
             <span class="n">link</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span>
             <span class="k">if</span> <span class="n">link</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;cannot find path from </span><span class="si">{</span><span class="n">start</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> to&#39;</span>
-                    <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">end</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="sa">f</span><span class="s2">&quot;cannot find path from </span><span class="si">{</span><span class="n">start</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> to&quot;</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">end</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
             <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
                 <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -1552,8 +1557,16 @@
             <span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">tool</span></div>
 
 <div class="viewcode-block" id="ERobot.jacob0"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacob0">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fast</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">q</span><span class="p">,</span>
+        <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">analytical</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fast</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator geometric Jacobian in the base frame</span>
 <span class="sd">        :param q: Joint coordinate vector</span>
@@ -1598,7 +1611,7 @@
 <span class="sd">            &gt;&gt;&gt; puma.jacobe([0, 0, 0, 0, 0, 0])</span>
 <span class="sd">        .. warning:: This is the geometric Jacobian as described in texts by</span>
 <span class="sd">            Corke, Spong etal., Siciliano etal.  The end-effector velocity is</span>
-<span class="sd">            described in terms of translational and angular velocity, not a </span>
+<span class="sd">            described in terms of translational and angular velocity, not a</span>
 <span class="sd">            velocity twist as per the text by Lynch &amp; Park.</span>
 <span class="sd">        .. warning:: ``start`` and ``end`` must be on the same branch,</span>
 <span class="sd">            with ``start`` closest to the base.</span>
@@ -1646,27 +1659,27 @@
                 <span class="n">y</span> <span class="o">=</span> <span class="n">Tu</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
                 <span class="n">z</span> <span class="o">=</span> <span class="n">Tu</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
 
-                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;Rz&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;Rz&quot;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">o</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
                     <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
 
-                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;Ry&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;Ry&quot;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
                     <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">o</span>
 
-                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;Rx&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;Rx&quot;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">o</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
                     <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span>
 
-                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;tx&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;tx&quot;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span>
                     <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero</span>
 
-                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;ty&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;ty&quot;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">o</span>
                     <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero</span>
 
-                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;tz&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;tz&quot;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
                     <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero</span>
 
@@ -1677,24 +1690,27 @@
                     <span class="n">U</span> <span class="o">=</span> <span class="n">U</span> <span class="o">@</span> <span class="n">A</span>
 
         <span class="c1"># compute rotational transform if analytical Jacobian required</span>
-        <span class="k">if</span> <span class="n">analytical</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">half</span> <span class="o">!=</span> <span class="s1">&#39;trans&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">analytical</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">half</span> <span class="o">!=</span> <span class="s2">&quot;trans&quot;</span><span class="p">:</span>
 
-            <span class="k">if</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;rpy/xyz&#39;</span><span class="p">:</span>
-                <span class="n">rpy</span> <span class="o">=</span> <span class="n">tr2rpy</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">)</span>
-                <span class="n">A</span> <span class="o">=</span> <span class="n">rpy2jac</span><span class="p">(</span><span class="n">rpy</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;rpy/zyx&#39;</span><span class="p">:</span>
-                <span class="n">rpy</span> <span class="o">=</span> <span class="n">tr2rpy</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;zyx&#39;</span><span class="p">)</span>
-                <span class="n">A</span> <span class="o">=</span> <span class="n">rpy2jac</span><span class="p">(</span><span class="n">rpy</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;zyx&#39;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;eul&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s2">&quot;rpy/xyz&quot;</span><span class="p">:</span>
+                <span class="n">rpy</span> <span class="o">=</span> <span class="n">tr2rpy</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">)</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">rpy2jac</span><span class="p">(</span><span class="n">rpy</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s2">&quot;rpy/zyx&quot;</span><span class="p">:</span>
+                <span class="n">rpy</span> <span class="o">=</span> <span class="n">tr2rpy</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;zyx&quot;</span><span class="p">)</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">rpy2jac</span><span class="p">(</span><span class="n">rpy</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;zyx&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s2">&quot;eul&quot;</span><span class="p">:</span>
                 <span class="n">eul</span> <span class="o">=</span> <span class="n">tr2eul</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
                 <span class="n">A</span> <span class="o">=</span> <span class="n">eul2jac</span><span class="p">(</span><span class="n">eul</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s1">&#39;exp&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">analytical</span> <span class="o">==</span> <span class="s2">&quot;exp&quot;</span><span class="p">:</span>
                 <span class="c1"># TODO: move to SMTB.base, Horner form with skew(v)</span>
                 <span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">=</span> <span class="n">trlog</span><span class="p">(</span><span class="n">t2r</span><span class="p">(</span><span class="n">T</span><span class="p">))</span>
-                <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">/</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">skew</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> \
-                    <span class="o">+</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">/</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">skew</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+                    <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">/</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">skew</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span> <span class="o">/</span> <span class="n">theta</span> <span class="o">*</span> <span class="n">skew</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad analyical value specified&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;bad analyical value specified&quot;</span><span class="p">)</span>
 
             <span class="n">J</span> <span class="o">=</span> <span class="n">block_diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">A</span><span class="p">))</span> <span class="o">@</span> <span class="n">J</span>
 
@@ -1702,18 +1718,16 @@
 
         <span class="c1"># return top or bottom half if asked</span>
         <span class="k">if</span> <span class="n">half</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">half</span> <span class="o">==</span> <span class="s1">&#39;trans&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">half</span> <span class="o">==</span> <span class="s2">&quot;trans&quot;</span><span class="p">:</span>
                 <span class="n">J</span> <span class="o">=</span> <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
-            <span class="k">elif</span> <span class="n">half</span> <span class="o">==</span> <span class="s1">&#39;rot&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">half</span> <span class="o">==</span> <span class="s2">&quot;rot&quot;</span><span class="p">:</span>
                 <span class="n">J</span> <span class="o">=</span> <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="p">:]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad half specified&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;bad half specified&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">J</span></div>
 
-<div class="viewcode-block" id="ERobot.jacobe_new"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobe_new">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe_new</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">fast</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ERobot.jacobe_new"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobe_new">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe_new</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fast</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="c1"># # Use c extension</span>
         <span class="c1"># if fast:</span>
@@ -1751,27 +1765,27 @@
                 <span class="n">y</span> <span class="o">=</span> <span class="n">U</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
                 <span class="n">z</span> <span class="o">=</span> <span class="n">U</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
 
-                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;Rz&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;Rz&quot;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">o</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
                     <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
 
-                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;Ry&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;Ry&quot;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
                     <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">o</span>
 
-                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;Rx&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;Rx&quot;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">o</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
                     <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span>
 
-                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;tx&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;tx&quot;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span>
                     <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero</span>
 
-                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;ty&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;ty&quot;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">o</span>
                     <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero</span>
 
-                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;tz&#39;</span><span class="p">:</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;tz&quot;</span><span class="p">:</span>
                     <span class="n">J</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
                     <span class="n">J</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero</span>
 
@@ -1814,7 +1828,7 @@
 <span class="sd">            &gt;&gt;&gt; puma.jacobe([0, 0, 0, 0, 0, 0])</span>
 <span class="sd">        .. warning:: This is the **geometric Jacobian** as described in texts by</span>
 <span class="sd">            Corke, Spong etal., Siciliano etal.  The end-effector velocity is</span>
-<span class="sd">            described in terms of translational and angular velocity, not a </span>
+<span class="sd">            described in terms of translational and angular velocity, not a</span>
 <span class="sd">            velocity twist as per the text by Lynch &amp; Park.</span>
 <span class="sd">        .. warning:: ``start`` and ``end`` must be on the same branch,</span>
 <span class="sd">            with ``start`` closest to the base.</span>
@@ -1839,8 +1853,7 @@
         <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="n">tool</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="n">tool</span>
 
         <span class="n">J0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">tool</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
         <span class="n">Je</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobev</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">tool</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span> <span class="o">@</span> <span class="n">J0</span>
@@ -1930,13 +1943,9 @@
                     <span class="n">idx0</span> <span class="o">=</span> <span class="n">count</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
                     <span class="n">idx1</span> <span class="o">=</span> <span class="n">count</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
 
-                    <span class="n">rot</span> <span class="o">+=</span> <span class="n">cross</span><span class="p">(</span>
-                        <span class="n">pdr0</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="o">*</span><span class="n">idx0</span><span class="p">)],</span>
-                        <span class="n">pdr1</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="o">*</span><span class="n">idx1</span><span class="p">)])</span>
+                    <span class="n">rot</span> <span class="o">+=</span> <span class="n">cross</span><span class="p">(</span><span class="n">pdr0</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="o">*</span><span class="n">idx0</span><span class="p">)],</span> <span class="n">pdr1</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="o">*</span><span class="n">idx1</span><span class="p">)])</span>
 
-                    <span class="n">trn</span> <span class="o">+=</span> <span class="n">cross</span><span class="p">(</span>
-                        <span class="n">pdr0</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="o">*</span><span class="n">idx0</span><span class="p">)],</span>
-                        <span class="n">pdr1</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="o">*</span><span class="n">idx1</span><span class="p">)])</span>
+                    <span class="n">trn</span> <span class="o">+=</span> <span class="n">cross</span><span class="p">(</span><span class="n">pdr0</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="o">*</span><span class="n">idx0</span><span class="p">)],</span> <span class="n">pdr1</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="o">*</span><span class="n">idx1</span><span class="p">)])</span>
 
                 <span class="n">pd</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="o">*</span><span class="n">count</span><span class="p">)]</span> <span class="o">=</span> <span class="n">trn</span>
                 <span class="n">pd</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="o">*</span><span class="n">count</span><span class="p">)]</span> <span class="o">=</span> <span class="n">rot</span>
@@ -1945,7 +1954,7 @@
                 <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">count</span><span class="p">)):</span>
                     <span class="k">if</span> <span class="n">count</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">nl</span><span class="p">:</span>
                         <span class="n">count</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">count</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">j</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">count</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                             <span class="n">count</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="n">d</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="p">)</span>
@@ -2053,9 +2062,7 @@
 
         <span class="k">return</span> <span class="n">H</span></div>
 
-<div class="viewcode-block" id="ERobot.jacobev"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobev">[docs]</a>    <span class="k">def</span> <span class="nf">jacobev</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ERobot.jacobev"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobev">[docs]</a>    <span class="k">def</span> <span class="nf">jacobev</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jv = jacobev(q) is the spatial velocity Jacobian, at joint</span>
 <span class="sd">        configuration q, which relates the velocity in the base frame to the</span>
@@ -2081,8 +2088,7 @@
         <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">)</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">T</span> <span class="o">*=</span> <span class="n">tool</span>
         <span class="n">R</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">R</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
@@ -2093,9 +2099,7 @@
 
         <span class="k">return</span> <span class="n">Jv</span></div>
 
-<div class="viewcode-block" id="ERobot.jacob0v"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacob0v">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0v</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ERobot.jacob0v"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacob0v">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0v</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jv = jacob0v(q) is the spatial velocity Jacobian, at joint</span>
 <span class="sd">        configuration q, which relates the velocity in the end-effector frame</span>
@@ -2121,11 +2125,10 @@
         <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">)</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">T</span> <span class="o">*=</span> <span class="n">tool</span>
-        <span class="n">R</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">R</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">R</span>
 
         <span class="n">Jv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
         <span class="n">Jv</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">R</span>
@@ -2134,9 +2137,17 @@
         <span class="k">return</span> <span class="n">Jv</span></div>
 
 <div class="viewcode-block" id="ERobot.link_collision_damper"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.link_collision_damper">[docs]</a>    <span class="k">def</span> <span class="nf">link_collision_damper</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">di</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">ds</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">xi</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-            <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">,</span>
+        <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">di</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+        <span class="n">ds</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+        <span class="n">xi</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">collision_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Formulates an inequality contraint which, when optimised for will</span>
 <span class="sd">        make it impossible for the robot to run into a collision. Requires</span>
 <span class="sd">        See examples/neo.py for use case</span>
@@ -2157,7 +2168,7 @@
 <span class="sd">        :type to_link: ELink</span>
 <span class="sd">        :returns: Ain, Bin as the inequality contraints for an omptimisor</span>
 <span class="sd">        :rtype: ndarray(6), ndarray(6)</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_link</span>
@@ -2186,8 +2197,8 @@
                 <span class="n">norm_h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">norm</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
                 <span class="n">Je</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span>
-                    <span class="n">q</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">link</span><span class="p">,</span>
-                    <span class="n">tool</span><span class="o">=</span><span class="n">link_col</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">fast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">q</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">link</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="n">link_col</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">fast</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
                 <span class="n">n_dim</span> <span class="o">=</span> <span class="n">Je</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">dp</span> <span class="o">=</span> <span class="n">norm_h</span> <span class="o">@</span> <span class="n">shape</span><span class="o">.</span><span class="n">v</span>
                 <span class="n">l_Ain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
@@ -2203,9 +2214,13 @@
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
                 <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
 
-            <span class="k">for</span> <span class="n">link_col</span> <span class="ow">in</span> <span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="p">:</span>
-                <span class="n">l_Ain</span><span class="p">,</span> <span class="n">l_bin</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">wTcp</span> <span class="o">=</span> <span class="n">indiv_calculation</span><span class="p">(</span>
-                    <span class="n">link</span><span class="p">,</span> <span class="n">link_col</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">collision_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">col_list</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">collision</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">col_list</span> <span class="o">=</span> <span class="n">collision_list</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">link_col</span> <span class="ow">in</span> <span class="n">col_list</span><span class="p">:</span>
+                <span class="n">l_Ain</span><span class="p">,</span> <span class="n">l_bin</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">wTcp</span> <span class="o">=</span> <span class="n">indiv_calculation</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">link_col</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">l_Ain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">l_bin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">Ain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2233,17 +2248,17 @@
         <span class="n">a</span> <span class="o">=</span> <span class="n">SpatialAcceleration</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">SpatialForce</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
         <span class="n">I</span> <span class="o">=</span> <span class="n">SpatialInertia</span><span class="o">.</span><span class="n">Alloc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>  <span class="c1"># noqa</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>   <span class="c1"># joint motion subspace</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>  <span class="c1"># joint motion subspace</span>
         <span class="k">if</span> <span class="n">symbolic</span><span class="p">:</span>
-            <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;O&#39;</span><span class="p">)</span>   <span class="c1"># joint torque/force</span>
+            <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;O&quot;</span><span class="p">)</span>  <span class="c1"># joint torque/force</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n</span><span class="p">,))</span>              <span class="c1"># joint torque/force</span>
+            <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n</span><span class="p">,))</span>  <span class="c1"># joint torque/force</span>
 
         <span class="c1"># initialize intermediate variables</span>
         <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">robot</span><span class="p">):</span>
             <span class="n">I</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">SpatialInertia</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="n">link</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">link</span><span class="o">.</span><span class="n">r</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">symbolic</span> <span class="ow">and</span> <span class="n">link</span><span class="o">.</span><span class="n">Ts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">Xtree</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;O&#39;</span><span class="p">),</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">Xtree</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;O&quot;</span><span class="p">),</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">Xtree</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">Ts</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">s</span>
@@ -2266,9 +2281,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">jp</span> <span class="o">=</span> <span class="n">robot</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">jindex</span>
                 <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xup</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="n">jp</span><span class="p">]</span> <span class="o">+</span> <span class="n">vJ</span>
-                <span class="n">a</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xup</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="n">jp</span><span class="p">]</span> \
-                    <span class="o">+</span> <span class="n">SpatialAcceleration</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">qdd</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> \
-                    <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">@</span> <span class="n">vJ</span>
+                <span class="n">a</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xup</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="n">jp</span><span class="p">]</span> <span class="o">+</span> <span class="n">SpatialAcceleration</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">qdd</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">@</span> <span class="n">vJ</span>
 
             <span class="n">f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">@</span> <span class="p">(</span><span class="n">I</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
 
@@ -2287,8 +2300,8 @@
 
 <span class="c1"># =========================================================================== #</span>
 
-<div class="viewcode-block" id="ERobot2"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2">[docs]</a><span class="k">class</span> <span class="nc">ERobot2</span><span class="p">(</span><span class="n">BaseERobot</span><span class="p">):</span>
 
+<div class="viewcode-block" id="ERobot2"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2">[docs]</a><span class="k">class</span> <span class="nc">ERobot2</span><span class="p">(</span><span class="n">BaseERobot</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">ETS2</span><span class="p">):</span>
@@ -2300,15 +2313,18 @@
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">ets_j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
                 <span class="n">elink</span> <span class="o">=</span> <span class="n">ELink2</span><span class="p">(</span><span class="n">ets_j</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;link</span><span class="si">{</span><span class="n">j</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="n">parent</span> <span class="o">=</span> <span class="n">elink</span>
-                <span class="k">if</span> <span class="n">elink</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">elink</span><span class="o">.</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">elink</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">elink</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="n">elink</span><span class="o">.</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="n">elink</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="p">):</span>
                     <span class="n">elink</span><span class="o">.</span><span class="n">qlim</span> <span class="o">=</span> <span class="n">elink</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">qlim</span>
                 <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elink</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">islistof</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">ELink2</span><span class="p">):</span>
             <span class="n">links</span> <span class="o">=</span> <span class="n">arg</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s1">&#39;constructor argument must be ETS2 or list of ELink2&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;constructor argument must be ETS2 or list of ELink2&quot;</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -2321,109 +2337,111 @@
 <div class="viewcode-block" id="ERobot2.jacobe"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.jacobe">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ERobot2.fkine"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ERobot2.fkine"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;rad&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span></div></div>
+
+
 <span class="c1"># --------------------------------------------------------------------- #</span>
 
-    <span class="c1"># def teach(</span>
-    <span class="c1">#         self,</span>
-    <span class="c1">#         q=None,</span>
-    <span class="c1">#         block=True,</span>
-    <span class="c1">#         limits=None,</span>
-    <span class="c1">#         vellipse=False,</span>
-    <span class="c1">#         fellipse=False,</span>
-    <span class="c1">#         eeframe=True,</span>
-    <span class="c1">#         name=False,</span>
-    <span class="c1">#         unit=&#39;rad&#39;,</span>
-    <span class="c1">#         backend=&#39;pyplot2&#39;):</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     2D Graphical teach pendant</span>
-    <span class="c1">#     :param block: Block operation of the code and keep the figure open</span>
-    <span class="c1">#     :type block: bool</span>
-    <span class="c1">#     :param q: The joint configuration of the robot (Optional,</span>
-    <span class="c1">#         if not supplied will use the stored q values).</span>
-    <span class="c1">#     :type q: float ndarray(n)</span>
-    <span class="c1">#     :param limits: Custom view limits for the plot. If not supplied will</span>
-    <span class="c1">#         autoscale, [x1, x2, y1, y2]</span>
-    <span class="c1">#     :type limits: array_like(4)</span>
-    <span class="c1">#     :param vellipse: (Plot Option) Plot the velocity ellipse at the</span>
-    <span class="c1">#         end-effector</span>
-    <span class="c1">#     :type vellipse: bool</span>
-    <span class="c1">#     :param vellipse: (Plot Option) Plot the force ellipse at the</span>
-    <span class="c1">#         end-effector</span>
-    <span class="c1">#     :type vellipse: bool</span>
-    <span class="c1">#     :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
-    <span class="c1">#         at the location of the end-effector. Uses three arrows, red,</span>
-    <span class="c1">#         green and blue to indicate the x, y, and z-axes.</span>
-    <span class="c1">#     :type eeframe: bool</span>
-    <span class="c1">#     :param name: (Plot Option) Plot the name of the robot near its base</span>
-    <span class="c1">#     :type name: bool</span>
-    <span class="c1">#     :param unit: angular units: &#39;rad&#39; [default], or &#39;deg&#39;</span>
-    <span class="c1">#     :type unit: str</span>
+<span class="c1"># def teach(</span>
+<span class="c1">#         self,</span>
+<span class="c1">#         q=None,</span>
+<span class="c1">#         block=True,</span>
+<span class="c1">#         limits=None,</span>
+<span class="c1">#         vellipse=False,</span>
+<span class="c1">#         fellipse=False,</span>
+<span class="c1">#         eeframe=True,</span>
+<span class="c1">#         name=False,</span>
+<span class="c1">#         unit=&#39;rad&#39;,</span>
+<span class="c1">#         backend=&#39;pyplot2&#39;):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     2D Graphical teach pendant</span>
+<span class="c1">#     :param block: Block operation of the code and keep the figure open</span>
+<span class="c1">#     :type block: bool</span>
+<span class="c1">#     :param q: The joint configuration of the robot (Optional,</span>
+<span class="c1">#         if not supplied will use the stored q values).</span>
+<span class="c1">#     :type q: float ndarray(n)</span>
+<span class="c1">#     :param limits: Custom view limits for the plot. If not supplied will</span>
+<span class="c1">#         autoscale, [x1, x2, y1, y2]</span>
+<span class="c1">#     :type limits: array_like(4)</span>
+<span class="c1">#     :param vellipse: (Plot Option) Plot the velocity ellipse at the</span>
+<span class="c1">#         end-effector</span>
+<span class="c1">#     :type vellipse: bool</span>
+<span class="c1">#     :param vellipse: (Plot Option) Plot the force ellipse at the</span>
+<span class="c1">#         end-effector</span>
+<span class="c1">#     :type vellipse: bool</span>
+<span class="c1">#     :param eeframe: (Plot Option) Plot the end-effector coordinate frame</span>
+<span class="c1">#         at the location of the end-effector. Uses three arrows, red,</span>
+<span class="c1">#         green and blue to indicate the x, y, and z-axes.</span>
+<span class="c1">#     :type eeframe: bool</span>
+<span class="c1">#     :param name: (Plot Option) Plot the name of the robot near its base</span>
+<span class="c1">#     :type name: bool</span>
+<span class="c1">#     :param unit: angular units: &#39;rad&#39; [default], or &#39;deg&#39;</span>
+<span class="c1">#     :type unit: str</span>
 
-    <span class="c1">#     :return: A reference to the PyPlot object which controls the</span>
-    <span class="c1">#         matplotlib figure</span>
-    <span class="c1">#     :rtype: PyPlot</span>
-    <span class="c1">#     - ``robot.teach2(q)`` creates a 2D matplotlib plot which allows the</span>
-    <span class="c1">#       user to &quot;drive&quot; a graphical robot using a graphical slider panel.</span>
-    <span class="c1">#       The robot&#39;s inital joint configuration is ``q``. The plot will</span>
-    <span class="c1">#       autoscale with an aspect ratio of 1.</span>
-    <span class="c1">#     - ``robot.teach2()`` as above except the robot&#39;s stored value of ``q``</span>
-    <span class="c1">#       is used.</span>
-    <span class="c1">#     .. note::</span>
-    <span class="c1">#         - Program execution is blocked until the teach window is</span>
-    <span class="c1">#           dismissed.  If ``block=False`` the method is non-blocking but</span>
-    <span class="c1">#           you need to poll the window manager to ensure that the window</span>
-    <span class="c1">#           remains responsive.</span>
-    <span class="c1">#         - The slider limits are derived from the joint limit properties.</span>
-    <span class="c1">#           If not set then:</span>
-    <span class="c1">#             - For revolute joints they are assumed to be [-pi, +pi]</span>
-    <span class="c1">#             - For prismatic joint they are assumed unknown and an error</span>
-    <span class="c1">#               occurs.</span>
-    <span class="c1">#           If not set then</span>
-    <span class="c1">#             - For revolute joints they are assumed to be [-pi, +pi]</span>
-    <span class="c1">#             - For prismatic joint they are assumed unknown and an error</span>
-    <span class="c1">#               occurs.</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     :return: A reference to the PyPlot object which controls the</span>
+<span class="c1">#         matplotlib figure</span>
+<span class="c1">#     :rtype: PyPlot</span>
+<span class="c1">#     - ``robot.teach2(q)`` creates a 2D matplotlib plot which allows the</span>
+<span class="c1">#       user to &quot;drive&quot; a graphical robot using a graphical slider panel.</span>
+<span class="c1">#       The robot&#39;s inital joint configuration is ``q``. The plot will</span>
+<span class="c1">#       autoscale with an aspect ratio of 1.</span>
+<span class="c1">#     - ``robot.teach2()`` as above except the robot&#39;s stored value of ``q``</span>
+<span class="c1">#       is used.</span>
+<span class="c1">#     .. note::</span>
+<span class="c1">#         - Program execution is blocked until the teach window is</span>
+<span class="c1">#           dismissed.  If ``block=False`` the method is non-blocking but</span>
+<span class="c1">#           you need to poll the window manager to ensure that the window</span>
+<span class="c1">#           remains responsive.</span>
+<span class="c1">#         - The slider limits are derived from the joint limit properties.</span>
+<span class="c1">#           If not set then:</span>
+<span class="c1">#             - For revolute joints they are assumed to be [-pi, +pi]</span>
+<span class="c1">#             - For prismatic joint they are assumed unknown and an error</span>
+<span class="c1">#               occurs.</span>
+<span class="c1">#           If not set then</span>
+<span class="c1">#             - For revolute joints they are assumed to be [-pi, +pi]</span>
+<span class="c1">#             - For prismatic joint they are assumed unknown and an error</span>
+<span class="c1">#               occurs.</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
 
-    <span class="c1">#     if q is None:</span>
-    <span class="c1">#         q = np.zeros((self.n,))</span>
-    <span class="c1">#     else:</span>
-    <span class="c1">#         q = getvector(q, self.n)</span>
+<span class="c1">#     if q is None:</span>
+<span class="c1">#         q = np.zeros((self.n,))</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         q = getvector(q, self.n)</span>
 
-    <span class="c1">#     if unit == &#39;deg&#39;:</span>
-    <span class="c1">#         q = self.toradians(q)</span>
+<span class="c1">#     if unit == &#39;deg&#39;:</span>
+<span class="c1">#         q = self.toradians(q)</span>
 
-    <span class="c1">#     # Make an empty 3D figure</span>
-    <span class="c1">#     env = self._get_graphical_backend(backend)</span>
+<span class="c1">#     # Make an empty 3D figure</span>
+<span class="c1">#     env = self._get_graphical_backend(backend)</span>
 
-    <span class="c1">#     # Add the robot to the figure in readonly mode</span>
-    <span class="c1">#     env.launch(&#39;Teach &#39; + self.name, limits=limits)</span>
-    <span class="c1">#     env.add(</span>
-    <span class="c1">#         self, readonly=True,</span>
-    <span class="c1">#         eeframe=eeframe, name=name)</span>
+<span class="c1">#     # Add the robot to the figure in readonly mode</span>
+<span class="c1">#     env.launch(&#39;Teach &#39; + self.name, limits=limits)</span>
+<span class="c1">#     env.add(</span>
+<span class="c1">#         self, readonly=True,</span>
+<span class="c1">#         eeframe=eeframe, name=name)</span>
 
-    <span class="c1">#     env._add_teach_panel(self, q)</span>
+<span class="c1">#     env._add_teach_panel(self, q)</span>
 
-    <span class="c1">#     if limits is None:</span>
-    <span class="c1">#         limits = np.r_[-1, 1, -1, 1] * self.reach * 1.5</span>
-    <span class="c1">#         env.ax.set_xlim([limits[0], limits[1]])</span>
-    <span class="c1">#         env.ax.set_ylim([limits[2], limits[3]])</span>
+<span class="c1">#     if limits is None:</span>
+<span class="c1">#         limits = np.r_[-1, 1, -1, 1] * self.reach * 1.5</span>
+<span class="c1">#         env.ax.set_xlim([limits[0], limits[1]])</span>
+<span class="c1">#         env.ax.set_ylim([limits[2], limits[3]])</span>
 
-    <span class="c1">#     if vellipse:</span>
-    <span class="c1">#         vell = self.vellipse(centre=&#39;ee&#39;, scale=0.5)</span>
-    <span class="c1">#         env.add(vell)</span>
+<span class="c1">#     if vellipse:</span>
+<span class="c1">#         vell = self.vellipse(centre=&#39;ee&#39;, scale=0.5)</span>
+<span class="c1">#         env.add(vell)</span>
 
-    <span class="c1">#     if fellipse:</span>
-    <span class="c1">#         fell = self.fellipse(centre=&#39;ee&#39;)</span>
-    <span class="c1">#         env.add(fell)</span>
+<span class="c1">#     if fellipse:</span>
+<span class="c1">#         fell = self.fellipse(centre=&#39;ee&#39;)</span>
+<span class="c1">#         env.add(fell)</span>
 
-    <span class="c1">#     # Keep the plot open</span>
-    <span class="c1">#     if block:           # pragma: no cover</span>
-    <span class="c1">#         env.hold()</span>
+<span class="c1">#     # Keep the plot open</span>
+<span class="c1">#     if block:           # pragma: no cover</span>
+<span class="c1">#         env.hold()</span>
 
-    <span class="c1">#     return env</span>
+<span class="c1">#     return env</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
@@ -2449,7 +2467,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 23-Apr-2021.
+        Last updated on 28-Apr-2021.
       </span>
 
     </p>
