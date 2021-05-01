@@ -752,7 +752,7 @@ class Link(ABC):
 
 # -------------------------------------------------------------------------- #
 
-    def closest_point(self, shape, inf_dist=1.0):
+    def closest_point(self, shape, inf_dist=1.0, homogenous=True):
         '''
         closest_point(shape, inf_dist) returns the minimum euclidean
         distance between this link and shape, provided it is less than
@@ -777,7 +777,7 @@ class Link(ABC):
         p2 = None
 
         for col in self.collision:
-            td, tp1, tp2 = col.closest_point(shape, inf_dist)
+            td, tp1, tp2 = col.closest_point(shape, inf_dist, homogenous)
 
             if td is not None and td < d:
                 d = td
