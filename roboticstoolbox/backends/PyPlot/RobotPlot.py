@@ -202,13 +202,13 @@ class RobotPlot():
             # in front
             if self.shadow:
                 shadow, = self.ax.plot(
-                    0, 0,
+                    [0], [0],
                     zorder=1, 
                     **self.options['shadow'])
                 self.sh_links.append(shadow)
 
             line,  = self.ax.plot(
-                0, 0, 0, **self.options['robot'])
+                [0], [0], [0], **self.options['robot'])
             self.links.append(line)
 
         self.eeframes = []
