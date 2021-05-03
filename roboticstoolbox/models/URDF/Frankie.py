@@ -2,6 +2,7 @@
 
 import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
+from spatialmath import SE3
 
 
 class Frankie(ERobot):
@@ -28,31 +29,43 @@ class Frankie(ERobot):
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke
     """
+
     def __init__(self):
 
         links, name = self.URDF_read(
-            "franka_description/robots/frankie_arm_hand.urdf.xacro")
-
-        super().__init__(
-            links,
-            name=name,
-            manufacturer='Franka Emika',
-            gripper_links=links[11]
+            "franka_description/robots/frankie_arm_hand.urdf.xacro"
         )
 
-        self.qdlim = np.array([
-            4.0, 4.0,
-            2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100,
-            3.0, 3.0])
+        super().__init__(
+            links, name=name, manufacturer="Franka Emika", gripper_links=links[11]
+        )
 
-        self.addconfiguration("qz", np.array(
-            [0, 0, 0, 0, 0, 0, 0, 0, 0]))
+        self.grippers[0].tool = SE3(0, 0, 0.1034)
 
-        self.addconfiguration("qr", np.array(
-            [0, 0, 0, -0.3, 0, -2.2, 0, 2.0, np.pi/4]))
+        self.qdlim = np.array(
+            [4.0, 4.0, 2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0]
+        )
+
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0]))
+
+        self.addconfiguration(
+            "qr", np.array([0, 0, 0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        )
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     robot = Frankie()
     print(robot)
+
+    for link in robot.links:
+        print(link.name)
+        print(link.isjoint)
+        print(len(link.collision))
+
+    print()
+
+    for link in robot.grippers[0].links:
+        print(link.name)
+        print(link.isjoint)
+        print(len(link.collision))

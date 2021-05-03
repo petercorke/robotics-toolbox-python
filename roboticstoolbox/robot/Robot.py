@@ -4,9 +4,15 @@ import copy
 import numpy as np
 import roboticstoolbox as rtb
 from spatialmath import SE3, SE2
-from spatialmath.base.argcheck import isvector, getvector, getmatrix, \
-    getunit, verifymatrix
+from spatialmath.base.argcheck import (
+    isvector,
+    getvector,
+    getmatrix,
+    getunit,
+    verifymatrix,
+)
 from roboticstoolbox.robot.Link import Link
+
 # from spatialmath.base.transforms3d import tr2delta
 # from roboticstoolbox.tools import urdf
 # from roboticstoolbox.tools import xacro
@@ -17,15 +23,18 @@ from ansitable import ANSITable, Column
 
 from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
+
 # from roboticstoolbox.backends.swift import Swift
 
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
+
 try:
     from matplotlib import colors
     from matplotlib import cm
+
     _mpl = True
-except ImportError:    # pragma nocover
+except ImportError:  # pragma nocover
     pass
 
 
@@ -38,16 +47,17 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     _color = True
 
     def __init__(
-            self,
-            links,
-            name='noname',
-            manufacturer='',
-            comment='',
-            base=None,
-            tool=None,
-            gravity=None,
-            keywords=(),
-            symbolic=False):
+        self,
+        links,
+        name="noname",
+        manufacturer="",
+        comment="",
+        base=None,
+        tool=None,
+        gravity=None,
+        keywords=(),
+        symbolic=False,
+    ):
 
         self.name = name
         self.manufacturer = manufacturer
@@ -61,7 +71,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         #     self.base = SE3()
 
         if keywords is not None and not isinstance(keywords, (tuple, list)):
-            raise TypeError('keywords must be a list or tuple')
+            raise TypeError("keywords must be a list or tuple")
         else:
             self.keywords = keywords
 
@@ -73,7 +83,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         # validate the links, must be a list of Link subclass objects
         if not isinstance(links, list):
-            raise TypeError('The links must be stored in a list.')
+            raise TypeError("The links must be stored in a list.")
 
         self._hasdynamics = False
         self._hasgeometry = False
@@ -81,7 +91,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         for link in links:
             if not isinstance(link, Link):
-                raise TypeError('links should all be Link subclass')
+                raise TypeError("links should all be Link subclass")
 
             # add link back to roboto
             link._robot = self
@@ -104,7 +114,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         self.qd = np.zeros(self.n)
         self.qdd = np.zeros(self.n)
 
-        self.control_type = 'v'
+        self.control_type = "v"
 
         self._configdict = {}
 
@@ -190,7 +200,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         :seealso: :func:`roboticstoolbox.Link._listen_dyn`
         """
         self._dynchanged = True
-        if what != 'gravity':
+        if what != "gravity":
             self._hasdynamics = True
 
     def _getq(self, q=None):
@@ -351,11 +361,10 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         """
         qlim = self.qlim
         if np.any(np.isnan(qlim)):
-            raise ValueError('some joint limits not defined')
-        return np.random.uniform(
-            low=qlim[0, :], high=qlim[1, :], size=(self.n,))
+            raise ValueError("some joint limits not defined")
+        return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
 
-    def addconfiguration(self, name, q, unit='rad'):
+    def addconfiguration(self, name, q, unit="rad"):
         """
         Add a named joint configuration (Robot superclass)
 
@@ -396,13 +405,15 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                 Column("name", colalign=">"),
                 *[
                     Column(f"q{j:d}", colalign="<", headalign="<")
-                    for j in range(self.n)],
-                border="thin")
+                    for j in range(self.n)
+                ],
+                border="thin",
+            )
 
             for name, q in self._configdict.items():
                 qlist = []
                 for j, c in enumerate(self.structure):
-                    if c == 'P':
+                    if c == "P":
                         qlist.append(f"{q[j]: .3g}")
                     else:
                         qlist.append(angle(q[j], "{: .3g}"))
@@ -439,11 +450,11 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         structure = []
         for link in self:
             if link.isrevolute:
-                structure.append('R')
+                structure.append("R")
             elif link.isprismatic:
-                structure.append('P')
+                structure.append("P")
 
-        return ''.join(structure)
+        return "".join(structure)
 
     @property
     def revolutejoints(self):
@@ -648,20 +659,17 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         """
 
-        if hasattr(self, 'ikine_a'):
+        if hasattr(self, "ikine_a"):
             ik = self.ikine_a
         else:
             ik = self.ikine_min
-        
+
         q1 = ik(T1, **kwargs)
         q2 = ik(T2, **kwargs)
 
         return rtb.jtraj(q1.q, q2.q, t)
 
-
-    def manipulability(
-            self, q=None, J=None, method='yoshikawa',
-            axes='all', **kwargs):
+    def manipulability(self, q=None, J=None, method="yoshikawa", axes="all", **kwargs):
         """
         Manipulability measure
 
@@ -743,19 +751,19 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         """
         if isinstance(axes, list) and len(axes) == 6:
             pass
-        elif axes == 'all':
+        elif axes == "all":
             axes = [True, True, True, True, True, True]
-        elif axes.startswith('trans'):
+        elif axes.startswith("trans"):
             axes = [True, True, True, False, False, False]
-        elif axes.startswith('rot'):
+        elif axes.startswith("rot"):
             axes = [False, False, False, True, True, True]
-        elif axes == 'both':
+        elif axes == "both":
             return (
-                self.manipulability(q, J, method, axes='trans', **kwargs),
-                self.manipulability(q, J, method, axes='rot', **kwargs)
+                self.manipulability(q, J, method, axes="trans", **kwargs),
+                self.manipulability(q, J, method, axes="rot", **kwargs),
             )
         else:
-            raise ValueError('axes must be all, trans, rot or both')
+            raise ValueError("axes must be all, trans, rot or both")
 
         def yoshikawa(robot, J, q, axes, **kwargs):
             J = J[axes, :]
@@ -788,17 +796,16 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             return np.min(e) / np.max(e)
 
         # choose the handler function
-        if method == 'yoshikawa':
+        if method == "yoshikawa":
             mfunc = yoshikawa
-        elif method == 'invcondition':
+        elif method == "invcondition":
             mfunc = condition
-        elif method == 'minsingular':
+        elif method == "minsingular":
             mfunc = minsingular
-        elif method == 'asada':
+        elif method == "asada":
             mfunc = asada
         else:
-            raise ValueError(
-                "Invalid method chosen")
+            raise ValueError("Invalid method chosen")
 
         # Calculate manipulability based on supplied Jacobian
         if J is not None:
@@ -856,7 +863,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         return Jd
 
-    def jacobm(self, q=None, J=None, H=None, end=None, start=None, axes='all'):
+    def jacobm(self, q=None, J=None, H=None, end=None, start=None, axes="all"):
         r"""
         Calculates the manipulability Jacobian. This measure relates the rate
         of change of the manipulability to the joint velocities of the robot.
@@ -898,14 +905,14 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         end, start, _ = self._get_limit_links(end, start)
         # path, n, _ = self.get_path(end, start)
 
-        if axes == 'all':
+        if axes == "all":
             axes = [True, True, True, True, True, True]
-        elif axes.startswith('trans'):
+        elif axes.startswith("trans"):
             axes = [True, True, True, False, False, False]
-        elif axes.startswith('rot'):
+        elif axes.startswith("rot"):
             axes = [False, False, False, True, True, True]
         else:
-            raise ValueError('axes must be all, trans or rot')
+            raise ValueError("axes must be all, trans or rot")
 
         if J is None:
             if q is None:
@@ -922,8 +929,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         else:
             verifymatrix(H, (6, self.n, self.n))
 
-        manipulability = self.manipulability(
-            q, J=J, start=start, end=end, axes=axes)
+        manipulability = self.manipulability(q, J=J, start=start, end=end, axes=axes)
 
         J = J[axes, :]
         H = H[axes, :, :]
@@ -933,11 +939,11 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         for i in range(self.n):
             c = J @ np.transpose(H[:, :, i])
-            Jm[i, 0] = manipulability * \
-                np.transpose(c.flatten('F')) @ b.flatten('F')
+            Jm[i, 0] = manipulability * np.transpose(c.flatten("F")) @ b.flatten("F")
 
         return Jm
-# --------------------------------------------------------------------- #
+
+    # --------------------------------------------------------------------- #
 
     @property
     def name(self):
@@ -957,7 +963,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     def name(self, name_new):
         self._name = name_new
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     @property
     def manufacturer(self):
@@ -976,7 +982,8 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     @manufacturer.setter
     def manufacturer(self, manufacturer_new):
         self._manufacturer = manufacturer_new
-# --------------------------------------------------------------------- #
+
+    # --------------------------------------------------------------------- #
 
     @property
     def links(self):
@@ -994,7 +1001,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         """
         return self._links
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     @property
     def base(self):
@@ -1042,8 +1049,9 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                 self._tool = SE3(T, check=True)
 
         else:
-            raise ValueError('base must be set to None (no tool), SE2, or SE3')
-# --------------------------------------------------------------------- #
+            raise ValueError("base must be set to None (no tool), SE2, or SE3")
+
+    # --------------------------------------------------------------------- #
 
     @property
     def tool(self):
@@ -1077,7 +1085,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         elif SE3.isvalid(T):
             self._tool = SE3(T, check=False)
         else:
-            raise ValueError('tool must be set to None (no tool) or an SE3')
+            raise ValueError("tool must be set to None (no tool) or an SE3")
 
     @property
     def qlim(self):
@@ -1113,7 +1121,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                     v = link.qlim
             elif link.isprismatic:
                 if link.qlim is None:
-                    raise ValueError('undefined prismatic joint limit')
+                    raise ValueError("undefined prismatic joint limit")
                 else:
                     v = link.qlim
             else:
@@ -1124,9 +1132,9 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             j += 1
         return limits
 
-# TODO, the remaining functions, I have only a hazy understanding
-# of how they work
-# --------------------------------------------------------------------- #
+    # TODO, the remaining functions, I have only a hazy understanding
+    # of how they work
+    # --------------------------------------------------------------------- #
 
     @property
     def q(self):
@@ -1147,7 +1155,8 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     @q.setter
     def q(self, q_new):
         self._q = getvector(q_new, self.n)
-# --------------------------------------------------------------------- #
+
+    # --------------------------------------------------------------------- #
 
     @property
     def qd(self):
@@ -1168,7 +1177,8 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     @qd.setter
     def qd(self, qd_new):
         self._qd = getvector(qd_new, self.n)
-# --------------------------------------------------------------------- #
+
+    # --------------------------------------------------------------------- #
 
     @property
     def qdd(self):
@@ -1189,9 +1199,10 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     @qdd.setter
     def qdd(self, qdd_new):
         self._qdd = getvector(qdd_new, self.n)
-# --------------------------------------------------------------------- #
 
-# TODO could we change this to control_mode ?
+    # --------------------------------------------------------------------- #
+
+    # TODO could we change this to control_mode ?
     @property
     def control_type(self):
         """
@@ -1210,13 +1221,12 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
     @control_type.setter
     def control_type(self, cn):
-        if cn == 'p' or cn == 'v' or cn == 'a':
+        if cn == "p" or cn == "v" or cn == "a":
             self._control_type = cn
         else:
-            raise ValueError(
-                'Control type must be one of \'p\', \'v\', or \'a\'')
+            raise ValueError("Control type must be one of 'p', 'v', or 'a'")
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     # TODO probably should be a static method
     def _get_graphical_backend(self, backend=None):
@@ -1226,71 +1236,83 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         # figure out the right default
         if backend is None:
             if isinstance(self, rtb.DHRobot):
-                default = 'pyplot'
+                default = "pyplot"
             elif isinstance(self, rtb.ERobot2):
-                default = 'pyplot2'
+                default = "pyplot2"
             else:
-                default = 'swift'
+                default = "swift"
 
         if backend is not None:
             backend = backend.lower()
 
         # find the right backend, modules are imported here on an as needs
         # basis
-        if backend == 'swift' or default == 'swift':  # pragma nocover
+        if backend == "swift" or default == "swift":  # pragma nocover
             # swift was requested, is it installed?
             if isinstance(self, rtb.DHRobot):
                 raise NotImplementedError(
-                    'Plotting in Swift is not implemented for DHRobots yet')
+                    "Plotting in Swift is not implemented for DHRobots yet"
+                )
             try:
                 # yes, use it
                 from roboticstoolbox.backends.swift import Swift
+
                 env = Swift()
                 return env
             except ModuleNotFoundError:
-                if backend == 'swift':
-                    print(
-                        'Swift is not installed, '
-                        'install it using pip or conda')
-                backend = 'pyplot'
+                if backend == "swift":
+                    print("Swift is not installed, " "install it using pip or conda")
+                backend = "pyplot"
 
-        elif backend == 'vpython' or default == 'vpython':  # pragma nocover
+        elif backend == "vpython" or default == "vpython":  # pragma nocover
             # vpython was requested, is it installed?
             if not isinstance(self, rtb.DHRobot):
                 raise NotImplementedError(
-                    'Plotting in VPython is only implemented for DHRobots')
+                    "Plotting in VPython is only implemented for DHRobots"
+                )
             try:
                 # yes, use it
                 from roboticstoolbox.backends.VPython import VPython
+
                 env = VPython()
                 return env
             except ModuleNotFoundError:
-                if backend == 'vpython':
-                    print(
-                        'VPython is not installed, '
-                        'install it using pip or conda')
-                backend = 'pyplot'
+                if backend == "vpython":
+                    print("VPython is not installed, " "install it using pip or conda")
+                backend = "pyplot"
 
         if backend is None:
             backend = default
 
-        if backend == 'pyplot':
+        if backend == "pyplot":
             from roboticstoolbox.backends.PyPlot import PyPlot
+
             env = PyPlot()
 
-        elif backend == 'pyplot2':
+        elif backend == "pyplot2":
             from roboticstoolbox.backends.PyPlot import PyPlot2
+
             env = PyPlot2()
 
         else:
-            raise ValueError('unknown backend', backend)
+            raise ValueError("unknown backend", backend)
 
         return env
 
     def plot(
-            self, q, backend=None, block=False, dt=0.050,
-            limits=None, vellipse=False, fellipse=False,
-            fig=None, movie=None, loop=False, **kwargs):
+        self,
+        q,
+        backend=None,
+        block=False,
+        dt=0.050,
+        limits=None,
+        vellipse=False,
+        fellipse=False,
+        fig=None,
+        movie=None,
+        loop=False,
+        **kwargs,
+    ):
         """
         Graphical display and animation
 
@@ -1368,19 +1390,18 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         # Add the self to the figure in readonly mode
         # Add the self to the figure in readonly mode
         if q.shape[0] == 1:
-            env.launch(self.name + ' Plot', limits=limits, fig=fig)
+            env.launch(self.name + " Plot", limits=limits, fig=fig)
         else:
-            env.launch(self.name + ' Trajectory Plot', limits=limits, fig=fig)
+            env.launch(self.name + " Trajectory Plot", limits=limits, fig=fig)
 
-        env.add(
-            self, readonly=True, **kwargs)
+        env.add(self, readonly=True, **kwargs)
 
         if vellipse:
-            vell = self.vellipse(centre='ee')
+            vell = self.vellipse(centre="ee")
             env.add(vell)
 
         if fellipse:
-            fell = self.fellipse(centre='ee')
+            fell = self.fellipse(centre="ee")
             env.add(fell)
 
         # Stop lint error
@@ -1405,21 +1426,25 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                 # save it as an animated GIF
                 images[0].save(
                     movie,
-                    save_all=True, append_images=images[1:], optimize=False,
-                    duration=dt, loop=0)
+                    save_all=True,
+                    append_images=images[1:],
+                    optimize=False,
+                    duration=dt,
+                    loop=0,
+                )
             if not loop:
                 break
 
         # Keep the plot open
-        if block:           # pragma: no cover
+        if block:  # pragma: no cover
             env.hold()
 
         return env
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
-    def fellipse(self, q=None, opt='trans', unit='rad', centre=[0, 0, 0]):
-        '''
+    def fellipse(self, q=None, opt="trans", unit="rad", centre=[0, 0, 0]):
+        """
         Create a force ellipsoid object for plotting with PyPlot
 
         :param q: The joint configuration of the robot (Optional,
@@ -1449,18 +1474,15 @@ class Robot(ABC, DynamicsMixin, IKMixin):
               3-vector, or the string "ee" ensures it is drawn at the
               end-effector position.
 
-        '''
+        """
         if isinstance(self, rtb.ERobot):  # pragma nocover
-            raise NotImplementedError(
-                "ERobot fellipse not implemented yet")
+            raise NotImplementedError("ERobot fellipse not implemented yet")
 
         q = getunit(q, unit)
-        ell = EllipsePlot(self, q, 'f', opt, centre=centre)
+        ell = EllipsePlot(self, q, "f", opt, centre=centre)
         return ell
 
-    def vellipse(
-            self, q=None, opt='trans', unit='rad',
-            centre=[0, 0, 0], scale=0.1):
+    def vellipse(self, q=None, opt="trans", unit="rad", centre=[0, 0, 0], scale=0.1):
         """
         Create a velocity ellipsoid object for plotting with PyPlot
 
@@ -1492,16 +1514,22 @@ class Robot(ABC, DynamicsMixin, IKMixin):
               end-effector position.
         """
         if isinstance(self, rtb.ERobot):  # pragma nocover
-            raise NotImplementedError(
-                "ERobot vellipse not implemented yet")
+            raise NotImplementedError("ERobot vellipse not implemented yet")
 
         q = getunit(q, unit)
-        ell = EllipsePlot(self, q, 'v', opt, centre=centre, scale=scale)
+        ell = EllipsePlot(self, q, "v", opt, centre=centre, scale=scale)
         return ell
 
     def plot_ellipse(
-            self, ellipse, block=True, limits=None,
-            jointaxes=True, eeframe=True, shadow=True, name=True):
+        self,
+        ellipse,
+        block=True,
+        limits=None,
+        jointaxes=True,
+        eeframe=True,
+        shadow=True,
+        name=True,
+    ):
         """
         Plot the an ellipsoid
 
@@ -1538,28 +1566,35 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         if not isinstance(ellipse, EllipsePlot):  # pragma nocover
             raise TypeError(
-                'ellipse must be of type '
-                'roboticstoolbox.backend.PyPlot.EllipsePlot')
+                "ellipse must be of type " "roboticstoolbox.backend.PyPlot.EllipsePlot"
+            )
 
         env = PyPlot()
 
         # Add the robot to the figure in readonly mode
-        env.launch(ellipse.robot.name + ' ' + ellipse.name, limits=limits)
+        env.launch(ellipse.robot.name + " " + ellipse.name, limits=limits)
 
-        env.add(
-            ellipse,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+        env.add(ellipse, jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
         # Keep the plot open
-        if block:           # pragma: no cover
+        if block:  # pragma: no cover
             env.hold()
 
         return env
 
     def plot_fellipse(
-            self, q=None, block=True, fellipse=None,
-            limits=None, opt='trans', centre=[0, 0, 0],
-            jointaxes=True, eeframe=True, shadow=True, name=True):
+        self,
+        q=None,
+        block=True,
+        fellipse=None,
+        limits=None,
+        opt="trans",
+        centre=[0, 0, 0],
+        jointaxes=True,
+        eeframe=True,
+        shadow=True,
+        name=True,
+    ):
         """
         Plot the force ellipsoid for manipulator
 
@@ -1618,7 +1653,8 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
-                "Ellipse Plotting of ERobot's not implemented yet")
+                "Ellipse Plotting of ERobot's not implemented yet"
+            )
 
         if q is not None:
             self.q = q
@@ -1627,13 +1663,28 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             fellipse = self.fellipse(q=q, opt=opt, centre=centre)
 
         return self.plot_ellipse(
-            fellipse, block=block, limits=limits,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+            fellipse,
+            block=block,
+            limits=limits,
+            jointaxes=jointaxes,
+            eeframe=eeframe,
+            shadow=shadow,
+            name=name,
+        )
 
     def plot_vellipse(
-            self, q=None, block=True, vellipse=None,
-            limits=None, opt='trans', centre=[0, 0, 0],
-            jointaxes=True, eeframe=True, shadow=True, name=True):
+        self,
+        q=None,
+        block=True,
+        vellipse=None,
+        limits=None,
+        opt="trans",
+        centre=[0, 0, 0],
+        jointaxes=True,
+        eeframe=True,
+        shadow=True,
+        name=True,
+    ):
         """
         Plot the velocity ellipsoid for manipulator
 
@@ -1692,7 +1743,8 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         if isinstance(self, rtb.ERobot):  # pragma nocover
             raise NotImplementedError(
-                "Ellipse Plotting of ERobot's not implemented yet")
+                "Ellipse Plotting of ERobot's not implemented yet"
+            )
 
         if q is not None:
             self.q = q
@@ -1701,16 +1753,32 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             vellipse = self.vellipse(q=q, opt=opt, centre=centre)
 
         return self.plot_ellipse(
-            vellipse, block=block, limits=limits,
-            jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
+            vellipse,
+            block=block,
+            limits=limits,
+            jointaxes=jointaxes,
+            eeframe=eeframe,
+            shadow=shadow,
+            name=name,
+        )
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     def teach(
-            self, q=None, block=True, order='xyz', limits=None,
-            jointaxes=True, jointlabels=False,
-            vellipse=False, fellipse=False, eeframe=True, shadow=True,
-            name=True, backend=None):
+        self,
+        q=None,
+        block=True,
+        order="xyz",
+        limits=None,
+        jointaxes=True,
+        jointlabels=False,
+        vellipse=False,
+        fellipse=False,
+        eeframe=True,
+        shadow=True,
+        name=True,
+        backend=None,
+    ):
         """
         Graphical teach pendant
 
@@ -1769,32 +1837,37 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         env = self._get_graphical_backend(backend)
 
         # Add the self to the figure in readonly mode
-        env.launch('Teach ' + self.name, limits=limits)
+        env.launch("Teach " + self.name, limits=limits)
         env.add(
-            self, readonly=True,
-            jointaxes=jointaxes, jointlabels=jointlabels, eeframe=eeframe,
-            shadow=shadow, name=name)
+            self,
+            readonly=True,
+            jointaxes=jointaxes,
+            jointlabels=jointlabels,
+            eeframe=eeframe,
+            shadow=shadow,
+            name=name,
+        )
 
         env._add_teach_panel(self, q)
 
         if vellipse:
-            vell = self.vellipse(centre='ee', scale=0.5)
+            vell = self.vellipse(centre="ee", scale=0.5)
             env.add(vell)
 
         if fellipse:
-            fell = self.fellipse(centre='ee')
+            fell = self.fellipse(centre="ee")
             env.add(fell)
 
         # Keep the plot open
-        if block:           # pragma: no cover
+        if block:  # pragma: no cover
             env.hold()
 
         return env
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     def closest_point(self, q, shape, inf_dist=1.0, skip=False):
-        '''
+        """
         closest_point(shape, inf_dist) returns the minimum euclidean
         distance between this robot and shape, provided it is less than
         inf_dist. It will also return the points on self and shape in the
@@ -1810,9 +1883,9 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         :type skip: boolean
         :returns: d, p1, p2 where d is the distance between the shapes,
             p1 and p2 are the points in the world frame on the respective
-            shapes. The points returned are homogeneous with [x, y, z, 1].
-        :rtype: float, ndarray(1x4), ndarray(1x4)
-        '''
+            shapes. The points returned are [x, y, z].
+        :rtype: float, ndarray(1x3), ndarray(1x3)
+        """
 
         if not skip:
             self._set_link_fk(q)
@@ -1835,7 +1908,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         return d, p1, p2
 
     def collided(self, q, shape, skip=False):
-        '''
+        """
         collided(shape) checks if this robot and shape have collided
         :param shape: The shape to compare distance to
         :type shape: Shape
@@ -1844,7 +1917,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         :type skip: boolean
         :returns: True if shapes have collided
         :rtype: bool
-        '''
+        """
 
         if not skip:
             self._set_link_fk(q)
@@ -1862,7 +1935,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         return False
 
     def joint_velocity_damper(self, ps=0.05, pi=0.1, n=None, gain=1.0):
-        '''
+        """
         Formulates an inequality contraint which, when optimised for will
         make it impossible for the robot to run into joint limits. Requires
         the joint limits of the robot to be specified. See examples/mmc.py
@@ -1881,7 +1954,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         :returns: Ain, Bin as the inequality contraints for an optisator
         :rtype: ndarray(6), ndarray(6)
-        '''
+        """
 
         if n is None:
             n = self.n
@@ -1891,12 +1964,10 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         for i in range(n):
             if self.q[i] - self.qlim[0, i] <= pi:
-                Bin[i] = -gain * (
-                    ((self.qlim[0, i] - self.q[i]) + ps) / (pi - ps))
+                Bin[i] = -gain * (((self.qlim[0, i] - self.q[i]) + ps) / (pi - ps))
                 Ain[i, i] = -1
             if self.qlim[1, i] - self.q[i] <= pi:
-                Bin[i] = gain * (
-                    (self.qlim[1, i] - self.q[i]) - ps) / (pi - ps)
+                Bin[i] = gain * ((self.qlim[1, i] - self.q[i]) - ps) / (pi - ps)
                 Ain[i, i] = 1
 
         return Ain, Bin

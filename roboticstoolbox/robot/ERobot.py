@@ -2029,7 +2029,7 @@ class ERobot(BaseERobot):
         bin = None
 
         def indiv_calculation(link, link_col, q):
-            d, wTlp, wTcp = link_col.closest_point(shape, di, homogenous=False)
+            d, wTlp, wTcp = link_col.closest_point(shape, di)
 
             if d is not None:
                 lpTcp = -wTlp + wTcp
