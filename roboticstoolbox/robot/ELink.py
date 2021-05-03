@@ -12,7 +12,6 @@ import fknm
 
 
 class BaseELink(Link):
-
     def __init__(self, name=None, parent=None, joint_name=None, **kwargs):
 
         super().__init__(**kwargs)
@@ -23,7 +22,7 @@ class BaseELink(Link):
             if isinstance(parent, (str, BaseELink)):
                 self._parent = parent
             else:
-                raise TypeError('parent must be BaseELink subclass or str')
+                raise TypeError("parent must be BaseELink subclass or str")
         else:
             self._parent = None
 
@@ -292,11 +291,11 @@ class BaseELink(Link):
                 if isinstance(gi, Shape):
                     new_coll.append(gi)
                 else:
-                    raise TypeError('Collision must be of Shape class')
+                    raise TypeError("Collision must be of Shape class")
         elif isinstance(coll, Shape):
             new_coll.append(coll)
         else:
-            raise TypeError('Geometry must be of Shape class or list of Shape')
+            raise TypeError("Geometry must be of Shape class or list of Shape")
 
         self._collision = new_coll
 
@@ -309,11 +308,11 @@ class BaseELink(Link):
                 if isinstance(gi, Shape):
                     new_geom.append(gi)
                 else:
-                    raise TypeError('Geometry must be of Shape class')
+                    raise TypeError("Geometry must be of Shape class")
         elif isinstance(geom, Shape):
             new_geom.append(geom)
         else:
-            raise TypeError('Geometry must be of Shape class or list of Shape')
+            raise TypeError("Geometry must be of Shape class or list of Shape")
 
         self._geometry = new_geom
 
@@ -355,20 +354,14 @@ class ELink(BaseELink):
     :seealso: :class:`Link`, :class:`DHLink`
     """
 
-    def __init__(
-            self,
-            ets=ETS(),
-            v=None,
-            jindex=None,
-            **kwargs):
+    def __init__(self, ets=ETS(), v=None, jindex=None, **kwargs):
 
         # process common options
         super().__init__(**kwargs)
 
         # check we have an ETS
         if not isinstance(ets, ETS):
-            raise TypeError(
-                'The ets argument must be of type ETS')
+            raise TypeError("The ets argument must be of type ETS")
 
         self._ets = ets
 
@@ -388,12 +381,11 @@ class ELink(BaseELink):
         if v is None:
             self._joint = False
         elif not isinstance(v, ETS):
-            raise TypeError('v must be of type ETS')
+            raise TypeError("v must be of type ETS")
         elif not v[0].isjoint:
-            raise ValueError('v must be a variable ETS')
+            raise ValueError("v must be a variable ETS")
         elif len(v) > 1:
-            raise ValueError(
-                "An elementary link can only have one joint variable")
+            raise ValueError("An elementary link can only have one joint variable")
         else:
             self._joint = True
 
@@ -418,17 +410,17 @@ class ELink(BaseELink):
             if jindex is None:
                 jindex = 0
 
-            if self._v.axis == 'Rx':
+            if self._v.axis == "Rx":
                 axis = 0
-            elif self._v.axis == 'Ry':
+            elif self._v.axis == "Ry":
                 axis = 1
-            elif self._v.axis == 'Rz':
+            elif self._v.axis == "Rz":
                 axis = 2
-            elif self._v.axis == 'tx':
+            elif self._v.axis == "tx":
                 axis = 3
-            elif self._v.axis == 'ty':
+            elif self._v.axis == "ty":
                 axis = 4
-            elif self._v.axis == 'tz':
+            elif self._v.axis == "tz":
                 axis = 5
 
         if self.parent is None:
@@ -453,22 +445,38 @@ class ELink(BaseELink):
             shape_sT.append(shap._sT)
             shape_sq.append(shap._sq)
 
-        return isflip, axis, jindex, parent, shape_base, shape_wT, \
-            shape_sT, shape_sq
+        return isflip, axis, jindex, parent, shape_base, shape_wT, shape_sT, shape_sq
 
     def _init_fknm(self):
         if isinstance(self.parent, str):
             # Initialise later
             return
 
-        isflip, axis, jindex, parent, \
-            shape_base, shape_wT, shape_sT, shape_sq = self._get_fknm()
+        (
+            isflip,
+            axis,
+            jindex,
+            parent,
+            shape_base,
+            shape_wT,
+            shape_sT,
+            shape_sq,
+        ) = self._get_fknm()
 
         self._fknm = fknm.link_init(
-            self.isjoint, isflip, axis, jindex, len(shape_base),
-            self._Ts, self._fk,
-            shape_base, shape_wT, shape_sT, shape_sq,
-            parent)
+            self.isjoint,
+            isflip,
+            axis,
+            jindex,
+            len(shape_base),
+            self._Ts,
+            self._fk,
+            shape_base,
+            shape_wT,
+            shape_sT,
+            shape_sq,
+            parent,
+        )
 
     def _update_fknm(self):
 
@@ -480,15 +488,32 @@ class ELink(BaseELink):
         except AttributeError:
             return
 
-        isflip, axis, jindex, parent, \
-            shape_base, shape_wT, shape_sT, shape_sq = self._get_fknm()
+        (
+            isflip,
+            axis,
+            jindex,
+            parent,
+            shape_base,
+            shape_wT,
+            shape_sT,
+            shape_sq,
+        ) = self._get_fknm()
 
         fknm.link_update(
             self._fknm,
-            self.isjoint, isflip, axis, jindex, len(shape_base),
-            self._Ts, self._fk,
-            shape_base, shape_wT, shape_sT, shape_sq,
-            parent)
+            self.isjoint,
+            isflip,
+            axis,
+            jindex,
+            len(shape_base),
+            self._Ts,
+            self._fk,
+            shape_base,
+            shape_wT,
+            shape_sT,
+            shape_sq,
+            parent,
+        )
 
     def _init_Ts(self):
         # Number of transforms in the ETS excluding the joint variable
@@ -508,7 +533,7 @@ class ELink(BaseELink):
             for et in self._ets:
                 # constant transforms only
                 if et.isjoint:
-                    raise ValueError('The transforms in ets must be constant')
+                    raise ValueError("The transforms in ets must be constant")
 
                 # if first:
                 #     T = et.T()
@@ -522,7 +547,7 @@ class ELink(BaseELink):
 
         elif isinstance(self._ets, SE3):
             self._Ts = self._ets
-            raise RuntimeError('this shouldnt happen')
+            raise RuntimeError("this shouldnt happen")
 
     @property
     def geometry(self):
@@ -562,11 +587,11 @@ class ELink(BaseELink):
                 if isinstance(gi, Shape):
                     new_coll.append(gi)
                 else:
-                    raise TypeError('Collision must be of Shape class')
+                    raise TypeError("Collision must be of Shape class")
         elif isinstance(coll, Shape):
             new_coll.append(coll)
         else:
-            raise TypeError('Geometry must be of Shape class or list of Shape')
+            raise TypeError("Geometry must be of Shape class or list of Shape")
 
         self._collision = new_coll
         self._update_fknm()
@@ -581,11 +606,11 @@ class ELink(BaseELink):
                 if isinstance(gi, Shape):
                     new_geom.append(gi)
                 else:
-                    raise TypeError('Geometry must be of Shape class')
+                    raise TypeError("Geometry must be of Shape class")
         elif isinstance(geom, Shape):
             new_geom.append(geom)
         else:
-            raise TypeError('Geometry must be of Shape class or list of Shape')
+            raise TypeError("Geometry must be of Shape class or list of Shape")
 
         self._geometry = new_geom
         self._update_fknm()
@@ -652,21 +677,14 @@ class ELink(BaseELink):
 
 
 class ELink2(BaseELink):
-
-    def __init__(
-            self,
-            ets=ETS2(),
-            v=None,
-            jindex=None,
-            **kwargs):
+    def __init__(self, ets=ETS2(), v=None, jindex=None, **kwargs):
 
         # process common options
         super().__init__(**kwargs)
 
         # check we have an ETS
         if not isinstance(ets, ETS2):
-            raise TypeError(
-                'The ets argument must be of type ETS2')
+            raise TypeError("The ets argument must be of type ETS2")
 
         self._ets = ets
 
@@ -685,12 +703,11 @@ class ELink2(BaseELink):
         if v is None:
             self._joint = False
         elif not isinstance(v, ETS2):
-            raise TypeError('v must be of type ETS2')
+            raise TypeError("v must be of type ETS2")
         elif not v[0].isjoint:
-            raise ValueError('v must be a variable ETS')
+            raise ValueError("v must be a variable ETS")
         elif len(v) > 1:
-            raise ValueError(
-                "An elementary link can only have one joint variable")
+            raise ValueError("An elementary link can only have one joint variable")
         else:
             self._joint = True
 
@@ -711,7 +728,7 @@ class ELink2(BaseELink):
             for et in self._ets:
                 # constant transforms only
                 if et.isjoint:
-                    raise ValueError('The transforms in ets must be constant')
+                    raise ValueError("The transforms in ets must be constant")
 
                 T = T @ et.T()
 
@@ -719,7 +736,7 @@ class ELink2(BaseELink):
 
         elif isinstance(self._ets, SE3):
             self._Ts = self._ets
-            raise RuntimeError('this shouldnt happen')
+            raise RuntimeError("this shouldnt happen")
 
     def A(self, q=0.0, **kwargs):
         """
