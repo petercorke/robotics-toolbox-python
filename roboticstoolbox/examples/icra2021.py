@@ -5,7 +5,7 @@
 # This is the code for the examples in the paper published at ICRA2021.
 #
 
-import swift.Swift
+from swift import Swift
 import spatialmath.base.symbolic as sym
 from roboticstoolbox import ETS as ET
 from roboticstoolbox import *
@@ -17,19 +17,18 @@ import numpy as np
 # # III.SPATIAL MATHEMATICS
 
 from spatialmath.base import *
-T = transl(0.5, 0.0, 0.0) @ rpy2tr(0.1, 0.2,
-                                   0.3, order='xyz') @ trotx(-90, 'deg')
+
+T = transl(0.5, 0.0, 0.0) @ rpy2tr(0.1, 0.2, 0.3, order="xyz") @ trotx(-90, "deg")
 print(T)
 
-T = SE3(0.5, 0.0, 0.0) * SE3.RPY([0.1, 0.2, 0.3],
-                                 order='xyz') * SE3.Rx(-90, unit='deg')
+T = SE3(0.5, 0.0, 0.0) * SE3.RPY([0.1, 0.2, 0.3], order="xyz") * SE3.Rx(-90, unit="deg")
 print(T)
 
 T.eul()
 
 T.R
 
-T.plot(color='red', label='2')
+T.plot(color="red", label="2")
 
 UnitQuaternion.Rx(0.3)
 UnitQuaternion.AngVec(0.3, [1, 0, 0])
@@ -47,11 +46,14 @@ a2 = 0.360
 d4 = 0.380
 d6 = 0.065
 
-robot = DHRobot([
-    RevoluteDH(d=d1, a=a1, alpha=-pi / 2),
-    RevoluteDH(a=a2),
-    RevoluteDH(alpha=pi / 2),
-], name="my IRB140")
+robot = DHRobot(
+    [
+        RevoluteDH(d=d1, a=a1, alpha=-pi / 2),
+        RevoluteDH(a=a2),
+        RevoluteDH(alpha=pi / 2),
+    ],
+    name="my IRB140",
+)
 
 print(robot)
 
@@ -73,9 +75,20 @@ l4 = 0.0203
 l5 = 0.0837
 l6 = 0.4318
 
-e = ET.tz(l1) * ET.rz() * ET.ty(l2) * ET.ry() \
-    * ET.tz(l3) * ET.tx(l4) * ET.ty(l5) * ET.ry() \
-    * ET.tz(l6) * ET.rz() * ET.ry() * ET.rz()
+e = (
+    ET.tz(l1)
+    * ET.rz()
+    * ET.ty(l2)
+    * ET.ry()
+    * ET.tz(l3)
+    * ET.tx(l4)
+    * ET.ty(l5)
+    * ET.ry()
+    * ET.tz(l6)
+    * ET.rz()
+    * ET.ry()
+    * ET.rz()
+)
 
 robot = ERobot(e)
 print(robot)
@@ -99,7 +112,7 @@ sol.q.shape
 
 # ## C. Symbolic manipulation
 
-phi, theta, psi = sym.symbol('φ, ϴ, ψ')
+phi, theta, psi = sym.symbol("φ, ϴ, ψ")
 rpy2r(phi, theta, psi)
 
 q = sym.symbol("q_:6")  # q = (q_1, q_2, ... q_5)
@@ -145,10 +158,10 @@ qdd = puma.accel(puma.qn, tau, np.zeros((6,)))
 
 
 obstacle = Box([1, 1, 1], base=SE3(1, 0, 0))
-iscollision = panda.collided(obstacle)  # boolean
+iscollision = panda.collided(panda.q, obstacle)  # boolean
 iscollision = panda.links[0].collided(obstacle)
 
-d, p1, p2 = panda.closest_point(obstacle)
+d, p1, p2 = panda.closest_point(panda.q, obstacle)
 print(d, p1, p2)
 d, p1, p2 = panda.links[0].closest_point(obstacle)
 print(d, p1, p2)
@@ -158,10 +171,10 @@ print(d, p1, p2)
 panda.plot(panda.qr, block=False)
 
 backend = Swift()
-backend.launch()   # create graphical world
+backend.launch()  # create graphical world
 backend.add(panda)  # add robot to the world
-panda.q = panda.qr        # update the robot
-backend.step()    # display the world
+panda.q = panda.qr  # update the robot
+backend.step()  # display the world
 
 
 #
