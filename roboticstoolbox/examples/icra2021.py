@@ -158,8 +158,8 @@ qdd = puma.accel(puma.qn, tau, np.zeros((6,)))
 
 
 obstacle = Box([1, 1, 1], base=SE3(1, 0, 0))
-iscollision = panda.collided(panda.q, obstacle)  # boolean
-iscollision = panda.links[0].collided(obstacle)
+iscollision0 = panda.collided(panda.q, obstacle)  # boolean
+iscollision1 = panda.links[0].collided(obstacle)
 
 d, p1, p2 = panda.closest_point(panda.q, obstacle)
 print(d, p1, p2)
