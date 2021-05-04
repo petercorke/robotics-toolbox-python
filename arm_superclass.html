@@ -335,7 +335,28 @@ dynamic parameters is invalid.</p>
 <dl class="py method">
 <dt id="roboticstoolbox.robot.Robot.Robot.nbranches">
 <em class="property"><span class="pre">abstract</span> <span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">nbranches</span></code><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.nbranches" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Number of branches (Robot superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of branches</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span><span class="o">.</span><span class="n">nbranches</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.n" title="roboticstoolbox.robot.Robot.Robot.n"><code class="xref py py-func docutils literal notranslate"><span class="pre">n()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.nlinks" title="roboticstoolbox.robot.Robot.Robot.nlinks"><code class="xref py py-func docutils literal notranslate"><span class="pre">nlinks()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="roboticstoolbox.robot.Robot.Robot.hasdynamics">
@@ -1273,8 +1294,8 @@ velocity but it is eliminated in the computation of this value.</p></li>
 in operational space for the robot in configuration <code class="docutils literal notranslate"><span class="pre">q</span></code> and velocity
 <code class="docutils literal notranslate"><span class="pre">qd</span></code>, where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of joints.</p>
 <div class="math notranslate nohighlight">
-\[\mathbf{C}_x = \mathbf{J}(q)^{-T} \left( 
-    \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q) 
+\[\mathbf{C}_x = \mathbf{J}(q)^{-T} \left(
+    \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q)
     \right) \mathbf{J}(q)^{-1}\]</div>
 <p>The product <span class="math notranslate nohighlight">\(\mathbf{C} \dot{x}\)</span> is the operational space wrench
 due to joint velocity coupling. This matrix is also known as the
@@ -2818,10 +2839,10 @@ option if using this method in conjuction with Swift to save time</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>d, p1, p2 where d is the distance between the shapes,
 p1 and p2 are the points in the world frame on the respective
-shapes. The points returned are homogeneous with [x, y, z, 1].</p>
+shapes. The points returned are [x, y, z].</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float, ndarray(1x4), ndarray(1x4)</p>
+<dd class="field-odd"><p>float, ndarray(1x3), ndarray(1x3)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3417,10 +3438,10 @@ the shape</p></li>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>d, p1, p2 where d is the distance between the shapes,
 p1 and p2 are the points in the world frame on the respective
-shapes. The points returned are homogeneous with [x, y, z, 1].</p>
+shapes. The points returned are [x, y, z].</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float, ndarray(1x4), ndarray(1x4)</p>
+<dd class="field-odd"><p>float, ndarray(1x3), ndarray(1x3)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3463,7 +3484,7 @@ shapes. The points returned are homogeneous with [x, y, z, 1].</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Apr-2021.
+        Last updated on 04-May-2021.
       </span>
 
     </p>

@@ -884,10 +884,10 @@ option if using this method in conjuction with Swift to save time</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>d, p1, p2 where d is the distance between the shapes,
 p1 and p2 are the points in the world frame on the respective
-shapes. The points returned are homogeneous with [x, y, z, 1].</p>
+shapes. The points returned are [x, y, z].</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float, ndarray(1x4), ndarray(1x4)</p>
+<dd class="field-odd"><p>float, ndarray(1x3), ndarray(1x3)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1000,8 +1000,8 @@ velocity but it is eliminated in the computation of this value.</p></li>
 in operational space for the robot in configuration <code class="docutils literal notranslate"><span class="pre">q</span></code> and velocity
 <code class="docutils literal notranslate"><span class="pre">qd</span></code>, where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of joints.</p>
 <div class="math notranslate nohighlight">
-\[\mathbf{C}_x = \mathbf{J}(q)^{-T} \left( 
-    \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q) 
+\[\mathbf{C}_x = \mathbf{J}(q)^{-T} \left(
+    \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q)
     \right) \mathbf{J}(q)^{-1}\]</div>
 <p>The product <span class="math notranslate nohighlight">\(\mathbf{C} \dot{x}\)</span> is the operational space wrench
 due to joint velocity coupling. This matrix is also known as the
@@ -3821,10 +3821,10 @@ option if using this method in conjuction with Swift to save time</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>d, p1, p2 where d is the distance between the shapes,
 p1 and p2 are the points in the world frame on the respective
-shapes. The points returned are homogeneous with [x, y, z, 1].</p>
+shapes. The points returned are [x, y, z].</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float, ndarray(1x4), ndarray(1x4)</p>
+<dd class="field-odd"><p>float, ndarray(1x3), ndarray(1x3)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3961,8 +3961,8 @@ velocity but it is eliminated in the computation of this value.</p></li>
 in operational space for the robot in configuration <code class="docutils literal notranslate"><span class="pre">q</span></code> and velocity
 <code class="docutils literal notranslate"><span class="pre">qd</span></code>, where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of joints.</p>
 <div class="math notranslate nohighlight">
-\[\mathbf{C}_x = \mathbf{J}(q)^{-T} \left( 
-    \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q) 
+\[\mathbf{C}_x = \mathbf{J}(q)^{-T} \left(
+    \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q)
     \right) \mathbf{J}(q)^{-1}\]</div>
 <p>The product <span class="math notranslate nohighlight">\(\mathbf{C} \dot{x}\)</span> is the operational space wrench
 due to joint velocity coupling. This matrix is also known as the
@@ -6743,10 +6743,10 @@ option if using this method in conjuction with Swift to save time</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>d, p1, p2 where d is the distance between the shapes,
 p1 and p2 are the points in the world frame on the respective
-shapes. The points returned are homogeneous with [x, y, z, 1].</p>
+shapes. The points returned are [x, y, z].</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float, ndarray(1x4), ndarray(1x4)</p>
+<dd class="field-odd"><p>float, ndarray(1x3), ndarray(1x3)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -6883,8 +6883,8 @@ velocity but it is eliminated in the computation of this value.</p></li>
 in operational space for the robot in configuration <code class="docutils literal notranslate"><span class="pre">q</span></code> and velocity
 <code class="docutils literal notranslate"><span class="pre">qd</span></code>, where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of joints.</p>
 <div class="math notranslate nohighlight">
-\[\mathbf{C}_x = \mathbf{J}(q)^{-T} \left( 
-    \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q) 
+\[\mathbf{C}_x = \mathbf{J}(q)^{-T} \left(
+    \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q)
     \right) \mathbf{J}(q)^{-1}\]</div>
 <p>The product <span class="math notranslate nohighlight">\(\mathbf{C} \dot{x}\)</span> is the operational space wrench
 due to joint velocity coupling. This matrix is also known as the
@@ -9851,10 +9851,10 @@ the shape</p></li>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>d, p1, p2 where d is the distance between the shapes,
 p1 and p2 are the points in the world frame on the respective
-shapes. The points returned are homogeneous with [x, y, z, 1].</p>
+shapes. The points returned are [x, y, z].</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float, ndarray(1x4), ndarray(1x4)</p>
+<dd class="field-odd"><p>float, ndarray(1x3), ndarray(1x3)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -10289,43 +10289,6 @@ variable within a vector of joint coordinates.
 </dd></dl>
 
 <dl class="py method">
-<dt id="roboticstoolbox.robot.ELink.ELink.fk">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">fk</span></code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.fk" title="Permalink to this definition">¶</a></dt>
-<dd><p>The forward kinemtics up to and including this link
-This value can be accessed after calling fkine_all(q)
-from the robot object.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="roboticstoolbox.robot.ELink.ELink.A">
-<code class="sig-name descname"><span class="pre">A</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.A"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.A" title="Permalink to this definition">¶</a></dt>
-<dd><p>Link transform matrix
-:param q: Joint coordinate (radians or metres). Not required for links</p>
-<blockquote>
-<div><p>with no variable</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>fast</strong> – return NumPy array instead of <code class="docutils literal notranslate"><span class="pre">SE3</span></code></p>
-</dd>
-<dt class="field-even">Return T</dt>
-<dd class="field-even"><p>link frame transformation matrix</p>
-</dd>
-<dt class="field-odd">Rtype T</dt>
-<dd class="field-odd"><p>SE3 or ndarray(4,4)</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">LINK.A(q)</span></code> is an SE(3) matrix that describes the rigid-body</dt><dd><p>transformation from the previous to the current link frame to
-the next, which depends on the joint coordinate <code class="docutils literal notranslate"><span class="pre">q</span></code>.</p>
-</dd>
-</dl>
-<p>If <code class="docutils literal notranslate"><span class="pre">fast</span></code> is True return a NumPy array, either SE(2) or SE(3).
-A value of None means that it is the identity matrix.
-If <code class="docutils literal notranslate"><span class="pre">fast</span></code> is False return an <code class="docutils literal notranslate"><span class="pre">SE2</span></code> or <code class="docutils literal notranslate"><span class="pre">SE3</span></code> instance.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt id="roboticstoolbox.robot.ELink.ELink.B">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">B</span></code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.B" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get/set motor viscous friction</p>
@@ -10532,10 +10495,10 @@ the shape</p></li>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>d, p1, p2 where d is the distance between the shapes,
 p1 and p2 are the points in the world frame on the respective
-shapes. The points returned are homogeneous with [x, y, z, 1].</p>
+shapes. The points returned are [x, y, z].</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float, ndarray(1x4), ndarray(1x4)</p>
+<dd class="field-odd"><p>float, ndarray(1x3), ndarray(1x3)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -10637,6 +10600,14 @@ centre of mass, inertia, friction, gear ratio and motor properties.</p>
 be last in the sequence</p></li>
 </ul>
 </div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.fk">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">fk</span></code><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.fk" title="Permalink to this definition">¶</a></dt>
+<dd><p>The forward kinemtics up to and including this link
+This value can be accessed after calling fkine_all(q)
+from the robot object.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -10972,6 +10943,35 @@ This property returns the latter.
 </div>
 </dd></dl>
 
+<dl class="py method">
+<dt id="roboticstoolbox.robot.ELink.ELink.A">
+<code class="sig-name descname"><span class="pre">A</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.A"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.A" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link transform matrix
+:param q: Joint coordinate (radians or metres). Not required for links</p>
+<blockquote>
+<div><p>with no variable</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fast</strong> – return NumPy array instead of <code class="docutils literal notranslate"><span class="pre">SE3</span></code></p>
+</dd>
+<dt class="field-even">Return T</dt>
+<dd class="field-even"><p>link frame transformation matrix</p>
+</dd>
+<dt class="field-odd">Rtype T</dt>
+<dd class="field-odd"><p>SE3 or ndarray(4,4)</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">LINK.A(q)</span></code> is an SE(3) matrix that describes the rigid-body</dt><dd><p>transformation from the previous to the current link frame to
+the next, which depends on the joint coordinate <code class="docutils literal notranslate"><span class="pre">q</span></code>.</p>
+</dd>
+</dl>
+<p>If <code class="docutils literal notranslate"><span class="pre">fast</span></code> is True return a NumPy array, either SE(2) or SE(3).
+A value of None means that it is the identity matrix.
+If <code class="docutils literal notranslate"><span class="pre">fast</span></code> is False return an <code class="docutils literal notranslate"><span class="pre">SE2</span></code> or <code class="docutils literal notranslate"><span class="pre">SE3</span></code> instance.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -11185,10 +11185,10 @@ the shape</p></li>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>d, p1, p2 where d is the distance between the shapes,
 p1 and p2 are the points in the world frame on the respective
-shapes. The points returned are homogeneous with [x, y, z, 1].</p>
+shapes. The points returned are [x, y, z].</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float, ndarray(1x4), ndarray(1x4)</p>
+<dd class="field-odd"><p>float, ndarray(1x3), ndarray(1x3)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -12818,37 +12818,12 @@ characteristics.</p>
 <p><code class="docutils literal notranslate"><span class="pre">YuMi()</span></code> is a class which imports an ABB YuMi (IRB14000) robot definition
 from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">YuMi</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">ERobot: yumi (by ABB), 17 joints (RRRRRRRPPRRRRRRRP), 3 branches, dynamics, geometry, collision</span>
-<span class="go">┌───┬────────────────────┬───────┬────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐</span>
-<span class="go">│id │        link        │ joint │     parent     │                                                            ETS                                                            │</span>
-<span class="go">├───┼────────────────────┼───────┼────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤</span>
-<span class="go">│23 │ world              │       │ BASE           │ {world} = {BASE}                                                                                                          │</span>
-<span class="go">│ 1 │ yumi_base_link     │       │ world          │ {yumi_base_link} = {world} ⊕ tz(0.1)                                                                                      │</span>
-<span class="go">│ 2 │ yumi_body          │       │ yumi_base_link │ {yumi_body} = {yumi_base_link}                                                                                            │</span>
-<span class="go">│ 3 │ yumi_link_1_r      │     0 │ yumi_body      │ {yumi_link_1_r} = {yumi_body} ⊕ tx(0.05355) ⊕ ty(-0.0725) ⊕ tz(0.4149) ⊕ Rz(-132.7°) ⊕ Ry(-32.56°) ⊕ Rx(-56.12°) ⊕ Rz(q0) │</span>
-<span class="go">│ 4 │ yumi_link_2_r      │     1 │ yumi_link_1_r  │ {yumi_link_2_r} = {yumi_link_1_r} ⊕ tx(0.03) ⊕ tz(0.1) ⊕ Rx(90°) ⊕ Rz(q1)                                                 │</span>
-<span class="go">│ 5 │ yumi_link_3_r      │     2 │ yumi_link_2_r  │ {yumi_link_3_r} = {yumi_link_2_r} ⊕ tx(-0.03) ⊕ ty(0.1728) ⊕ Rx(-90°) ⊕ Rz(q2)                                            │</span>
-<span class="go">│ 6 │ yumi_link_4_r      │     3 │ yumi_link_3_r  │ {yumi_link_4_r} = {yumi_link_3_r} ⊕ tx(-0.04188) ⊕ tz(0.07873) ⊕ Ry(-90°) ⊕ Rx(90°) ⊕ Rz(q3)                              │</span>
-<span class="go">│ 7 │ yumi_link_5_r      │     4 │ yumi_link_4_r  │ {yumi_link_5_r} = {yumi_link_4_r} ⊕ tx(0.0405) ⊕ ty(0.1646) ⊕ Rx(-90°) ⊕ Rz(q4)                                           │</span>
-<span class="go">│ 8 │ yumi_link_6_r      │     5 │ yumi_link_5_r  │ {yumi_link_6_r} = {yumi_link_5_r} ⊕ tx(-0.027) ⊕ tz(0.1004) ⊕ Rx(90°) ⊕ Rz(q5)                                            │</span>
-<span class="go">│ 9 │ yumi_link_7_r      │     6 │ yumi_link_6_r  │ {yumi_link_7_r} = {yumi_link_6_r} ⊕ tx(0.027) ⊕ ty(0.029) ⊕ Rx(-90°) ⊕ Rz(q6)                                             │</span>
-<span class="go">│17 │ gripper_r_base     │       │ yumi_link_7_r  │ {gripper_r_base} = {yumi_link_7_r} ⊕ tz(0.007) ⊕ Rz(180°)                                                                 │</span>
-<span class="go">│18 │ gripper_r_finger_r │     7 │ gripper_r_base │ {gripper_r_finger_r} = {gripper_r_base} ⊕ ty(-0.0065) ⊕ tz(0.0837) ⊕ tx(-q7)                                              │</span>
-<span class="go">│19 │ gripper_r_finger_l │     8 │ gripper_r_base │ {gripper_r_finger_l} = {gripper_r_base} ⊕ ty(0.0065) ⊕ tz(0.0837) ⊕ Rz(180°) ⊕ tx(-q8)                                    │</span>
-<span class="go">│10 │ yumi_link_1_l      │     9 │ yumi_body      │ {yumi_link_1_l} = {yumi_body} ⊕ tx(0.05355) ⊕ ty(0.0725) ⊕ tz(0.4149) ⊕ Rz(132.8°) ⊕ Ry(-32.75°) ⊕ Rx(56.04°) ⊕ Rz(q9)    │</span>
-<span class="go">│11 │ yumi_link_2_l      │    10 │ yumi_link_1_l  │ {yumi_link_2_l} = {yumi_link_1_l} ⊕ tx(0.03) ⊕ tz(0.1) ⊕ Rx(90°) ⊕ Rz(q10)                                                │</span>
-<span class="go">│12 │ yumi_link_3_l      │    11 │ yumi_link_2_l  │ {yumi_link_3_l} = {yumi_link_2_l} ⊕ tx(-0.03) ⊕ ty(0.1728) ⊕ Rx(-90°) ⊕ Rz(q11)                                           │</span>
-<span class="go">│13 │ yumi_link_4_l      │    12 │ yumi_link_3_l  │ {yumi_link_4_l} = {yumi_link_3_l} ⊕ tx(-0.04188) ⊕ tz(0.07873) ⊕ Ry(-90°) ⊕ Rx(90°) ⊕ Rz(q12)                             │</span>
-<span class="go">│14 │ yumi_link_5_l      │    13 │ yumi_link_4_l  │ {yumi_link_5_l} = {yumi_link_4_l} ⊕ tx(0.0405) ⊕ ty(0.1646) ⊕ Rx(-90°) ⊕ Rz(q13)                                          │</span>
-<span class="go">│15 │ yumi_link_6_l      │    14 │ yumi_link_5_l  │ {yumi_link_6_l} = {yumi_link_5_l} ⊕ tx(-0.027) ⊕ tz(0.1004) ⊕ Rx(90°) ⊕ Rz(q14)                                           │</span>
-<span class="go">│16 │ yumi_link_7_l      │    15 │ yumi_link_6_l  │ {yumi_link_7_l} = {yumi_link_6_l} ⊕ tx(0.027) ⊕ ty(0.029) ⊕ Rx(-90°) ⊕ Rz(q15)                                            │</span>
-<span class="go">│20 │ @gripper_l_base    │       │ yumi_link_7_l  │ {gripper_l_base} = {yumi_link_7_l} ⊕ tz(0.007) ⊕ Rz(180°)                                                                 │</span>
-<span class="go">│22 │ gripper_l_finger_l │    16 │ gripper_l_base │ {gripper_l_finger_l} = {gripper_l_base} ⊕ ty(0.0065) ⊕ tz(0.0837) ⊕ Rz(180°) ⊕ tx(-q16)                                   │</span>
-<span class="go">└───┴────────────────────┴───────┴────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘</span>
-
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;, line 325, in getvector</span>
+<span class="go">    raise ValueError(&quot;incorrect vector length: expected {}, got {}&quot;.format(dim, s))</span>
+<span class="go">ValueError: incorrect vector length: expected 17, got (14,)</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;robot&#39; is not defined</span>
 </pre></div>
 </div>
 <p>Defined joint configurations are:</p>
@@ -12887,7 +12862,7 @@ characteristics.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Apr-2021.
+        Last updated on 04-May-2021.
       </span>
 
     </p>

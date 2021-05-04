@@ -161,8 +161,14 @@
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> <span class="n">isvector</span><span class="p">,</span> \
-    <span class="n">getvector</span><span class="p">,</span> <span class="n">assertmatrix</span><span class="p">,</span> <span class="n">getvector</span><span class="p">,</span> <span class="n">isscalar</span>
+<span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">isvector</span><span class="p">,</span>
+    <span class="n">getvector</span><span class="p">,</span>
+    <span class="n">assertmatrix</span><span class="p">,</span>
+    <span class="n">getvector</span><span class="p">,</span>
+    <span class="n">isscalar</span><span class="p">,</span>
+<span class="p">)</span>
+
 
 <div class="viewcode-block" id="Trajectory"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory">[docs]</a><span class="k">class</span> <span class="nc">Trajectory</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -297,7 +303,7 @@
 <span class="sd">        :type block: bool</span>
 
 
-<span class="sd">        Plot the position, velocity and acceleration data.  The format of the </span>
+<span class="sd">        Plot the position, velocity and acceleration data.  The format of the</span>
 <span class="sd">        plot depends on the function that created it.</span>
 
 <span class="sd">        - ``tpoly`` and ``lspb`` show the individual points with markers</span>
@@ -307,10 +313,10 @@
 <span class="sd">        :seealso: :func:`~tpoly`, :func:`~lspb`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">plotopts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="s1">&#39;markersize&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+        <span class="n">plotopts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="s2">&quot;markersize&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">plotargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">plotopts</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">plotopts</span><span class="p">,</span> <span class="o">**</span><span class="n">plotargs</span><span class="p">}</span>
-        <span class="n">textopts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;fontsize&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">}</span>
+        <span class="n">textopts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;fontsize&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">textargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">textopts</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">textopts</span><span class="p">,</span> <span class="o">**</span><span class="n">textargs</span><span class="p">}</span>
 
@@ -318,69 +324,73 @@
         <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># plot position</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;tpoly&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;tpoly&quot;</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;lspb&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;lspb&quot;</span><span class="p">:</span>
             <span class="c1"># accel phase</span>
             <span class="n">tf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tblend</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
 
             <span class="c1"># coast phase</span>
-            <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">tblend</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">tf</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">tblend</span><span class="p">))</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">tblend</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">tf</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tblend</span><span class="p">))</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
             <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">k</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span>
+            <span class="p">)</span>
 
             <span class="c1"># decel phase</span>
             <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">tf</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tblend</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
             <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">k</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span>
+            <span class="p">)</span>
 
             <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">naxes</span><span class="p">)])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">naxes</span><span class="p">)])</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">istime</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;traj&#39;</span><span class="p">,</span> <span class="s1">&#39;mtraj&#39;</span><span class="p">,</span> <span class="s1">&#39;mstraj&#39;</span><span class="p">):</span>
-                <span class="n">symbol</span> <span class="o">=</span> <span class="s1">&#39;q&#39;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;traj&quot;</span><span class="p">,</span> <span class="s2">&quot;mtraj&quot;</span><span class="p">,</span> <span class="s2">&quot;mstraj&quot;</span><span class="p">):</span>
+                <span class="n">symbol</span> <span class="o">=</span> <span class="s2">&quot;q&quot;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">symbol</span> <span class="o">=</span> <span class="s1">&#39;s&#39;</span>
+                <span class="n">symbol</span> <span class="o">=</span> <span class="s2">&quot;s&quot;</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;$</span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="s2">(t)$&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$s(k)$&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$s(k)$&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
 
         <span class="c1"># plot velocity</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">istime</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;$\dot</span><span class="se">{{</span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="se">}}</span><span class="s2">(t)$&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$ds/dk$&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$ds/dk$&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
 
         <span class="c1"># plot acceleration</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sdd</span><span class="p">,</span> <span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sdd</span><span class="p">,</span> <span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">plotopts</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">istime</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;$\ddot</span><span class="se">{{</span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="se">}}</span><span class="s2">(t)$&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;t (seconds)&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;t (seconds)&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$d^2s/dk^2$&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;k (step)&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$d^2s/dk^2$&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">textopts</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;k (step)&quot;</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
 
@@ -388,13 +398,14 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot multi-axis trajectory</span>
 
-<span class="sd">        :param **kwargs: optional arguments passed to ``qplot`` </span>
+<span class="sd">        :param **kwargs: optional arguments passed to ``qplot``</span>
 
 <span class="sd">        Plots a multi-axis trajectory, held within the object, as position against time.</span>
 
 <span class="sd">        :seealso: :func:`qplot`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">qplot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
 
 <div class="viewcode-block" id="tpoly"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.tpoly">[docs]</a><span class="k">def</span> <span class="nf">tpoly</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">qf</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">qd0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">qdf</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -424,12 +435,12 @@
 <span class="sd">              *not* per second squared.</span>
 
 <span class="sd">    - ``tg = tpoly(q0, q1, t)`` as above but ``t`` is a uniformly-spaced time</span>
-<span class="sd">      vector </span>
+<span class="sd">      vector</span>
 
 <span class="sd">            - Velocity is in units of distance per second.</span>
 <span class="sd">            - Acceleration is in units of distance per second squared.</span>
-<span class="sd"> </span>
-<span class="sd">    The return value is an object that contains position, velocity and </span>
+
+<span class="sd">    The return value is an object that contains position, velocity and</span>
 <span class="sd">    acceleration data.</span>
 
 <span class="sd">    .. note:: The time vector T is assumed to be monotonically increasing, and</span>
@@ -449,7 +460,7 @@
         <span class="n">t</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
         <span class="n">istime</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bad argument for time, must be int or vector&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;bad argument for time, must be int or vector&quot;</span><span class="p">)</span>
     <span class="n">tf</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
 
     <span class="n">polyfunc</span> <span class="o">=</span> <span class="n">tpoly_func</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">qf</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">qd0</span><span class="p">,</span> <span class="n">qdf</span><span class="p">)</span>
@@ -460,30 +471,37 @@
     <span class="n">pd</span> <span class="o">=</span> <span class="n">traj</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">pdd</span> <span class="o">=</span> <span class="n">traj</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;tpoly&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">pd</span><span class="p">,</span> <span class="n">pdd</span><span class="p">,</span> <span class="n">istime</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s2">&quot;tpoly&quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">pd</span><span class="p">,</span> <span class="n">pdd</span><span class="p">,</span> <span class="n">istime</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="tpoly_func"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.tpoly_func">[docs]</a><span class="k">def</span> <span class="nf">tpoly_func</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">qf</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">qd0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">qdf</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 
     <span class="c1"># solve for the polynomial coefficients using least squares</span>
     <span class="n">X</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">[</span> <span class="mi">0</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>           <span class="mi">0</span><span class="p">,</span>           <span class="mi">0</span><span class="p">,</span>       <span class="mi">0</span><span class="p">,</span>   <span class="mi">1</span><span class="p">],</span>
-            <span class="p">[</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">5</span><span class="p">,</span>        <span class="n">T</span> <span class="o">**</span> <span class="mi">4</span><span class="p">,</span>      <span class="n">T</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span>      <span class="n">T</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>  <span class="n">T</span><span class="p">,</span>   <span class="mi">1</span><span class="p">],</span>
-            <span class="p">[</span> <span class="mi">0</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>           <span class="mi">0</span><span class="p">,</span>           <span class="mi">0</span><span class="p">,</span>       <span class="mi">1</span><span class="p">,</span>   <span class="mi">0</span><span class="p">],</span>
-            <span class="p">[</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">4</span><span class="p">,</span>    <span class="mi">4</span> <span class="o">*</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span>  <span class="mi">3</span> <span class="o">*</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span> <span class="o">*</span> <span class="n">T</span><span class="p">,</span>   <span class="mi">1</span><span class="p">,</span>   <span class="mi">0</span><span class="p">],</span>
-            <span class="p">[</span> <span class="mi">0</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>           <span class="mi">0</span><span class="p">,</span>           <span class="mi">2</span><span class="p">,</span>       <span class="mi">0</span><span class="p">,</span>   <span class="mi">0</span><span class="p">],</span>
-            <span class="p">[</span><span class="mi">20</span> <span class="o">*</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span>   <span class="mi">12</span> <span class="o">*</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>  <span class="mi">6</span> <span class="o">*</span> <span class="n">T</span><span class="p">,</span>       <span class="mi">2</span><span class="p">,</span>       <span class="mi">0</span><span class="p">,</span>   <span class="mi">0</span><span class="p">]</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">T</span> <span class="o">**</span> <span class="mi">5</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">4</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">5</span> <span class="o">*</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">T</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">20</span> <span class="o">*</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">T</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
     <span class="p">]</span>
     <span class="n">coeffs</span><span class="p">,</span> <span class="n">resid</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span>
-        <span class="n">X</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">q0</span><span class="p">,</span> <span class="n">qf</span><span class="p">,</span> <span class="n">qd0</span><span class="p">,</span> <span class="n">qdf</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">q0</span><span class="p">,</span> <span class="n">qf</span><span class="p">,</span> <span class="n">qd0</span><span class="p">,</span> <span class="n">qdf</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">)</span>
 
     <span class="c1"># coefficients of derivatives</span>
     <span class="n">coeffs_d</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">coeffs_dd</span> <span class="o">=</span> <span class="n">coeffs_d</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">coeffs_d</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">coeffs_dd</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">coeffs_d</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">coeffs_dd</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span>
+    <span class="p">)</span></div>
 
 
 <span class="c1"># -------------------------------------------------------------------------- #</span>
+
 
 <div class="viewcode-block" id="lspb"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.lspb">[docs]</a><span class="k">def</span> <span class="nf">lspb</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">qf</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -521,7 +539,7 @@
 <span class="sd">    - ``tg = lspb(q0, q1, t, V)``  as above but specifies the velocity of the</span>
 <span class="sd">      linear segment which is normally computed automatically.</span>
 
-<span class="sd">    The return value is an object that contains position, velocity and </span>
+<span class="sd">    The return value is an object that contains position, velocity and</span>
 <span class="sd">    acceleration data.</span>
 
 <span class="sd">    .. note::</span>
@@ -546,7 +564,7 @@
         <span class="n">t</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
         <span class="n">istime</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bad argument for time, must be int or vector&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;bad argument for time, must be int or vector&quot;</span><span class="p">)</span>
 
     <span class="n">tf</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
 
@@ -558,9 +576,10 @@
     <span class="n">pd</span> <span class="o">=</span> <span class="n">traj</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">pdd</span> <span class="o">=</span> <span class="n">traj</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
-    <span class="n">traj</span> <span class="o">=</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;lspb&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">pd</span><span class="p">,</span> <span class="n">pdd</span><span class="p">,</span> <span class="n">istime</span><span class="p">)</span>
+    <span class="n">traj</span> <span class="o">=</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s2">&quot;lspb&quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">pd</span><span class="p">,</span> <span class="n">pdd</span><span class="p">,</span> <span class="n">istime</span><span class="p">)</span>
     <span class="n">traj</span><span class="o">.</span><span class="n">tblend</span> <span class="o">=</span> <span class="n">lspbfunc</span><span class="o">.</span><span class="n">tb</span>
     <span class="k">return</span> <span class="n">traj</span></div>
+
 
 <div class="viewcode-block" id="lspb_func"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.lspb_func">[docs]</a><span class="k">def</span> <span class="nf">lspb_func</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">qf</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
@@ -570,9 +589,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">V</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">qf</span> <span class="o">-</span> <span class="n">q0</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">qf</span> <span class="o">-</span> <span class="n">q0</span><span class="p">)</span> <span class="o">/</span> <span class="n">tf</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;V too small&#39;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">abs</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">qf</span><span class="o">-</span><span class="n">q0</span><span class="p">)</span> <span class="o">/</span> <span class="n">tf</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;V too big&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;V too small&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">abs</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">qf</span> <span class="o">-</span> <span class="n">q0</span><span class="p">)</span> <span class="o">/</span> <span class="n">tf</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;V too big&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">q0</span> <span class="o">==</span> <span class="n">qf</span><span class="p">:</span>
         <span class="c1"># Commented these because they arent used anywhere</span>
@@ -595,7 +614,7 @@
         <span class="k">for</span> <span class="n">tk</span> <span class="ow">in</span> <span class="n">t</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">tk</span> <span class="o">&lt;=</span> <span class="n">tb</span><span class="p">:</span>
                 <span class="c1"># initial blend</span>
-                <span class="n">pk</span> <span class="o">=</span> <span class="n">q0</span> <span class="o">+</span> <span class="n">a</span><span class="o">/</span><span class="mi">2</span> <span class="o">*</span> <span class="n">tk</span> <span class="o">**</span> <span class="mi">2</span>
+                <span class="n">pk</span> <span class="o">=</span> <span class="n">q0</span> <span class="o">+</span> <span class="n">a</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">tk</span> <span class="o">**</span> <span class="mi">2</span>
                 <span class="n">pdk</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">tk</span>
                 <span class="n">pddk</span> <span class="o">=</span> <span class="n">a</span>
             <span class="k">elif</span> <span class="n">tk</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">tf</span> <span class="o">-</span> <span class="n">tb</span><span class="p">):</span>
@@ -620,7 +639,10 @@
     <span class="n">func</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">V</span>
 
     <span class="k">return</span> <span class="n">func</span></div>
+
+
 <span class="c1"># -------------------------------------------------------------------------- #</span>
+
 
 <div class="viewcode-block" id="jtraj"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.jtraj">[docs]</a><span class="k">def</span> <span class="nf">jtraj</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">qf</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">qd0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qd1</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -647,7 +669,7 @@
 <span class="sd">    - ``tg = jtraj(q0, qf, t)`` as above but ``t`` is a uniformly-spaced time</span>
 <span class="sd">      vector</span>
 
-<span class="sd">    The return value is an object that contains position, velocity and </span>
+<span class="sd">    The return value is an object that contains position, velocity and</span>
 <span class="sd">    acceleration data.</span>
 
 <span class="sd">    Notes:</span>
@@ -670,20 +692,20 @@
     <span class="n">qf</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qf</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">q0</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">qf</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;q0 and q1 must be same size&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;q0 and q1 must be same size&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">qd0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">qd0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">q0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">qd0</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qd0</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">qd0</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">q0</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;qd0 has wrong size&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;qd0 has wrong size&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">qd1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">qd1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">q0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">qd1</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qd1</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">qd1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">q0</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;qd1 has wrong size&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;qd1 has wrong size&quot;</span><span class="p">)</span>
 
     <span class="c1"># compute the polynomial coefficients</span>
     <span class="n">A</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">*</span> <span class="p">(</span><span class="n">qf</span> <span class="o">-</span> <span class="n">q0</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">qd1</span> <span class="o">+</span> <span class="n">qd0</span><span class="p">)</span> <span class="o">*</span> <span class="n">tscal</span>
@@ -694,24 +716,22 @@
 
     <span class="c1"># n = len(q0)</span>
 
-    <span class="n">tt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ts</span><span class="o">**</span><span class="mi">5</span><span class="p">,</span> <span class="n">ts</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span> <span class="n">ts</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="n">ts</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">shape</span><span class="p">)])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">tt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ts</span> <span class="o">**</span> <span class="mi">5</span><span class="p">,</span> <span class="n">ts</span> <span class="o">**</span> <span class="mi">4</span><span class="p">,</span> <span class="n">ts</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="n">ts</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">shape</span><span class="p">)])</span><span class="o">.</span><span class="n">T</span>
     <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">E</span><span class="p">,</span> <span class="n">F</span><span class="p">])</span>  <span class="c1"># 6xN</span>
 
     <span class="n">qt</span> <span class="o">=</span> <span class="n">tt</span> <span class="o">@</span> <span class="n">coeffs</span>
 
     <span class="c1"># compute  velocity</span>
-    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">A</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">B</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">C</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">E</span><span class="p">])</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">A</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">B</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">C</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">E</span><span class="p">])</span>
     <span class="n">qdt</span> <span class="o">=</span> <span class="n">tt</span> <span class="o">@</span> <span class="n">coeffs</span> <span class="o">/</span> <span class="n">tscal</span>
 
     <span class="c1"># compute  acceleration</span>
-    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
-        <span class="mi">20</span> <span class="o">*</span> <span class="n">A</span><span class="p">,</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">B</span><span class="p">,</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">C</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)])</span>
+    <span class="n">coeffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">A</span><span class="p">,</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">B</span><span class="p">,</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">C</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)]</span>
+    <span class="p">)</span>
     <span class="n">qddt</span> <span class="o">=</span> <span class="n">tt</span> <span class="o">@</span> <span class="n">coeffs</span> <span class="o">/</span> <span class="n">tscal</span> <span class="o">**</span> <span class="mi">2</span>
 
-    <span class="k">return</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;jtraj&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">qt</span><span class="p">,</span> <span class="n">qdt</span><span class="p">,</span> <span class="n">qddt</span><span class="p">,</span> <span class="n">istime</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
-
+    <span class="k">return</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s2">&quot;jtraj&quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">qt</span><span class="p">,</span> <span class="n">qdt</span><span class="p">,</span> <span class="n">qddt</span><span class="p">,</span> <span class="n">istime</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="mtraj"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.mtraj">[docs]</a><span class="k">def</span> <span class="nf">mtraj</span><span class="p">(</span><span class="n">tfunc</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">qf</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
@@ -733,10 +753,10 @@
 
 <span class="sd">    - ``tg = mtraj(func, q0, qf, n)`` is a multi-axis trajectory varying</span>
 <span class="sd">      from configuration ``q0`` (M) to ``qf`` (M) according to the scalar trajectory</span>
-<span class="sd">      function ``tfunc`` in ``n``` steps. </span>
+<span class="sd">      function ``tfunc`` in ``n``` steps.</span>
 
 <span class="sd">    - ``tg = mtraj(func, q0, qf, t)`` as above but ``t`` is a uniformly-spaced time</span>
-<span class="sd">      vector </span>
+<span class="sd">      vector</span>
 
 <span class="sd">    The scalar trajectory function is applied to each axis::</span>
 
@@ -744,8 +764,8 @@
 
 <span class="sd">    and possible values of TFUNC include ``lspb`` for a trapezoidal trajectory, or</span>
 <span class="sd">    ``tpoly`` for a polynomial trajectory.</span>
-<span class="sd"> </span>
-<span class="sd">    The return value is an object that contains position, velocity and </span>
+
+<span class="sd">    The return value is an object that contains position, velocity and</span>
 <span class="sd">    acceleration data.</span>
 
 <span class="sd">    .. note:: The time vector, if given, is assumed to be monotonically increasing, and</span>
@@ -755,12 +775,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">tfunc</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;first argument must be a function reference&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;first argument must be a function reference&quot;</span><span class="p">)</span>
 
     <span class="n">q0</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q0</span><span class="p">)</span>
     <span class="n">qf</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qf</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">q0</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">qf</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;must be same number of elements in q0 and qf&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;must be same number of elements in q0 and qf&quot;</span><span class="p">)</span>
 
     <span class="n">traj</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">q0</span><span class="p">)):</span>
@@ -771,14 +791,24 @@
     <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">tg</span><span class="o">.</span><span class="n">s</span> <span class="k">for</span> <span class="n">tg</span> <span class="ow">in</span> <span class="n">traj</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
     <span class="n">yd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">tg</span><span class="o">.</span><span class="n">sd</span> <span class="k">for</span> <span class="n">tg</span> <span class="ow">in</span> <span class="n">traj</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
     <span class="n">ydd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">tg</span><span class="o">.</span><span class="n">sdd</span> <span class="k">for</span> <span class="n">tg</span> <span class="ow">in</span> <span class="n">traj</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
-    
+
     <span class="n">istime</span> <span class="o">=</span> <span class="n">traj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">istime</span>
 
-    <span class="k">return</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;mtraj&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">yd</span><span class="p">,</span> <span class="n">ydd</span><span class="p">,</span> <span class="n">istime</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s2">&quot;mtraj&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">yd</span><span class="p">,</span> <span class="n">ydd</span><span class="p">,</span> <span class="n">istime</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="qplot"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.qplot">[docs]</a><span class="k">def</span> <span class="nf">qplot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wrist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unwrap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-    <span class="n">loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stack</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="qplot"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.qplot">[docs]</a><span class="k">def</span> <span class="nf">qplot</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">wrist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">unwrap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">stack</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot trajectory data</span>
 
@@ -788,7 +818,7 @@
 <span class="sd">    :type t: numpy ndarray, shape=(M,)</span>
 <span class="sd">    :param wrist: distinguish arm and wrist joints with line styles</span>
 <span class="sd">    :type wrist: bool</span>
-<span class="sd">    :param unwrap: unwrap joint angles so that they smoothly increase or </span>
+<span class="sd">    :param unwrap: unwrap joint angles so that they smoothly increase or</span>
 <span class="sd">        decrease when they pass through :math:`\pm \pi`</span>
 <span class="sd">    :type unwrap: bool</span>
 <span class="sd">    :param block: block until the plot is closed</span>
@@ -823,7 +853,7 @@
         <span class="n">q</span> <span class="o">=</span> <span class="n">y</span>
 
     <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;dimensions of arguments are not consistent&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;dimensions of arguments are not consistent&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">unwrap</span><span class="p">:</span>
         <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -833,10 +863,9 @@
     <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;wrong type for labels&#39;</span><span class="p">)</span>
-
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;wrong type for labels&quot;</span><span class="p">)</span>
 
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 
@@ -845,32 +874,34 @@
             <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            
+
             <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (s)&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">6</span> <span class="ow">and</span> <span class="n">wrist</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">loc</span><span class="p">)</span>
-        
+
         <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time (s)&#39;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Joint coordinates (rad,m)&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Joint coordinates (rad,m)&quot;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_axes</span><span class="p">()</span></div>
 
+
 <span class="c1"># -------------------------------------------------------------------------- #</span>
+
 
 <div class="viewcode-block" id="ctraj"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.ctraj">[docs]</a><span class="k">def</span> <span class="nf">ctraj</span><span class="p">(</span><span class="n">T0</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -926,11 +957,11 @@
         <span class="n">s</span> <span class="o">=</span> <span class="n">lspb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span><span class="o">.</span><span class="n">s</span>
     <span class="k">elif</span> <span class="n">isvector</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">lspb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>  <span class="n">t</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="o">.</span><span class="n">s</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">lspb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">t</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="o">.</span><span class="n">s</span>
     <span class="k">elif</span> <span class="n">isvector</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;bad argument for time, must be int or vector&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;bad argument for time, must be int or vector&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">T0</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">T1</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span></div>
 
@@ -941,9 +972,18 @@
 
 <span class="c1"># -------------------------------------------------------------------------- #</span>
 
+
 <div class="viewcode-block" id="mstraj"><a class="viewcode-back" href="../../../arm_trajectory.html#roboticstoolbox.tools.trajectory.mstraj">[docs]</a><span class="k">def</span> <span class="nf">mstraj</span><span class="p">(</span>
-        <span class="n">viapoints</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tacc</span><span class="p">,</span> <span class="n">qdmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tsegment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">q0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qd0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qdf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">viapoints</span><span class="p">,</span>
+    <span class="n">dt</span><span class="p">,</span>
+    <span class="n">tacc</span><span class="p">,</span>
+    <span class="n">qdmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tsegment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">q0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">qd0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">qdf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Multi-segment multi-axis trajectory</span>
 
@@ -1032,27 +1072,26 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">q0</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q0</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">viapoints</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">q0</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;WP and Q0 must have same number of columns&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;WP and Q0 must have same number of columns&quot;</span><span class="p">)</span>
 
     <span class="n">ns</span><span class="p">,</span> <span class="n">nj</span> <span class="o">=</span> <span class="n">viapoints</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">Tacc</span> <span class="o">=</span> <span class="n">tacc</span>
 
     <span class="k">if</span> <span class="n">qdmax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tsegment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;cannot specify both qdmax and tsegment&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;cannot specify both qdmax and tsegment&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">qdmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">tsegment</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;tsegment must be given if qdmax is not&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;tsegment must be given if qdmax is not&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">tsegment</span><span class="p">)</span> <span class="o">==</span> <span class="n">ns</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Length of TSEG does not match number of viapoints&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Length of TSEG does not match number of viapoints&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">tsegment</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
         <span class="c1"># This is unreachable, left just in case</span>
         <span class="k">if</span> <span class="n">qdmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;qdmax must be given if tsegment is not&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;qdmax must be given if tsegment is not&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">qdmax</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
             <span class="c1"># if qdmax is a scalar assume all axes have the same speed</span>
@@ -1061,47 +1100,46 @@
             <span class="n">qdmax</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qdmax</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">qdmax</span><span class="p">)</span> <span class="o">==</span> <span class="n">nj</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s1">&#39;Length of QDMAX does not match number of axes&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Length of QDMAX does not match number of axes&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Tacc</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
         <span class="n">Tacc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">Tacc</span><span class="p">,</span> <span class="p">(</span><span class="n">ns</span><span class="p">,))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">Tacc</span><span class="p">)</span> <span class="o">==</span> <span class="n">ns</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Tacc is wrong size&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Tacc is wrong size&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">qd0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">qd0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nj</span><span class="p">,))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">qd0</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">q0</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;qd0 is wrong size&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;qd0 is wrong size&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">qdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">qdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nj</span><span class="p">,))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">qdf</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">q0</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;qdf is wrong size&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;qdf is wrong size&quot;</span><span class="p">)</span>
 
     <span class="c1"># set the initial conditions</span>
     <span class="n">q_prev</span> <span class="o">=</span> <span class="n">q0</span>
     <span class="n">qd_prev</span> <span class="o">=</span> <span class="n">qd0</span>
 
-    <span class="n">clock</span> <span class="o">=</span> <span class="mi">0</span>     <span class="c1"># keep track of time</span>
-    <span class="n">arrive</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ns</span><span class="p">,))</span>   <span class="c1"># record planned time of arrival at via points</span>
+    <span class="n">clock</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># keep track of time</span>
+    <span class="n">arrive</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ns</span><span class="p">,))</span>  <span class="c1"># record planned time of arrival at via points</span>
     <span class="n">tg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">nj</span><span class="p">))</span>
     <span class="n">infolist</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">info</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;mstraj_info&#39;</span><span class="p">,</span> <span class="s1">&#39;slowest segtime clock&#39;</span><span class="p">)</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;mstraj_info&quot;</span><span class="p">,</span> <span class="s2">&quot;slowest segtime clock&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">mrange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        mrange(start, stop, step) behaves like MATLAB start:step:stop</span>
 <span class="sd">        and includes the final value unlike range() or np.arange()</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># ret = []</span>
         <span class="n">istart</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">start</span> <span class="o">/</span> <span class="n">step</span><span class="p">)</span>
         <span class="n">istop</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">stop</span> <span class="o">/</span> <span class="n">step</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">istart</span><span class="p">,</span> <span class="n">istop</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">step</span>
 
     <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ns</span><span class="p">):</span>
-        <span class="n">q_next</span> <span class="o">=</span> <span class="n">viapoints</span><span class="p">[</span><span class="n">seg</span><span class="p">,</span> <span class="p">:]</span>    <span class="c1"># current target</span>
+        <span class="n">q_next</span> <span class="o">=</span> <span class="n">viapoints</span><span class="p">[</span><span class="n">seg</span><span class="p">,</span> <span class="p">:]</span>  <span class="c1"># current target</span>
 
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;------- segment </span><span class="si">{</span><span class="n">seg</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">q_prev</span><span class="si">}</span><span class="s2"> --&gt; </span><span class="si">{</span><span class="n">q_next</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1120,7 +1158,7 @@
         <span class="c1"># estimate travel time</span>
         <span class="c1">#    could better estimate distance travelled during the blend</span>
 
-        <span class="n">dq</span> <span class="o">=</span> <span class="n">q_next</span> <span class="o">-</span> <span class="n">q_prev</span>    <span class="c1"># total distance to move this segment</span>
+        <span class="n">dq</span> <span class="o">=</span> <span class="n">q_next</span> <span class="o">-</span> <span class="n">q_prev</span>  <span class="c1"># total distance to move this segment</span>
 
         <span class="c1"># probably should iterate over the next section to get qb right...</span>
         <span class="c1"># while 1</span>
@@ -1147,7 +1185,7 @@
             <span class="n">tseg</span> <span class="o">=</span> <span class="n">tt</span><span class="p">[</span><span class="n">slowest</span><span class="p">]</span>
 
             <span class="c1"># best if there is some linear motion component</span>
-            <span class="k">if</span> <span class="n">tseg</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="o">*</span><span class="n">tacc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tseg</span> <span class="o">&lt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">tacc</span><span class="p">:</span>
                 <span class="n">tseg</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">tacc</span>
 
         <span class="k">elif</span> <span class="n">tsegment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1162,10 +1200,11 @@
         <span class="k">if</span> <span class="n">seg</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">arrive</span><span class="p">[</span><span class="n">seg</span><span class="p">]</span> <span class="o">+=</span> <span class="n">tacc2</span>
 
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="nb">print</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;seg </span><span class="si">{</span><span class="n">seg</span><span class="si">}</span><span class="s2">, distance </span><span class="si">{</span><span class="n">dq</span><span class="si">}</span><span class="s2">, &quot;</span>
-                <span class="s2">&quot;slowest axis </span><span class="si">{slowest}</span><span class="s2">, time required </span><span class="si">{tseg}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="s2">&quot;slowest axis </span><span class="si">{slowest}</span><span class="s2">, time required </span><span class="si">{tseg}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># create the trajectories for this segment</span>
 
@@ -1173,25 +1212,23 @@
         <span class="n">qd</span> <span class="o">=</span> <span class="n">dq</span> <span class="o">/</span> <span class="n">tseg</span>
 
         <span class="c1"># add the blend polynomial</span>
-        <span class="n">qb</span> <span class="o">=</span> <span class="n">jtraj</span><span class="p">(</span>
-            <span class="n">q0</span><span class="p">,</span> <span class="n">q_prev</span> <span class="o">+</span> <span class="n">tacc2</span> <span class="o">*</span> <span class="n">qd</span><span class="p">,</span> <span class="n">mrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">taccx</span><span class="p">,</span> <span class="n">dt</span><span class="p">),</span>
-            <span class="n">qd0</span><span class="o">=</span><span class="n">qd_prev</span><span class="p">,</span> <span class="n">qd1</span><span class="o">=</span><span class="n">qd</span><span class="p">)</span><span class="o">.</span><span class="n">s</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>    <span class="c1"># pragma nocover</span>
+        <span class="n">qb</span> <span class="o">=</span> <span class="n">jtraj</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">q_prev</span> <span class="o">+</span> <span class="n">tacc2</span> <span class="o">*</span> <span class="n">qd</span><span class="p">,</span> <span class="n">mrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">taccx</span><span class="p">,</span> <span class="n">dt</span><span class="p">),</span> <span class="n">qd0</span><span class="o">=</span><span class="n">qd_prev</span><span class="p">,</span> <span class="n">qd1</span><span class="o">=</span><span class="n">qd</span><span class="p">)</span><span class="o">.</span><span class="n">s</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">qb</span><span class="p">)</span>
         <span class="n">tg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">tg</span><span class="p">,</span> <span class="n">qb</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:]])</span>
 
-        <span class="n">clock</span> <span class="o">=</span> <span class="n">clock</span> <span class="o">+</span> <span class="n">taccx</span>     <span class="c1"># update the clock</span>
+        <span class="n">clock</span> <span class="o">=</span> <span class="n">clock</span> <span class="o">+</span> <span class="n">taccx</span>  <span class="c1"># update the clock</span>
 
         <span class="c1"># add the linear part, from tacc/2+dt to tseg-tacc/2</span>
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">mrange</span><span class="p">(</span><span class="n">tacc2</span> <span class="o">+</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tseg</span> <span class="o">-</span> <span class="n">tacc2</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">t</span> <span class="o">/</span> <span class="n">tseg</span>
-            <span class="n">q0</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="n">q_prev</span> <span class="o">+</span> <span class="n">s</span> <span class="o">*</span> <span class="n">q_next</span>       <span class="c1"># linear step</span>
-            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>    <span class="c1"># pragma nocover</span>
+            <span class="n">q0</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="n">q_prev</span> <span class="o">+</span> <span class="n">s</span> <span class="o">*</span> <span class="n">q_next</span>  <span class="c1"># linear step</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">q0</span><span class="p">)</span>
             <span class="n">tg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">tg</span><span class="p">,</span> <span class="n">q0</span><span class="p">])</span>
             <span class="n">clock</span> <span class="o">+=</span> <span class="n">dt</span>
 
-        <span class="n">q_prev</span> <span class="o">=</span> <span class="n">q_next</span>    <span class="c1"># next target becomes previous target</span>
+        <span class="n">q_prev</span> <span class="o">=</span> <span class="n">q_next</span>  <span class="c1"># next target becomes previous target</span>
         <span class="n">qd_prev</span> <span class="o">=</span> <span class="n">qd</span>
 
     <span class="c1"># add the final blend</span>
@@ -1200,7 +1237,7 @@
 
     <span class="n">infolist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">tseg</span><span class="p">,</span> <span class="n">clock</span><span class="p">))</span>
 
-    <span class="n">traj</span> <span class="o">=</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;mstraj&#39;</span><span class="p">,</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">tg</span><span class="p">)</span>
+    <span class="n">traj</span> <span class="o">=</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s2">&quot;mstraj&quot;</span><span class="p">,</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">tg</span><span class="p">)</span>
     <span class="n">traj</span><span class="o">.</span><span class="n">arrive</span> <span class="o">=</span> <span class="n">arrive</span>
     <span class="n">traj</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">infolist</span>
     <span class="n">traj</span><span class="o">.</span><span class="n">via</span> <span class="o">=</span> <span class="n">viapoints</span>
@@ -1216,12 +1253,12 @@
     <span class="n">t</span> <span class="o">=</span> <span class="n">tpoly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
     <span class="n">t</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 
-    <span class="n">t</span> <span class="o">=</span> <span class="n">tpoly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">tpoly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>
     <span class="n">t</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 
     <span class="n">t</span> <span class="o">=</span> <span class="n">lspb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
     <span class="n">t</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">lspb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">lspb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>
     <span class="n">t</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
@@ -1236,7 +1273,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Apr-2021.
+        Last updated on 04-May-2021.
       </span>
 
     </p>

@@ -171,7 +171,6 @@
 
 
 <div class="viewcode-block" id="BaseELink"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.BaseELink">[docs]</a><span class="k">class</span> <span class="nc">BaseELink</span><span class="p">(</span><span class="n">Link</span><span class="p">):</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">joint_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -182,7 +181,7 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseELink</span><span class="p">)):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;parent must be BaseELink subclass or str&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;parent must be BaseELink subclass or str&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -451,11 +450,11 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
                     <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Collision must be of Shape class&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Collision must be of Shape class&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
             <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coll</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Geometry must be of Shape class or list of Shape&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span> <span class="o">=</span> <span class="n">new_coll</span>
 
@@ -468,11 +467,11 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
                     <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Geometry must be of Shape class&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
             <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Geometry must be of Shape class or list of Shape&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">new_geom</span></div>
 
@@ -514,20 +513,14 @@
 <span class="sd">    :seealso: :class:`Link`, :class:`DHLink`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">ets</span><span class="o">=</span><span class="n">ETS</span><span class="p">(),</span>
-            <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ets</span><span class="o">=</span><span class="n">ETS</span><span class="p">(),</span> <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">jindex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="c1"># process common options</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># check we have an ETS</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">ETS</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s1">&#39;The ets argument must be of type ETS&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The ets argument must be of type ETS&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span> <span class="o">=</span> <span class="n">ets</span>
 
@@ -537,7 +530,7 @@
                 <span class="n">v</span><span class="o">.</span><span class="n">jindex</span> <span class="o">=</span> <span class="n">jindex</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">jindex</span> <span class="o">=</span> <span class="n">jindex</span>
             <span class="k">elif</span> <span class="n">jindex</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">jindex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">jindex</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">jindex</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">jindex</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">jindex</span>
 
         <span class="c1"># Initialise the static transform representing the constant</span>
         <span class="c1"># component of the ETS</span>
@@ -547,12 +540,11 @@
         <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_joint</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">ETS</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;v must be of type ETS&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;v must be of type ETS&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;v must be a variable ETS&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;v must be a variable ETS&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;An elementary link can only have one joint variable&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;An elementary link can only have one joint variable&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_joint</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -577,17 +569,17 @@
             <span class="k">if</span> <span class="n">jindex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">jindex</span> <span class="o">=</span> <span class="mi">0</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;Rx&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;Rx&quot;</span><span class="p">:</span>
                 <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;Ry&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;Ry&quot;</span><span class="p">:</span>
                 <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;Rz&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;Rz&quot;</span><span class="p">:</span>
                 <span class="n">axis</span> <span class="o">=</span> <span class="mi">2</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;tx&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;tx&quot;</span><span class="p">:</span>
                 <span class="n">axis</span> <span class="o">=</span> <span class="mi">3</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;ty&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;ty&quot;</span><span class="p">:</span>
                 <span class="n">axis</span> <span class="o">=</span> <span class="mi">4</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;tz&#39;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span><span class="o">.</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;tz&quot;</span><span class="p">:</span>
                 <span class="n">axis</span> <span class="o">=</span> <span class="mi">5</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -612,22 +604,38 @@
             <span class="n">shape_sT</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shap</span><span class="o">.</span><span class="n">_sT</span><span class="p">)</span>
             <span class="n">shape_sq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shap</span><span class="o">.</span><span class="n">_sq</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">isflip</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">jindex</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">shape_base</span><span class="p">,</span> <span class="n">shape_wT</span><span class="p">,</span> \
-            <span class="n">shape_sT</span><span class="p">,</span> <span class="n">shape_sq</span>
+        <span class="k">return</span> <span class="n">isflip</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">jindex</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">shape_base</span><span class="p">,</span> <span class="n">shape_wT</span><span class="p">,</span> <span class="n">shape_sT</span><span class="p">,</span> <span class="n">shape_sq</span>
 
     <span class="k">def</span> <span class="nf">_init_fknm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="c1"># Initialise later</span>
             <span class="k">return</span>
 
-        <span class="n">isflip</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">jindex</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> \
-            <span class="n">shape_base</span><span class="p">,</span> <span class="n">shape_wT</span><span class="p">,</span> <span class="n">shape_sT</span><span class="p">,</span> <span class="n">shape_sq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fknm</span><span class="p">()</span>
+        <span class="p">(</span>
+            <span class="n">isflip</span><span class="p">,</span>
+            <span class="n">axis</span><span class="p">,</span>
+            <span class="n">jindex</span><span class="p">,</span>
+            <span class="n">parent</span><span class="p">,</span>
+            <span class="n">shape_base</span><span class="p">,</span>
+            <span class="n">shape_wT</span><span class="p">,</span>
+            <span class="n">shape_sT</span><span class="p">,</span>
+            <span class="n">shape_sq</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fknm</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_fknm</span> <span class="o">=</span> <span class="n">fknm</span><span class="o">.</span><span class="n">link_init</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span><span class="p">,</span> <span class="n">isflip</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">jindex</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape_base</span><span class="p">),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fk</span><span class="p">,</span>
-            <span class="n">shape_base</span><span class="p">,</span> <span class="n">shape_wT</span><span class="p">,</span> <span class="n">shape_sT</span><span class="p">,</span> <span class="n">shape_sq</span><span class="p">,</span>
-            <span class="n">parent</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span><span class="p">,</span>
+            <span class="n">isflip</span><span class="p">,</span>
+            <span class="n">axis</span><span class="p">,</span>
+            <span class="n">jindex</span><span class="p">,</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">shape_base</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fk</span><span class="p">,</span>
+            <span class="n">shape_base</span><span class="p">,</span>
+            <span class="n">shape_wT</span><span class="p">,</span>
+            <span class="n">shape_sT</span><span class="p">,</span>
+            <span class="n">shape_sq</span><span class="p">,</span>
+            <span class="n">parent</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_update_fknm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -639,15 +647,32 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="n">isflip</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">jindex</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> \
-            <span class="n">shape_base</span><span class="p">,</span> <span class="n">shape_wT</span><span class="p">,</span> <span class="n">shape_sT</span><span class="p">,</span> <span class="n">shape_sq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fknm</span><span class="p">()</span>
+        <span class="p">(</span>
+            <span class="n">isflip</span><span class="p">,</span>
+            <span class="n">axis</span><span class="p">,</span>
+            <span class="n">jindex</span><span class="p">,</span>
+            <span class="n">parent</span><span class="p">,</span>
+            <span class="n">shape_base</span><span class="p">,</span>
+            <span class="n">shape_wT</span><span class="p">,</span>
+            <span class="n">shape_sT</span><span class="p">,</span>
+            <span class="n">shape_sq</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fknm</span><span class="p">()</span>
 
         <span class="n">fknm</span><span class="o">.</span><span class="n">link_update</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_fknm</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span><span class="p">,</span> <span class="n">isflip</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">jindex</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape_base</span><span class="p">),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fk</span><span class="p">,</span>
-            <span class="n">shape_base</span><span class="p">,</span> <span class="n">shape_wT</span><span class="p">,</span> <span class="n">shape_sT</span><span class="p">,</span> <span class="n">shape_sq</span><span class="p">,</span>
-            <span class="n">parent</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isjoint</span><span class="p">,</span>
+            <span class="n">isflip</span><span class="p">,</span>
+            <span class="n">axis</span><span class="p">,</span>
+            <span class="n">jindex</span><span class="p">,</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">shape_base</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fk</span><span class="p">,</span>
+            <span class="n">shape_base</span><span class="p">,</span>
+            <span class="n">shape_wT</span><span class="p">,</span>
+            <span class="n">shape_sT</span><span class="p">,</span>
+            <span class="n">shape_sq</span><span class="p">,</span>
+            <span class="n">parent</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_init_Ts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Number of transforms in the ETS excluding the joint variable</span>
@@ -667,7 +692,7 @@
             <span class="k">for</span> <span class="n">et</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">:</span>
                 <span class="c1"># constant transforms only</span>
                 <span class="k">if</span> <span class="n">et</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The transforms in ets must be constant&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The transforms in ets must be constant&quot;</span><span class="p">)</span>
 
                 <span class="c1"># if first:</span>
                 <span class="c1">#     T = et.T()</span>
@@ -681,7 +706,7 @@
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;this shouldnt happen&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;this shouldnt happen&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -721,11 +746,11 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
                     <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Collision must be of Shape class&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Collision must be of Shape class&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
             <span class="n">new_coll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coll</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Geometry must be of Shape class or list of Shape&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span> <span class="o">=</span> <span class="n">new_coll</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_fknm</span><span class="p">()</span>
@@ -740,11 +765,11 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gi</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
                     <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gi</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Geometry must be of Shape class&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Shape</span><span class="p">):</span>
             <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Geometry must be of Shape class or list of Shape&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Geometry must be of Shape class or list of Shape&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">new_geom</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_fknm</span><span class="p">()</span>
@@ -801,9 +826,6 @@
             <span class="c1"># a fixed joint</span>
             <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ts</span>
 
-        <span class="k">if</span> <span class="n">fast</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">T</span>
-
         <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">SE3</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -811,21 +833,14 @@
 
 
 <div class="viewcode-block" id="ELink2"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink2">[docs]</a><span class="k">class</span> <span class="nc">ELink2</span><span class="p">(</span><span class="n">BaseELink</span><span class="p">):</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">ets</span><span class="o">=</span><span class="n">ETS2</span><span class="p">(),</span>
-            <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ets</span><span class="o">=</span><span class="n">ETS2</span><span class="p">(),</span> <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">jindex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="c1"># process common options</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># check we have an ETS</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">ETS2</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s1">&#39;The ets argument must be of type ETS2&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The ets argument must be of type ETS2&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span> <span class="o">=</span> <span class="n">ets</span>
 
@@ -844,12 +859,11 @@
         <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_joint</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">ETS2</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;v must be of type ETS2&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;v must be of type ETS2&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;v must be a variable ETS&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;v must be a variable ETS&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;An elementary link can only have one joint variable&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;An elementary link can only have one joint variable&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_joint</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -870,7 +884,7 @@
             <span class="k">for</span> <span class="n">et</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">:</span>
                 <span class="c1"># constant transforms only</span>
                 <span class="k">if</span> <span class="n">et</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The transforms in ets must be constant&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The transforms in ets must be constant&quot;</span><span class="p">)</span>
 
                 <span class="n">T</span> <span class="o">=</span> <span class="n">T</span> <span class="o">@</span> <span class="n">et</span><span class="o">.</span><span class="n">T</span><span class="p">()</span>
 
@@ -878,7 +892,7 @@
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ets</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_Ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;this shouldnt happen&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;this shouldnt happen&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ELink2.A"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ELink.ELink2.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -934,7 +948,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Apr-2021.
+        Last updated on 04-May-2021.
       </span>
 
     </p>

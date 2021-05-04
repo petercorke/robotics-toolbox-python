@@ -830,7 +830,7 @@ is related to joint velocity by <span class="math notranslate nohighlight">\({}^
 <p class="admonition-title">Warning</p>
 <p>This is the <strong>geometric Jacobian</strong> as described in texts by
 Corke, Spong etal., Siciliano etal.  The end-effector velocity is
-described in terms of translational and angular velocity, not a 
+described in terms of translational and angular velocity, not a
 velocity twist as per the text by Lynch &amp; Park.</p>
 </div>
 </dd></dl>
@@ -905,7 +905,7 @@ is related to joint velocity by <span class="math notranslate nohighlight">\({}^
 <p class="admonition-title">Warning</p>
 <p>The <strong>geometric Jacobian</strong> is as described in texts by
 Corke, Spong etal., Siciliano etal.  The end-effector velocity is
-described in terms of translational and angular velocity, not a 
+described in terms of translational and angular velocity, not a
 velocity twist as per the text by Lynch &amp; Park.</p>
 </div>
 <div class="admonition note">
@@ -1339,10 +1339,10 @@ option if using this method in conjuction with Swift to save time</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>d, p1, p2 where d is the distance between the shapes,
 p1 and p2 are the points in the world frame on the respective
-shapes. The points returned are homogeneous with [x, y, z, 1].</p>
+shapes. The points returned are [x, y, z].</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float, ndarray(1x4), ndarray(1x4)</p>
+<dd class="field-odd"><p>float, ndarray(1x3), ndarray(1x3)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1479,8 +1479,8 @@ velocity but it is eliminated in the computation of this value.</p></li>
 in operational space for the robot in configuration <code class="docutils literal notranslate"><span class="pre">q</span></code> and velocity
 <code class="docutils literal notranslate"><span class="pre">qd</span></code>, where <code class="docutils literal notranslate"><span class="pre">n</span></code> is the number of joints.</p>
 <div class="math notranslate nohighlight">
-\[\mathbf{C}_x = \mathbf{J}(q)^{-T} \left( 
-    \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q) 
+\[\mathbf{C}_x = \mathbf{J}(q)^{-T} \left(
+    \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q)
     \right) \mathbf{J}(q)^{-1}\]</div>
 <p>The product <span class="math notranslate nohighlight">\(\mathbf{C} \dot{x}\)</span> is the operational space wrench
 due to joint velocity coupling. This matrix is also known as the
@@ -4134,10 +4134,10 @@ the shape</p></li>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>d, p1, p2 where d is the distance between the shapes,
 p1 and p2 are the points in the world frame on the respective
-shapes. The points returned are homogeneous with [x, y, z, 1].</p>
+shapes. The points returned are [x, y, z].</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float, ndarray(1x4), ndarray(1x4)</p>
+<dd class="field-odd"><p>float, ndarray(1x3), ndarray(1x3)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -6286,7 +6286,7 @@ arm.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Apr-2021.
+        Last updated on 04-May-2021.
       </span>
 
     </p>

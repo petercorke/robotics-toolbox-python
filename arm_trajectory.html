@@ -324,7 +324,7 @@ applications.</p>
 <dd class="field-odd"><p><strong>block</strong> (<em>bool</em>) – wait till plot is dismissed</p>
 </dd>
 </dl>
-<p>Plot the position, velocity and acceleration data.  The format of the 
+<p>Plot the position, velocity and acceleration data.  The format of the
 plot depends on the function that created it.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">tpoly</span></code> and <code class="docutils literal notranslate"><span class="pre">lspb</span></code> show the individual points with markers</p></li>
@@ -419,7 +419,7 @@ vector</p>
 </div></blockquote>
 </li>
 </ul>
-<p>The return value is an object that contains position, velocity and 
+<p>The return value is an object that contains position, velocity and
 acceleration data.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -494,7 +494,7 @@ second.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">lspb(q0,</span> <span class="pre">q1,</span> <span class="pre">t,</span> <span class="pre">V)</span></code>  as above but specifies the velocity of the
 linear segment which is normally computed automatically.</p></li>
 </ul>
-<p>The return value is an object that contains position, velocity and 
+<p>The return value is an object that contains position, velocity and
 acceleration data.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -554,7 +554,7 @@ acceleration.  Time is assumed to vary from 0 to 1 in <code class="docutils lite
 <li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">jtraj(q0,</span> <span class="pre">qf,</span> <span class="pre">t)</span></code> as above but <code class="docutils literal notranslate"><span class="pre">t</span></code> is a uniformly-spaced time
 vector</p></li>
 </ul>
-<p>The return value is an object that contains position, velocity and 
+<p>The return value is an object that contains position, velocity and
 acceleration data.</p>
 <p>Notes:</p>
 <ul class="simple">
@@ -608,7 +608,7 @@ vector</p></li>
 </div>
 <p>and possible values of TFUNC include <code class="docutils literal notranslate"><span class="pre">lspb</span></code> for a trapezoidal trajectory, or
 <code class="docutils literal notranslate"><span class="pre">tpoly</span></code> for a polynomial trajectory.</p>
-<p>The return value is an object that contains position, velocity and 
+<p>The return value is an object that contains position, velocity and
 acceleration data.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -632,7 +632,7 @@ time scaling is based on the first and last element.</p>
 <li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>m</em><em>,</em><em>n</em><em>)</em>) – trajectory, one row per timestep</p></li>
 <li><p><strong>t</strong> (<em>numpy ndarray</em><em>, </em><em>shape=</em><em>(</em><em>M</em><em>,</em><em>)</em>) – time vector, optional</p></li>
 <li><p><strong>wrist</strong> (<em>bool</em>) – distinguish arm and wrist joints with line styles</p></li>
-<li><p><strong>unwrap</strong> (<em>bool</em>) – unwrap joint angles so that they smoothly increase or 
+<li><p><strong>unwrap</strong> (<em>bool</em>) – unwrap joint angles so that they smoothly increase or
 decrease when they pass through <span class="math notranslate nohighlight">\(\pm \pi\)</span></p></li>
 <li><p><strong>block</strong> (<em>bool</em>) – block until the plot is closed</p></li>
 <li><p><strong>labels</strong> (<em>list of str</em><em>, or </em><em>single string with space separated labels</em>) – legend labels</p></li>
@@ -834,7 +834,7 @@ maximum speed.</p></li>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Apr-2021.
+        Last updated on 04-May-2021.
       </span>
 
     </p>

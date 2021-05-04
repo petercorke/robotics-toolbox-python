@@ -158,33 +158,30 @@
             
   <h1>Source code for roboticstoolbox.robot.Robot</h1><div class="highlight"><pre>
 <span></span><span class="c1"># import sys</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">abstractproperty</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractproperty</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">SE2</span>
-<span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> <span class="n">isvector</span><span class="p">,</span> <span class="n">getvector</span><span class="p">,</span> <span class="n">getmatrix</span><span class="p">,</span> \
-    <span class="n">getunit</span><span class="p">,</span> <span class="n">verifymatrix</span>
-<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Link</span> <span class="kn">import</span> <span class="n">Link</span>
-<span class="c1"># from spatialmath.base.transforms3d import tr2delta</span>
-<span class="c1"># from roboticstoolbox.tools import urdf</span>
-<span class="c1"># from roboticstoolbox.tools import xacro</span>
-<span class="c1"># from pathlib import PurePath, PurePosixPath</span>
-<span class="c1"># from scipy.optimize import minimize, Bounds, LinearConstraint</span>
-<span class="c1"># from roboticstoolbox.tools.null import null</span>
+<span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">isvector</span><span class="p">,</span>
+    <span class="n">getvector</span><span class="p">,</span>
+    <span class="n">getmatrix</span><span class="p">,</span>
+    <span class="n">getunit</span><span class="p">,</span>
+    <span class="n">verifymatrix</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
-
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot</span> <span class="kn">import</span> <span class="n">PyPlot</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot.EllipsePlot</span> <span class="kn">import</span> <span class="n">EllipsePlot</span>
-<span class="c1"># from roboticstoolbox.backends.swift import Swift</span>
-
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Dynamics</span> <span class="kn">import</span> <span class="n">DynamicsMixin</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.IK</span> <span class="kn">import</span> <span class="n">IKMixin</span>
+
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colors</span>
     <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span>
+
     <span class="n">_mpl</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>    <span class="c1"># pragma nocover</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
     <span class="k">pass</span>
 
 
@@ -197,16 +194,17 @@
     <span class="n">_color</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">links</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;noname&#39;</span><span class="p">,</span>
-            <span class="n">manufacturer</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-            <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-            <span class="n">base</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">gravity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">keywords</span><span class="o">=</span><span class="p">(),</span>
-            <span class="n">symbolic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">links</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;noname&quot;</span><span class="p">,</span>
+        <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">base</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">gravity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">keywords</span><span class="o">=</span><span class="p">(),</span>
+        <span class="n">symbolic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span> <span class="o">=</span> <span class="n">manufacturer</span>
@@ -220,7 +218,7 @@
         <span class="c1">#     self.base = SE3()</span>
 
         <span class="k">if</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keywords</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;keywords must be a list or tuple&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;keywords must be a list or tuple&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">keywords</span> <span class="o">=</span> <span class="n">keywords</span>
 
@@ -232,15 +230,15 @@
 
         <span class="c1"># validate the links, must be a list of Link subclass objects</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">links</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;The links must be stored in a list.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The links must be stored in a list.&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_hasdynamics</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hasgeometry</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hascollision</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">Link</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;links should all be Link subclass&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">Link</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;links should all be Link subclass&quot;</span><span class="p">)</span>
 
             <span class="c1"># add link back to roboto</span>
             <span class="n">link</span><span class="o">.</span><span class="n">_robot</span> <span class="o">=</span> <span class="bp">self</span>
@@ -263,7 +261,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">qd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qdd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">control_type</span> <span class="o">=</span> <span class="s1">&#39;v&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">control_type</span> <span class="o">=</span> <span class="s2">&quot;v&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_configdict</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -349,7 +347,7 @@
 <span class="sd">        :seealso: :func:`roboticstoolbox.Link._listen_dyn`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynchanged</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">if</span> <span class="n">what</span> <span class="o">!=</span> <span class="s1">&#39;gravity&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">what</span> <span class="o">!=</span> <span class="s2">&quot;gravity&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_hasdynamics</span> <span class="o">=</span> <span class="kc">True</span></div>
 
     <span class="k">def</span> <span class="nf">_getq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -410,8 +408,6 @@
 
     <span class="nd">@abstractproperty</span>
     <span class="k">def</span> <span class="nf">nbranches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span>
-
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of branches (Robot superclass)</span>
 
@@ -510,11 +506,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">qlim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">qlim</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;some joint limits not defined&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
-            <span class="n">low</span><span class="o">=</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">high</span><span class="o">=</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;some joint limits not defined&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">high</span><span class="o">=</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,))</span>
 
-<div class="viewcode-block" id="Robot.addconfiguration"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.addconfiguration">[docs]</a>    <span class="k">def</span> <span class="nf">addconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Robot.addconfiguration"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.addconfiguration">[docs]</a>    <span class="k">def</span> <span class="nf">addconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;rad&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a named joint configuration (Robot superclass)</span>
 
@@ -555,13 +550,15 @@
                 <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&gt;&quot;</span><span class="p">),</span>
                 <span class="o">*</span><span class="p">[</span>
                     <span class="n">Column</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">j</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)],</span>
-                <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+                <span class="p">],</span>
+                <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configdict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">qlist</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
                         <span class="n">qlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">:</span><span class="s2"> .3g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">qlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">angle</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="s2">&quot;</span><span class="si">{: .3g}</span><span class="s2">&quot;</span><span class="p">))</span>
@@ -598,11 +595,11 @@
         <span class="n">structure</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
-                <span class="n">structure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;R&#39;</span><span class="p">)</span>
+                <span class="n">structure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
-                <span class="n">structure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">)</span>
+                <span class="n">structure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">revolutejoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -807,20 +804,17 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;ikine_a&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;ikine_a&quot;</span><span class="p">):</span>
             <span class="n">ik</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ikine_a</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ik</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ikine_min</span>
-        
+
         <span class="n">q1</span> <span class="o">=</span> <span class="n">ik</span><span class="p">(</span><span class="n">T1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">q2</span> <span class="o">=</span> <span class="n">ik</span><span class="p">(</span><span class="n">T2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">rtb</span><span class="o">.</span><span class="n">jtraj</span><span class="p">(</span><span class="n">q1</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">q2</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="Robot.manipulability"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.manipulability">[docs]</a>    <span class="k">def</span> <span class="nf">manipulability</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;yoshikawa&#39;</span><span class="p">,</span>
-            <span class="n">axes</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Robot.manipulability"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.manipulability">[docs]</a>    <span class="k">def</span> <span class="nf">manipulability</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;yoshikawa&quot;</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulability measure</span>
 
@@ -902,19 +896,19 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
             <span class="k">pass</span>
-        <span class="k">elif</span> <span class="n">axes</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">axes</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
             <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">axes</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;trans&#39;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">axes</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;trans&quot;</span><span class="p">):</span>
             <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">axes</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;rot&#39;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">axes</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;rot&quot;</span><span class="p">):</span>
             <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">axes</span> <span class="o">==</span> <span class="s1">&#39;both&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">axes</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s1">&#39;rot&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s2">&quot;trans&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s2">&quot;rot&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;axes must be all, trans, rot or both&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;axes must be all, trans, rot or both&quot;</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">yoshikawa</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="n">J</span> <span class="o">=</span> <span class="n">J</span><span class="p">[</span><span class="n">axes</span><span class="p">,</span> <span class="p">:]</span>
@@ -947,17 +941,16 @@
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
         <span class="c1"># choose the handler function</span>
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;yoshikawa&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;yoshikawa&quot;</span><span class="p">:</span>
             <span class="n">mfunc</span> <span class="o">=</span> <span class="n">yoshikawa</span>
-        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;invcondition&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;invcondition&quot;</span><span class="p">:</span>
             <span class="n">mfunc</span> <span class="o">=</span> <span class="n">condition</span>
-        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;minsingular&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;minsingular&quot;</span><span class="p">:</span>
             <span class="n">mfunc</span> <span class="o">=</span> <span class="n">minsingular</span>
-        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;asada&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;asada&quot;</span><span class="p">:</span>
             <span class="n">mfunc</span> <span class="o">=</span> <span class="n">asada</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Invalid method chosen&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid method chosen&quot;</span><span class="p">)</span>
 
         <span class="c1"># Calculate manipulability based on supplied Jacobian</span>
         <span class="k">if</span> <span class="n">J</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1015,7 +1008,7 @@
 
         <span class="k">return</span> <span class="n">Jd</span></div>
 
-<div class="viewcode-block" id="Robot.jacobm"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.jacobm">[docs]</a>    <span class="k">def</span> <span class="nf">jacobm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Robot.jacobm"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.jacobm">[docs]</a>    <span class="k">def</span> <span class="nf">jacobm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the manipulability Jacobian. This measure relates the rate</span>
 <span class="sd">        of change of the manipulability to the joint velocities of the robot.</span>
@@ -1057,14 +1050,14 @@
         <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limit_links</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
         <span class="c1"># path, n, _ = self.get_path(end, start)</span>
 
-        <span class="k">if</span> <span class="n">axes</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">axes</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
             <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">axes</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;trans&#39;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">axes</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;trans&quot;</span><span class="p">):</span>
             <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">axes</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;rot&#39;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">axes</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;rot&quot;</span><span class="p">):</span>
             <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;axes must be all, trans or rot&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;axes must be all, trans or rot&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">J</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1081,8 +1074,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">verifymatrix</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
 
-        <span class="n">manipulability</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span>
-            <span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="n">J</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+        <span class="n">manipulability</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="n">J</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
 
         <span class="n">J</span> <span class="o">=</span> <span class="n">J</span><span class="p">[</span><span class="n">axes</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">H</span> <span class="o">=</span> <span class="n">H</span><span class="p">[</span><span class="n">axes</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
@@ -1092,11 +1084,11 @@
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
             <span class="n">c</span> <span class="o">=</span> <span class="n">J</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">H</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">])</span>
-            <span class="n">Jm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">manipulability</span> <span class="o">*</span> \
-                <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">))</span> <span class="o">@</span> <span class="n">b</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+            <span class="n">Jm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">manipulability</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="s2">&quot;F&quot;</span><span class="p">))</span> <span class="o">@</span> <span class="n">b</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Jm</span></div>
-<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1116,7 +1108,7 @@
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name_new</span>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">manufacturer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1135,7 +1127,8 @@
     <span class="nd">@manufacturer</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">manufacturer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manufacturer_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_manufacturer</span> <span class="o">=</span> <span class="n">manufacturer_new</span>
-<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">links</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1153,7 +1146,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_links</span>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">base</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1201,8 +1194,9 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;base must be set to None (no tool), SE2, or SE3&#39;</span><span class="p">)</span>
-<span class="c1"># --------------------------------------------------------------------- #</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;base must be set to None (no tool), SE2, or SE3&quot;</span><span class="p">)</span>
+
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1236,7 +1230,7 @@
         <span class="k">elif</span> <span class="n">SE3</span><span class="o">.</span><span class="n">isvalid</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;tool must be set to None (no tool) or an SE3&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;tool must be set to None (no tool) or an SE3&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1272,7 +1266,7 @@
                     <span class="n">v</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">qlim</span>
             <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">qlim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;undefined prismatic joint limit&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;undefined prismatic joint limit&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">v</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">qlim</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1283,9 +1277,9 @@
             <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">limits</span>
 
-<span class="c1"># TODO, the remaining functions, I have only a hazy understanding</span>
-<span class="c1"># of how they work</span>
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># TODO, the remaining functions, I have only a hazy understanding</span>
+    <span class="c1"># of how they work</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1306,7 +1300,8 @@
     <span class="nd">@q</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q_new</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1327,7 +1322,8 @@
     <span class="nd">@qd</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">qd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qd_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_qd</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qd_new</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-<span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qdd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1348,9 +1344,10 @@
     <span class="nd">@qdd</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">qdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qdd_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_qdd</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qdd_new</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-<span class="c1"># --------------------------------------------------------------------- #</span>
 
-<span class="c1"># TODO could we change this to control_mode ?</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="c1"># TODO could we change this to control_mode ?</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">control_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1369,13 +1366,12 @@
 
     <span class="nd">@control_type</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">control_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cn</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">cn</span> <span class="o">==</span> <span class="s1">&#39;p&#39;</span> <span class="ow">or</span> <span class="n">cn</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span> <span class="ow">or</span> <span class="n">cn</span> <span class="o">==</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cn</span> <span class="o">==</span> <span class="s2">&quot;p&quot;</span> <span class="ow">or</span> <span class="n">cn</span> <span class="o">==</span> <span class="s2">&quot;v&quot;</span> <span class="ow">or</span> <span class="n">cn</span> <span class="o">==</span> <span class="s2">&quot;a&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_control_type</span> <span class="o">=</span> <span class="n">cn</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Control type must be one of </span><span class="se">\&#39;</span><span class="s1">p</span><span class="se">\&#39;</span><span class="s1">, </span><span class="se">\&#39;</span><span class="s1">v</span><span class="se">\&#39;</span><span class="s1">, or </span><span class="se">\&#39;</span><span class="s1">a</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Control type must be one of &#39;p&#39;, &#39;v&#39;, or &#39;a&#39;&quot;</span><span class="p">)</span>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="c1"># TODO probably should be a static method</span>
     <span class="k">def</span> <span class="nf">_get_graphical_backend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1385,71 +1381,83 @@
         <span class="c1"># figure out the right default</span>
         <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">):</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="s1">&#39;pyplot&#39;</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;pyplot&quot;</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot2</span><span class="p">):</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="s1">&#39;pyplot2&#39;</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;pyplot2&quot;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="s1">&#39;swift&#39;</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;swift&quot;</span>
 
         <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
         <span class="c1"># find the right backend, modules are imported here on an as needs</span>
         <span class="c1"># basis</span>
-        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;swift&#39;</span> <span class="ow">or</span> <span class="n">default</span> <span class="o">==</span> <span class="s1">&#39;swift&#39;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;swift&quot;</span> <span class="ow">or</span> <span class="n">default</span> <span class="o">==</span> <span class="s2">&quot;swift&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="c1"># swift was requested, is it installed?</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                    <span class="s1">&#39;Plotting in Swift is not implemented for DHRobots yet&#39;</span><span class="p">)</span>
+                    <span class="s2">&quot;Plotting in Swift is not implemented for DHRobots yet&quot;</span>
+                <span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># yes, use it</span>
                 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.swift</span> <span class="kn">import</span> <span class="n">Swift</span>
+
                 <span class="n">env</span> <span class="o">=</span> <span class="n">Swift</span><span class="p">()</span>
                 <span class="k">return</span> <span class="n">env</span>
             <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;swift&#39;</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span>
-                        <span class="s1">&#39;Swift is not installed, &#39;</span>
-                        <span class="s1">&#39;install it using pip or conda&#39;</span><span class="p">)</span>
-                <span class="n">backend</span> <span class="o">=</span> <span class="s1">&#39;pyplot&#39;</span>
+                <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;swift&quot;</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Swift is not installed, &quot;</span> <span class="s2">&quot;install it using pip or conda&quot;</span><span class="p">)</span>
+                <span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;pyplot&quot;</span>
 
-        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;vpython&#39;</span> <span class="ow">or</span> <span class="n">default</span> <span class="o">==</span> <span class="s1">&#39;vpython&#39;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
+        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;vpython&quot;</span> <span class="ow">or</span> <span class="n">default</span> <span class="o">==</span> <span class="s2">&quot;vpython&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
             <span class="c1"># vpython was requested, is it installed?</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">DHRobot</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                    <span class="s1">&#39;Plotting in VPython is only implemented for DHRobots&#39;</span><span class="p">)</span>
+                    <span class="s2">&quot;Plotting in VPython is only implemented for DHRobots&quot;</span>
+                <span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># yes, use it</span>
                 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.VPython</span> <span class="kn">import</span> <span class="n">VPython</span>
+
                 <span class="n">env</span> <span class="o">=</span> <span class="n">VPython</span><span class="p">()</span>
                 <span class="k">return</span> <span class="n">env</span>
             <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;vpython&#39;</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span>
-                        <span class="s1">&#39;VPython is not installed, &#39;</span>
-                        <span class="s1">&#39;install it using pip or conda&#39;</span><span class="p">)</span>
-                <span class="n">backend</span> <span class="o">=</span> <span class="s1">&#39;pyplot&#39;</span>
+                <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;vpython&quot;</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;VPython is not installed, &quot;</span> <span class="s2">&quot;install it using pip or conda&quot;</span><span class="p">)</span>
+                <span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;pyplot&quot;</span>
 
         <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">backend</span> <span class="o">=</span> <span class="n">default</span>
 
-        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;pyplot&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;pyplot&quot;</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot</span> <span class="kn">import</span> <span class="n">PyPlot</span>
+
             <span class="n">env</span> <span class="o">=</span> <span class="n">PyPlot</span><span class="p">()</span>
 
-        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;pyplot2&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;pyplot2&quot;</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot</span> <span class="kn">import</span> <span class="n">PyPlot2</span>
+
             <span class="n">env</span> <span class="o">=</span> <span class="n">PyPlot2</span><span class="p">()</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;unknown backend&#39;</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;unknown backend&quot;</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">env</span>
 
 <div class="viewcode-block" id="Robot.plot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.050</span><span class="p">,</span>
-            <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">movie</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">q</span><span class="p">,</span>
+        <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">dt</span><span class="o">=</span><span class="mf">0.050</span><span class="p">,</span>
+        <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">fellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">movie</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">loop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Graphical display and animation</span>
 
@@ -1527,19 +1535,18 @@
         <span class="c1"># Add the self to the figure in readonly mode</span>
         <span class="c1"># Add the self to the figure in readonly mode</span>
         <span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">env</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; Plot&#39;</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">)</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; Plot&quot;</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">env</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; Trajectory Plot&#39;</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">)</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; Trajectory Plot&quot;</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">)</span>
 
-        <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">vellipse</span><span class="p">:</span>
-            <span class="n">vell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vellipse</span><span class="p">(</span><span class="n">centre</span><span class="o">=</span><span class="s1">&#39;ee&#39;</span><span class="p">)</span>
+            <span class="n">vell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vellipse</span><span class="p">(</span><span class="n">centre</span><span class="o">=</span><span class="s2">&quot;ee&quot;</span><span class="p">)</span>
             <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vell</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">fellipse</span><span class="p">:</span>
-            <span class="n">fell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fellipse</span><span class="p">(</span><span class="n">centre</span><span class="o">=</span><span class="s1">&#39;ee&#39;</span><span class="p">)</span>
+            <span class="n">fell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fellipse</span><span class="p">(</span><span class="n">centre</span><span class="o">=</span><span class="s2">&quot;ee&quot;</span><span class="p">)</span>
             <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fell</span><span class="p">)</span>
 
         <span class="c1"># Stop lint error</span>
@@ -1564,21 +1571,25 @@
                 <span class="c1"># save it as an animated GIF</span>
                 <span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
                     <span class="n">movie</span><span class="p">,</span>
-                    <span class="n">save_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">append_images</span><span class="o">=</span><span class="n">images</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">optimize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">duration</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">save_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">append_images</span><span class="o">=</span><span class="n">images</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+                    <span class="n">optimize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">duration</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span>
+                    <span class="n">loop</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">loop</span><span class="p">:</span>
                 <span class="k">break</span>
 
         <span class="c1"># Keep the plot open</span>
-        <span class="k">if</span> <span class="n">block</span><span class="p">:</span>           <span class="c1"># pragma: no cover</span>
+        <span class="k">if</span> <span class="n">block</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="n">env</span><span class="o">.</span><span class="n">hold</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">env</span></div>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
-<div class="viewcode-block" id="Robot.fellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.fellipse">[docs]</a>    <span class="k">def</span> <span class="nf">fellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="Robot.fellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.fellipse">[docs]</a>    <span class="k">def</span> <span class="nf">fellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s2">&quot;trans&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;rad&quot;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a force ellipsoid object for plotting with PyPlot</span>
 
 <span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
@@ -1608,18 +1619,15 @@
 <span class="sd">              3-vector, or the string &quot;ee&quot; ensures it is drawn at the</span>
 <span class="sd">              end-effector position.</span>
 
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;ERobot fellipse not implemented yet&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;ERobot fellipse not implemented yet&quot;</span><span class="p">)</span>
 
         <span class="n">q</span> <span class="o">=</span> <span class="n">getunit</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
-        <span class="n">ell</span> <span class="o">=</span> <span class="n">EllipsePlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
+        <span class="n">ell</span> <span class="o">=</span> <span class="n">EllipsePlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="s2">&quot;f&quot;</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ell</span></div>
 
-<div class="viewcode-block" id="Robot.vellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.vellipse">[docs]</a>    <span class="k">def</span> <span class="nf">vellipse</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;rad&#39;</span><span class="p">,</span>
-            <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<div class="viewcode-block" id="Robot.vellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.vellipse">[docs]</a>    <span class="k">def</span> <span class="nf">vellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s2">&quot;trans&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;rad&quot;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a velocity ellipsoid object for plotting with PyPlot</span>
 
@@ -1651,16 +1659,22 @@
 <span class="sd">              end-effector position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;ERobot vellipse not implemented yet&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;ERobot vellipse not implemented yet&quot;</span><span class="p">)</span>
 
         <span class="n">q</span> <span class="o">=</span> <span class="n">getunit</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
-        <span class="n">ell</span> <span class="o">=</span> <span class="n">EllipsePlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">ell</span> <span class="o">=</span> <span class="n">EllipsePlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ell</span></div>
 
 <div class="viewcode-block" id="Robot.plot_ellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.plot_ellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_ellipse</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">ellipse</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ellipse</span><span class="p">,</span>
+        <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the an ellipsoid</span>
 
@@ -1697,28 +1711,35 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ellipse</span><span class="p">,</span> <span class="n">EllipsePlot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s1">&#39;ellipse must be of type &#39;</span>
-                <span class="s1">&#39;roboticstoolbox.backend.PyPlot.EllipsePlot&#39;</span><span class="p">)</span>
+                <span class="s2">&quot;ellipse must be of type &quot;</span> <span class="s2">&quot;roboticstoolbox.backend.PyPlot.EllipsePlot&quot;</span>
+            <span class="p">)</span>
 
         <span class="n">env</span> <span class="o">=</span> <span class="n">PyPlot</span><span class="p">()</span>
 
         <span class="c1"># Add the robot to the figure in readonly mode</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="n">ellipse</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">ellipse</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">)</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="n">ellipse</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">ellipse</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">)</span>
 
-        <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
-            <span class="n">ellipse</span><span class="p">,</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ellipse</span><span class="p">,</span> <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
         <span class="c1"># Keep the plot open</span>
-        <span class="k">if</span> <span class="n">block</span><span class="p">:</span>           <span class="c1"># pragma: no cover</span>
+        <span class="k">if</span> <span class="n">block</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="n">env</span><span class="o">.</span><span class="n">hold</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">env</span></div>
 
 <div class="viewcode-block" id="Robot.plot_fellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.plot_fellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_fellipse</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">fellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">opt</span><span class="o">=</span><span class="s2">&quot;trans&quot;</span><span class="p">,</span>
+        <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the force ellipsoid for manipulator</span>
 
@@ -1777,7 +1798,8 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;Ellipse Plotting of ERobot&#39;s not implemented yet&quot;</span><span class="p">)</span>
+                <span class="s2">&quot;Ellipse Plotting of ERobot&#39;s not implemented yet&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
@@ -1786,13 +1808,28 @@
             <span class="n">fellipse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fellipse</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span>
-            <span class="n">fellipse</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+            <span class="n">fellipse</span><span class="p">,</span>
+            <span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">,</span>
+            <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span>
+            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span>
+            <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span>
+            <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Robot.plot_vellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.plot_vellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_vellipse</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s1">&#39;trans&#39;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">vellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">opt</span><span class="o">=</span><span class="s2">&quot;trans&quot;</span><span class="p">,</span>
+        <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the velocity ellipsoid for manipulator</span>
 
@@ -1851,7 +1888,8 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>  <span class="c1"># pragma nocover</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;Ellipse Plotting of ERobot&#39;s not implemented yet&quot;</span><span class="p">)</span>
+                <span class="s2">&quot;Ellipse Plotting of ERobot&#39;s not implemented yet&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">q</span>
@@ -1860,16 +1898,32 @@
             <span class="n">vellipse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vellipse</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span>
-            <span class="n">vellipse</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+            <span class="n">vellipse</span><span class="p">,</span>
+            <span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">,</span>
+            <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">,</span>
+            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span>
+            <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span>
+            <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="Robot.teach"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.teach">[docs]</a>    <span class="k">def</span> <span class="nf">teach</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">jointlabels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">vellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">order</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span>
+        <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">jointaxes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">jointlabels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">vellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">fellipse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Graphical teach pendant</span>
 
@@ -1928,32 +1982,37 @@
         <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_graphical_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
 
         <span class="c1"># Add the self to the figure in readonly mode</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="s1">&#39;Teach &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">)</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="s2">&quot;Teach &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="n">limits</span><span class="p">)</span>
         <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span> <span class="n">jointlabels</span><span class="o">=</span><span class="n">jointlabels</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span>
-            <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">readonly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span>
+            <span class="n">jointlabels</span><span class="o">=</span><span class="n">jointlabels</span><span class="p">,</span>
+            <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span>
+            <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="n">env</span><span class="o">.</span><span class="n">_add_teach_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">vellipse</span><span class="p">:</span>
-            <span class="n">vell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vellipse</span><span class="p">(</span><span class="n">centre</span><span class="o">=</span><span class="s1">&#39;ee&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">vell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vellipse</span><span class="p">(</span><span class="n">centre</span><span class="o">=</span><span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
             <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vell</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">fellipse</span><span class="p">:</span>
-            <span class="n">fell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fellipse</span><span class="p">(</span><span class="n">centre</span><span class="o">=</span><span class="s1">&#39;ee&#39;</span><span class="p">)</span>
+            <span class="n">fell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fellipse</span><span class="p">(</span><span class="n">centre</span><span class="o">=</span><span class="s2">&quot;ee&quot;</span><span class="p">)</span>
             <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fell</span><span class="p">)</span>
 
         <span class="c1"># Keep the plot open</span>
-        <span class="k">if</span> <span class="n">block</span><span class="p">:</span>           <span class="c1"># pragma: no cover</span>
+        <span class="k">if</span> <span class="n">block</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="n">env</span><span class="o">.</span><span class="n">hold</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">env</span></div>
 
-<span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="Robot.closest_point"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.closest_point">[docs]</a>    <span class="k">def</span> <span class="nf">closest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        closest_point(shape, inf_dist) returns the minimum euclidean</span>
 <span class="sd">        distance between this robot and shape, provided it is less than</span>
 <span class="sd">        inf_dist. It will also return the points on self and shape in the</span>
@@ -1969,9 +2028,9 @@
 <span class="sd">        :type skip: boolean</span>
 <span class="sd">        :returns: d, p1, p2 where d is the distance between the shapes,</span>
 <span class="sd">            p1 and p2 are the points in the world frame on the respective</span>
-<span class="sd">            shapes. The points returned are homogeneous with [x, y, z, 1].</span>
-<span class="sd">        :rtype: float, ndarray(1x4), ndarray(1x4)</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">            shapes. The points returned are [x, y, z].</span>
+<span class="sd">        :rtype: float, ndarray(1x3), ndarray(1x3)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">skip</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_link_fk</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
@@ -1994,7 +2053,7 @@
         <span class="k">return</span> <span class="n">d</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span></div>
 
 <div class="viewcode-block" id="Robot.collided"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.collided">[docs]</a>    <span class="k">def</span> <span class="nf">collided</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        collided(shape) checks if this robot and shape have collided</span>
 <span class="sd">        :param shape: The shape to compare distance to</span>
 <span class="sd">        :type shape: Shape</span>
@@ -2003,7 +2062,7 @@
 <span class="sd">        :type skip: boolean</span>
 <span class="sd">        :returns: True if shapes have collided</span>
 <span class="sd">        :rtype: bool</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">skip</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_link_fk</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
@@ -2021,7 +2080,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="Robot.joint_velocity_damper"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.joint_velocity_damper">[docs]</a>    <span class="k">def</span> <span class="nf">joint_velocity_damper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ps</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">pi</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Formulates an inequality contraint which, when optimised for will</span>
 <span class="sd">        make it impossible for the robot to run into joint limits. Requires</span>
 <span class="sd">        the joint limits of the robot to be specified. See examples/mmc.py</span>
@@ -2040,7 +2099,7 @@
 
 <span class="sd">        :returns: Ain, Bin as the inequality contraints for an optisator</span>
 <span class="sd">        :rtype: ndarray(6), ndarray(6)</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
@@ -2050,12 +2109,10 @@
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pi</span><span class="p">:</span>
-                <span class="n">Bin</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">gain</span> <span class="o">*</span> <span class="p">(</span>
-                    <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="n">ps</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">pi</span> <span class="o">-</span> <span class="n">ps</span><span class="p">))</span>
+                <span class="n">Bin</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">gain</span> <span class="o">*</span> <span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="n">ps</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">pi</span> <span class="o">-</span> <span class="n">ps</span><span class="p">))</span>
                 <span class="n">Ain</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pi</span><span class="p">:</span>
-                <span class="n">Bin</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">gain</span> <span class="o">*</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="n">ps</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">pi</span> <span class="o">-</span> <span class="n">ps</span><span class="p">)</span>
+                <span class="n">Bin</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">gain</span> <span class="o">*</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="n">ps</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">pi</span> <span class="o">-</span> <span class="n">ps</span><span class="p">)</span>
                 <span class="n">Ain</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
         <span class="k">return</span> <span class="n">Ain</span><span class="p">,</span> <span class="n">Bin</span></div></div>
@@ -2086,7 +2143,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Apr-2021.
+        Last updated on 04-May-2021.
       </span>
 
     </p>

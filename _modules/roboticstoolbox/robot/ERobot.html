@@ -164,7 +164,6 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">splitext</span>
-<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">webbrowser</span>
@@ -1142,7 +1141,6 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">ETS</span><span class="p">):</span>
             <span class="c1"># we&#39;re passed an ETS string</span>
-            <span class="n">ets</span> <span class="o">=</span> <span class="n">arg</span>
             <span class="n">links</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="c1"># chop it up into segments, a link frame after every joint</span>
             <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1746,7 +1744,6 @@
 
         <span class="n">q</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
 
-        <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
         <span class="n">j</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">J</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
         <span class="n">zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
@@ -2191,7 +2188,7 @@
             <span class="n">d</span><span class="p">,</span> <span class="n">wTlp</span><span class="p">,</span> <span class="n">wTcp</span> <span class="o">=</span> <span class="n">link_col</span><span class="o">.</span><span class="n">closest_point</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">di</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">lpTcp</span> <span class="o">=</span> <span class="o">-</span><span class="n">wTlp</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">wTcp</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+                <span class="n">lpTcp</span> <span class="o">=</span> <span class="o">-</span><span class="n">wTlp</span> <span class="o">+</span> <span class="n">wTcp</span>
 
                 <span class="n">norm</span> <span class="o">=</span> <span class="n">lpTcp</span> <span class="o">/</span> <span class="n">d</span>
                 <span class="n">norm_h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">norm</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -2306,7 +2303,6 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">ETS2</span><span class="p">):</span>
             <span class="c1"># we&#39;re passed an ETS string</span>
-            <span class="n">ets</span> <span class="o">=</span> <span class="n">arg</span>
             <span class="n">links</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="c1"># chop it up into segments, a link frame after every joint</span>
             <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2452,8 +2448,6 @@
     <span class="n">e4</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span><span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span> <span class="n">jindex</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">e3</span><span class="p">)</span>
 
     <span class="n">ERobot</span><span class="p">([</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">,</span> <span class="n">e3</span><span class="p">,</span> <span class="n">e4</span><span class="p">])</span>
-
-    <span class="k">pass</span>
 </pre></div>
 
            </div>
@@ -2467,7 +2461,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 28-Apr-2021.
+        Last updated on 04-May-2021.
       </span>
 
     </p>
