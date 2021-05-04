@@ -5,7 +5,6 @@ Created on Tue Apr 24 15:48:52 2020
 """
 
 from os.path import splitext
-import copy
 import tempfile
 import subprocess
 import webbrowser
@@ -983,7 +982,6 @@ class ERobot(BaseERobot):
 
         if isinstance(arg, ETS):
             # we're passed an ETS string
-            ets = arg
             links = []
             # chop it up into segments, a link frame after every joint
             parent = None
@@ -1587,7 +1585,6 @@ class ERobot(BaseERobot):
 
         q = getvector(q, self.n)
 
-        U = np.eye(4)
         j = n - 1
         J = np.zeros((6, n))
         zero = np.array([0, 0, 0])
@@ -2147,7 +2144,6 @@ class ERobot2(BaseERobot):
 
         if isinstance(arg, ETS2):
             # we're passed an ETS string
-            ets = arg
             links = []
             # chop it up into segments, a link frame after every joint
             parent = None
@@ -2293,5 +2289,3 @@ if __name__ == "__main__":  # pragma nocover
     e4 = ELink(ETS.rz(), jindex=5, parent=e3)
 
     ERobot([e1, e2, e3, e4])
-
-    pass

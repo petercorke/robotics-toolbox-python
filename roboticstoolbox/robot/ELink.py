@@ -371,7 +371,7 @@ class ELink(BaseELink):
                 v.jindex = jindex
                 self.jindex = jindex
             elif jindex is None and v.jindex is not None:
-                jindex = v.jindex
+                self.jindex = v.jindex
 
         # Initialise the static transform representing the constant
         # component of the ETS
@@ -666,9 +666,6 @@ class ELink(BaseELink):
         else:
             # a fixed joint
             T = self.Ts
-
-        if fast:
-            return T
 
         if T is None:
             return SE3()

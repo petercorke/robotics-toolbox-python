@@ -32,23 +32,17 @@ class YuMi(ERobot):
 
     def __init__(self):
 
-        links, name = self.URDF_read(
-            "yumi_description/urdf/yumi.urdf")
+        links, name = self.URDF_read("yumi_description/urdf/yumi.urdf")
 
         super().__init__(
-            links,
-            name=name,
-            manufacturer='ABB',
-            gripper_links=[links[20]]
+            links, name=name, manufacturer="ABB", gripper_links=[links[20]]
         )
 
-        # self.addconfiguration(
-        #     "qz", np.zeros((14,)))
-        # self.addconfiguration(
-        #     "qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4]))
+        self.addconfiguration("qz", np.zeros((14,)))
+        self.addconfiguration("qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]))
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     robot = YuMi()
     print(robot)

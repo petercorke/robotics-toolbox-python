@@ -6,15 +6,22 @@
 import numpy as np
 import roboticstoolbox as rp
 from spatialmath import SE3
-from spatialmath import base
 
 
-class RobotPlot():
-
+class RobotPlot:
     def __init__(
-            self, robot, env, readonly, display=True,
-            jointaxes=True, jointlabels=False, eeframe=True, shadow=True,
-            name=True, options=None):
+        self,
+        robot,
+        env,
+        readonly,
+        display=True,
+        jointaxes=True,
+        jointlabels=False,
+        eeframe=True,
+        shadow=True,
+        name=True,
+        options=None,
+    ):
 
         super(RobotPlot, self).__init__()
 
@@ -55,15 +62,15 @@ class RobotPlot():
         self.showname = name
 
         defaults = {
-            'robot': {'color': '#E16F6D', 'linewidth': 5},
-            'shadow': {'color': 'lightgrey', 'linewidth': 3},
-            'jointaxes': {'color': '#8FC1E2', 'linewidth': 2},
-            'jointlabels': {},
-            'jointaxislength': 0.2,
-            'eex': {'color': '#F84752', 'linewidth': 2}, # '#EE9494'
-            'eey': {'color': '#BADA55', 'linewidth': 2}, # '#93E7B0'
-            'eez': {'color': '#54AEFF', 'linewidth': 2},
-            'eelength': 0.06,
+            "robot": {"color": "#E16F6D", "linewidth": 5},
+            "shadow": {"color": "lightgrey", "linewidth": 3},
+            "jointaxes": {"color": "#8FC1E2", "linewidth": 2},
+            "jointlabels": {},
+            "jointaxislength": 0.2,
+            "eex": {"color": "#F84752", "linewidth": 2},  # '#EE9494'
+            "eey": {"color": "#BADA55", "linewidth": 2},  # '#93E7B0'
+            "eez": {"color": "#54AEFF", "linewidth": 2},
+            "eelength": 0.06,
         }
 
         if options is not None:
@@ -83,7 +90,7 @@ class RobotPlot():
 
         # compute all link frames
         T = self.robot.fkine_all(self.robot.q)
-        
+
         # draw all the line segments for the noodle plot
         for i, segment in enumerate(self.segments):
             linkframes = []
@@ -95,8 +102,8 @@ class RobotPlot():
             points = np.array([linkframe.t for linkframe in linkframes])
 
             self.links[i].set_xdata(points[:, 0])
-            self.links[i].set_ydata(points[:,1 ])
-            self.links[0].set_3d_properties(points[:,2 ])
+            self.links[i].set_ydata(points[:, 1])
+            self.links[0].set_3d_properties(points[:, 2])
 
             # Update the shadow of the robot links
             if self.shadow:
@@ -115,7 +122,7 @@ class RobotPlot():
 
         if self.eeframe:
             # Axes arrow transforms
-            len = self.options['eelength']
+            len = self.options["eelength"]
             Tjx = SE3([len, 0, 0])
             Tjy = SE3([0, len, 0])
             Tjz = SE3([0, 0, len])
@@ -129,9 +136,9 @@ class RobotPlot():
                 Tey = Te * Tjy
                 Tez = Te * Tjz
 
-                xaxis = self._plot_quiver(Te.t, Tex.t, self.options['eex'])
-                yaxis = self._plot_quiver(Te.t, Tey.t, self.options['eey'])
-                zaxis = self._plot_quiver(Te.t, Tez.t, self.options['eez'])
+                xaxis = self._plot_quiver(Te.t, Tex.t, self.options["eex"])
+                yaxis = self._plot_quiver(Te.t, Tey.t, self.options["eey"])
+                zaxis = self._plot_quiver(Te.t, Tez.t, self.options["eez"])
 
                 self.eeframes.extend([xaxis, yaxis, zaxis])
 
@@ -159,17 +166,16 @@ class RobotPlot():
                 elif link.isjoint:
                     Tj = T[link.number]
                     R = Tj.R
-                    if link.v.axis[1] == 'z':
+                    if link.v.axis[1] == "z":
                         direction = R[:, 2]  # z direction
-                    elif link.v.axis[1] == 'y':
+                    elif link.v.axis[1] == "y":
                         direction = R[:, 1]  # y direction
-                    elif link.v.axis[1] == 'x':
+                    elif link.v.axis[1] == "x":
                         direction = R[:, 0]  #  direction
 
                 if direction is not None:
                     arrow = self._plot_quiver2(Tj.t, direction, link.jindex)
                     self.joints.extend(arrow)
-
 
     def init(self):
 
@@ -189,26 +195,20 @@ class RobotPlot():
 
         # Plot robot name
         if self.showname:
-            self.name = self.ax.text(
-                Tb.t[0], Tb.t[1], 0.05, self.robot.name)
+            self.name = self.ax.text(Tb.t[0], Tb.t[1], 0.05, self.robot.name)
 
         # Initialize the robot links
         self.links = []
         self.sh_links = []
         for i in range(len(self.segments)):
 
-
             # Plot the shadow of the robot links, draw first so robot is always
             # in front
             if self.shadow:
-                shadow, = self.ax.plot(
-                    [0], [0],
-                    zorder=1, 
-                    **self.options['shadow'])
+                (shadow,) = self.ax.plot([0], [0], zorder=1, **self.options["shadow"])
                 self.sh_links.append(shadow)
 
-            line,  = self.ax.plot(
-                [0], [0], [0], **self.options['robot'])
+            (line,) = self.ax.plot([0], [0], [0], **self.options["robot"])
             self.links.append(line)
 
         self.eeframes = []
@@ -216,27 +216,29 @@ class RobotPlot():
 
     def _plot_quiver(self, p0, p1, options):
         qv = self.ax.quiver(
-            p0[0], p0[1], p0[2],
-            p1[0] - p0[0],
-            p1[1] - p0[1],
-            p1[2] - p0[2],
-            **options
+            p0[0], p0[1], p0[2], p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2], **options
         )
         return qv
 
     def _plot_quiver2(self, p0, dir, j):
-        vec = dir * self.options['jointaxislength']
+        vec = dir * self.options["jointaxislength"]
         start = p0 - vec / 2
         qv = self.ax.quiver(
-            start[0], start[1], start[2],
-            vec[0], vec[1], vec[2],
+            start[0],
+            start[1],
+            start[2],
+            vec[0],
+            vec[1],
+            vec[2],
             zorder=5,
-            **self.options['jointaxes']
+            **self.options["jointaxes"],
         )
 
         if self.jointlabels:
             pl = p0 - vec * 0.6
-            label = self.ax.text(pl[0], pl[1], pl[2], f'$q_{j}$', **self.options['jointlabels'] )
+            label = self.ax.text(
+                pl[0], pl[1], pl[2], f"$q_{j}$", **self.options["jointlabels"]
+            )
             return [qv, label]
         else:
             return [qv]

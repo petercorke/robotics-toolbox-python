@@ -11,12 +11,13 @@ import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.DHLink import DHLink  # HACK
-from spatialmath.base.argcheck import \
-    getvector, isscalar, verifymatrix, getmatrix
+from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix
+
 # from spatialmath import base
 from spatialmath.base import tr2jac, tr2eul, tr2rpy, t2r, eul2jac, rpy2jac
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
+
 # from scipy.optimize import minimize, Bounds
 from ansitable import ANSITable, Column
 from scipy.linalg import block_diag
@@ -60,15 +61,11 @@ class DHRobot(Robot):
 
     """
 
-    def __init__(
-            self,
-            links,
-            meshdir=None,
-            **kwargs):
+    def __init__(self, links, meshdir=None, **kwargs):
 
         # Verify L
         if not isinstance(links, list):
-            raise TypeError('The links must be stored in a list.')
+            raise TypeError("The links must be stored in a list.")
 
         all_links = []
         self._n = 0
@@ -105,7 +102,7 @@ class DHRobot(Robot):
         # Check the DH convention
         self._mdh = self.links[0].mdh
         if not all([link.mdh == self.mdh for link in self.links]):
-            raise ValueError('Robot has mixed D&H link conventions')
+            raise ValueError("Robot has mixed D&H link conventions")
 
         # load meshes if required
         if meshdir is not None:
@@ -164,7 +161,7 @@ class DHRobot(Robot):
             return s
 
         def angle(theta, fmt=None):
-            if sym.issymbol(theta):   # pragma nocover
+            if sym.issymbol(theta):  # pragma nocover
                 return "<<red>>" + str(theta)
             else:
                 if fmt is not None:
@@ -175,7 +172,8 @@ class DHRobot(Robot):
         has_qlim = any([link._qlim is not None for link in self])
         if has_qlim:
             qlim_columns = [
-                Column("q⁻", headalign="^"), Column("q⁺", headalign="^"),
+                Column("q⁻", headalign="^"),
+                Column("q⁺", headalign="^"),
             ]
             qlim = self.qlim
 
@@ -189,7 +187,7 @@ class DHRobot(Robot):
                 Column("θⱼ", headalign="^"),
                 Column("dⱼ", headalign="^"),
                 *qlim_columns,
-                border="thick"
+                border="thick",
             )
             for j, L in enumerate(self):
                 if has_qlim:
@@ -200,11 +198,9 @@ class DHRobot(Robot):
                 else:
                     ql = []
                 if L.isprismatic:
-                    table.row(
-                        L.a, angle(L.alpha), angle(L.theta), qstr(j, L), *ql)
+                    table.row(L.a, angle(L.alpha), angle(L.theta), qstr(j, L), *ql)
                 else:
-                    table.row(
-                        L.a, angle(L.alpha), qstr(j, L), L.d, *ql)
+                    table.row(L.a, angle(L.alpha), qstr(j, L), L.d, *ql)
         else:
             # DH format
             table = ANSITable(
@@ -213,7 +209,7 @@ class DHRobot(Robot):
                 Column("aⱼ", headalign="^"),
                 Column("⍺ⱼ", headalign="^"),
                 *qlim_columns,
-                border="thick"
+                border="thick",
             )
             for j, L in enumerate(self):
                 if has_qlim:
@@ -225,10 +221,12 @@ class DHRobot(Robot):
                     ql = []
                 if L.isprismatic:
                     table.row(
-                        angle(L.theta), qstr(j, L), f"{L.a:.4g}", angle(L.alpha), *ql)
+                        angle(L.theta), qstr(j, L), f"{L.a:.4g}", angle(L.alpha), *ql
+                    )
                 else:
-                    table.row(qstr(j, L), f"{L.d:.4g}",
-                              f"{L.a:.4g}", angle(L.alpha), *ql)
+                    table.row(
+                        qstr(j, L), f"{L.d:.4g}", f"{L.a:.4g}", angle(L.alpha), *ql
+                    )
 
         s += str(table)
 
@@ -237,15 +235,19 @@ class DHRobot(Robot):
             table = ANSITable(
                 Column("", colalign=">"),
                 Column("", colalign="<"),
-                border="thin", header=False)
+                border="thin",
+                header=False,
+            )
             if self._base is not None:
                 table.row(
-                    "base", self._base.printline(
-                        orient="rpy/xyz", fmt="{:.2g}", file=None))
+                    "base",
+                    self._base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
+                )
             if self._tool is not None:
                 table.row(
-                    "tool", self._tool.printline(
-                        orient="rpy/xyz", fmt="{:.2g}", file=None))
+                    "tool",
+                    self._tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
+                )
             s += "\n" + str(table)
 
         # show named configurations
@@ -268,8 +270,9 @@ class DHRobot(Robot):
             for j in range(L.n):
                 nlinks.append(L.links[j])
         else:
-            raise TypeError("Can only combine DHRobots with other "
-                            "DHRobots or DHLinks")
+            raise TypeError(
+                "Can only combine DHRobots with other " "DHRobots or DHLinks"
+            )
 
         return DHRobot(
             nlinks,
@@ -277,7 +280,8 @@ class DHRobot(Robot):
             manufacturer=self.manufacturer,
             base=self.base,
             tool=self.tool,
-            gravity=self.gravity)
+            gravity=self.gravity,
+        )
 
     # def copy(self):
     #     """
@@ -303,10 +307,10 @@ class DHRobot(Robot):
 
     #     return new
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     def _set_link_fk(self, q):
-        '''
+        """
         robot._set_link_fk(q) evaluates fkine for each link within a
         robot and stores that pose in a private variable within the link.
 
@@ -319,11 +323,11 @@ class DHRobot(Robot):
 
             - The robot's base transform, if present, are incorporated
               into the result.
-        '''
+        """
 
         q = getvector(q, self.n)
 
-        t = self.base
+        # t = self.base
 
         tall = self.fkine_all(q, old=True)
 
@@ -336,7 +340,7 @@ class DHRobot(Robot):
             for gi in link.geometry:
                 gi.wT = tall[i]
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     @property
     def mdh(self):
@@ -547,7 +551,7 @@ class DHRobot(Robot):
         :return: number of branches in the robot's kinematic tree
         :rtype: int
 
-        Number of branches in this robot.  
+        Number of branches in this robot.
 
         Example:
 
@@ -654,21 +658,22 @@ class DHRobot(Robot):
         if self.n < 3:
             return False
 
-        L = self.links[self.n - 3:self.n]
+        L = self.links[self.n - 3 : self.n]
 
         alpha = [-np.pi / 2, np.pi / 2]
 
-        return L[0].a == 0 \
-            and L[1].a == 0 \
-            and L[1].d == 0 \
+        return (
+            L[0].a == 0
+            and L[1].a == 0
+            and L[1].d == 0
             and (
                 (L[0].alpha == alpha[0] and L[1].alpha == alpha[1])
-                or
-                (L[0].alpha == alpha[1] and L[1].alpha == alpha[0])
-        ) \
-            and L[0].sigma == 0 \
-            and L[1].sigma == 0 \
+                or (L[0].alpha == alpha[1] and L[1].alpha == alpha[0])
+            )
+            and L[0].sigma == 0
+            and L[1].sigma == 0
             and L[2].sigma == 0
+        )
 
     def dhunique(self):
         """
@@ -690,7 +695,8 @@ class DHRobot(Robot):
         table = ANSITable(
             Column("param"),
             Column("value", headalign="^", colalign="<", fmt="{:.4g}"),
-            border="thin")
+            border="thin",
+        )
         for j, link in enumerate(self):
             if link.isprismatic:
                 if link.theta != 0:
@@ -760,9 +766,9 @@ class DHRobot(Robot):
                 else:
                     # subsequent links
                     if link.sigma == 0:
-                        tw[j] = Twist3.Revolute(T[j-1].a, T[j-1].t)  # revolute
+                        tw[j] = Twist3.Revolute(T[j - 1].a, T[j - 1].t)  # revolute
                     else:
-                        tw[j] = Twist3.Prismatic(T[j-1].a)  # prismatic
+                        tw[j] = Twist3.Prismatic(T[j - 1].a)  # prismatic
 
         return tw, T[-1]
 
@@ -851,7 +857,7 @@ class DHRobot(Robot):
         return T
 
     def fkine_path(self, q, old=None):
-        '''
+        """
         Compute the pose of every link frame
 
         :param q: The joint configuration
@@ -868,7 +874,7 @@ class DHRobot(Robot):
         :references:
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
-        '''
+        """
         T = self.base
         q = getvector(q)
         Tj = T
@@ -961,7 +967,7 @@ class DHRobot(Robot):
 
         .. warning:: This is the **geometric Jacobian** as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
-            described in terms of translational and angular velocity, not a 
+            described in terms of translational and angular velocity, not a
             velocity twist as per the text by Lynch & Park.
         """  # noqa
 
@@ -980,15 +986,17 @@ class DHRobot(Robot):
 
             if not L[j].sigma:
                 # revolute axis
-                d = np.array([
-                    -U[0, 0] * U[1, 3] + U[1, 0] * U[0, 3],
-                    -U[0, 1] * U[1, 3] + U[1, 1] * U[0, 3],
-                    -U[0, 2] * U[1, 3] + U[1, 2] * U[0, 3]
-                ])
-                delta = U[2, :3]   # nz oz az
+                d = np.array(
+                    [
+                        -U[0, 0] * U[1, 3] + U[1, 0] * U[0, 3],
+                        -U[0, 1] * U[1, 3] + U[1, 1] * U[0, 3],
+                        -U[0, 2] * U[1, 3] + U[1, 2] * U[0, 3],
+                    ]
+                )
+                delta = U[2, :3]  # nz oz az
             else:
                 # prismatic axis
-                d = U[2, :3]      # nz oz az
+                d = U[2, :3]  # nz oz az
                 delta = np.zeros((3,))
 
             J[:, j] = np.r_[d, delta]
@@ -999,12 +1007,12 @@ class DHRobot(Robot):
 
         # return top or bottom half if asked
         if half is not None:
-            if half == 'trans':
+            if half == "trans":
                 return J[:3, :]
-            elif half == 'rot':
+            elif half == "rot":
                 return J[3:, :]
             else:
-                raise ValueError('bad half specified')
+                raise ValueError("bad half specified")
 
         return J
 
@@ -1050,7 +1058,7 @@ class DHRobot(Robot):
 
         .. warning:: The **geometric Jacobian** is as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
-            described in terms of translational and angular velocity, not a 
+            described in terms of translational and angular velocity, not a
             velocity twist as per the text by Lynch & Park.
 
         .. note:: ``T`` can be passed in to save the cost of computing forward
@@ -1070,22 +1078,25 @@ class DHRobot(Robot):
         # compute rotational transform if analytical Jacobian required
         if analytical is not None:
 
-            if analytical == 'rpy/xyz':
-                rpy = tr2rpy(T, 'xyz')
-                A = rpy2jac(rpy, 'xyz')
-            elif analytical == 'rpy/zyx':
-                rpy = tr2rpy(T, 'zyx')
-                A = rpy2jac(rpy, 'zyx')
-            elif analytical == 'eul':
+            if analytical == "rpy/xyz":
+                rpy = tr2rpy(T, "xyz")
+                A = rpy2jac(rpy, "xyz")
+            elif analytical == "rpy/zyx":
+                rpy = tr2rpy(T, "zyx")
+                A = rpy2jac(rpy, "zyx")
+            elif analytical == "eul":
                 eul = tr2eul(T)
                 A = eul2jac(eul)
-            elif analytical == 'exp':
+            elif analytical == "exp":
                 # TODO: move to SMTB.base, Horner form with skew(v)
                 (theta, v) = trlog(t2r(T))
-                A = np.eye(3, 3) - (1 - math.cos(theta)) / theta * skew(v) \
-                    + (theta - math.sin(theta)) / theta * skew(v)**2
+                A = (
+                    np.eye(3, 3)
+                    - (1 - math.cos(theta)) / theta * skew(v)
+                    + (theta - math.sin(theta)) / theta * skew(v) ** 2
+                )
             else:
-                raise ValueError('bad analytical value specified')
+                raise ValueError("bad analytical value specified")
 
             J0 = block_diag(np.eye(3, 3), np.linalg.inv(A)) @ J0
 
@@ -1093,12 +1104,12 @@ class DHRobot(Robot):
 
         # return top or bottom half if asked
         if half is not None:
-            if half == 'trans':
+            if half == "trans":
                 J0 = J0[:3, :]
-            elif half == 'rot':
+            elif half == "rot":
                 J0 = J0[3:, :]
             else:
-                raise ValueError('bad half specified')
+                raise ValueError("bad half specified")
         return J0
 
     def hessian0(self, q=None, J0=None, start=None, end=None):
@@ -1162,7 +1173,7 @@ class DHRobot(Robot):
 
         return None, None, None
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     def _init_rne(self):
         # Compress link data into a 1D array
@@ -1177,12 +1188,12 @@ class DHRobot(Robot):
             L[j + 4] = self.links[i].sigma
             L[j + 5] = self.links[i].offset
             L[j + 6] = self.links[i].m
-            L[j + 7:j + 10] = self.links[i].r.flatten()
-            L[j + 10:j + 19] = self.links[i].I.flatten()
+            L[j + 7 : j + 10] = self.links[i].r.flatten()
+            L[j + 10 : j + 19] = self.links[i].I.flatten()
             L[j + 19] = self.links[i].Jm
             L[j + 20] = self.links[i].G
             L[j + 21] = self.links[i].B
-            L[j + 22:j + 24] = self.links[i].Tc.flatten()
+            L[j + 22 : j + 24] = self.links[i].Tc.flatten()
 
         # we negate gravity here, since the C code has the sign wrong
         self._rne_ob = init(self.n, self.mdh, L, -self.gravity)
@@ -1235,9 +1246,9 @@ class DHRobot(Robot):
         trajn = 1
 
         try:
-            q = getvector(q, self.n, 'row')
-            qd = getvector(qd, self.n, 'row')
-            qdd = getvector(qdd, self.n, 'row')
+            q = getvector(q, self.n, "row")
+            qd = getvector(qd, self.n, "row")
+            qdd = getvector(qdd, self.n, "row")
         except ValueError:
             trajn = q.shape[0]
             verifymatrix(q, (trajn, self.n))
@@ -1263,7 +1274,13 @@ class DHRobot(Robot):
         for i in range(trajn):
             tau[i, :] = frne(
                 # we negate gravity here, since the C code has the sign wrong
-                self._rne_ob, q[i, :], qd[i, :], qdd[i, :], -gravity, fext)
+                self._rne_ob,
+                q[i, :],
+                qd[i, :],
+                qdd[i, :],
+                -gravity,
+                fext,
+            )
 
         if trajn == 1:
             return tau[0, :]
@@ -1271,8 +1288,15 @@ class DHRobot(Robot):
             return tau
 
     def rne_python(
-            self, Q, QD=None, QDD=None,
-            gravity=None, fext=None, debug=False, basewrench=False):
+        self,
+        Q,
+        QD=None,
+        QDD=None,
+        gravity=None,
+        fext=None,
+        debug=False,
+        basewrench=False,
+    ):
         """
         Compute inverse dynamics via recursive Newton-Euler formulation
 
@@ -1319,7 +1343,7 @@ class DHRobot(Robot):
         n = self.n
 
         if self.symbolic:
-            dtype = 'O'
+            dtype = "O"
         else:
             dtype = None
 
@@ -1336,16 +1360,16 @@ class DHRobot(Robot):
             fext = getvector(fext, 6)
 
         if debug:
-            print('grav', gravity)
-            print('fext', fext)
+            print("grav", gravity)
+            print("fext", fext)
 
         # unpack the joint coordinates and derivatives
         if Q is not None and QD is None and QDD is None:
             # single argument case
             Q = getmatrix(Q, (None, self.n * 3))
             q = Q[:, 0:n]
-            qd = Q[:, n:2 * n]
-            qdd = Q[:, 2 * n:]
+            qd = Q[:, n : 2 * n]
+            qdd = Q[:, 2 * n :]
 
         else:
             # 3 argument case
@@ -1366,9 +1390,9 @@ class DHRobot(Robot):
             qdd_k = qdd[k, :]
 
             if debug:
-                print('q_k', q_k)
-                print('qd_k', qd_k)
-                print('qdd_k', qdd_k)
+                print("q_k", q_k)
+                print("qd_k", qd_k)
+                print("qdd_k", qdd_k)
                 print()
 
             # joint vector quantities stored columwise in matrix
@@ -1414,15 +1438,13 @@ class DHRobot(Robot):
                 #   O_{j-1} to O_j in {j}, negative inverse of link xform
                 alpha = link.alpha
                 if self.mdh:
-                    pstar = np.r_[
-                        link.a, -d * sym.sin(alpha), d * sym.cos(alpha)]
+                    pstar = np.r_[link.a, -d * sym.sin(alpha), d * sym.cos(alpha)]
                     if j == 0:
                         if self._base:
                             Tj = self._base.A @ Tj
                             pstar = self._base.A @ pstar
                 else:
-                    pstar = np.r_[
-                        link.a, d * sym.sin(alpha), d * sym.cos(alpha)]
+                    pstar = np.r_[link.a, d * sym.sin(alpha), d * sym.cos(alpha)]
 
                 # stash them for later
                 Rm.append(t2r(Tj))
@@ -1432,7 +1454,7 @@ class DHRobot(Robot):
 
             for j, link in enumerate(self.links):
 
-                Rt = Rm[j].T    # transpose!!
+                Rt = Rm[j].T  # transpose!!
                 pstar = pstarm[:, j]
                 r = link.r
 
@@ -1442,23 +1464,17 @@ class DHRobot(Robot):
                     if link.isrevolute:
                         # revolute axis
                         w_ = Rt @ w + z0 * qd_k[j]
-                        wd_ = Rt @ wd \
-                            + z0 * qdd_k[j] \
-                            + _cross(Rt @ w, z0 * qd_k[j])
-                        vd_ = Rt @ _cross(wd, pstar) \
-                            + _cross(w, _cross(w, pstar)) \
-                            + vd
+                        wd_ = Rt @ wd + z0 * qdd_k[j] + _cross(Rt @ w, z0 * qd_k[j])
+                        vd_ = Rt @ _cross(wd, pstar) + _cross(w, _cross(w, pstar)) + vd
                     else:
                         # prismatic axis
                         w_ = Rt @ w
                         wd_ = Rt @ wd
-                        vd_ = Rt @ (
-                            _cross(wd, pstar)
-                            + _cross(w, _cross(w, pstar))
-                            + vd
-                        ) \
-                            + 2 * _cross(Rt @ w, z0 * qd_k[j]) \
+                        vd_ = (
+                            Rt @ (_cross(wd, pstar) + _cross(w, _cross(w, pstar)) + vd)
+                            + 2 * _cross(Rt @ w, z0 * qd_k[j])
                             + z0 * qdd_k[j]
+                        )
                     # trailing underscore means new value, update here
                     w = w_
                     wd = wd_
@@ -1466,42 +1482,38 @@ class DHRobot(Robot):
                 else:
                     if link.isrevolute:
                         # revolute axis
-                        wd = Rt @ (
-                            wd + z0 * qdd_k[j]
-                            + _cross(w, z0 * qd_k[j]))
+                        wd = Rt @ (wd + z0 * qdd_k[j] + _cross(w, z0 * qd_k[j]))
                         w = Rt @ (w + z0 * qd_k[j])
-                        vd = _cross(wd, pstar) \
-                            + _cross(w, _cross(w, pstar)) \
-                            + Rt @ vd
+                        vd = _cross(wd, pstar) + _cross(w, _cross(w, pstar)) + Rt @ vd
                     else:
                         # prismatic axis
                         w = Rt @ w
                         wd = Rt @ wd
-                        vd = Rt @  (z0 * qdd_k[j] + vd) \
-                            + _cross(wd, pstar) \
-                            + 2 * _cross(w, Rt @ z0 * qd_k[j]) \
+                        vd = (
+                            Rt @ (z0 * qdd_k[j] + vd)
+                            + _cross(wd, pstar)
+                            + 2 * _cross(w, Rt @ z0 * qd_k[j])
                             + _cross(w, _cross(w, pstar))
+                        )
 
-                vhat = _cross(wd, r) \
-                    + _cross(w, _cross(w, r)) \
-                    + vd
+                vhat = _cross(wd, r) + _cross(w, _cross(w, r)) + vd
                 Fm[:, j] = link.m * vhat
                 Nm[:, j] = link.I @ wd + _cross(w, link.I @ w)
 
                 if debug:
-                    print('w:     ', removesmall(w))
-                    print('wd:    ', removesmall(wd))
-                    print('vd:    ', removesmall(vd))
-                    print('vdbar: ', removesmall(vhat))
+                    print("w:     ", removesmall(w))
+                    print("wd:    ", removesmall(wd))
+                    print("vd:    ", removesmall(vd))
+                    print("vdbar: ", removesmall(vhat))
                     print()
 
             if debug:
-                print('Fm\n', Fm)
-                print('Nm\n', Nm)
+                print("Fm\n", Fm)
+                print("Nm\n", Nm)
 
             # -----------------  the backward recursion -------------------- #
 
-            f = fext[:3]      # force/moments on end of arm
+            f = fext[:3]  # force/moments on end of arm
             nn = fext[3:]
 
             for j in range(n - 1, -1, -1):
@@ -1521,10 +1533,12 @@ class DHRobot(Robot):
                         pstar = pstarm[:, j + 1]
 
                     f_ = R @ f + Fm[:, j]
-                    nn_ = R @ nn \
-                        + _cross(pstar, R @ f) \
-                        + _cross(pstar, Fm[:, j]) \
+                    nn_ = (
+                        R @ nn
+                        + _cross(pstar, R @ f)
+                        + _cross(pstar, Fm[:, j])
                         + Nm[:, j]
+                    )
                     f = f_
                     nn = nn_
 
@@ -1535,14 +1549,16 @@ class DHRobot(Robot):
                     else:
                         R = Rm[j + 1]
 
-                    nn = R @ (nn + _cross(R.T @ pstar, f)) \
-                        + _cross(pstar + r, Fm[:, j]) \
+                    nn = (
+                        R @ (nn + _cross(R.T @ pstar, f))
+                        + _cross(pstar + r, Fm[:, j])
                         + Nm[:, j]
+                    )
                     f = R @ f + Fm[:, j]
 
                 if debug:
-                    print('f: ', removesmall(f))
-                    print('n: ', removesmall(nn))
+                    print("f: ", removesmall(f))
+                    print("n: ", removesmall(nn))
 
                 R = Rm[j]
                 if self.mdh:
@@ -1562,12 +1578,15 @@ class DHRobot(Robot):
 
                 # add joint inertia and friction
                 #  no Coulomb friction if model is symbolic
-                tau[k, j] = t \
-                    + link.G ** 2 * link.Jm * qdd_k[j] \
+                tau[k, j] = (
+                    t
+                    + link.G ** 2 * link.Jm * qdd_k[j]
                     - link.friction(qd_k[j], coulomb=not self.symbolic)
+                )
                 if debug:
                     print(
-                        f'j={j:}, G={link.G:}, Jm={link.Jm:}, friction={link.friction(qd_k[j], coulomb=False):}')  # noqa
+                        f"j={j:}, G={link.G:}, Jm={link.Jm:}, friction={link.friction(qd_k[j], coulomb=False):}"
+                    )  # noqa
                     print()
 
             # compute the base wrench and save it
@@ -1597,7 +1616,7 @@ class DHRobot(Robot):
         else:
             return tau
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     def ikine_6s(self, T, config, ikfunc):
         # Undo base and tool transformations, but if they are not
@@ -1624,16 +1643,17 @@ class DHRobot(Robot):
                 T13 = self.A([0, 2], theta)
 
                 # T = T13 * Tz(d4) * R * Tz(d6) Tx(a5)
-                Td4 = SE3(0, 0, self.links[3].d)      # Tz(d4)
+                Td4 = SE3(0, 0, self.links[3].d)  # Tz(d4)
 
                 # Tz(d6) Tx(a5) Rx(alpha6)
-                Tt = SE3(self.links[5].a, 0, self.links[5].d) * \
-                    SE3.Rx(self.links[5].alpha)
+                Tt = SE3(self.links[5].a, 0, self.links[5].d) * SE3.Rx(
+                    self.links[5].alpha
+                )
 
                 R = Td4.inv() * T13.inv() * Tk * Tt.inv()
 
                 # The spherical wrist implements Euler angles
-                if 'f' in config:
+                if "f" in config:
                     eul = R.eul(flip=True)
                 else:
                     eul = R.eul()
@@ -1661,7 +1681,8 @@ class DHRobot(Robot):
             return iksol(
                 np.vstack([sol.q for sol in solutions]),
                 np.array([sol.success for sol in solutions]),
-                [sol.reason for sol in solutions])
+                [sol.reason for sol in solutions],
+            )
 
     def config_validate(self, config, allowables):
         """
@@ -1711,22 +1732,21 @@ class DHRobot(Robot):
 class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
         warnings.warn(
-            'SerialLink is deprecated, use DHRobot instead',
-            DeprecationWarning
+            "SerialLink is deprecated, use DHRobot instead", DeprecationWarning
         )
         super().__init__(*args, **kwargs)
 
 
 def _cross(a, b):
     return np.r_[
-        a[1] * b[2] - a[2] * b[1],
-        a[2] * b[0] - a[0] * b[2],
-        a[0] * b[1] - a[1] * b[0]]
+        a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]
+    ]
 
 
-if __name__ == "__main__":   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     import roboticstoolbox as rtb
+
     # import spatialmath.base.symbolic as sym
 
     # planar = rtb.models.DH.Planar2()
@@ -1739,7 +1759,7 @@ if __name__ == "__main__":   # pragma nocover
 
     puma = rtb.models.DH.Puma560()
     print(puma)
-    print(puma.jacob0(puma.qn, analytical='eul'))
+    print(puma.jacob0(puma.qn, analytical="eul"))
     # puma.base = None
     # print('base', puma.base)
     # print('tool', puma.tool)

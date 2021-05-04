@@ -1,5 +1,5 @@
 # import sys
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractproperty
 import copy
 import numpy as np
 import roboticstoolbox as rtb
@@ -11,21 +11,9 @@ from spatialmath.base.argcheck import (
     getunit,
     verifymatrix,
 )
-from roboticstoolbox.robot.Link import Link
-
-# from spatialmath.base.transforms3d import tr2delta
-# from roboticstoolbox.tools import urdf
-# from roboticstoolbox.tools import xacro
-# from pathlib import PurePath, PurePosixPath
-# from scipy.optimize import minimize, Bounds, LinearConstraint
-# from roboticstoolbox.tools.null import null
 from ansitable import ANSITable, Column
-
 from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
-
-# from roboticstoolbox.backends.swift import Swift
-
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
 
@@ -90,7 +78,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         self._hascollision = False
 
         for link in links:
-            if not isinstance(link, Link):
+            if not isinstance(link, rtb.Link):
                 raise TypeError("links should all be Link subclass")
 
             # add link back to roboto
@@ -261,8 +249,6 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
     @abstractproperty
     def nbranches(self):
-        pass
-
         """
         Number of branches (Robot superclass)
 
