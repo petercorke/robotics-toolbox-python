@@ -1,0 +1,60 @@
+name: build
+
+on:
+  push:
+    branches: [ future ]
+
+jobs:
+  unittest:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9]
+
+    steps:
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Checkout future branch
+      uses: actions/checkout@v2
+      with:
+        ref: future
+        path: rtb
+        
+    - name: Checkout Swift
+      uses: actions/checkout@v2
+      with:
+        repository: jhavl/swift
+        path: swift
+
+    - name: Checkout Spatialmath
+      uses: actions/checkout@v2
+      with:
+        repository: petercorke/spatialmath-python
+        path: sm
+
+    - name: Checkout Spatialgeometry
+      uses: actions/checkout@v2
+      with:
+        repository: jhavl/spatialgeometry
+        path: sg
+        
+    - name: Install dependencies
+      run: |
+        cd sm
+        python -m pip install .
+        cd ../sg
+        python -m pip install .
+        cd ../swift
+        python -m pip install .
+        cd ../rtb
+        python -m pip install --upgrade pip
+    - name: Test with pytest
+      run: |
+        pip install .[dev,collision,vpython]
+        pip install pytest-timeout
+        pytest --timeout=50 --timeout_method thread -s
