@@ -45,16 +45,18 @@ jobs:
         
     - name: Install dependencies
       run: |
+        python -m pip install --upgrade pip
         cd sm
         python -m pip install .
         cd ../sg
         python -m pip install .
         cd ../swift
         python -m pip install .
-        cd ../rtb
-        python -m pip install --upgrade pip
+        cd ../rtb/rtb-data
+        python -m pip install .
     - name: Test with pytest
       run: |
+        cd rtb
         pip install .[dev,collision,vpython]
         pip install pytest-timeout
         pytest --timeout=50 --timeout_method thread -s
