@@ -6,7 +6,7 @@ import math
 
 
 def p_servo(wTe, wTep, gain=2, threshold=0.1):
-    '''
+    """
     Position-based servoing.
 
     Returns the end-effector velocity which will cause the robot to approach
@@ -29,7 +29,7 @@ def p_servo(wTe, wTep, gain=2, threshold=0.1):
         pose
     :rtype arrived: bool
 
-    '''
+    """
 
     if not isinstance(wTe, SE3):
         wTe = SE3(wTe)
@@ -40,11 +40,11 @@ def p_servo(wTe, wTep, gain=2, threshold=0.1):
     # Pose difference
     eTep = wTe.inv() * wTep
 
-    # Translational velocity error
+    # Translational error
     ev = eTep.t
 
-    # Angular velocity error
-    ew = eTep.rpy('rad')
+    # Angular error
+    ew = eTep.rpy("rad")
 
     # Form error vector
     e = np.r_[ev, ew]
