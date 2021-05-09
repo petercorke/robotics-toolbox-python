@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
 
@@ -31,6 +33,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
@@ -509,7 +512,7 @@
 
         <span class="k">def</span> <span class="nf">recurse</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">indent</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">link</span><span class="o">.</span><span class="n">child</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">link</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
                 <span class="n">recurse</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">indent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="n">recurse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_link</span><span class="p">)</span></div>
@@ -823,13 +826,16 @@
                 <span class="n">T</span> <span class="o">*=</span> <span class="n">link</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">jindex</span><span class="p">])</span>
                 <span class="n">Tall</span><span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">number</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span>
 
-                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">nchildren</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">nchildren</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># no children</span>
+                    <span class="k">return</span>
+                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">nchildren</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># one child</span>
+                    <span class="k">if</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_links</span><span class="p">:</span>
+                        <span class="c1"># this link is an end-effector, go no further</span>
+                        <span class="k">return</span>
                     <span class="n">link</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="k">continue</span>
-
-                <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">nchildren</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">return</span>
-
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># multiple children</span>
                     <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">link</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
@@ -2258,7 +2264,10 @@
                 <span class="n">Xtree</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;O&quot;</span><span class="p">),</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">Xtree</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">Ts</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">s</span>
+            <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">s</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">gravity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">a_grav</span> <span class="o">=</span> <span class="o">-</span><span class="n">SpatialAcceleration</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
@@ -2461,7 +2470,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 04-May-2021.
+        Last updated on 09-May-2021.
       </span>
 
     </p>

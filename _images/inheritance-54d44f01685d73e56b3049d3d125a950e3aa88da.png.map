@@ -1,0 +1,9 @@
+<map id="inheritance3a5240bd69" name="inheritance3a5240bd69">
+<area shape="rect" id="node1" href="#roboticstoolbox.robot.DHLink" target="_top" title="A link superclass for all robots defined using Denavit&#45;Hartenberg notation." alt="" coords="257,80,377,105"/>
+<area shape="rect" id="node3" href="#roboticstoolbox.robot.DHLink.PrismaticDH" target="_top" title="Class for prismatic link using standard DH convention" alt="" coords="431,5,586,31"/>
+<area shape="rect" id="node4" href="#roboticstoolbox.robot.DHLink.PrismaticMDH" target="_top" title="Class for prismatic link using modified DH convention" alt="" coords="425,55,592,80"/>
+<area shape="rect" id="node5" href="#roboticstoolbox.robot.DHLink.RevoluteDH" target="_top" title="Class for revolute links using standard DH convention" alt="" coords="433,104,584,129"/>
+<area shape="rect" id="node6" href="#roboticstoolbox.robot.DHLink.RevoluteMDH" target="_top" title="Class for revolute links using modified DH convention" alt="" coords="427,153,590,179"/>
+<area shape="rect" id="node2" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" target="_top" title="Link superclass" alt="" coords="129,80,209,105"/>
+<area shape="rect" id="node7" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,80,81,105"/>
+</map>
