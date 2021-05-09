@@ -351,7 +351,7 @@ class BaseERobot(Robot):
 
         def recurse(link, indent=0):
             print(" " * indent * 2, link.name)
-            for child in link.child:
+            for child in link.children:
                 recurse(child, indent + 1)
 
         recurse(self.base_link)
