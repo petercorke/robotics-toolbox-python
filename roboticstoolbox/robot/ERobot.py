@@ -2102,7 +2102,10 @@ class ERobot(BaseERobot):
                 Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
             else:
                 Xtree[j] = SE3(link.Ts, check=False)
-            s[j] = link.v.s
+            if link.v is not None:
+                s[j] = link.v.s
+            else:
+                s[j] = None
 
         if gravity is None:
             a_grav = -SpatialAcceleration(robot.gravity)
