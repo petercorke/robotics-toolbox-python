@@ -12,8 +12,7 @@ so must be subclassed by ``DHRobot`` class.
 """
 from collections import namedtuple
 import numpy as np
-from spatialmath.base import \
-    getvector, verifymatrix, isscalar, getmatrix, t2r, rot2jac
+from spatialmath.base import getvector, verifymatrix, isscalar, getmatrix, t2r, rot2jac
 from scipy import integrate, interpolate
 from spatialmath.base import symbolic as sym
 
@@ -23,7 +22,7 @@ import warnings
 
 class DynamicsMixin:
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     @property
     def gravity(self):
@@ -48,7 +47,7 @@ class DynamicsMixin:
         self._gravity = getvector(gravity_new, 3)
         self.dynchanged()
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
     def dynamics(self):
         """
         Pretty print the dynamic parameters (Robot superclass)
@@ -73,7 +72,9 @@ class DynamicsMixin:
             Column("Jm", colalign="<", headalign="^"),
             Column("B", colalign="<", headalign="^"),
             Column("Tc", colalign="<", headalign="^"),
-            Column("G", colalign="<", headalign="^"), border="thin")
+            Column("G", colalign="<", headalign="^"),
+            border="thin",
+        )
 
         for j, link in enumerate(self):
             table.row(link.name, *link._dyn2list())
@@ -90,7 +91,7 @@ class DynamicsMixin:
             print("\nLink {:d}::".format(j), link)
             print(link.dyn(indent=2))
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     def friction(self, qd):
         r"""
@@ -149,7 +150,7 @@ class DynamicsMixin:
 
         return tau
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     def nofriction(self, coulomb=True, viscous=False):
         """
@@ -172,17 +173,25 @@ class DynamicsMixin:
         # shallow copy the robot object
         self.delete_rne()  # remove the inherited C pointers
         nf = self.copy()
-        nf.name = 'NF/' + self.name
+        nf.name = "NF/" + self.name
 
         # add the modified links (copies)
         nf._links = [link.nofriction(coulomb, viscous) for link in self.links]
 
         return nf
 
-
     def fdyn(
-            self, T, q0, torqfun=None, targs=None, qd0=None,
-            solver='RK45', sargs=None, dt=None, progress=False):
+        self,
+        T,
+        q0,
+        torqfun=None,
+        targs=None,
+        qd0=None,
+        solver="RK45",
+        sargs=None,
+        dt=None,
+        progress=False,
+    ):
         """
         Integrate forward dynamics
 
@@ -286,7 +295,7 @@ class DynamicsMixin:
         n = self.n
 
         if not isscalar(T):
-            raise ValueError('T must be a scalar')
+            raise ValueError("T must be a scalar")
         q0 = getvector(q0, n)
         if qd0 is None:
             qd0 = np.zeros((n,))
@@ -294,7 +303,7 @@ class DynamicsMixin:
             qd0 = getvector(qd0, n)
         if torqfun is not None:
             if not callable(torqfun):
-                raise ValueError('torque function must be callable')
+                raise ValueError("torque function must be callable")
         if sargs is None:
             sargs = {}
         if targs is None:
@@ -308,24 +317,26 @@ class DynamicsMixin:
 
         integrator = scipy_integrator(
             lambda t, y: self._fdyn(t, y, torqfun, targs),
-            t0=0.0, y0=x0, t_bound=T, **sargs
-            )
+            t0=0.0,
+            y0=x0,
+            t_bound=T,
+            **sargs,
+        )
 
         # initialize list of time and states
         tlist = [0]
         xlist = [np.r_[q0, qd0]]
 
         if progress:
-            _printProgressBar(
-                0, prefix='Progress:', suffix='complete', length=60)
+            _printProgressBar(0, prefix="Progress:", suffix="complete", length=60)
 
-        while integrator.status == 'running':
+        while integrator.status == "running":
 
             # step the integrator, calls _fdyn multiple times
             integrator.step()
 
-            if integrator.status == 'failed':
-                raise RuntimeError('integration completed with failed status ')
+            if integrator.status == "failed":
+                raise RuntimeError("integration completed with failed status ")
 
             # stash the results
             tlist.append(integrator.t)
@@ -334,12 +345,12 @@ class DynamicsMixin:
             # update the progress bar
             if progress:
                 _printProgressBar(
-                    integrator.t / T, prefix='Progress:', suffix='complete',
-                    length=60)
+                    integrator.t / T, prefix="Progress:", suffix="complete", length=60
+                )
 
         # cleanup the progress bar
         if progress:
-            print('\r' + ' ' * 90 + '\r')
+            print("\r" + " " * 90 + "\r")
 
         tarray = np.array(tlist)
         xarray = np.array(xlist)
@@ -350,10 +361,9 @@ class DynamicsMixin:
 
             tnew = np.arange(0, T, dt)
             xnew = interp(tnew)
-            return namedtuple('fdyn', 't q qd')(tnew, xnew[:, :n], xnew[:, n:])
+            return namedtuple("fdyn", "t q qd")(tnew, xnew[:, :n], xnew[:, n:])
         else:
-            return namedtuple('fdyn', 't q qd')(
-                tarray, xarray[:, :n], xarray[:, n:])
+            return namedtuple("fdyn", "t q qd")(tarray, xarray[:, :n], xarray[:, n:])
 
     def _fdyn(self, t, x, torqfun, targs):
         """
@@ -387,7 +397,8 @@ class DynamicsMixin:
             tau = torqfun(self, t, q, qd, **targs)
             if len(tau) != n or not all(np.isreal(tau)):
                 raise RuntimeError(
-                    'torque function must return vector with N real elements')
+                    "torque function must return vector with N real elements"
+                )
 
         qdd = self.accel(q, qd, tau)
 
@@ -415,7 +426,7 @@ class DynamicsMixin:
         the number of robot joints.
 
         .. math::
-        
+
             \ddot{q} = \mathbf{M}^{-1} \left(\tau - \mathbf{C}(q)\dot{q} - \mathbf{g}(q)\right)
 
         Example:
@@ -584,7 +595,7 @@ class DynamicsMixin:
 
         """
 
-        p = getvector(p, 3, out='col')
+        p = getvector(p, 3, out="col")
         lastlink = self.links[self.n - 1]
 
         lastlink.m = m
@@ -639,10 +650,7 @@ class DynamicsMixin:
         Deprecated, use ``inertia_x``
 
         """
-        warnings.warn(
-            'cinertia is deprecated, use inertia_x',
-            DeprecationWarning
-        )
+        warnings.warn("cinertia is deprecated, use inertia_x", DeprecationWarning)
 
     def inertia(self, q):
         """
@@ -692,7 +700,8 @@ class DynamicsMixin:
                 (np.c_[qk] @ np.ones((1, self.n))).T,
                 np.zeros((self.n, self.n)),
                 np.eye(self.n),
-                gravity=[0, 0, 0])
+                gravity=[0, 0, 0],
+            )
 
         if q.shape[0] == 1:
             return In[0, :, :]
@@ -744,7 +753,7 @@ class DynamicsMixin:
         q = getmatrix(q, (None, self.n))
         qd = getmatrix(qd, (None, self.n))
         if q.shape[0] != qd.shape[0]:
-            raise ValueError('q and qd must have the same number of rows')
+            raise ValueError("q and qd must have the same number of rows")
 
         # ensure that friction doesn't enter the mix, it's also a velocity
         # dependent force/torque
@@ -760,8 +769,7 @@ class DynamicsMixin:
             for i in range(self.n):
                 QD = np.zeros(self.n)
                 QD[i] = 1
-                tau = r1.rne(
-                    qk, QD, np.zeros(self.n), gravity=[0, 0, 0])
+                tau = r1.rne(qk, QD, np.zeros(self.n), gravity=[0, 0, 0])
                 Csq[k, :, i] = Csq[k, :, i] + tau
 
         # Find the torques that depend on a pair of finite joint speeds,
@@ -777,11 +785,13 @@ class DynamicsMixin:
                     QD[j] = 1
                     tau = r1.rne(qk, QD, np.zeros(self.n), gravity=[0, 0, 0])
 
-                    C[k, :, j] = C[k, :, j] + \
-                        (tau - Csq[k, :, j] - Csq[k, :, i]) * qdk[i] / 2
+                    C[k, :, j] = (
+                        C[k, :, j] + (tau - Csq[k, :, j] - Csq[k, :, i]) * qdk[i] / 2
+                    )
 
-                    C[k, :, i] = C[k, :, i] + \
-                        (tau - Csq[k, :, j] - Csq[k, :, i]) * qdk[j] / 2
+                    C[k, :, i] = (
+                        C[k, :, i] + (tau - Csq[k, :, j] - Csq[k, :, i]) * qdk[j] / 2
+                    )
 
             C[k, :, :] = C[k, :, :] + Csq[k, :, :] @ np.diag(qdk)
 
@@ -844,13 +854,13 @@ class DynamicsMixin:
         else:
             return taug
 
-    def inertia_x(self, q=None, pinv=False, analytical='rpy-xyz'):
+    def inertia_x(self, q=None, pinv=False, analytical="rpy-xyz"):
         r"""
         Operational space inertia matrix
 
         :param q: Joint coordinates
         :type q: array_like(n) or ndarray(m,n)
-        :param pinv: use pseudo inverse rather than inverse 
+        :param pinv: use pseudo inverse rather than inverse
         :type pinv: bool
         :param analytical: the type of analytical Jacobian to use, default is
             'rpy-xyz'
@@ -863,7 +873,7 @@ class DynamicsMixin:
         acceleration at the joint configuration q.
 
         .. math::
-        
+
             \mathbf{M}_x = \mathbf{J}(q)^{-T} \mathbf{M}(q) \mathbf{J}(q)^{-1}
 
         The transformation to operational space requires an analytical, rather
@@ -893,7 +903,7 @@ class DynamicsMixin:
         corresponds to the Cartesian inertia for the corresponding
         row of ``q``.
 
-        .. note::  
+        .. note::
             - If the robot is not 6 DOF the ``pinv`` option is set True.
             - ``pinv()`` is around 5x slower than ``inv()``
 
@@ -921,7 +931,7 @@ class DynamicsMixin:
         else:
             return Mt
 
-    def coriolis_x(self, q, qd, pinv=False, analytical='rpy-xyz'):
+    def coriolis_x(self, q, qd, pinv=False, analytical="rpy-xyz"):
         r"""
         Operational space Coriolis and centripetal term
 
@@ -929,7 +939,7 @@ class DynamicsMixin:
         :type q: ndarray(n) or ndarray(m,n)
         :param qd: Joint velocity
         :type qd: ndarray(n) or ndarray(m,n)
-        :param pinv: use pseudo inverse rather than inverse 
+        :param pinv: use pseudo inverse rather than inverse
         :type pinv: bool
         :param analytical: the type of analytical Jacobian to use, default is
             'rpy-xyz'
@@ -942,9 +952,9 @@ class DynamicsMixin:
         ``qd``, where ``n`` is the number of joints.
 
         .. math::
-        
-            \mathbf{C}_x = \mathbf{J}(q)^{-T} \left( 
-                \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q) 
+
+            \mathbf{C}_x = \mathbf{J}(q)^{-T} \left(
+                \mathbf{C}(q) - \mathbf{M}_x(q) \mathbf{J})(q)
                 \right) \mathbf{J}(q)^{-1}
 
         The product :math:`\mathbf{C} \dot{x}` is the operational space wrench
@@ -995,7 +1005,6 @@ class DynamicsMixin:
         if n != 6:
             pinv = True
 
-
         Ct = np.zeros((q.shape[0], 6, 6))
 
         for k, (qk, qdk) in enumerate(zip(q, qd)):
@@ -1006,8 +1015,8 @@ class DynamicsMixin:
             C = self.coriolis(qk, qdk)
             Mx = self.inertia_x(qk)
             Jd = self.jacob_dot(qk, qdk, J0=J)
-            A = 1
-            
+            # A = 1
+
             if pinv:
                 Ji = np.linalg.pinv(Ja)
             else:
@@ -1019,7 +1028,7 @@ class DynamicsMixin:
         else:
             return Ct
 
-    def gravload_x(self, q=None, gravity=None, pinv=False, analytical='rpy-xyz'):
+    def gravload_x(self, q=None, gravity=None, pinv=False, analytical="rpy-xyz"):
         """
         Operational space gravity load
 
@@ -1028,7 +1037,7 @@ class DynamicsMixin:
         :param gravity: Gravitational acceleration (Optional, if not supplied will
             use the ``gravity`` attribute of self).
         :type gravity: ndarray(3)
-        :param pinv: use pseudo inverse rather than inverse 
+        :param pinv: use pseudo inverse rather than inverse
         :type pinv: bool
         :param analytical: the type of analytical Jacobian to use, default is
             'rpy-xyz'
@@ -1044,7 +1053,7 @@ class DynamicsMixin:
         acceleration is explicitly specified as ``g``.
 
         .. math::
-        
+
             \mathbf{G}_x = \mathbf{J}(q)^{-T} \mathbf{G}(q)
 
         The transformation to operational space requires an analytical, rather
@@ -1073,7 +1082,7 @@ class DynamicsMixin:
         configuration vector, and the result is a matrix (nxm) each column
         being the corresponding joint torques.
 
-        .. note::  
+        .. note::
             - If the robot is not 6 DOF the ``pinv`` option is set True.
             - ``pinv()`` is around 5x slower than ``inv()``
 
@@ -1086,13 +1095,13 @@ class DynamicsMixin:
         if q.shape[1] != 6:
             pinv = True
 
-        if gravity is None:
-            gravity = self.gravity
-        else:
-            gravity = getvector(gravity, 3)
+        # if gravity is None:
+        #     gravity = self.gravity
+        # else:
+        #     gravity = getvector(gravity, 3)
 
         taug = np.zeros((q.shape[0], self.n))
-        z = np.zeros(self.n)
+        # z = np.zeros(self.n)
 
         for k, qk in enumerate(q):
             Ja = self.jacob0(qk, analytical=analytical)
@@ -1109,7 +1118,7 @@ class DynamicsMixin:
         else:
             return taug
 
-    def accel_x(self, q, xd, wrench, gravity=None, pinv=False, analytical='rpy-xyz'):
+    def accel_x(self, q, xd, wrench, gravity=None, pinv=False, analytical="rpy-xyz"):
         r"""
         Operational space acceleration due to applied wrench
 
@@ -1122,7 +1131,7 @@ class DynamicsMixin:
         :param gravity: Gravitational acceleration (Optional, if not supplied will
             use the ``gravity`` attribute of self).
         :type gravity: ndarray(3)
-        :param pinv: use pseudo inverse rather than inverse 
+        :param pinv: use pseudo inverse rather than inverse
         :type pinv: bool
         :param analytical: the type of analytical Jacobian to use, default is
             'rpy-xyz'
@@ -1135,7 +1144,7 @@ class DynamicsMixin:
         configuration ``q`` and joint velocity ``qd``.
 
         .. math::
-        
+
             \ddot{x} = \mathbf{J}(q) \mathbf{M}(q)^{-1} \left(
                 \mathbf{J}(q)^T w - \mathbf{C}(q)\dot{q} - \mathbf{g}(q)
                 \right)
@@ -1203,16 +1212,16 @@ class DynamicsMixin:
 
             # xd = Ja qd
             # xdd = Jad qd + Ja qdd
-            # 
+            #
             # Ja = T J
             # Jad = Td J + T Jd
             # assume Td = 0, not sure how valid that is
-            
+
             # need Jacobian dot
             qdk = Ji @ xdk
             Jd = self.jacob_dot(qk, qdk, J0=J)
 
-            xdd[k, :] = T @ (Jd @ qdk  + J @ qdd)
+            xdd[k, :] = T @ (Jd @ qdk + J @ qdd)
 
         if q.shape[0] == 1:
             return xdd[0, :]
@@ -1259,19 +1268,17 @@ class DynamicsMixin:
         q = getmatrix(q, (None, self.n))
         qdd = getmatrix(qdd, (None, self.n))
         if q.shape[0] != qdd.shape[0]:
-            raise ValueError('q and qdd must have the same number of rows')
+            raise ValueError("q and qdd must have the same number of rows")
 
         taui = np.zeros((q.shape[0], self.n))
 
         for k, (qk, qddk) in enumerate(zip(q, qdd)):
-            taui[k, :] = self.rne(
-                qk, np.zeros(self.n), qddk, gravity=[0, 0, 0])
+            taui[k, :] = self.rne(qk, np.zeros(self.n), qddk, gravity=[0, 0, 0])
 
         if q.shape[0] == 1:
             return taui[0, :]
         else:
             return taui
-
 
     def paycap(self, w, tauR, frame=1, q=None):
         """
@@ -1317,8 +1324,8 @@ class DynamicsMixin:
             q = self.q
 
         try:
-            q = getvector(q, self.n, 'row')
-            w = getvector(w, 6, 'row')
+            q = getvector(q, self.n, "row")
+            w = getvector(w, 6, "row")
         except ValueError:
             trajn = q.shape[1]
             verifymatrix(q, (trajn, self.n))
@@ -1336,8 +1343,7 @@ class DynamicsMixin:
             #     np.zeros(self.n), np.zeros(self.n),
             #     q, grav=[0, 0, 0], fext=w/np.linalg.norm(w))
 
-            tauP = self.pay(
-                w[i, :]/np.linalg.norm(w[i, :]), q=q[i, :], frame=frame)
+            tauP = self.pay(w[i, :] / np.linalg.norm(w[i, :]), q=q[i, :], frame=frame)
 
             M = tauP > 0
             m = tauP <= 0
@@ -1386,34 +1392,32 @@ class DynamicsMixin:
         """
 
         r2 = self.copy()
-        r2.name = 'P/' + self.name
+        r2.name = "P/" + self.name
 
         for i in range(self.n):
             s = (2 * np.random.random() - 1) * p + 1
             r2.links[i].m = r2.links[i].m * s
 
             s = (2 * np.random.random() - 1) * p + 1
-            r2.links[i].I = r2.links[i].I * s    # noqa
+            r2.links[i].I = r2.links[i].I * s  # noqa
 
         return r2
 
 
-
 def _printProgressBar(
-        fraction, prefix='', suffix='', decimals=1,
-        length=50, fill='█', printEnd="\r"):
+    fraction, prefix="", suffix="", decimals=1, length=50, fill="█", printEnd="\r"
+):
 
     percent = ("{0:." + str(decimals) + "f}").format(fraction * 100)
     filledLength = int(length * fraction)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=printEnd)
+    bar = fill * filledLength + "-" * (length - filledLength)
+    print(f"\r{prefix} |{bar}| {percent}% {suffix}", end=printEnd)
 
 
-
-
-if __name__ == "__main__":   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     import roboticstoolbox as rtb
+
     # from spatialmath.base import symbolic as sym
 
     puma = rtb.models.DH.Puma560()

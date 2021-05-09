@@ -16,7 +16,7 @@ def _listen_dyn(func):
     affects the result of inverse dynamics.  This allows the C version of the
     parameters only having to be updated when they change, rather than on
     every call.  This decorator signals the change by:
-    
+
     - invoking the ``.dynchanged()`` method of the robot that owns the link.
       This assumes that the Link object is owned by a robot, this happens
       when the Link object is passed to a robot constructor.
@@ -31,12 +31,14 @@ def _listen_dyn(func):
 
     :seealso: :func:`DHLink._dyn_changed`
     """
+
     @wraps(func)
     def wrapper_listen_dyn(*args):
         if args[0]._robot is not None:
             args[0]._robot.dynchanged()
         args[0]._hasdynamics = True
         return func(*args)
+
     return wrapper_listen_dyn
 
 
@@ -91,21 +93,22 @@ class Link(ABC):
     """
 
     def __init__(
-            self,
-            name=None,
-            qlim=None,
-            flip=False,
-            m=None,
-            r=None,
-            I=None,  # noqa
-            Jm=None,
-            B=None,
-            Tc=None,
-            G=None,
-            mesh=None,
-            geometry=[],
-            collision=[],
-            **kwargs):
+        self,
+        name=None,
+        qlim=None,
+        flip=False,
+        m=None,
+        r=None,
+        I=None,  # noqa
+        Jm=None,
+        B=None,
+        Tc=None,
+        G=None,
+        mesh=None,
+        geometry=[],
+        collision=[],
+        **kwargs,
+    ):
 
         self._robot = None  # reference to owning robot
 
@@ -138,15 +141,15 @@ class Link(ABC):
 
         dynchange = 0
         # link inertial parameters
-        dynchange += dynpar(self, 'm', m, 0.0)
-        dynchange += dynpar(self, 'r', r, np.zeros((3,)))
-        dynchange += dynpar(self, 'I', I, np.zeros((3, 3)))
+        dynchange += dynpar(self, "m", m, 0.0)
+        dynchange += dynpar(self, "r", r, np.zeros((3,)))
+        dynchange += dynpar(self, "I", I, np.zeros((3, 3)))
 
         # Motor inertial and frictional parameters
-        dynchange += dynpar(self, 'Jm', Jm, 0.0)
-        dynchange += dynpar(self, 'B', B, 0.0)
-        dynchange += dynpar(self, 'Tc', Tc, np.zeros((2,)))
-        dynchange += dynpar(self, 'G', G, 0.0)
+        dynchange += dynpar(self, "Jm", Jm, 0.0)
+        dynchange += dynpar(self, "B", B, 0.0)
+        dynchange += dynpar(self, "Tc", Tc, np.zeros((2,)))
+        dynchange += dynpar(self, "G", G, 0.0)
 
         self.actuator = None  # reference to more advanced actuator model
 
@@ -164,12 +167,12 @@ class Link(ABC):
         """
         new = copy.copy(self)
         for k, v in self.__dict__.items():
-            if k.startswith('_') and isinstance(v, np.ndarray):
+            if k.startswith("_") and isinstance(v, np.ndarray):
                 setattr(new, k, np.copy(v))
         return new
 
     def _copy(self):
-        raise DeprecationWarning('Use copy method of Link class')
+        raise DeprecationWarning("Use copy method of Link class")
 
     def dyn(self, indent=0):
         """
@@ -196,34 +199,46 @@ class Link(ABC):
         :seealso: :func:`~dyntable`
         """
 
-        s = "m     =  {:8.2g} \n" \
-            "r     =  {:8.2g} {:8.2g} {:8.2g} \n" \
-            "        | {:8.2g} {:8.2g} {:8.2g} | \n" \
-            "I     = | {:8.2g} {:8.2g} {:8.2g} | \n" \
-            "        | {:8.2g} {:8.2g} {:8.2g} | \n" \
-            "Jm    =  {:8.2g} \n" \
-            "B     =  {:8.2g} \n" \
-            "Tc    =  {:8.2g}(+) {:8.2g}(-) \n" \
-            "G     =  {:8.2g} \n" \
+        s = (
+            "m     =  {:8.2g} \n"
+            "r     =  {:8.2g} {:8.2g} {:8.2g} \n"
+            "        | {:8.2g} {:8.2g} {:8.2g} | \n"
+            "I     = | {:8.2g} {:8.2g} {:8.2g} | \n"
+            "        | {:8.2g} {:8.2g} {:8.2g} | \n"
+            "Jm    =  {:8.2g} \n"
+            "B     =  {:8.2g} \n"
+            "Tc    =  {:8.2g}(+) {:8.2g}(-) \n"
+            "G     =  {:8.2g} \n"
             "qlim  =  {:8.2g} to {:8.2g}".format(
                 self.m,
-                self.r[0], self.r[1], self.r[2],
-                self.I[0, 0], self.I[0, 1], self.I[0, 2],
-                self.I[1, 0], self.I[1, 1], self.I[1, 2],
-                self.I[2, 0], self.I[2, 1], self.I[2, 2],
+                self.r[0],
+                self.r[1],
+                self.r[2],
+                self.I[0, 0],
+                self.I[0, 1],
+                self.I[0, 2],
+                self.I[1, 0],
+                self.I[1, 1],
+                self.I[1, 2],
+                self.I[2, 0],
+                self.I[2, 1],
+                self.I[2, 2],
                 self.Jm,
                 self.B,
-                self.Tc[0], self.Tc[1],
+                self.Tc[0],
+                self.Tc[1],
                 self.G,
-                self.qlim[0], self.qlim[1]
+                self.qlim[0],
+                self.qlim[1],
             )
+        )
 
         if indent > 0:
             # insert indentations into the string
             # TODO there is probably a tidier way to integrate this step with
             # above
-            sp = ' ' * indent
-            s = sp + s.replace('\n', '\n' + sp)
+            sp = " " * indent
+            s = sp + s.replace("\n", "\n" + sp)
 
         return s
 
@@ -245,11 +260,12 @@ class Link(ABC):
         ANSITable(
             Column("Parameter", headalign="^"),
             Column("Value", headalign="^", colalign="<"),
-            border="thin")
+            border="thin",
+        )
 
         def format(l, fmt, val):  # noqa
             if isinstance(val, np.ndarray):
-                s = ', '.join([fmt.format(v) for v in val])
+                s = ", ".join([fmt.format(v) for v in val])
             else:
                 s = fmt.format(val)
             l.append(s)
@@ -404,7 +420,7 @@ class Link(ABC):
 
         return tau
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def name(self):
@@ -424,7 +440,7 @@ class Link(ABC):
     def name(self, name):
         self._name = name
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def qlim(self):
@@ -477,7 +493,7 @@ class Link(ABC):
         """
         return self._hasdynamics
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def flip(self):
@@ -510,7 +526,7 @@ class Link(ABC):
     def flip(self, flip_new):
         self._flip = flip_new
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def m(self):
@@ -532,7 +548,7 @@ class Link(ABC):
     def m(self, m_new):
         self._m = m_new
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def r(self):
@@ -556,10 +572,10 @@ class Link(ABC):
     def r(self, r_new):
         self._r = getvector(r_new, 3)
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
-    def I(self):    # noqa
+    def I(self):  # noqa
         r"""
         Get/set link inertia
 
@@ -596,33 +612,35 @@ class Link(ABC):
         if ismatrix(I_new, (3, 3)):
             # 3x3 matrix passed
             if np.any(np.abs(I_new - I_new.T) > 1e-8):
-                raise ValueError('3x3 matrix is not symmetric')
+                raise ValueError("3x3 matrix is not symmetric")
 
         elif isvector(I_new, 9):
             # 3x3 matrix passed as a 1d vector
             I_new = I_new.reshape(3, 3)
             if np.any(np.abs(I_new - I_new.T) > 1e-8):
-                raise ValueError('3x3 matrix is not symmetric')
+                raise ValueError("3x3 matrix is not symmetric")
 
         elif isvector(I_new, 6):
             # 6-vector passed, moments and products of inertia,
             # [Ixx Iyy Izz Ixy Iyz Ixz]
-            I_new = np.array([
-                [I_new[0], I_new[3], I_new[5]],
-                [I_new[3], I_new[1], I_new[4]],
-                [I_new[5], I_new[4], I_new[2]]
-            ])
+            I_new = np.array(
+                [
+                    [I_new[0], I_new[3], I_new[5]],
+                    [I_new[3], I_new[1], I_new[4]],
+                    [I_new[5], I_new[4], I_new[2]],
+                ]
+            )
 
         elif isvector(I_new, 3):
             # 3-vector passed, moments of inertia [Ixx Iyy Izz]
             I_new = np.diag(I_new)
 
         else:
-            raise ValueError('invalid shape passed: must be (3,3), (6,), (3,)')
+            raise ValueError("invalid shape passed: must be (3,3), (6,), (3,)")
 
         self._I = I_new
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def Jm(self):
@@ -645,7 +663,7 @@ class Link(ABC):
     def Jm(self, Jm_new):
         self._Jm = Jm_new
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def B(self):
@@ -673,7 +691,7 @@ class Link(ABC):
         else:
             raise TypeError("B must be a scalar")
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def Tc(self):
@@ -723,7 +741,7 @@ class Link(ABC):
 
         self._Tc = Tc_new
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def G(self):
@@ -750,10 +768,10 @@ class Link(ABC):
     def G(self, G_new):
         self._G = G_new
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
-    def closest_point(self, shape, inf_dist=1.0, homogenous=True):
-        '''
+    def closest_point(self, shape, inf_dist=1.0):
+        """
         closest_point(shape, inf_dist) returns the minimum euclidean
         distance between this link and shape, provided it is less than
         inf_dist. It will also return the points on self and shape in the
@@ -768,16 +786,16 @@ class Link(ABC):
 
         :returns: d, p1, p2 where d is the distance between the shapes,
             p1 and p2 are the points in the world frame on the respective
-            shapes. The points returned are homogeneous with [x, y, z, 1].
-        :rtype: float, ndarray(1x4), ndarray(1x4)
-        '''
+            shapes. The points returned are [x, y, z].
+        :rtype: float, ndarray(1x3), ndarray(1x3)
+        """
 
         d = 10000
-        p1 = None,
+        p1 = (None,)
         p2 = None
 
         for col in self.collision:
-            td, tp1, tp2 = col.closest_point(shape, inf_dist, homogenous)
+            td, tp1, tp2 = col.closest_point(shape, inf_dist)
 
             if td is not None and td < d:
                 d = td
@@ -790,7 +808,7 @@ class Link(ABC):
         return d, p1, p2
 
     def collided(self, shape):
-        '''
+        """
         collided(shape) checks if this link and shape have collided
 
         :param shape: The shape to compare distance to
@@ -798,7 +816,7 @@ class Link(ABC):
 
         :returns: True if shapes have collided
         :rtype: bool
-        '''
+        """
 
         for col in self.collision:
             if col.collided(shape):
@@ -814,7 +832,7 @@ if __name__ == "__main__":  # pragma nocover
 
     ET = rtb.ETS
 
-    d, a, theta = sym.symbol('d, a, theta')
+    d, a, theta = sym.symbol("d, a, theta")
 
     e = ET.tx(d) * ET.ty(a) * ET.rz(theta)
     print(e)

@@ -24,16 +24,16 @@ Robot blocks:
 class FKine(FunctionBlock):
     """
     :blockname:`FKINE`
-    
+
     .. table::
        :align: left
-    
+
        +------------+---------+---------+
        | inputs     | outputs |  states |
        +------------+---------+---------+
        | 1          | 1       | 0       |
        +------------+---------+---------+
-       | ndarray    | SE3     |         | 
+       | ndarray    | SE3     |         |
        +------------+---------+---------+
     """
 
@@ -48,49 +48,52 @@ class FKine(FunctionBlock):
         :param ``**kwargs``: common Block options
         :return: a FORWARD_KINEMATICS block
         :rtype: Foward_Kinematics instance
-        
+
         Robot arm forward kinematic model.
-        
+
         The block has one input port:
-            
+
             1. Joint configuration vector as an ndarray.
-            
+
         and one output port:
-            
+
             1. End-effector pose as an SE(3) object
 
 
         """
         super().__init__(nin=1, nout=1, inputs=inputs, **kwargs)
-        self.type = 'forward-kinematics'
+        self.type = "forward-kinematics"
 
         self.robot = robot
         self.args = args
-            
-        self.inport_names(('q',))
-        self.outport_names(('T',))
-        
+
+        self.inport_names(("q",))
+        self.outport_names(("T",))
+
     def output(self, t=None):
         return [self.robot.fkine(self.inputs[0], **self.args)]
+
 
 @block
 class IKine(FunctionBlock):
     """
     :blockname:`IKINE`
-    
+
     .. table::
        :align: left
-    
+
        +------------+---------+---------+
        | inputs     | outputs |  states |
        +------------+---------+---------+
        | 1          | 1       | 0       |
        +------------+---------+---------+
-       | SE3        | ndarray |         | 
+       | SE3        | ndarray |         |
        +------------+---------+---------+
     """
 
-    def __init__(self, robot=None, q0=None, useprevious=True, ik=None, *inputs, **kwargs):
+    def __init__(
+        self, robot=None, q0=None, useprevious=True, ik=None, *inputs, **kwargs
+    ):
         """
         :param robot: Robot model
         :type robot: Robot subclass
@@ -105,31 +108,31 @@ class IKine(FunctionBlock):
         :type ``*inputs``: Block or Plug
         :return: an INVERSE_KINEMATICS block
         :rtype: Inverse_Kinematics instance
-        
+
         Robot arm inverse kinematic model.
-        
+
         The block has one input port:
-            
+
             1. End-effector pose as an SE(3) object
-            
+
         and one output port:
-            
+
             1. Joint configuration vector as an ndarray.
 
 
         """
         super().__init__(nin=1, nout=1, inputs=inputs, **kwargs)
-        self.type = 'inverse-kinematics'
+        self.type = "inverse-kinematics"
 
         self.robot = robot
         self.q0 = q0
         self.qprev = q0
         self.useprevious = useprevious
         self.ik = None
-            
-        self.inport_names(('T',))
-        self.outport_names(('q',))
-    
+
+        self.inport_names(("T",))
+        self.outport_names(("q",))
+
     def start(self):
         super().start()
         if self.useprevious:
@@ -147,31 +150,42 @@ class IKine(FunctionBlock):
             sol = self.ik(self.inputs[0])
 
         if not sol.success:
-            raise RuntimeError('inverse kinematic failure for pose', self.inputs[0])
+            raise RuntimeError("inverse kinematic failure for pose", self.inputs[0])
 
         if self.useprevious:
             self.qprev = sol.q
 
         return [sol.q]
+
+
 # ------------------------------------------------------------------------ #
 @block
 class Jacobian(FunctionBlock):
     """
     :blockname:`JACOBIAN`
-    
+
     .. table::
        :align: left
-    
+
        +------------+---------+---------+
        | inputs     | outputs |  states |
        +------------+---------+---------+
        | 1          | 1       | 0       |
        +------------+---------+---------+
-       | ndarray    | ndarray |         | 
+       | ndarray    | ndarray |         |
        +------------+---------+---------+
     """
 
-    def __init__(self, robot, *inputs, frame='0', inverse=False, pinv=False, transpose=False, **kwargs):
+    def __init__(
+        self,
+        robot,
+        *inputs,
+        frame="0",
+        inverse=False,
+        pinv=False,
+        transpose=False,
+        **kwargs
+    ):
         """
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
@@ -188,15 +202,15 @@ class Jacobian(FunctionBlock):
         :param ``**kwargs``: common Block options
         :return: a JACOBIAN block
         :rtype: Jacobian instance
-        
+
         Robot arm Jacobian.
-        
+
         The block has one input port:
-            
+
             1. Joint configuration vector as an ndarray.
-            
+
         and one output port:
-            
+
             1. Jacobian matrix as an ndarray(6,n)
 
         .. notes::
@@ -207,28 +221,28 @@ class Jacobian(FunctionBlock):
               error will occur.
         """
         super().__init__(nin=1, nout=1, inputs=inputs, **kwargs)
-        self.type = 'jacobian'
+        self.type = "jacobian"
 
         self.robot = robot
 
-        if frame == '0':
+        if frame == "0":
             self.jfunc = robot.jacob0
-        elif frame == 'e':
+        elif frame == "e":
             self.jfunc = robot.jacobe
         else:
-            raise ValueError('unknown frame')
-        
+            raise ValueError("unknown frame")
+
         if inverse and robot.n != 6:
-            raise ValueError('cannot invert a non square Jacobian')
+            raise ValueError("cannot invert a non square Jacobian")
         if inverse and pinv:
-            raise ValueError('can only set one of inverse and pinv')
+            raise ValueError("can only set one of inverse and pinv")
         self.inverse = inverse
         self.pinv = pinv
         self.transpose = transpose
-            
-        self.inport_names(('q',))
-        self.outport_names(('J',))
-        
+
+        self.inport_names(("q",))
+        self.outport_names(("J",))
+
     def output(self, t=None):
         J = self.jfunc(self.inputs[0])
         if self.inverse:
@@ -239,20 +253,21 @@ class Jacobian(FunctionBlock):
             J = J.T
         return [J]
 
+
 @block
 class Tr2Delta(FunctionBlock):
     """
     :blockname:`TR2DELTA`
-    
+
     .. table::
        :align: left
-    
+
        +------------+------------+---------+
        | inputs     | outputs    |  states |
        +------------+------------+---------+
        | 2          | 1          | 0       |
        +------------+------------+---------+
-       | SE3, SE3   | ndarray(6) |         | 
+       | SE3, SE3   | ndarray(6) |         |
        +------------+------------+---------+
     """
 
@@ -263,45 +278,47 @@ class Tr2Delta(FunctionBlock):
         :param ``**kwargs``: common Block options
         :return: a TR2DELTA block
         :rtype: Tr2Delta instance
-        
+
         Difference between T1 and T2 as a 6-vector
-        
+
         The block has two input port:
-            
+
             1. T1 as an SE3.
             2. T2 as an SE3.
-            
+
         and one output port:
-            
+
             1. delta as an ndarray(6,n)
 
         :seealso: :func:`spatialmath.base.tr2delta`
         """
         super().__init__(nin=2, nout=1, inputs=inputs, **kwargs)
-        self.type = 'tr2delta'
-           
-        self.inport_names(('T1', 'T2'))
-        self.outport_names(('$\delta$',))
-        
+        self.type = "tr2delta"
+
+        self.inport_names(("T1", "T2"))
+        self.outport_names(("$\delta$",))
+
     def output(self, t=None):
         return [base.tr2delta(self.inputs[0].A, self.inputs[1].A)]
 
+
 # ------------------------------------------------------------------------ #
+
 
 @block
 class Delta2Tr(FunctionBlock):
     """
     :blockname:`DELTA2TR`
-    
+
     .. table::
        :align: left
-    
+
        +------------+----------+---------+
        | inputs     | outputs  |  states |
        +------------+----------+---------+
        | 1          | 1        | 0       |
        +------------+----------+---------+
-       | ndarray(6) | SE3      |         | 
+       | ndarray(6) | SE3      |         |
        +------------+----------+---------+
     """
 
@@ -312,44 +329,46 @@ class Delta2Tr(FunctionBlock):
         :param ``**kwargs``: common Block options
         :return: a DELTA2TR block
         :rtype: Delta2Tr instance
-        
+
         Delta to SE(3)
-        
+
         The block has one input port:
-            
+
             1. delta as an ndarray(6,n)
-            
+
         and one output port:
-            
+
             1. T as an SE3
 
         :seealso: :func:`spatialmath.base.delta2tr`
         """
         super().__init__(nin=1, nout=1, inputs=inputs, **kwargs)
-        self.type = 'delta2tr'
-           
-        self.inport_names(('$\delta$',))
-        self.outport_names(('T',))
-        
+        self.type = "delta2tr"
+
+        self.inport_names(("$\delta$",))
+        self.outport_names(("T",))
+
     def output(self, t=None):
         return [SE3.Delta(self.inputs[0])]
 
+
 # ------------------------------------------------------------------------ #
+
 
 @block
 class Point2Tr(FunctionBlock):
     """
     :blockname:`POINT2TR`
-    
+
     .. table::
        :align: left
-    
+
        +------------+----------+---------+
        | inputs     | outputs  |  states |
        +------------+----------+---------+
        | 1          | 1        | 0       |
        +------------+----------+---------+
-       | ndarray(3) | SE3      |         | 
+       | ndarray(3) | SE3      |         |
        +------------+----------+---------+
     """
 
@@ -362,44 +381,46 @@ class Point2Tr(FunctionBlock):
         :param ``**kwargs``: common Block options
         :return: a POINT2TR block
         :rtype: Point2Tr instance
-        
+
         The block has one input port:
-            
+
             1. a 3D point as an ndarray(3)
-            
+
         and one output port:
-            
+
             1. T as an SE3 with its position part replaced by the input
 
         :seealso: :func:`spatialmath.base.delta2tr`
         """
         super().__init__(nin=1, nout=1, inputs=inputs, **kwargs)
-        self.type = 'point2tr'
-           
-        self.inport_names(('t',))
-        self.outport_names(('T',))
+        self.type = "point2tr"
+
+        self.inport_names(("t",))
+        self.outport_names(("T",))
         self.pose = T
-        
+
     def output(self, t=None):
         T = SE3.SO3(self.pose.R, t=self.inputs[0])
         return [T]
 
+
 # ------------------------------------------------------------------------ #
+
 
 @block
 class TR2T(FunctionBlock):
     """
     :blockname:`TR2T`
-    
+
     .. table::
        :align: left
-    
+
        +------------+----------+---------+
        | inputs     | outputs  |  states |
        +------------+----------+---------+
        | 1          | 3        | 0       |
        +------------+----------+---------+
-       | SE3        | float    |         | 
+       | SE3        | float    |         |
        +------------+----------+---------+
     """
 
@@ -412,42 +433,43 @@ class TR2T(FunctionBlock):
         :param ``**kwargs``: common Block options
         :return: a POINT2TR block
         :rtype: Point2Tr instance
-        
+
         The block has one input port:
-            
+
             1. a 3D point as an ndarray(3)
-            
+
         and one output port:
-            
+
             1. T as an SE3 with its position part replaced by the input
 
         :seealso: :func:`spatialmath.base.delta2tr`
         """
         super().__init__(nin=1, nout=3, inputs=inputs, **kwargs)
-        self.type = 'tr2t'
-           
-        self.inport_names(('T',))
-        self.outport_names(('x', 'y', 'z'))
-        
+        self.type = "tr2t"
+
+        self.inport_names(("T",))
+        self.outport_names(("x", "y", "z"))
+
     def output(self, t=None):
         t = self.inputs[0].t
         return list(t)
+
 
 # ------------------------------------------------------------------------ #
 @block
 class FDyn(TransferBlock):
     """
     :blockname:`FDYN`
-    
+
     .. table::
        :align: left
-    
+
        +------------+---------+---------+
        | inputs     | outputs |  states |
        +------------+---------+---------+
        | 1          | 3       | 0       |
        +------------+---------+---------+
-       | ndarray    | ndarray,|         | 
+       | ndarray    | ndarray,|         |
        |            | ndarray,|         |
        |            | ndarray |         |
        +------------+---------+---------+
@@ -464,15 +486,15 @@ class FDyn(TransferBlock):
         :param ``**kwargs``: common Block options
         :return: a FORWARD_DYNAMICS block
         :rtype: Foward_Dynamics instance
-        
+
         Robot arm forward dynamics model.
-        
+
         The block has one input port:
-            
+
             1. Joint configuration vector as an ndarray.
-            
+
         and three output ports:
-            
+
             1. joint configuration
             2. joint velocity
             3. joint acceleration
@@ -480,15 +502,15 @@ class FDyn(TransferBlock):
 
         """
         super().__init__(nin=1, nout=3, inputs=inputs, **kwargs)
-        self.type = 'forward-dynamics'
+        self.type = "forward-dynamics"
 
         self.robot = robot
         self.nstates = robot.n * 2
 
         # state vector is [q qd]
 
-        self.inport_names(('$\tau$',))
-        self.outport_names(('q', 'qd', 'qdd'))
+        self.inport_names(("$\tau$",))
+        self.outport_names(("q", "qd", "qdd"))
 
         if q0 is None:
             q0 = np.zeros((robot.n,))
@@ -496,7 +518,7 @@ class FDyn(TransferBlock):
             q0 = base.getvector(q0, robot.n)
         self._x0 = np.r_[q0, np.zeros((robot.n,))]
         self._qdd = None
-        
+
     def output(self, t=None):
         n = self.robot.n
         q = self._x[:n]
@@ -508,7 +530,7 @@ class FDyn(TransferBlock):
         # return [qd qdd]
         Q = self.inputs[0]
         n = self.robot.n
-        assert len(Q) == n, 'torque vector wrong size'
+        assert len(Q) == n, "torque vector wrong size"
 
         q = self._x[:n]
         qd = self._x[n:]
@@ -516,22 +538,23 @@ class FDyn(TransferBlock):
         self._qdd = qdd
         return np.r_[qd, qdd]
 
+
 @block
 class IDyncs(FunctionBlock):
     """
     :blockname:`IDYN`
-    
+
     .. table::
        :align: left
-    
+
        +------------+---------+---------+
        | inputs     | outputs |  states |
        +------------+---------+---------+
        | 3          | 1       | 0       |
        +------------+---------+---------+
-       | ndarray,   | ndarray |         | 
+       | ndarray,   | ndarray |         |
        | ndarray,   |         |         |
-       | ndarray    |         |         |  
+       | ndarray    |         |         |
        +------------+---------+---------+
     """
 
@@ -547,55 +570,56 @@ class IDyncs(FunctionBlock):
         :param ``**kwargs``: common Block options
         :return: an INVERSE_DYNAMICS block
         :rtype: Inverse_Dynamics instance
-        
+
         Robot arm forward dynamics model.
-        
+
         The block has three input port:
-            
+
             1. Joint configuration vector as an ndarray.
             2. Joint velocity vector as an ndarray.
             3. Joint acceleration vector as an ndarray.
-            
+
         and one output ports:
-            
+
             1. joint torque/force
 
         .. TODO:: end-effector wrench input, base wrench output, payload input
         """
         super().__init__(nin=3, nout=1, inputs=inputs, **kwargs)
-        self.type = 'inverse-dynamics'
+        self.type = "inverse-dynamics"
 
         self.robot = robot
 
         # state vector is [q qd]
 
-        self.inport_names(('q', 'qd', 'qdd'))
-        self.outport_names(('$\tau$',))
-        
+        self.inport_names(("q", "qd", "qdd"))
+        self.outport_names(("$\tau$",))
+
     def output(self, t=None):
         tau = self.robot.rne(self.inputs[0], self.inputs[1], self.inputs[2])
         return [tau]
 
-        
+
 # ------------------------------------------------------------------------ #
+
 
 @block
 class ArmPlot(GraphicsBlock):
     """
     :blockname:`ARMPLOT`
-    
+
     .. table::
        :align: left
-    
+
        +--------+---------+---------+
        | inputs | outputs |  states |
        +--------+---------+---------+
        | 1      | 0       | 0       |
        +--------+---------+---------+
-       | ndarray|         |         | 
+       | ndarray|         |         |
        +--------+---------+---------+
     """
-        
+
     def __init__(self, robot=None, *inputs, q0=None, backend=None, **kwargs):
         """
         :param ``*inputs``: Optional incoming connections
@@ -610,17 +634,17 @@ class ArmPlot(GraphicsBlock):
 
 
         Create a robot animation.
-        
+
         Notes:
-            
+
             - Uses RTB ``plot`` method
 
            Example of vehicle display (animated).  The label at the top is the
            block name.
         """
         super().__init__(nin=1, inputs=inputs, **kwargs)
-        self.type = 'armplot'
-        self.inport_names(('q',))
+        self.type = "armplot"
+        self.inport_names(("q",))
 
         if q0 is None:
             q0 = np.zeros((robot.n,))
@@ -628,49 +652,53 @@ class ArmPlot(GraphicsBlock):
         self.backend = backend
         self.q0 = q0
         self.env = None
-        
+
     def start(self, **kwargs):
         # create the plot
         super().reset()
         if self.bd.options.graphics:
             self.fig = self.create_figure()
-            self.env = self.robot.plot(self.q0, backend=self.backend, fig=self.fig, block=False)
+            self.env = self.robot.plot(
+                self.q0, backend=self.backend, fig=self.fig, block=False
+            )
             super().start()
-        
+
     def step(self):
         # inputs are set
         if self.bd.options.graphics:
-            
+
             self.robot.q = self.inputs[0]
 
             if self.bd.options.animation:
                 self.env.step()
 
             super().step()
-        
+
     def done(self, block=False, **kwargs):
         if self.bd.options.graphics:
             plt.show(block=block)
-            
+
             super().done()
+
+
 @block
 class Traj(FunctionBlock):
     """
     :blockname:`TRAJ`
-    
+
     .. table::
        :align: left
-    
+
        +------------+---------+---------+
        | inputs     | outputs |  states |
        +------------+---------+---------+
        | 0 or 1     | 1       | 0       |
        +------------+---------+---------+
-       | float      | float   |         | 
+       | float      | float   |         |
        +------------+---------+---------+
     """
 
-    def __init__(self, y0=0, yf=1, T=None, time=False, traj='lspb', *inputs, **kwargs):
+    def __init__(self, y0=0, yf=1, T=None, time=False, traj="lspb", *inputs, **kwargs):
         """
 
         :param y0: initial value
@@ -686,23 +714,23 @@ class Traj(FunctionBlock):
         :param ``**kwargs``: common Block options
         :return: TRAJ block
         :rtype: Traj instance
-        
+
         Create a trajectory block.
-    
+
         A block that generates a trajectory using a trapezoidal or quintic
         polynomial profile.
-        
+
         A simple triangle function with domain [0,10] and range [0,1] can be
         defined by::
-            
+
             INTERPOLATE(x=(0,5,10), y=(0,1,0))
-        
+
         We might also express this as::
-            
+
             INTERPOLATE(xy=[(0,0), (5,1), (10,0)])
-        
+
         The distance along the trajectory comes from:
-            
+
         - Input port 0
         - Simulation time, if ``time=True``.  In this case the block has no
           input ports and is a ``Source`` not a ``Function``.
@@ -710,15 +738,15 @@ class Traj(FunctionBlock):
         self.time = time
         if time:
             nin = 0
-            self.blockclass = 'source'
+            self.blockclass = "source"
         else:
             nin = 1
         super().__init__(nin=nin, nout=3, inputs=inputs, **kwargs)
-        self.type = 'function'
+        self.type = "function"
 
         y0 = base.getvector(y0)
         yf = base.getvector(yf)
-        assert len(y0) == len(yf), 'y0 and yf must have same length'
+        assert len(y0) == len(yf), "y0 and yf must have same length"
 
         self.y0 = y0
         self.yf = yf
@@ -726,22 +754,22 @@ class Traj(FunctionBlock):
         self.T = T
         self.traj = traj
 
-        self.outport_names(('y', 'yd', 'ydd'))
-                
+        self.outport_names(("y", "yd", "ydd"))
+
     def start(self, **kwargs):
         if self.time:
-            assert self.x[0] <= 0, 'interpolation not defined for t=0'
-            assert self.x[-1] >= self.bd.T, 'interpolation not defined for t=T'
+            assert self.x[0] <= 0, "interpolation not defined for t=0"
+            assert self.x[-1] >= self.bd.T, "interpolation not defined for t=T"
 
-        if self.traj == 'lspb':
+        if self.traj == "lspb":
             trajfunc = lspb_func
-        elif self.traj == 'tpoly':
+        elif self.traj == "tpoly":
             trajfunc = tpoly_func
 
         self.trajfuncs = []
         for i in range(len(self.y0)):
             self.trajfuncs.append(trajfunc(self.y0[i], self.yf[i], self.T))
-        
+
     def output(self, t=None):
         if not self.time:
             t = self.inputs[0]
@@ -758,20 +786,21 @@ class Traj(FunctionBlock):
 
         return [np.hstack(y), np.hstack(yd), np.hstack(ydd)]
 
+
 @block
 class JTraj(SourceBlock):
     """
     :blockname:`JTRAJ`
-    
+
     .. table::
        :align: left
-    
+
        +------------+------------+---------+
        | inputs     | outputs    |  states |
        +------------+------------+---------+
        | 0          | 3          | 0       |
        +------------+------------+---------+
-       |            | ndarray(n) |         | 
+       |            | ndarray(n) |         |
        +------------+------------+---------+
     """
 
@@ -803,7 +832,7 @@ class JTraj(SourceBlock):
         - ``tg = jtraj(q0, qf, t)`` as above but ``t`` is a uniformly-spaced time
         vector
 
-        The return value is an object that contains position, velocity and 
+        The return value is an object that contains position, velocity and
         acceleration data.
 
         Notes:
@@ -815,35 +844,40 @@ class JTraj(SourceBlock):
         :seealso: :func:`ctraj`, :func:`qplot`, :func:`~SerialLink.jtraj`
         """
         super().__init__(nin=0, nout=3, **kwargs)
-        self.blockclass = 'jtraj'
-        self.type = 'source'
-        self.outport_names(('q', 'qd', 'qdd',))
+        self.blockclass = "jtraj"
+        self.type = "source"
+        self.outport_names(
+            (
+                "q",
+                "qd",
+                "qdd",
+            )
+        )
         self.T = T
 
         q0 = base.getvector(q0)
         qf = base.getvector(qf)
 
         if not len(q0) == len(qf):
-            raise ValueError('q0 and q1 must be same size')
+            raise ValueError("q0 and q1 must be same size")
 
         if qd0 is None:
             qd0 = np.zeros(q0.shape)
         else:
             qd0 = getvector(qd0)
             if not len(qd0) == len(q0):
-                raise ValueError('qd0 has wrong size')
+                raise ValueError("qd0 has wrong size")
         if qdf is None:
             qdf = np.zeros(q0.shape)
         else:
             qd1 = getvector(qdf)
             if not len(qd1) == len(q0):
-                raise ValueError('qd1 has wrong size')
+                raise ValueError("qd1 has wrong size")
 
         self.q0 = q0
         self.qf = qf
         self.qd0 = qd0
         self.qdf = qf
-
 
     def start(self):
 
@@ -865,16 +899,24 @@ class JTraj(SourceBlock):
 
         self.coeffs = np.array([A, B, C, np.zeros(A.shape), E, F])
         self.dcoeffs = np.array(
-            [np.zeros(A.shape), 5 * A, 4 * B, 3 * C, np.zeros(A.shape), E])
-        self.ddcoeffs = np.array([
-            np.zeros(A.shape), np.zeros(A.shape),
-            20 * A, 12 * B, 6 * C, np.zeros(A.shape)])
+            [np.zeros(A.shape), 5 * A, 4 * B, 3 * C, np.zeros(A.shape), E]
+        )
+        self.ddcoeffs = np.array(
+            [
+                np.zeros(A.shape),
+                np.zeros(A.shape),
+                20 * A,
+                12 * B,
+                6 * C,
+                np.zeros(A.shape),
+            ]
+        )
 
     def output(self, t=None):
 
         tscal = self.T
-        tt = np.array([t**5, t**4, t**3, t**2, t, 1]).T
-        
+        tt = np.array([t ** 5, t ** 4, t ** 3, t ** 2, t, 1]).T
+
         qt = tt @ self.coeffs
 
         # compute  velocity
@@ -884,24 +926,36 @@ class JTraj(SourceBlock):
         qddt = tt @ self.ddcoeffs / tscal ** 2
 
         return [qt, qdt, qddt]
+
+
 @block
 class CirclePath(SourceBlock):
     """
     :blockname:`CIRCLEPATH`
-    
+
     .. table::
        :align: left
-    
+
        +------------+---------+---------+
        | inputs     | outputs |  states |
        +------------+---------+---------+
        | 0 or 1     | 1       | 0       |
        +------------+---------+---------+
-       | float      | float   |         | 
+       | float      | float   |         |
        +------------+---------+---------+
     """
 
-    def __init__(self, radius=1, centre=(0,0, 0), pose=None, phase=0, frequency=1, unit='rps', *inputs, **kwargs):
+    def __init__(
+        self,
+        radius=1,
+        centre=(0, 0, 0),
+        pose=None,
+        phase=0,
+        frequency=1,
+        unit="rps",
+        *inputs,
+        **kwargs
+    ):
         """
 
         :param y0: initial value
@@ -917,49 +971,51 @@ class CirclePath(SourceBlock):
         :param ``**kwargs``: common Block options
         :return: TRAJ block
         :rtype: Traj instance
-        
+
         Create a trajectory block.
-    
+
         A block that generates a trajectory using a trapezoidal or quintic
         polynomial profile.
-        
+
         A simple triangle function with domain [0,10] and range [0,1] can be
         defined by::
-            
+
             INTERPOLATE(x=(0,5,10), y=(0,1,0))
-        
+
         We might also express this as::
-            
+
             INTERPOLATE(xy=[(0,0), (5,1), (10,0)])
-        
+
         The distance along the trajectory comes from:
-            
+
         - Input port 0
         - Simulation time, if ``time=True``.  In this case the block has no
           input ports and is a ``Source`` not a ``Function``.
         """
 
         super().__init__(nin=0, nout=1, **kwargs)
-        self.blockclass = 'circlepath'
+        self.blockclass = "circlepath"
 
-        if unit == 'rps':
+        if unit == "rps":
             omega = frequency * 2 * pi
             phase = frequency * 2 * pi
-        elif unit == 'rad':
+        elif unit == "rad":
             omega = frequency
-            phase = phase
+
+            # Redundant assignment, commented for LGTM
+            # phase = phase
         else:
-            raise ValueError('bad units: rps or rad')
+            raise ValueError("bad units: rps or rad")
 
         self.radius = radius
-        assert len(centre) == 3, 'centre must be a 3 vector'
+        assert len(centre) == 3, "centre must be a 3 vector"
         self.centre = centre
         self.pose = pose
         self.omega = omega
         self.phase = phase
 
-        self.outport_names(('y',))
-        
+        self.outport_names(("y",))
+
     def output(self, t=None):
         theta = t * self.omega + self.phase
         x = self.radius * cos(theta) + self.centre[0]
@@ -969,12 +1025,17 @@ class CirclePath(SourceBlock):
         if self.pose is not None:
             p = self.pose * [x, y, 0]
             p = p.flatten()
-        
+
         return [p]
+
 
 if __name__ == "__main__":
 
     import pathlib
     import os.path
 
-    exec(open(os.path.join(pathlib.Path(__file__).parent.absolute(), "test_robots.py")).read())
+    exec(
+        open(
+            os.path.join(pathlib.Path(__file__).parent.absolute(), "test_robots.py")
+        ).read()
+    )

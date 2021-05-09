@@ -1,6 +1,8 @@
+from typing import Type
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.ERobot import ERobot2
 from ansitable import ANSITable, Column
+
 # import importlib
 
 
@@ -32,6 +34,7 @@ def list(keywords=None, dof=None, mtype=None):
     """
 
     import roboticstoolbox.models as m
+
     # module = importlib.import_module(
     #   '.' + os.path.splitext(file)[0], package='bdsim.blocks')
 
@@ -47,13 +50,13 @@ def list(keywords=None, dof=None, mtype=None):
             Column("dynamics", colalign="<"),
             Column("geometry", colalign="<"),
             Column("keywords", headalign="^", colalign="<"),
-            border=border
+            border=border,
         )
 
         if mtype is not None:
             categories = [mtype]
         else:
-            categories = ['DH', 'URDF', 'ETS']
+            categories = ["DH", "URDF", "ETS"]
         for category in categories:
             group = m.__dict__[category]
             for cls in group.__dict__.values():
@@ -61,11 +64,11 @@ def list(keywords=None, dof=None, mtype=None):
                     # we found a BaseRobot subclass, instantiate it
                     try:
                         robot = cls()
-                    except:
+                    except TypeError:
                         print(f"failed to load {cls}")
                     try:
                         structure = robot.structure
-                    except Exception:   # pragma nocover
+                    except Exception:  # pragma nocover
                         structure = ""
 
                     # apply filters
@@ -73,7 +76,7 @@ def list(keywords=None, dof=None, mtype=None):
                         if len(set(keywords) & set(robot.keywords)) == 0:
                             continue
                     if dof is not None and robot.n != dof:
-                        continue     # pragma nocover
+                        continue  # pragma nocover
 
                     dims = 0
 
@@ -90,16 +93,18 @@ def list(keywords=None, dof=None, mtype=None):
                         robot.n,
                         f"{dims}d",
                         structure,
-                        'Y' if robot._hasdynamics else '',
-                        'Y' if robot._hasgeometry else '',
-                        ', '.join(robot.keywords)
+                        "Y" if robot._hasdynamics else "",
+                        "Y" if robot._hasgeometry else "",
+                        ", ".join(robot.keywords),
                     )
 
         table.print()
 
+    # make_table(border='')
 
-if __name__ == "__main__":   # pragma nocover
+
+if __name__ == "__main__":  # pragma nocover
     list()
-    list(keywords=('dynamics',))
+    list(keywords=("dynamics",))
     list(dof=6)
-    list(keywords=('dynamics',), dof=6)
+    list(keywords=("dynamics",), dof=6)

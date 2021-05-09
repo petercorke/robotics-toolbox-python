@@ -26,19 +26,16 @@ path = rtb.path_to_datafile("data")
 g1 = Mesh(
     filename=str(path / "gimbal-ring1.stl"), color=[34, 143, 201], scale=(1.0 / 3,) * 3
 )
-g1.v = [0, 0, 0, 0, 0.5, 0]
 
 g2 = Mesh(
     filename=str(path / "gimbal-ring2.stl"), color=[31, 184, 72], scale=(1.1 / 3,) * 3
 )
-g2.v = [0, 0, 0, 0.5, 0, 0]
 
 g3 = Mesh(
     filename=str(path / "gimbal-ring3.stl"),
     color=[240, 103, 103],
     scale=(1.1 ** 2 / 3,) * 3,
 )
-g3.v = [0, 0, 0, 0, 0, 0.5]
 
 plane = Mesh(
     filename=str(path / "spitfire_assy-gear_up.stl"),
@@ -231,4 +228,4 @@ update_gimbals(0, 2)
 update_gimbals(0, 3)
 
 while True:
-    env.step(0.05)
+    env.step(0)

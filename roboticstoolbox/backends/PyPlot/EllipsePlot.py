@@ -9,9 +9,8 @@ from spatialmath import base
 import matplotlib.pyplot as plt
 
 
-class EllipsePlot():
-
-    def __init__(self, robot, q, etype, opt='trans', centre=[0, 0, 0], scale=1):
+class EllipsePlot:
+    def __init__(self, robot, q, etype, opt="trans", centre=[0, 0, 0], scale=1):
 
         super(EllipsePlot, self).__init__()
 
@@ -21,10 +20,10 @@ class EllipsePlot():
             centre = base.getvector(centre, 2)
             centre = np.array([centre[0], centre[1], 0])
         except TypeError:
-            if centre != 'ee':
+            if centre != "ee":
                 raise ValueError(
-                    'Centre must be a three vector or \'ee\' meaning'
-                    'end-effector')
+                    "Centre must be a three vector or 'ee' meaning" "end-effector"
+                )
 
         self.ell = None
         self.robot = robot
@@ -38,12 +37,12 @@ class EllipsePlot():
         else:
             self.q = q
 
-        if etype == 'v':
+        if etype == "v":
             self.vell = True
-            self.name = 'Velocity Ellipse'
-        elif etype == 'f':
+            self.name = "Velocity Ellipse"
+        elif etype == "f":
             self.vell = False
-            self.name = 'Force Ellipse'
+            self.name = "Force Ellipse"
 
     def draw(self):
         self.make_ellipsoid()
@@ -52,8 +51,8 @@ class EllipsePlot():
             self.ax.collections.remove(self.ell)
 
         self.ell = self.ax.plot_wireframe(
-            self.x, self.y, self.z, rstride=6,
-            cstride=6, color='#2980b9', alpha=0.2)
+            self.x, self.y, self.z, rstride=6, cstride=6, color="#2980b9", alpha=0.2
+        )
 
     def draw2(self):
         self.make_ellipsoid2()
@@ -61,24 +60,23 @@ class EllipsePlot():
         if self.ell is not None:
             self.ell[0].set_data(self.x, self.y)
         else:
-            self.ell = self.ax.plot(
-                self.x, self.y, color='#2980b9')
+            self.ell = self.ax.plot(self.x, self.y, color="#2980b9")
 
     def plot(self, ax=None):
         if ax is None:
             ax = self.ax
-        
+
         if ax is None:
             fig = plt.figure()
-            ax = plt.axes(projection='3d')
+            ax = plt.axes(projection="3d")
             self.ax = ax
-        
+
         self.draw()
 
     def plot2(self, ax=None):
         if ax is None:
             ax = self.ax
-        
+
         if ax is None:
             ax = plt.axes()
             self.ax = ax
@@ -91,10 +89,10 @@ class EllipsePlot():
 
         """
 
-        if self.opt == 'trans':
+        if self.opt == "trans":
             J = self.robot.jacobe(self.q)[3:, :]
             A = J @ J.T
-        elif self.opt == 'rot':
+        elif self.opt == "rot":
             J = self.robot.jacobe(self.q)[:3, :]
             A = J @ J.T
 
@@ -102,7 +100,7 @@ class EllipsePlot():
             # Do the extra step for the force ellipse
             A = np.linalg.inv(A)
 
-        if isinstance(self.centre, str) and self.centre == 'ee':
+        if isinstance(self.centre, str) and self.centre == "ee":
             centre = self.robot.fkine(self.q).t
         else:
             centre = self.centre
@@ -121,8 +119,9 @@ class EllipsePlot():
         # transform points to ellipsoid
         for i in range(len(x)):
             for j in range(len(x)):
-                [x[i, j], y[i, j], z[i, j]] = \
-                    np.dot([x[i, j], y[i, j], z[i, j]], rotation)
+                [x[i, j], y[i, j], z[i, j]] = np.dot(
+                    [x[i, j], y[i, j], z[i, j]], rotation
+                )
 
         self.x = x * self.scale + centre[0]
         self.y = y * self.scale + centre[1]
@@ -134,13 +133,13 @@ class EllipsePlot():
 
         """
 
-        if self.opt == 'trans':
+        if self.opt == "trans":
             J = self.robot.jacob0(self.q)[:2, :]
             A = J @ J.T
-        elif self.opt == 'rot':
+        elif self.opt == "rot":
             raise ValueError(
-                "Can not do rotational ellipse for a 2d robot plot."
-                " Set opt='trans'")
+                "Can not do rotational ellipse for a 2d robot plot." " Set opt='trans'"
+            )
 
         # if not self.vell:
         #     # Do the extra step for the force ellipse
@@ -149,7 +148,7 @@ class EllipsePlot():
         #     except:
         #         A = np.zeros((2,2))
 
-        if isinstance(self.centre, str) and self.centre == 'ee':
+        if isinstance(self.centre, str) and self.centre == "ee":
             centre = self.robot.fkine(self.q).t
         else:
             centre = self.centre
@@ -158,7 +157,7 @@ class EllipsePlot():
         theta = np.linspace(0.0, 2.0 * np.pi, 50)
         y = np.array([np.cos(theta), np.sin(theta)])
         # RVC2 p 602
-        x = sp.linalg.sqrtm(A) @ y
+        # x = sp.linalg.sqrtm(A) @ y
 
         x, y = base.ellipse(A, inverted=True, centre=centre[:2], scale=self.scale)
         self.x = x
