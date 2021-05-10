@@ -32,10 +32,17 @@ class YuMi(ERobot):
 
     def __init__(self):
 
-        links, name = self.URDF_read("yumi_description/urdf/yumi.urdf")
+        links, name, urdf_string, urdf_filepath = self.URDF_read(
+            "yumi_description/urdf/yumi.urdf"
+        )
 
         super().__init__(
-            links, name=name, manufacturer="ABB", gripper_links=[links[20]]
+            links,
+            name=name,
+            manufacturer="ABB",
+            gripper_links=[links[20]],
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
         )
 
         self.addconfiguration("qz", np.zeros((14,)))
