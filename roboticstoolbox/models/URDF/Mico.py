@@ -26,24 +26,28 @@ class Mico(ERobot):
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke
     """
+
     def __init__(self):
 
-        links, name = self.URDF_read(
-            "kinova_description/urdf/j2n4s300_standalone.xacro")
+        links, name, urdf_string, urdf_filepath = self.URDF_read(
+            "kinova_description/urdf/j2n4s300_standalone.xacro"
+        )
 
         super().__init__(
-                links,
-                name=name,
-                manufacturer='Kinova'
-            )
+            links,
+            name=name,
+            manufacturer="Kinova",
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
+        )
 
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
         self.addconfiguration(
-            "qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
-        self.addconfiguration(
-            "qr", np.array([0, 45, 60, 0, 0, 0, 0, 0, 0, 0]) * np.pi/180)
+            "qr", np.array([0, 45, 60, 0, 0, 0, 0, 0, 0, 0]) * np.pi / 180
+        )
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     robot = Mico()
     print(robot)

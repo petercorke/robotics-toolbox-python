@@ -39,12 +39,16 @@ class Puma560(ERobot):
 
     def __init__(self):
 
-        links, name = self.URDF_read(
-            "puma560_description/urdf/puma560_robot.urdf.xacro")
+        links, name, urdf_string, urdf_filepath = self.URDF_read(
+            "puma560_description/urdf/puma560_robot.urdf.xacro"
+        )
 
         super().__init__(
             links,
-            name=name)
+            name=name,
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
+        )
 
         self.manufacturer = "Unimation"
         # self.ee_link = self.ets[9]
@@ -53,16 +57,16 @@ class Puma560(ERobot):
         self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
 
         # ready pose, arm up
-        self.addconfiguration("qr", np.array([0, pi/2, -pi/2, 0, 0, 0]))
+        self.addconfiguration("qr", np.array([0, pi / 2, -pi / 2, 0, 0, 0]))
 
         # straight and horizontal
-        self.addconfiguration("qs", np.array([0, 0, -pi/2, 0, 0, 0]))
+        self.addconfiguration("qs", np.array([0, 0, -pi / 2, 0, 0, 0]))
 
         # nominal table top picking pose
-        self.addconfiguration("qn", np.array([0, pi/4, pi, 0, pi/4, 0]))
+        self.addconfiguration("qn", np.array([0, pi / 4, pi, 0, pi / 4, 0]))
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     robot = Puma560()
     print(robot)

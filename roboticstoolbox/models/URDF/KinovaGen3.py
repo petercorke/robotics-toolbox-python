@@ -31,27 +31,30 @@ class KinovaGen3(ERobot):
 
     def __init__(self):
 
-        elinks, name = self.URDF_read(
-            "kortex_description/robots/gen3.xacro")
+        links, name, urdf_string, urdf_filepath = self.URDF_read(
+            "kortex_description/robots/gen3.xacro"
+        )
 
         super().__init__(
-            elinks,
+            links,
             name=name,
-            manufacturer='Kinova'
+            manufacturer="Kinova",
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
             # gripper_links=elinks[9]
         )
 
         # self.qdlim = np.array([
         # 2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0])
 
-        self.addconfiguration("qz", np.array(
-            [0, 0, 0, 0, 0, 0, 0]))
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0]))
 
-        self.addconfiguration("qr", np.array(
-            [np.pi, -0.3, 0, -1.6, 0, -1.0, np.pi / 2]))
+        self.addconfiguration(
+            "qr", np.array([np.pi, -0.3, 0, -1.6, 0, -1.0, np.pi / 2])
+        )
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
-    robot = LBR()
+    robot = KinovaGen3()
     print(robot)

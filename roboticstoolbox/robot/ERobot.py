@@ -973,7 +973,10 @@ graph [rankdir=LR];
 
 
 class ERobot(BaseERobot):
-    def __init__(self, arg, **kwargs):
+    def __init__(self, arg, urdf_string=None, urdf_filepath=None, **kwargs):
+
+        self._urdf_string = urdf_string
+        self._urdf_filepath = urdf_filepath
 
         if isinstance(arg, DHRobot):
             # we're passed a DHRobot object
@@ -1025,7 +1028,7 @@ class ERobot(BaseERobot):
         If ``gripper`` is specified, links from that link outward are removed
         from the rigid-body tree and folded into a ``Gripper`` object.
         """
-        links, name = ERobot.URDF_read(file_path)
+        links, name, _, _ = ERobot.URDF_read(file_path)
 
         if gripper is not None:
             if isinstance(gripper, int):
@@ -1040,9 +1043,23 @@ class ERobot(BaseERobot):
             else:
                 raise TypeError("bad argument passed as gripper")
 
-        links, name = ERobot.URDF_read(file_path)
+        links, name, urdf_string, urdf_filepath = ERobot.URDF_read(file_path)
 
-        return cls(links, name=name, gripper_links=gripper)
+        return cls(
+            links,
+            name=name,
+            gripper_links=gripper,
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
+        )
+
+    @property
+    def urdf_string(self):
+        return self._urdf_string
+
+    @property
+    def urdf_filepath(self):
+        return self._urdf_filepath
 
     # --------------------------------------------------------------------- #
 
@@ -1212,7 +1229,7 @@ class ERobot(BaseERobot):
         else:  # pragma nocover
             urdf = URDF.loadstr(open(file_path).read(), file_path)
 
-        return urdf.elinks, urdf.name
+        return urdf.elinks, urdf.name, urdf_string, file_path
 
     # --------------------------------------------------------------------- #
 

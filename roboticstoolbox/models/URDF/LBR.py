@@ -31,27 +31,28 @@ class LBR(ERobot):
 
     def __init__(self):
 
-        links, name = self.URDF_read(
-            "kuka_description/kuka_lbr_iiwa/urdf/lbr_iiwa_14_r820.xacro")
+        links, name, urdf_string, urdf_filepath = self.URDF_read(
+            "kuka_description/kuka_lbr_iiwa/urdf/lbr_iiwa_14_r820.xacro"
+        )
 
         super().__init__(
             links,
             name=name,
-            manufacturer='Kuka'
+            manufacturer="Kuka",
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
             # gripper_links=elinks[9]
         )
 
         # self.qdlim = np.array([
         #     2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0])
 
-        self.addconfiguration("qz", np.array(
-            [0, 0, 0, 0, 0, 0, 0]))
+        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0]))
 
-        self.addconfiguration("qr", np.array(
-            [0, -0.3, 0, -1.9, 0, 1.5, np.pi/4]))
+        self.addconfiguration("qr", np.array([0, -0.3, 0, -1.9, 0, 1.5, np.pi / 4]))
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     robot = LBR()
     print(robot)
