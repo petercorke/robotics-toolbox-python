@@ -5,8 +5,8 @@ import timeit
 
 np.set_printoptions(linewidth=np.inf)
 
-class KinematicCache:
 
+class KinematicCache:
     def __init__(self, robot, cachesize=16):
         """
         Create kinematic cache instance
@@ -81,15 +81,15 @@ class KinematicCache:
             since hash has to be computed for every cached kinematic function
             it's quicker to merge both functions.
         """
-        # cache is an ordered dict, new entries go on the end to old entries 
+        # cache is an ordered dict, new entries go on the end to old entries
         # are popped from the front (last=False)
         while len(self._dict) > self._cachesize:
             self._dict.popitem(last=False)
 
         # compute and return the hash
-        return hash(q.tobytes('C'))
+        return hash(q.tobytes("C"))
 
-    #TODO:
+    # TODO:
     # this needs to accept a common subset of arguments for DHRobot and ERobot classes.
     # that means end, tool and start.  Need to rationalise these
     # end can be ELink or str, means we have to make Elink hashable
@@ -109,10 +109,10 @@ class KinematicCache:
         """
         # compute the key we use for cache lookup
         qhash = self._qhash(q)
-        key = ('fkine', qhash, end)
+        key = ("fkine", qhash, end)
         if key not in self._dict:
             # cache miss, check if we have fkine_all() result
-            key_fkall = ('fkine_all', qhash, end)
+            key_fkall = ("fkine_all", qhash, end)
             if key_fkall in self._dict:
                 # we do, take just the EE pose and cache that
                 self._dict[key] = self._dict[key_fkall][-1]
@@ -134,7 +134,7 @@ class KinematicCache:
         :rtype: multi-valuedSE3 instance
         """
 
-        key = ('fkine_all', self._qhash(q), end)
+        key = ("fkine_all", self._qhash(q), end)
         if key not in self._dict:
             # cache miss, compute it
             self._dict[key] = self._robot.fkine_all(q)
@@ -160,7 +160,7 @@ class KinematicCache:
         #      key = ('jacob0', self._qhash(q), tuple(kwargs.keys()))
         # which is more elegant/compact but the order of the kw arguments would
         # then become important
-        key = ('jacob0', self._qhash(q), end, analytical, half)
+        key = ("jacob0", self._qhash(q), end, analytical, half)
         if key not in self._dict:
             # cache miss, compute it
 
@@ -168,7 +168,9 @@ class KinematicCache:
             # TODO: fkine() will have to compute the hash again, maybe pass it
             # down as argument _qhash
             T = self.fkine(q, end=end)
-            self._dict[key] = self._robot.jacob0(q, T=T, end=end, half=half, analytical=analytical)
+            self._dict[key] = self._robot.jacob0(
+                q, T=T, end=end, half=half, analytical=analytical
+            )
         return self._dict[key]
 
     def jacob0_inv(self, q, end=None, analytical=None):
@@ -186,7 +188,7 @@ class KinematicCache:
 
         .. note:: Robot objects don't have this method.
         """
-        key = ('jacob0_inv', self._qhash(q), end, analytical)
+        key = ("jacob0_inv", self._qhash(q), end, analytical)
         if key not in self._dict:
             # cache miss, compute it
 
@@ -210,7 +212,7 @@ class KinematicCache:
 
         .. note:: Robot objects don't have this method.
         """
-        key = ('jacob0_pinv', self._qhash(q), end, analytical)
+        key = ("jacob0_pinv", self._qhash(q), end, analytical)
         if key not in self._dict:
             # cache miss, compute it
 
@@ -238,7 +240,7 @@ class KinematicCache:
         #      key = ('jacob0', self._qhash(q), tuple(kwargs.keys()))
         # which is more elegant/compact but the order of the kw arguments would
         # then become important
-        key = ('jacobe', self._qhash(q), end, half)
+        key = ("jacobe", self._qhash(q), end, half)
         if key not in self._dict:
             # cache miss, compute it
 
@@ -263,7 +265,7 @@ class KinematicCache:
 
         .. note:: Robot objects don't have this method.
         """
-        key = ('jacobe_inv', self._qhash(q), end)
+        key = ("jacobe_inv", self._qhash(q), end)
         if key not in self._dict:
             # cache miss, compute it
 
@@ -285,7 +287,7 @@ class KinematicCache:
 
         .. note:: Robot objects don't have this method.
         """
-        key = ('jacob0_pinv', self._qhash(q), end, analytical)
+        key = ("jacob0_pinv", self._qhash(q), end, analytical)
         if key not in self._dict:
             # cache miss, compute it
 
@@ -294,35 +296,35 @@ class KinematicCache:
             self._dict[key] = np.linalg.pinv(J)
         return self._dict[key]
 
-q = np.r_[1,2,3,4,5,6,7]
 
-panda = rtb.models.DH.Panda()
-kc = KinematicCache(panda)
-print(kc)
-print(panda.fkine(panda.qr))
-print(panda.fkine(panda.qr))
-print('--')
-print(panda.jacob0(panda.qr))
-print(panda.jacob0(panda.qr))
-print('--')
+if __name__ == "__main__":
+    q = np.r_[1, 2, 3, 4, 5, 6, 7]
 
-def timething(statement, N=1_000):
-    t = timeit.timeit(stmt=statement,  globals=globals(), number=N)
-    print(f"{statement:>25s}: {t / N * 1e6:.1f}μs")
+    panda = rtb.models.DH.Panda()
+    kc = KinematicCache(panda)
+    print(kc)
+    print(panda.fkine(panda.qr))
+    print(panda.fkine(panda.qr))
+    print("--")
+    print(panda.jacob0(panda.qr))
+    print(panda.jacob0(panda.qr))
+    print("--")
 
-timething("kc._qhash(q)", 1_000_000)
-timething("panda.fkine(panda.qr)", 1_000)
-timething("kc.fkine(panda.qr)", 1_000_000)
+    def timething(statement, N=1_000):
+        t = timeit.timeit(stmt=statement, globals=globals(), number=N)
+        print(f"{statement:>25s}: {t / N * 1e6:.1f}μs")
 
-kc.fkine_all(panda.qr)
-print(len(kc))
-print(kc.cache())
+    timething("kc._qhash(q)", 1_000_000)
+    timething("panda.fkine(panda.qr)", 1_000)
+    timething("kc.fkine(panda.qr)", 1_000_000)
 
-for i in range(50):
-    q = np.random.rand(7)
-    kc.fkine(q)
-    kc.fkine_all(q)
-print(len(kc))
-print(kc.cache())
+    kc.fkine_all(panda.qr)
+    print(len(kc))
+    print(kc.cache())
 
-
+    for i in range(50):
+        q = np.random.rand(7)
+        kc.fkine(q)
+        kc.fkine_all(q)
+    print(len(kc))
+    print(kc.cache())
