@@ -73,6 +73,8 @@ parser.add_argument('--ansi', default=False, action='store_true',
                     help='use ANSImatrix to display matrices')
 parser.add_argument('--examples', '-e', default=False, action='store_true',
                     help='change working directory to shipped examples')
+parser.add_argument('--swift', '-s', default=False, action='store_true',
+            help='use Swift as default backend')
 args = parser.parse_args()
 
 # TODO more options
@@ -89,12 +91,17 @@ if args.book:
     args.ansi = False
     args.examples = True
 
+# set default backend for Robot.plot
+if args.swift:
+    Robot.default_backend = "swift"
+
+# set matrix printing mode for spatialmath
 SE3._ansimatrix = args.ansi
 
+# set default matplotlib backend
 if args.backend is not None:
     print(f"Using matplotlb backend {args.backend}")
     mpl.use(args.backend)
-
 
 # load some robot models
 puma = models.DH.Puma560()

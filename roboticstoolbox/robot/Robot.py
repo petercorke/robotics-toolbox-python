@@ -25,6 +25,7 @@ try:
 except ImportError:  # pragma nocover
     pass
 
+_default_backend = None
 
 # TODO maybe this needs to be abstract
 # ikine functions need: fkine, jacobe, qlim methods from subclass
@@ -349,6 +350,33 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         if np.any(np.isnan(qlim)):
             raise ValueError("some joint limits not defined")
         return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
+
+    @property
+    def default_backend(self):
+        """
+        Get default graphical backend
+
+        :return: backend name
+        :rtype: str
+
+        Get the default graphical backend, used when no explicit backend is
+        passed to ``Robot.plot``.
+        """
+        return _default_backend
+
+    @default_backend.setter
+    def default_backend(self, be):
+        """
+        Set default graphical backend
+
+        :param be: backend name
+        :type be: str
+
+        Set the default graphical backend, used when no explicit backend is
+        passed to ``Robot.plot``.  The default set here will be overridden if
+        the particular ``Robot`` subclass cannot support it.
+        """
+        _default_backend = be
 
     def addconfiguration(self, name, q, unit="rad"):
         """
@@ -1217,7 +1245,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     # TODO probably should be a static method
     def _get_graphical_backend(self, backend=None):
 
-        default = None
+        default = self.default_backend
 
         # figure out the right default
         if backend is None:
@@ -1225,8 +1253,6 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                 default = "pyplot"
             elif isinstance(self, rtb.ERobot2):
                 default = "pyplot2"
-            else:
-                default = "swift"
 
         if backend is not None:
             backend = backend.lower()
@@ -1266,7 +1292,6 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                 if backend == "vpython":
                     print("VPython is not installed, " "install it using pip or conda")
                 backend = "pyplot"
-
         if backend is None:
             backend = default
 
