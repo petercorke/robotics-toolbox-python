@@ -19,17 +19,17 @@ class Bicycle(TransferBlock):
     .. table::
        :align: left
     
-       +------------+---------+---------+
-       | inputs     | outputs |  states |
-       +------------+---------+---------+
-       | 2          | 3       | 3       |
-       +------------+---------+---------+
-       | float      | float   |         | 
-       +------------+---------+---------+
+    +------------+---------+---------+
+    | inputs     | outputs |  states |
+    +------------+---------+---------+
+    | 2          | 3       | 3       |
+    +------------+---------+---------+
+    | float      | float   |         | 
+    +------------+---------+---------+
     """
 
     def __init__(self, *inputs, x0=None, L=1, vlim=1, slim=1, **kwargs):
-        """
+        r"""
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
         :param x0: Inital state, defaults to 0
@@ -43,6 +43,12 @@ class Bicycle(TransferBlock):
         :param ``**kwargs``: common Block options
         :return: a BICYCLE block
         :rtype: Bicycle instance
+
+        :INPUT v: velocity
+        :INPUT γ: steering wheel angle
+        :OUTPUT x: x-position
+        :OUTPUT y: y-position
+        :OUTPUT θ: heading angle
         
         Create a vehicle model with Bicycle kinematics.
         
@@ -104,13 +110,13 @@ class Unicycle(TransferBlock):
     .. table::
        :align: left
     
-       +------------+---------+---------+
-       | inputs     | outputs |  states |
-       +------------+---------+---------+
-       | 2          | 3       | 3       |
-       +------------+---------+---------+
-       | float      | float   |         | 
-       +------------+---------+---------+
+    +------------+---------+---------+
+    | inputs     | outputs |  states |
+    +------------+---------+---------+
+    | 2          | 3       | 3       |
+    +------------+---------+---------+
+    | float      | float   |         | 
+    +------------+---------+---------+
     """
 
     def __init__(self, *inputs, x0=None, **kwargs):
@@ -124,6 +130,12 @@ class Unicycle(TransferBlock):
         :param ``**kwargs``: common Block options
         :return: a UNICYCLE block
         :rtype: Unicycle instance
+
+        :input v: velocity
+        :input ω: steering wheel angle
+        :output x: x-position
+        :output y: y-position
+        :output θ: heading angle
         
         Create a vehicle model with Unicycle kinematics.
 
@@ -170,13 +182,13 @@ class DiffSteer(TransferBlock):
     .. table::
        :align: left
     
-       +------------+---------+---------+
-       | inputs     | outputs |  states |
-       +------------+---------+---------+
-       | 2          | 3       | 3       |
-       +------------+---------+---------+
-       | float      | float   |         | 
-       +------------+---------+---------+
+    +------------+---------+---------+
+    | inputs     | outputs |  states |
+    +------------+---------+---------+
+    | 2          | 3       | 3       |
+    +------------+---------+---------+
+    | float      | float   |         | 
+    +------------+---------+---------+
     """
 
     def __init__(self, *inputs, R=1, W=1, x0=None, **kwargs):
@@ -247,13 +259,13 @@ class VehiclePlot(GraphicsBlock):
     .. table::
        :align: left
     
-       +--------+---------+---------+
-       | inputs | outputs |  states |
-       +--------+---------+---------+
-       | 3      | 0       | 0       |
-       +--------+---------+---------+
-       | float  |         |         | 
-       +--------+---------+---------+
+    +--------+---------+---------+
+    | inputs | outputs |  states |
+    +--------+---------+---------+
+    | 3      | 0       | 0       |
+    +--------+---------+---------+
+    | float  |         |         | 
+    +--------+---------+---------+
     """
     
     # TODO add ability to render an image instead of an outline
