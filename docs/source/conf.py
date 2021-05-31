@@ -16,6 +16,8 @@ import sys
 import sphinx_rtd_theme
 import re
 
+# defined relative to configuration directory which is where this file conf.py lives
+sys.path.append(os.path.abspath('exts'))
 
 # -- Project information -----------------------------------------------------
 
@@ -44,6 +46,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.inheritance_diagram',
     'sphinx_autorun',
+    'blockname',
     ]
 
 autosummary_generate = True

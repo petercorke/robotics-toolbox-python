@@ -13,4 +13,4 @@ Robotics Toolbox for Python
    intro
    arm
    mobile
-   
+   blocks
