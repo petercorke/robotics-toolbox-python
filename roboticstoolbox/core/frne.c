@@ -106,7 +106,8 @@ static PyObject *delete(PyObject *self, PyObject *args) {
 static PyObject *frne(PyObject *self, PyObject *args) {
 
     Robot *robot;
-    PyObject *rO, *qO, *qdO, *qddO, *gravO, *fextO;
+    PyObject *rO, *qO, *qdO, *qddO, *gravO, *fextO, *temp;
+    // PyObject *python_float;
     double  *q, *qd, *qdd, *fext;
     // Vect *grav;
     int nq = 1; //, nqd = njoints, nqdd = njoints;
@@ -127,7 +128,6 @@ static PyObject *frne(PyObject *self, PyObject *args) {
     qd = (double *)PyMem_RawCalloc(njoints, sizeof(double));
     qdd = (double *)PyMem_RawCalloc(njoints, sizeof(double));
     fext = (double *)PyMem_RawCalloc(6, sizeof(double));
-    // grav = (Vect *)PyMem_RawMalloc(sizeof(Vect));
 
     // Create iterators for arrays
     PyObject *iq = PyObject_GetIter(qO);
@@ -137,26 +137,44 @@ static PyObject *frne(PyObject *self, PyObject *args) {
     PyObject *ifext = PyObject_GetIter(fextO);
 
     // Create the gravity vector
-    robot->gravity->x = PyFloat_AsDouble(PyIter_Next(igrav));
-    robot->gravity->y = PyFloat_AsDouble(PyIter_Next(igrav));
-    robot->gravity->z = PyFloat_AsDouble(PyIter_Next(igrav));
+    temp = PyIter_Next(igrav);
+    robot->gravity->x = PyFloat_AsDouble(temp);
+    Py_DECREF(temp);
+
+    temp = PyIter_Next(igrav);
+    robot->gravity->y = PyFloat_AsDouble(temp);
+    Py_DECREF(temp);
+
+    temp = PyIter_Next(igrav);
+    robot->gravity->z = PyFloat_AsDouble(temp);
+    Py_DECREF(temp);
+
 
     // Create the joint arrays
     for (int i = 0; i < njoints; i++) {
-        q[i] = PyFloat_AsDouble(PyIter_Next(iq));
-        qd[i] = PyFloat_AsDouble(PyIter_Next(iqd));
-        qdd[i] = PyFloat_AsDouble(PyIter_Next(iqdd));
+        temp = PyIter_Next(iq);
+        q[i] = PyFloat_AsDouble(temp);
+        Py_DECREF(temp);
+
+        temp = PyIter_Next(iqd);
+        qd[i] = PyFloat_AsDouble(temp);
+        Py_DECREF(temp);
+
+        temp = PyIter_Next(iqdd);
+        qdd[i] = PyFloat_AsDouble(temp);
+        Py_DECREF(temp);
     }
 
     // Create the fext array
     for (int i = 0; i < 6; i++) {
-        fext[i] = PyFloat_AsDouble(PyIter_Next(ifext));
+        temp = PyIter_Next(ifext);
+        fext[i] = PyFloat_AsDouble(temp);
+        Py_DECREF(temp);
     }
 
     // Create a matrix for the return argument */
     double  *tau;
     tau = (double *)PyMem_RawCalloc(njoints, sizeof(double));
-
 
     #define MEL(x,R,C)  (x[(R)+(C)*nq])
 
@@ -185,14 +203,19 @@ static PyObject *frne(PyObject *self, PyObject *args) {
     PyMem_RawFree(q);
     PyMem_RawFree(qd);
     PyMem_RawFree(qdd);
-    // PyMem_RawFree(grav);
     PyMem_RawFree(fext);
+
+    Py_DECREF(iq);
+    Py_DECREF(iqd);
+    Py_DECREF(iqdd);
+    Py_DECREF(igrav);
+    Py_DECREF(ifext);
 
     PyObject* ret = PyList_New(njoints);
     for (int i = 0; i < njoints; ++i) {
-        PyObject* python_float = Py_BuildValue("d", tau[i]);
-        PyList_SetItem(ret, i, python_float);
+        PyList_SetItem(ret, i, Py_BuildValue("d", tau[i]));
     }
+
     PyMem_RawFree(tau);
 
     return ret;
