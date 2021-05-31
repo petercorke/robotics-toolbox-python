@@ -147,7 +147,7 @@ setup(
 
     package_data={'roboticstoolbox': extra_files},
 
-    scripts=['roboticstoolbox/examples/rtbtool'],
+    scripts=['roboticstoolbox/bin/rtbtool'],
 
     install_requires=req,
 
