@@ -222,7 +222,7 @@ Denavit-Hartenberg notation.</p>
 <li><p><strong>L</strong> (<em>list</em><em>(</em><em>n</em><em>)</em>) – List of links which define the robot</p></li>
 <li><p><strong>name</strong> (<em>str</em>) – Name of the robot</p></li>
 <li><p><strong>manufacturer</strong> (<em>str</em>) – Manufacturer of the robot</p></li>
-<li><p><strong>base</strong> (<em>SE3</em>) – Locaation of the base</p></li>
+<li><p><strong>base</strong> (<em>SE3</em>) – Location of the base</p></li>
 <li><p><strong>tool</strong> (<em>SE3</em>) – Location of the tool</p></li>
 <li><p><strong>gravity</strong> (<em>ndarray</em><em>(</em><em>3</em><em>)</em>) – Gravitational acceleration vector</p></li>
 </ul>
@@ -4809,9 +4809,9 @@ conventions.</p>
 <span class="go">┃  0.088 ┃  90.0° ┃  q7 ┃ 0.107 ┃ -166.0° ┃ 166.0° ┃</span>
 <span class="go">┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
-<span class="go">┌─────┬──────┐</span>
-<span class="go">│tool │ None │</span>
-<span class="go">└─────┴──────┘</span>
+<span class="go">┌─────┬───────────────────────────────────────┐</span>
+<span class="go">│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │</span>
+<span class="go">└─────┴───────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
@@ -5506,10 +5506,10 @@ conventions.</p>
 <span class="go">┃ q4 ┃     0 ┃   0.126 ┃  0.0° ┃   45.0° ┃ 315.0° ┃</span>
 <span class="go">┗━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
-<span class="go">┌─────┬──────┐</span>
-<span class="go">│base │ None │</span>
-<span class="go">│tool │ None │</span>
-<span class="go">└─────┴──────┘</span>
+<span class="go">┌─────┬──────────────────────────────────────┐</span>
+<span class="go">│base │ t = 0.03, 0, 0; rpy/xyz = 0°, 0°, 0° │</span>
+<span class="go">│tool │ t = 0, 0, 0; rpy/xyz = 0°, 90°, 0°   │</span>
+<span class="go">└─────┴──────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬──────┬───────┬───────┐</span>
 <span class="go">│name │ q0  │ q1   │ q2    │ q3    │</span>
@@ -5661,9 +5661,9 @@ conventions.</p>
 <span class="go">┃ q7 ┃    0 ┃  0 ┃   0.0° ┃ -166.0° ┃ 166.0° ┃</span>
 <span class="go">┗━━━━┻━━━━━━┻━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
-<span class="go">┌─────┬──────┐</span>
-<span class="go">│tool │ None │</span>
-<span class="go">└─────┴──────┘</span>
+<span class="go">┌─────┬───────────────────────────────────────┐</span>
+<span class="go">│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │</span>
+<span class="go">└─────┴───────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐</span>
 <span class="go">│name │ q0  │ q1  │ q2  │ q3  │ q4  │ q5  │ q6  │</span>
@@ -6291,7 +6291,7 @@ arm.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 09-May-2021.
+        Last updated on 07-Jun-2021.
       </span>
 
     </p>
