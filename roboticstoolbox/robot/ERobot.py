@@ -1275,6 +1275,9 @@ class ERobot(BaseERobot):
               Sequence, J. Haviland and P. Corke
         """
 
+        if start is not None:
+            include_base = False
+
         # Use c extension to calculate fkine
         if fast:
             path, _, etool = self.get_path(end, start, _fknm=True)
@@ -1286,10 +1289,10 @@ class ERobot(BaseERobot):
             T = np.empty((4, 4))
             fknm.fkine(m, path, q, etool, tool, T)
 
-            if not include_base:
-                return T
-            else:
+            if self._base is not None and start is None and include_base == True:
                 return self.base.A @ T
+            else:
+                return T
 
         # Otherwise use Python method
         # we work with NumPy arrays not SE2/3 classes for speed
@@ -1340,7 +1343,11 @@ class ERobot(BaseERobot):
                     break
 
             # add base transform if it is set
-            if self._base is not None and start == self.base_link:
+            if (
+                self._base is not None
+                and start == self.base_link
+                and include_base == True
+            ):
                 Tk = self.base.A @ Tk
 
             # cast to pose class and append
