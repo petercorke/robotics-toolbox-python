@@ -516,7 +516,7 @@ class Vehicle(ABC):
         if stop:
             self._stopsim = True
 
-    def plot(self, path=None, block=True):
+    def plot(self, x=None, shape='box', block=False, size=True, **kwargs):
         """
         [summary] (superclass method)
 
@@ -525,9 +525,22 @@ class Vehicle(ABC):
         :param block: [description], defaults to True
         :type block: bool, optional
         """
- 
-        plt.plot(path[:,0], path[:,1])
-        plt.show(block=block)
+        if shape == 'triangle':
+            L = size
+            W = 0.6 * size
+            vertices = [(L, 0), (-L, -W), (-L, W)]
+        elif shape == 'box':
+            L1 = size
+            L2 = size
+            W = 0.6 * size
+            vertices = [(-L1, W), (0.6*L2, W), (L2, 0.5*W), (L2, -0.5*W), (0.6*L2, -W), (-L1, -W)]
+        elif isinstance(shape, np.ndarray):
+            vertices = shape
+        else:
+            raise ValueError('bad vehicle shape specified')
+
+        vertices = np.array(vertices).T
+        base.plot_poly(SE2(x) * vertices, close=True, **kwargs)
 
     def plot_x_y(self, block=True, **kwargs):
         xyt = self._x_hist
@@ -598,8 +611,8 @@ class Vehicle(ABC):
         if x0 is None:
             x0 = np.zeros(3)
 
-        def dynamics(t, x, vehicle, demand):
-            u = vehicle.control(demand, x)
+        def dynamics(t, x, vehicle, u):
+            # u = vehicle.control(demand, x)
             
             return vehicle.deriv(x, u)
 
@@ -613,7 +626,7 @@ class Vehicle(ABC):
             raise ValueError('bad time argument')
         sol = integrate.solve_ivp(dynamics, t_span, x0, t_eval=t_eval, method="RK45", args=(self, u))
 
-        return (sol.t, sol.y)
+        return (sol.t, sol.y.T)
 # ========================================================================= #
 
 class Bicycle(Vehicle):
@@ -655,6 +668,14 @@ class Bicycle(Vehicle):
         :rtype: float
         """
         return self._l
+
+    @property
+    def radius_min(self):
+        return self.l / np.tan(self.steer_max)
+
+    @property
+    def curvature_max(self):
+        return 1.0 / self.radius_min
 
     @property
     def steer_max(self):

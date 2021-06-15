@@ -1,7 +1,10 @@
-from roboticstoolbox.mobile.vehicle import *
-from roboticstoolbox.mobile.bug2 import Bug2
-from roboticstoolbox.mobile.dx_form import DXform
-from roboticstoolbox.mobile.dstar import DStar
+from roboticstoolbox.mobile.Vehicle import Vehicle, Bicycle, Unicycle
+from roboticstoolbox.mobile.Bug2Planner import Bug2Planner
+from roboticstoolbox.mobile.DistanceTransformPlanner import DistanceTransformPlanner
+from roboticstoolbox.mobile.DstarPlanner import DstarPlanner
+from roboticstoolbox.mobile.DubinsPlanner import DubinsPlanner
+from roboticstoolbox.mobile.ReedsSheppPlanner import ReedsSheppPlanner
+
 from roboticstoolbox.mobile.landmarkmap import LandmarkMap
 from roboticstoolbox.mobile.sensors import RangeBearingSensor
 from roboticstoolbox.mobile.drivers import *
@@ -12,9 +15,13 @@ __all__ = [
     'Vehicle',
     'Bicycle',
     'Unicycle',
-    'Bug2',
-    'DXform',
-    'DStar',
+    'Bug2Planner',
+    'DistanceTransformPlanner',
+    'DstarPlanner',
+    'DubinsPlanner',
+    'ReedsSheppPlanner',
+    'CurvaturePolyPlanner',
+    'PRMPlanner',
     'VehicleMarker',
     'VehiclePolygon',
     'VehicleIcon',
