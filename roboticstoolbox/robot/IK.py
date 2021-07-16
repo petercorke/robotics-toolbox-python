@@ -319,7 +319,7 @@ class IKMixin:
                     failure = f"iteration limit {ilimit} exceeded"
                     break
 
-                e = base.tr2delta(self.fkine(q).A, Tk.A)
+                e = base.tr2delta(self.fkine(q, end=end).A, Tk.A)
 
                 # Are we there yet?
                 if base.norm(W @ e) < tol:
@@ -404,7 +404,8 @@ class IKMixin:
             ilimit=500,
             tol=1e-10,
             wN=1e-3,
-            Lmin=0
+            Lmin=0,
+            end=None
     ):
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization
@@ -423,6 +424,8 @@ class IKMixin:
         :type tol: float
         :param ωN: damping coefficient
         :type ωN: float (default 1e-3)
+        :param end: end of path, defaults to end-effector
+        :type end: ELink or str, optional
         :return: inverse kinematic solution
         :rtype: named tuple
 
@@ -544,7 +547,7 @@ class IKMixin:
                     failure = f"iteration limit {ilimit} exceeded"
                     break
 
-                e = _angle_axis(self.fkine(q).A, Tk.A)
+                e = _angle_axis(self.fkine(q, end=end).A, Tk.A)
 
                 # Are we there yet?
                 E = 0.5 * e.T @ W @ e
@@ -552,7 +555,7 @@ class IKMixin:
                     break
 
                 # Compute the Jacobian and projection matrices
-                J = self.jacob0(q)
+                J = self.jacob0(q, end=end)
                 WN = E * np.eye(self.n) + wN * np.eye(self.n)
                 H = J.T @ W @ J + WN  # n x n
                 g = J.T @ W @ e       # n x 1
