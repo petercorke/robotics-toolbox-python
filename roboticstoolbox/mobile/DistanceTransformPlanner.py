@@ -14,10 +14,10 @@ from spatialmath.pose2d import SE2
 from spatialmath import base
 from scipy.ndimage import *
 from matplotlib import cm
-from roboticstoolbox.mobile.navigation import Navigation
+from roboticstoolbox.mobile.Planner import Planner
 
 
-class DXform(Navigation):
+class DistanceTransformPlanner(Planner):
     def __init__(self, occ_grid=None, metric="euclidean", distance_map=None, **kwargs):
 
         super().__init__(occ_grid=occ_grid, **kwargs)
@@ -46,11 +46,11 @@ class DXform(Navigation):
         self._distance_map = np.array([])
 
     def plan(self, goal=None, animate=False):
-        show = None
-        if animate:
-            show = 0.05
-        else:
-            show = 0
+        # show = None
+        # if animate:
+        #     show = 0.05
+        # else:
+        #     show = 0
 
         if goal is not None:
             self.goal = goal
@@ -58,7 +58,8 @@ class DXform(Navigation):
         if self._goal is None:
             raise ValueError('No goal specified here or in constructor')
 
-        self._distance_map = distancexform(self.occ_grid_nav, self._goal, self._metric)
+        self._distance_map = distancexform(self.occ_grid_nav,
+                goal=self._goal, metric=self._metric, animate=animate)
 
     # Use plot from parent class
 
@@ -76,7 +77,7 @@ class DXform(Navigation):
             [ 1,  0],
             [ 0,  1],
             [ 1,  1],
-        ])
+        ], dtype=int)
 
         x = robot[0]
         y = robot[1]
@@ -107,12 +108,14 @@ class DXform(Navigation):
         fig = plt.figure()
         ax = fig.gca(projection='3d')
 
-        surf = ax.plot_surface(self._distance_map, cmap=cm.coolwarm,
-                               linewidth=0, antialiased=False)
+        distance = self._distance_map
+        X, Y = np.meshgrid(np.arange(distance.shape[1]), np.arange(distance.shape[0]))
+        surf = ax.plot_surface(X, Y, distance, #cmap='gray',
+                               linewidth=1, antialiased=False)
 
         if p is not None:
-            k = sub2ind(np.shape(self._distance_map), p[:, 1], p[:, 0])
-            height = self._distance_map[k]
+            # k = sub2ind(np.shape(self._distance_map), p[:, 1], p[:, 0])
+            height = distance[p[:,1], p[:,0]]
             ax.plot(p[:, 0], p[:, 1], height)
 
         plt.show()
@@ -138,25 +141,30 @@ def ind2sub(array_shape, ind):
 
 import numpy as np
 
-def distancexform(occgrid, goal, metric='cityblock', show=False):
+def distancexform(occgrid, goal, metric='cityblock', animate=False):
     """
     Distance transform for path planning
 
-    :param occgrid: Occupancy grid
+    :param occgrid: Occupancy grid, 0 is free, >0 is occupied/obstacle
     :type occgrid: NumPy ndarray
     :param goal: Goal position (x,y)
     :type goal: 2-element array-like
     :param metric: distance metric, defaults to 'cityblock'
     :type metric: str, optional
+    :param animate: animate the iterations of the algorithm
     :return: Distance transform matrix
     :rtype: NumPy ndarray
 
-    Returns a matrix the same size as the occupancy grid ``occgrid`` where each
-    cell contains the distance to the goal according to the chosen ``metric``.
+    Implements the grass/brush fire algorithm to compute, for every reachable
+    cell in the occupancy grid, its distance from the goal.
 
-        - Obstacle cells will be set to ``nan``.  
+    The result is an array, the same size as the occupancy grid ``occgrid``,
+    where each cell contains the distance to the goal according to the chosen
+    ``metric``.  In addition:
+
+        - Obstacle cells will be set to ``nan``
         - Unreachable cells, ie. free cells _inside obstacles_ will be set 
-          to ``inf``. 
+          to ``inf``
 
     The cells of the passed occupancy grid are:
         - zero, cell is free or driveable
@@ -169,51 +177,63 @@ def distancexform(occgrid, goal, metric='cityblock', show=False):
     # - goal is zero
 
     goal = base.getvector(goal, 2, dtype=np.int)
-    occgrid = occgrid.astype(np.float32)
-    occgrid[occgrid > 0] = np.nan  # assign nan to obstacle cells
-    nans = np.isnan(occgrid)  # keep record of where the NaNs are
 
-    occgrid[occgrid==0] = np.inf  # assign inf to other cells
-    occgrid[goal[1], goal[0]] = 0  # assign zero to goal
+    distance = occgrid.astype(np.float32)
+    distance[occgrid > 0] = np.nan  # assign nan to obstacle cells
+    distance[occgrid==0] = np.inf   # assign inf to other cells
+    distance[goal[1], goal[0]] = 0  # assign zero to goal
     
     # create the appropriate distance matrix D
     if metric.lower() in ('manhattan', 'cityblock'):
+        # fmt: off
         D = np.array([
                 [ np.inf,   1,   np.inf],
                 [      1,   0,        1],
                 [ np.inf,   1,   np.inf]
             ])
+        # fmt: on
     elif metric.lower() == 'euclidean':
         r2 = np.sqrt(2)
+        # fmt: off
         D = np.array([
                 [ r2,   1,   r2],
                 [  1,   0,    1],
                 [ r2,   1,   r2]
                 ])
+        # fmt: on
 
     # get ready to iterate
     count = 0
     ninf = np.inf  # number of infinities in the map
 
+    h = None
     while True:
-        
-        occgrid = dxstep(occgrid, D)
-        occgrid[nans] = np.nan
+        distance = grassfire_step(distance, D)
+        distance[occgrid > 0] = np.nan  # reinsert nans for obstacles
 
         count += 1
-        # if opt.animate
-        #     cmap = [1 0 0; gray(count)];
-        #     colormap(cmap)
-        #     image(occgrid+1, 'CDataMapping', 'direct');
-        #     set(gca, 'Ydir', 'normal');
-        #     xlabel('x');
-        #     ylabel('y');
-        #     if opt.animate
-        #         anim.add();
-        #     else
-        #         pause(opt.delay);
 
-        ninfnow = sum(np.isinf(occgrid.flatten()))  # current number of Infs
+        if animate:
+            # TODO, needs work to update colorbar and be faster
+            display = distance.copy()
+            display[np.isinf(display)] = 0
+            if h is None:
+                plt.figure()
+                plt.xlabel('x')
+                plt.ylabel('y')
+                ax = plt.gca()
+                plt.pause(0.001)
+                cmap = cm.get_cmap('gray')
+                cmap.set_bad('red')
+                cmap.set_over('white')
+                h = plt.imshow(display, cmap=cmap)
+                plt.colorbar(label='distance')
+            else:
+                h.remove()
+                h = plt.imshow(display, cmap=cmap)
+            plt.pause(0.001)
+
+        ninfnow = np.isinf(distance).sum()  # current number of Infs
         if ninfnow == ninf:
             # stop if the number of Infs left in the map had stopped reducing
             # it may never get to zero if there are unreachable cells in the map
@@ -222,9 +242,9 @@ def distancexform(occgrid, goal, metric='cityblock', show=False):
         ninf = ninfnow
 
     print(f"{count:d} iterations, {ninf:d} unreachable cells")
-    return occgrid
+    return distance
 
-def dxstep(G, D):
+def grassfire_step(G, D):
 
     # pad with inf
     H = np.pad(G, max(D.shape) // 2, 'constant', constant_values=np.inf)

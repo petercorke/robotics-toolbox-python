@@ -14,51 +14,52 @@ from spatialmath import base
 from spatialmath.base.animate import *
 from scipy.ndimage import *
 from matplotlib import cm
-from roboticstoolbox.mobile.navigation import Navigation
+import matplotlib.pyplot as plt
+from matplotlib import animation
+from roboticstoolbox.mobile.Planner import Planner
 
-
-class Bug2(Navigation):
+class Bug2Planner(Planner):
     def __init__(self, occ_grid, **kwargs):
 
         """
         
                     %Bug2.Bug2 Construct a Bug2 navigation object 
             %
-            % B = Bug2(MAP, OPTIONS) is a bug2 navigation object, and MAP is an occupancy grid,
-            % a representation of a planar world as a matrix whose elements are 0 (free
-            % space) or 1 (occupied).
+            B = Bug2(MAP, OPTIONS) is a bug2 navigation object, and MAP is an occupancy grid,
+            a representation of a planar world as a matrix whose elements are 0 (free
+            space) or 1 (occupied).
             %
-            % Options::
-            % 'goal',G      Specify the goal point (1x2)
-            % 'inflate',K   Inflate all obstacles by K cells.
+            Options::
+            'goal',G      Specify the goal point (1x2)
+            'inflate',K   Inflate all obstacles by K cells.
             %
-            % See also Navigation.Navigation.
+            See also Navigation.Navigation.
 
                     %Navigation.Navigation Create a Navigation object
         %
-        % N = Navigation(OCCGRID, OPTIONS) is a Navigation object that holds an
-        % occupancy grid OCCGRID.  A number of options can be be passed.
+        N = Navigation(OCCGRID, OPTIONS) is a Navigation object that holds an
+        occupancy grid OCCGRID.  A number of options can be be passed.
         %
-        % Options::
-        % 'goal',G        Specify the goal point (2x1)
-        % 'inflate',K     Inflate all obstacles by K cells.
-        % 'private'       Use private random number stream.
-        % 'reset'         Reset random number stream.
-        % 'verbose'       Display debugging information
-        % 'seed',S        Set the initial state of the random number stream.  S must
-        %                 be a proper random number generator state such as saved in
-        %                 the seed0 property of an earlier run.
+        Options::
+        'goal',G        Specify the goal point (2x1)
+        'inflate',K     Inflate all obstacles by K cells.
+        'private'       Use private random number stream.
+        'reset'         Reset random number stream.
+        'verbose'       Display debugging information
+        'seed',S        Set the initial state of the random number stream.  S must
+                        be a proper random number generator state such as saved in
+                        the seed0 property of an earlier run.
         %
-        % Notes::
-        % - In the occupancy grid a value of zero means free space and non-zero means
-        %   occupied (not driveable).
-        % - Obstacle inflation is performed with a round structuring element (kcircle) 
-        %   with radius given by the 'inflate' option.
-        % - Inflation requires either MVTB or IPT installed.
-        % - The 'private' option creates a private random number stream for the methods 
-        %   rand, randn and randi.  If not given the global stream is used.
+        Notes::
+        - In the occupancy grid a value of zero means free space and non-zero means
+          occupied (not driveable).
+        - Obstacle inflation is performed with a round structuring element (kcircle) 
+          with radius given by the 'inflate' option.
+        - Inflation requires either MVTB or IPT installed.
+        - The 'private' option creates a private random number stream for the methods 
+          rand, randn and randi.  If not given the global stream is used.
         %
-        % See also randstream.
+        See also randstream.
 
         """
         super().__init__(occ_grid=occ_grid, **kwargs)
@@ -100,102 +101,100 @@ class Bug2(Navigation):
     def k(self):
         return self._k
 
-    def query(self, start=None, goal=None, animate=False, movie=None, current=False):
+    # override query method of base class
+    def query(self, start=None, goal=None, animate=False, movie=None, trail=True):
         """
-        [summary]
-
-        :param start: [description], defaults to None
-        :type start: [type], optional
-        :param goal: [description], defaults to None
-        :type goal: [type], optional
-        :param animate: [description], defaults to False
+        Find a path using Bug2
+        
+        :param start: starting position
+        :type start: array_like(2)
+        :param goal: goal position
+        :type goal: array_like(2)
+        :param animate: show animation of robot moving over the map, 
+            defaults to False
         :type animate: bool, optional
-        :param movie: [description], defaults to None
-        :type movie: [type], optional
-        :param current: [description], defaults to False
+        :param movie: save animation as a movie, defaults to None. Is either
+            name of movie or a tuple (filename, frame interval)
+        :type movie: str or tuple(str, float), optional
+        :param trail: show the path followed by the robot, defaults to True
         :type current: bool, optional
-        :return: [description]
-        :rtype: [type]
+        :return: path from ``start`` to ``goal``
+        :rtype: ndarray(2,N)
 
-                    %Bug2.query  Find a path
-            %
-            % B.query(START, GOAL, OPTIONS) is the path (Nx2) from START (1x2) to GOAL
-            % (1x2).  Row are the coordinates of successive points along the path.  If
-            % either START or GOAL is [] the grid map is displayed and the user is
-            % prompted to select a point by clicking on the plot.
-            %
-            % Options::
-            %  'animate'   show a simulation of the robot moving along the path
-            %  'movie',M   create a movie
-            %  'current'   show the current position as a black circle
-            %
-            % Notes::
-            % - START and GOAL are given as X,Y coordinates in the grid map, not as
-            %   MATLAB row and column coordinates.
-            % - START and GOAL are tested to ensure they lie in free space.
-            % - The Bug2 algorithm is completely reactive so there is no planning
-            %   method.
-            % - If the bug does a lot of back tracking it's hard to see the current
-            %   position, use the 'current' option.
-            % - For the movie option if M contains an extension a movie file with that
-            %   extension is created.  Otherwise a folder will be created containing
-            %   individual frames.
-            %
-            % See also Animate.
+        Compute the path from ``start`` to `goal` assuming the robot is capable
+        of 8-way motion from its current cell to the next.
+        
+        .. note::
+        
+            - ``start`` and `goal` are given as (x,y) coordinates in the grid map,
+              not as matrix row and column coordinates.
+            - ``start`` and ``goal`` are tested to ensure they lie in free space
+            - The Bug2 algorithm is completely reactive, there is no planning so
+              paths can be very inefficient.
+            - If the bug does a lot of back tracking it's hard to see the current
+              position, set ``trail=False``
+            - For the ``movie`` option specify a file or a tuple containing the
+              filename and the frame interval (1/fps) in seconds.
+
+        :seealso: :class:`MovieWriter`
         """
-        anim = None
-        if movie is not None:
-            anim = Animate(movie)
-            animate = True
 
         # make sure start and goal are set and valid
-        self.check_query(start, goal)
+        self.check_points(start, goal)
 
         # compute the m-line
         #  create homogeneous representation of the line
         #  line*[x y 1]' = 0
-        self._m_line = hom_line(self._start[0], self._start[1],
-                                   self._goal[0], self._goal[1])
+        self._m_line = hom_line(self._start, self._goal)
+
+        if movie is not None:
+            animate = True
 
         if animate:
             self.plot()
             self.plot_m_line()
+            plt.pause(0.05)
+
+        movie = MovieWriter(movie)
 
         robot = self._start[:]
         self._step = 1
-        path = [self._start]
+        path = np.r_[self._start]
         h = None
+
+        trail_line, = plt.plot(0, 0, 'y.')
+        trail_head, = plt.plot(0, 0, 'ko')
 
         # iterate using the next() method until we reach the goal
         while True:
             if animate:
-                plt.plot(robot[0], robot[1], 'y.')
-                plt.pause(0.1)
-                if current:
-                    h = self.plot(robot)
-                plt.draw()
-                if movie is not None:
-                    anim.plot(h)
-                if current:
-                    self.delete(h)
+                trail_head.set_data(robot[0], robot[1])
+                if trail:
+                    trail_line.set_data(path.T)
+
+                plt.pause(0.001)
+                # plt.draw()
+                # plt.show(block=False)
+                # plt.gcf().canvas.flush_events()
+
+                movie.add()
 
             # move to next point on path
             robot = self.next(robot)
 
-            # have we been here before, ie. in a loop
-            if any([all(robot == x) for x in path]):
-                raise RuntimeError('trapped')
+            # # have we been here before, ie. in a loop
+            # if any([all(robot == x) for x in path]):
+            #     raise RuntimeError('trapped')
 
             # are we there yet?
             if robot is None:
                 break
             else:
-                path.append(robot)
+                path = np.vstack((path, robot))
 
-        if movie is not None:
-            anim.done()
+        movie.done()
 
-        return np.r_[path]
+        return path
 
     def plot_m_line(self, ls=None):
         if ls is None:
@@ -290,6 +289,7 @@ class Bug2(Navigation):
 # https://github.com/petercorke/toolbox-common-matlab/blob/master/edgelist.m
 
 #  these are directions of 8-neighbours in a clockwise direction
+# fmt: off
 _dirs = np.array([
         [-1,  0],
         [-1,  1],
@@ -300,7 +300,7 @@ _dirs = np.array([
         [ 0, -1],
         [-1, -1],
     ])
-
+# fmt: on
 def edgelist(im, p, direction=1):
     """
     Find edge of a region
@@ -446,8 +446,8 @@ def adjacent_point(im, seed, pix0):
 
 # Implementation of Peter Corke's matlab homline function from:
 # https://github.com/petercorke/spatialmath-matlab/blob/master/homline.m
-def hom_line(x1, y1, x2, y2):
-    line = np.cross(np.r_[x1, y1, 1], np.r_[x2, y2, 1])
+def hom_line(p1, p2):
+    line = np.cross(np.r_[p1[0], p1[1], 1], np.r_[p2[0], p2[1], 1])
 
     # normalize so that the result of x*l' is the pixel distance
     # from the line
@@ -465,7 +465,7 @@ def hom_line(x1, y1, x2, y2):
 #     ind[ind < 0] = -1
 #     ind[ind >= array_shape[0]*array_shape[1]] = -1
 #     rows = (ind.astype('int') / array_shape[1])
-#     cols = ind % array_shape[1]
+#     cols = ind array_shape[1]
 #     return rows, cols
 
 # def col_norm(x):
