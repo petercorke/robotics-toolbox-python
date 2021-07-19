@@ -2,45 +2,32 @@
 <robot name="Puma560" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:macro name="puma560_link_geometry" params="link_num">
-    <mesh filename="package://puma560_description/meshes/puma_link${link_num}.stl" scale="${0.001*25.4} ${25.4*0.001} ${25.4*0.001}"/>
+    <mesh filename="package://puma560_description/meshes/puma560_link${link_num}.dae" scale="1.0 1.0 1.0"/>
   </xacro:macro>
-
-  <material name="blue">
-    <color rgba="0 0 0.8 0.8"/>
-  </material>
-
-  <material name="red">
-    <color rgba="0.8 0 0 0.8"/>
-  </material>
-
-  <material name="green">
-    <color rgba="0 0.8 0 0.8"/>
-  </material>
 
   <xacro:property name="M_PI" value="3.14159265"/>
 
-  <!-- DH Paramaters -->
-  <xacro:property name="d_1" value="0.6718"/>
-  <xacro:property name="d_2" value="0.1501"/>
-  <xacro:property name="d_3" value="0"/>
-  <xacro:property name="d_4" value="0.4331"/>
-  <xacro:property name="d_5" value="0"/>
-  <xacro:property name="d_6" value="0.0558"/>
-
-  <xacro:property name="a_1" value="0"/>
-  <xacro:property name="a_2" value="0.4318"/>
-  <xacro:property name="a_3" value="-0.0203"/>
-  <xacro:property name="a_4" value="0"/>
-  <xacro:property name="a_5" value="0"/>
-  <xacro:property name="a_6" value="0"/>
+  <xacro:property name="l1_1" value="0.54864"/>
+  <xacro:property name="l2_1" value="0.07493"/>
+  <xacro:property name="l2_2" value="0.14224"/>
+  <xacro:property name="l3_2" value="0.0254"/>
+  <xacro:property name="l3_3" value="0.4318"/>
+  <xacro:property name="l3_3" value="0.4318"/>
+  <xacro:property name="l4_3" value="0.0"/>
+  <xacro:property name="l4_4z" value="0.35179"/>
+  <xacro:property name="l4_4y" value="-0.0381"/>
+  <xacro:property name="l5_4" value="0.02032"/>
+  <xacro:property name="l5_5" value="0.059979"/>
+  <xacro:property name="l6_5" value="0.0"/>
+  <xacro:property name="l6_6" value="0.05334"/>
+  <xacro:property name="l7_6" value="0.0"/>
 
   <link name="link1">
     <visual>
       <geometry>
         <xacro:puma560_link_geometry link_num="1"/>
       </geometry>
-      <origin rpy="0 0 ${M_PI/2}"/>
-      <material name="green"/>
+      <origin rpy="0 0 0"/>
     </visual>  
   </link>
 
@@ -49,15 +36,14 @@
       <geometry>
         <xacro:puma560_link_geometry link_num="2"/>
       </geometry>
-      <origin xyz="0 0 -0.1" rpy="0 0 0"/>
-      <material name="red"/>
-    </visual>  
+      <origin xyz="0 ${l2_1} 0" rpy="0 0 0"/><!-- X-forward, Y-Up, Z-left -->
+    </visual>
   </link>
 
   <joint name="j1" type="revolute">
     <parent link="link1"/>
     <child link="link2"/>
-    <origin xyz="0 0 ${d_1}" rpy="${M_PI/2} 0 0"/>
+    <origin xyz="0 0 ${l1_1}" rpy="${M_PI/2} 0 0"/>
     <axis xyz="0 1 0"/> <!-- This is descibed in child frame -->
     <limit effort="1000.0" lower="${-M_PI}" upper="${M_PI}" velocity="0"/>
   </joint>
@@ -67,15 +53,14 @@
       <geometry>
         <xacro:puma560_link_geometry link_num="3"/>
       </geometry>
-      <origin xyz="0 0 ${0.0435+d_2}"/>
-      <material name="blue"/>
-    </visual>  
+      <origin xyz="0 0 ${l3_2}"/><!-- X-forward, Y-Up, Z-right -->
+    </visual>
   </link>
 
   <joint name="j2" type="revolute">
     <parent link="link2"/>
     <child link="link3"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="0 ${l2_1} ${l2_2}" rpy="0 0 0"/><!-- X-forward, Y-Up, Z-right -->
     <axis xyz="0 0 1"/> <!-- This is descibed in child frame -->
     <limit effort="1000.0" lower="${-M_PI/2}" upper="${M_PI/2}" velocity="0"/>
   </joint>
@@ -85,15 +70,14 @@
       <geometry>
         <xacro:puma560_link_geometry link_num="4"/>
       </geometry>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <material name="green"/>
-    </visual>  
+      <origin xyz="0 0 ${l4_3}" rpy="0 0 0"/><!-- X-Up, Y-Back, Z-right -->
+    </visual>
   </link>
 
   <joint name="j3" type="revolute">
     <parent link="link3"/>
     <child link="link4"/>
-    <origin xyz="${a_2} ${a_3} ${d_2}" rpy="0 0 ${M_PI/2}"/>
+    <origin xyz="${l3_3} 0 ${l3_2}" rpy="0 0 ${M_PI/2}"/><!-- X-forward, Y-Up, Z-right -->
     <axis xyz="0 0 1"/> <!-- This is descibed in child frame -->
     <limit effort="1000.0" lower="${-M_PI/2}" upper="${M_PI/2}" velocity="0"/>
   </joint>
@@ -103,15 +87,14 @@
       <geometry>
         <xacro:puma560_link_geometry link_num="5"/>
       </geometry>
-      <origin xyz="0 0 ${d_4-0.071}" rpy="0 0 ${M_PI/2}"/>
-      <material name="red"/>
-    </visual>  
+      <origin xyz="0 0 ${l5_4}" rpy="0 0 0"/><!-- X-back, Y-right, Z-up -->
+    </visual>
   </link> 
 
   <joint name="j4" type="revolute">
     <parent link="link4"/>
     <child link="link5"/>
-    <origin xyz="0 0 0" rpy="${M_PI/2} 0 ${M_PI/2}"/>
+    <origin xyz="${l4_4z} 0 ${l4_4y + l4_3}" rpy="${-M_PI/2} 0 ${-M_PI/2}"/><!-- X-Up, Y-Back, Z-right -->
     <axis xyz="0 0 1"/> 
     <limit effort="1000.0" lower="${-M_PI/2}" upper="${M_PI/2}" velocity="0"/>
   </joint>
@@ -121,15 +104,14 @@
       <geometry>
         <xacro:puma560_link_geometry link_num="6"/>
       </geometry>
-      <origin xyz="0 0 0" rpy="${M_PI} 0 ${M_PI/2}"/>
-      <material name="green"/>
-    </visual>  
+      <origin xyz="0 0 ${l6_5}" rpy="0 0 0"/><!-- X-back, Y-down, Z-right -->
+    </visual>
   </link> 
 
   <joint name="j5" type="revolute">
     <parent link="link5"/>
     <child link="link6"/>
-    <origin xyz="0 0 ${d_4}" rpy="${M_PI/2} 0 0"/>
+    <origin xyz="0 0 ${l5_4 + l5_5}" rpy="${M_PI/2} 0 0"/><!-- X-back, Y-right, Z-up -->
     <axis xyz="0 0 1"/> 
     <limit effort="1000.0" lower="${-M_PI/2}" upper="${M_PI/2}" velocity="0"/>
   </joint>
@@ -139,15 +121,14 @@
       <geometry>
         <xacro:puma560_link_geometry link_num="7"/>
       </geometry>
-      <origin xyz="0 0 -0.010" rpy="0 0 0"/>
-      <material name="blue"/>
-    </visual>  
+      <origin xyz="0 ${l7_6} 0" rpy="0 0 0"/><!-- Y-up-->
+    </visual>
   </link> 
 
   <joint name="j6" type="revolute">
     <parent link="link6"/>
     <child link="link7"/>
-    <origin xyz="0 ${d_6} 0" rpy="${-M_PI/2} 0 0"/>
+    <origin xyz="0 ${l6_6 + l6_5} 0" rpy="${-M_PI/2} 0 0"/><!-- Y-up -->
     <axis xyz="0 0 1"/> 
     <limit effort="1000.0" lower="${-M_PI/2}" upper="${M_PI/2}" velocity="0"/>
   </joint>
