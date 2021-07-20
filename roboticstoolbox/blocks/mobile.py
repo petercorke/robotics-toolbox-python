@@ -53,14 +53,14 @@ class Bicycle(TransferBlock):
             
             :input v: Vehicle speed (metres/sec).  The velocity limit ``vlim`` is
                 applied to the magnitude of this input.
-            :input g: Steering wheel angle (radians).  The steering limit ``slim``
+            :input γ: Steering wheel angle (radians).  The steering limit ``slim``
                 is applied to the magnitude of this input.
             
         and three output ports:
             
             :output x: position in the world frame (metres)
             :output y: positon in the world frame (metres)
-            :output t: heading angle with respect to the world frame (radians)
+            :output θ: heading angle with respect to the world frame (radians)
 
         """
         super().__init__(nin=2, nout=3, inputs=inputs, **kwargs)
