@@ -56,7 +56,7 @@ while not arrived:
     omni.base = omni.fkine(omni.q, end=omni.links[2])
     omni.q = omni.qz
     base_new = frankie.fkine(frankie._q, end=frankie.links[2], fast=True)
-    base_new[2, 3] -= 0.38
+    # base_new[2, 3] -= 0.38
     frankie._base.A[:] = base_new
     frankie.q[:2] = 0
 

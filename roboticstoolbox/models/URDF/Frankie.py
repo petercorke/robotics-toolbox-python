@@ -40,7 +40,7 @@ class Frankie(ERobot):
             links,
             name=name,
             manufacturer="Franka Emika",
-            gripper_links=links[11],
+            gripper_links=links[12],
             urdf_string=urdf_string,
             urdf_filepath=urdf_filepath,
         )

@@ -938,6 +938,8 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         else:
             verifymatrix(J, (6, self.n))
 
+        n = J.shape[1]
+
         if H is None:
             H = self.hessian0(J0=J, start=start, end=end)
         else:
@@ -949,9 +951,9 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         H = H[axes, :, :]
 
         b = np.linalg.inv(J @ np.transpose(J))
-        Jm = np.zeros((self.n, 1))
+        Jm = np.zeros((n, 1))
 
-        for i in range(self.n):
+        for i in range(n):
             c = J @ np.transpose(H[:, :, i])
             Jm[i, 0] = manipulability * np.transpose(c.flatten("F")) @ b.flatten("F")
 
