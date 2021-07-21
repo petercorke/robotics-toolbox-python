@@ -7,7 +7,7 @@ from roboticstoolbox.tools.trajectory import tpoly, tpoly_func, \
 from roboticstoolbox.tools.numerical import jacobian_numerical, \
     hessian_numerical
 from roboticstoolbox.tools.jsingu import jsingu
-from roboticstoolbox.tools.data import loaddata, loadmat, path_to_datafile
+from roboticstoolbox.tools.data import rtb_loaddata, rtb_loadmat, rtb_path_to_datafile
 
 
 __all__ = [
@@ -26,7 +26,7 @@ __all__ = [
     'jsingu',
     'jacobian_numerical',
     'hessian_numerical',
-    'loaddata',
-    'loadmat',
-    'path_to_datafile',
+    'rtb_loaddata',
+    'rtb_loadmat',
+    'rtb_path_to_datafile',
 ]

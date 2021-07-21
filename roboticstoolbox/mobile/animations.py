@@ -14,7 +14,7 @@ from matplotlib import patches
 import matplotlib.transforms as mtransforms
 
 from spatialmath import SE2, base
-from roboticstoolbox import loaddata
+from roboticstoolbox import rtb_loaddata
 
 
 class VehicleAnimation(ABC):
@@ -241,7 +241,7 @@ class VehicleIcon(VehicleAnimation):
         if '.' not in filename:
             try:
                 # try the default folder first
-                image = loaddata(filename + ".png", plt.imread)
+                image = rtb_loaddata(filename + ".png", plt.imread)
             except FileNotFoundError:
                 raise ValueError(f"{filename} is not a provided icon")
         else:

@@ -4,7 +4,7 @@ import importlib
 
 
 
-def loadmat(filename):
+def rtb_loadmat(filename):
     """
     Load toolbox mat format data file
 
@@ -27,9 +27,9 @@ def loadmat(filename):
     """
     from scipy.io import loadmat
 
-    return loaddata(filename, loadmat, squeeze_me=True, struct_as_record=False)
+    return rtb_loaddata(filename, loadmat, squeeze_me=True, struct_as_record=False)
 
-def loaddata(filename, handler, **kwargs):
+def rtb_loaddata(filename, handler, **kwargs):
     """
     Load toolbox data file
 
@@ -44,16 +44,21 @@ def loaddata(filename, handler, **kwargs):
     data reading function::
 
         handler(abs_file_name, **kwargs)
+
+    For example::
+
+        data = rtb_loaddata('data/queensland.json', lambda f: json.load(open(f, 'r')))
+
     
     .. note:: If the filename has no path component, eg. ``foo.dat``, it will 
         first be looked for in the folder ``roboticstoolbox/data``.
 
     :seealso: :func:`path_to_datafile`
     """
-    path = path_to_datafile(filename)
+    path = rtb_path_to_datafile(filename)
     return handler(path, **kwargs)
 
-def path_to_datafile(*filename, local=True):
+def rtb_path_to_datafile(*filename, local=True):
     """
     Get absolute path to datafile
 
@@ -103,8 +108,8 @@ def path_to_datafile(*filename, local=True):
 
 if __name__ == "__main__":
 
-    a = loadmat("map1.mat")
+    a = rtb_loadmat("map1.mat")
     print(a)
-    a = loadmat("data/map1.mat")
+    a = rtb_loadmat("data/map1.mat")
     print(a)
 

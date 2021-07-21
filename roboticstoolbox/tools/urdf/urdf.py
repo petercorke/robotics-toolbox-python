@@ -12,7 +12,7 @@ import os
 import xml.etree.ElementTree as ET
 import spatialmath as sm
 from io import BytesIO
-from roboticstoolbox.tools.data import path_to_datafile
+from roboticstoolbox.tools.data import rtb_path_to_datafile
 
 
 from .utils import (parse_origin, configure_origin)
@@ -304,7 +304,7 @@ class Mesh(URDFType):
         if value.startswith('package://'):
             value = value.replace('package://', '')
 
-        value = path_to_datafile('xacro', value)
+        value = rtb_path_to_datafile('xacro', value)
 
         self._filename = str(value)
 

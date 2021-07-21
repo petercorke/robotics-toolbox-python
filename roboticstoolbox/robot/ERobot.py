@@ -19,7 +19,7 @@ from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
-from roboticstoolbox.tools.data import path_to_datafile
+from roboticstoolbox.tools.data import rtb_path_to_datafile
 
 from pathlib import PurePosixPath
 from ansitable import ANSITable, Column
@@ -1209,7 +1209,7 @@ class ERobot(BaseERobot):
         """
 
         # get the path to the class that defines the robot
-        base_path = path_to_datafile("xacro")
+        base_path = rtb_path_to_datafile("xacro")
         # print("*** urdf_to_ets_args: ", classpath)
         # add on relative path to get to the URDF or xacro file
         # base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
@@ -1227,7 +1227,8 @@ class ERobot(BaseERobot):
                 print("error parsing URDF file", file_path)
                 raise e
         else:  # pragma nocover
-            urdf = URDF.loadstr(open(file_path).read(), file_path)
+            urdf_string = open(file_path).read()
+            urdf = URDF.loadstr(urdf_string, file_path)
 
         return urdf.elinks, urdf.name, urdf_string, file_path
 

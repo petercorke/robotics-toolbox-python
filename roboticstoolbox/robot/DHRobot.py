@@ -4,7 +4,7 @@
 """
 
 from collections import namedtuple
-from roboticstoolbox.tools.data import path_to_datafile
+from roboticstoolbox.tools.data import rtb_path_to_datafile
 import warnings
 import copy
 import numpy as np
@@ -106,7 +106,7 @@ class DHRobot(Robot):
 
         # load meshes if required
         if meshdir is not None:
-            self.meshdir = path_to_datafile(meshdir)
+            self.meshdir = rtb_path_to_datafile(meshdir)
             self.basemesh = self.meshdir / "link0.stl"
             for j, link in enumerate(self._links, start=1):
                 link.mesh = self.meshdir / "link{:d}.stl".format(j)
