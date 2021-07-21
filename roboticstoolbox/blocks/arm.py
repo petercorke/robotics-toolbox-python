@@ -41,10 +41,10 @@ class FKine(FunctionBlock):
         """
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
-        :param robot: Robot model
-        :type robot: Robot subclass
-        :param args: Options for fkine
-        :type args: dict
+        :param robot: Robot model, defaults to None
+        :type robot: Robot subclass, optional
+        :param args: Options for fkine, defaults to {}
+        :type args: dict, optional
         :param ``**kwargs``: common Block options
         :return: a FORWARD_KINEMATICS block
         :rtype: Foward_Kinematics instance
@@ -95,13 +95,13 @@ class IKine(FunctionBlock):
         self, robot=None, q0=None, useprevious=True, ik=None, *inputs, **kwargs
     ):
         """
-        :param robot: Robot model
-        :type robot: Robot subclass
-        :param q0: Initial joint angles
-        :type q0: array_like(n)
-        :param useprevious: Use previous IK solution as q0
-        :type useprevious: bool
-        :param ik: Specify an IK function, default is ikine_LM
+        :param robot: Robot model, defaults to None
+        :type robot: Robot subclass, optional
+        :param q0: Initial joint angles, defaults to None
+        :type q0: array_like(n), optional
+        :param useprevious: Use previous IK solution as q0, defaults to True
+        :type useprevious: bool, optional
+        :param ik: Specify an IK function, defaults to 'ikine_LM'
         :type ik: callable f(T)
         :param ``**kwargs``: common Block options
         :param ``*inputs``: Optional incoming connections
@@ -191,14 +191,14 @@ class Jacobian(FunctionBlock):
         :type ``*inputs``: Block or Plug
         :param robot: Robot model
         :type robot: Robot subclass
-        :param frame: Frame to compute Jacobian for: '0' (default) or 'e'
-        :type frame: str
-        :param inverse: output inverse of Jacobian
-        :type inverse: bool
-        :param pinv: output pseudo-inverse of Jacobian
-        :type pinv: bool
-        :param transpose: output transpose of Jacobian
-        :type transpose: bool
+        :param frame: Frame to compute Jacobian for, one of: '0' [default], 'e'
+        :type frame: str, optional
+        :param inverse: output inverse of Jacobian, defaults to False
+        :type inverse: bool, optional
+        :param pinv: output pseudo-inverse of Jacobian, defaults to False
+        :type pinv: bool, optional
+        :param transpose: output transpose of Jacobian, defaults to False
+        :type transpose: bool, optional
         :param ``**kwargs``: common Block options
         :return: a JACOBIAN block
         :rtype: Jacobian instance
@@ -563,7 +563,7 @@ class IDyncs(FunctionBlock):
 
         :param robot: Robot model
         :type robot: Robot subclass
-        :param gravity: Link to compute pose of, defaults to end-effector
+        :param gravity: Link to compute pose of, defaults to 'end-effector'
         :type gravity: Link or str
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
@@ -626,8 +626,8 @@ class ArmPlot(GraphicsBlock):
         :type ``*inputs``: Block or Plug
         :param robot: Robot model
         :type robot: Robot subclass
-        :param backend: RTB backend name, default is pyplot
-        :type backend: str
+        :param backend: RTB backend name, defaults to 'pyplot'
+        :type backend: str, optional
         :param ``**kwargs``: common Block options
         :return: An ARMPLOT block
         :rtype: ArmPlot instance
@@ -701,14 +701,16 @@ class Traj(FunctionBlock):
     def __init__(self, y0=0, yf=1, T=None, time=False, traj="lspb", *inputs, **kwargs):
         """
 
-        :param y0: initial value
-        :type y0: array_like(m)
-        :param yf: final value
-        :type yf: array_like(m)
+        :param y0: initial value, defaults to 0
+        :type y0: array_like(m), optional
+        :param yf: final value, defaults to 1
+        :type yf: array_like(m), optional
+        :param T: time vector or number of steps, defaults to None
+        :type T: array_like or int, optional
         :param time: x is simulation time, defaults to False
-        :type time: bool
-        :param traj: trajectory type: 'lspb' [default] or 'tpoly'
-        :type traj: str
+        :type time: bool, optional
+        :param traj: trajectory type, one of: 'lspb' [default], 'tpoly'
+        :type traj: str, optional
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
         :param ``**kwargs``: common Block options
@@ -812,12 +814,12 @@ class JTraj(SourceBlock):
         :type q0: array_like(n)
         :param qf: final joint coordinate
         :type qf: array_like(n)
-        :param tv: time vector or number of steps
-        :type tv: array_like or int
-        :param qd0: initial velocity, defaults to zero
+        :param T: time vector or number of steps, defaults to None
+        :type T: array_like or int, optional
+        :param qd0: initial velocity, defaults to None
         :type qd0: array_like(n), optional
-        :param qd1: final velocity, defaults to zero
-        :type qd1: array_like(n), optional
+        :param qdf: final velocity, defaults to None
+        :type qdf: array_like(n), optional
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
         :param ``**kwargs``: common Block options
@@ -963,9 +965,9 @@ class CirclePath(SourceBlock):
         :param yf: final value
         :type yf: array_like(m)
         :param time: x is simulation time, defaults to False
-        :type time: bool
-        :param traj: trajectory type: 'lspb' [default] or 'tpoly'
-        :type traj: str
+        :type time: bool, optional
+        :param traj: trajectory type, one of: 'lspb' [default], 'tpoly'
+        :type traj: str, optional
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
         :param ``**kwargs``: common Block options

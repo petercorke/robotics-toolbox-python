@@ -83,12 +83,12 @@ class MultiRotor(TransferBlock):
         :type model: dict
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
-        :param groundcheck: Prevent vehicle moving below ground , defaults to True
+        :param groundcheck: Prevent vehicle moving below ground, defaults to True
         :type groundcheck: bool
         :param speedcheck: Check for zero rotor speed, defaults to True
         :type speedcheck: bool
-        :param x0: Initial state, defaults to all zeros
-        :type x0: TYPE, optional
+        :param x0: Initial state, defaults to None
+        :type x0: float, optional
         :param ``**kwargs``: common Block options
         :return: a MULTIROTOR block
         :rtype: MultiRotor instance
@@ -346,11 +346,11 @@ class MultiRotorPlot(GraphicsBlock):
         :type model: dict
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
-        :param scale: dimensions of workspace: xmin, xmax, ymin, ymax, zmin, zmax
-        :type scale: array_like
-        :param flapscale: exagerate flapping angle by this factor, default is 1
+        :param scale: dimensions of workspace: xmin, xmax, ymin, ymax, zmin, zmax, defaults to [-2,2,-2,2,10]
+        :type scale: array_like, optional
+        :param flapscale: exagerate flapping angle by this factor, defaults to 1
         :type flapscale: float
-        :param projection: 3D projection: ortho or perspective, defaults to 'ortho'
+        :param projection: 3D projection, one of: 'ortho' [default], 'perspective'
         :type projection: str
         :param ``**kwargs``: common Block options
         :return: a MULTIROTOPLOT block

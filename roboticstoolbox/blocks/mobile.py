@@ -33,7 +33,7 @@ class Bicycle(TransferBlock):
         r"""
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
-        :param x0: Inital state, defaults to 0
+        :param x0: Inital state, defaults to None
         :type x0: array_like, optional
         :param L: Wheelbase, defaults to 1
         :type L: float, optional
@@ -118,7 +118,7 @@ class Unicycle(TransferBlock):
         r"""
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
-        :param x0: Inital state, defaults to 0
+        :param x0: Inital state, defaults to None
         :type x0: array_like, optional
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
@@ -184,15 +184,15 @@ class DiffSteer(TransferBlock):
     """
 
     def __init__(self, *inputs, R=1, W=1, x0=None, **kwargs):
-        r"""
+        """
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
-        :param x0: Inital state, defaults to 0
+        :param x0: Inital state, defaults to None
         :type x0: array_like, optional
         :param R: Wheel radius, defaults to 1
         :type R: float, optional
         :param W: Wheel separation in lateral direction, defaults to 1
-        :type R: float, optional
+        :type W: float, optional
         :param ``**kwargs``: common Block options
         :return: a DIFFSTEER block
         :rtype: DifSteer instance
@@ -270,7 +270,7 @@ class VehiclePlot(GraphicsBlock):
         :type path: bool, optional
         :param pathstyle: linestyle for path, defaults to None
         :type pathstyle: str or dict, optional
-        :param shape: vehicle shape: 'triangle' (default) or 'box'
+        :param shape: vehicle shape, one of: 'triangle' [default], 'box'
         :type shape: str, optional
         :param color: vehicle outline color, defaults to "blue"
         :type color: str, optional
@@ -279,9 +279,9 @@ class VehiclePlot(GraphicsBlock):
         :param size: length of vehicle, defaults to 1
         :type size: float, optional
         :param scale: x- and y-axis scale, defaults to 'auto'
-        :type scale: 2- or 4-element sequence
-        :param labels: axis labels (xlabel, ylabel)
-        :type labels: 2-element tuple or list
+        :type scale: array_like(2) or array_like(4), optional
+        :param labels: axis labels (xlabel, ylabel), defaults to ["X","Y"]
+        :type labels: array_like(2) or list
         :param square: Set aspect ratio to 1, defaults to True
         :type square: bool, optional
         :param init: initialize graphics, defaults to None
