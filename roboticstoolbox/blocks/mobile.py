@@ -20,13 +20,13 @@ class Bicycle(TransferBlock):
     .. table::
        :align: left
     
-    +------------+---------+---------+
-    | inputs     | outputs |  states |
-    +------------+---------+---------+
-    | 2          | 3       | 3       |
-    +------------+---------+---------+
-    | float      | float   |         | 
-    +------------+---------+---------+
+    +------------+------------+---------+
+    | inputs     | outputs    |  states |
+    +------------+------------+---------+
+    | 2          | 1          | 3       |
+    +------------+------------+---------+
+    | float      | ndarray(3) |         | 
+    +------------+------------+---------+
     """
 
     def __init__(self, *inputs, x0=None, L=1, vlim=1, slim=1, **kwargs):
@@ -56,14 +56,12 @@ class Bicycle(TransferBlock):
             :input γ: Steering wheel angle (radians).  The steering limit ``slim``
                 is applied to the magnitude of this input.
             
-        and three output ports:
+        and one output port:
             
-            :output x: position in the world frame (metres)
-            :output y: positon in the world frame (metres)
-            :output θ: heading angle with respect to the world frame (radians)
+            :output q: state (x, y, θ)
 
         """
-        super().__init__(nin=2, nout=3, inputs=inputs, **kwargs)
+        super().__init__(nin=2, nout=1, inputs=inputs, **kwargs)
 
         self.nstates = 3
         self.vlim = vlim
@@ -82,7 +80,7 @@ class Bicycle(TransferBlock):
         self.state_names(('x', 'y', r'$\theta$'))
         
     def output(self, t):
-        return list(self._x)
+        return [self._x]  # one output which is ndarray(3)
     
     def deriv(self):
         theta = self._x[2]
