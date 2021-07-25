@@ -1255,8 +1255,11 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                 default = "pyplot"
             elif isinstance(self, rtb.ERobot2):
                 default = "pyplot2"
-            elif isinstance(self, rtb.ERobot) and self.hasgeometry:
-                default = "swift"
+            elif isinstance(self, rtb.ERobot):
+                if self.hasgeometry:
+                    default = "swift"
+                else:
+                    default = "pyplot"
 
         if backend is not None:
             backend = backend.lower()
