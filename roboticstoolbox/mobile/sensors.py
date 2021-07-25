@@ -5,7 +5,7 @@ from math import pi, sin, cos
 import matplotlib.pyplot as plt
 from spatialmath import base
 import roboticstoolbox as rtb
-
+from collections.abc import Iterable
 
 """
 Sensor Sensor superclass
@@ -46,7 +46,7 @@ class Sensor(ABC):
         # delay
         
 
-    def __init__(self, robot, map, every=1, fail=[], animate=False, delay=0.1, verbose=False):
+    def __init__(self, robot, map, every=1, fail=[], animate=False, delay=0.1, seed=0, verbose=False):
         """Sensor.Sensor Sensor object constructor
         %
         # S = Sensor(VEHICLE, MAP, OPTIONS) is a sensor mounted on a vehicle
@@ -75,7 +75,8 @@ class Sensor(ABC):
 
         self._animate = animate
 
-        self._rand = np.random.default_rng()
+        self._random = np.random.default_rng(seed)
+        self._seed = seed
 
 
     def __str__(self):
@@ -102,10 +103,32 @@ class Sensor(ABC):
         return self._sensor
 
     @property
+    def random(self):
+        """
+        Get private random number generator
+
+        :return: NumPy random number generator
+        :rtype: Generator
+
+        Has methods including:
+            - ``integers(low, high, size, endpoint)``
+            - ``random(size)``
+            - ``uniform``
+            - ``normal(mean, std, size)``
+            - ``multivariate_normal(mean, covar, size)``
+
+        The generator is initialized with the seed provided at constructor
+        time every time ``init`` is called.
+
+        :seealso: :meth:`init`
+        """
+        return self._random
+
+    @property
     def verbose(self):
         return self._verbose
     
-    def plot(s, jf):
+    def plot(s, lm_id):
         """Sensor.plot Plot sensor reading
         %
         # self.plot(J) draws a line from the robot to the J'th map feature.
@@ -126,18 +149,16 @@ class Sensor(ABC):
         
         # # there is a sensor line animate it
         
-        # if jf == 0
+        # if lm_id == 0
         #     set(h, 'Visible', 'off')
         # else
-        #     xi = self.self.map(:,jf)
+        #     xi = self.self.map(:,lm_id)
         #     set(h, 'Visible', 'on', 'XData', [self.robot.x[0], xi[0]], 'YData', [self.robot.x[1], xi[1]])
         # end
         # pause(self.delay)
 
         # drawnow
         pass
-
-
 
 """RangeBearingSensor Range and bearing sensor class
 
@@ -199,6 +220,7 @@ class RangeBearingSensor(Sensor):
             covar=None, 
             range=None,
             angle=None,
+            plot=False,
             **kwargs):
         """RangeBearingSensor.RangeBearingSensor Range and bearing sensor constructor
         %
@@ -240,27 +262,42 @@ class RangeBearingSensor(Sensor):
         else:
             self._covar = covar
         self._W = self._covar
-
+        
         if range is None:
             self._r_range = None
-        elif len(range) == 1:
+        elif isinstance(range, Iterable):
+            self._r_range = base.getvector(range, 2)
+        else:
             self._r_range = [0, range]
-        elif len(range) == 2:
-            self._r_range = range
 
         if angle is None:
             self._theta_range = None
-        elif len(angle) == 1:
+        elif isinstance(angle, Iterable):
+            self._theta_range = base.getvector(angle, 2)
+        else:
             self._theta_range = [-angle, angle]
-        elif len(angle) == 2:
-            self._theta_range = angle
 
+        self._plot = plot
         self._landmarklog = []
 
+    def __str__(self):
+        s = super().__str__()
+        s += f"\n  W = {base.array2str(self._W)}\n"
+
+        s += f"  sampled every {self._every} samples\n"
+        if self._r_range is not None:
+            s += f"  range: {self._r_range[0]} to {self._r_range[0]}\n"
+        if self._theta_range is not None:
+            s += f"  angle: {self._theta_range[0]} to {self._theta_range[0]}\n"
+        return s.rstrip()
 
     def init(self):
         self._landmarklog = []
-        self._count = 1
+        self._count = 0
+        if self._seed is not None:
+            self._random = np.random.default_rng(self._seed)
+        if self._plot:
+            self.map.plot()
     
     def selectFeature(self):
         return self.randstream.randi(self._sensor.nlandmarks)
@@ -298,7 +335,7 @@ class RangeBearingSensor(Sensor):
 
         # check conditions for NOT returning a value
         z = []
-        jf = 0
+        lm_id = 0
         # sample interval
         if self._count % self._every != 0:
             return (None, None)
@@ -335,7 +372,7 @@ class RangeBearingSensor(Sensor):
         # if range and bearing angle limits are in place look for
         # any landmarks that match criteria
 
-        # get range/bearing to all landmarks, one per row
+        # get range/bearing to all landmarks
         z = self.h(self.robot.x)
         zk = [(z, k) for k, z in enumerate(z)]
         # a list of tuples, each tuple is ((range, bearing), k)
@@ -346,32 +383,43 @@ class RangeBearingSensor(Sensor):
         if self._theta_range is not None:
             # find all within angular range as well
             zk = filter(lambda zk: self._theta_range[0] <= zk[0][1] <= self._theta_range[1], zk)
-            
+        
+        zk = list(zk)
         if len(zk) > 1:
             # more than 1 in range, pick a random one
-            i = self._rand.integers(len(zk))
+            i = self.random.integers(len(zk))
             z = zk[i][0]
-            jf = zk[i][1]
+            lm_id = zk[i][1]
             if self.verbose:
-                print(f"Sensor:: feature {jf}: ({z[0]}, {z[1]})")
+                print(f"Sensor:: feature {lm_id}: ({z[0]}, {z[1]})")
+        elif len(zk) == 1:
+            # just 1 reading
+            z = zk[0][0]
+            lm_id = zk[0][1]
+            if self.verbose:
+                print(f"Sensor:: feature {lm_id}: ({z[0]}, {z[1]})")
         else:
             if self.verbose:
                 print('Sensor:: no features\n')
+            self._landmarklog.append(lm_id)
             return (None, None)
 
         # compute the range and bearing from robot to feature
-        # z = self.h(self.robot.x, jf)  
+        # z = self.h(self.robot.x, lm_id)  
         
         if self._animate:
-            self.plot(jf)
+            self.plot(lm_id)
         
         # add the reading to the landmark log
-        self._landmarklog.append(jf)
+        self._landmarklog.append(lm_id)
+
+        # add noise with covariance W
+        z += self.random.multivariate_normal((0, 0), self._W)
     
-        return z
+        return z, lm_id
 
 
-    def h(self, xv, jf=None):
+    def h(self, xv, lm_id=None):
         """
         Landmark range and bearing
         %
@@ -392,37 +440,44 @@ class RangeBearingSensor(Sensor):
         # See also RangeBearingSensor.reading, RangeBearingSensor.Hx, RangeBearingSensor.Hw, RangeBearingSensor.Hp.
         """
         # get the landmarks, one per row
-        if jf is None:
+
+        if isinstance(xv, np.ndarray) and xv.ndim == 2:
+            # x is Nx3 set of vehicle states, do vectorized form
+            # used by particle filter
+            x = xv[:, 0]
+            y = xv[:, 1]
+            t = xv[:, 2]
+        else:
+            x, y, t = xv
+
+        if lm_id is None:
             # self.h(XV)   all landmarks
-            dx = self.map.x - xv[0]
-            dy = self.map.y - xv[1]
-        elif base.isinteger(jf):
+            dx = self.map.x - x
+            dy = self.map.y - y
+        elif base.isinteger(lm_id):
             # self.h(XV, JF)
-            xlm = self.map.landmark(jf)
-            dx = xlm[0] - xv[0]
-            dy = xlm[1] - xv[1]
+            xlm = self.map.landmark(lm_id)
+            dx = xlm[0] - x
+            dy = xlm[1] - y
         else:
             # self.h(XV, XF)
-            xlm = base.getvector(jf, 2)
-            dx = xlm[0] - xv[0]
-            dy = xlm[1] - xv[1]
+            xlm = base.getvector(lm_id, 2)
+            dx = xlm[0] - x
+            dy = xlm[1] - y
 
         # compute range and bearing (Vectorized code)
 
         z = np.c_[
                 np.sqrt(dx**2 + dy**2), 
-                base.angdiff(np.arctan2(dy, dx), xv[2]) 
+                base.angdiff(np.arctan2(dy, dx), t) 
             ]  # range & bearing as columns
 
-        # add noise with covariance W
-        z += self._rand.normal(size=z.shape) @ sp.linalg.sqrtm(self._W)
-
-        if z.shape[0] == 1:
+        if z.ndim == 1 and z.shape[0] == 1:
             return z[0]
         else:
             return z
 
-    def Hx(self, xv, jf):
+    def Hx(self, xv, lm_id):
         """
         Jacobian dh/dx
         %
@@ -433,21 +488,23 @@ class RangeBearingSensor(Sensor):
         %
         # See also RangeBearingSensor.h.
         """
-        if base.isinteger(jf):
+        if base.isinteger(lm_id):
             # landmark index provided
-            xf = self.sensor.landmark(jf)
+            xf = self.map.landmark(lm_id)
         else:
             # assume it is a coordinate
-            xf = base.getvector(jf, 2)
+            xf = base.getvector(lm_id, 2)
 
         Delta = xf - xv[0:2]
         r = base.norm(Delta)
+        # fmt: off
         return np.array([
             [-Delta[0] / r,    -Delta[1] / r,      0],
             [ Delta[1] / r**2, -Delta[0] / r**2,  -1],
                 ])
+        # fmt: on
 
-    def Hp(self, xv, jf):
+    def Hp(self, xv, lm_id):
         """
         Jacobian dh/dp
         %
@@ -458,19 +515,22 @@ class RangeBearingSensor(Sensor):
         %
         # See also RangeBearingSensor.h.
         """
-        if base.isinteger(jf):
-            xf = self.map.landmark(jf)
+        if base.isinteger(lm_id):
+            xf = self.map.landmark(lm_id)
         else:
-            xf = jf
+            xf = lm_id
+        xv = base.getvector(xv, 3)
 
         Delta = xf - xv[0:2]
         r = base.norm(Delta)
+        # fmt: off
         return np.array([
-            [ Delta([0]) / r,      Delta([1]) / r],
-            [-Delta([1]) / r**2,    Delta([0]) / r**2],
+            [ Delta[0] / r,      Delta[1] / r],
+            [-Delta[1] / r**2,   Delta[0] / r**2],
             ])
+        # fmt: on
 
-    def Hw(self, xv, jf):
+    def Hw(self, xv, lm_id):
         """
         Jacobian dh/dw
         %
@@ -493,10 +553,12 @@ class RangeBearingSensor(Sensor):
         range = z[0]
         bearing = z[1] + xv[2]  # bearing angle in vehicle frame
 
+        # fmt: off
         return np.r_[
             xv[0] + range * cos(bearing),
             xv[1] + range * sin(bearing)
                 ]
+        # fmt: on
 
     def Gx(self, xv, z):
         """RangeBearingSensor.Gxv Jacobian dg/dx
@@ -507,13 +569,14 @@ class RangeBearingSensor(Sensor):
         # See also RangeBearingSensor.g.
         """
         theta = xv[2]
-        r = z[0]
-        bearing = z[1]
+        r, bearing = z
 
+        # fmt: off
         return np.array([
             [1,   0,   -r*sin(theta + bearing)],
             [0,   1,    r*cos(theta + bearing)],
                 ])
+        # fmt: on
 
     def Gz(self, xv, z):
         """
@@ -525,23 +588,15 @@ class RangeBearingSensor(Sensor):
         # See also RangeBearingSensor.g.
         """
         theta = xv[2]
-        r = z[0]
-        bearing = z[1]
+        r, bearing = z
+        # fmt: off
         return np.array([
-            [cos(theta + bearing),   -r*sin(theta + bearing)],
-            [sin(theta + bearing),    r*cos(theta + bearing)],
+            [cos(theta + bearing),   -r * sin(theta + bearing)],
+            [sin(theta + bearing),    r * cos(theta + bearing)],
             ])
+        # fmt: on
 
-    def __str__(self):
-        s = super().__str__()
-        s += f"\n  W = {self._W.tolist()}\n"
 
-        s += f"  sampled every {self._every} samples\n"
-        if self._r_range is not None:
-            s += f"  range: {self._r_range[0]} to {self._r_range[0]}\n"
-        if self._theta_range is not None:
-            s += f"  angle: {self._theta_range[0]} to {self._theta_range[0]}\n"
-        return s.rstrip()
 
 if __name__ == "__main__":
     

@@ -10,11 +10,12 @@ import numpy as np
 import spatialmath.base as sm
 import unittest
 
-from roboticstoolbox import Bug2, DXform, loadmat
-from roboticstoolbox.mobile.bug2 import edgelist
+from roboticstoolbox import Bug2, DistanceTransformPlanner, rtb_loadmat
+from roboticstoolbox.mobile.Bug2 import edgelist
 from roboticstoolbox.mobile.landmarkmap import *
 from roboticstoolbox.mobile.drivers import *
 from roboticstoolbox.mobile.sensors import *
+from roboticstoolbox.mobile.Vehicle import *
 
 # ======================================================================== #
 
@@ -69,129 +70,7 @@ class TestNavigation(unittest.TestCase):
         self.assertFalse( nav.is_occupied([3,4]) )
 
 
-    def test_rand(self):
-    
-        og = np.r_[0]
-        nav = Bug2(og)  # we can't instantiate Navigation because it's abstract
-        
-        # test random number generator
-        r = nav.rand()
-        self.assertIsInstance(r, float)
-        self.assertTrue(0 <= r <= 1)
 
-        r = nav.rand(low=10, high=20);
-        self.assertIsInstance(r, float)
-        self.assertTrue(10 <= r <= 20)
-
-        r = nav.rand(size=(3,4))
-        self.assertIsInstance(r, np.ndarray)
-        self.assertEqual(r.shape, (3,4))
-
-
-    def test_randn(self):
-    
-        og = np.r_[0]
-        nav = Bug2(og)  # we can't instantiate Navigation because it's abstract
-        
-        # test random number generator
-        r = nav.randn()
-        self.assertIsInstance(r, float)
-
-        r = nav.randn(size=(3,4))
-        self.assertIsInstance(r, np.ndarray)
-        self.assertEqual(r.shape, (3,4))
-
-        r = nav.randn(size=(100,))
-        self.assertIsInstance(r, np.ndarray)
-        self.assertEqual(r.shape, (100,))
-        self.assertTrue(-0.4 <= np.mean(r) <= 0.4)
-
-        r = nav.randn(loc=100, size=(100,))
-        self.assertIsInstance(r, np.ndarray)
-        self.assertEqual(r.shape, (100,))
-        self.assertTrue(99 <= np.mean(r) <= 101)
-
-    def test_randi(self):
-    
-        og = np.r_[0]
-        nav = Bug2(og)  # we can't instantiate Navigation because it's abstract
-        
-        # test random number generator
-        r = nav.randi(10)
-        self.assertIsInstance(r, np.int64)
-        self.assertTrue(0 <= r < 10)
-
-        r = nav.randi(low=10, high=20);
-        self.assertIsInstance(r, np.int64)
-        self.assertTrue(10 <= r < 20)
-
-        r = nav.randi(10, size=(3,4))
-        self.assertIsInstance(r, np.ndarray)
-        self.assertEqual(r.shape, (3,4))
-
-    def test_bug2(self):
-
-        vars = loadmat("data/map1.mat")
-        map = vars['map']
-
-        bug = Bug2(map)
-        # bug.plan()
-        path = bug.query([20, 10], [50, 35])
-
-        # valid path
-        self.assertTrue(path is not None)
-
-        # valid Nx2 array
-        self.assertIsInstance(path, np.ndarray)
-        self.assertEqual(path.shape[1], 2)
-
-        # includes start and goal
-        self.assertTrue(all(path[0,:] == [20,10]))
-        self.assertTrue(all(path[-1,:] == [50,35]))
-
-        # path doesn't include obstacles
-        for p in path:
-            self.assertFalse(bug.is_occupied(p))
-
-        # there are no gaps
-        for k in range(len(path)-1):
-            d = np.linalg.norm(path[k] - path[k+1])
-            self.assertTrue(d < 1.5)
-
-        bug.plot()
-        bug.plot(path=path)
-
-    def test_dxform(self):
-
-        vars = loadmat("data/map1.mat")
-        map = vars['map']
-
-        dx = DXform(map)
-        dx.plan([50, 35])
-        path = dx.query([20, 10])
-
-        # valid path
-        self.assertTrue(path is not None)
-
-        # valid Nx2 array
-        self.assertIsInstance(path, np.ndarray)
-        self.assertEqual(path.shape[1], 2)
-
-        # includes start and goal
-        self.assertTrue(all(path[0,:] == [20,10]))
-        self.assertTrue(all(path[-1,:] == [50,35]))
-
-        # path doesn't include obstacles
-        for p in path:
-            self.assertFalse(dx.is_occupied(p))
-
-        # there are no gaps
-        for k in range(len(path)-1):
-            d = np.linalg.norm(path[k] - path[k+1])
-            self.assertTrue(d < 1.5)
-            
-        dx.plot()
-        dx.plot(path=path)
 
 # ======================================================================== #
 
@@ -211,42 +90,108 @@ class RangeBearingSensorTest(unittest.TestCase):
 
     def test_reading(self):
         
-        z = self.rs.reading()
+        z, lm_id = self.rs.reading()
         self.assertIsInstance(z, np.ndarray)
         self.assertEqual(z.shape, (2,))
 
         # test missing samples
         rs = RangeBearingSensor(self.veh, self.map, every=2)
 
-        z = rs.reading()
+        z, lm_id = rs.reading()
         self.assertIsInstance(z, np.ndarray)
         self.assertEqual(z.shape, (2,))
 
-        z = rs.reading()
-        self.assertEqual(z, (None, None))
+        z, lm_id = rs.reading()
+        self.assertEqual(z, None)
 
-        z = rs.reading()
+        z, lm_id = rs.reading()
         self.assertIsInstance(z, np.ndarray)
         self.assertEqual(z.shape, (2,))
 
     def test_h(self):
-
-        z = self.rs.h([0,0,0], 10)
+        xv = np.r_[2, 3, 0.5]
+        p = np.r_[3,4]
+        z = self.rs.h(xv, 10)
         self.assertIsInstance(z, np.ndarray)
         self.assertEqual(z.shape, (2,))
+        self.assertAlmostEqual(z[0], 
+            np.linalg.norm(self.rs.map.landmark(10) - xv[:2]))
+        theta = z[1] + xv[2]
+        nt.assert_almost_equal(self.rs.map.landmark(10),
+            xv[:2] + z[0] * np.r_[np.cos(theta), np.sin(theta)])
 
-        z = self.rs.h([0,0,0], [3,4])
+        z = self.rs.h(xv, [3,4])
         self.assertIsInstance(z, np.ndarray)
         self.assertEqual(z.shape, (2,))
+        self.assertAlmostEqual(z[0], 
+            np.linalg.norm(p - xv[:2]))
+        theta = z[1] + 0.5
+        nt.assert_almost_equal([3, 4],
+            xv[:2] + z[0] * np.r_[np.cos(theta), np.sin(theta)])
 
-        z = self.rs.h([0,0,0])
+        # all landmarks
+        z = self.rs.h(xv)
         self.assertIsInstance(z, np.ndarray)
         self.assertEqual(z.shape, (20,2))
+        for k in range(20):
+            nt.assert_almost_equal(z[k, :], self.rs.h(xv, k))
 
         # if vehicle at landmark 10 range=bearing=0
         x = np.r_[self.map.landmark(10), 0]
         z = self.rs.h(x, 10)
         self.assertEqual(tuple(z), (0, 0))
+
+    def test_H_jacobians(self):
+        xv = np.r_[1, 2, pi/4]
+        p = np.r_[5, 7]
+        id = 10
+
+        nt.assert_almost_equal(
+            self.rs.Hx(xv, id),
+            base.numjac(lambda x: self.rs.h(x, id), xv),
+            decimal=4)
+
+        nt.assert_almost_equal(
+            self.rs.Hp(xv, p),
+            base.numjac(lambda p: self.rs.h(xv, p), p),
+            decimal=4)
+
+        xv = [1, 2, pi/4]
+        p = [5, 7]
+        id = 10
+
+        nt.assert_almost_equal(
+            self.rs.Hx(xv, id),
+            base.numjac(lambda x: self.rs.h(x, id), xv),
+            decimal=4)
+
+        nt.assert_almost_equal(
+            self.rs.Hp(xv, p),
+            base.numjac(lambda p: self.rs.h(xv, p), p),
+            decimal=4)
+
+    def test_g(self):
+        xv = np.r_[1, 2, pi/4]
+        p = np.r_[5, 7]
+
+        z = self.rs.h(xv, p)
+        nt.assert_almost_equal(p, self.rs.g(xv, z))
+
+    def test_G_jacobians(self):
+        xv = np.r_[1, 2, pi/4]
+        p = np.r_[5, 7]
+
+        z = self.rs.h(xv, p)
+
+        nt.assert_almost_equal(
+            self.rs.Gx(xv, z),
+            base.numjac(lambda x: self.rs.g(x, z), xv),
+            decimal=4)
+
+        nt.assert_almost_equal(
+            self.rs.Gz(xv, z),
+            base.numjac(lambda z: self.rs.g(xv, z), z),
+            decimal=4)
 
     def test_plot(self):
 
@@ -312,8 +257,35 @@ class DriversTest(unittest.TestCase):
         self.assertIsInstance(u, np.ndarray)
         self.assertTrue(u.shape, (2,))
 
-class TestVehicle(unittest.TestCase):
-	pass
+class TestBicycle(unittest.TestCase):
+
+    # def test_deriv(self):
+    #     xv = np.r_[1, 2, pi/4]
+
+    #     veh = Bicycle()
+
+    #     u = [1, 0.2]
+    #     nt.assert_almost_equal(
+    #         veh.deriv(xv, ),
+    #         base.numjac(lambda p: veh(xv, p), p),
+    #         decimal=4)
+
+    def test_jacobians(self):
+        xv = np.r_[1, 2, pi/4]
+        odo = np.r_[0.1, 0.2]
+        veh = Bicycle()
+
+        nt.assert_almost_equal(
+            veh.Fx(xv, odo),
+            base.numjac(lambda x: veh.f(x, odo), xv),
+            decimal=4)
+
+        nt.assert_almost_equal(
+            veh.Fv(xv, odo),
+            base.numjac(lambda d: veh.f(xv, d), odo),
+            decimal=4)
+
+
 # function setupOnce(testCase)
 #     testCase.TestData.Duration = 50;
 # end

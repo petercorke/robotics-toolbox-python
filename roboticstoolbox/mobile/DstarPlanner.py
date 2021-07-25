@@ -16,11 +16,37 @@ from matplotlib import cm
 from enum import IntEnum
 from roboticstoolbox.mobile.Planner import Planner
 
-class State(IntEnum):
+class _State(IntEnum):
     NEW = 0
     OPEN = 1
     CLOSED = 2
 class DstarPlanner(Planner):
+    r"""
+    D* path planner
+
+    :param occgrid: occupancy grid
+    :type curvature: OccGrid or ndarray(w,h)
+    :param Planner: D* path planner
+    :type Planner: DstarPlanner instance
+
+    ==================   ========================
+    Feature              Capability
+    ==================   ========================
+    Plan                 Cartesian space
+    Obstacle avoidance   Yes
+    Curvature            Discontinuous
+    Motion               Forwards only
+    ==================   ========================
+
+    Also known as wavefront, grassfire or brushfire planning algorithm.
+
+    Creates a planner that finds the path between two points in the
+    plane using forward motion.  The path comprises a set of points in 
+    adjacent cells.
+
+    :author: Peter Corke_
+    :seealso: :class:`Planner`
+    """
     def __init__(self, occ_grid=None, 
                  reset=False, **kwargs):
         self._g = None
@@ -108,6 +134,19 @@ class DstarPlanner(Planner):
             return x[1], x[0]
 
     def plan(self, goal=None, animate=False, progress=True):
+        r"""
+        Plan D* path
+
+        :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to None
+        :type goal: array_like(2) or array_like(3), optional
+        :param animate: animate the planning algorithm iterations, defaults to False
+        :type animate: bool, optional
+        :param progress: show progress bar, defaults to True
+        :type progress: bool, optional
+
+        The implementation depends on the particular planner.  Some may have
+        no planning phase.  The plan may also depend on just the start or goal.
+        """
         if goal is not None:
             self._goal = np.array(goal).astype(int)
             self.reset()
@@ -152,6 +191,7 @@ class DstarPlanner(Planner):
         self._valid_plan = False
 
     def modify_cost(self, xy, new_cost):
+        # xy is [xmin xmax ymin ymax]
         if np.all(np.shape[xy] == np.array([2, 2])) and np.size(new_cost) == 1:
             for xx in range(xy[0, 0], xy[0, 1]):
                 for yy in range(xy[1, 0], xy[1, 1]):
@@ -330,12 +370,12 @@ def ind2sub(array_shape, ind):
 
 if __name__ == "__main__":
 
-    from roboticstoolbox import DStar, path_to_datafile
+    from roboticstoolbox import DStarPlanner, path_to_datafile
     from scipy.io import loadmat
 
     path = path_to_datafile("data/map1.mat")
     vars = loadmat(path, squeeze_me=True, struct_as_record=False)
     map = vars['map']
-    ds = DStar(map, verbose=True)
+    ds = DStarPlanner(map, verbose=True)
     ds = ds.plan([50, 35])
     path = ds.query([20, 10])

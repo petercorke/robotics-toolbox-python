@@ -26,6 +26,7 @@ from roboticstoolbox.mobile.Planner import Planner
 import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import *
+from spatialmath import base
 
 def left_straight_left(alpha, beta, d):
     sa = math.sin(alpha)
@@ -303,19 +304,80 @@ def path_planning(start, goal, curvature, step_size=0.1):
     path = np.c_[x_list, y_list, yaw_list]
     return path, length, mode, lengths
 
+# ============================================================================
 class DubinsPlanner(Planner):
+    r"""
+    Dubins path planner
 
-    def __init__(self, curvature=1, step_size=0.1):
-        super().__init__()
-        self.curvature = curvature
-        self.step_size = step_size
+    :param curvature: maximum path curvature, defaults to 1.0
+    :type curvature: float, optional
+    :param stepsize: spacing between points on the path, defaults to 0.1
+    :type stepsize: float, optional
+    :return: Dubins path planner
+    :rtype: DubinsPlanner instance
 
-    def query(self, start, goal):
-        self._start = start
-        self._goal = goal
-        path, length, mode, lengths = path_planning(start, goal, c=self.curvature, step_size=self.step_size)
-        status = namedtuple('DubinsStatus', ['segments', 'lengths'])(mode, lengths)
-        return path, status
+    ==================   ========================
+    Feature              Capability
+    ==================   ========================
+    Plan                 Configuration space
+    Obstacle avoidance   No
+    Curvature            Discontinuous
+    Motion               Forwards only
+    ==================   ========================
+
+    Creates a planner that finds the path between two configurations in the
+    plane using forward motion only.  The path comprises upto 3 segments that are
+    straight lines or arcs with :math:`\pm` ``curvature``.
+
+    :reference: On Curves of Minimal Length with a Constraint on Average 
+        Curvature, and with Prescribed Initial and Terminal Positions and 
+        Tangents,  Dubins, L.E. (July 1957), American Journal of Mathematics.
+        79(3): 497–516.
+    :author: Atsushi Sakai `PythonRobotics <https://github.com/AtsushiSakai/PythonRobotics>`_
+    :seealso: :class:`Planner`
+    """
+    def __init__(self, curvature=1, stepsize=0.1, **kwargs):
+
+        super().__init__(ndims=3, **kwargs)
+        self._curvature = curvature
+        self._stepsize = stepsize
+
+    def query(self, start, goal, **kwargs):
+        r"""
+        Find a Dubins path
+
+        :param start: start configuration :math:`(x, y, \theta)`
+        :type start: array_like(3), optional
+        :param goal: goal configuration :math:`(x, y, \theta)`
+        :type goal: array_like(3), optional
+        :return: path and status
+        :rtype: ndarray(N,3), namedtuple
+
+        The returned status value has elements:
+
+
+        +-------------+-----------------------------------------------------+
+        | Element     |  Description                                        |
+        +-------------+-----------------------------------------------------+
+        |``segments`` | a list containing the type of each path segment as  |
+        |             | a single letter code: either "L", "R" or "S" for    |
+        |             | left turn, right turn or straight line respectively.|
+        +-------------+-----------------------------------------------------+
+        |``lengths``  | the length of each path segment. The sign of the    |
+        |             |length indicates the direction of travel.            |
+        +-------------+-----------------------------------------------------+
+
+        :seealso: :meth:`Planner.query`
+        """
+        super().query(start=start, goal=goal, next=False, **kwargs)
+
+        path, length, mode, lengths = path_planning(
+            start=self.start, goal=self.goal,
+            curvature=self._curvature, step_size=self._stepsize)
+
+        status = namedtuple('DubinsStatus', ['segments', 'length', 'seglengths'])
+        
+        return path, status(mode, sum(lengths), lengths)
 
 if __name__ == '__main__':
     from math import pi
@@ -331,7 +393,7 @@ if __name__ == '__main__':
 
     print(path)
     print(status)
-    dubins.plot(path=path[:, :2])
+    dubins.plot(path, twod=True)
 
     plt.show(block=True)
     # plt.plot(path_x, path_y, label="final course " + "".join(mode))

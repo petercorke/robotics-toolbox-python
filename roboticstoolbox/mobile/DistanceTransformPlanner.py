@@ -13,29 +13,58 @@ from spatialmath.base.vectors import *
 from spatialmath.pose2d import SE2
 from spatialmath import base
 from scipy.ndimage import *
+import matplotlib.pyplot as plt
 from matplotlib import cm
 from roboticstoolbox.mobile.Planner import Planner
 
 
 class DistanceTransformPlanner(Planner):
-    def __init__(self, occ_grid=None, metric="euclidean", distance_map=None, **kwargs):
+    r"""
+    Distance transform path planner
 
-        super().__init__(occ_grid=occ_grid, **kwargs)
+    :param occgrid: occupancy grid
+    :type curvature: OccGrid or ndarray(w,h)
+    :param metric: distane metric, one of: "euclidean" [default], "manhattan"
+    :type metric: str optional
+    :param Planner: distance transform path planner
+    :type Planner: DistanceTransformPlanner instance
+
+    ==================   ========================
+    Feature              Capability
+    ==================   ========================
+    Plan                 Cartesian space
+    Obstacle avoidance   Yes
+    Curvature            Discontinuous
+    Motion               Forwards only
+    ==================   ========================
+
+    Also known as wavefront, grassfire or brushfire planning algorithm.
+
+    Creates a planner that finds the path between two points in the
+    plane using forward motion.  The path comprises a set of points in 
+    adjacent cells.
+
+    :author: Peter Corke_
+    :seealso: :class:`Planner`
+    """
+    def __init__(self, occgrid=None, metric="euclidean", **kwargs):
+
+        super().__init__(occgrid=occgrid, ndims=2, **kwargs)
         self._metric = metric
-        self._distance_map = None
+        self._distancemap = None
 
     @property
     def metric(self):
         return self._metric
 
     @property
-    def distance_map(self):
-        return self._distance_map
+    def distancemap(self):
+        return self._distancemap
 
     def __str__(self):
         s = super().__str__()
         s += f"\n  Distance metric: {self._metric}"
-        if self._distance_map is not None:
+        if self.distancemap is not None:
             s += ", Distance map: computed "
         else:
             s += ", Distance map: empty "
@@ -43,7 +72,7 @@ class DistanceTransformPlanner(Planner):
         return s
 
     def goal_change(self, goal):
-        self._distance_map = np.array([])
+        self._distancemap = np.array([])
 
     def plan(self, goal=None, animate=False):
         # show = None
@@ -58,13 +87,13 @@ class DistanceTransformPlanner(Planner):
         if self._goal is None:
             raise ValueError('No goal specified here or in constructor')
 
-        self._distance_map = distancexform(self.occ_grid_nav,
+        self._distancemap = distancexform(self.occgrid.grid,
                 goal=self._goal, metric=self._metric, animate=animate)
 
     # Use plot from parent class
 
-    def next(self, robot):
-        if self._distance_map is None:
+    def next(self, position):
+        if self.distancemap is None:
             Error("No distance map computed, you need to plan.")
 
         directions = np.array([
@@ -79,15 +108,15 @@ class DistanceTransformPlanner(Planner):
             [ 1,  1],
         ], dtype=int)
 
-        x = robot[0]
-        y = robot[1]
+        x = int(position[0])
+        y = int(position[1])
 
         min_dist = np.inf
         for d in directions:
             try:
-                if self._distance_map[y + d[0], x + d[1]] < min_dist:
+                if self._distancemap[y + d[0], x + d[1]] < min_dist:
                     min_dir = d
-                    min_dist = self.distance_map[y + d[0], x + d[1]]
+                    min_dist = self._distancemap[y + d[0], x + d[1]]
             except:
                 # come here if the neighbouring cell is outside the map bounds
                 raise RuntimeError(f"Unexpected error finding next min dist at {d}")
@@ -108,20 +137,18 @@ class DistanceTransformPlanner(Planner):
         fig = plt.figure()
         ax = fig.gca(projection='3d')
 
-        distance = self._distance_map
+        distance = self._distancemap
         X, Y = np.meshgrid(np.arange(distance.shape[1]), np.arange(distance.shape[0]))
         surf = ax.plot_surface(X, Y, distance, #cmap='gray',
                                linewidth=1, antialiased=False)
 
         if p is not None:
-            # k = sub2ind(np.shape(self._distance_map), p[:, 1], p[:, 0])
+            # k = sub2ind(np.shape(self._distancemap), p[:, 1], p[:, 0])
             height = distance[p[:,1], p[:,0]]
             ax.plot(p[:, 0], p[:, 1], height)
 
         plt.show()
 
-    def plot(self, **kwargs):
-        super().plot(distance=self._distance_map, **kwargs)
 
 # Sourced from: https://stackoverflow.com/questions/28995146/matlab-ind2sub-equivalent-in-python/28995315#28995315
 def sub2ind(array_shape, rows, cols):
@@ -279,15 +306,14 @@ if __name__ == "__main__":
     # print(dx)
 
 
-    from roboticstoolbox import DXform
-    from scipy.io import loadmat
+    from roboticstoolbox import DistanceTransformPlanner, loadmat
 
-    vars = loadmat("/Users/corkep/code/robotics-toolbox-python/data/house.mat", squeeze_me=True, struct_as_record=False)
-    house = vars['house']
-    place = vars['place']
+    house = rtb_loadmat('data/house.mat')
+    floorplan = house['floorplan']
+    places = house['places']
 
-    dx = DXform(house)
+    dx = DistanceTransformPlanner(floorplan)
     print(dx)
     dx.goal = [1,2]
-    dx.plan(place.kitchen)
+    dx.plan(places.kitchen)
     dx.plot()

@@ -52,7 +52,7 @@ class LandmarkMap:
     #     end
 
 
-    def __init__(self, nlandmarks, dim=10, verbose=True, seed=None):
+    def __init__(self, nlandmarks, workspace=10, verbose=True, seed=0):
         """
         Create a map of point landmark landmarks
         %
@@ -67,11 +67,11 @@ class LandmarkMap:
         """
     
         self._nlandmarks = nlandmarks
-        self._dim = base.expand_dims(dim)
+        self._workspace = base.expand_dims(workspace)
 
         random = np.random.default_rng(seed)
-        x = random.uniform(self._dim[0], self._dim[1], nlandmarks)
-        y = random.uniform(self._dim[2], self._dim[3], nlandmarks)
+        x = random.uniform(self._workspace[0], self._workspace[1], nlandmarks)
+        y = random.uniform(self._workspace[2], self._workspace[3], nlandmarks)
 
         self._map = np.c_[x, y].T
         self._verbose = verbose
@@ -80,8 +80,11 @@ class LandmarkMap:
     def __str__(self):
     # s = M.char() is a string showing map parameters in 
     # a compact human readable format. 
-        s = f"LandmarkMap object with {self._nlandmarks} landmarks, dim=" + str(self._dim)
+        s = f"LandmarkMap object with {self._nlandmarks} landmarks, dim=" + str(self._workspace)
         return s
+
+    def __len__(self):
+        return self.nlandmarks
 
     @property
     def nlandmarks(self):
@@ -95,9 +98,23 @@ class LandmarkMap:
     def y(self):
         return self._map[1,:]
 
+
     @property
     def xy(self):
         return self._map
+
+    @property
+    def workspace(self):
+        """
+        Size of map workspace
+
+        :return: workspace bounds [xmin, xmax, ymin, ymax]
+        :rtype: ndarray(4)
+
+        Returns the bounds of the workspace as specified by constructor
+        option ``workspace``
+        """
+        return self._workspace
 
     def landmark(self, k):
         """
@@ -121,7 +138,7 @@ class LandmarkMap:
         # Notes::
         # - The plot is left with HOLD ON.
         """
-        ax = base.plotvol2(self._dim)
+        ax = base.plotvol2(self._workspace)
         ax.set_aspect('equal')
 
         ax.set_xlabel('x')
@@ -130,8 +147,8 @@ class LandmarkMap:
         if len(kwargs) == 0:
             kwargs = {
                 'linewidth': 0,
-                'marker': 'P',
-                'color': 'k',
+                'marker': 'x',
+                'color': 'b',
             }
 
         plt.plot(self._map[0,:], self._map[1,:], **kwargs)

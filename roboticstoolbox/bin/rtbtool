@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt  # lgtm [py/unused-import]
 from roboticstoolbox import *  # lgtm [py/unused-import]
 from spatialmath import *  # lgtm [py/polluting-import]
 from spatialgeometry import *  # lgtm [py/polluting-import]
-from spatialmath.base import *  # lgtm [py/polluting-import]
+import spatialmath.base as smb 
 from spatialmath.base import sym
 import matplotlib as mpl
 from pathlib import Path
@@ -57,8 +57,10 @@ parser.add_argument(
     default="neutral",
     help="specify terminal color scheme (neutral, lightbg, nocolor, linux), linux is for dark mode",
 )
-parser.add_argument("--confirmexit", "-x", default=False, help="confirm exit")
-parser.add_argument("--prompt", "-p", default="(rtb) >>> ", help="input prompt")
+parser.add_argument("--confirmexit", "-x", default=False,
+    help="confirm exit")
+parser.add_argument("--prompt", "-p", default="(rtb) >>> ",
+    help="input prompt")
 parser.add_argument(
     "--resultprefix",
     "-r",
@@ -73,7 +75,12 @@ parser.add_argument(
     help="do not display the result of assignments",
 )
 parser.add_argument(
-    "--book", default=False, action="store_true", help="use defaults as per RVC book"
+    "--book", default=False, action="store_true",
+    help="use defaults as per RVC book"
+)
+parser.add_argument(
+    "--vision", default=False, action="store_true",
+    help="import vision toolbox (MVTB)"
 )
 parser.add_argument(
     "--ansi",
@@ -114,6 +121,9 @@ if args.book:
 # set default backend for Robot.plot
 if args.swift:
     Robot.default_backend = "swift"
+
+if args.vision:
+    from machinevisiontoolbox import *
 
 # set matrix printing mode for spatialmath
 SE3._ansimatrix = args.ansi
@@ -182,7 +192,6 @@ class MyPrompt(Prompts):
                 (Token.Prompt, args.resultprefix.format(self.shell.execution_count))
             ]
 
-
 # set configuration options, there are lots, see
 # https://ipython.readthedocs.io/en/stable/config/options/terminal.html
 c = Config()
@@ -205,6 +214,7 @@ if args.script is not None:
     code = path.open("r").readlines()
 if code is None:
     code = [
+        "%precision %.3g",
         "plt.ion()",
     ]
 

@@ -25,6 +25,7 @@ from roboticstoolbox.mobile.Planner import Planner
 import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import *
+from spatialmath import base
 
 
 class Path:
@@ -372,23 +373,88 @@ def reeds_shepp_path_planning(start, goal, maxc, step_size):
 
     return bpath
 
+# ============================================================================
 
 class ReedsSheppPlanner(Planner):
+    r"""
+    Reeds-Shepp path planner
 
-    def __init__(self, curvature=1, stepsize=0.1):
-        super().__init__()
-        self.curvature = curvature
-        self.stepsize = stepsize
+    :param curvature: maximum path curvature, defaults to 1.0
+    :type curvature: float, optional
+    :param stepsize: spacing between points on the path, defaults to 0.1
+    :type stepsize: float, optional
+    :param Planner: Reeds-Shepp path planner
+    :type Planner: ReedsSheppPlanner instance
 
-    def query(self, start, goal):
-        self.start = start
-        self.goal = goal
-        bpath = reeds_shepp_path_planning(start, goal, self.curvature, self.stepsize)
+    ==================   ========================
+    Feature              Capability
+    ==================   ========================
+    Plan                 Configuration space
+    Obstacle avoidance   No
+    Curvature            Discontinuous
+    Motion               Bidirectional
+    ==================   ========================
+
+    Creates a planner that finds the path between two configurations in the
+    plane using forward and backward motion.  The path comprises upto 3 segments
+    that are straight lines or arcs with :math:`\pm` ``curvature``.
+
+    :reference: Optimal paths for a car that goes both forwards and backwards,
+        Reeds, J.A. and L.A. Shepp, Pacific J. Math., 145 (1990), 
+        pp. 367–393. 
+
+    :author: Atsushi Sakai `PythonRobotics <https://github.com/AtsushiSakai/PythonRobotics>`_
+    :seealso: :class:`Planner`
+    """
+    def __init__(self, curvature=1, stepsize=0.1, **kwargs):
+        super().__init__(ndims=3, **kwargs)
+        self._curvature = curvature
+        self._stepsize = stepsize
+
+    def query(self, start, goal, **kwargs):
+        r"""
+        Find Reeds-Shepp path
+
+        :param start: start configuration :math:`(x, y, \theta)`
+        :type start: array_like(3), optional
+        :param goal: goal configuration :math:`(x, y, \theta)`
+        :type goal: array_like(3), optional
+        :return: path and status
+        :rtype: ndarray(N,3), namedtuple
+
+        The returned status value has elements:
+
+        +-------------+-----------------------------------------------------+
+        | Element     |  Description                                        |
+        +-------------+-----------------------------------------------------+
+        |``segments`` | a list containing the type of each path segment as  |
+        |             | a single letter code: either "L", "R" or "S" for    |
+        |             | left turn, right turn or straight line respectively.|
+        +-------------+-----------------------------------------------------+
+        |``lengths``  | the length of each path segment. The sign of the    |
+        |             |length indicates the direction of travel.            |
+        +-------------+-----------------------------------------------------+
+        |``direction``| the direction of motion at each point on the path   |
+        +-------------+-----------------------------------------------------+
+    
+        .. note:: The direction of turning is reversed when travelling 
+            backwards.
+
+        :seealso: :meth:`Planner.query`
+        """
+        super().query(start=start, goal=goal, next=False, **kwargs)
+
+        bpath = reeds_shepp_path_planning(
+            start=self.start, goal=self.goal,
+            maxc=self._curvature, step_size=self._stepsize)
 
         path = np.c_[bpath.x, bpath.y, bpath.yaw]
 
-        status = namedtuple('ReedsSheppStatus', ['segments', 'lengths', 'direction'])(bpath.ctypes, bpath.lengths, bpath.directions)
-        return path, status
+        status = namedtuple('ReedsSheppStatus', 
+            ['segments', 'length', 'seglengths', 'direction'])
+
+        return path, status(bpath.ctypes, sum([abs(l) for l in bpath.lengths]),
+            bpath.lengths, bpath.directions)
 
 
 if __name__ == '__main__':
@@ -401,8 +467,9 @@ if __name__ == '__main__':
     start = (0, 0, 0)
     goal = (0, 0, pi)
 
-    reedsshepp = ReedsShepp(curvature=1.0, stepsize=0.1)
+    reedsshepp = ReedsSheppPlanner(curvature=1.0, stepsize=0.1)
     path, status = reedsshepp.query(start, goal)
+    print(status)
 
     # px, py, pyaw, mode, clen = reeds_shepp_path_planning(
     #     start_x, start_y, start_yaw, end_x, end_y, end_yaw, curvature, step_size)
@@ -420,5 +487,5 @@ if __name__ == '__main__':
     #     plt.axis("equal")
     #     plt.show(block=True)
 
-    reedsshepp.plot_fg(path=path, direction=status.direction)
+    reedsshepp.plot(path=path, direction=status.direction, twod=True)
     plt.show(block=True)

@@ -1,24 +1,40 @@
+# motion models
 from roboticstoolbox.mobile.Vehicle import Vehicle, Bicycle, Unicycle
-from roboticstoolbox.mobile.Bug2Planner import Bug2Planner
+
+# planners
+from roboticstoolbox.mobile.Bug2 import Bug2
 from roboticstoolbox.mobile.DistanceTransformPlanner import DistanceTransformPlanner
 from roboticstoolbox.mobile.DstarPlanner import DstarPlanner
+from roboticstoolbox.mobile.PRMPlanner import PRMPlanner
+#from roboticstoolbox.mobile.LatticePlanner import LatticePlanner
+
 from roboticstoolbox.mobile.DubinsPlanner import DubinsPlanner
 from roboticstoolbox.mobile.ReedsSheppPlanner import ReedsSheppPlanner
+from roboticstoolbox.mobile.LatticePlanner import LatticePlanner
+from roboticstoolbox.mobile.CurvaturePolyPlanner import CurvaturePolyPlanner
+from roboticstoolbox.mobile.QuinticPolyPlanner import QuinticPolyPlanner
+from roboticstoolbox.mobile.PRMPlanner import PRMPlanner
+from roboticstoolbox.mobile.Planner import Planner
+from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid, OccupancyGrid
 
+# localization and state estimation
 from roboticstoolbox.mobile.landmarkmap import LandmarkMap
 from roboticstoolbox.mobile.sensors import RangeBearingSensor
 from roboticstoolbox.mobile.drivers import *
 from roboticstoolbox.mobile.animations import *
 from roboticstoolbox.mobile.PoseGraph import *
+from roboticstoolbox.mobile.EKF import EKF
+from roboticstoolbox.mobile.ParticleFilter import ParticleFilter
 
 __all__ = [
     'Vehicle',
     'Bicycle',
     'Unicycle',
-    'Bug2Planner',
+    'Bug2',
     'DistanceTransformPlanner',
     'DstarPlanner',
     'DubinsPlanner',
+    'LatticePlanner',
     'ReedsSheppPlanner',
     'CurvaturePolyPlanner',
     'PRMPlanner',
@@ -31,7 +47,15 @@ __all__ = [
     'LandmarkMap',
     'RangeBearingSensor',
     'PoseGraph',
+    'BinaryOccupancyGrid',
+    'OccupancyGrid',
+    'Planner',
+    'EKF',
+    'ParticleFilter',
 ]
+
+#    'LatticePlanner',
+
 
 # __doc__ = """
 # The Robotics Toolbox for Python

@@ -81,12 +81,12 @@ class RandomPath(VehicleDriver):
 
     """
 
-    def __init__(self, dim, speed=1, dthresh=0.05, seed=None, headinggain=1, goalmarkerstyle=None):
+    def __init__(self, workspace, speed=1, dthresh=0.05, seed=0, headinggain=0.3, goalmarkerstyle=None):
         """
         Driving agent for random path
 
-        :param dim: dimension of workspace, see spatialmath.plotvol2
-        :type dim: scalar, array_like(2), array_like(4)
+        :param workspace: dimension of workspace, see spatialmath.plotvol2
+        :type workspace: scalar, array_like(2), array_like(4)
         :param speed: forward speed, defaults to 1
         :type speed: float, optional
         :param dthresh: distance threshold, defaults to 0.05
@@ -121,10 +121,10 @@ class RandomPath(VehicleDriver):
         # TODO options to specify region, maybe accept a Map object?
         
 
-        self._dim = base.expand_dims(dim)
-        
+        self._workspace = base.expand_dims(workspace)
+
         self._speed = speed
-        self._dthresh = dthresh * np.diff(self._dim[0:2])
+        self._dthresh = dthresh * np.diff(self._workspace[0:2])
         self._goal_marker = None
         if goalmarkerstyle is None:
             self._goal_marker_style = {
@@ -137,12 +137,13 @@ class RandomPath(VehicleDriver):
         self._headinggain = headinggain
         
         self._d_prev = np.inf
-        self._rand = np.random.default_rng(seed)
+        self._random = np.random.default_rng(seed)
+        self._seed = seed
         self.verbose = True
         self._goal = None
         self._dthresh = dthresh * max(
-                self._dim[1] - self._dim[0], 
-                self._dim[3] - self._dim[2]
+                self._workspace[1] - self._workspace[0], 
+                self._workspace[3] - self._workspace[2]
                                     )
 
         self._veh = None
@@ -154,9 +155,45 @@ class RandomPath(VehicleDriver):
         % a compact human readable format. """
 
         s = 'RandomPath driver object\n'
-        s += f"  X {self._dim[0]} : {self._dim[1]}; Y {self._dim[0]} : {self._dim[1]}, dthresh={self._dthresh}\n"
+        s += f"  X {self._workspace[0]} : {self._workspace[1]}; Y {self._workspace[0]} : {self._workspace[1]}, dthresh={self._dthresh}\n"
         s += f"  current goal={self._goal}"
         return s
+
+
+    @property
+    def random(self):
+        """
+        Get private random number generator
+
+        :return: NumPy random number generator
+        :rtype: Generator
+
+        Has methods including:
+            - ``integers(low, high, size, endpoint)``
+            - ``random(size)``
+            - ``uniform``
+            - ``normal(mean, std, size)``
+            - ``multivariate_normal(mean, covar, size)``
+
+        The generator is initialized with the seed provided at constructor
+        time every time ``init`` is called.
+
+        :seealso: :meth:`init`
+        """
+        return self._random
+
+    @property
+    def workspace(self):
+        """
+        Size of robot driving workspace
+
+        :return: workspace bounds [xmin, xmax, ymin, ymax]
+        :rtype: ndarray(4)
+
+        Returns the bounds of the workspace as specified by constructor
+        option ``workspace``
+        """
+        return self._workspace
 
     @property
     def vehicle(self):
@@ -186,6 +223,9 @@ class RandomPath(VehicleDriver):
         %
         % See also RANDSTREAM.
         """
+        if self._seed is not None:
+            self._random = np.random.default_rng(self._seed)
+            
         self._goal = None
         # delete(driver.h_goal);   % delete the goal
         # driver.h_goal = [];
@@ -207,11 +247,11 @@ class RandomPath(VehicleDriver):
 
         # if nearly at goal point, choose the next one
         d = np.linalg.norm(self._veh._x[0:2] - self._goal)
-        if d < self._dthresh:
+        if d < self._dthresh or abs(d - self._d_prev) < 1e-3:
             self._new_goal()
         # elif d > 2 * self._d_prev:
         #     self.choose_goal()
-        # self._d_prev = d
+        self._d_prev = d
 
         speed = self._speed
 
@@ -229,11 +269,11 @@ class RandomPath(VehicleDriver):
         
         # choose a uniform random goal within inner 80% of driving area
         while True:
-            r = self._rand.uniform(0.1, 0.9)
-            gx = self._dim[0:2] @ np.r_[r, 1-r]
+            r = self.random.uniform(0.1, 0.9)
+            gx = self._workspace[0:2] @ np.r_[r, 1-r]
 
-            r = self._rand.uniform(0.1, 0.9)
-            gy = self._dim[2:4] @ np.r_[r, 1-r]
+            r = self.random.uniform(0.1, 0.9)
+            gy = self._workspace[2:4] @ np.r_[r, 1-r]
 
             self._goal = np.r_[gx, gy]
 

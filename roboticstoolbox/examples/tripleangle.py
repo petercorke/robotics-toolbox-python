@@ -20,7 +20,7 @@ import numpy as np
 env = swift.Swift()
 env.launch()
 
-path = rtb.path_to_datafile("data")
+path = rtb.rtb_path_to_datafile("data")
 
 
 g1 = Mesh(

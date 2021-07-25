@@ -14,20 +14,46 @@ from spatialmath.base.vectors import *
 from spatialmath.pose2d import SE2
 from spatialmath.base import animate
 from scipy.ndimage import *
-from matplotlib import cm
+from matplotlib import cm, pyplot as plt
 from roboticstoolbox.mobile.Planner import Planner
 from pgraph import UGraph
 
 
 class PRMPlanner(Planner):
-    def __init__(self,
-                 private=False, reset=False, verbose=None,
-                 transform=SE2(), npoints=100, dist_thresh=None, **kwargs):
+    r"""
+    Distance transform path planner
 
-        super().__init__(**kwargs)
+    :param occgrid: occupancy grid
+    :type curvature: OccGrid or ndarray(w,h)
+    :param npoints: number of random points, defaults to 100
+    :type npoints: int, optional
+    :param dist_thresh: distance threshold, a new point is only added to the
+        roadmap if it is closer than this distance to an existing vertex,
+        defaults to None
+    :type dist_thresh: float, optional
+    :param Planner: probabilistic roadmap path planner
+    :type Planner: PRMPlanner instance
+
+    ==================   ========================
+    Feature              Capability
+    ==================   ========================
+    Plan                 Cartesian space
+    Obstacle avoidance   Yes
+    Curvature            Discontinuous
+    Motion               Forwards only
+    ==================   ========================
+
+    Creates a planner that finds the path between two points in the
+    plane using forward motion.  The path comprises a set of way points.
+
+    :author: Peter Corke_
+    :seealso: :class:`Planner`
+    """
+    def __init__(self, occ_grid=None, npoints=100, dist_thresh=None, **kwargs):
+        super().__init__(ndims=2, **kwargs)
 
         if dist_thresh is None:
-            self._dist_thresh = 0.3 * max(self.occgrid.shape)
+            self._dist_thresh = 0.3 * self.occgrid.maxdim
 
         self._npoints = npoints
         self._npoints0 = npoints
@@ -117,7 +143,7 @@ class PRMPlanner(Planner):
                 if not np.empty(movie):
                     a.add()
 
-    def test_path(self, p1, p2, npoints = 10):
+    def test_path(self, p1, p2, npoints = 100):
         dir = p2 - p1
 
         for s in np.linspace(0, 1, npoints):
@@ -126,6 +152,19 @@ class PRMPlanner(Planner):
         return True
 
     def plan(self, npoints=None, dist_thresh=None, animate=None):
+        """
+        Plan PRM path
+
+        :param npoints: number of random points, defaults to ``npoints`` given
+            to constructor
+        :type npoints: int, optional
+        :param dist_thresh: distance threshold, defaults to ``dist_thresh`` given
+            to constructor
+        :type dist_thresh: float, optional
+        :param animate: animate the planning algorithm iterations, defaults to False
+        :type animate: bool, optional
+        """
+
         self.message('create the graph')
 
         if npoints is None:
@@ -140,11 +179,11 @@ class PRMPlanner(Planner):
         self._v_path = np.array([])
         self.create_roadmap(animate)
 
-    def query(self, start, goal):
+    def query(self, start, goal, **kwargs):
         if self.graph.n == 0:
             Error('RTB:PRM:noplan:query: no plan: run the planner')
 
-        self.check_points(start, goal)
+        super().query(start=start, goal=goal, next=False, **kwargs)
 
         # find vertices closest to start and goal
         vstart, _ = self.graph.closest(self.start)
@@ -200,6 +239,14 @@ class PRMPlanner(Planner):
         self._local_pathh = self._local_path[1:len(self._local_path), :]
         return n
 
+    def plot(self, *args, vertex=None, edge=None, **kwargs):
+        super().plot(*args, **kwargs)
+        if vertex is None:
+            vertex=dict(markersize=4)
+        if edge is None:
+             edge=dict(linewidth=0.5)
+
+        self.graph.plot(text=False, vertex=vertex, edge=edge)
     # def char(self):
     #     s = "\ngraph size: " + self._npoints
     #     s = s + "\nndist thresh: " + self._dist_thresh
@@ -276,6 +323,7 @@ class PRMPlanner(Planner):
 
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
 
     # start and goal position
     start = (10, 10)
