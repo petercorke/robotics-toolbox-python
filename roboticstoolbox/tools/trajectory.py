@@ -69,7 +69,7 @@ class Trajectory:
         :return: number of steps in the trajectory
         :rtype: int
         """
-        return len(self.t)
+        return self.s.shape[0]
 
     @property
     def q(self):
