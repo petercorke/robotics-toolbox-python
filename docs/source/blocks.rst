@@ -6,6 +6,8 @@ bdsim blocks
 
 A set of block definitions that provide robotic capability to `bdsim <https://github.com/petercorke/bdsim>`_.
 
+.. warning:: This capability is still experimental
+
 .. toctree::
    :maxdepth: 2
 

@@ -17,9 +17,19 @@ The various models :ref:`E Models` all subclass this class.
    :show-inheritance:
    :inherited-members:
    :special-members: __getitem__
+
+Kinematic cache
+---------------
+
+.. automodule:: roboticstoolbox.robot.KinematicCache
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __init__
    
 Link
--------
+----
 
 The ``ERobot`` is defined by a tree of ``ELink`` subclass objects.
 
