@@ -7,6 +7,46 @@ np.set_printoptions(linewidth=np.inf)
 
 
 class KinematicCache:
+    """
+    Kinematic cache
+
+    Many robot kinematic (and dynamic operations) have dependencies. For
+    example, computing the world-frame Jacobian requires the
+    forward kinematics, computing operational space acceleration requires
+    the Jacobian.  To optimize computation time it becomes difficult to keep
+    track of all the dependencies.
+
+    The ``KinematicCache`` acts as a proxy for a ``Robot`` subclass object
+    and implements a subset of its methods, just those that concerned with, or
+    using kinematics.
+
+    For everycall a hash is computed for ``q`` and relevant arguments such as
+    ``end`` and the value of kinematic operation is looked up in the cache.  If
+    it is not in the cache it will be computed and added to the cache.
+
+    For example::
+
+        robot = models.ETS.Panda()
+        kc = KinematicCache(robot)
+
+        q = robot.qr
+        T = kc.fkine(q)
+        J = kc.jacob0(q)
+        Ix = kc.inertia_x(q)
+        J = kc.jacob0(q)
+    
+    The ``fkine`` method will be a cache miss and the forward kinematics will be
+    computed.  The ``jacob0`` method will be a cache miss but the required
+    forward kinematics are in the cache and will be used.  The ``inertia_x``
+    method will be a cache miss but the required Jacobian is in the cache and
+    will be used. The final ``jacob0`` method will be a cache hit and the
+    previously computed value will be returned.
+
+    The cost of computing the hash is small compared to the cost of the
+    kinematic operations and not having to keep track of saved values makes code
+    cleaner.
+
+    """
     def __init__(self, robot, cachesize=16):
         """
         Create kinematic cache instance
@@ -50,14 +90,14 @@ class KinematicCache:
         :rtype: str
 
         The cache dictionary is displayed.  Oldest entries are first.
-        The display::
+        For example, the display::
 
             fkine_all   : 0x59913cdb1a5be5c0, (None,)
             fkine       : 0xb9cd1db3d2a255e0, (None,)
             fkine_all   : 0xb9cd1db3d2a255e0, (None,)
             fkine       : 0x639cf014e2baaafb, (None,)
 
-        shows the kinematic function, the joint configuration has, and any
+        shows the kinematic function, the joint configuration hash, and any
         additional arguments.
         """
         s = ""
@@ -274,7 +314,7 @@ class KinematicCache:
             self._dict[key] = np.linalg.inv(J)
         return self._dict[key]
 
-    def jacobe_pinv(self, q, end=None):
+    def jacobe_pinv(self, q, end=None, analytical=None):
         """
         Cached end-effector-frame Jacobian pseudo inverse
 
@@ -294,6 +334,58 @@ class KinematicCache:
             # get Jacobian from cache
             J = self.jacobe(q, end=end)
             self._dict[key] = np.linalg.pinv(J)
+        return self._dict[key]
+
+    def coriolis(self, q, qd):
+        key = ("coriolis", self._qhash(q), self._qhash(qd))
+        if key not in self._dict:
+            # cache miss, compute it
+            C = self.coriolis(q, qd)
+            self._dict[key] = self._robot.coriolis_x(q, qd)
+        return self._dict[key]
+
+    def inertia_x(self, q, pinv=False, analytical="rpy-xyz"):
+        key = ("inertia_x", self._qhash(q), pinv, analytical)
+        if key not in self._dict:
+            # cache miss, compute it
+
+            # get Jacobian inv or pinv from cache
+            if pinv:
+                Ji = self.jacobe0_pinv(analytical=analytical)
+            else:
+                Ji = self.jacobe0_inv(analytical=analytical)
+            self._dict[key] = self._robot.inertia_x(q, Ji=Ji)
+        return self._dict[key]
+
+    def coriolis_x(self, q, qd, pinv=False, analytical="rpy-xyz"):
+        key = ("coriolis_x", self._qhash(q), self._qhash(qd), pinv, analytical)
+        if key not in self._dict:
+            # cache miss, compute it
+
+            # get Jacobian inv or pinv from cache
+            if pinv:
+                Ji = self.jacobe0_pinv(analytical=analytical)
+            else:
+                Ji = self.jacobe0_inv(analytical=analytical)
+            # get inertia, Jacobian dot and Coriolis from cache
+            Mx = self.inertia_x(q, pinv=pinv, analytical=analytical)
+            Jd = self.jacob_dot(q, J0=self.jacob0(q, analytical=analytical))
+            C = self.coriolis(q, qd)
+            self._dict[key] = self._robot.coriolis_x(q, qd, pinv, analytical, 
+                J, Ji, Jd, C, Mx)
+        return self._dict[key]
+
+    def gravload_x(self, q, pinv=False, analytical="rpy-xyz"):
+        key = ("gravload_x", self._qhash(q), pinv, analytical)
+        if key not in self._dict:
+            # cache miss, compute it
+
+            # get Jacobian inv or pinv from cache
+            if pinv:
+                Ji = self.jacobe0_pinv(analytical=analytical)
+            else:
+                Ji = self.jacobe0_inv(analytical=analytical)
+            self._dict[key] = self._robot.gravload_x(q, Ji=Ji)
         return self._dict[key]
 
 
