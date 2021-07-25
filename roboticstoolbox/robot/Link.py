@@ -282,13 +282,18 @@ class Link(ABC):
 
         return dyn
 
-    def _format(self, l, name, ignorevalue=0, indices=None):  # noqa  # pragma nocover
+    def _format(self, l, name, symbol=None, ignorevalue=None, indices=None):  # noqa  # pragma nocover
+        # if value == ignorevalue then don't display it
+        
         v = getattr(self, name)
         s = None
         if v is None:
             return
         if isscalar(v) and v != ignorevalue:
-            s = f"{name}={v:.3g}"
+            if symbol is not None:
+                s = f"{symbol}={v:.3g}"
+            else:
+                s = f"{name}={v:.3g}"
         elif isinstance(v, np.ndarray):
             if np.linalg.norm(v, ord=np.inf) > 0:
                 if indices is not None:
@@ -301,7 +306,7 @@ class Link(ABC):
     def _params(self):  # pragma nocover
         l = []  # noqa
         self._format(l, "name")
-        self._format(l, "flip", False)
+        self._format(l, "flip", ignorevalue=False)
         self._format(l, "qlim")
         self._format(l, "m")
         self._format(l, "r")
