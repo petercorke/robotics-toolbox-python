@@ -183,12 +183,12 @@ class DHLink(Link):
             qvar = f"q{self.id}"
         cls = self.__class__.__name__
         if self.isrevolute:
-            s = f"{cls}:   theta={qvar}{offset},  d={self.d}, " \
-                f"a={self.a}, alpha={self.alpha}"
+            s = f"{cls}:   θ={qvar}{offset},  d={self.d}, " \
+                f"a={self.a}, ⍺={self.alpha}"
         elif self.isprismatic:
             s = f"{cls}:  theta={self.theta},  d={qvar}{offset}, " \
                 f" a={self.a},  " \
-                f"alpha={self.alpha}"
+                f"⍺={self.alpha}"
         return s
 
     def __repr__(self):
@@ -197,9 +197,9 @@ class DHLink(Link):
         if self.isrevolute:
             self._format(args, "d")
         else:
-            self._format(args, "theta")
+            self._format(args, "theta", "θ")
         self._format(args, "a")
-        self._format(args, "alpha")
+        self._format(args, "alpha", "⍺")
         args.extend(super()._params())
         return name + "(" + ", ".join(args) + ")"
 
