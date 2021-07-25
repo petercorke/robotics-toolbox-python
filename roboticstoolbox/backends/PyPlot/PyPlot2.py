@@ -8,6 +8,7 @@ import numpy as np
 from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot.RobotPlot2 import RobotPlot2
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
+import time
 
 _mpl = False
 
@@ -67,6 +68,7 @@ class PyPlot2(Connector):
         # Create a 2D axes
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.set_facecolor('white')
+        plt.get_current_fig_manager().set_window_title(f"Robotics Toolbox for Python (Figure {self.ax.figure.number})")
 
         self.ax.set_xbound(-0.5, 0.5)
         self.ax.set_ybound(-0.5, 0.5)
