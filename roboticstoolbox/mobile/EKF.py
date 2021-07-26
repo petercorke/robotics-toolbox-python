@@ -39,7 +39,7 @@ class EKF:
             if not isinstance(sensor, tuple) or len(sensor) != 2 \
                 or not isinstance(sensor[0], Sensor):
                     raise TypeError('sensor must be tuple (sensor, W_est)')
-            self.sensor = sensor[0]  # reference to the sensor
+            self._sensor = sensor[0]  # reference to the sensor
             self._W_est = sensor[1]  # estimate of sensor covariance W
         else:
             self._sensor = None
