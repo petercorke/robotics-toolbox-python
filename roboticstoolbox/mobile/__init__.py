@@ -2,7 +2,7 @@
 from roboticstoolbox.mobile.Vehicle import Vehicle, Bicycle, Unicycle
 
 # planners
-# from roboticstoolbox.mobile.Bug2 import Bug2
+from roboticstoolbox.mobile.Bug2 import Bug2
 from roboticstoolbox.mobile.DistanceTransformPlanner import DistanceTransformPlanner
 from roboticstoolbox.mobile.DstarPlanner import DstarPlanner
 from roboticstoolbox.mobile.PRMPlanner import PRMPlanner
@@ -12,7 +12,6 @@ from roboticstoolbox.mobile.PRMPlanner import PRMPlanner
 from roboticstoolbox.mobile.DubinsPlanner import DubinsPlanner
 from roboticstoolbox.mobile.ReedsSheppPlanner import ReedsSheppPlanner
 
-# from roboticstoolbox.mobile.LatticePlanner import LatticePlanner
 from roboticstoolbox.mobile.CurvaturePolyPlanner import CurvaturePolyPlanner
 from roboticstoolbox.mobile.QuinticPolyPlanner import QuinticPolyPlanner
 from roboticstoolbox.mobile.PRMPlanner import PRMPlanner
@@ -26,14 +25,14 @@ from roboticstoolbox.mobile.drivers import *
 from roboticstoolbox.mobile.animations import *
 
 # from roboticstoolbox.mobile.PoseGraph import *
-# from roboticstoolbox.mobile.EKF import EKF
-# from roboticstoolbox.mobile.ParticleFilter import ParticleFilter
+from roboticstoolbox.mobile.EKF import EKF
+from roboticstoolbox.mobile.ParticleFilter import ParticleFilter
 
 __all__ = [
     "Vehicle",
     "Bicycle",
     "Unicycle",
-    # "Bug2",
+    "Bug2",
     "DistanceTransformPlanner",
     "DstarPlanner",
     "DubinsPlanner",
@@ -53,8 +52,8 @@ __all__ = [
     "BinaryOccupancyGrid",
     "OccupancyGrid",
     "Planner",
-    # "EKF",
-    # "ParticleFilter",
+    "EKF",
+    "ParticleFilter",
 ]
 
 #    'LatticePlanner',
