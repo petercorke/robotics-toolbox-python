@@ -1104,7 +1104,7 @@ class ERobot(BaseERobot):
     #     path.reverse()
     #     return path
 
-    def _to_dict(self, show_robot=True, show_collision=False):
+    def _to_dict(self, robot_alpha=1.0, collision_alpha=0.0):
 
         self._set_link_fk(self.q)
 
@@ -1112,46 +1112,50 @@ class ERobot(BaseERobot):
 
         for link in self.links:
 
-            if show_robot:
+            if robot_alpha > 0:
                 for gi in link.geometry:
+                    gi.set_alpha(robot_alpha)
                     ob.append(gi.to_dict())
-            if show_collision:
+            if collision_alpha > 0:
                 for gi in link.collision:
+                    gi.set_alpha(collision_alpha)
                     ob.append(gi.to_dict())
 
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
 
-                if show_robot:
+                if robot_alpha > 0:
                     for gi in link.geometry:
+                        gi.set_alpha(robot_alpha)
                         ob.append(gi.to_dict())
-                if show_collision:
+                if collision_alpha > 0:
                     for gi in link.collision:
+                        gi.set_alpha(collision_alpha)
                         ob.append(gi.to_dict())
 
         return ob
 
-    def _fk_dict(self, show_robot=True, show_collision=False):
+    def _fk_dict(self, robot_alpha=1.0, collision_alpha=0.0):
         ob = []
 
         # Do the robot
         for link in self.links:
 
-            if show_robot:
+            if robot_alpha > 0:
                 for gi in link.geometry:
                     ob.append(gi.fk_dict())
-            if show_collision:
+            if collision_alpha > 0:
                 for gi in link.collision:
                     ob.append(gi.fk_dict())
 
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
-                if show_robot:
+                if robot_alpha > 0:
                     for gi in link.geometry:
                         ob.append(gi.fk_dict())
-                if show_collision:
+                if collision_alpha > 0:
                     for gi in link.collision:
                         ob.append(gi.fk_dict())
 
