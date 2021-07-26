@@ -306,26 +306,31 @@ class RangeBearingSensor(Sensor):
     def reading(self):
         """
         Choose landmark and return observation
-        %
-        # [Z,K] = self.reading() is an observation of a random visible landmark where
-        # Z=[R,THETA] is the range and bearing with additive Gaussian noise of
-        # covariance W (property W). K is the index of the map feature that was
-        # observed.
-        %
-        # The landmark is chosen randomly from the set of all visible landmarks,
-        # those within the angular field of view and range limitself.  If no valid
-        # measurement, ie. no features within range, interval subsampling enabled
-        # or simulated failure the return is Z=[] and K=0.
-        %
-        # Notes::
-        # - Noise with covariance W (property W) is added to each row of Z.
-        # - If 'animate' option set then show a line from the vehicle to the
-        #   landmark
-        # - If 'animate' option set and the angular and distance limits are set
-        #   then display that region as a shaded polygon.
-        # - Implements sensor failure and subsampling if specified to constructor.
-        %
-        # See also RangeBearingSensor.h.
+
+        :return: range,bearing to a landmark, and landmark id
+        :rtype: (float, float), int
+
+        Returns an observation of a random visible landmark (range, bearing)
+        and the ``id`` of that landmark. The landmark is chosen randomly from the set of all visible landmarks,
+        those within the angular field of view and range limit.
+        
+        If constructor argument ``every`` is set then only return a valid reading on
+        every ``every`` calls.
+
+        If constructor argument ``fail`` is set then do not return a reading in that
+        time interval.
+
+        If no valid reading is available then return (None, None)
+    
+        .. note::
+
+            - Noise with covariance ``W`` (set by constructor) is added to the reading
+            - If ``animate`` option is set then show a line from the vehicle to the
+              landmark
+            - If ``animate`` option set and the angular and distance limits are set
+              then display the sensor field of view as a shaded polygon.
+
+        :seealso: :meth:`h`
         """
         
         # TODO probably should return K=0 to indicated invalid
@@ -419,25 +424,28 @@ class RangeBearingSensor(Sensor):
         return z, lm_id
 
 
-    def h(self, xv, lm_id=None):
+    def h(self, xv, landmark=None):
         """
         Landmark range and bearing
-        %
-        # Z = self.h(X, K) is a sensor observation (1x2), range and bearing, from vehicle at 
-        # pose X (1x3) to the K'th landmark.
-        %
-        # Z = self.h(X, P) as above but compute range and bearing to a landmark at coordinate P.
-        %
-        # Z = self.h(X) as above but computes range and bearing to all
-        # map featureself.  Z has one row per landmark.
-        %
-        # Notes::
-        # - Noise with covariance W (propertyW) is added to each row of Z.
-        # - Supports vectorized operation where XV (Nx3) and Z (Nx2).
-        # - The landmark is assumed visible, field of view and range liits are not
-        #   applied.
-        %
-        # See also RangeBearingSensor.reading, RangeBearingSensor.Hx, RangeBearingSensor.Hw, RangeBearingSensor.Hp.
+
+        :param xv: vehicle configuration :math:`(x, y, \theta)1
+        :type xv: array_like(3)
+        :param landmark: landmark id or position, defaults to None
+        :type landmark: int or array_like(2), optional
+        :return: range and bearing to landmark
+        :rtype: ndarray(2) or ndarray(N,2)
+
+        - ``.h(xv)`` is range, bearing to all landmarks, one row per landmark
+        - ``.h(xv, id)`` is range, bearing to landmark ``id``
+        - ``.h(xv, p)`` is range, bearing to landmark position ``p``
+        
+        .. note::
+            - Noise with covariance W (propertyW) is added to each row of Z.
+            - Supports vectorized operation where ``xv`` (Nx3).
+            - The landmark is assumed visible, field of view and range limits are not
+              applied.
+
+        :seealso: :meth:`reading` :meth:`Hx` :meth:`Hw` :meth:`Hp`
         """
         # get the landmarks, one per row
 
@@ -450,18 +458,20 @@ class RangeBearingSensor(Sensor):
         else:
             x, y, t = xv
 
-        if lm_id is None:
+        if landmark is None:
             # self.h(XV)   all landmarks
             dx = self.map.x - x
             dy = self.map.y - y
-        elif base.isinteger(lm_id):
+        elif base.isinteger(landmark):
+            # landmark id
             # self.h(XV, JF)
-            xlm = self.map.landmark(lm_id)
+            xlm = self.map.landmark(landmark)
             dx = xlm[0] - x
             dy = xlm[1] - y
         else:
+            # landmark position
             # self.h(XV, XF)
-            xlm = base.getvector(lm_id, 2)
+            xlm = base.getvector(landmark, 2)
             dx = xlm[0] - x
             dy = xlm[1] - y
 
@@ -472,7 +482,7 @@ class RangeBearingSensor(Sensor):
                 base.angdiff(np.arctan2(dy, dx), t) 
             ]  # range & bearing as columns
 
-        if z.ndim == 1 and z.shape[0] == 1:
+        if z.shape[0] == 1:
             return z[0]
         else:
             return z
