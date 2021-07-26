@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-@author Jesse Haviland
+@author John Skinner
 """
 
 import swift
