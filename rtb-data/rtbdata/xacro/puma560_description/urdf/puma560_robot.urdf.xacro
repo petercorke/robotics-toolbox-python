@@ -4,6 +4,9 @@
   <xacro:macro name="puma560_link_geometry" params="link_num">
     <mesh filename="package://puma560_description/meshes/puma560_link${link_num}.dae" scale="1.0 1.0 1.0"/>
   </xacro:macro>
+  <xacro:macro name="puma560_link_collision" params="link_num">
+    <mesh filename="package://puma560_description/meshes/puma560_collision${link_num}.dae" scale="1.0 1.0 1.0"/>
+  </xacro:macro>
 
   <xacro:property name="M_PI" value="3.14159265"/>
 
@@ -28,7 +31,13 @@
         <xacro:puma560_link_geometry link_num="1"/>
       </geometry>
       <origin rpy="0 0 0"/>
-    </visual>  
+    </visual>
+    <collision>
+      <geometry>
+        <xacro:puma560_link_collision link_num="1"/>
+      </geometry>
+      <origin rpy="0 0 0"/>
+    </collision>
   </link>
 
   <link name="link2">
@@ -38,6 +47,12 @@
       </geometry>
       <origin xyz="0 ${l2_1} 0" rpy="0 0 0"/><!-- X-forward, Y-Up, Z-left -->
     </visual>
+    <collision>
+      <geometry>
+        <xacro:puma560_link_collision link_num="2"/>
+      </geometry>
+      <origin xyz="0 ${l2_1} 0" rpy="0 0 0"/>
+    </collision>
   </link>
 
   <joint name="j1" type="revolute">
@@ -55,6 +70,12 @@
       </geometry>
       <origin xyz="0 0 ${l3_2}"/><!-- X-forward, Y-Up, Z-right -->
     </visual>
+    <collision>
+      <geometry>
+        <xacro:puma560_link_collision link_num="3"/>
+      </geometry>
+      <origin xyz="0 0 ${l3_2}"/>
+    </collision>
   </link>
 
   <joint name="j2" type="revolute">
@@ -72,6 +93,12 @@
       </geometry>
       <origin xyz="0 0 ${l4_3}" rpy="0 0 0"/><!-- X-Up, Y-Back, Z-right -->
     </visual>
+    <collision>
+      <geometry>
+        <xacro:puma560_link_collision link_num="4"/>
+      </geometry>
+      <origin xyz="0 0 ${l4_3}" rpy="0 0 0"/>
+    </collision>
   </link>
 
   <joint name="j3" type="revolute">
@@ -89,6 +116,12 @@
       </geometry>
       <origin xyz="0 0 ${l5_4}" rpy="0 0 0"/><!-- X-back, Y-right, Z-up -->
     </visual>
+    <collision>
+      <geometry>
+        <xacro:puma560_link_collision link_num="5"/>
+      </geometry>
+      <origin xyz="0 0 ${l5_4}" rpy="0 0 0"/>
+    </collision>
   </link> 
 
   <joint name="j4" type="revolute">
@@ -106,6 +139,12 @@
       </geometry>
       <origin xyz="0 0 ${l6_5}" rpy="0 0 0"/><!-- X-back, Y-down, Z-right -->
     </visual>
+    <collision>
+      <geometry>
+        <xacro:puma560_link_collision link_num="6"/>
+      </geometry>
+      <origin xyz="0 0 ${l6_5}" rpy="0 0 0"/>
+    </collision>
   </link> 
 
   <joint name="j5" type="revolute">
@@ -121,8 +160,14 @@
       <geometry>
         <xacro:puma560_link_geometry link_num="7"/>
       </geometry>
-      <origin xyz="0 ${l7_6} 0" rpy="0 0 0"/><!-- Y-up-->
+      <origin xyz="0 0 ${l7_6}" rpy="0 0 0"/><!-- Z-up-->
     </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.01016" radius="0.0254"/><!-- Simple collision for the end effector -->
+      </geometry>
+      <origin xyz="0 0 ${l7_6 + 0.00508}" rpy="0 0 0"/><!-- Z-up-->
+    </collision>
   </link> 
 
   <joint name="j6" type="revolute">

@@ -14,7 +14,7 @@ env.launch(realtime=True)
 # Create a puma in the default zero pose
 puma = rp.models.Puma560()
 puma.q = puma.qz
-env.add(puma)
+env.add(puma, show_robot=True, show_collision=False)
 
 dt = 0.05
 interp_time = 5
