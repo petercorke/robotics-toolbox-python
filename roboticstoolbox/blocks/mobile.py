@@ -5,14 +5,13 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 import time
 
-from bdsim.components import TransferBlock, block
+from bdsim.components import TransferBlock
 from bdsim.graphics import GraphicsBlock
 
 from spatialmath import base
 from roboticstoolbox import Bicycle, Unicycle
 
 # ------------------------------------------------------------------------ #
-@block
 class Bicycle(TransferBlock):
     """
     :blockname:`BICYCLE`
@@ -29,8 +28,13 @@ class Bicycle(TransferBlock):
     +------------+------------+---------+
     """
 
+    nin = 2
+    nout = 1
+
     def __init__(self, *inputs, x0=None, L=1, vlim=1, slim=1, **kwargs):
         r"""
+        Create a vehicle model with Bicycle kinematics.
+
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
         :param x0: Inital state, defaults to None
@@ -45,28 +49,25 @@ class Bicycle(TransferBlock):
         :return: a BICYCLE block
         :rtype: Bicycle instance
 
-        Create a vehicle model with Bicycle kinematics.
         
         Bicycle kinematic model with state :math:`[x, y, \theta]`.  
         
-        The block has two input ports:
+        **Block ports**
             
             :input v: Vehicle speed (metres/sec).  The velocity limit ``vlim`` is
                 applied to the magnitude of this input.
             :input γ: Steering wheel angle (radians).  The steering limit ``slim``
                 is applied to the magnitude of this input.
             
-        and one output port:
-            
-            :output q: state (x, y, θ)
+            :output q: configuration (x, y, θ)
 
+        :seealso: :class:`Unicycle` :class:`DiffSteer`
         """
-        super().__init__(nin=2, nout=1, inputs=inputs, **kwargs)
+        super().__init__(inputs=inputs, **kwargs)
 
         self.nstates = 3
         self.vlim = vlim
         self.slim = slim
-        self.type = 'bicycle'
 
         self.L = L
         if x0 is None:
@@ -95,7 +96,6 @@ class Bicycle(TransferBlock):
         return xd
     
 # ------------------------------------------------------------------------ #
-@block
 class Unicycle(TransferBlock):
     """
     :blockname:`UNICYCLE`
@@ -111,9 +111,13 @@ class Unicycle(TransferBlock):
     | float      | float   |         | 
     +------------+---------+---------+
     """
+    nin = 2
+    nout = 1
 
     def __init__(self, *inputs, x0=None, **kwargs):
         r"""
+        Create a vehicle model with Unicycle kinematics.
+
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
         :param x0: Inital state, defaults to None
@@ -124,28 +128,22 @@ class Unicycle(TransferBlock):
         :return: a UNICYCLE block
         :rtype: Unicycle instance
 
-        
-        Create a vehicle model with Unicycle kinematics.
 
         Unicycle kinematic model with state :math:`[x, y, \theta]`.
             
-        The block has two input ports:
+        **Block ports**
             
             :input v: Vehicle speed (metres/sec).  The velocity limit ``vlim`` is
                 applied to the magnitude of this input.
             :input ω: Angular velocity (radians/sec).  The steering limit ``slim``
                 is applied to the magnitude of this input.
             
-        and three output ports:
-            
-            :output x: position in the world frame (metres)
-            :output y: positon in the world frame (metres)
-            :output θ: heading angle with respect to the world frame (radians)
+            :output q: configuration (x, y, θ)
 
+        :seealso: :class:`Bicycle` :class:`DiffSteer`
         """        
-        super().__init__(nin=2, nout=3, inputs=inputs, **kwargs)
+        super().__init__(inputs=inputs, **kwargs)
         self.nstates = 3
-        self.type = 'unicycle'
         
         if x0 is None:
             self._x0 = np.zeros((slef.nstates,))
@@ -154,7 +152,7 @@ class Unicycle(TransferBlock):
             self._x0 = x0
         
     def output(self, t):
-        return list(self._x)
+        return self._x
     
     def deriv(self):
         theta = self._x[2]
@@ -164,7 +162,6 @@ class Unicycle(TransferBlock):
         return xd
     
 # ------------------------------------------------------------------------ #
-@block
 class DiffSteer(TransferBlock):
     """
     :blockname:`DIFFSTEER`
@@ -181,8 +178,16 @@ class DiffSteer(TransferBlock):
     +------------+---------+---------+
     """
 
+    nin = 2
+    nout = 1
+
+    inlabels = ('ωL', 'ωR')
+    outlabels = ('q',)
+
     def __init__(self, *inputs, R=1, W=1, x0=None, **kwargs):
         """
+        Create a differential steer vehicle model
+
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
         :param x0: Inital state, defaults to None
@@ -195,26 +200,20 @@ class DiffSteer(TransferBlock):
         :return: a DIFFSTEER block
         :rtype: DifSteer instance
         
-        Create a differential steer vehicle model with Unicycle kinematics, with inputs
-        given as wheel angular velocity.
-        
-        Unicycle kinematic model with state :math:`[x, y, \theta]`.
+        Unicycle kinematic model with state :math:`[x, y, \theta]`, with
+        with inputs given as wheel angular velocity.
 
-        The block has two input ports:
-            
-        :input ωl: Left-wheel angular velocity (radians/sec).
-        :input ωr: Right-wheel angular velocity (radians/sec).
+        **Block ports**
+
+            :input ωL: Left-wheel angular velocity (radians/sec).
+            :input ωR: Right-wheel angular velocity (radians/sec).
               
-        and three output ports:
-            
-            :output x: position in the world frame (metres)
-            :output y: positon in the world frame (metres)
-            :output θ: heading angle with respect to the world frame (radians)
+            :output q: configuration (x, y, θ)
 
-        Note:
-
-            - wheel velocity is defined such that if both are positive the vehicle
+        .. note:: Wheel velocity is defined such that if both are positive the vehicle
               moves forward.
+
+        :seealso: :class:`Bicycle` :class:`Unicycle`
         """
         super().__init__(nin=2, nout=3, inputs=inputs, **kwargs)
         self.nstates = 3
@@ -229,7 +228,7 @@ class DiffSteer(TransferBlock):
             self._x0 = x0
         
     def output(self, t):
-        return list(self._x)
+        return self._x
     
     def deriv(self):
         theta = self._x[2]
@@ -241,7 +240,6 @@ class DiffSteer(TransferBlock):
     
 # ------------------------------------------------------------------------ #
 
-@block
 class VehiclePlot(GraphicsBlock):
     """
     :blockname:`VEHICLEPLOT`
@@ -257,11 +255,18 @@ class VehiclePlot(GraphicsBlock):
     | float  |         |         | 
     +--------+---------+---------+
     """
-    
+
+    nin = 1
+    nout = 0
+
+    inlabels = ('q',)
+
     # TODO add ability to render an image instead of an outline
     
     def __init__(self, *inputs, path=True, pathstyle=None, shape='triangle', color="blue", fill="white", size=1, scale='auto', labels=['X', 'Y'], square=True, init=None, **kwargs):
         """
+        Create a vehicle animation
+
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
         :param path: plot path taken by vehicle, defaults to True
@@ -288,8 +293,11 @@ class VehiclePlot(GraphicsBlock):
         :return: A VEHICLEPLOT block
         :rtype: VehiclePlot instance
 
-
         Create a vehicle animation similar to the figure below.
+
+        **Block ports**
+
+            :input qL: configuration (x, y, θ)
         
         Notes:
             

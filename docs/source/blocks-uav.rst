@@ -9,5 +9,5 @@ UAV blocks
    :undoc-members:
    :show-inheritance:
    :special-members: __init__
-   :exclude-members: output, reset, step, start, done, deriv
+   :exclude-members: output, reset, step, start, done, deriv, nin, nout, inlabels, outlabels
 
