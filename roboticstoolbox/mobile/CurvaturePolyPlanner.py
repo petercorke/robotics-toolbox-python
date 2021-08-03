@@ -11,21 +11,38 @@ from roboticstoolbox.mobile.Planner import Planner
 def solvepath(poly, s_f, x0=[0, 0, 0], **kwargs):
     # poly is 4 coeffs of curvature polynomial
     # x0 is initial state of the vehicle
-    def dotfunc(t, x, poly):
+    maxcurvature = 0
+
+    def dotfunc(s, x, poly):
+        # x = (x, y, θ)
+        # xdot = (cosθ, sinθ, ϰ)
+        k = poly[0] * s ** 3 + poly[1] * s ** 2 + poly[2] * s + poly[3]
+
+        # save maximum curvature for this path solution
+        nonlocal maxcurvature
+        maxcurvature = max(maxcurvature, abs(k))
+
         theta = x[2]
-        k = poly[0] * t ** 3 + poly[1] * t ** 2 + poly[2] * t + poly[3]
         return math.cos(theta), math.sin(theta), k
 
     sol = scipy.integrate.solve_ivp(dotfunc, [0, s_f], x0, args=(poly,), **kwargs)
-    return sol.y
+    return sol.y, maxcurvature
 
-def costfunc(unknowns, start, goal):
+def costfunc(unknowns, start, goal, curvature):
     # final cost of path from start with params
     # p[0:4] is polynomial
     # p[4] is s_f
-    path = solvepath(poly=unknowns[:4], s_f=unknowns[4], x0=start)
+
+    # integrate the path for this curvature polynomial and length
+    path, maxcurvature = solvepath(poly=unknowns[:4], s_f=unknowns[4], x0=start)
+
+    # cost is configuration error at end of path
     e = np.linalg.norm(path[:, -1] - np.r_[goal])
-    print(e, path[:, -1], np.r_[goal])
+
+    if curvature is not None and maxcurvature > curvature:
+        # e *= np.exp(maxcurvature - curvature)
+        e += 0.1 * (maxcurvature - curvature)
+    # print(e, path[:, -1], np.r_[goal])
     return e
 class CurvaturePolyPlanner(Planner):
 
@@ -71,8 +88,9 @@ class CurvaturePolyPlanner(Planner):
     :seealso: :class:`Planner`
     """
 
-    def __init__(self):
+    def __init__(self, curvature=None):
         super().__init__(ndims=3)
+        self.curvature = curvature
 
     def query(self, start, goal):
         r"""
@@ -107,13 +125,14 @@ class CurvaturePolyPlanner(Planner):
         # theta = math.atan2(delta[1], delta[0])
         sol = scipy.optimize.minimize(costfunc, [0, 0, 1, 0, d],
             bounds=[(None, None), (None, None), (None, None), (None, None), (d, None)],
-            args=(start, goal,))
+            args=(start, goal, self.curvature))
 
-        path = solvepath(sol.x[:4], s_f=sol.x[4], x0=start, dense_output=True, max_step = 1e-2)
+        path, maxcurvature = solvepath(sol.x[:4], s_f=sol.x[4], x0=start, dense_output=True, max_step = 1e-2)
 
-        status = namedtuple('CurvaturePolyStatus', ['length', 'poly'])(sol.x[4], sol.x[:4])
+        status = namedtuple('CurvaturePolyStatus', 
+            ['length', 'maxcurvature', 'poly', 'success', 'iterations', 'message'])
 
-        return path.T, status
+        return path, status(sol.x[4], maxcurvature, sol.x[:4], sol.success, sol.nit, sol.message)
 
 if __name__ == '__main__':
     from math import pi
@@ -126,10 +145,10 @@ if __name__ == '__main__':
     # start = (0, 0, pi/2)
     # goal = (1, 0, pi/2)
 
-    planner = CurvaturePolyPlanner()
+    planner = CurvaturePolyPlanner(curvature=1)
     path, status = planner.query(start, goal)
-    print('start', path[0,:])
-    print('goal', path[-1, :])
+    print('start', path[:, 0])
+    print('goal', path[:, -1])
 
     print(status)
     planner.plot(path, block=True)
