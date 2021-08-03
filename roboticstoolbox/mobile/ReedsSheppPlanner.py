@@ -411,6 +411,9 @@ class ReedsSheppPlanner(Planner):
         self._curvature = curvature
         self._stepsize = stepsize
 
+    def __str__(self):
+        s = super().__str__() + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
+
     def query(self, start, goal, **kwargs):
         r"""
         Find Reeds-Shepp path

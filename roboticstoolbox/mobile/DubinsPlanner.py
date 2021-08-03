@@ -342,6 +342,9 @@ class DubinsPlanner(Planner):
         self._curvature = curvature
         self._stepsize = stepsize
 
+    def __str__(self):
+        s = super().__str__() + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
+
     def query(self, start, goal, **kwargs):
         r"""
         Find a Dubins path
@@ -354,7 +357,6 @@ class DubinsPlanner(Planner):
         :rtype: ndarray(N,3), namedtuple
 
         The returned status value has elements:
-
 
         +-------------+-----------------------------------------------------+
         | Element     |  Description                                        |

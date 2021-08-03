@@ -66,6 +66,11 @@ class PRMPlanner(Planner):
         self._v_path = None
         self._g_path = None
 
+    def __str__(self):
+        s = super().__str__()
+        s += '\n  ' + str(self.graph)
+        return s
+
     @property
     def npoints(self):
         return self._npoints
