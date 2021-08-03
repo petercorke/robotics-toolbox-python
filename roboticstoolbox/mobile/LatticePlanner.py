@@ -3,7 +3,8 @@ import numpy as np
 from spatialmath import SE2
 import matplotlib.pyplot as plt
 import itertools
-from roboticstoolbox.mobile.Planner import Planner, BinaryOccupancyGrid
+from roboticstoolbox.mobile.Planner import Planner
+from roboticstoolbox.mobile.OccGrid import OccupancyGrid
 from collections import namedtuple
 
 def make_arc(dir, radius=1, npoints=20):

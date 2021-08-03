@@ -119,7 +119,8 @@ class DistanceTransformPlanner(Planner):
                     min_dist = self._distancemap[y + d[0], x + d[1]]
             except:
                 # come here if the neighbouring cell is outside the map bounds
-                raise RuntimeError(f"Unexpected error finding next min dist at {d}")
+                # raise RuntimeError(f"Unexpected error finding next min dist at {d}")
+                pass
 
         if np.isinf(min_dist):
             raise RuntimeError("no minimum found, shouldn't happen")
@@ -147,7 +148,11 @@ class DistanceTransformPlanner(Planner):
             height = distance[p[:,1], p[:,0]]
             ax.plot(p[:, 0], p[:, 1], height)
 
+        plt.xlabel('x')
+        plt.ylabel('y')
+        ax.set_zlabel('z')
         plt.show()
+        return ax
 
 
 # Sourced from: https://stackoverflow.com/questions/28995146/matlab-ind2sub-equivalent-in-python/28995315#28995315
