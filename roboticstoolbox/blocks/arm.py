@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import time
 from spatialmath import base, SE3
 
-from bdsim.components import TransferBlock, FunctionBlock, SourceBlock, block
+from bdsim.components import TransferBlock, FunctionBlock, SourceBlock
 from bdsim.graphics import GraphicsBlock
 
 from roboticstoolbox import tpoly_func, lspb_func
@@ -20,7 +20,6 @@ Robot blocks:
 # The constructor of each class ``MyClass`` with a ``@block`` decorator becomes a method ``MYCLASS()`` of the BlockDiagram instance.
 
 # ------------------------------------------------------------------------ #
-@block
 class FKine(FunctionBlock):
     """
     :blockname:`FKINE`
@@ -37,6 +36,9 @@ class FKine(FunctionBlock):
     +------------+---------+---------+
     """
 
+    nin = 1
+    nout = 1
+
     def __init__(self, robot=None, args={}, *inputs, **kwargs):
         """
         :param ``*inputs``: Optional incoming connections
@@ -51,17 +53,13 @@ class FKine(FunctionBlock):
 
         Robot arm forward kinematic model.
 
-        The block has one input port:
+        **Block ports**
 
-            1. Joint configuration vector as an ndarray.
+            :input q: Joint configuration vector as an ndarray.
 
-        and one output port:
-
-            1. End-effector pose as an SE(3) object
-
-
+            :output T: End-effector pose as an SE(3) object
         """
-        super().__init__(nin=1, nout=1, inputs=inputs, **kwargs)
+        super().__init__(inputs=inputs, **kwargs)
         self.type = "forward-kinematics"
 
         self.robot = robot
@@ -74,7 +72,6 @@ class FKine(FunctionBlock):
         return [self.robot.fkine(self.inputs[0], **self.args)]
 
 
-@block
 class IKine(FunctionBlock):
     """
     :blockname:`IKINE`
@@ -90,6 +87,9 @@ class IKine(FunctionBlock):
     | SE3        | ndarray |         |
     +------------+---------+---------+
     """
+
+    nin = 1
+    nout = 1
 
     def __init__(
         self, robot=None, q0=None, useprevious=True, ik=None, *inputs, **kwargs
@@ -121,7 +121,7 @@ class IKine(FunctionBlock):
 
 
         """
-        super().__init__(nin=1, nout=1, inputs=inputs, **kwargs)
+        super().__init__(inputs=inputs, **kwargs)
         self.type = "inverse-kinematics"
 
         self.robot = robot
@@ -159,7 +159,7 @@ class IKine(FunctionBlock):
 
 
 # ------------------------------------------------------------------------ #
-@block
+
 class Jacobian(FunctionBlock):
     """
     :blockname:`JACOBIAN`
@@ -175,6 +175,9 @@ class Jacobian(FunctionBlock):
     | ndarray    | ndarray |         |
     +------------+---------+---------+
     """
+
+    nin = 1
+    nout = 1
 
     def __init__(
         self,
@@ -220,8 +223,7 @@ class Jacobian(FunctionBlock):
             - If ``inverse`` is True and the Jacobian is singular a runtime
               error will occur.
         """
-        super().__init__(nin=1, nout=1, inputs=inputs, **kwargs)
-        self.type = "jacobian"
+        super().__init__(inputs=inputs, **kwargs)
 
         self.robot = robot
 
@@ -254,7 +256,6 @@ class Jacobian(FunctionBlock):
         return [J]
 
 
-@block
 class Tr2Delta(FunctionBlock):
     """
     :blockname:`TR2DELTA`
@@ -270,6 +271,9 @@ class Tr2Delta(FunctionBlock):
     | SE3, SE3   | ndarray(6) |         |
     +------------+------------+---------+
     """
+
+    nin = 2
+    nout = 1
 
     def __init__(self, *inputs, **kwargs):
         """
@@ -292,8 +296,7 @@ class Tr2Delta(FunctionBlock):
 
         :seealso: :func:`spatialmath.base.tr2delta`
         """
-        super().__init__(nin=2, nout=1, inputs=inputs, **kwargs)
-        self.type = "tr2delta"
+        super().__init__(inputs=inputs, **kwargs)
 
         self.inport_names(("T1", "T2"))
         self.outport_names(("$\delta$",))
@@ -305,7 +308,6 @@ class Tr2Delta(FunctionBlock):
 # ------------------------------------------------------------------------ #
 
 
-@block
 class Delta2Tr(FunctionBlock):
     """
     :blockname:`DELTA2TR`
@@ -321,6 +323,9 @@ class Delta2Tr(FunctionBlock):
     | ndarray(6) | SE3      |         |
     +------------+----------+---------+
     """
+
+    nin = 1
+    nout = 1
 
     def __init__(self, *inputs, **kwargs):
         """
@@ -342,8 +347,7 @@ class Delta2Tr(FunctionBlock):
 
         :seealso: :func:`spatialmath.base.delta2tr`
         """
-        super().__init__(nin=1, nout=1, inputs=inputs, **kwargs)
-        self.type = "delta2tr"
+        super().__init__(inputs=inputs, **kwargs)
 
         self.inport_names(("$\delta$",))
         self.outport_names(("T",))
@@ -354,8 +358,6 @@ class Delta2Tr(FunctionBlock):
 
 # ------------------------------------------------------------------------ #
 
-
-@block
 class Point2Tr(FunctionBlock):
     """
     :blockname:`POINT2TR`
@@ -371,6 +373,9 @@ class Point2Tr(FunctionBlock):
     | ndarray(3) | SE3      |         |
     +------------+----------+---------+
     """
+
+    nin = 1
+    nout = 1
 
     def __init__(self, T, *inputs, **kwargs):
         """
@@ -392,8 +397,7 @@ class Point2Tr(FunctionBlock):
 
         :seealso: :func:`spatialmath.base.delta2tr`
         """
-        super().__init__(nin=1, nout=1, inputs=inputs, **kwargs)
-        self.type = "point2tr"
+        super().__init__(inputs=inputs, **kwargs)
 
         self.inport_names(("t",))
         self.outport_names(("T",))
@@ -407,7 +411,6 @@ class Point2Tr(FunctionBlock):
 # ------------------------------------------------------------------------ #
 
 
-@block
 class TR2T(FunctionBlock):
     """
     :blockname:`TR2T`
@@ -423,6 +426,9 @@ class TR2T(FunctionBlock):
     | SE3        | float    |         |
     +------------+----------+---------+
     """
+
+    nin = 1
+    nout = 3
 
     def __init__(self, *inputs, **kwargs):
         """
@@ -444,8 +450,7 @@ class TR2T(FunctionBlock):
 
         :seealso: :func:`spatialmath.base.delta2tr`
         """
-        super().__init__(nin=1, nout=3, inputs=inputs, **kwargs)
-        self.type = "tr2t"
+        super().__init__(inputs=inputs, **kwargs)
 
         self.inport_names(("T",))
         self.outport_names(("x", "y", "z"))
@@ -456,7 +461,7 @@ class TR2T(FunctionBlock):
 
 
 # ------------------------------------------------------------------------ #
-@block
+
 class FDyn(TransferBlock):
     """
     :blockname:`FDYN`
@@ -474,6 +479,9 @@ class FDyn(TransferBlock):
     |            | ndarray |         |
     +------------+---------+---------+
     """
+
+    nin = 1
+    nout = 3
 
     def __init__(self, robot, *inputs, q0=None, **kwargs):
         """
@@ -501,7 +509,7 @@ class FDyn(TransferBlock):
 
 
         """
-        super().__init__(nin=1, nout=3, inputs=inputs, **kwargs)
+        super().__init__(inputs=inputs, **kwargs)
         self.type = "forward-dynamics"
 
         self.robot = robot
@@ -539,8 +547,7 @@ class FDyn(TransferBlock):
         return np.r_[qd, qdd]
 
 
-@block
-class IDyncs(FunctionBlock):
+class IDyn(FunctionBlock):
     """
     :blockname:`IDYN`
 
@@ -557,6 +564,9 @@ class IDyncs(FunctionBlock):
     | ndarray    |         |         |
     +------------+---------+---------+
     """
+
+    nin = 3
+    nout = 1
 
     def __init__(self, robot, *inputs, gravity=None, **kwargs):
         """
@@ -585,7 +595,7 @@ class IDyncs(FunctionBlock):
 
         .. TODO:: end-effector wrench input, base wrench output, payload input
         """
-        super().__init__(nin=3, nout=1, inputs=inputs, **kwargs)
+        super().__init__(inputs=inputs, **kwargs)
         self.type = "inverse-dynamics"
 
         self.robot = robot
@@ -602,8 +612,6 @@ class IDyncs(FunctionBlock):
 
 # ------------------------------------------------------------------------ #
 
-
-@block
 class ArmPlot(GraphicsBlock):
     """
     :blockname:`ARMPLOT`
@@ -619,6 +627,10 @@ class ArmPlot(GraphicsBlock):
     | ndarray|         |         |
     +--------+---------+---------+
     """
+
+    nin = 1
+    nout = 0
+    inlabels = ('q',)
 
     def __init__(self, robot=None, *inputs, q0=None, backend=None, **kwargs):
         """
@@ -642,8 +654,7 @@ class ArmPlot(GraphicsBlock):
            Example of vehicle display (animated).  The label at the top is the
            block name.
         """
-        super().__init__(nin=1, inputs=inputs, **kwargs)
-        self.type = "armplot"
+        super().__init__(inputs=inputs, **kwargs)
         self.inport_names(("q",))
 
         if q0 is None:
@@ -681,7 +692,7 @@ class ArmPlot(GraphicsBlock):
             super().done()
 
 
-@block
+
 class Traj(FunctionBlock):
     """
     :blockname:`TRAJ`
@@ -697,6 +708,9 @@ class Traj(FunctionBlock):
     | float      | float   |         |
     +------------+---------+---------+
     """
+
+    nin = -1
+    nout = 3
 
     def __init__(self, y0=0, yf=1, T=None, time=False, traj="lspb", *inputs, **kwargs):
         """
@@ -743,8 +757,7 @@ class Traj(FunctionBlock):
             self.blockclass = "source"
         else:
             nin = 1
-        super().__init__(nin=nin, nout=3, inputs=inputs, **kwargs)
-        self.type = "function"
+        super().__init__(nin=nin, inputs=inputs, **kwargs)
 
         y0 = base.getvector(y0)
         yf = base.getvector(yf)
@@ -789,7 +802,6 @@ class Traj(FunctionBlock):
         return [np.hstack(y), np.hstack(yd), np.hstack(ydd)]
 
 
-@block
 class JTraj(SourceBlock):
     """
     :blockname:`JTRAJ`
@@ -805,6 +817,9 @@ class JTraj(SourceBlock):
     |            | ndarray(n) |         |
     +------------+------------+---------+
     """
+
+    nin = 0
+    nout = 3
 
     def __init__(self, q0, qf, qd0=None, qdf=None, T=None, *inputs, **kwargs):
         """
@@ -845,8 +860,7 @@ class JTraj(SourceBlock):
 
         :seealso: :func:`ctraj`, :func:`qplot`, :func:`~SerialLink.jtraj`
         """
-        super().__init__(nin=0, nout=3, **kwargs)
-        self.blockclass = "jtraj"
+        super().__init__(**kwargs)
         self.type = "source"
         self.outport_names(
             (
@@ -930,7 +944,6 @@ class JTraj(SourceBlock):
         return [qt, qdt, qddt]
 
 
-@block
 class CirclePath(SourceBlock):
     """
     :blockname:`CIRCLEPATH`
@@ -946,6 +959,9 @@ class CirclePath(SourceBlock):
     | float      | float   |         |
     +------------+---------+---------+
     """
+
+    nin = 0
+    nout = 1
 
     def __init__(
         self,
@@ -995,8 +1011,7 @@ class CirclePath(SourceBlock):
           input ports and is a ``Source`` not a ``Function``.
         """
 
-        super().__init__(nin=0, nout=1, **kwargs)
-        self.blockclass = "circlepath"
+        super().__init__(**kwargs)
 
         if unit == "rps":
             omega = frequency * 2 * pi

@@ -4,11 +4,10 @@ from math import sin, cos, atan2, tan, sqrt, pi
 import matplotlib.pyplot as plt
 import time
 
-from bdsim.components import TransferBlock, block
+from bdsim.components import TransferBlock
 from bdsim.graphics import GraphicsBlock
 # ------------------------------------------------------------------------ #
 
-@block
 class MultiRotor(TransferBlock):
     """
     :blockname:`MULTIROTOR`
@@ -24,6 +23,8 @@ class MultiRotor(TransferBlock):
        | A(4,)      | dict    |         | 
        +------------+---------+---------+
     """
+    nin = 1
+    nout = 1
 
 
 	# Flyer2dynamics lovingly coded by Paul Pounds, first coded 12/4/04
@@ -79,6 +80,8 @@ class MultiRotor(TransferBlock):
 	# 
     def __init__(self, model, *inputs, groundcheck=True, speedcheck=True, x0=None, **kwargs):
         r"""
+        Create a a multi-rotor dynamic model block.
+
         :param model: Vehicle geometric and inertial parameters
         :type model: dict
         :param ``*inputs``: Optional incoming connections
@@ -93,20 +96,19 @@ class MultiRotor(TransferBlock):
         :return: a MULTIROTOR block
         :rtype: MultiRotor instance
         
-        Create a a multi-rotor dynamic model block.
         
-        The block has one input port which is a vector of input rotor speeds
-        in (radians/sec).  These are, looking down, clockwise from the front rotor
-        which lies on the x-axis.
+        **Block ports**
         
-        The block has one output port which is a dictionary signal with the
-        following items:
-            
-            - ``x`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
-            - ``vb`` translational velocity in the world frame (metres/sec)
-            - ``w`` angular rates in the world frame as yaw-pitch-roll rates (radians/second)
-            - ``a1s`` longitudinal flapping angles (radians)
-            - ``b1s`` lateral flapping angles (radians)
+            :input ω: a vector of input rotor speeds in (radians/sec).  These are,
+                looking down, clockwise from the front rotor which lies on the x-axis.
+                
+            :output x: a dictionary signal with the following items:
+                
+                - ``x`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
+                - ``vb`` translational velocity in the world frame (metres/sec)
+                - ``w`` angular rates in the world frame as yaw-pitch-roll rates (radians/second)
+                - ``a1s`` longitudinal flapping angles (radians)
+                - ``b1s`` lateral flapping angles (radians)
             
         Based on MATLAB code developed by Pauline Pounds 2004.
         """
@@ -302,7 +304,6 @@ class MultiRotor(TransferBlock):
 
 # ------------------------------------------------------------------------ #
 
-@block
 class MultiRotorPlot(GraphicsBlock):
     """
     :blockname:`MULTIROTORPLOT`
@@ -319,6 +320,10 @@ class MultiRotorPlot(GraphicsBlock):
        +--------+---------+---------+
     """
  
+    nin = 1
+    nout = 0
+    inlabels = ('x',)
+
     # Based on code lovingly coded by Paul Pounds, first coded 17/4/02
     # version 2 2004 added scaling and ground display
     # version 3 2010 improved rotor rendering and fixed mirroring bug
@@ -342,6 +347,8 @@ class MultiRotorPlot(GraphicsBlock):
      
     def __init__(self, model, *inputs, scale=[-2, 2, -2, 2, 10], flapscale=1, projection='ortho', **kwargs):
         """
+        Create a block that displays/animates a multi-rotor flying vehicle.
+
         :param model: A dictionary of vehicle geometric and inertial properties
         :type model: dict
         :param ``*inputs``: Optional incoming connections
@@ -356,7 +363,12 @@ class MultiRotorPlot(GraphicsBlock):
         :return: a MULTIROTOPLOT block
         :rtype: MultiRobotPlot instance
 
-        Create a block that displays/animates a multi-rotor flying vehicle.
+
+        **Block ports**
+        
+            :input ω: a dictionary signal that includes the item:
+                
+                - ``x`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
 
         .. figure:: ../../figs/multirotorplot.png
            :width: 500px
