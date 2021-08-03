@@ -1,25 +1,239 @@
 """
-Python ReedShepp Planner
-@Author: Kristian Gibson
-TODO: Comments + Sphynx Docs Structured Text
-TODO: Bug-fix, testing
 
-Not ready for use yet.
+D* grid planning
+
+author: Nirnay Roy
+
+See Wikipedia article (https://en.wikipedia.org/wiki/D*)
+
 """
-from numpy import disp
-from scipy import integrate
-from spatialmath.base.transforms2d import *
-from spatialmath.base.vectors import *
-from spatialmath.pose2d import SE2
-from scipy.ndimage import *
-from matplotlib import cm
-from enum import IntEnum
-from roboticstoolbox.mobile.Planner import Planner
+import math
 
-class _State(IntEnum):
-    NEW = 0
-    OPEN = 1
-    CLOSED = 2
+from sys import maxsize
+from collections import namedtuple
+from enum import IntEnum, auto
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.cm as cm
+from roboticstoolbox.mobile.Planner import Planner
+from roboticstoolbox.mobile.OccGrid import OccupancyGrid
+
+
+show_animation = True
+
+class Tag(IntEnum):
+    NEW = auto()
+    OPEN = auto()
+    CLOSED = auto()
+class State:
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.parent = None # 'back pointer' to next state
+        self.t = Tag.NEW  # open closed new
+        self.h = 0  # cost to goal
+        self.k = 0  # estimate of shortest path cost
+
+    def __str__(self):
+        return f"({self.x}, {self.y})" #[{self.h:.1f}, {self.k:.1f}]"
+
+    def __repr__(self):
+        return self.__str__()
+
+class Map:
+
+    def __init__(self, row, col):
+        self.row = row
+        self.col = col
+        self.map = self.init_map()
+
+    def init_map(self):
+        map_list = []
+        for i in range(self.row):
+            tmp = []
+            for j in range(self.col):
+                tmp.append(State(i, j))
+            map_list.append(tmp)
+        return map_list
+
+    _neighbours = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+
+    def get_neighbors(self, state):
+        state_list = []
+        # for i in [-1, 0, 1]:
+        #     for j in [-1, 0, 1]:
+                # if i == 0 and j == 0:
+                #     continue
+                # if state.x + i < 0 or state.x + i >= self.row:
+                #     continue
+                # if state.y + j < 0 or state.y + j >= self.col:
+                #     continue
+                # state_list.append(self.map[state.x + i][state.y + j])
+        for i, j in self._neighbours:
+            try:
+                state_list.append(self.map[state.x + i][state.y + j])
+            except IndexError:
+                pass
+        return state_list
+
+
+    def set_cost(self, region, cost, modify=None):
+
+        xmin = max(0, region[0])
+        xmax = min(self.col, region[1])
+        ymin = max(0, region[2])
+        ymax = min(self.row, region[3])
+
+        self.costmap[ymin:ymax, xmin:xmax] = cost
+
+        if modify is not None:
+            for x in range(xmin, xmax):
+                for y in range(ymin, ymax):
+                    modify.modify_cost(self.map[x][y])
+
+    _root2 = np.sqrt(2)
+
+    def cost(self, state1, state2):
+        c = (self.costmap[state1.y, state1.x] + self.costmap[state2.y, state2.x]) / 2
+
+        dx = state1.x - state2.x
+        dy = state1.y - state2.y
+        if dx == 0 or dy == 0:
+            # NSEW movement, distance of 1
+            return c
+        else:
+            # diagonal movement, distance of sqrt(2)
+            return c * self._root2
+        # return c * math.sqrt(()**2 +
+        #                  ()**2)
+
+    def show_h(self):
+        h = np.empty((self.col, self.row))
+
+        for x in range(self.col):
+            for y in range(self.row):
+                h[y, x] = self.map[x][y].h
+        print(h)
+
+class Dstar:
+    def __init__(self, map):
+        self.map = map
+        self.open_list = set()
+        self.nexpand = 0
+
+    def process_state(self, verbose=False):
+        if verbose:
+            print('FRONTIER ', ', '.join([str(x) for x in self.open_list]))
+        
+        # get state from frontier
+        x = self.min_state()
+        if x is None:
+            if verbose:
+                print('  x is None ')
+            return -1
+        self.nexpand += 1
+
+        # get its current cost
+        k_old = self.get_kmin()
+        self.remove(x)
+
+        if verbose:
+            print('EXPAND ', x, k_old)
+
+        if x.h > k_old + 1e-6:
+            # RAISE state
+            if verbose:
+                print('  raise')
+            for y in self.map.get_neighbors(x):
+                if y.t is not Tag.NEW and y.h <= k_old and x.h > y.h + self.map.cost(x, y):
+                    x.parent = y
+                    x.h = y.h + self.map.cost(x, y)
+
+        if np.isclose(x.h, k_old):
+            # normal state
+            if verbose:
+                print('  normal')
+            for y in self.map.get_neighbors(x):
+                if y.t is Tag.NEW \
+                   or (y.parent == x and not np.isclose(y.h, x.h + self.map.cost(x, y))) \
+                   or (y.parent != x and y.h > x.h + self.map.cost(x, y) + 1e-6):
+                    if verbose:
+                        print(f"  reparent {y} from {y.parent} to {x}")
+                    y.parent = x
+                    self.insert(y, x.h + self.map.cost(x, y))
+        else:
+            # RAISE or LOWER state
+            if verbose:
+                print('  lower')
+            for y in self.map.get_neighbors(x):
+                if y.t is Tag.NEW or (y.parent == x and not np.isclose(y.h, x.h + self.map.cost(x, y))):
+                    y.parent = x
+                    self.insert(y, x.h + self.map.cost(x, y))
+                else:
+                    if y.parent != x and (y.h > x.h + self.map.cost(x, y)) and x.t is Tag.CLOSED:
+                        self.insert(x, x.h)
+                    else:
+                        if y.parent != x and x.h > y.h + self.map.cost(y, x) + 1e-6 \
+                                and y.t is Tag.CLOSED and y.h > k_old + 1e-6:
+                            self.insert(y, y.h)
+        if verbose:
+            print()
+        return self.get_kmin()
+
+    def min_state(self):
+        if not self.open_list:
+            return None
+        min_state = min(self.open_list, key=lambda x: x.k)
+        return min_state
+
+    def get_kmin(self):
+        if not self.open_list:
+            return -1
+        k_min = min([x.k for x in self.open_list])
+        return k_min
+
+    ninsert = 0
+    nin = 0
+
+    def insert(self, state, h_new):
+        self.ninsert += 1
+        if state in self.open_list:
+            self.nin += 1
+            if state.t is not Tag.OPEN:
+                print('already in but not open')
+        if state.t is Tag.NEW:
+            state.k = h_new
+        elif state.t is Tag.OPEN:
+            state.k = min(state.k, h_new)
+        elif state.t is Tag.CLOSED:
+            state.k = min(state.h, h_new)
+        state.h = h_new
+        state.t = Tag.OPEN
+
+        self.open_list.add(state)
+
+    def remove(self, state):
+        if state.t is Tag.OPEN:
+            state.t = Tag.CLOSED
+        else:
+            state.t = Tag.CLOSED
+            print('removing non open state')
+        self.open_list.remove(state)
+
+    def modify_cost(self, x, newcost):
+        self.map.costmap[x.y, x.x] = newcost
+        if x.t is Tag.CLOSED:
+            self.insert(x, x.parent.h + self.map.cost(x, x.parent))
+        return self.get_kmin()
+
+    def modify(self, state):
+        self.modify_cost(state)
+        while True:
+            k_min = self.process_state()
+            if k_min == -1 or k_min >= state.h:
+                break
+
 class DstarPlanner(Planner):
     r"""
     D* path planner
@@ -49,91 +263,15 @@ class DstarPlanner(Planner):
     """
     def __init__(self, occ_grid=None, 
                  reset=False, **kwargs):
-        self._g = None
-        self._b = None  # backpointers
-        self._t = None  # tags
-        self._h = None  # path cost estimates
-        self._valid_plan = None
-        self.open_list = None
-        self.open_list_maxlen = None
-        self._niter = None
-        self._costmap = occ_grid.astype(np.float32)
-        self._m = 'euclidean'
+        super().__init__(ndims=2, **kwargs)
 
-        super().__init__(occ_grid=occ_grid, **kwargs)
-
-    @property
-    def niter(self):
-        return self._niter
-
-    @property
-    def costmap(self):
-        return self._costmap
-
-    def dstar(self, map, goal=None, metric=None, inflate=None, progress=None):
-        self._occ_grid = map
-        self._goal = goal
-
-        self.reset()
-        if self._goal is not None or self._goal is not np.array([]):
-            self.goal_change()
-
-        self.reset()
-
-        return self
-
-    def reset(self):
-        # self._b = np.zeros(self._costmap.shape)
-        # self._t = np.zeros(self._costmap.shape)
-        # self._h = np.inf * np.ones(self._costmap.shape)
-
-        self._bmat = np.zeros(self._costmap.shape)
-        self._tmat = np.zeros(self._costmap.shape)
-        self._hmat = np.inf * np.ones(self._costmap.shape)
-
-        self._b = self._bmat.ravel()
-        self._t = self._tmat.ravel()
-        self._h = self._hmat.ravel()
-        
-        self.open_list = np.zeros((2, 0))
-
-        self.open_list_maxlen = -np.inf
-
-        self.occgrid2costmap(self._occ_grid_nav)
-
-        self._valid_plan = False
-
-    def __str__(self):
-        s = super().__str__()
-        s += f"\n  Distance metric: {self._metric}"
-        if self._distance_map is not None:
-            s += ", Cost map: computed "
-        else:
-            s += ", Cost map: empty "
-        if self._valid_plan:
-            s += "  \nPlan: valid"
-        else:
-            s += "  \nPlan: stale"
-        return s
+        self.costmap = np.where(self.occgrid.grid > 0, np.inf, 1)
+        self.map = Map(self.costmap.shape[1], self.costmap.shape[0])
+        self.map.costmap = self.costmap
+        self.dstar = Dstar(self.map)
 
 
-    # Just feed self._h into plot function from parent as p
-
-    def next(self, current):
-        if not self._valid_plan:
-            Error("Cost map has changed, replan")
-        # x = sub2ind(np.shape(self._costmap), current[1], current[0])
-        # x = self._b[x]
-        i = np.ravel_multi_index([current[1], current[0]], self._costmap.shape)
-        i = self._b[i]
-
-        if i == 0:
-            return None  # we have arrived
-        else:
-            x = np.unravel_index((i), self._costmap.shape)
-            return x[1], x[0]
-
-    def plan(self, goal=None, animate=False, progress=True):
+    def plan(self, goal, animate=False, progress=True):
         r"""
         Plan D* path
 
@@ -147,235 +285,140 @@ class DstarPlanner(Planner):
         The implementation depends on the particular planner.  Some may have
         no planning phase.  The plan may also depend on just the start or goal.
         """
-        if goal is not None:
-            self._goal = np.array(goal).astype(int)
-            self.reset()
+        self.goal = goal
+        goalstate = self.map.map[goal[0]][goal[1]]
+        self.goalstate = goalstate
 
-        assert(goal is not None and goal is not np.array([]))
-
-        goal = self._goal
-
-        self._g = np.ravel_multi_index([goal[1], goal[0]], self._costmap.shape)
-        self.__insert(self._g, 0, 'goalset')
-        self._h[self._g] = 0
-
-        self._niter = 0
-        h_prog = None
-        if progress:
-            h_prog = self.progress_init('D* Planning')
-
-        n_free = np.prod(self._occ_grid_nav.shape) - np.sum(self._occ_grid_nav > 0)
-        n_update = np.round(n_free / 100)
+        # self.dstar.open_list.add(goalstate)
+        self.dstar.insert(goalstate, 0)
 
         while True:
-            self._niter = self._niter + 1
-            if progress and np.mod(self._niter, n_update) == 0:
-                self.progress(h_prog, self._niter/n_free)
+            ret = self.dstar.process_state()
+            # print('plan', ret, len(self.dstar.open_list))
 
-                if animate:
-                    self.show_distance(self._h)
-
-            if self._process_state() < 0:
+            if ret == -1:
                 break
-
-            if progress:
-                self.progress_delete(h_prog)
-            self._valid_plan = True
-            disp(self._niter + " iterations\n")
-
-    def set_cost(self, cost_map):
-        if not np.all(np.shape(cost_map) == np.shape(self._occ_grid_nav)):
-            Error("Costmap must be the same size of the occupancy grid")
-
-        self._costmap = cost_map
-        self._valid_plan = False
-
-    def modify_cost(self, xy, new_cost):
-        # xy is [xmin xmax ymin ymax]
-        if np.all(np.shape[xy] == np.array([2, 2])) and np.size(new_cost) == 1:
-            for xx in range(xy[0, 0], xy[0, 1]):
-                for yy in range(xy[1, 0], xy[1, 1]):
-                    self.modify(xx, yy, new_cost)
-        elif len(xy[0]) == np.size(new_cost):
-            for i in range(0, len[xy[0]]):
-                self.modify(xy[0, i], xy[1, i], new_cost[i])
-        else:
-            Error("Number of columns of P and C must match")
-
-        self._valid_plan = False
-
-    def modify(self, x, y, new_cost):
-        x = sub2ind(np.shape(self._costmap), y, x)
-        self._costmap[x] = new_cost
-
-        if self._t[x] == State.CLOSED:
-            self.__insert(x, self._h[x], 'modifycost')
-
-    # These are private methods ... kinda
-    def __occ_grid2cost_map(self, og=None, cost=None):
-        if cost is None:
-            cost = 1
-        self._costmap = og
-        self._costmap[self._costmap==1] = np.Inf
-        self._costmap[self._costmap==0] = cost
-
-    def _process_state(self):
-        x = self.__min_state()
-        r = None
-
-        if x is None or x is np.array([]):
-            r = -1
-            return r
-
-        k_old = self.__get_kmin()
-        self.__delete(x)
-
-        if k_old < self._h[x]:
-            self.message('k_old == h[x]: ' + k_old)
-            for y in self.__neighbours(x):
-                if (self._h[y] <= k_old) and (self._h[x] > self._h[y] + self.__c(y, x)):
-                    self._b[x] = y
-                    self._h[x] = self._h[y] + self.__c(y, x)
-
-        if k_old == self._h[x]:
-            self.message(f"k_old == h[x]: {k_old}")
-            for y in self.__neighbours(x):
-                if (self._t[y] == State.NEW) or ( (self._b[y] == x) and
-                    (self._h[y] != (self._h[x] + self.c[x, y]))) or  ((self._b[y] != x)
-                     and (self._h[y] > (self._h[x] + self.c[x, y]))):
-
-                    self._b[y] = x
-                    self.__insert(y, self._h[x] + self._c(x, y), 'L13')
-        else:
-            self.message("k_old == h[x]: " + k_old)
-            for y in self.__neighbours(x):
-                if (self._t[y] == self.__new) or ((self._b[y] == x) and
-                        (self._h[y] != (self._h[x] + self.__c(x, y)))):
-                    self._b[y] = x
-                    self.__insert(y, self._h[x] + self.__c(x, y), "L18")
-                else:
-                    if (self._b[y] != x) and (self._h[y] > (self._h[x] + self.__c(x, y))):
-                        self.__insert(x, self._h[x], "L21")
-                    else:
-                        if (self._b[y] != x) and (self._h[x] > self._h[y] + self.__c(y, x)) and \
-                                (self._t[y] == self.__closed) and self._h[y] > k_old:
-                            self.__insert(y, self._h[y], 'L25')
-
-        r = 0
-        return r
-
-    def __k(self, x):
-        i = self.open_list[0,:] == x
-        kk = self.open_list[1, i]
-        return kk
-
-    def __insert(self, x, h_new, where):
-        self.message(f"Insert ({where}) {x} = {h_new}")
-
-        i = np.argwhere(self.open_list[0, :] == x)
-        if len(i) > 1:
-            Error("D*:Insert: state in open list " + x + " times.\n")
-
-        k_new = None
-        if self._t[x] == State.NEW:
-            k_new = h_new
-            self.open_list = np.c_[self.open_list, [x, k_new]]
-        elif self._t[x] == State.OPEN:
-            k_new = np.min(self.open_list[1, i], h_new)
-        elif self._t[x] == State.CLOSED:
-            k_new = np.min(self._h[x], h_new)
-            data = np.array([(x), (k_new)])
-            self.open_list = np.array([self.open_list, data])
-
-        # if len(self.open_list[0]) > self.open_list_maxlen:
-        #     self.open_list_maxlen = len(self.open_list[0])
-
-        self._h[x] = h_new
-        self._t[x] = State.OPEN
-
-    def __delete(self, x):
-        # % remove node from open list
-        self.message(f"Delete {x}")
-        i = np.argwhere(self.open_list[0, :] == x)
-        if len(i) != 1:
-            Error("D*:Delete: state " + x + " doesn't exist.")
-        if len(i) > 1:
-            disp("Del")
-        self.open_list = np.delete(self.open_list, i-1, 1)
-        self._t[x] = State.CLOSED
-
-    def __min_state(self):
-        # return the index of the open state with the smallest k value
-        ms = None
-        if self.open_list is None or self.open_list is np.array([]):
-            ms = np.array([])
-        else:
-            i = np.argmin(self.open_list[1, :])
-            ms = self.open_list[0, i]
-        return ms.astype(int)
-
-    def __get_kmin(self):
-        return self.open_list[1, :].min()
-
-    def _c(self, x, y):
-        # % return the cost of moving from state X to state Y
-        r, c = ind2sub(np.shape(self.costmap), np.array([[x], [y]]))
-
-        r, c = np.ravel_multi_index([goal[1], goal[0]], self._costmap.shape)
-
-        dist = np.sqrt(np.sum(np.diff(np.square(np.array([r, c])))))
-        d_cost = (self._costmap[x] + self._costmap[y])/2
-
-        cost = dist * d_cost
-        return cost
-
-    def __neighbours(self, x):
-        dims = self._costmap.shape
-        # r, c = ind2sub(dims, x)
-
-        r, c = np.unravel_index((x), dims)
-
-        y = np.array([[r-1, r-1, r-1, r, r,  r+1, r+1, r+1],
-                      [c-1, c, c+1, c-1, c+1, c-1, c, c+1]])
-
-        k = (y.min(axis=0) > 0) & (y[0, :] <= dims[0]) & (y[1, :] <= dims[1])
-        y = y[:, k-1]
-        # y = np.transpose(sub2ind(dims, np.transpose(y[0, :]), np.transpose(y[1, :])))
-
-        # QUERY are these the right way around?
-        i = np.ravel_multi_index((y[0, :], y[1, :]), self._costmap.shape)
-        return i
-
-    def occgrid2costmap(self, occgrid, cost=1):
-
-            self._costmap = occgrid.astype(float)
-            self._costmap[self.costmap == 1] = np.inf;  # occupied cells have inf driving cost
-            self._costmap[self.costmap == 0] = cost     # unoccupied cells have driving cost
-
-# Sourced from: https://stackoverflow.com/questions/28995146/matlab-ind2sub-equivalent-in-python/28995315#28995315
-def sub2ind(array_shape, rows, cols):
-    ind = rows*array_shape[1] + cols
-    ind[ind < 0] = -1
-    ind[ind >= array_shape[0]*array_shape[1]] = -1
-    return ind
+        
+        print(self.dstar.ninsert, self.dstar.nin)
 
 
-def ind2sub(array_shape, ind):
-    ind[ind < 0] = -1
-    ind[ind >= array_shape[0]*array_shape[1]] = -1
-    rows = (ind.astype('int') / array_shape[1])
-    cols = ind % array_shape[1]
-    return rows, cols
+    def query(self, start, update=None, changes=None):
+        self.start = start
+        startstate = self.map.map[start[0]][start[1]]
+        s = startstate
+        s = s.parent
+        tmp = startstate
 
+        cost = tmp.h
+
+        for x in range(self.map.col):
+            for y in range(self.map.row):
+                self.dstar.map.map[x][y].t == 'new'
+        self.goalstate.h = 0
+
+        path = []
+        while True:
+            path.append((tmp.x, tmp.y))
+            if tmp == self.goalstate:
+                break
+            
+            # x, y = tmp.parent.x, tmp.parent.y
+            if update is not None and update == tmp:
+                # make changes now
+                for x, y, newcost in changes:
+                    X = self.dstar.map.map[x][y]
+                    print('difference at ', x, y)
+                    val = self.dstar.modify_cost(X, newcost)
+                    while val != -1 and val < tmp.h:
+                        val = self.dstar.process_state()
+            tmp = tmp.parent
+            print('done')
+
+        status = namedtuple('DstarStatus', ['cost',])
+        
+        return np.array(path).T, status(cost)
+
+    # # Just feed self._h into plot function from parent as p
+
+    # def next(self, current):
+    #     if not self._valid_plan:
+    #         Error("Cost map has changed, replan")
+    #     # x = sub2ind(np.shape(self._costmap), current[1], current[0])
+    #     # x = self._b[x]
+    #     i = np.ravel_multi_index([current[1], current[0]], self._costmap.shape)
+    #     i = self._b[i]
+
+    #     if i == 0:
+    #         return None  # we have arrived
+    #     else:
+    #         x = np.unravel_index((i), self._costmap.shape)
+    #         return x[1], x[0]
 
 if __name__ == "__main__":
 
-    from roboticstoolbox import DStarPlanner, path_to_datafile
-    from scipy.io import loadmat
+    og = np.zeros((10,10))
+    og[4:8, 3:6] = 1
+    print(og)
 
-    path = path_to_datafile("data/map1.mat")
-    vars = loadmat(path, squeeze_me=True, struct_as_record=False)
-    map = vars['map']
-    ds = DStarPlanner(map, verbose=True)
-    ds = ds.plan([50, 35])
-    path = ds.query([20, 10])
+    ds = DstarPlanner(occgrid=og)
+    print(ds.costmap)
+
+    start = (1,1)
+    goal = (7,6)
+
+    ds.plan(goal=goal)
+    ds.map.show_h()
+
+    # path, status = ds.query(start=start)
+    # print(path)
+    # print(status)
+
+    # ds.plot(path=path)
+
+
+    changes = []
+    for x in range(3, 6):
+        for y in range(0, 4):
+            changes.append((x, y, 5))
+    # print(costmap2)
+
+    path2, status2 = ds.query(start=start, update=ds.dstar.map.map[3][3], changes=changes)
+    print(ds.map.costmap)
+    ds.map.show_h()
+
+    # ds.dstar.replan()
+
+    # path2, status = ds.query(start=start)
+    print(path2)
+    print(status2)
+
+    ds.plot(path=path2)
+    # ds.plot(path=path2, block=True)
+
+    # obstacle zone
+    # m.set_cost([30, 60, 20, 60], np.inf)
+
+    # start = [10, 10]
+    # goal = [70, 70]
+    # if show_animation:
+    #     m.plot()
+    #     plt.plot(start[0], start[1], "og")
+    #     plt.plot(goal[0], goal[1], "xb")
+    #     plt.axis("equal")
+
+    # start = m.map[start[0]][start[1]]
+    # end = m.map[goal[0]][goal[1]]
+    # dstar = Dstar(m)
+    # rx, ry = dstar.run(start, end)
+
+    # if show_animation:
+    #     plt.plot(rx, ry, "-r")
+    #     plt.show(block=True)
+
+    # # costly zone
+    # m.set_cost([30, 40, 60, 80], 1.70, modify=dstar)
+
+    # dstar.replan()
+
+    plt.show(block=True)
+
