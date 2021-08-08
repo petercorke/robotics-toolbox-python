@@ -17,7 +17,8 @@ import numpy as np
 import matplotlib.cm as cm
 from roboticstoolbox.mobile.Planner import Planner
 from roboticstoolbox.mobile.OccGrid import OccupancyGrid
-
+import heapq
+import math
 
 show_animation = True
 
@@ -41,6 +42,9 @@ class State:
     def __repr__(self):
         return self.__str__()
 
+    def __lt__(self, other):
+        return True
+
 class Map:
 
     def __init__(self, row, col):
@@ -49,48 +53,42 @@ class Map:
         self.map = self.init_map()
 
     def init_map(self):
-        map_list = []
+        map_list = []  # list of rows
         for i in range(self.row):
+            # for each row, make a list
             tmp = []
             for j in range(self.col):
-                tmp.append(State(i, j))
-            map_list.append(tmp)
+                tmp.append(State(j, i))  # append column to the row
+            map_list.append(tmp) # append row to map
         return map_list
 
     _neighbours = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
     def get_neighbors(self, state):
         state_list = []
-        # for i in [-1, 0, 1]:
-        #     for j in [-1, 0, 1]:
-                # if i == 0 and j == 0:
-                #     continue
-                # if state.x + i < 0 or state.x + i >= self.row:
-                #     continue
-                # if state.y + j < 0 or state.y + j >= self.col:
-                #     continue
-                # state_list.append(self.map[state.x + i][state.y + j])
+
         for i, j in self._neighbours:
             try:
-                state_list.append(self.map[state.x + i][state.y + j])
+                if state.x + i > 0 and state.y + j > 0:
+                    state_list.append(self.map[state.y + j][state.x + i])
             except IndexError:
                 pass
         return state_list
 
 
-    def set_cost(self, region, cost, modify=None):
+    # def set_cost(self, region, cost, modify=None):
 
-        xmin = max(0, region[0])
-        xmax = min(self.col, region[1])
-        ymin = max(0, region[2])
-        ymax = min(self.row, region[3])
+    #     xmin = max(0, region[0])
+    #     xmax = min(self.col, region[1])
+    #     ymin = max(0, region[2])
+    #     ymax = min(self.row, region[3])
 
-        self.costmap[ymin:ymax, xmin:xmax] = cost
+    #     self.costmap[ymin:ymax, xmin:xmax] = cost
 
-        if modify is not None:
-            for x in range(xmin, xmax):
-                for y in range(ymin, ymax):
-                    modify.modify_cost(self.map[x][y])
+    #     if modify is not None:
+    #         for x in range(xmin, xmax):
+    #             for y in range(ymin, ymax):
+    #                 modify.modify_cost(self.map[y][x])
 
     _root2 = np.sqrt(2)
 
@@ -113,50 +111,62 @@ class Map:
 
         for x in range(self.col):
             for y in range(self.row):
-                h[y, x] = self.map[x][y].h
+                h[y, x] = self.map[y][x].h
         print(h)
 
+# for performance reasons there are some important differences compared to
+# the version from Python Robotics
+#
+# replace the classic D* functions min_state(), get_kmin(), insert(), remove()
+# with heapq.heappush() and heapq.heappop(). The open_list is now a list of 
+# tuples (k, state) maintained by heapq, rather than a set
+#
+# lots of unnecessary inserting/deleting from the open_list due to arithmetic
+# rounding in tests for costs h and k:
+#  - replace equality tests with math.isclose() which is faster than np.isclose()
+#  - add an offset to inequality tests, X > Y becomes X > Y + tol
 class Dstar:
     def __init__(self, map):
         self.map = map
-        self.open_list = set()
+        # self.open_list = set()
+        self.open_list = []
         self.nexpand = 0
 
     def process_state(self, verbose=False):
         if verbose:
-            print('FRONTIER ', ', '.join([str(x) for x in self.open_list]))
-        
+            print('FRONTIER ', ' '.join([f"({x[1].x}, {x[1].y})" for x in self.open_list]))
+
         # get state from frontier
-        x = self.min_state()
-        if x is None:
+        if len(self.open_list) == 0:
             if verbose:
                 print('  x is None ')
             return -1
+        k_old, x = heapq.heappop(self.open_list)
+        x.t = Tag.CLOSED
+
         self.nexpand += 1
 
-        # get its current cost
-        k_old = self.get_kmin()
-        self.remove(x)
-
         if verbose:
-            print('EXPAND ', x, k_old)
+            print(f"EXPAND {x}, {k_old:.1f}")
 
         if x.h > k_old + 1e-6:
             # RAISE state
             if verbose:
                 print('  raise')
             for y in self.map.get_neighbors(x):
-                if y.t is not Tag.NEW and y.h <= k_old and x.h > y.h + self.map.cost(x, y):
+                if y.t is not Tag.NEW and y.h <= k_old and x.h > y.h + self.map.cost(x, y) + 1e-6:
+                    if verbose:
+                        print(f"  {x} cost from {x.h:.1f} to {y.h + self.map.cost(x, y):.1f}; parent from {x.parent} to {y}")
                     x.parent = y
                     x.h = y.h + self.map.cost(x, y)
 
-        if np.isclose(x.h, k_old):
+        if math.isclose(x.h, k_old, rel_tol=0, abs_tol=1e-6):
             # normal state
             if verbose:
                 print('  normal')
             for y in self.map.get_neighbors(x):
                 if y.t is Tag.NEW \
-                   or (y.parent == x and not np.isclose(y.h, x.h + self.map.cost(x, y))) \
+                   or (y.parent == x and not math.isclose(y.h, x.h + self.map.cost(x, y), rel_tol=0, abs_tol=1e-6)) \
                    or (y.parent != x and y.h > x.h + self.map.cost(x, y) + 1e-6):
                     if verbose:
                         print(f"  reparent {y} from {y.parent} to {x}")
@@ -165,75 +175,118 @@ class Dstar:
         else:
             # RAISE or LOWER state
             if verbose:
-                print('  lower')
+                print('  raise/lower')
             for y in self.map.get_neighbors(x):
-                if y.t is Tag.NEW or (y.parent == x and not np.isclose(y.h, x.h + self.map.cost(x, y))):
+                if y.t is Tag.NEW or (y.parent == x and not math.isclose(y.h, x.h + self.map.cost(x, y), rel_tol=0, abs_tol=1e-6)):
+                    if verbose:
+                        print(f"  {y} cost from {y.h:.1f} to {y.h + self.map.cost(x, y):.1f}; parent from {y.parent} to {x}; add to frontier")
                     y.parent = x
                     self.insert(y, x.h + self.map.cost(x, y))
                 else:
-                    if y.parent != x and (y.h > x.h + self.map.cost(x, y)) and x.t is Tag.CLOSED:
+                    if y.parent != x and y.h > x.h + self.map.cost(x, y) + 1e-6 and x.t is Tag.CLOSED:
                         self.insert(x, x.h)
+                        if verbose:
+                            print(f"  {x}, {x.h:.1f} add to frontier")
                     else:
                         if y.parent != x and x.h > y.h + self.map.cost(y, x) + 1e-6 \
                                 and y.t is Tag.CLOSED and y.h > k_old + 1e-6:
                             self.insert(y, y.h)
+                        if verbose:
+                            print(f"  {y}, {y.h:.1f} add to frontier")
         if verbose:
             print()
-        return self.get_kmin()
 
-    def min_state(self):
-        if not self.open_list:
-            return None
-        min_state = min(self.open_list, key=lambda x: x.k)
-        return min_state
-
-    def get_kmin(self):
-        if not self.open_list:
+        if len(self.open_list) == 0:
             return -1
-        k_min = min([x.k for x in self.open_list])
-        return k_min
+        else:
+            return self.open_list[0][0]
 
     ninsert = 0
     nin = 0
 
     def insert(self, state, h_new):
         self.ninsert += 1
-        if state in self.open_list:
-            self.nin += 1
-            if state.t is not Tag.OPEN:
-                print('already in but not open')
+
         if state.t is Tag.NEW:
             state.k = h_new
+
         elif state.t is Tag.OPEN:
+            # k_new = min(state.k, h_new)
+            # if state.k == k_new:
+            #     # k hasn't changed, leave vertex in frontier
+            #     return
+            # else:
+            #     state.k = k_new
+            #     # remove the item from the open list
+            #     # print('node already in open list, remove it first')
+            #     #TODO use bisect on old state.k to find the entry
+            #     for i, item in enumerate(self.open_list):
+            #         if item[1] is state:
+            #             del self.open_list[i]
+            #             break
+
             state.k = min(state.k, h_new)
+            # remove the item from the open list
+            # print('node already in open list, remove it first')
+            #TODO use bisect on old state.k to find the entry
+            for i, item in enumerate(self.open_list):
+                if item[1] is state:
+                    del self.open_list[i]
+                    break  
+
         elif state.t is Tag.CLOSED:
             state.k = min(state.h, h_new)
+
         state.h = h_new
         state.t = Tag.OPEN
 
-        self.open_list.add(state)
+        # self.open_list.add(state)
+        heapq.heappush(self.open_list, (state.k, state))
 
-    def remove(self, state):
-        if state.t is Tag.OPEN:
-            state.t = Tag.CLOSED
-        else:
-            state.t = Tag.CLOSED
-            print('removing non open state')
-        self.open_list.remove(state)
+    # def remove(self, state):
+    #     if state.t is Tag.OPEN:
+    #         state.t = Tag.CLOSED
+    #     else:
+    #         state.t = Tag.CLOSED
+    #         print('removing non open state')
+    #     self.open_list.remove(state)
 
     def modify_cost(self, x, newcost):
         self.map.costmap[x.y, x.x] = newcost
         if x.t is Tag.CLOSED:
             self.insert(x, x.parent.h + self.map.cost(x, x.parent))
-        return self.get_kmin()
+        # return self.get_kmin()
+        if len(self.open_list) == 0:
+            return -1
+        else:
+            # lowest priority item is always at index 0 according to docs
+            return self.open_list[0][0]
 
-    def modify(self, state):
-        self.modify_cost(state)
-        while True:
-            k_min = self.process_state()
-            if k_min == -1 or k_min >= state.h:
-                break
+    # def modify(self, state):
+    #     self.modify_cost(state)
+    #     while True:
+    #         k_min = self.process_state()
+    #         if k_min == -1 or k_min >= state.h:
+    #             break
 
+    # def showparents(self):
+    #     return
+    #     for y in range(self.map.row):
+    #         if y == 0:
+    #             print("   ", end='')
+    #             for x in range(self.map.col):
+    #                 print(f"  {x}   ", end='')
+    #             print()
+    #         print(f"{y}: ", end='')
+    #         for x in range(self.map.col):
+    #             x = self.map.map[y][x]
+    #             par = x.parent
+    #             if par is None:
+    #                 print('  G   ', end='')
+    #             else:
+    #                 print(f"({par.x},{par.y}) ", end='')
+    #         print()
+    #     print()
 class DstarPlanner(Planner):
     r"""
     D* path planner
@@ -266,7 +319,7 @@ class DstarPlanner(Planner):
         super().__init__(ndims=2, **kwargs)
 
         self.costmap = np.where(self.occgrid.grid > 0, np.inf, 1)
-        self.map = Map(self.costmap.shape[1], self.costmap.shape[0])
+        self.map = Map(self.costmap.shape[0], self.costmap.shape[1])
         self.map.costmap = self.costmap
         self.dstar = Dstar(self.map)
 
@@ -286,7 +339,7 @@ class DstarPlanner(Planner):
         no planning phase.  The plan may also depend on just the start or goal.
         """
         self.goal = goal
-        goalstate = self.map.map[goal[0]][goal[1]]
+        goalstate = self.map.map[goal[1]][goal[0]]
         self.goalstate = goalstate
 
         # self.dstar.open_list.add(goalstate)
@@ -302,18 +355,15 @@ class DstarPlanner(Planner):
         print(self.dstar.ninsert, self.dstar.nin)
 
 
-    def query(self, start, update=None, changes=None):
+
+    def query(self, start, sensor=None, animate=False, verbose=False):
         self.start = start
-        startstate = self.map.map[start[0]][start[1]]
+        startstate = self.map.map[start[1]][start[0]]
         s = startstate
         s = s.parent
         tmp = startstate
 
         cost = tmp.h
-
-        for x in range(self.map.col):
-            for y in range(self.map.row):
-                self.dstar.map.map[x][y].t == 'new'
         self.goalstate.h = 0
 
         path = []
@@ -323,16 +373,23 @@ class DstarPlanner(Planner):
                 break
             
             # x, y = tmp.parent.x, tmp.parent.y
-            if update is not None and update == tmp:
-                # make changes now
-                for x, y, newcost in changes:
-                    X = self.dstar.map.map[x][y]
-                    print('difference at ', x, y)
-                    val = self.dstar.modify_cost(X, newcost)
+
+            if sensor is not None:
+                changes = sensor((tmp.x, tmp.y))
+                if changes is not None:
+                    # make changes to the plan
+                    for x, y, newcost in changes:
+                        X = self.dstar.map.map[y][x]
+                        # print(f"change cost at ({x}, {y}) to {newcost}")
+                        val = self.dstar.modify_cost(X, newcost)
+                    # propagate the changes to plan
+                    print('propagate')
                     while val != -1 and val < tmp.h:
-                        val = self.dstar.process_state()
+                        val = self.dstar.process_state(verbose=verbose)
+                        # print('open set', len(self.dstar.open_list))
+                    
             tmp = tmp.parent
-            print('done')
+            # print('move to ', tmp)
 
         status = namedtuple('DstarStatus', ['cost',])
         
@@ -376,14 +433,17 @@ if __name__ == "__main__":
     # ds.plot(path=path)
 
 
-    changes = []
-    for x in range(3, 6):
-        for y in range(0, 4):
-            changes.append((x, y, 5))
-    # print(costmap2)
+    def sensorfunc(pos):
+        if pos == (3, 3):
+            changes = []
+            for x in range(3, 6):
+                for y in range(0, 4):
+                    changes.append((x, y, 5))
+            return changes
 
-    path2, status2 = ds.query(start=start, update=ds.dstar.map.map[3][3], changes=changes)
+    path2, status2 = ds.query(start=start, sensor=sensorfunc, verbose=False)
     print(ds.map.costmap)
+
     ds.map.show_h()
 
     # ds.dstar.replan()
