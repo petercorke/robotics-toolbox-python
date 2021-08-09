@@ -98,6 +98,4 @@ def p_servo(wTe, wTep, gain=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0], threshold=0.1):
 
     arrived = True if np.sum(np.abs(e)) < threshold else False
 
-    print(np.sum(np.abs(e)))
-
     return v, arrived
