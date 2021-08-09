@@ -333,7 +333,6 @@ class Material(URDFType):
     _TAG = "material"
 
     def __init__(self, name, color=None, texture=None):
-
         # if color is None:
         #     color = name
 
