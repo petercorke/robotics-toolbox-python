@@ -1003,8 +1003,19 @@ class ERobot(BaseERobot):
             links = arg
 
         elif isinstance(arg, ERobot):
-            # we're passed an ERobot, clone it
-            links = [link.copy() for link in arg]
+            # We're passed an ERobot, clone it
+            # We need to preserve the parent link as we copy
+            links = []
+
+            def dfs(node, node_copy):
+                for child in node.children:
+                    child_copy = child.copy(node_copy)
+                    links.append(child_copy)
+                    dfs(child, child_copy)
+
+            link0 = arg.links[0]
+            links.append(arg.links[0].copy())
+            dfs(link0, links[0])
 
         else:
             raise TypeError("constructor argument must be ETS or list of ELink")
