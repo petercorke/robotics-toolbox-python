@@ -81,3 +81,5 @@ while not arrivedl or not arrivedr:
     r_frame.base = r.fkine(r.q, end=r.grippers[1])
 
     env.step(dt)
+
+env.hold()
