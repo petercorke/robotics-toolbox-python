@@ -127,7 +127,6 @@ class Link(ABC):
         self.mesh = mesh
 
         # Link dynamic Parameters
-
         def dynpar(self, name, value, default):
             if value is None:
                 value = default
@@ -167,8 +166,16 @@ class Link(ABC):
         """
         new = copy.copy(self)
         for k, v in self.__dict__.items():
+            # print(k)
             if k.startswith("_") and isinstance(v, np.ndarray):
                 setattr(new, k, np.copy(v))
+
+        new._geometry = [shape.copy() for shape in self._geometry]
+        new._collision = [shape.copy() for shape in self._collision]
+
+        # print(new._geometry[0]._wT)
+        # print(self._geometry[0]._wT)
+
         return new
 
     def _copy(self):
@@ -282,9 +289,11 @@ class Link(ABC):
 
         return dyn
 
-    def _format(self, l, name, symbol=None, ignorevalue=None, indices=None):  # noqa  # pragma nocover
+    def _format(
+        self, l, name, symbol=None, ignorevalue=None, indices=None
+    ):  # noqa  # pragma nocover
         # if value == ignorevalue then don't display it
-        
+
         v = getattr(self, name)
         s = None
         if v is None:
