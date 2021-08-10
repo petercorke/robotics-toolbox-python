@@ -21,7 +21,7 @@ copies or substantial portions of the Software.
 """
 import math
 from collections import namedtuple
-from roboticstoolbox.mobile.Planner import Planner
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
 import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import *
@@ -375,7 +375,7 @@ def reeds_shepp_path_planning(start, goal, maxc, step_size):
 
 # ============================================================================
 
-class ReedsSheppPlanner(Planner):
+class ReedsSheppPlanner(PlannerBase):
     r"""
     Reeds-Shepp path planner
 

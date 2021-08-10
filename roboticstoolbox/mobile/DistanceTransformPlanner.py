@@ -15,10 +15,10 @@ from spatialmath import base
 from scipy.ndimage import *
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from roboticstoolbox.mobile.Planner import Planner
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
 
 
-class DistanceTransformPlanner(Planner):
+class DistanceTransformPlanner(PlannerBase):
     r"""
     Distance transform path planner
 

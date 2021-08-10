@@ -13,9 +13,9 @@ from scipy.ndimage import *
 from matplotlib import cm
 import matplotlib.pyplot as plt
 from matplotlib import animation
-from roboticstoolbox.mobile.Planner import Planner
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
 
-class Bug2(Planner):
+class Bug2(PlannerBase):
     """
     Construct a Bug2 reactive navigator
 

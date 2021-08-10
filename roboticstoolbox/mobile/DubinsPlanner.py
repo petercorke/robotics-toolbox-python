@@ -21,7 +21,7 @@ copies or substantial portions of the Software.
 """
 import math
 from collections import namedtuple
-from roboticstoolbox.mobile.Planner import Planner
+from roboticstoolbox.mobile import PlannerBase
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -86,7 +86,6 @@ def left_straight_right(alpha, beta, d):
     q = base.wrap_0_2pi(-base.wrap_0_2pi(beta) + tmp2)
 
     return t, p, q, mode
-
 
 def right_straight_left(alpha, beta, d):
     sa = math.sin(alpha)
@@ -305,7 +304,7 @@ def path_planning(start, goal, curvature, step_size=0.1):
     return path, length, mode, lengths
 
 # ============================================================================
-class DubinsPlanner(Planner):
+class DubinsPlanner(PlannerBase):
     r"""
     Dubins path planner
 

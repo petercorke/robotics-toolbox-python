@@ -28,7 +28,7 @@ from collections import namedtuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-from roboticstoolbox.mobile.Planner import Planner
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
 
 # parameter
 
@@ -158,7 +158,7 @@ def quintic_polynomials_planner(sx, sy, syaw, sv, sa, gx, gy, gyaw, gv, ga, max_
     return time, np.c_[rx, ry, ryaw], rv, ra, rj
 
 
-class QuinticPolyPlanner(Planner):
+class QuinticPolyPlanner(PlannerBase):
     r"""
     Quintic polynomial path planner
 

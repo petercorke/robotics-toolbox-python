@@ -3,6 +3,7 @@ from roboticstoolbox.mobile.Vehicle import Vehicle, Bicycle, Unicycle
 
 # planners
 from roboticstoolbox.mobile.Bug2 import Bug2
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from roboticstoolbox.mobile.DistanceTransformPlanner import DistanceTransformPlanner
 from roboticstoolbox.mobile.DstarPlanner import DstarPlanner
 from roboticstoolbox.mobile.PRMPlanner import PRMPlanner
@@ -15,7 +16,6 @@ from roboticstoolbox.mobile.ReedsSheppPlanner import ReedsSheppPlanner
 from roboticstoolbox.mobile.CurvaturePolyPlanner import CurvaturePolyPlanner
 from roboticstoolbox.mobile.QuinticPolyPlanner import QuinticPolyPlanner
 from roboticstoolbox.mobile.PRMPlanner import PRMPlanner
-from roboticstoolbox.mobile.Planner import Planner
 from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid, OccupancyGrid
 
 # localization and state estimation
@@ -51,7 +51,7 @@ __all__ = [
     # "PoseGraph",
     "BinaryOccupancyGrid",
     "OccupancyGrid",
-    "Planner",
+    "PlannerBase",
     "EKF",
     "ParticleFilter",
 ]

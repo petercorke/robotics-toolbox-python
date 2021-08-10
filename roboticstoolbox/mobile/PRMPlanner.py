@@ -15,11 +15,11 @@ from spatialmath.pose2d import SE2
 from spatialmath.base import animate
 from scipy.ndimage import *
 from matplotlib import cm, pyplot as plt
-from roboticstoolbox.mobile.Planner import Planner
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from pgraph import UGraph
 
 
-class PRMPlanner(Planner):
+class PRMPlanner(PlannerBase):
     r"""
     Distance transform path planner
 

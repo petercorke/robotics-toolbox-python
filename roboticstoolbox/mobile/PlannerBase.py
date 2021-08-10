@@ -4,8 +4,9 @@ Python Navigation Abstract Class
 TODO: Comments + Sphynx Docs Structured Text
 TODO: Bug-fix, testing
 
-Not ready for use yet.
 """
+
+from abc import ABC
 from scipy import integrate
 from spatialmath.base.transforms2d import *
 from spatialmath.base.vectors import *
@@ -15,10 +16,12 @@ from abc import ABC, abstractmethod
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import copy
-from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
+from roboticstoolbox.mobile.OccGrid import BaseOccupancyGrid, BinaryOccupancyGrid
+from roboticstoolbox.mobile.Animations import VehiclePolygon
 from colored import fg, attr
 
-class Planner:
+
+class PlannerBase(ABC):
     r"""
     Mobile robot motion planner (superclass)
 
@@ -52,7 +55,8 @@ class Planner:
     """
 
     def __init__(self, occgrid=None, inflate=0, ndims=None,
-                 verbose=False, msgcolor='yellow', seed=None, **unused):
+                 verbose=False, msgcolor='yellow', 
+                 marker=None, seed=None, **unused):
 
         self._occgrid = None
         if ndims is None:
@@ -66,8 +70,11 @@ class Planner:
         self._start = None
         self._goal = None
 
+
+        self.marker = marker
+
         if occgrid is not None:
-            if not isinstance(occgrid, BinaryOccupancyGrid):
+            if not isinstance(occgrid, BaseOccupancyGrid):
                 occgrid = BinaryOccupancyGrid(occgrid)
             self._occgrid0 = occgrid  # original occgrid for reference
 
@@ -88,7 +95,7 @@ class Planner:
         if self._occgrid0 is not None:
             s += str(self.occgrid)
         if self._start is not None:
-            s += f"\n Start: {self.start}"
+            s += f"\n  Start: {self.start}"
         if self._goal is not None:
             s += f"\n  Goal: {self.goal}"
         return s
@@ -221,9 +228,11 @@ class Planner:
         """
         return self._private_random
 
+    def randinit(self):
+        if self._seed is not None:
+            self._private_random = np.random.default_rng(seed=self._seed)
 
     # Define abstract classes to be implemented later
-    @abstractmethod
     def plan(self):
         r"""
         Plan path (abstract superclass)
@@ -293,45 +302,54 @@ class Planner:
                 # are we are done?
                 if robot is None:
                     path.append(self._goal)
-                    return np.array(path).astype(int)
+                    return np.array(path).astype(int).T
 
                 path.append(robot)
 
     def plot(self, path=None,
+            style='striped', stripe=(('black', 4), ('yellow', 3)),
+            stripe_r=(('black', 4), ('red', 3)),
+            line=None, line_r=None,
+            configspace=False, unwrap=True,
             direction=None, background=True,
-            twod=False, unwrap=True,
             path_marker=None, path_marker_reverse=None,
             start_marker=None, goal_marker=None,
-            qstart_marker=None, qgoal_marker=None,
+            start_vehicle=None, goal_vehicle=None,
             start=None, goal=None,
             ax=None, block=False, **kwargs):
         r"""
         Plot vehicle path
 
         :param path: path, defaults to None
-        :type p: ndarray(N,2) or ndarray(N,3)
+        :type path: ndarray(2, N) or ndarray(3, N)
+        :param style: line style: 'striped' [default] or 'line'
+        :type style: str
+        :param stripe: striped line style for forward motion
+        :type stripe: tuple of (color, linewidth)
+        :param stripe_r: striped line style for reverse motion
+        :type stripe: tuple of (color, linewidth)
+        :param line: plain line style for forward motion
+        :type line: dict of arguments for ``plot``
+        :param line_r: plain line style for forward motion
+        :type line_r: dict of arguments for ``plot``
         :param direction: travel direction associated with each point on path, is either >0 or <0, defaults to None
         :type direction: ndarray(N,), optional
-        :param twod: for configuration space paths force a 2D plot but 
-            start and goal style will be given by ``qstart_marker`` and ``qgoal_marker``, defaults to False
-        :type twod: bool, optional
+        :param configspace: plot the path in 3D configuration space, input must be 3xN.  
+            Start and goal style will be given by ``qstart_marker`` and ``qgoal_marker``, defaults to False
+        :type configspace: bool, optional
         :param unwrap: for configuration space plot unwrap :math:`\theta` so
             there are no discontinuities at :math:`\pm \pi`, defaults to True
         :type unwrap: bool, optional
         :param background: plot occupancy grid if present, default True
         :type background: bool, optional
-        :param path_marker: style for marking points on path when travelling forward
-        :type path_marker: dict, optional
-        :param path_marker: style for marking points on path when travelling backward
-        :type path_marker: dict, optional
         :param start_marker: style for marking start point
         :type start_marker: dict, optional
         :param goal_marker: style for marking goal point
         :type goal_marker: dict, optional
-        :param qstart_marker: style for marking start configuration in 2D plane
-        :type qstart_marker: dict, optional
-        :param qgoal_marker: style for marking goal configuration in 2D plane
-        :type qgoal_marker: dict, optional
+        :param start_vehicle: style for vehicle animation object at start configuration
+        :type start_vehicle: dict
+        :param goal_vehicle: style for vehicle animation object at goal configuration
+        :type goal_vehicle: dict
         :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value used for ``plan/query``
         :type start: array_like(2) or array_like(3), optional
         :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value used for ``plan/query``
@@ -341,12 +359,37 @@ class Planner:
         :param block: block after displaying the plot
         :type block: bool, optional
 
-        The path has one row per time step and either 2 or 3 columns:
+        The path has one column per point and either 2 or 3 rows:
         
-        - 2 columns describes motion in the :math:`x-y` plane and a 2D plot  is created
-        - 3 columns describes motion in the :math:`x-y-\theta` configuration space and
-          a 3D plot is created unless ``twod`` is True in which case motion in
-          the :math:`x-y` plane is shown.
+        - 2 rows describes motion in the :math:`x-y` plane and a 2D plot  is created
+        - 3 rows describes motion in the :math:`x-y-\theta` configuration space. By
+          default only the :math:`x-y` plane is plotted unless ``configspace``
+          is True in which case motion in :math:`x-y-\theta` configuration space
+          is shown.
+
+        If the planner supports bi-directional motion then the ``direction``
+        option gives the direction for each point on the path.
+
+        The default line style is a ``'striped'`` line which comprises a wide first
+        line with a slightly narrow dashed line plotted on top.  For example::
+
+                (('black', 4), ('yellow', 3))
+
+        is a blackline of width 4 with a dashed yellow line of width 3 plotted
+        on top, giving a line of alternating black and yellow dashes.
+
+        The parameters ``stripe`` and ``stripe_r`` specify the colors and widths for
+        forward and reverse motion respectively.
+
+        The ``'line'`` style is a regular Matplotlib and the parameters 
+        ``line`` and ``line_r`` specify the line and marker styles for
+        forward and reverse motion respectively.
+
+        For 2D plots with an :math:`x-y` path or 3D plots, the start and goal markers are specified
+        by the dicts ``start_marker`` and ``goal_marker`` respectively.
+
+        For 2D plots with an :math:`x-y-\theta` path the vehicle pose
+        is indicated by a vehicle animation object passed to the constructor.
 
         Markers are specified as dicts using Matplotlib keywords, for example::
 
@@ -354,19 +397,18 @@ class Planner:
 
         Default values are provided for all markers:
 
-            - forward motion is a blue dot,
-            - backward motion is a red dot,
-            - the start point is a circle, and
-            - the goal point is a star. 
+            - the start point is a circle
+            - the goal point is a star
+            - the start vehicle style is a ``VehiclePolygon(shape='car')`` as
+              an unfilled outline
+            - the goal vehicle style is a ``VehiclePolygon(shape='car')`` as
+              a transparent filled shape
     
-        If ``twod`` is True then direction-indicating markers are used to
+        If ``configspace`` is True then direction-indicating markers are used to
         display start and goal configuration. These are also given as dicts but
         have two items: ``'shape'`` which is the shape of the polygonal marker
         and is either ``'triangle'`` or ``'car'``.  The second item ``'args'`` is
         passed to :func:`base.plot_poly` and Matplotlib.
-
-        If the planner supports bi-directional motion then the ``direction``
-        option gives the direction for each point on the path.
 
         If ``background`` is True then the background of the plot is either or
         both of:
@@ -379,15 +421,8 @@ class Planner:
         :seealso: :meth:`plot_bg` :func:`base.plot_poly`
         """
         # create default markers
-        if path_marker is None:
-            path_marker = { 'marker': '.',
-                            'markerfacecolor': 'b',
-                            'markersize': 12,
-                          }
-            path_marker_reverse = { 'marker': '.',
-                            'markerfacecolor': 'r',
-                            'markersize': 10,
-                          }
+        
+        # passed to Matplotlib plot()
         if start_marker is None:
             start_marker = {'marker': 'o',
                             'markeredgecolor': 'w',
@@ -402,28 +437,24 @@ class Planner:
                             'markersize': 16,
                             'zorder': 10,
                           }
-        if qstart_marker is None:
-            qstart_marker = {'shape': 'triangle',
-                             'args': {
-                                'linewidth': 2,
-                                'color': 'darkgrey',
-                                }
-                            }
-        if qgoal_marker is None:
-            qgoal_marker = {'shape': 'triangle',
-                             'args': {
-                                'filled': True,
-                                'color': 'darkgrey'
-                                }
-                            }
+
+        # passed to VehiclePolygon
+        if start_vehicle is None:
+            start_vehicle = {'facecolor': 'none', 'edgecolor': 'k', 'linewidth': 2}
+
+        if goal_vehicle is None:
+            goal_vehicle = {'alpha': 0.5}
 
         ndims = self._ndims
-        if twod:
-            if path is not None:
-                path0 = path
-                path = path[:, :2]
-                ndims = 2
 
+        if ndims == 3 and not configspace and path is not None:
+            path0 = path
+            path = path[:2, :]
+            ndims = 2
+
+        if configspace and ndims < 3 and path is not None:
+            raise ValueError(f"path should have {ndims} rows")
+                
         ax = base.axes_logic(ax, ndims)
 
         # plot occupancy grid background
@@ -436,30 +467,90 @@ class Planner:
                 # 2D case
                 if direction is not None:
                     direction = np.array(direction)
-                    if direction.shape[0] != path.shape[0]:
+                    if direction.shape[0] != path.shape[1]:
                         raise ValueError('direction vector must have same length as path')
-                    ax.plot(path[:, 0], path[:, 1], 'k')
-                    ax.plot(path[direction > 0, 0], path[direction > 0, 1], color='none', **path_marker)
-                    ax.plot(path[direction < 0, 0], path[direction < 0, 1], color='none', **path_marker_reverse)
+
+                    while len(direction) > 0:
+                        dir = direction[0]
+                        change = np.argwhere(dir != direction)
+                        if len(change) == 0:
+                            k = -1
+                        else:
+                            k = change[0, 0]
+                        
+                        if style == 'striped':
+                            if dir > 0:
+                                xstripe = stripe
+                            else:
+                                xstripe = stripe_r
+                            ax.plot(path[0, :k], path[1, :k], color=xstripe[0][0], linewidth=xstripe[0][1])
+                            ax.plot(path[0, :k], path[1, :k], color=xstripe[1][0], linewidth=xstripe[1][1], dashes=(5,5))
+                        elif style == 'line':
+                            if dir > 0:
+                                ax.plot(path[0, :], path[1, :], **line)
+                            else:
+                                ax.plot(path[0, :], path[1, :], **line_r)
+
+                        if len(change) == 0:
+                            break
+                        direction = direction[k-1:]
+                        direction[0] = direction[1]
+                        path = path[:, k-1:]
+
                 else:
-                    ax.plot(path[:, 0], path[:, 1], **path_marker)
+                    if style == 'striped':
+                        ax.plot(path[0, :], path[1, :], color=stripe[0][0], linewidth=stripe[0][1])
+                        ax.plot(path[0, :], path[1, :], color=stripe[1][0], linewidth=stripe[1][1], dashes=(5,5))
+                    elif style == 'line':
+                        ax.plot(path[0, :], path[1, :], **kwargs)
             elif ndims == 3:
                 # 3D case
                 if direction is not None:
                     direction = np.array(direction)
-                    if direction.shape[0] != path.shape[0]:
+                    if direction.shape[0] != path.shape[1]:
                         raise ValueError('direction vector must have same length as path')
-                    theta = path[:, 2]
+                    theta = path[2, :]
                     if unwrap:
-                        theta = np.unwrap(path[:, 2])
-                    ax.plot(path[:, 0], path[:, 1], theta, 'k')
-                    ax.plot(path[direction > 0, 0], path[direction > 0, 1], theta[direction > 0], color='none', **path_marker)
-                    ax.plot(path[direction < 0, 0], path[direction < 0, 1], theta[direction < 0], color='none', **path_marker_reverse)
+                        theta = np.unwrap(theta)
+
+                    while len(direction) > 0:
+                        dir = direction[0]
+                        change = np.argwhere(dir != direction)
+                        if len(change) == 0:
+                            k = -1
+                        else:
+                            k = change[0, 0]
+                        
+
+                        if style == 'striped':
+                            if dir > 0:
+                                xstripe = stripe
+                            else:
+                                xstripe = stripe_r
+                            ax.plot(path[0, :k], path[1, :k], theta[:k], color=xstripe[0][0], linewidth=xstripe[0][1])
+                            ax.plot(path[0, :k], path[1, :k], theta[:k], color=xstripe[1][0], linewidth=xstripe[1][1], dashes=(5,5))
+                        elif style == 'line':
+                            if dir > 0:
+                                ax.plot(path[0, :], path[1, :], **line)
+                            else:
+                                ax.plot(path[0, :], path[1, :], **line_r)
+
+                        if len(change) == 0:
+                            break
+                        direction = direction[k-1:]
+                        direction[0] = direction[1]
+                        path = path[:, k-1:]
+                        theta = theta[k-1:]
+        
                 else:
-                    theta = path[:, 2]
+                    theta = path[2, :]
                     if unwrap:
-                        theta = np.unwrap(path[:, 2])
-                    ax.plot(path[:, 0], path[:, 1], theta, **path_marker)
+                        theta = np.unwrap(theta)
+                    if style == 'striped':
+                        ax.plot(path[0, :], path[1, :], theta, color=stripe[0][0], linewidth=stripe[0][1])
+                        ax.plot(path[0, :], path[1, :], theta, color=stripe[1][0], linewidth=stripe[1][1], dashes=(5,5))
+                    elif style == 'line':
+                        ax.plot(path[0, :], path[1, :], **line)
 
         # mark start and goal if requested
         if start is not None:
@@ -471,23 +562,24 @@ class Planner:
         else:
             goal = self.goal
 
-        if ndims == 2 and not twod:
+        if ndims == 2 and self._ndims == 2:
             # proper 2d plot
             if start is not None:
                 ax.plot(start[0], start[1], **start_marker)
             if goal is not None:
                 ax.plot(goal[0], goal[1], **goal_marker)
         
-        elif ndims == 2 and twod:
+        elif ndims == 2 and self._ndims == 3:
             # 2d projection of 3d plot, show start/goal configuration
             scale = base.axes_get_scale(ax) / 10
+            
+            if self.marker is None:
+                self.marker = VehiclePolygon(shape='car', scale=scale)
 
             if start is not None:
-                poly = self._qmarker(qstart_marker['shape']) * scale
-                base.plot_poly(poly, pose=SE2(start), **qstart_marker['args'])
+                self.marker.plot(start, **start_vehicle)
             if goal is not None:
-                poly = self._qmarker(qgoal_marker['shape']) * scale
-                base.plot_poly(poly, pose=SE2(goal), **qgoal_marker['args'])
+                self.marker.plot(goal, **goal_vehicle)
 
         elif ndims == 3:
             # 3d plot
@@ -510,6 +602,8 @@ class Planner:
             ax.set_zlabel(r'$\theta$')
 
         plt.show(block=block)
+
+        return ax
 
     def _qmarker(self, shape):
         h = 0.3
@@ -560,6 +654,22 @@ class Planner:
 
         ax = base.axes_logic(ax, 2)
 
+        # create color map for free space + obstacle:
+        #   free space, color index = 1, white, alpha=0 to allow background and grid lines to show
+        #   obstacle, color index = 2, red, alpha=1
+
+        if self._inflate > 0 and inflated:
+            # 0 background (white, transparent)
+            # 1 inflated obstacle (pink)
+            # 2 original obstacle (red)
+            colors = [(1, 1, 1, 0), (1, 0.75, 0.8, 1), (1, 0, 0, 1)]
+            image = self.occgrid.grid.astype(int) + self._occgrid0.grid.astype(int)
+        else:
+            # 0 background
+            # 1 obstacle
+            colors = [(1, 1, 1, 0), (1, 0, 0, 1)]
+            image = self.occgrid.grid
+
         if distance is None and hasattr(self, 'distancemap'):
             distance = self.distancemap
 
@@ -573,7 +683,7 @@ class Planner:
 
             # create a copy of greyscale color map
             c_map = copy.copy(mpl.cm.get_cmap(cmap))
-            c_map.set_bad(color=(1,0,0,1))  # nan and inf are red
+            # c_map.set_bad(color=(1,0,0,1))  # nan and inf are red
 
             # change all inf to large value, so they are not 'bad' ie. red
             distance[np.isinf(distance)] = 2 * vmax
@@ -591,36 +701,25 @@ class Planner:
             scalar_mappable_c_map = cm.ScalarMappable(cmap=c_map, norm=norm)
             plt.colorbar(scalar_mappable_c_map, label='Distance', shrink=0.7, aspect=20*0.7)
 
-            ax.set_xlabel('X')
-            ax.set_ylabel('y (cells)')
+            # overlay obstacles
+            c_map = mpl.colors.ListedColormap(colors)
+            self.occgrid.plot(image, cmap=c_map, zorder=1)
 
         else:
             # occupancy grid only
 
-            # create color map for free space + obstacle:
-            #   free space, color index = 1, white, alpha=0 to allow background and grid lines to show
-            #   obstacle, color index = 2, red, alpha=1
-
-            if self._inflate > 0 and inflated:
-                # 0 background (white, transparent)
-                # 1 inflated obstacle (pink)
-                # 2 original obstacle (red)
-                colors = [(1, 1, 1, 0), (1, 0.75, 0.8, 1), (1, 0, 0, 1)]
-                image = self.occgrid.grid.astype(int) + self._occgrid0.grid.astype(int)
-            else:
-                # 0 background
-                # 1 obstacle
-                colors = [(1, 1, 1, 0), (1, 0, 0, 1)]
-                image = self.occgrid.grid
-
-            ax.set_facecolor((1, 1, 1)) # create white background
+            # overlay obstacles
             c_map = mpl.colors.ListedColormap(colors)
             self.occgrid.plot(image, cmap=c_map, zorder=1)
-            ax.grid(True, zorder=0)
+        
+        ax.set_facecolor((1, 1, 1)) # create white background
+        ax.set_xlabel('x (cells)')
+        ax.set_ylabel('y (cells)')
+        ax.grid(True, zorder=0)
 
         # lock axis limits to current value
-        ax.set_xlim(ax.get_xlim())
-        ax.set_ylim(ax.get_ylim())
+        # ax.set_xlim(ax.get_xlim())
+        # ax.set_ylim(ax.get_ylim())
 
         plt.draw()
         plt.show(block=False)

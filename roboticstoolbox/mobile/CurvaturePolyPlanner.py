@@ -5,7 +5,7 @@ import scipy.optimize
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import namedtuple
-from roboticstoolbox.mobile.Planner import Planner
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
 
 
 def solvepath(poly, s_f, x0=[0, 0, 0], **kwargs):
@@ -44,7 +44,7 @@ def costfunc(unknowns, start, goal, curvature):
         e += 0.1 * (maxcurvature - curvature)
     # print(e, path[:, -1], np.r_[goal])
     return e
-class CurvaturePolyPlanner(Planner):
+class CurvaturePolyPlanner(PlannerBase):
 
     r"""
     Curvature polynomial planner

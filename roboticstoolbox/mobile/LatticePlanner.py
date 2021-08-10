@@ -3,8 +3,8 @@ import numpy as np
 from spatialmath import SE2
 import matplotlib.pyplot as plt
 import itertools
-from roboticstoolbox.mobile.Planner import Planner
 from roboticstoolbox.mobile.OccGrid import OccupancyGrid
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from collections import namedtuple
 
 def make_arc(dir, radius=1, npoints=20):
@@ -57,7 +57,7 @@ class LatticeEdge(Edge):
         plt.plot(xy[0, :], xy[1, :], **kwargs)
 
 
-class LatticePlanner(Planner):
+class LatticePlanner(PlannerBase):
     """
     Lattice planner
 

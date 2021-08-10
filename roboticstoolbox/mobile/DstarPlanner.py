@@ -15,9 +15,10 @@ from enum import IntEnum, auto
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.cm as cm
-from roboticstoolbox.mobile.Planner import Planner
+from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from roboticstoolbox.mobile.OccGrid import OccupancyGrid
 import heapq
+import bisect
 import math
 
 show_animation = True
@@ -287,7 +288,7 @@ class Dstar:
     #                 print(f"({par.x},{par.y}) ", end='')
     #         print()
     #     print()
-class DstarPlanner(Planner):
+class DstarPlanner(PlannerBase):
     r"""
     D* path planner
 
