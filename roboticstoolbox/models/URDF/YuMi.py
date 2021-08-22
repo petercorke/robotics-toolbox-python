@@ -53,8 +53,8 @@ class YuMi(ERobot):
         l_gripper_links = [link for link in links if link.parent == gripper_l_base]
 
         # New intermediate links
-        r_gripper = ELink(name="r_gripper", parent=gripper_l_base)
-        l_gripper = ELink(name="l_gripper", parent=gripper_r_base)
+        r_gripper = ELink(name="r_hand", parent=gripper_l_base)
+        l_gripper = ELink(name="l_hand", parent=gripper_r_base)
         links.append(r_gripper)
         links.append(l_gripper)
 
