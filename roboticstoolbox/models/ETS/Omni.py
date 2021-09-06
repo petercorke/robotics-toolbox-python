@@ -47,7 +47,9 @@ class Omni(ERobot):
 
         g0 = ELink(name="gripper", parent=b2)
 
-        b2.geometry = sg.Box([l, w, h], base=sm.SE3(0, 0, h / 2), color=(163, 157, 134))
+        b2.geometry = sg.Cuboid(
+            [l, w, h], base=sm.SE3(0, 0, h / 2), color=(163, 157, 134)
+        )
 
         elinks = [b0, b1, b2, g0]
 
