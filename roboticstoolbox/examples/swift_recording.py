@@ -19,7 +19,7 @@ motion controller,” arXiv preprint arXiv:2002.11901,2020.
 env = swift.Swift()
 
 # Launch the sim in chrome as only chrome supports webm videos
-env.launch("google-chrome")
+env.launch(browser="google-chrome", realtime=True)
 
 # Create a Panda robot object
 panda = rtb.models.Panda()
@@ -39,7 +39,7 @@ dt = 0.025
 env.start_recording("panda_swift_recording", 1 / dt)
 
 # To export as a gif replace the above line with
-# env.start_recording('panda_swift_recording', 1 / dt, format='gif')
+# env.start_recording("panda_swift_recording", 1 / dt, format="gif")
 
 # To export as a tar folder of jpg captures replace with
 # env.start_recording('panda_swift_recording', 1 / dt, format='jpg')
@@ -119,3 +119,6 @@ while not arrived:
 
 # Stop recording and save the video (to the downloads folder)
 env.stop_recording()
+
+# Hold is required for gifs which take extra time to process
+# env.hold()
