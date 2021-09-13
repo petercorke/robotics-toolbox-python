@@ -340,15 +340,17 @@ class RangeBearingSensor(Sensor):
 
         # check conditions for NOT returning a value
         z = []
-        lm_id = 0
+        lm_id = -1
         # sample interval
         if self._count % self._every != 0:
+            self._landmarklog.append(lm_id)
             return (None, None)
 
         # simulated failure, fail is a list of 2-tuples giving (start,end) times
         # for a sensor failure
         if self._fail is not None:
             if any([start <= self._count < end for start, end in self._fail]):
+                self._landmarklog.append(lm_id)
                 return (None, None)
         
         # create a polygon to indicate the active sensing area based on range+angle limits
@@ -487,7 +489,7 @@ class RangeBearingSensor(Sensor):
         else:
             return z
 
-    def Hx(self, xv, lm_id):
+    def Hx(self, xv, arg):
         """
         Jacobian dh/dx
         %
@@ -498,14 +500,14 @@ class RangeBearingSensor(Sensor):
         %
         # See also RangeBearingSensor.h.
         """
-        if base.isinteger(lm_id):
+        if base.isinteger(arg):
             # landmark index provided
-            xf = self.map.landmark(lm_id)
+            xf = self.map.landmark(arg)
         else:
             # assume it is a coordinate
-            xf = base.getvector(lm_id, 2)
+            xf = base.getvector(arg, 2)
 
-        Delta = xf - xv[0:2]
+        Delta = xf - xv[:2]
         r = base.norm(Delta)
         # fmt: off
         return np.array([
@@ -514,7 +516,7 @@ class RangeBearingSensor(Sensor):
                 ])
         # fmt: on
 
-    def Hp(self, xv, lm_id):
+    def Hp(self, xv, arg):
         """
         Jacobian dh/dp
         %
@@ -525,13 +527,13 @@ class RangeBearingSensor(Sensor):
         %
         # See also RangeBearingSensor.h.
         """
-        if base.isinteger(lm_id):
-            xf = self.map.landmark(lm_id)
+        if base.isinteger(arg):
+            xf = self.map.landmark(arg)
         else:
-            xf = lm_id
+            xf = arg
         xv = base.getvector(xv, 3)
 
-        Delta = xf - xv[0:2]
+        Delta = xf - xv[:2]
         r = base.norm(Delta)
         # fmt: off
         return np.array([

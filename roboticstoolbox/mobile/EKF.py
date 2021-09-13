@@ -16,21 +16,20 @@ from scipy.stats.distributions import chi2
 import matplotlib.pyplot as plt
 
 from spatialmath.base.animate import Animate
-from spatialmath import base
-from roboticstoolbox.mobile import Vehicle
+from spatialmath import base, SE2
+from roboticstoolbox.mobile import VehicleBase
 from roboticstoolbox.mobile.landmarkmap import LandmarkMap
 from roboticstoolbox.mobile.sensors import Sensor
-
 
 class EKF:
     def __init__(self, robot=None,  sensor=None, map=None, 
             P0=None, x_est=None, joseph=True,
-            landmarks=None,
+            landmarks=None, animate=True, x0=[0, 0, 0],
             verbose=False, history=True, dim=None):
 
         if robot is not None:
             if not isinstance(robot, tuple) or len(robot) != 2 \
-                or not isinstance(robot[0], Vehicle):
+                or not isinstance(robot[0], VehicleBase):
                     raise TypeError('robot must be tuple (vehicle, V_est)')
             self._robot = robot[0]  # reference to the robot vehicle
             self._V_est = robot[1]  # estimate of vehicle state covariance V
@@ -49,7 +48,19 @@ class EKF:
             raise TypeError('map must be LandmarkMap instance')
         self._ekf_map = map  # prior map for localization
 
-        self._P0 = P0        #  initial system covariance
+        if animate:
+            if map is not None:
+                self._workspace = map.workspace
+                self._robot._workspace = map.workspace
+            elif sensor is not None:
+                self._workspace = sensor[0].map.workspace
+                self._robot._workspace = sensor[0].map.workspace
+            elif self.robot.workspace is None:
+                raise ValueError('for animation robot must have a defined workspace')
+        self.animate = animate
+
+        self._P0 = P0  #  initial system covariance
+        self._x0 = x0  # initial vehicle state
 
         self._x_est = x_est           #  estimated state
         self._landmarks = landmarks           #  ekf_map state
@@ -71,7 +82,7 @@ class EKF:
         self._verbose = verbose
 
         self._keep_history = history     #  keep history
-        self._htuple = namedtuple("EKFlog", "t xest odo P innov S K")
+        self._htuple = namedtuple("EKFlog", "t xest odo P innov S K lm z")
 
         if dim is None:
             # TODO get world size from landmark map, else
@@ -113,6 +124,8 @@ class EKF:
         #     raise ValueError('expecting Sensor object')
 
         self.init()
+
+        self.xxdata = ([], [])
 
     def __str__(self):
         s = f"EKF object: {len(self._x_est)} states"
@@ -213,6 +226,20 @@ class EKF:
         """
         return self._workspace
     
+    def landmark(self, lm_id):
+        """
+        Landmark information
+
+        :param lm: landmark index
+        :type lm: int
+        :return: number of times seen, order in which it was first seen, index in the state vector
+        :rtype: int, int, int
+        """
+        if lm_id in self._landmarks:
+            l = self._landmarks[lm_id]
+            return l[1], l[0] // 2, l[0]
+        else:
+            raise ValueError(f"unknown landmark {lm_id}")
 
     def init(self):
         #EKF.init Reset the filter
@@ -232,16 +259,19 @@ class EKF:
             self._P_est = np.empty((0, 0))
         else:
             # noisy odometry case
-            self._x_est = self.robot.x
-            self._P_est = self.P0
+            self._x_est = self._x0
+            self._P_est = self._P0
             self._estVehicle = True
         
         if self.sensor is not None:
-            self._landmarks = np.zeros((2, len(self.sensor.map)), dtype=int)
+            # landmark dictionary maps lm_id to list[index, nseen]
+            self._landmarks = {}
 
-    def run(self, T, plot=True, movie=np.array([])):
+            # np.full((2, len(self.sensor.map)), -1, dtype=int)
+
+    def run(self, T, animate=False, movie=np.array([])):
         self.init()
-        if plot:
+        if animate:
             if self.sensor is not None:
                 self.sensor.map.plot()
             elif self._dim is not None:
@@ -255,14 +285,14 @@ class EKF:
                 elif len(self._dim) == 4:
                     plt.axis(self._dim)
             else:
-                plot = False
+                animate = False
 
             plt.xlabel('X')
             plt.ylabel('Y')
 
         # anim = Animate(movie)
         for k in range(round(T / self.robot.dt)):
-            if plot:
+            if animate:
                 self.robot.plot()
             self.step()
         #     anim.add()
@@ -273,6 +303,7 @@ class EKF:
     # TODO: Make the following methods private.
     def step(self, z_pred=None):
 
+        # move the robot
         odo = self.robot.step()
 
         # =================================================================
@@ -347,13 +378,15 @@ class EKF:
         # P R O C E S S    O B S E R V A T I O N S
         # =================================================================
 
-        sensorReading = False
+        
         if self.sensor is not None:
             #  read the sensor
             z, lm_id = self.sensor.reading()
-
-            # test if the sensor has returned a reading at this time interval
             sensorReading = z is not None
+        else:
+            lm_id = None  # keep history saving happy
+            z = None
+            sensorReading = False
 
         if sensorReading:
             #  here for MBL, MM, SLAM
@@ -368,13 +401,22 @@ class EKF:
             if self._est_ekf_map:
                 # the ekf_map is estimated MM or SLAM case
                 if self.isseenbefore(lm_id):
-
+                    # landmark is previously seen
+                    
                     # get previous estimate of its state
-                    jx = self._landmarks[0, lm_id]
+                    jx = self.landmark_index(lm_id)
                     xf = xm_pred[jx: jx+2]
 
                     # compute Jacobian for this particular landmark
+                    # xf = self.sensor.g(xv_pred, z) # HACK
                     Hx_k = self.sensor.Hp(xv_pred, xf)
+
+                    z_pred = self.sensor.h(xv_pred, xf)
+                    innov = np.array([
+                        z[0] - z_pred[0],
+                        base.angdiff(z[1], z_pred[1])
+                    ])
+
                     #  create the Jacobian for all landmarks
                     Hx = np.zeros((2, len(xm_pred)))
                     Hx[:, jx:jx+2] = Hx_k
@@ -386,13 +428,27 @@ class EKF:
                         Hxv = self.sensor.Hx(xv_pred, xf)
                         Hx = np.block([Hxv, Hx])
 
+                    self.landmark_increment(lm_id)  # update the count
+                    if self._verbose:
+                        print(f"landmark {lm_id} seen {self.landmark_count(lm_id)} times, state_idx={self.landmark_index(lm_id)}")
                     doUpdatePhase = True
+
                 else:
-                    # get the extended state
+                    # new landmark, seen for the first time
+
+                    # extend the state vector and covariance
                     x_pred, P_pred = self.extend_map(P_pred, xv_pred, xm_pred, z, lm_id)
+                    # if lm_id == 17:
+                    #     print(P_pred)
+                    #     # print(x_pred[-2:], self._sensor._map.landmark(17), base.norm(x_pred[-2:] - self._sensor._map.landmark(17)))
+
+                    self.landmark_add(lm_id)
+                    if self._verbose:
+                        print(f"landmark {lm_id} seen for first time, state_idx={self.landmark_index(lm_id)}")
                     doUpdatePhase = False
 
             else:
+                    # LBL
                     Hx = self.sensor.Hx(xv_pred, lm_id)
                     Hw = self.sensor.Hw(xv_pred, lm_id)
                     doUpdatePhase = True
@@ -421,7 +477,7 @@ class EKF:
             K = P_pred @ Hx.T @ np.linalg.inv(S)
 
             # update the state vector
-            x_est = x_pred + K @ innov.T
+            x_est = x_pred + K @ innov
 
             if self._est_vehicle:
                 #  wrap heading state for a vehicle
@@ -455,7 +511,9 @@ class EKF:
                 P_est.copy(),
                 innov.copy() if innov is not None else None,
                 S.copy() if S is not None else None,
-                K.copy() if K is not None else None
+                K.copy() if K is not None else None,
+                lm_id if lm_id is not None else -1,
+                z.copy() if z is not None else None,
             )
             self._history.append(hist)
 
@@ -464,14 +522,25 @@ class EKF:
         # _landmarks[0, id] is the index in state vector
         # _landmarks[1, id] is the occurence count
 
-        if self._landmarks[1, lm_id] > 0:
-            if self._verbose:
-                print(f"landmark {lm_id} seen {self._landmarks[1, lm_id]} times before, state_idx={self._landmarks[0,lm_id]}")
-            self._landmarks[1, lm_id] += 1 # update the count
-            s = True
-        else:
-            s = False
-        return s
+        return lm_id in self._landmarks
+
+    def landmark_increment(self, lm_id):
+        self._landmarks[lm_id][1] += 1  # update the count
+
+    def landmark_count(self, lm_id):
+        return self._landmarks[lm_id][1]
+
+    def landmark_add(self, lm_id):
+        self._landmarks[lm_id] = [len(self._landmarks) * 2, 1]
+    
+    def landmark_index(self, lm_id):
+        return self._landmarks[lm_id][0]
+
+    def landmark_x(self, lm_id):
+        jx = self._landmarks[lm_id][0]
+        if self._est_vehicle:
+            jx += 3
+        return self._x_est[jx: jx+2]
 
     def extend_map(self, P, xv, xm, z, lm_id):
             # this is a new landmark, we haven't seen it before
@@ -479,8 +548,6 @@ class EKF:
             # noisy sensor reading and current vehicle pose
 
         M = None
-        if self._verbose:
-            print(f'landmark {lm_id} first sighted')
 
         # estimate its position based on observation and vehicle state
         xf = self.sensor.g(xv, z)
@@ -495,26 +562,27 @@ class EKF:
         Gz = self.sensor.Gz(xv, z)
 
         # extend the covariance matrix
+        n = len(self._x_est)
         if self._est_vehicle:
+            # estimating vehicle state
             Gx = self.sensor.Gx(xv, z)
-            n = len(self._x_est)
             # fmt: off
-            M = np.block([
+            Yz = np.block([
                 [np.eye(n), np.zeros((n, 2))    ],
                 [Gx,        np.zeros((2, n-3)), Gz]
             ])
             # fmt: on
-            P_ext = M @ block_diag(P, self._W_est) @ M.T
         else:
-            P_ext = block_diag(P, Gz @ self._W_est @ Gz.T)
+            # estimating landmarks only
+            #P_ext = block_diag(P, Gz @ self._W_est @ Gz.T)
+            # fmt: off
+            Yz = np.block([
+                [np.eye(n),        np.zeros((n, 2))    ],
+                [np.zeros((2, n)), Gz]
+            ])
+            # fmt: on
+        P_ext = Yz @ block_diag(P, self._W_est) @ Yz.T
 
-        # record the position in the state vector where this 
-        # landmark's state starts
-        self._landmarks[0, lm_id] = len(xm) # position in map state vector
-        self._landmarks[1, lm_id] = 1  # seen once
-
-        if self._verbose:
-            print('extend state vector')
         return x_ext, P_ext
 
     def get_xy(self):
@@ -536,7 +604,7 @@ class EKF:
             xyt = None
         return xyt
 
-    def plot_xy(self, block=False, **kwargs):
+    def plot_xy(self, *args, block=False, **kwargs):
         """            %EKF.plot_xy Plot vehicle position
             %
             % E.plot_xy() overlay the current plot with the estimated vehicle path in
@@ -551,8 +619,10 @@ class EKF:
         :param block: [description], defaults to False
         :type block: bool, optional
         """
+        if args is None and 'color' not in kwargs:
+            kwargs['color'] = 'r'
         xyt = self.get_xy()
-        plt.plot(xyt[:, 0], xyt[:, 1], **kwargs)
+        plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
         # plt.show(block=block)
 
     def plot_ellipse(self, confidence=0.95, N=10, **kwargs):
@@ -664,22 +734,17 @@ class EKF:
 
     def get_ekf_map(self):
         xy = []
-        for ix, n in self._landmarks.T:
-            if n == 0:
-                #  this landmark never observed
-                xy.append((np.nan, np.nan))
-                continue
-            else:
-                #  n is an index into the *landmark* part of the state
-                #  vector, we need to offset it to account for the vehicle
-                #  state if we are estimating vehicle as well
-                if self._est_vehicle:
-                    n += 3
-                xf = self._x_est[ix: ix+2]
-                xy.append(xf)
+        for lm_id, (jx, n) in self._landmarks.items():
+            #  jx is an index into the *landmark* part of the state
+            #  vector, we need to offset it to account for the vehicle
+            #  state if we are estimating vehicle as well
+            if self._est_vehicle:
+                jx += 3
+            xf = self._x_est[jx: jx+2]
+            xy.append(xf)
         return np.array(xy)
 
-    def plot_map(self, confidence = 0.95, **kwargs):
+    def plot_map(self, marker=None, ellipse=None, confidence = 0.95):
         """        %EKF.plot_map Plot landmarks
         %
         % E.plot_map(OPTIONS) overlay the current plot with the estimated landmark 
@@ -696,16 +761,43 @@ class EKF:
         % TODO:  some option to plot map evolution, layered ellipses
         """
         
-        xf = self.get_ekf_map()
 
-        for i in range(xf.shape[0]):
-            Pi = self.P_est[i: i+2, i: i+2]
-        # % TODO reinstate the interval landmark
-            base.plot_ellipse(Pi, centre=xf[i, :], confidence=confidence, inverted=True, **kwargs)
+        if marker is None:
+            marker = {
+                'marker': '+',
+                'markersize': 10, 
+                'markerfacecolor': 'red',
+                'linewidth': 0
+            }
+        
+        xm = self._x_est
+        P = self._P_est
+        if self._est_vehicle:
+            xm = xm[3:]
+            P = P[3:, 3:]
+
+        # mark the estimate as a point
+        xm = xm.reshape((-1, 2))  # arrange as Nx2
+        plt.plot(xm[:, 0], xm[:, 1], label='estimated landmark', **marker)
+
+        # add an ellipse
+        if ellipse is not None:
+            for i in range(xm.shape[0]):
+                Pi = self.P_est[i: i+2, i: i+2]
+                if i == 0:
+                    base.plot_ellipse(Pi, centre=xm[i, :], confidence=confidence, inverted=True, label='confidence', **ellipse)
+                else:
+                    base.plot_ellipse(Pi, centre=xm[i, :], confidence=confidence, inverted=True, **ellipse)
         # plot_ellipse( P * chi2inv_rtb(opt.confidence, 2), xf, args{:});
-        plt.plot(xf[:, 0], xf[:, 1], 'ro', markerfacecolor='none')
+
 
     def get_P(self, k=None):
+        if k is not None:
+            return self._history[k].P
+        else:
+            return [h.P for h in self._history]
+
+    def get_Pnorm(self, k=None):
         if k is not None:
             return np.sqrt(np.linalg.det(self._history[k].P))
         else:
@@ -726,7 +818,19 @@ class EKF:
         plt.xlabel('State')
         plt.ylabel('State')
 
+    def transform(self, map):
+        p = []
+        q = []
 
+        for lm_id in self._landmarks.keys():
+            p.append(map.landmark(lm_id))
+            q.append(self.landmark_x(lm_id))
+
+        p = np.array(p)
+        q = np.array(q)
+
+        T = base.points2tr2(p, q)
+        return SE2(T)
 
 if __name__ == "__main__":
 
