@@ -118,6 +118,7 @@ class IKMixin:
         search=False,
         slimit=100,
         transpose=None,
+        end=None,
     ):
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization
@@ -248,6 +249,9 @@ class IKMixin:
         if not isinstance(T, SE3):
             raise TypeError("argument must be SE3")
 
+        if isinstance(self, rtb.DHRobot):
+            end = None
+
         solutions = []
 
         if search:
@@ -323,14 +327,14 @@ class IKMixin:
                     failure = f"iteration limit {ilimit} exceeded"
                     break
 
-                e = base.tr2delta(self.fkine(q).A, Tk.A)
+                e = base.tr2delta(self.fkine(q, end=end).A, Tk.A)
 
                 # Are we there yet?
                 if base.norm(W @ e) < tol:
                     break
 
                 # Compute the Jacobian
-                J = self.jacobe(q)
+                J = self.jacobe(q, end=end)
 
                 JtJ = J.T @ W @ J
 
@@ -356,7 +360,7 @@ class IKMixin:
                     qnew = q + dq
 
                     # And figure out the new error
-                    enew = base.tr2delta(self.fkine(qnew).A, Tk.A)
+                    enew = base.tr2delta(self.fkine(qnew, end=end).A, Tk.A)
 
                     # Was it a good update?
                     if np.linalg.norm(W @ enew) < np.linalg.norm(W @ e):
@@ -404,7 +408,9 @@ class IKMixin:
 
     # --------------------------------------------------------------------- #
 
-    def ikine_LMS(self, T, q0=None, mask=None, ilimit=500, tol=1e-10, wN=1e-3, Lmin=0):
+    def ikine_LMS(
+        self, T, q0=None, mask=None, ilimit=500, tol=1e-10, wN=1e-3, Lmin=0, end=None
+    ):
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization
         (Robot superclass)
@@ -512,6 +518,9 @@ class IKMixin:
         if not isinstance(T, SE3):
             raise TypeError("argument must be SE3")
 
+        if isinstance(self, rtb.DHRobot):
+            end = None
+
         solutions = []
 
         if q0 is None:
@@ -545,7 +554,7 @@ class IKMixin:
                     failure = f"iteration limit {ilimit} exceeded"
                     break
 
-                e = _angle_axis(self.fkine(q).A, Tk.A)
+                e = _angle_axis(self.fkine(q, end=end).A, Tk.A)
 
                 # Are we there yet?
                 E = 0.5 * e.T @ W @ e
@@ -553,7 +562,7 @@ class IKMixin:
                     break
 
                 # Compute the Jacobian and projection matrices
-                J = self.jacob0(q)
+                J = self.jacob0(q, end=end)
                 WN = E * np.eye(self.n) + wN * np.eye(self.n)
                 H = J.T @ W @ J + WN  # n x n
                 g = J.T @ W @ e  # n x 1
@@ -607,6 +616,7 @@ class IKMixin:
         stiffness=0,
         costfun=None,
         options={},
+        end=None,
     ):
         r"""
         Inverse kinematics by optimization with joint limits (Robot superclass)
@@ -715,6 +725,9 @@ class IKMixin:
         if not isinstance(T, SE3):
             raise TypeError("argument must be SE3")
 
+        if isinstance(self, rtb.DHRobot):
+            end = None
+
         if q0 is None:
             q0 = np.zeros((self.n))
         else:
@@ -745,7 +758,7 @@ class IKMixin:
 
         def cost(q, T, weight, costfun, stiffness):
             # T, weight, costfun, stiffness = args
-            e = _angle_axis(self.fkine(q).A, T) * weight
+            e = _angle_axis(self.fkine(q, end=end).A, T) * weight
             E = (e ** 2).sum()
 
             if stiffness > 0:
@@ -785,7 +798,7 @@ class IKMixin:
     # --------------------------------------------------------------------- #
 
     def ikine_global(
-        self, T, qlim=False, ilimit=1000, tol=1e-16, method=None, options={}
+        self, T, qlim=False, ilimit=1000, tol=1e-16, method=None, options={}, end=None
     ):
         r"""
         .. warning:: Experimental code for using SciPy global optimizers.
@@ -803,6 +816,9 @@ class IKMixin:
 
         if not isinstance(T, SE3):
             raise TypeError("argument must be SE3")
+
+        if isinstance(self, rtb.DHRobot):
+            end = None
 
         solutions = []
 
@@ -833,7 +849,7 @@ class IKMixin:
 
         def cost(q, T, weight):
             # T, weight, costfun, stiffness = args
-            e = _angle_axis(self.fkine(q).A, T) * weight
+            e = _angle_axis(self.fkine(q, end=end).A, T) * weight
             return (e ** 2).sum()
 
         for _ in T:
