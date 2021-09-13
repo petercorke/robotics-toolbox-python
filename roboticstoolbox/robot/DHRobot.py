@@ -804,7 +804,7 @@ class DHRobot(Robot):
 
         return ets
 
-    def fkine(self, q):
+    def fkine(self, q, **kwargs):
         """
         Forward kinematics
 
@@ -940,7 +940,7 @@ class DHRobot(Robot):
             Tall.append(Tj)
         return Tall
 
-    def jacobe(self, q, half=None):
+    def jacobe(self, q, half=None, **kwargs):
         r"""
         Manipulator Jacobian in end-effector frame
 
