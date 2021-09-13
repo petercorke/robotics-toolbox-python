@@ -70,26 +70,11 @@ class Map:
 
         for i, j in self._neighbours:
             try:
-                if state.x + i > 0 and state.y + j > 0:
+                if state.x + i >= 0 and state.y + j >= 0:
                     state_list.append(self.map[state.y + j][state.x + i])
             except IndexError:
                 pass
         return state_list
-
-
-    # def set_cost(self, region, cost, modify=None):
-
-    #     xmin = max(0, region[0])
-    #     xmax = min(self.col, region[1])
-    #     ymin = max(0, region[2])
-    #     ymax = min(self.row, region[3])
-
-    #     self.costmap[ymin:ymax, xmin:xmax] = cost
-
-    #     if modify is not None:
-    #         for x in range(xmin, xmax):
-    #             for y in range(ymin, ymax):
-    #                 modify.modify_cost(self.map[y][x])
 
     _root2 = np.sqrt(2)
 
@@ -127,11 +112,12 @@ class Map:
 #  - replace equality tests with math.isclose() which is faster than np.isclose()
 #  - add an offset to inequality tests, X > Y becomes X > Y + tol
 class Dstar:
-    def __init__(self, map):
+    def __init__(self, map, tol=1e-6):
         self.map = map
         # self.open_list = set()
         self.open_list = []
         self.nexpand = 0
+        self.tol = tol
 
     def process_state(self, verbose=False):
         if verbose:
@@ -150,25 +136,27 @@ class Dstar:
         if verbose:
             print(f"EXPAND {x}, {k_old:.1f}")
 
-        if x.h > k_old + 1e-6:
+        if x.h > k_old + self.tol:
             # RAISE state
             if verbose:
                 print('  raise')
             for y in self.map.get_neighbors(x):
-                if y.t is not Tag.NEW and y.h <= k_old and x.h > y.h + self.map.cost(x, y) + 1e-6:
+                if (y.t is not Tag.NEW and
+                        y.h <= k_old - self.tol and 
+                        x.h > y.h + self.map.cost(x, y) + self.tol):
                     if verbose:
                         print(f"  {x} cost from {x.h:.1f} to {y.h + self.map.cost(x, y):.1f}; parent from {x.parent} to {y}")
                     x.parent = y
                     x.h = y.h + self.map.cost(x, y)
 
-        if math.isclose(x.h, k_old, rel_tol=0, abs_tol=1e-6):
+        if math.isclose(x.h, k_old, rel_tol=0, abs_tol=self.tol):
             # normal state
             if verbose:
                 print('  normal')
             for y in self.map.get_neighbors(x):
                 if y.t is Tag.NEW \
-                   or (y.parent == x and not math.isclose(y.h, x.h + self.map.cost(x, y), rel_tol=0, abs_tol=1e-6)) \
-                   or (y.parent != x and y.h > x.h + self.map.cost(x, y) + 1e-6):
+                   or (y.parent == x and not math.isclose(y.h, x.h + self.map.cost(x, y), rel_tol=0, abs_tol=self.tol)) \
+                   or (y.parent != x and y.h > x.h + self.map.cost(x, y) + self.tol):
                     if verbose:
                         print(f"  reparent {y} from {y.parent} to {x}")
                     y.parent = x
@@ -178,19 +166,19 @@ class Dstar:
             if verbose:
                 print('  raise/lower')
             for y in self.map.get_neighbors(x):
-                if y.t is Tag.NEW or (y.parent == x and not math.isclose(y.h, x.h + self.map.cost(x, y), rel_tol=0, abs_tol=1e-6)):
+                if y.t is Tag.NEW or (y.parent == x and not math.isclose(y.h, x.h + self.map.cost(x, y), rel_tol=0, abs_tol=self.tol)):
                     if verbose:
                         print(f"  {y} cost from {y.h:.1f} to {y.h + self.map.cost(x, y):.1f}; parent from {y.parent} to {x}; add to frontier")
                     y.parent = x
                     self.insert(y, x.h + self.map.cost(x, y))
                 else:
-                    if y.parent != x and y.h > x.h + self.map.cost(x, y) + 1e-6 and x.t is Tag.CLOSED:
+                    if y.parent != x and y.h > x.h + self.map.cost(x, y) + self.tol and x.t is Tag.CLOSED:
                         self.insert(x, x.h)
                         if verbose:
                             print(f"  {x}, {x.h:.1f} add to frontier")
                     else:
-                        if y.parent != x and x.h > y.h + self.map.cost(y, x) + 1e-6 \
-                                and y.t is Tag.CLOSED and y.h > k_old + 1e-6:
+                        if y.parent != x and x.h > y.h + self.map.cost(y, x) + self.tol \
+                                and y.t is Tag.CLOSED and y.h > k_old + self.tol:
                             self.insert(y, y.h)
                         if verbose:
                             print(f"  {y}, {y.h:.1f} add to frontier")
@@ -212,28 +200,32 @@ class Dstar:
             state.k = h_new
 
         elif state.t is Tag.OPEN:
-            # k_new = min(state.k, h_new)
-            # if state.k == k_new:
-            #     # k hasn't changed, leave vertex in frontier
-            #     return
-            # else:
-            #     state.k = k_new
-            #     # remove the item from the open list
-            #     # print('node already in open list, remove it first')
-            #     #TODO use bisect on old state.k to find the entry
-            #     for i, item in enumerate(self.open_list):
-            #         if item[1] is state:
-            #             del self.open_list[i]
-            #             break
+            k_new = min(state.k, h_new)
+            if state.k == k_new:
+                # k hasn't changed, and vertex already in frontier
+                # just update h and be done
+                state.h = h_new
+                return
+            else:
+                # k has changed, we need to remove the vertex from the list
+                # and re-insert it
+                state.k = k_new
 
-            state.k = min(state.k, h_new)
-            # remove the item from the open list
-            # print('node already in open list, remove it first')
-            #TODO use bisect on old state.k to find the entry
-            for i, item in enumerate(self.open_list):
-                if item[1] is state:
-                    del self.open_list[i]
-                    break  
+                # scan the list to find vertex, then remove it
+                # this is quite slow
+                for i, item in enumerate(self.open_list):
+                    if item[1] is state:
+                        del self.open_list[i]
+                        break
+
+            # state.k = min(state.k, h_new)
+            # # remove the item from the open list
+            # # print('node already in open list, remove it first')
+            # #TODO use bisect on old state.k to find the entry
+            # for i, item in enumerate(self.open_list):
+            #     if item[1] is state:
+            #         del self.open_list[i]
+            #         break  
 
         elif state.t is Tag.CLOSED:
             state.k = min(state.h, h_new)
@@ -244,50 +236,33 @@ class Dstar:
         # self.open_list.add(state)
         heapq.heappush(self.open_list, (state.k, state))
 
-    # def remove(self, state):
-    #     if state.t is Tag.OPEN:
-    #         state.t = Tag.CLOSED
-    #     else:
-    #         state.t = Tag.CLOSED
-    #         print('removing non open state')
-    #     self.open_list.remove(state)
-
     def modify_cost(self, x, newcost):
         self.map.costmap[x.y, x.x] = newcost
         if x.t is Tag.CLOSED:
             self.insert(x, x.parent.h + self.map.cost(x, x.parent))
-        # return self.get_kmin()
         if len(self.open_list) == 0:
             return -1
         else:
             # lowest priority item is always at index 0 according to docs
             return self.open_list[0][0]
 
-    # def modify(self, state):
-    #     self.modify_cost(state)
-    #     while True:
-    #         k_min = self.process_state()
-    #         if k_min == -1 or k_min >= state.h:
-    #             break
-
-    # def showparents(self):
-    #     return
-    #     for y in range(self.map.row):
-    #         if y == 0:
-    #             print("   ", end='')
-    #             for x in range(self.map.col):
-    #                 print(f"  {x}   ", end='')
-    #             print()
-    #         print(f"{y}: ", end='')
-    #         for x in range(self.map.col):
-    #             x = self.map.map[y][x]
-    #             par = x.parent
-    #             if par is None:
-    #                 print('  G   ', end='')
-    #             else:
-    #                 print(f"({par.x},{par.y}) ", end='')
-    #         print()
-    #     print()
+    def showparents(self):
+        for y in range(self.map.row-1, -1, -1):
+            if y == self.map.row-1:
+                print("   ", end='')
+                for x in range(self.map.col):
+                    print(f"  {x}   ", end='')
+                print()
+            print(f"{y}: ", end='')
+            for x in range(self.map.col):
+                x = self.map.map[y][x]
+                par = x.parent
+                if par is None:
+                    print('  G   ', end='')
+                else:
+                    print(f"({par.x},{par.y}) ", end='')
+            print()
+        print()
 class DstarPlanner(PlannerBase):
     r"""
     D* path planner
@@ -322,7 +297,7 @@ class DstarPlanner(PlannerBase):
         self.costmap = np.where(self.occgrid.grid > 0, np.inf, 1)
         self.map = Map(self.costmap.shape[0], self.costmap.shape[1])
         self.map.costmap = self.costmap
-        self.dstar = Dstar(self.map)
+        self.dstar = Dstar(self.map) #, tol=0)
 
 
     def plan(self, goal, animate=False, progress=True):
@@ -356,6 +331,9 @@ class DstarPlanner(PlannerBase):
         print(self.dstar.ninsert, self.dstar.nin)
 
 
+    @property
+    def nexpand(self):
+        return self.dstar.nexpand
 
     def query(self, start, sensor=None, animate=False, verbose=False):
         self.start = start
@@ -385,16 +363,18 @@ class DstarPlanner(PlannerBase):
                         val = self.dstar.modify_cost(X, newcost)
                     # propagate the changes to plan
                     print('propagate')
+                    # self.dstar.showparents()
                     while val != -1 and val < tmp.h:
                         val = self.dstar.process_state(verbose=verbose)
                         # print('open set', len(self.dstar.open_list))
+                    # self.dstar.showparents()
                     
             tmp = tmp.parent
             # print('move to ', tmp)
 
         status = namedtuple('DstarStatus', ['cost',])
         
-        return np.array(path).T, status(cost)
+        return np.array(path), status(cost)
 
     # # Just feed self._h into plot function from parent as p
 
@@ -439,7 +419,7 @@ if __name__ == "__main__":
             changes = []
             for x in range(3, 6):
                 for y in range(0, 4):
-                    changes.append((x, y, 5))
+                    changes.append((x, y, 100))
             return changes
 
     path2, status2 = ds.query(start=start, sensor=sensorfunc, verbose=False)
