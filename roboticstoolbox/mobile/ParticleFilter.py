@@ -285,7 +285,7 @@ class ParticleFilter:
 
         # display the initial particles
         if self.robot._animation is not None:
-            self.h, = plt.plot(self.x[:, 0], self.x[:, 1], 'go', zorder=0, markersize=3, markeredgecolor='none', alpha=0.3)
+            self.h, = plt.plot(self.x[:, 0], self.x[:, 1], 'go', zorder=0, markersize=3, markeredgecolor='none', alpha=0.3, label='particle')
         # set(self.h, 'Tag', 'particles')
         
         # self.robot.plot()
@@ -346,24 +346,24 @@ class ParticleFilter:
             )
             self._history.append(hist)
 
-    # def plot_pdf(self):
-    #     #ParticleFilter.plot_pdf Plot particles as a PDF
-    #     #
-    #     # PF.plot_pdf() plots a sparse PDF as a series of vertical line
-    #     # segments of height equal to particle weight.
-    #     clf
-    #     hold on
-    #     for p = 1:self.nparticles
-    #         x = self.x(p,:)
-    #         plot3([x[0] x[0]], [x[1] x[1]], [0 self.weight(p)], 'r')
-    #         plot3([x[0] x[0]], [x[1] x[1]], [0 self.weight(p)], 'k.', 'MarkerSize', 12)
+    def plot_pdf(self):
+        #ParticleFilter.plot_pdf Plot particles as a PDF
+        #
+        # PF.plot_pdf() plots a sparse PDF as a series of vertical line
+        # segments of height equal to particle weight.
+        ax = base.plotvol3()
+        for (x, y, t), weight in zip(self.x, self.weight):
+            # ax.plot([x, x], [y, y], [0, weight], 'r')
+            ax.plot([x, x], [y, y], [0, weight], 'skyblue', linewidth=3)
+            ax.plot(x, y, weight, 'k.', markersize=6)
 
-    #     end
-    #     grid on
-    #     xyzlabel
-    #     zlabel('particle weight')
-    #     view[29,59]
-    #     rotate3d on
+
+        plt.grid(True)
+        plt.xlabel('X')
+        plt.ylabel('Y')
+        plt.xlim()
+        ax.set_zlabel('particle weight')
+        ax.view_init(29, 59)
 
 
     # def plot_xy(self, varargin):
