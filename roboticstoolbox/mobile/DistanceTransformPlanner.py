@@ -41,12 +41,13 @@ class DistanceTransformPlanner(PlannerBase):
     Also known as wavefront, grassfire or brushfire planning algorithm.
 
     Creates a planner that finds the path between two points in the
-    plane using forward motion.  The path comprises a set of points in 
+    plane using forward motion.  The path comprises a set of points in
     adjacent cells.
 
     :author: Peter Corke_
     :seealso: :class:`Planner`
     """
+
     def __init__(self, occgrid=None, metric="euclidean", **kwargs):
 
         super().__init__(occgrid=occgrid, ndims=2, **kwargs)
@@ -85,11 +86,15 @@ class DistanceTransformPlanner(PlannerBase):
             self.goal = goal
 
         if self._goal is None:
-            raise ValueError('No goal specified here or in constructor')
+            raise ValueError("No goal specified here or in constructor")
 
-        self._distancemap = distancexform(self.occgrid.grid,
-                goal=self._goal, metric=self._metric, animate=animate,
-                verbose=verbose)
+        self._distancemap = distancexform(
+            self.occgrid.grid,
+            goal=self._goal,
+            metric=self._metric,
+            animate=animate,
+            verbose=verbose,
+        )
 
     # Use plot from parent class
 
@@ -97,17 +102,20 @@ class DistanceTransformPlanner(PlannerBase):
         if self.distancemap is None:
             Error("No distance map computed, you need to plan.")
 
-        directions = np.array([
-            # dy  dx
-            [-1, -1],
-            [ 0, -1],
-            [ 1, -1],
-            [-1,  0],
-            [ 0,  0],
-            [ 1,  0],
-            [ 0,  1],
-            [ 1,  1],
-        ], dtype=int)
+        directions = np.array(
+            [
+                # dy  dx
+                [-1, -1],
+                [0, -1],
+                [1, -1],
+                [-1, 0],
+                [0, 0],
+                [1, 0],
+                [0, 1],
+                [1, 1],
+            ],
+            dtype=int,
+        )
 
         x = int(position[0])
         y = int(position[1])
@@ -137,28 +145,30 @@ class DistanceTransformPlanner(PlannerBase):
 
     def plot_3d(self, p=None, ls=None):
         fig = plt.figure()
-        ax = fig.gca(projection='3d')
+        ax = fig.gca(projection="3d")
 
         distance = self._distancemap
         X, Y = np.meshgrid(np.arange(distance.shape[1]), np.arange(distance.shape[0]))
-        surf = ax.plot_surface(X, Y, distance, #cmap='gray',
-                               linewidth=1, antialiased=False)
+        surf = ax.plot_surface(
+            X, Y, distance, linewidth=1, antialiased=False  # cmap='gray',
+        )
 
         if p is not None:
             # k = sub2ind(np.shape(self._distancemap), p[:, 1], p[:, 0])
-            height = distance[p[:,1], p[:,0]]
+            height = distance[p[:, 1], p[:, 0]]
             ax.plot(p[:, 0], p[:, 1], height)
 
-        plt.xlabel('x')
-        plt.ylabel('y')
-        ax.set_zlabel('z')
+        plt.xlabel("x")
+        plt.ylabel("y")
+        ax.set_zlabel("z")
         plt.show()
         return ax
 
 
 import numpy as np
 
-def distancexform(occgrid, goal, metric='cityblock', animate=False, verbose=False):
+
+def distancexform(occgrid, goal, metric="cityblock", animate=False, verbose=False):
     """
     Distance transform for path planning
 
@@ -180,7 +190,7 @@ def distancexform(occgrid, goal, metric='cityblock', animate=False, verbose=Fals
     ``metric``.  In addition:
 
         - Obstacle cells will be set to ``nan``
-        - Unreachable cells, ie. free cells _inside obstacles_ will be set 
+        - Unreachable cells, ie. free cells _inside obstacles_ will be set
           to ``inf``
 
     The cells of the passed occupancy grid are:
@@ -197,11 +207,11 @@ def distancexform(occgrid, goal, metric='cityblock', animate=False, verbose=Fals
 
     distance = occgrid.astype(np.float32)
     distance[occgrid > 0] = np.nan  # assign nan to obstacle cells
-    distance[occgrid==0] = np.inf   # assign inf to other cells
+    distance[occgrid == 0] = np.inf  # assign inf to other cells
     distance[goal[1], goal[0]] = 0  # assign zero to goal
-    
+
     # create the appropriate distance matrix D
-    if metric.lower() in ('manhattan', 'cityblock'):
+    if metric.lower() in ("manhattan", "cityblock"):
         # fmt: off
         D = np.array([
                 [ np.inf,   1,   np.inf],
@@ -209,7 +219,7 @@ def distancexform(occgrid, goal, metric='cityblock', animate=False, verbose=Fals
                 [ np.inf,   1,   np.inf]
             ])
         # fmt: on
-    elif metric.lower() == 'euclidean':
+    elif metric.lower() == "euclidean":
         r2 = np.sqrt(2)
         # fmt: off
         D = np.array([
@@ -236,15 +246,15 @@ def distancexform(occgrid, goal, metric='cityblock', animate=False, verbose=Fals
             display[np.isinf(display)] = 0
             if h is None:
                 plt.figure()
-                plt.xlabel('x')
-                plt.ylabel('y')
+                plt.xlabel("x")
+                plt.ylabel("y")
                 ax = plt.gca()
                 plt.pause(0.001)
-                cmap = cm.get_cmap('gray')
-                cmap.set_bad('red')
-                cmap.set_over('white')
+                cmap = cm.get_cmap("gray")
+                cmap.set_bad("red")
+                cmap.set_over("white")
                 h = plt.imshow(display, cmap=cmap)
-                plt.colorbar(label='distance')
+                plt.colorbar(label="distance")
             else:
                 h.remove()
                 h = plt.imshow(display, cmap=cmap)
@@ -262,12 +272,13 @@ def distancexform(occgrid, goal, metric='cityblock', animate=False, verbose=Fals
         print(f"{count:d} iterations, {ninf:d} unreachable cells")
     return distance
 
+
 def grassfire_step(G, D):
 
     # pad with inf
-    H = np.pad(G, max(D.shape) // 2, 'constant', constant_values=np.inf)
+    H = np.pad(G, max(D.shape) // 2, "constant", constant_values=np.inf)
     rows, columns = G.shape
-    
+
     # inspired by https://landscapearchaeology.org/2018/numpy-loops/
     minimum = np.full(G.shape, np.inf)
     for y in range(3):
@@ -280,7 +291,7 @@ def grassfire_step(G, D):
 
 
 if __name__ == "__main__":
-
+    pass
 
     # # make a simple map, as per the MOOCs
     # occgrid = np.zeros((10,10))
@@ -296,16 +307,15 @@ if __name__ == "__main__":
     # dx = distancexform(occgrid, goal, metric='Euclidean')
     # print(dx)
 
+    # from roboticstoolbox import DistanceTransformPlanner, rtb_loadmat
 
-    from roboticstoolbox import DistanceTransformPlanner, rtb_loadmat
+    # house = rtb_loadmat('data/house.mat')
+    # floorplan = house['floorplan']
+    # places = house['places']
 
-    house = rtb_loadmat('data/house.mat')
-    floorplan = house['floorplan']
-    places = house['places']
-
-    dx = DistanceTransformPlanner(floorplan)
-    print(dx)
-    dx.goal = [1,2]
-    dx.plan(places.kitchen)
-    path = dx.query(places.br3)
-    dx.plot(path, block=True)
+    # dx = DistanceTransformPlanner(floorplan)
+    # print(dx)
+    # dx.goal = [1,2]
+    # dx.plan(places.kitchen)
+    # path = dx.query(places.br3)
+    # dx.plot(path, block=True)
