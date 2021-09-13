@@ -409,9 +409,13 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         def angle(theta, fmt=None):
 
             if fmt is not None:
-                return fmt.format(theta * deg) + "\u00b0"
-            else:  # pragma nocover
-                return str(theta * deg) + "\u00b0"
+                try:
+                    return fmt.format(theta * deg) + "\u00b0"
+                except TypeError:
+                    pass
+
+            # pragma nocover
+            return str(theta * deg) + "\u00b0"
 
         # show named configurations
         if len(self._configdict) > 0:
