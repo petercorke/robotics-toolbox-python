@@ -1693,9 +1693,7 @@ class URDF(URDFType):
             rot = joint.rpy
 
             # Check if axis of rotation/tanslation is not 1
-            if np.sum(np.abs(np.array(joint.axis))) == 1 and 1 in np.abs(
-                np.array(joint.axis)
-            ):
+            if np.count_nonzero(joint.axis) < 2:
                 childlink._ets = rtb.ETS.SE3(trans, rot)
             else:
                 # Normalise the joint axis to be along or about z axis
