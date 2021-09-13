@@ -114,8 +114,14 @@ class PoseGraph:
             
             # indices into ROBOTLASER1 record for the 3x3 info matrix in column major
             # order
+            # IXX IXY IXT IYY IYT ITT
+            #   6   7   8   9  10  11
+            #   0   1   2   3   4   5
             g2o =  [0,  1,  2,  1,  3,  4,   2,  4,  5]
-            toro = [0,  1, 4,  1,  2,  5,  4,  5,   3]
+            # IXX IXY IYY ITT IXT IYT
+            #   6   7   8   9  10  11
+            #   0   1   2   3   4   5
+            toro = [0,  1,  4,  1,  2,  5,  4,  5,  3]
             
             # we keep an array self. = vindex(gi) to map g2o vertex index to PGraph vertex index
             
@@ -192,7 +198,7 @@ class PoseGraph:
                     # IXX IXY IYY ITT IXT IYT
                     #   6   7   8   9  10  11
                     d = np.array([float(x) for x in tokens[6:12]])
-                    info = d[g2o].reshape((3,3))
+                    info = d[toro].reshape((3,3))
 
                     # create the edge
                     v1 = self.graph[v1]
@@ -239,7 +245,7 @@ class PoseGraph:
                 filetype = "TORO/LAGO"
             else:
                 filetype = "g2o"
-            print(f"loaded {filetype} format file: {self.graph.n} nodes, {self.graph.ne} edges")
+            print(f"loaded {filetype} format file: {self.graph.n} vertices, {self.graph.ne} edges")
             
             if nlaser > 0:
                 lasermeta = [float(x) for x in lasermeta]
@@ -280,7 +286,11 @@ class PoseGraph:
         return self.vindex[i].time
     
     def plot(self, **kwargs):
-        self.graph.plot(**kwargs)
+        if not 'vertex' in kwargs:
+            kwargs['vertex'] = dict(markersize=8, markerfacecolor='blue', markeredgecolor='None')
+        if not 'edge' in kwargs:
+            kwargs['edge'] = dict(linewidth=1, color='black')
+        self.graph.plot(colorcomponents=False, **kwargs)
         plt.xlabel('x')
         plt.ylabel('y')
         plt.grid(True)
