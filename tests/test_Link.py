@@ -13,7 +13,6 @@ import unittest
 
 
 class TestDHLink(unittest.TestCase):
-
     def test_link(self):
         rp.DHLink()
 
@@ -48,17 +47,9 @@ class TestDHLink(unittest.TestCase):
         l1 = rp.DHLink(I=[0, 1, 2, 3, 4, 5])
         l2 = rp.DHLink(I=np.eye(3))
 
-        I0 = np.array([
-            [1, 0, 0],
-            [0, 2, 0],
-            [0, 0, 3]
-        ])
+        I0 = np.array([[1, 0, 0], [0, 2, 0], [0, 0, 3]])
 
-        I1 = np.array([
-            [0, 3, 5],
-            [3, 1, 4],
-            [5, 4, 2]
-        ])
+        I1 = np.array([[0, 3, 5], [3, 1, 4], [5, 4, 2]])
 
         I2 = np.eye(3)
 
@@ -73,19 +64,13 @@ class TestDHLink(unittest.TestCase):
         l3 = rp.DHLink(sigma=1, mdh=1)
         l4 = rp.DHLink(flip=True)
 
-        T0 = sm.SE3(np.array([
-            [-1, 0, 0, 0],
-            [0, -1, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ]))
+        T0 = sm.SE3(
+            np.array([[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+        )
 
-        T1 = sm.SE3(np.array([
-            [1, 0, 0, 0],
-            [0, 1, 0, 0],
-            [0, 0, 1, np.pi],
-            [0, 0, 0, 1]
-        ]))
+        T1 = sm.SE3(
+            np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, np.pi], [0, 0, 0, 1]])
+        )
 
         nt.assert_array_almost_equal(l0.A(np.pi).A, T0.A)
         nt.assert_array_almost_equal(l1.A(np.pi).A, T1.A)
@@ -151,12 +136,8 @@ class TestDHLink(unittest.TestCase):
         s0 = l0.__str__()
         s1 = l1.__str__()
 
-        self.assertEqual(
-            s0, "PrismaticDH:  theta=0.0,  d=q,  a=0.0,  "
-                "alpha=0.0")
-        self.assertEqual(
-            s1, "RevoluteDH:   theta=q,  d=0.0, a=0.0, "
-                "alpha=0.0")
+        self.assertEqual(s0, "PrismaticDH:  θ=0.0,  d=q,  a=0.0,  ⍺=0.0")
+        self.assertEqual(s1, "RevoluteDH:   θ=q,  d=0.0,  a=0.0,  ⍺=0.0")
 
     def test_dyn(self):
         puma = rp.models.DH.Puma560()
@@ -174,7 +155,8 @@ Jm    =    0.0002
 B     =    0.0015 
 Tc    =       0.4(+)    -0.43(-) 
 G     =       -63 
-qlim  =      -2.8 to      2.8""")  # noqa
+qlim  =      -2.8 to      2.8""",
+        )  # noqa
 
         puma.links[0].dyn(indent=2)
 
@@ -237,6 +219,6 @@ qlim  =      -2.8 to      2.8""")  # noqa
         self.assertFalse(l0.islimit(0.1))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     unittest.main()

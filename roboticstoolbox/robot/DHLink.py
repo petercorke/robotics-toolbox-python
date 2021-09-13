@@ -12,6 +12,8 @@ from roboticstoolbox.robot.ETS import ETS
 _eps = np.finfo(np.float64).eps
 
 from functools import wraps
+
+
 def _check_rne(func):
     """
     @_check_rne decorator
@@ -30,6 +32,7 @@ def _check_rne(func):
 
     :seealso: :func:`Link._listen_dyn`
     """
+
     @wraps(func)
     def wrapper_check_rne(*args, **kwargs):
         if args[0]._rne_ob is None or args[0]._dynchanged:
@@ -37,7 +40,9 @@ def _check_rne(func):
             args[0]._init_rne()
         args[0]._rne_changed = False
         return func(*args, **kwargs)
+
     return wrapper_check_rne
+
 
 # --------------------------------------------------------------#
 
@@ -47,7 +52,10 @@ try:  # pragma: no cover
 
     def _issymbol(x):
         return isinstance(x, sym.Expr)
+
+
 except ImportError:
+
     def _issymbol(x):  # pylint: disable=unused-argument
         return False
 
@@ -64,6 +72,7 @@ def _sin(theta):
         return sym.sin(theta)
     else:
         return np.sin(theta)
+
 
 # --------------------------------------------------------------#
 
@@ -116,15 +125,8 @@ class DHLink(Link):
     """
 
     def __init__(
-            self,
-            d=0.0,
-            alpha=0.0,
-            theta=0.0,
-            a=0.0,
-            sigma=0,
-            mdh=False,
-            offset=0,
-            **kwargs):
+        self, d=0.0, alpha=0.0, theta=0.0, a=0.0, sigma=0, mdh=False, offset=0, **kwargs
+    ):
 
         # TODO
         #  probably should make DHLink(link) return a copy
@@ -166,7 +168,8 @@ class DHLink(Link):
                 manufacturer=L.manufacturer,
                 base=L.base,
                 tool=L.tool,
-                gravity=L.gravity)
+                gravity=L.gravity,
+            )
 
         else:
             raise TypeError("Cannot add a Link with a non Link object")
@@ -183,12 +186,16 @@ class DHLink(Link):
             qvar = f"q{self.id}"
         cls = self.__class__.__name__
         if self.isrevolute:
-            s = f"{cls}:   θ={qvar}{offset},  d={self.d}, " \
-                f"a={self.a}, ⍺={self.alpha}"
+            s = (
+                f"{cls}:   θ={qvar}{offset},  d={self.d}, "
+                f" a={self.a},  ⍺={self.alpha}"
+            )
         elif self.isprismatic:
-            s = f"{cls}:  theta={self.theta},  d={qvar}{offset}, " \
-                f" a={self.a},  " \
+            s = (
+                f"{cls}:  θ={self.theta},  d={qvar}{offset}, "
+                f" a={self.a},  "
                 f"⍺={self.alpha}"
+            )
         return s
 
     def __repr__(self):
@@ -203,7 +210,7 @@ class DHLink(Link):
         args.extend(super()._params())
         return name + "(" + ", ".join(args) + ")"
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def theta(self):
@@ -226,7 +233,7 @@ class DHLink(Link):
         else:
             self._theta = theta_new
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def d(self):
@@ -249,7 +256,7 @@ class DHLink(Link):
         else:
             self._d = d_new
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def a(self):
@@ -268,7 +275,8 @@ class DHLink(Link):
     @_listen_dyn
     def a(self, a_new):
         self._a = a_new
-# -------------------------------------------------------------------------- #
+
+    # -------------------------------------------------------------------------- #
 
     @property
     def alpha(self):
@@ -288,7 +296,7 @@ class DHLink(Link):
     def alpha(self, alpha_new):
         self._alpha = alpha_new
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def sigma(self):
@@ -310,7 +318,8 @@ class DHLink(Link):
     @_listen_dyn
     def sigma(self, sigma_new):
         self._sigma = sigma_new
-# -------------------------------------------------------------------------- #
+
+    # -------------------------------------------------------------------------- #
 
     @property
     def mdh(self):
@@ -333,7 +342,7 @@ class DHLink(Link):
     def mdh(self, mdh_new):
         self._mdh = int(mdh_new)
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     @property
     def offset(self):
@@ -358,7 +367,7 @@ class DHLink(Link):
     def offset(self, offset_new):
         self._offset = offset_new
 
-# -------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------- #
 
     def A(self, q):
         r"""
@@ -422,20 +431,24 @@ class DHLink(Link):
 
         if self.mdh == 0:
             # standard DH
-            T = np.array([
-                [ct, -st * ca, st * sa, self.a * ct],
-                [st, ct * ca, -ct * sa, self.a * st],
-                [0, sa, ca, d],
-                [0, 0, 0, 1]
-            ])
+            T = np.array(
+                [
+                    [ct, -st * ca, st * sa, self.a * ct],
+                    [st, ct * ca, -ct * sa, self.a * st],
+                    [0, sa, ca, d],
+                    [0, 0, 0, 1],
+                ]
+            )
         else:
             # modified DH
-            T = np.array([
-                [ct, -st, 0, self.a],
-                [st * ca, ct * ca, -sa, -sa * d],
-                [st * sa, ct * sa, ca, ca * d],
-                [0, 0, 0, 1]
-            ])
+            T = np.array(
+                [
+                    [ct, -st, 0, self.a],
+                    [st * ca, ct * ca, -sa, -sa * d],
+                    [st * sa, ct * sa, ca, ca * d],
+                    [0, 0, 0, 1],
+                ]
+            )
 
         return SE3(T, check=False)
 
@@ -523,6 +536,7 @@ class DHLink(Link):
 
 # -------------------------------------------------------------------------- #
 
+
 class RevoluteDH(DHLink):
     r"""
     Class for revolute links using standard DH convention
@@ -573,23 +587,25 @@ class RevoluteDH(DHLink):
     """  # noqa
 
     def __init__(
-            self,
-            d=0.0,
-            a=0.0,
-            alpha=0.0,
-            offset=0.0,
-            qlim=None,
-            flip=False,
-            **kwargs
-            ):
+        self, d=0.0, a=0.0, alpha=0.0, offset=0.0, qlim=None, flip=False, **kwargs
+    ):
 
         theta = 0.0
         sigma = 0
         mdh = False
 
         super().__init__(
-            d=d, alpha=alpha, theta=theta, a=a, sigma=sigma, mdh=mdh,
-            offset=offset, qlim=qlim, flip=flip, **kwargs)
+            d=d,
+            alpha=alpha,
+            theta=theta,
+            a=a,
+            sigma=sigma,
+            mdh=mdh,
+            offset=offset,
+            qlim=qlim,
+            flip=flip,
+            **kwargs,
+        )
 
 
 class PrismaticDH(DHLink):
@@ -644,23 +660,25 @@ class PrismaticDH(DHLink):
     """  # noqa
 
     def __init__(
-            self,
-            theta=0.0,
-            a=0.0,
-            alpha=0.0,
-            offset=0.0,
-            qlim=None,
-            flip=False,
-            **kwargs
-            ):
+        self, theta=0.0, a=0.0, alpha=0.0, offset=0.0, qlim=None, flip=False, **kwargs
+    ):
 
         d = 0.0
         sigma = 1
         mdh = False
 
         super().__init__(
-            theta=theta, d=d, a=a, alpha=alpha, sigma=sigma, mdh=mdh,
-            offset=offset, qlim=qlim, flip=flip, **kwargs)
+            theta=theta,
+            d=d,
+            a=a,
+            alpha=alpha,
+            sigma=sigma,
+            mdh=mdh,
+            offset=offset,
+            qlim=qlim,
+            flip=flip,
+            **kwargs,
+        )
 
 
 class RevoluteMDH(DHLink):
@@ -713,23 +731,25 @@ class RevoluteMDH(DHLink):
     """  # noqa
 
     def __init__(
-            self,
-            d=0.0,
-            a=0.0,
-            alpha=0.0,
-            offset=0.0,
-            qlim=None,
-            flip=False,
-            **kwargs
-            ):
+        self, d=0.0, a=0.0, alpha=0.0, offset=0.0, qlim=None, flip=False, **kwargs
+    ):
 
         theta = 0.0
         sigma = 0
         mdh = True
 
         super().__init__(
-            d=d, alpha=alpha, theta=theta, a=a, sigma=sigma, mdh=mdh,
-            offset=offset, qlim=qlim, flip=flip, **kwargs)
+            d=d,
+            alpha=alpha,
+            theta=theta,
+            a=a,
+            sigma=sigma,
+            mdh=mdh,
+            offset=offset,
+            qlim=qlim,
+            flip=flip,
+            **kwargs,
+        )
 
 
 class PrismaticMDH(DHLink):
@@ -784,20 +804,22 @@ class PrismaticMDH(DHLink):
     """  # noqa
 
     def __init__(
-            self,
-            theta=0.0,
-            a=0.0,
-            alpha=0.0,
-            offset=0.0,
-            qlim=None,
-            flip=False,
-            **kwargs
-            ):
+        self, theta=0.0, a=0.0, alpha=0.0, offset=0.0, qlim=None, flip=False, **kwargs
+    ):
 
         d = 0.0
         sigma = 1
         mdh = True
 
         super().__init__(
-            theta=theta, d=d, a=a, alpha=alpha, sigma=sigma, mdh=mdh,
-            offset=offset, qlim=qlim, flip=flip, **kwargs)
+            theta=theta,
+            d=d,
+            a=a,
+            alpha=alpha,
+            sigma=sigma,
+            mdh=mdh,
+            offset=offset,
+            qlim=qlim,
+            flip=flip,
+            **kwargs,
+        )
