@@ -4,7 +4,7 @@ from math import sin, cos, atan2, tan, sqrt, pi
 import matplotlib.pyplot as plt
 import time
 
-from bdsim.components import TransferBlock
+from bdsim.components import TransferBlock, FunctionBlock
 from bdsim.graphics import GraphicsBlock
 # ------------------------------------------------------------------------ #
 
@@ -135,11 +135,13 @@ class MultiRotor(TransferBlock):
         self.speedcheck = speedcheck
 
         self.D = np.zeros((3,self.nrotors))
+        self.theta = np.zeros((self.nrotors,))
         for i in range(0, self.nrotors):
             theta = i / self.nrotors * 2 * pi
             #  Di      Rotor hub displacements (1x3)
             # first rotor is on the x-axis, clockwise order looking down from above
             self.D[:,i] = np.r_[ model['d'] * cos(theta), model['d'] * sin(theta), model['h']]
+            self.theta[i] = theta
             
         self.a1s = np.zeros((self.nrotors,))
         self.b1s = np.zeros((self.nrotors,))
@@ -181,6 +183,7 @@ class MultiRotor(TransferBlock):
         out['w'] = iW @ self._x[9:12]               # RPY rates mapped to body frame
         out['a1s'] = self.a1s
         out['b1s'] = self.b1s
+        out['X'] = self._x
     
         return [out]
     
@@ -295,11 +298,90 @@ class MultiRotor(TransferBlock):
     
         do = np.linalg.inv(model['J']) @ (np.cross(-o, model['J'] @ o) + np.sum(tau, axis=1) + np.sum(Q, axis=1)) # row sum of torques
     
-        # stash the flapping information for plotting
-        self.a1s = a1s
-        self.b1s = b1s
+        # # stash the flapping information for plotting
+        # self.a1s = a1s
+        # self.b1s = b1s
         
         return np.r_[dz, dn, dv, do]  # This is the state derivative vector
+
+# ------------------------------------------------------------------------ #
+
+class MultiRotorMixer(FunctionBlock):
+    """
+    :blockname:`MULTIROTORMIXER`
+    
+    .. table::
+       :align: left
+    
+       +--------+---------+---------+
+       | inputs | outputs |  states |
+       +--------+---------+---------+
+       | 4      | 1       | 0       |
+       +--------+---------+---------+
+       | float  |         |         | 
+       +--------+---------+---------+
+    """
+ 
+    nin = 4
+    nout = 1
+    inlabels = ('𝛕r', '𝛕p', '𝛕y', 'T')
+    outlabels = ('ω',)
+
+    def __init__(self, maxw=1000, minw=5, **kwargs):
+        """
+        Create a block that displays/animates a multi-rotor flying vehicle.
+
+        :param maxw: maximum rotor speed in rad/s, defaults to 1000
+        :type maxw: float
+        :param minw: minimum rotor speed in rad/s, defaults to 5
+        :type minw: float
+        :param ``**kwargs``: common Block options
+        :return: a MULTIROTORMIXER block
+        :rtype: MultiRotorMixer instance
+
+
+        **Block ports**
+        
+            :input 𝛕r: roll torque
+            :input 𝛕p: pitch torque
+            :input 𝛕y: yaw torque
+            :input T: total thrust
+
+            :output ω: 1D array of rotor speeds
+
+        Derived from Simulink model by Pauline Pounds 2004
+        """
+        super().__init__(inputs=inputs, **kwargs)
+        self.type = 'multirotormixer'
+        self.minw = minw
+        self.maxw = maxw
+
+    def output(self, t):
+        w = np.zeros((self.nrotors,))
+        tau = self.inputs
+        for i in self.nrotors:
+            # roll and pitch coupling
+            w[i] += -tau[0] * sin(self.theta[i]) + tau[1] * cos(self.theta[i])
+
+            # yaw coupling
+            sign = 1 if i % 1 == 0 else -1
+            w[i] += sign * tau[2]
+
+            # overall thrust
+            w[i] += tau[3] / self.nrotors
+
+        # clip the rotor speeds to the range [minw, maxw]
+        w = np.clip(w, self.minw, self.maxw)
+
+        # convert to thrust
+        w = np.sqrt(w) / self.model['b']
+
+        # negate alterate rotors to indicate counter-rotation
+        for i in self.nrotors:
+            if i % 1 == 0:
+                w[i] = -w[i]
+
+        return [w]
 
 
 # ------------------------------------------------------------------------ #
@@ -360,15 +442,18 @@ class MultiRotorPlot(GraphicsBlock):
         :param projection: 3D projection, one of: 'ortho' [default], 'perspective'
         :type projection: str
         :param ``**kwargs``: common Block options
-        :return: a MULTIROTOPLOT block
-        :rtype: MultiRobotPlot instance
+        :return: a MULTIROTORPLOT block
+        :rtype: MultiRotorPlot instance
 
 
         **Block ports**
         
-            :input ω: a dictionary signal that includes the item:
+            :input y: a dictionary signal that includes the item:
                 
                 - ``x`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
+                - ``X`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
+                - ``a1s``
+                - ``b1s``
 
         .. figure:: ../../figs/multirotorplot.png
            :width: 500px
@@ -386,7 +471,7 @@ class MultiRotorPlot(GraphicsBlock):
         self.projection = projection
         self.flapscale = flapscale
 
-    def start(self):
+    def start(self, state):
         quad = self.model
         
         # vehicle dimensons
@@ -411,6 +496,11 @@ class MultiRotorPlot(GraphicsBlock):
         self.ax.set_xlabel('X')
         self.ax.set_ylabel('Y')
         self.ax.set_zlabel('-Z (height above ground)')
+
+        self.panel = self.ax.text2D(0.05, 0.95, '', transform=self.ax.transAxes, 
+            fontsize=10, family='monospace', verticalalignment='top',
+            bbox=dict(boxstyle='round', facecolor='white', edgecolor='black'))
+
         
         # TODO allow user to set maximum height of plot volume
         self.ax.set_xlim(self.scale[0], self.scale[1])
@@ -418,8 +508,8 @@ class MultiRotorPlot(GraphicsBlock):
         self.ax.set_zlim(0, self.scale[4])
 
         # plot the ground boundaries and the big cross
-        self.ax.plot([self.scale[0], self.scale[2]], [self.scale[1], self.scale[3]], [0, 0], 'b-')
-        self.ax.plot([self.scale[0], self.scale[3]], [self.scale[1], self.scale[2]], [0, 0], 'b-')
+        self.ax.plot([self.scale[0], self.scale[1]], [self.scale[2], self.scale[3]], [0, 0], 'b-')
+        self.ax.plot([self.scale[0], self.scale[1]], [self.scale[3], self.scale[2]], [0, 0], 'b-')
         self.ax.grid(True)
         
         self.shadow, = self.ax.plot([0, 0], [0, 0], 'k--')
@@ -440,32 +530,32 @@ class MultiRotorPlot(GraphicsBlock):
         self.a1s = np.zeros((self.nrotors,))
         self.b1s = np.zeros((self.nrotors,))
 
-    def step(self):
+
+    def step(self, state):
 
         def plot3(h, x, y, z):
-            h.set_data(x, y)
-            h.set_3d_properties(z)
+            h.set_data_3d(x, y, z)
+            # h.set_data(x, y)
+            # h.set_3d_properties(np.r_[z])
             
         # READ STATE
-        z = self.inputs[0][0:3]
-        n = self.inputs[0][3:6]
+        z = self.inputs[0]['x'][0:3]
+        n = self.inputs[0]['x'][3:6]
         
         # TODO, check input dimensions, 12 or 12+2N, deal with flapping
         
-        a1s = self.a1s
-        b1s = self.b1s
+        a1s = self.inputs[0]['a1s']
+        b1s = self.inputs[0]['b1s']
         
         quad = self.model
         
         # vehicle dimensons
-        d = quad['d'];  # Hub displacement from COG
-        r = quad['r'];  # Rotor radius
+        d = quad['d']  # Hub displacement from COG
+        r = quad['r']  # Rotor radius
         
         # PREPROCESS ROTATION MATRIX
-        phi = n[0];    # Euler angles
-        the = n[1];
-        psi = n[2];
-        
+        phi, the, psi = n    # Euler angles
+
         # BBF > Inertial rotation matrix
         R = np.array([
                 [cos(the) * cos(phi), sin(psi) * sin(the) * cos(phi) - cos(psi) * sin(phi), cos(psi) * sin(the) * cos(phi) + sin(psi) * sin(phi)],   
@@ -512,7 +602,7 @@ class MultiRotorPlot(GraphicsBlock):
         hub0 = F @ z  # centre of vehicle
         for i in range(0, self.nrotors):
             # line from hub to centre plot3([hub(1,N) hub(1,S)],[hub(2,N) hub(2,S)],[hub(3,N) hub(3,S)],'-b')
-            plot3(self.arm[i], [hub[0,i], hub0[0]],[hub[1,i], hub0[1]],[hub[2,i], hub0[2]])
+            plot3(self.arm[i], [hub[0,i], hub0[0]], [hub[1,i], hub0[1]], [hub[2,i], hub0[2]])
             
             # plot a circle at the hub itself
             #plot3([hub(1,i)],[hub(2,i)],[hub(3,i)],'o')
@@ -520,5 +610,10 @@ class MultiRotorPlot(GraphicsBlock):
         # plot the vehicle's centroid on the ground plane
         plot3(self.shadow, [z[0], 0], [-z[1], 0], [0, 0])
         plot3(self.groundmark, z[0], -z[1], 0)
+
+        textstr = f"t={state.t: .2f}\nh={z[2]: .2f}\nγ={n[0]: .2f}"
+        self.panel.set_text(textstr)
+
+        super().step(state=state)
 
 
