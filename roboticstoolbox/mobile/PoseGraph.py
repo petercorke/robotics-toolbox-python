@@ -98,7 +98,7 @@ class PoseGraph:
         
         self.graph = pgraph.UGraph(verbose=verbose)
 
-        path = Path(rtb.path_to_datafile(filename))
+        path = Path(rtb.rtb_path_to_datafile(filename))
 
         if path.suffix == '.zip':
             zf = zipfile.ZipFile(path, 'r')

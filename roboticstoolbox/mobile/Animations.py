@@ -14,7 +14,7 @@ from matplotlib import patches
 import matplotlib.transforms as mtransforms
 
 from spatialmath import SE2, base
-from roboticstoolbox import rtb_loaddata
+from roboticstoolbox import rtb_load_data
 
 
 class VehicleAnimation(ABC):
