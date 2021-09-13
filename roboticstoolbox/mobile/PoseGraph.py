@@ -259,8 +259,10 @@ class PoseGraph:
     def scanxy(self, i):
         
         range, theta = self.scan(i)
+        range = np.where(range < self._maxrange, range, np.nan)
         x = range * np.cos(theta)
         y = range * np.sin(theta)
+
 
         return np.c_[x, y].T
     
