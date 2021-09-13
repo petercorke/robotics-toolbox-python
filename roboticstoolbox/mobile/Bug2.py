@@ -68,7 +68,7 @@ class Bug2(PlannerBase):
         return self._m_line
 
     # override query method of base class
-    def run(self, start=None, goal=None, animate=False, trail=True, movie=None, **kwargs):
+    def run(self, start=None, goal=None, animate=False, pause=0.001, trail=True, movie=None, **kwargs):
         """
         Find a path using Bug2 reactive navigation algorithm
         
@@ -122,7 +122,7 @@ class Bug2(PlannerBase):
         path = robot
         h = None
 
-        trail_line, = plt.plot(0, 0, 'y.')
+        trail_line, = plt.plot(0, 0, 'y.', label='robot path')
         trail_head, = plt.plot(0, 0, 'ko', zorder=10)
 
         # iterate using the next() method until we reach the goal
@@ -132,7 +132,8 @@ class Bug2(PlannerBase):
                 if trail:
                     trail_line.set_data(path.T)
 
-                plt.pause(0.001)
+                if pause > 0:
+                    plt.pause(pause)
                 # plt.draw()
                 # plt.show(block=False)
                 # plt.gcf().canvas.flush_events()
@@ -165,7 +166,7 @@ class Bug2(PlannerBase):
         if self._m_line[1] == 0:
             # handle the case that the line is vertical
             plt.plot([self._start[0], self._start[0]],
-                     [y_min, y_max], 'k--')
+                     [y_min, y_max], 'k--', label='m-line')
         else:
             # regular line
             x = np.array([
@@ -173,7 +174,7 @@ class Bug2(PlannerBase):
                 [x_max, 1]  ])
             y = -x @ np.r_[self._m_line[0], self._m_line[2]]
             y = y / self._m_line[1]
-            plt.plot([x_min, x_max], y, ls, zorder=10)
+            plt.plot([x_min, x_max], y, ls, zorder=10, label='m-line')
 
     def next(self, position):
 

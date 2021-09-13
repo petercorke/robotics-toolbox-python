@@ -19,7 +19,7 @@ motion controller,” arXiv preprint arXiv:2002.11901,2020.
 env = swift.Swift()
 
 # Launch the sim in chrome as only chrome supports webm videos
-env.launch(browser="google-chrome", realtime=True)
+env.launch('google-chrome')
 
 # Create a Panda robot object
 panda = rtb.models.Panda()
@@ -36,10 +36,10 @@ dt = 0.025
 # Start recording with a framerate of 1/dt and
 # call the video panda_swift_recording
 # Export video as a webm file (this only works in Chrome)
-env.start_recording("panda_swift_recording", 1 / dt)
+env.start_recording('panda_swift_recording', 1 / dt)
 
 # To export as a gif replace the above line with
-# env.start_recording("panda_swift_recording", 1 / dt, format="gif")
+# env.start_recording('panda_swift_recording', 1 / dt, format='gif')
 
 # To export as a tar folder of jpg captures replace with
 # env.start_recording('panda_swift_recording', 1 / dt, format='jpg')
@@ -68,7 +68,7 @@ while not arrived:
 
     # Calulate the required end-effector spatial velocity for the robot
     # to approach the goal. Gain is set to 1.0
-    v, arrived = rtb.p_servo(Te, Tep, np.ones(6))
+    v, arrived = rtb.p_servo(Te, Tep, 1.0)
 
     # Gain term (lambda) for control minimisation
     Y = 0.01
@@ -83,7 +83,7 @@ while not arrived:
     Q[n:, n:] = (1 / e) * np.eye(6)
 
     # The equality contraints
-    Aeq = np.c_[panda.jacob0(panda.q), np.eye(6)]
+    Aeq = np.c_[panda.jacobe(panda.q), np.eye(6)]
     beq = v.reshape((6,))
 
     # The inequality constraints for joint limit avoidance
@@ -119,6 +119,3 @@ while not arrived:
 
 # Stop recording and save the video (to the downloads folder)
 env.stop_recording()
-
-# Hold is required for gifs which take extra time to process
-# env.hold()

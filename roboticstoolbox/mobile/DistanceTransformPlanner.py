@@ -74,7 +74,7 @@ class DistanceTransformPlanner(PlannerBase):
     def goal_change(self, goal):
         self._distancemap = np.array([])
 
-    def plan(self, goal=None, animate=False):
+    def plan(self, goal=None, animate=False, verbose=False):
         # show = None
         # if animate:
         #     show = 0.05
@@ -88,7 +88,8 @@ class DistanceTransformPlanner(PlannerBase):
             raise ValueError('No goal specified here or in constructor')
 
         self._distancemap = distancexform(self.occgrid.grid,
-                goal=self._goal, metric=self._metric, animate=animate)
+                goal=self._goal, metric=self._metric, animate=animate,
+                verbose=verbose)
 
     # Use plot from parent class
 
@@ -155,25 +156,9 @@ class DistanceTransformPlanner(PlannerBase):
         return ax
 
 
-# Sourced from: https://stackoverflow.com/questions/28995146/matlab-ind2sub-equivalent-in-python/28995315#28995315
-def sub2ind(array_shape, rows, cols):
-    ind = rows*array_shape[1] + cols
-    ind[ind < 0] = -1
-    ind[ind >= array_shape[0]*array_shape[1]] = -1
-    return ind
-
-
-def ind2sub(array_shape, ind):
-    ind[ind < 0] = -1
-    ind[ind >= array_shape[0]*array_shape[1]] = -1
-    rows = (ind.astype('int') / array_shape[1])
-    cols = ind % array_shape[1]
-    return rows, cols
-
-
 import numpy as np
 
-def distancexform(occgrid, goal, metric='cityblock', animate=False):
+def distancexform(occgrid, goal, metric='cityblock', animate=False, verbose=False):
     """
     Distance transform for path planning
 
@@ -273,7 +258,8 @@ def distancexform(occgrid, goal, metric='cityblock', animate=False):
 
         ninf = ninfnow
 
-    print(f"{count:d} iterations, {ninf:d} unreachable cells")
+    if verbose:
+        print(f"{count:d} iterations, {ninf:d} unreachable cells")
     return distance
 
 def grassfire_step(G, D):
@@ -311,7 +297,7 @@ if __name__ == "__main__":
     # print(dx)
 
 
-    from roboticstoolbox import DistanceTransformPlanner, loadmat
+    from roboticstoolbox import DistanceTransformPlanner, rtb_loadmat
 
     house = rtb_loadmat('data/house.mat')
     floorplan = house['floorplan']
@@ -321,4 +307,5 @@ if __name__ == "__main__":
     print(dx)
     dx.goal = [1,2]
     dx.plan(places.kitchen)
-    dx.plot()
+    path = dx.query(places.br3)
+    dx.plot(path, block=True)

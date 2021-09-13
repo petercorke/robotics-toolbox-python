@@ -3,8 +3,7 @@ import sys
 import importlib
 
 
-
-def rtb_loadmat(filename):
+def rtb_load_matfile(filename):
     """
     Load toolbox mat format data file
 
@@ -27,9 +26,33 @@ def rtb_loadmat(filename):
     """
     from scipy.io import loadmat
 
-    return rtb_loaddata(filename, loadmat, squeeze_me=True, struct_as_record=False)
+    return rtb_load_data(filename, loadmat, squeeze_me=True, struct_as_record=False)
 
-def rtb_loaddata(filename, handler, **kwargs):
+def rtb_load_jsonfile(filename):
+    """
+    Load toolbox JSON format data file
+
+    :param filename: relative pathname of datafile
+    :type filename: str
+    :raises ValueError: File does not exist
+    :return: contents of JSON data file
+    :rtype: dict
+
+    Reads a JSON format file which can contain multiple variables and return
+    a dict where the keys are the variable
+    names and the values are NumPy arrays.
+
+    .. note::
+        - If the filename has no path component, eg. ``map1.mat`, it will be 
+          first be looked for in the folder ``roboticstoolbox/data``.
+    
+    :seealso: :func:`path_to_datafile`
+    """
+    import json
+
+    return rtb_load_data(filename, lambda f: json.load(open(f, 'r')))
+
+def rtb_load_data(filename, handler, **kwargs):
     """
     Load toolbox data file
 
@@ -47,7 +70,7 @@ def rtb_loaddata(filename, handler, **kwargs):
 
     For example::
 
-        data = rtb_loaddata('data/queensland.json', lambda f: json.load(open(f, 'r')))
+        data = rtb_load_data('data/queensland.json', lambda f: json.load(open(f, 'r')))
 
     
     .. note:: If the filename has no path component, eg. ``foo.dat``, it will 

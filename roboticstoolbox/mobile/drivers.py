@@ -120,8 +120,11 @@ class RandomPath(VehicleDriver):
         
         # TODO options to specify region, maybe accept a Map object?
         
-
-        self._workspace = base.expand_dims(workspace)
+        if hasattr(workspace, 'workspace'):
+            # workspace can be defined by an object with a workspace attribute
+            self._workspace = base.expand_dims(workspace.workspace)
+        else:
+            self._workspace = base.expand_dims(workspace)
 
         self._speed = speed
         self._dthresh = dthresh * np.diff(self._workspace[0:2])
@@ -131,6 +134,7 @@ class RandomPath(VehicleDriver):
                 'marker': 'D',
                 'markersize': 6, 
                 'color': 'r',
+                'linestyle': 'None',
                 }
         else:
             self._goal_marker_style = goalmarkerstyle
@@ -230,7 +234,7 @@ class RandomPath(VehicleDriver):
         # delete(driver.h_goal);   % delete the goal
         # driver.h_goal = [];
         if ax is not None:
-            self._goal_marker = plt.plot(np.nan, np.nan, **self._goal_marker_style)[0]
+            self._goal_marker = plt.plot(np.nan, np.nan, **self._goal_marker_style, label='random waypoint')[0]
 
     def demand(self):
         """

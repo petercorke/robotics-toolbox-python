@@ -15,12 +15,13 @@ import matplotlib.transforms as mtransforms
 
 from spatialmath import SE2, base
 from roboticstoolbox.mobile.drivers import VehicleDriver
-from roboticstoolbox.mobile.animations import VehiclePolygon
+from roboticstoolbox.mobile.Animations import VehiclePolygon
 
 
-class Vehicle(ABC):
-    def __init__(self, covar=None, speed_max=np.inf, accel_max=np.inf, x0=None, dt=0.1,
-                 control=None, seed=0, animation=None, verbose=False, plot=False, workspace=None):
+class VehicleBase(ABC):
+    def __init__(self, covar=None, speed_max=np.inf, accel_max=np.inf, x0=[0, 0, 0], dt=0.1,
+                 control=None, seed=0, animation=None, verbose=False, plot=False, workspace=None,
+                 polygon=None):
         r"""
         Superclass for vehicle kinematic models
 
@@ -62,13 +63,14 @@ class Vehicle(ABC):
             if len(x0) not in (2,3):
                 raise ValueError('x0 must be length 2 or 3')
         self._x0 = x0
-        self._x = x0
+        self._x = x0.copy()
 
         self._random = np.random.default_rng(seed)
         self._seed = seed
         self._speed_max = speed_max
         self._accel_max = accel_max
         self._v_prev = 0
+        self._polygon = polygon
 
         if isinstance(animation, str):
             animation = VehiclePolygon(animation)
@@ -84,6 +86,9 @@ class Vehicle(ABC):
 
         self._verbose = verbose
         self._plot = False
+
+        self._control = None
+        self._x_hist = []
 
         if workspace:
             self._workspace = base.expand_dims(workspace)
@@ -111,10 +116,25 @@ class Vehicle(ABC):
         Returns the bounds of the workspace as specified by constructor
         option ``workspace``
         """
-        return self._workspace
+
+        # get workspace specified for Vehicle or from its driver
+        if self._workspace is not None:
+            return self._workspace
+        if self._control is not None:
+            return self._control._workspace
 
     @property
     def x(self):
+        """
+        Get vehicle state/configuration (superclass method)
+
+        :return: Vehicle state :math:`(x, y, \theta)`
+        :rtype: ndarray(3)
+        """
+        return self._x
+
+    @property
+    def q(self):
         """
         Get vehicle state/configuration (superclass method)
 
@@ -140,7 +160,7 @@ class Vehicle(ABC):
         """
         return self._x0
 
-    @property
+    @x0.setter
     def x0(self, x0):
         """
         Set vehicle initial state/configuration (superclass method)
@@ -288,9 +308,7 @@ class Vehicle(ABC):
         Control can be:
 
             * a constant tuple as the control inputs to the vehicle
-            * a function called as ``f(vehicle, t, x)`` that returns a tuple
-            * an interpolator called as f(t) that returns a tuple, see
-              SciPy interp1d
+
             * a driver agent, subclass of :func:`VehicleDriver`
 
         Example:
@@ -303,11 +321,17 @@ class Vehicle(ABC):
 
         :seealso: :func:`eval_control`, :func:`RandomPath`, :func:`PurePursuit`
         """
+        # * a function called as ``f(vehicle, t, x)`` that returns a tuple
+        # * an interpolator called as f(t) that returns a tuple, see
+        #   SciPy interp1d
+
         self._control = control
         if isinstance(control, VehicleDriver):
             # if this is a driver agent, connect it to the vehicle
             control.vehicle = self
 
+    def polygon(self, q):
+        return self._polygon.transformed(SE2(q))
 
     # This function is overridden by the child class
     @abstractmethod
@@ -399,7 +423,7 @@ class Vehicle(ABC):
         if x0 is not None:
             self._x = base.getvector(x0, 3)
         else:
-            self._x = self._x0
+            self._x = self._x0.copy()
 
         self._x_hist = []
 
@@ -407,6 +431,7 @@ class Vehicle(ABC):
             self._random = np.random.default_rng(self._seed)
 
         if control is not None:
+            # override control
             self._control = control
         
         if self._control is not None:
@@ -418,12 +443,12 @@ class Vehicle(ABC):
         if self._animation is not None:
 
             # setup the plot
-            self._ax = base.plotvol2(self._workspace)
+            self._ax = base.plotvol2(self.workspace)
         
             self._ax.set_xlabel('x')
             self._ax.set_ylabel('y')
             self._ax.set_aspect('equal')
-            self._ax.figure.canvas.set_window_title(
+            self._ax.figure.canvas.manager.set_window_title(
                 f"Robotics Toolbox for Python (Figure {self._ax.figure.number})")
 
             self._animation.add(ax=self._ax)  # add vehicle animation to axis
@@ -433,16 +458,15 @@ class Vehicle(ABC):
         if isinstance(self._control, VehicleDriver):
             self._control.init(ax=self._ax)
 
-    def step(self, u1=None, u2=None):
+    def step(self, u=None, animate=False):
         """
         Step simulator by one time step (superclass method)
 
         :return: odometry :math:`(\delta_d, \delta_\theta)`
         :rtype: ndarray(2)
 
-        - ``veh.step(vel, steer)`` for a Bicycle vehicle model
-        - ``veh.step((vel, steer))`` as above but control is a tuple
-        - ``veh.step(vel, vel_diff)`` for a Unicycle vehicle model
+        - ``veh.step((vel, steer))`` for a Bicycle vehicle model
+        - ``veh.step((vel, vel_diff))`` for a Unicycle vehicle model
         - ``veh.step()`` as above but control is taken from the ``control``
           attribute which might be a function or driver agent.
 
@@ -466,11 +490,8 @@ class Vehicle(ABC):
         :seealso: :func:`control`, :func:`update`, :func:`run`
         """
         # determine vehicle control
-        if u1 is not None:
-            if u2 is not None:
-                u = self.eval_control((u1, u2), self._x)
-            else:
-                u = self.eval_control(u1, self._x)
+        if u is not None:
+            u = self.eval_control(u, self._x)
         else:
             u = self.eval_control(self._control, self._x)
 
@@ -490,7 +511,7 @@ class Vehicle(ABC):
             odo += self.random.multivariate_normal((0, 0), self._V)
 
         # do the graphics
-        if self._animation:
+        if animate and self._animation:
             self._animation.update(self._x)
             if self._timer is not None:
                 self._timer.set_text(f"t = {self._t:.2f}")
@@ -501,7 +522,6 @@ class Vehicle(ABC):
         # be verbose
         if self._verbose:
             print(f"{self._t:8.2f}: u=({u[0]:8.2f}, {u[1]:8.2f}), x=({self._x[0]:8.2f}, {self._x[1]:8.2f}, {self._x[2]:8.2f})")
-
 
         return odo
 
@@ -595,6 +615,8 @@ class Vehicle(ABC):
         base.plot_poly(SE2(x) * vertices, close=True, **kwargs)
 
     def plot_xy(self, *args, block=False, **kwargs):
+        if args is None and 'color' not in kwargs:
+            kwargs['color'] = 'b'
         xyt = self.x_hist
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
         plt.show(block=block)
@@ -620,14 +642,17 @@ class Vehicle(ABC):
             is reset at the start of each simulation.
         """
         # acceleration limit
-        if (v - self._v_prev) / self._dt > self._accel_max:
-            v = self._v_prev + self._accelmax * self._dt;
-        elif (v - self._v_prev) / self._dt < -self._accel_max:
-            v = self._v_prev - self._accel_max * self._dt;
+        if self._accel_max is not None:
+            if (v - self._v_prev) / self._dt > self._accel_max:
+                v = self._v_prev + self._accelmax * self._dt;
+            elif (v - self._v_prev) / self._dt < -self._accel_max:
+                v = self._v_prev - self._accel_max * self._dt;
         self._v_prev = v
         
         # speed limit
-        return min(self._speed_max, max(v, -self._speed_max));
+        if self._speed_max is not None:
+            v = np.clip(v, -self._speed_max, self._speed_max)
+        return v
 
 
     def path(self, t=10, u=None, x0=None):
@@ -681,18 +706,18 @@ class Vehicle(ABC):
         return (sol.t, sol.y.T)
 # ========================================================================= #
 
-class Bicycle(Vehicle):
+class Bicycle(VehicleBase):
 
     def __init__(self,
-                l=1,
+                L=1,
                 steer_max=0.45 * pi,
                 **kwargs
                 ):
         r"""
         Create new bicycle kinematic model
 
-        :param l: wheel base, defaults to 1
-        :type l: float, optional
+        :param L: wheel base, defaults to 1
+        :type L: float, optional
         :param steer_max: [description], defaults to :math:`0.45\pi`
         :type steer_max: float, optional
         :param **kwargs: additional arguments passed to :class:`Vehicle`
@@ -702,7 +727,7 @@ class Bicycle(Vehicle):
         """
         super().__init__(**kwargs)
 
-        self._l = l
+        self._l = L
         self._steer_max = steer_max
 
     def __str__(self):
@@ -867,7 +892,7 @@ class Bicycle(Vehicle):
         # fmt: on
         return J
 
-    def deriv(self, x, u):
+    def deriv(self, x, u, limits=True):
         r"""
         Time derivative of state
 
@@ -880,12 +905,13 @@ class Bicycle(Vehicle):
 
         Returns the time derivative of state (3x1) at the state ``x`` with 
         inputs ``u``.
-
-        .. note:: Vehicle speed and steering limits are not applied here
         """
         
         # unpack some variables
         theta = x[2]
+
+        if limits:
+            u = self.u_limited(u)
         v = u[0]
         gamma = u[1]
             
@@ -900,29 +926,29 @@ class Bicycle(Vehicle):
         # limit speed and steer angle
         ulim = np.array(u)
         ulim[0] = self.limits_va(u[0])
-        ulim[1] = np.maximum(-self._steer_max, np.minimum(self._steer_max, u[1]))
+        ulim[1] = np.clip(u[1], -self._steer_max, self._steer_max)
 
         return ulim
 
 # ========================================================================= #
 
-class Unicycle(Vehicle):
+class Unicycle(VehicleBase):
 
     def __init__(self,
-                w=1,
+                W=1,
                 **kwargs):
         r"""
         Create new unicycle kinematic model
 
-        :param w: vehicle width, defaults to 1
-        :type w: float, optional
+        :param W: vehicle width, defaults to 1
+        :type W: float, optional
         :param **kwargs: additional arguments passed to :class:`Vehicle`
             constructor
 
         :seealso: :class:`.Vehicle`
         """
         super().__init__(**kwargs)
-        self._w = w
+        self._w = W
 
     def __str__(self):
 
@@ -1070,39 +1096,52 @@ class Unicycle(Vehicle):
 
         return ulim
 
+class DiffSteer(Unicycle):
+    pass
 
 if __name__ == "__main__":
-    from math import pi
 
-    V = np.diag(np.r_[0.02, 0.5 * pi / 180] ** 2)
+    from roboticstoolbox import RandomPath
 
-    v = VehiclePolygon()
-    # v = VehicleIcon('greycar2', scale=2, rotation=90)
+    V = np.eye(2) * 0.001
+    robot = Bicycle(covar=V, animation="car")
+    odo = robot.step((1, 0.3), animate=False)
 
-    veh = Bicycle(covar=V, animation=v, control=RandomPath(10), verbose=False)
-    print(veh)
+    robot.control = RandomPath(workspace=10)
 
-    odo = veh.step(1, 0.3)
-    print(odo)
+    robot.run(T=10)
 
-    print(veh.x)
+    # from math import pi
 
-    print(veh.f([0, 0, 0], odo))
+    # V = np.diag(np.r_[0.02, 0.5 * pi / 180] ** 2)
 
-    def control(v, t, x):
-        goal = (6,6)
-        goal_heading = atan2(goal[1]-x[1], goal[0]-x[0])
-        d_heading = base.angdiff(goal_heading, x[2])
-        v.stopif(base.norm(x[0:2] - goal) < 0.1)
+    # v = VehiclePolygon()
+    # # v = VehicleIcon('greycar2', scale=2, rotation=90)
 
-        return (1, d_heading)
+    # veh = Bicycle(covar=V, animation=v, control=RandomPath(10), verbose=False)
+    # print(veh)
 
-    veh.control=RandomPath(10)
-    p = veh.run(1000, plot=True)
-    # plt.show()
-    print(p)
+    # odo = veh.step(1, 0.3)
+    # print(odo)
 
-    veh.plot_xyt_t()
+    # print(veh.x)
+
+    # print(veh.f([0, 0, 0], odo))
+
+    # def control(v, t, x):
+    #     goal = (6,6)
+    #     goal_heading = atan2(goal[1]-x[1], goal[0]-x[0])
+    #     d_heading = base.angdiff(goal_heading, x[2])
+    #     v.stopif(base.norm(x[0:2] - goal) < 0.1)
+
+    #     return (1, d_heading)
+
+    # veh.control=RandomPath(10)
+    # p = veh.run(1000, plot=True)
+    # # plt.show()
+    # print(p)
+
+    # veh.plot_xyt_t()
     # veh.plot(p)
 
     # t, x = veh.path(5, u=control)

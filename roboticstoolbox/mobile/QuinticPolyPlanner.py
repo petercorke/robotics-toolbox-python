@@ -36,7 +36,7 @@ from roboticstoolbox.mobile.PlannerBase import PlannerBase
 show_animation = True
 
 
-class _QuinticPolynomial:
+class QuinticPolynomial:
 
     def __init__(self, xs, vxs, axs, xe, vxe, axe, time):
         # calc coefficient of quintic polynomial
@@ -120,8 +120,8 @@ def quintic_polynomials_planner(sx, sy, syaw, sv, sa, gx, gy, gyaw, gv, ga, max_
     time, rx, ry, ryaw, rv, ra, rj = [], [], [], [], [], [], []
 
     for T in np.arange(MIN_T, MAX_T, MIN_T):
-        xqp = _QuinticPolynomial(sx, vxs, axs, gx, vxg, axg, T)
-        yqp = _QuinticPolynomial(sy, vys, ays, gy, vyg, ayg, T)
+        xqp = QuinticPolynomial(sx, vxs, axs, gx, vxg, axg, T)
+        yqp = QuinticPolynomial(sy, vys, ays, gy, vyg, ayg, T)
 
         time, rx, ry, ryaw, rv, ra, rj = [], [], [], [], [], [], []
 

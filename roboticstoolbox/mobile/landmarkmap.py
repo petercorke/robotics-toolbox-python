@@ -124,7 +124,7 @@ class LandmarkMap:
         """
         return self._map[:,k]
 
-    def plot(self, block=False, **kwargs):
+    def plot(self, block=False, labels=False, **kwargs):
         """
         Plot the map
         %
@@ -148,10 +148,19 @@ class LandmarkMap:
             kwargs = {
                 'linewidth': 0,
                 'marker': 'x',
-                'color': 'b',
+                'color': 'black',
+                'linestyle': 'None',
             }
 
-        plt.plot(self._map[0,:], self._map[1,:], **kwargs)
+        if 'label' not in kwargs:
+            kwargs['label'] = 'landmark'
+
+        # plt.plot(self._map[0,:], self._map[1,:], , **kwargs)
+        if labels:
+            labels = "#{}"
+        else:
+            labels = None
+        base.plot_point(self._map, text=labels, **kwargs)
         plt.grid(True)
         plt.show(block=block)
 
