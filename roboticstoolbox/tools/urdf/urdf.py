@@ -1693,37 +1693,22 @@ class URDF(URDFType):
             rot = joint.rpy
 
             # Check if axis of rotation/tanslation is not 1
-            # if np.sum(np.abs(np.array(joint.axis))) == 1 and 1 in np.abs(
-            #     np.array(joint.axis)
-            # ):
-            #     print("not")
-            childlink._ets = rtb.ETS.SE3(trans, rot)
-            # else:
+            if np.sum(np.abs(np.array(joint.axis))) == 1 and 1 in np.abs(
+                np.array(joint.axis)
+            ):
+                childlink._ets = rtb.ETS.SE3(trans, rot)
+            else:
+                # Normalise the joint axis to be along or about z axis
+                # Convert rest to static ETS
+                v = joint.axis
+                u, n = sm.base.unitvec_norm(v)
+                R = sm.base.angvec2r(n, u)
 
-            # phi = np.arctan2(
-            #     np.sqrt(joint.axis[0] * joint.axis[0] + joint.axis[1] * joint.axis[1]),
-            #     joint.axis[2],
-            # )
-            # print(phi)
-            # theta = np.arctan2(joint.axis[1], -joint.axis[0])
-            # print(theta)
+                R_total = sm.SE3.RPY(joint.rpy) * R
+                rpy = sm.base.tr2rpy(R_total)
 
-            # joint.axis = [1, 0, 0]
-
-            # new_axis = [0, 0, 1]
-
-            # v = np.cross(joint.axis, new_axis)
-            # theta = np.arccos(np.dot(joint.axis, new_axis))
-            # new_rot = sm.SO3.AngVec(theta, v)
-
-            # print(joint.axis)
-            # print(new_rot.rpy())
-
-            # childlink._ets = rtb.ETS.SE3(trans, rot) * rtb.ETS.SE3(
-            #     [0, 0, 0], new_rot.rpy()
-            # )
-
-            # joint.axis = [0, 0, 1]
+                childlink._ets = rtb.ETS.SE3(trans, rpy)
+                joint.axis = [0, 0, 1]
 
             childlink._init_Ts()
 
