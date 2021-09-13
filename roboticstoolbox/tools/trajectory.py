@@ -172,14 +172,14 @@ class Trajectory:
             # accel phase
             tf = self.t[-1]
             k = self.t <= self.tblend
-            ax.plot(self.t[k], self.s[k], color="red", **plotopts)
+            ax.plot(self.t[k], self.s[k], color="red", label="acceleration", **plotopts)
 
             # coast phase
             k = (self.t > self.tblend) & (self.t <= (tf - self.tblend))
             ax.plot(self.t[k], self.s[k], color="green", **plotopts)
             k = np.where(k)[0][0]
             ax.plot(
-                self.t[k - 1 : k + 1], self.s[k - 1 : k + 1], color="green", **plotopts
+                self.t[k - 1 : k + 1], self.s[k - 1 : k + 1], color="green", label="linear", **plotopts
             )
 
             # decel phase
@@ -187,7 +187,7 @@ class Trajectory:
             ax.plot(self.t[k], self.s[k], color="blue", **plotopts)
             k = np.where(k)[0][0]
             ax.plot(
-                self.t[k - 1 : k + 1], self.s[k - 1 : k + 1], color="blue", **plotopts
+                self.t[k - 1 : k + 1], self.s[k - 1 : k + 1], color="blue", label="deceleration", **plotopts
             )
 
             ax.grid(True)
