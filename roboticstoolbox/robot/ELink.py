@@ -61,6 +61,10 @@ class BaseELink(Link):
 
     def copy(self, parent=None):
         new = super().copy()
+
+        new._geometry = [shape.copy() for shape in self._geometry]
+        new._collision = [shape.copy() for shape in self._collision]
+
         # invalidate references to parent, child
         new._parent = parent
         new._children = []

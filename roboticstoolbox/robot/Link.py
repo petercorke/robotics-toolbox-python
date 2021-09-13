@@ -170,8 +170,9 @@ class Link(ABC):
             if k.startswith("_") and isinstance(v, np.ndarray):
                 setattr(new, k, np.copy(v))
 
-        new._geometry = [shape.copy() for shape in self._geometry]
-        new._collision = [shape.copy() for shape in self._collision]
+        # if isinstance(self, rtb.ELink):
+        #     new._geometry = [shape.copy() for shape in self._geometry]
+        #     new._collision = [shape.copy() for shape in self._collision]
 
         # print(new._geometry[0]._wT)
         # print(self._geometry[0]._wT)
