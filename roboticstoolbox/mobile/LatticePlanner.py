@@ -3,8 +3,8 @@ import numpy as np
 from spatialmath import SE2
 import matplotlib.pyplot as plt
 import itertools
-from roboticstoolbox.mobile.OccGrid import OccupancyGrid
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
+from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
 from collections import namedtuple
 
 def make_arc(dir, radius=1, npoints=20):
@@ -51,10 +51,25 @@ class LatticeEdge(Edge):
         self.move = move
         self.arc = arcs[move]
 
-    def plot(self, **kwargs):
+    def plot(self, configspace=False, unwrap=False, **kwargs):
         T = self.pose
         xy = self.pose * self.arc
-        plt.plot(xy[0, :], xy[1, :], **kwargs)
+        if configspace:
+            # 3D plot
+            theta0 = self.pose.theta()
+            if self.move == 'L':
+                thetaf = theta0 + np.pi / 2
+            elif self.move == 'R':
+                thetaf = theta0 - np.pi / 2
+            elif self.move == 'S':
+                thetaf = theta0
+            theta = np.linspace(theta0, thetaf, self.arc.shape[1])
+            if unwrap:
+                theta = np.unwrap(theta)
+            plt.plot(xy[0, :], xy[1, :], theta, **kwargs)
+        else:
+            # 2D plot
+            plt.plot(xy[0, :], xy[1, :], **kwargs)
 
 
 class LatticePlanner(PlannerBase):
@@ -250,25 +265,57 @@ class LatticePlanner(PlannerBase):
         return np.array([p.coord for p in path]), status(cost, segments, edges)
 
     def plot(self, path=None, **kwargs):
-        super().plot(twod=True, **kwargs)
+        super().plot(**kwargs)
         
-        for k, vertex in enumerate(self.graph):
-            # for every node
-            if k == 0:
-                plt.plot(vertex.coord[0], vertex.coord[1], 'k>', markersize=10)
-            else:
-                plt.plot(vertex.coord[0], vertex.coord[1], 'bo')
+        if kwargs.get('configspace', False):
 
-        for edge in self.graph.edges():
-            edge.plot(color='k')
+            # 3D plot
+            for k, vertex in enumerate(self.graph):
+                # for every node
+                if k == 0:
+                    plt.plot(vertex.coord[0], vertex.coord[1], vertex.coord[2], 'k>', markersize=10)
+                else:
+                    plt.plot(vertex.coord[0], vertex.coord[1], vertex.coord[2], 'bo')
 
-        if path is not None:
-            for p, n in zip(path[:-1], path[1:]):
-                # turn coordinaets back into vertices
-                vp, _ = self.graph.closest(p)
-                vn, _ = self.graph.closest(n)
-                e = vp.edgeto(vn)
-                e.plot(color='b', linewidth=4)
+            for edge in self.graph.edges():
+                edge.plot(color='k', **kwargs)
+
+            if path is not None:
+                for p, n in zip(path[:-1], path[1:]):
+                    # turn coordinaets back into vertices
+                    vp, _ = self.graph.closest(p)
+                    vn, _ = self.graph.closest(n)
+                    e = vp.edgeto(vn)
+
+                    #e.plot(color='b', linewidth=4)
+                    
+                    e.plot(color='k', linewidth=4)
+                    e.plot(color='yellow', linewidth=3, dashes=(4,4))
+        else:
+            # 2D plot
+            for k, vertex in enumerate(self.graph):
+                # for every node
+                if k == 0:
+                    plt.plot(vertex.coord[0], vertex.coord[1], 'k>', markersize=10)
+                else:
+                    plt.plot(vertex.coord[0], vertex.coord[1], 'bo')
+
+            for edge in self.graph.edges():
+                edge.plot(color='k')
+
+            if path is not None:
+                for p, n in zip(path[:-1], path[1:]):
+                    # turn coordinaets back into vertices
+                    vp, _ = self.graph.closest(p)
+                    vn, _ = self.graph.closest(n)
+                    e = vp.edgeto(vn)
+
+                    #e.plot(color='b', linewidth=4)
+                    
+                    e.plot(color='k', linewidth=4)
+                    e.plot(color='yellow', linewidth=3, dashes=(4,4))
+
+
 
 if __name__ == "__main__":
 

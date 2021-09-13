@@ -8,6 +8,7 @@ TODO: Bug-fix, testing
 
 from abc import ABC
 from scipy import integrate
+from scipy.ndimage import interpolation
 from spatialmath.base.transforms2d import *
 from spatialmath.base.vectors import *
 from spatialmath import SE2, SE3
@@ -20,6 +21,11 @@ from roboticstoolbox.mobile.OccGrid import BaseOccupancyGrid, BinaryOccupancyGri
 from roboticstoolbox.mobile.Animations import VehiclePolygon
 from colored import fg, attr
 
+try:
+    from progress.bar import FillingCirclesBar
+    _progress = True
+except:
+    _progress = False
 
 class PlannerBase(ABC):
     r"""
@@ -56,7 +62,7 @@ class PlannerBase(ABC):
 
     def __init__(self, occgrid=None, inflate=0, ndims=None,
                  verbose=False, msgcolor='yellow', 
-                 marker=None, seed=None, **unused):
+                 progress=True, marker=None, seed=None, **unused):
 
         self._occgrid = None
         if ndims is None:
@@ -70,6 +76,7 @@ class PlannerBase(ABC):
         self._start = None
         self._goal = None
 
+        self._progress = progress and _progress
 
         self.marker = marker
 
@@ -99,6 +106,9 @@ class PlannerBase(ABC):
         if self._goal is not None:
             s += f"\n  Goal: {self.goal}"
         return s
+
+    def __repr__(self):
+        return str(self)
 
     @property
     def occgrid(self):
@@ -254,6 +264,16 @@ class PlannerBase(ABC):
                 raise ValueError("Point is inside obstacle")
         return p
 
+    def progress_start(self, n):
+        self._bar = FillingCirclesBar(self.__class__.__name__, max=n, 
+            suffix = '%(percent).1f%% - %(eta)ds')
+
+    def progress_next(self):
+        self._bar.next()
+
+    def progress_end(self):
+        self._bar.finish()
+
     def query(self, start=None, goal=None, dtype=None, next=True, animate=False, movie=None):
         """
         Find a path from start to goal using plan (superclass)
@@ -302,7 +322,7 @@ class PlannerBase(ABC):
                 # are we are done?
                 if robot is None:
                     path.append(self._goal)
-                    return np.array(path).astype(int).T
+                    return np.array(path).astype(int)
 
                 path.append(robot)
 
@@ -321,7 +341,7 @@ class PlannerBase(ABC):
         Plot vehicle path
 
         :param path: path, defaults to None
-        :type path: ndarray(2, N) or ndarray(3, N)
+        :type path: ndarray(N, 2) or ndarray(N, 3)
         :param style: line style: 'striped' [default] or 'line'
         :type style: str
         :param stripe: striped line style for forward motion
@@ -447,10 +467,11 @@ class PlannerBase(ABC):
 
         ndims = self._ndims
 
-        if ndims == 3 and not configspace and path is not None:
-            path0 = path
-            path = path[:2, :]
+        if ndims == 3 and not configspace:
             ndims = 2
+            if path is not None:
+                path = path[:, :2]
+            
 
         if configspace and ndims < 3 and path is not None:
             raise ValueError(f"path should have {ndims} rows")
@@ -467,7 +488,7 @@ class PlannerBase(ABC):
                 # 2D case
                 if direction is not None:
                     direction = np.array(direction)
-                    if direction.shape[0] != path.shape[1]:
+                    if direction.shape[0] != path.shape[0]:
                         raise ValueError('direction vector must have same length as path')
 
                     while len(direction) > 0:
@@ -483,33 +504,33 @@ class PlannerBase(ABC):
                                 xstripe = stripe
                             else:
                                 xstripe = stripe_r
-                            ax.plot(path[0, :k], path[1, :k], color=xstripe[0][0], linewidth=xstripe[0][1])
-                            ax.plot(path[0, :k], path[1, :k], color=xstripe[1][0], linewidth=xstripe[1][1], dashes=(5,5))
+                            ax.plot(path[:k, 0], path[:k, 1], color=xstripe[0][0], linewidth=xstripe[0][1])
+                            ax.plot(path[:k, 0], path[:k, 1], color=xstripe[1][0], linewidth=xstripe[1][1], dashes=(5,5))
                         elif style == 'line':
                             if dir > 0:
-                                ax.plot(path[0, :], path[1, :], **line)
+                                ax.plot(path[:, 0], path[:, 1], **line)
                             else:
-                                ax.plot(path[0, :], path[1, :], **line_r)
+                                ax.plot(path[:, 0], path[:, 1], **line_r)
 
                         if len(change) == 0:
                             break
                         direction = direction[k-1:]
                         direction[0] = direction[1]
-                        path = path[:, k-1:]
+                        path = path[k-1:, :]
 
                 else:
                     if style == 'striped':
-                        ax.plot(path[0, :], path[1, :], color=stripe[0][0], linewidth=stripe[0][1])
-                        ax.plot(path[0, :], path[1, :], color=stripe[1][0], linewidth=stripe[1][1], dashes=(5,5))
+                        ax.plot(path[:, 0], path[:, 1], color=stripe[0][0], linewidth=stripe[0][1], zorder=9)
+                        ax.plot(path[:, 0], path[:, 1], color=stripe[1][0], linewidth=stripe[1][1], dashes=(5,5), zorder=9)
                     elif style == 'line':
-                        ax.plot(path[0, :], path[1, :], **kwargs)
+                        ax.plot(path[:, 0], path[:, 1], **kwargs)
             elif ndims == 3:
                 # 3D case
                 if direction is not None:
                     direction = np.array(direction)
-                    if direction.shape[0] != path.shape[1]:
+                    if direction.shape[0] != path.shape[0]:
                         raise ValueError('direction vector must have same length as path')
-                    theta = path[2, :]
+                    theta = path[:, 2]
                     if unwrap:
                         theta = np.unwrap(theta)
 
@@ -527,30 +548,30 @@ class PlannerBase(ABC):
                                 xstripe = stripe
                             else:
                                 xstripe = stripe_r
-                            ax.plot(path[0, :k], path[1, :k], theta[:k], color=xstripe[0][0], linewidth=xstripe[0][1])
-                            ax.plot(path[0, :k], path[1, :k], theta[:k], color=xstripe[1][0], linewidth=xstripe[1][1], dashes=(5,5))
+                            ax.plot(path[:k, 0], path[:k, 1], theta[:k], color=xstripe[0][0], linewidth=xstripe[0][1])
+                            ax.plot(path[:k, 0], path[:k, 1], theta[:k], color=xstripe[1][0], linewidth=xstripe[1][1], dashes=(5,5))
                         elif style == 'line':
                             if dir > 0:
-                                ax.plot(path[0, :], path[1, :], **line)
+                                ax.plot(path[:, 0], path[:, 1], **line)
                             else:
-                                ax.plot(path[0, :], path[1, :], **line_r)
+                                ax.plot(path[:, 0], path[:, 1], **line_r)
 
                         if len(change) == 0:
                             break
                         direction = direction[k-1:]
                         direction[0] = direction[1]
-                        path = path[:, k-1:]
+                        path = path[k-1:, :]
                         theta = theta[k-1:]
         
                 else:
-                    theta = path[2, :]
+                    theta = path[:, 2]
                     if unwrap:
                         theta = np.unwrap(theta)
                     if style == 'striped':
-                        ax.plot(path[0, :], path[1, :], theta, color=stripe[0][0], linewidth=stripe[0][1])
-                        ax.plot(path[0, :], path[1, :], theta, color=stripe[1][0], linewidth=stripe[1][1], dashes=(5,5))
+                        ax.plot(path[:, 0], path[:, 1], theta, color=stripe[0][0], linewidth=stripe[0][1])
+                        ax.plot(path[:, 0], path[:, 1], theta, color=stripe[1][0], linewidth=stripe[1][1], dashes=(5,5))
                     elif style == 'line':
-                        ax.plot(path[0, :], path[1, :], **line)
+                        ax.plot(path[:, 0], path[:, 1], **line)
 
         # mark start and goal if requested
         if start is not None:
@@ -652,7 +673,10 @@ class PlannerBase(ABC):
         if self._occgrid is None:
             return
 
-        ax = base.axes_logic(ax, 2)
+        if isinstance(self._occgrid, BaseOccupancyGrid):
+            ax = base.plotvol2(dim=self._occgrid.workspace, ax=ax)
+        else:
+            ax = base.axes_logic(ax, 2)
 
         # create color map for free space + obstacle:
         #   free space, color index = 1, white, alpha=0 to allow background and grid lines to show
@@ -692,6 +716,7 @@ class PlannerBase(ABC):
             # display image
             norm = mpl.colors.Normalize(vmin=0, vmax=vmax, clip=False)
             ax.imshow(distance, origin='lower',
+                interpolation=None,
                 cmap=c_map,
                 norm=norm,
                 )

@@ -17,6 +17,7 @@ from scipy.ndimage import *
 from matplotlib import cm, pyplot as plt
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from pgraph import UGraph
+from progress.bar import FillingCirclesBar
 
 
 class PRMPlanner(PlannerBase):
@@ -113,46 +114,69 @@ class PRMPlanner(PlannerBase):
 
 
     def create_roadmap(self, animate=None):
-        a = Animate(animate, 'fps', 5)
+        # a = Animate(animate, fps=5)
+        self.progress_start(self.npoints)
+
         x = None
         y = None
         for j in range(self.npoints):
+            # find a random point in freespace
             while True:
                 # pick a random unoccupied point
                 x = self.random.uniform(self.occgrid.xmin, self.occgrid.xmax)
                 y = self.random.uniform(self.occgrid.ymin, self.occgrid.ymax)
                 if not self.occgrid.isoccupied((x, y)):
                     break
-            new = np.r_[x, y]
 
-            # compute distance from new node to all other nodes
+            # add it as a vertex to the graph
+            vnew = self.graph.add_vertex([x, y])
+
+
+        # compute distance between vertices
+        for vertex in self.graph:
+            # find distance from vertex to all other vertices
             distances = []
-            for v in self.graph:
-                distances.append((v, v.distance(new)))
+            for othervertex in self.graph:
+                # skip self
+                if vertex is othervertex:
+                    continue
+                # add (distance, vertex) tuples to list 
+                distances.append((vertex.distance(othervertex), othervertex))
             
-            vnew = self.graph.add_vertex(new)
+            # sort into ascending distance
+            distances.sort(key=lambda x:x[0])
 
-            if len(distances) > 0:
-                # sort into ascending order
-                distances.sort(key=lambda x: x[1])
-                for v, d in distances:
-                    if d > self.dist_thresh:
-                        continue
-                    if not self.test_path(new, v.coord):
-                        continue
+            # create edges to vertex if permissible
+            for distance, othervertex in distances:
+                # test if below distance threshold
+                if self.dist_thresh is not None and distance > self.dist_thresh:
+                    break # sorted into ascending order, so we are done
 
-                    self.graph.add_edge(v, vnew)
+                # test if obstacle free path connecting them
+                if self.test_path(vertex, othervertex):
+                    # add an edge
+                    self.graph.add_edge(vertex, othervertex, cost=distance)
+            self.progress_next()
 
-            if animate is not None:
-                self.plot()
-                if not np.empty(movie):
-                    a.add()
+        self.progress_end()
+            # if animate is not None:
+            #     self.plot()
+            #     if not np.empty(movie):
+            #         a.add()
 
-    def test_path(self, p1, p2, npoints = 100):
-        dir = p2 - p1
+    def test_path(self, v1, v2, npoints=None):
+        # vector from v1 to v2
+        dir = v2.coord - v1.coord
 
+        # figure the number of points, essentially the line length
+        # TODO: should delegate this test to the OccGrid object and do it
+        # world units
+        if npoints is None:
+            npoints = int(round(np.linalg.norm(dir)))
+
+        # test each point along the line from v1 to v2
         for s in np.linspace(0, 1, npoints):
-            if self.occgrid.isoccupied(p1 + s * dir):
+            if self.occgrid.isoccupied(v1.coord + s * dir):
                 return False
         return True
 
@@ -182,6 +206,8 @@ class PRMPlanner(PlannerBase):
 
         self._graph = UGraph()
         self._v_path = np.array([])
+
+        self.randinit()  # reset the random number generator
         self.create_roadmap(animate)
 
     def query(self, start, goal, **kwargs):
@@ -204,23 +230,6 @@ class PRMPlanner(PlannerBase):
         path.append(goal)
         return np.array(path)
 
-    # def closest(self, vertex, v_component):
-    #     component = None
-    #     if v_component is not None:
-    #         component = self.graph.component[v_component]
-    #     d, v = self.graph.distances(vertex)
-    #     c = np.array([])
-
-    #     for i in range(0, len(d)):
-    #         if v_component is not None:
-    #             if self._graph.component(v[i]) != component:
-    #                 continue
-    #         if not self.test_path(vertex, self._graph.coord(v(i))):
-    #             continue
-    #         c = v[i]
-    #         break
-
-    #     return c
 
     def next(self, p):
         if all(p[:] == self.goal):
@@ -252,79 +261,6 @@ class PRMPlanner(PlannerBase):
              edge=dict(linewidth=0.5)
 
         self.graph.plot(text=False, vertex=vertex, edge=edge)
-    # def char(self):
-    #     s = "\ngraph size: " + self._npoints
-    #     s = s + "\nndist thresh: " + self._dist_thresh
-    #     s = s + "\nGraph: " + self.graph
-    #     return s
-
-    #     self.create_roadmap(self, animate)
-
-# def bresenham(p0, p1):
-#     # https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#Python
-#     x0, y0 = p0
-#     x1, y1 = p1
-#     line = []
-
-#     dx = abs(x1 - x0)
-#     dy = abs(y1 - y0)
-#     x, y = x0, y0
-#     sx = -1 if x0 > x1 else 1
-#     sy = -1 if y0 > y1 else 1
-#     if dx > dy:
-#         err = dx / 2.0
-#         while x != x1:
-#             line.append((x, y))
-#             err -= dy
-#             if err < 0:
-#                 y += sy
-#                 err += dx
-#             x += sx
-#     else:
-#         err = dy / 2.0
-#         while y != y1:
-#             line.append((x, y))
-#             err -= dx
-#             if err < 0:
-#                 x += sx
-#                 err += dy
-#             y += sy        
-#     line.append((x, y))
-#     return np.array(line).T
-
-# def hom_line(x1, y1, x2, y2):
-#     line = np.cross(np.array([x1, y1, 1]), np.array([x2, y2, 1]))
-
-#     # normalize so that the result of x*l' is the pixel distance
-#     # from the line
-#     line = line / np.linalg.norm(line[0:2])
-#     return line
-
-
-# # Sourced from: https://stackoverflow.com/questions/28995146/matlab-ind2sub-equivalent-in-python/28995315#28995315
-# def sub2ind(array_shape, rows, cols):
-#     ind = rows * array_shape[1] + cols
-#     ind[ind < 0] = -1
-#     ind[ind >= array_shape[0] * array_shape[1]] = -1
-#     return ind
-
-
-# def ind2sub(array_shape, ind):
-#     ind[ind < 0] = -1
-#     ind[ind >= array_shape[0] * array_shape[1]] = -1
-#     rows = (ind.astype('int') / array_shape[1])
-#     cols = ind % array_shape[1]
-#     return rows, cols
-
-# def col_norm(x):
-#     y = np.array([])
-#     if x.ndim > 1:
-#         x = np.column_stack(x)
-#         for vector in x:
-#             y = np.append(y, np.linalg.norm(vector))
-#     else:
-#         y = np.linalg.norm(x)
-#     return y
 
 
 if __name__ == "__main__":

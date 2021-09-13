@@ -1,42 +1,47 @@
 # motion models
-from roboticstoolbox.mobile.Vehicle import Vehicle, Bicycle, Unicycle
+from roboticstoolbox.mobile.Vehicle import VehicleBase, Bicycle, Unicycle, DiffSteer
+
 
 # planners
-from roboticstoolbox.mobile.Bug2 import Bug2
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from roboticstoolbox.mobile.DistanceTransformPlanner import DistanceTransformPlanner
 from roboticstoolbox.mobile.DstarPlanner import DstarPlanner
 from roboticstoolbox.mobile.PRMPlanner import PRMPlanner
-
-# from roboticstoolbox.mobile.LatticePlanner import LatticePlanner
-
+from roboticstoolbox.mobile.LatticePlanner import LatticePlanner
 from roboticstoolbox.mobile.DubinsPlanner import DubinsPlanner
 from roboticstoolbox.mobile.ReedsSheppPlanner import ReedsSheppPlanner
-
 from roboticstoolbox.mobile.CurvaturePolyPlanner import CurvaturePolyPlanner
 from roboticstoolbox.mobile.QuinticPolyPlanner import QuinticPolyPlanner
-from roboticstoolbox.mobile.PRMPlanner import PRMPlanner
-from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid, OccupancyGrid
+from roboticstoolbox.mobile.RRTPlanner import RRTPlanner
+
+from roboticstoolbox.mobile.Bug2 import Bug2
+
+from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid, OccupancyGrid, PolygonMap
 
 # localization and state estimation
 from roboticstoolbox.mobile.landmarkmap import LandmarkMap
 from roboticstoolbox.mobile.sensors import RangeBearingSensor
 from roboticstoolbox.mobile.drivers import *
-from roboticstoolbox.mobile.animations import *
+from roboticstoolbox.mobile.Animations import VehicleAnimationBase, VehicleMarker, VehiclePolygon, VehicleIcon
 
-# from roboticstoolbox.mobile.PoseGraph import *
+from roboticstoolbox.mobile.PoseGraph import *
 from roboticstoolbox.mobile.EKF import EKF
 from roboticstoolbox.mobile.ParticleFilter import ParticleFilter
 
 __all__ = [
-    "Vehicle",
+    "VehicleBase",
     "Bicycle",
     "Unicycle",
+    "DiffSteer",
+    "VehicleAnimationBase",
+    "VehicleMarker",
+    "VehiclePolygon",
+    "VehicleIcon",
     "Bug2",
     "DistanceTransformPlanner",
     "DstarPlanner",
     "DubinsPlanner",
-    # "LatticePlanner",
+    "LatticePlanner",
     "ReedsSheppPlanner",
     "CurvaturePolyPlanner",
     "PRMPlanner",
@@ -48,15 +53,15 @@ __all__ = [
     "PurePursuit",
     "LandmarkMap",
     "RangeBearingSensor",
-    # "PoseGraph",
+    "PoseGraph",
+    "PolygonMap",
     "BinaryOccupancyGrid",
     "OccupancyGrid",
     "PlannerBase",
+    "RRTPlanner",
     "EKF",
     "ParticleFilter",
 ]
-
-#    'LatticePlanner',
 
 
 # __doc__ = """

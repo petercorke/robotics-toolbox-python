@@ -3,11 +3,23 @@ import matplotlib.pyplot as plt
 from spatialmath import base
 import scipy.ndimage as sp
 from abc import ABC
-class BaseOccupancyGrid(ABC):
+from spatialmath import base
 
-    def __init__(self, grid=None, origin=(0, 0),
-            workspace=None, 
-            value=0, cellsize=1, name=None):
+from spatialmath.geom2d import Polygon2
+
+class BaseMap(ABC):
+    def __init__(self, workspace=None, name=None, **unused):
+        if workspace is not None:
+            workspace = base.expand_dims(workspace)
+            self._workspace = workspace
+            self.dx = workspace[1] - workspace[0]
+            self.dy = workspace[3] - workspace[2]
+        self._name = name
+
+class BaseOccupancyGrid(BaseMap):
+
+    def __init__(self, grid=None, origin=(0, 0), 
+            value=0, cellsize=1, **kwargs):
         """
         Create an occupancy grid instance
 
@@ -25,19 +37,18 @@ class BaseOccupancyGrid(ABC):
         World coordinates are converted to grid coordinates to lookup the 
         occupancy status.
         """
+        super().__init__(**kwargs)
+
         if grid is not None:
             self._grid = grid
             self._origin = base.getvector(origin, 2)
 
-        elif workspace is not None:
-            dx = workspace[1] - workspace[0]
-            dy = workspace[3] - workspace[2]
-            self._grid = np.full(np.floor(np.r_[dx, dy] / cellsize).astype(int) + 1, value)
-            self._origin = np.r_[workspace[0], workspace[2]]
+        elif self._workspace is not None:
+            self._grid = np.full(np.floor(np.r_[self.dx, self.dy] / cellsize).astype(int) + 1, value)
+            self._origin = np.r_[self._workspace[0], self._workspace[2]]
 
         self._cellsize = cellsize
         
-        self._name = name
 
     def copy(self):
         """
@@ -54,7 +65,7 @@ class BaseOccupancyGrid(ABC):
             s += f"[{self._name}]"
         s += f": {self._grid.shape[1]} x {self._grid.shape[0]}"
         s += f", cell size={self._cellsize}"
-        s += f", x: {self.xmin} - {self.xmax}, y: {self.ymin} - {self.ymax}"
+        s += f", x = [{self.xmin}, {self.xmax}], y = [{self.ymin}, {self.ymax}]"
         return s
 
     @property
@@ -163,6 +174,11 @@ class BaseOccupancyGrid(ABC):
         """
         self._name = name
 
+    def set(self, region, value):
+        bl = self.w2g([region[0], region[2]])
+        tr = self.w2g([region[1], region[3]])
+        self.grid[bl[1]:tr[1]+1,bl[0]:tr[0]+1] = value
+
     def g2w(self, p):
         """
         Convert grid coordinate to world coordinate
@@ -216,11 +232,12 @@ class BaseOccupancyGrid(ABC):
         """
 
         ax = base.axes_logic(ax, 2)
-        extent = self.workspace
+        
         if map is None:
             map = self._grid
+            kwargs['extent'] = self.workspace
 
-        ax.imshow(map, extent=extent, origin='lower', interpolation='none', **kwargs)
+        ax.imshow(map, origin='lower', interpolation=None, **kwargs) #extent=extent, 
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         plt.show(block=block)
@@ -312,6 +329,50 @@ class OccupancyGrid(BaseOccupancyGrid):
         s += f", min {g.min()}, max {g.max()}, mean {g.mean()}"
         return s
 
+class PolygonMap(BaseMap):
+
+    def __init__(self, workspace=None, polygons=[]):
+        super().__init__(workspace=workspace)
+
+        self.polygons = polygons
+
+    def add(self, polygon):
+
+        if isinstance(polygon, Polygon2):
+            self.polygons.append(polygon)
+        else:
+            self.polygons.append(Polygon2(polygon))
+
+    def iscollision(self, polygon):
+        return polygon.intersects(self.polygons)
+
+    def plot(self, block=False):
+        base.plotvol2(self.workspace)
+
+        for polygon in self.polygons:
+            polygon.plot(color='r')
+
+        plt.show(block=block)
+
+    def isoccupied(self, p):
+        for polygon in self.polygons:
+            if polygon.contains(p):
+                return True
+
+        return False
+
+    @property
+    def workspace(self):
+        """
+        Bounds of the occupancy grid
+
+        :return: workspace bounds [xmin, xmax, ymin, ymax]
+        :rtype: ndarray(4)
+
+        Returns the bounds of the occupancy grid.
+        """
+        return self._workspace
+
 if __name__ == "__main__":
 
     # g = np.zeros((100, 100))
@@ -330,22 +391,35 @@ if __name__ == "__main__":
     # plt.figure()
     # og2.plot(block=True)
 
-    g = np.zeros((10,10))
-    g[2:3, 4:5] = 1
-    og = BinaryOccupancyGrid(g)
-    print(og)
+    # g = np.zeros((10,10))
+    # g[2:3, 4:5] = 1
+    # og = BinaryOccupancyGrid(g)
+    # print(og)
 
-    r = og.ravel
-    print(r[24])
+    # r = og.ravel
+    # print(r[24])
 
-    og = BinaryOccupancyGrid(workspace=[2,3,4,5], cellsize=0.2)
-    print(og)
+    # og = BinaryOccupancyGrid(workspace=[2,3,4,5], cellsize=0.2)
+    # print(og)
 
-    og = BinaryOccupancyGrid(workspace=[2,3,4,5], cellsize=0.2, value=True)
-    print(og)
+    # og = BinaryOccupancyGrid(workspace=[2,3,4,5], cellsize=0.2, value=True)
+    # print(og)
 
-    og = OccupancyGrid(workspace=[2,3,4,5], cellsize=0.2, value=3)
-    print(og)
+    # og = OccupancyGrid(workspace=[2,3,4,5], cellsize=0.2, value=3)
+    # print(og)
 
-    og = OccupancyGrid(workspace=[2,3,4,5], cellsize=0.2, value=3.0)
-    print(og)
+    # og = OccupancyGrid(workspace=[2,3,4,5], cellsize=0.2, value=3.0)
+    # print(og)
+
+    map = PolygonMap(workspace=[0, 10])
+    map.add([(5, 50), (5, 6), (6, 6), (6, 50)])
+    map.add([(5, 4), (5, -50), (6, -50), (6, 4)])
+    map.plot()
+
+    og = BinaryOccupancyGrid(workspace=[-5, 5, -5, 5], value=False)
+    # np.set_printoptions(linewidth=300)
+    # og = BinaryOccupancyGrid(workspace=[-10, 10, -10, 10], value=False)
+    # print(og)
+    # og.set([1,10, -10, 10], True)
+    # print(og.grid)
+    # print(og.isoccupied((0,0)))

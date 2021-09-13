@@ -490,5 +490,5 @@ if __name__ == '__main__':
     #     plt.axis("equal")
     #     plt.show(block=True)
 
-    reedsshepp.plot(path=path, direction=status.direction, twod=True)
+    reedsshepp.plot(path=path, direction=status.direction, configspace=True)
     plt.show(block=True)

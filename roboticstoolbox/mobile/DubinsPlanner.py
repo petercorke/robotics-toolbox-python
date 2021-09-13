@@ -394,7 +394,7 @@ if __name__ == '__main__':
 
     print(path)
     print(status)
-    dubins.plot(path, twod=True)
+    dubins.plot(path, configspace=True)
 
     plt.show(block=True)
     # plt.plot(path_x, path_y, label="final course " + "".join(mode))
