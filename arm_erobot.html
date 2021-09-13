@@ -114,6 +114,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
 </ul>
 
             
@@ -980,7 +981,7 @@ velocity but it is eliminated in the computation of this value.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.BaseERobot.coriolis_x">
-<span class="sig-name descname"><span class="pre">coriolis_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.coriolis_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">coriolis_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Jd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Mx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.coriolis_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space Coriolis and centripetal term</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1040,7 +1041,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </table>
 </div></blockquote>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad representation specified</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad analytical value specified</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -1066,6 +1067,22 @@ velocity but it is eliminated in the computation of this value.</p></li>
 <dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ERobot.BaseERobot.coriolis" title="roboticstoolbox.robot.ERobot.BaseERobot.coriolis"><code class="xref py py-func docutils literal notranslate"><span class="pre">coriolis()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ERobot.BaseERobot.inertia_x" title="roboticstoolbox.robot.ERobot.BaseERobot.inertia_x"><code class="xref py py-func docutils literal notranslate"><span class="pre">inertia_x()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">hessian0()</span></code></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.BaseERobot.default_backend">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">default_backend</span></span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.default_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get default graphical backend</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>backend name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p>Get the default graphical backend, used when no explicit backend is
+passed to <code class="docutils literal notranslate"><span class="pre">Robot.plot</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1389,7 +1406,7 @@ being the corresponding joint torques.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.BaseERobot.gravload_x">
-<span class="sig-name descname"><span class="pre">gravload_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.gravload_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">gravload_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.gravload_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space gravity load</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1546,7 +1563,7 @@ being the corresponding joint torques.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.BaseERobot.ikine_LM">
-<span class="sig-name descname"><span class="pre">ikine_LM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rlimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.ikine_LM" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_LM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rlimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.ikine_LM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics by Levenberg-Marquadt optimization
 (Robot superclass)</p>
 <dl class="field-list simple">
@@ -1651,7 +1668,7 @@ Section 8.4.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.BaseERobot.ikine_LMS">
-<span class="sig-name descname"><span class="pre">ikine_LMS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.ikine_LMS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_LMS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.ikine_LMS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics by Levenberg-Marquadt optimization
 (Robot superclass)</p>
 <dl class="field-list simple">
@@ -1742,7 +1759,7 @@ October 2011, pp. 984-991.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.BaseERobot.ikine_global">
-<span class="sig-name descname"><span class="pre">ikine_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.ikine_global" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.ikine_global" title="Permalink to this definition">¶</a></dt>
 <dd><div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Experimental code for using SciPy global optimizers.</p>
@@ -1753,7 +1770,7 @@ design will need a bit of thought.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.BaseERobot.ikine_min">
-<span class="sig-name descname"><span class="pre">ikine_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stiffness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costfun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.ikine_min" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stiffness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costfun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.ikine_min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse kinematics by optimization with joint limits (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1912,7 +1929,7 @@ the gear ratio.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.BaseERobot.inertia_x">
-<span class="sig-name descname"><span class="pre">inertia_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.inertia_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">inertia_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.BaseERobot.inertia_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space inertia matrix</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3203,7 +3220,7 @@ end-effector position.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ERobot.</span></span><span class="sig-name descname"><span class="pre">ERobot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ERobot.</span></span><span class="sig-name descname"><span class="pre">ERobot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">urdf_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">urdf_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ERobot.html#ERobot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.BaseERobot" title="roboticstoolbox.robot.ERobot.BaseERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.BaseERobot</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot.URDF">
@@ -3218,6 +3235,16 @@ end-effector position.</p></li>
 If <code class="docutils literal notranslate"><span class="pre">gripper</span></code> is specified, links from that link outward are removed
 from the rigid-body tree and folded into a <code class="docutils literal notranslate"><span class="pre">Gripper</span></code> object.</p>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot.urdf_string">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">urdf_string</span></span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.urdf_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot.urdf_filepath">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">urdf_filepath</span></span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.urdf_filepath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot.URDF_read">
@@ -3941,7 +3968,7 @@ velocity but it is eliminated in the computation of this value.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot.coriolis_x">
-<span class="sig-name descname"><span class="pre">coriolis_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.coriolis_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">coriolis_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Jd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Mx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.coriolis_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space Coriolis and centripetal term</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -4001,7 +4028,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </table>
 </div></blockquote>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad representation specified</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad analytical value specified</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -4027,6 +4054,22 @@ velocity but it is eliminated in the computation of this value.</p></li>
 <dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot.coriolis" title="roboticstoolbox.robot.ERobot.ERobot.coriolis"><code class="xref py py-func docutils literal notranslate"><span class="pre">coriolis()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot.inertia_x" title="roboticstoolbox.robot.ERobot.ERobot.inertia_x"><code class="xref py py-func docutils literal notranslate"><span class="pre">inertia_x()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot.hessian0" title="roboticstoolbox.robot.ERobot.ERobot.hessian0"><code class="xref py py-func docutils literal notranslate"><span class="pre">hessian0()</span></code></a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot.default_backend">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">default_backend</span></span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.default_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get default graphical backend</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>backend name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p>Get the default graphical backend, used when no explicit backend is
+passed to <code class="docutils literal notranslate"><span class="pre">Robot.plot</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -4484,7 +4527,7 @@ being the corresponding joint torques.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot.gravload_x">
-<span class="sig-name descname"><span class="pre">gravload_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.gravload_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">gravload_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.gravload_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space gravity load</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -4656,7 +4699,7 @@ Example:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot.ikine_LM">
-<span class="sig-name descname"><span class="pre">ikine_LM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rlimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikine_LM" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_LM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rlimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikine_LM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics by Levenberg-Marquadt optimization
 (Robot superclass)</p>
 <dl class="field-list simple">
@@ -4761,7 +4804,7 @@ Section 8.4.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot.ikine_LMS">
-<span class="sig-name descname"><span class="pre">ikine_LMS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikine_LMS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_LMS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikine_LMS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics by Levenberg-Marquadt optimization
 (Robot superclass)</p>
 <dl class="field-list simple">
@@ -4852,7 +4895,7 @@ October 2011, pp. 984-991.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot.ikine_global">
-<span class="sig-name descname"><span class="pre">ikine_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikine_global" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikine_global" title="Permalink to this definition">¶</a></dt>
 <dd><div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Experimental code for using SciPy global optimizers.</p>
@@ -4863,7 +4906,7 @@ design will need a bit of thought.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot.ikine_min">
-<span class="sig-name descname"><span class="pre">ikine_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stiffness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costfun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikine_min" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stiffness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costfun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.ikine_min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse kinematics by optimization with joint limits (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -5022,7 +5065,7 @@ the gear ratio.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot.inertia_x">
-<span class="sig-name descname"><span class="pre">inertia_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.inertia_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">inertia_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot.inertia_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space inertia matrix</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -6863,7 +6906,7 @@ velocity but it is eliminated in the computation of this value.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot2.coriolis_x">
-<span class="sig-name descname"><span class="pre">coriolis_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.coriolis_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">coriolis_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Jd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Mx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.coriolis_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space Coriolis and centripetal term</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -6923,7 +6966,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </table>
 </div></blockquote>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad representation specified</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad analytical value specified</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -6949,6 +6992,22 @@ velocity but it is eliminated in the computation of this value.</p></li>
 <dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot2.coriolis" title="roboticstoolbox.robot.ERobot.ERobot2.coriolis"><code class="xref py py-func docutils literal notranslate"><span class="pre">coriolis()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot2.inertia_x" title="roboticstoolbox.robot.ERobot.ERobot2.inertia_x"><code class="xref py py-func docutils literal notranslate"><span class="pre">inertia_x()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">hessian0()</span></code></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot2.default_backend">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">default_backend</span></span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.default_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get default graphical backend</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>backend name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p>Get the default graphical backend, used when no explicit backend is
+passed to <code class="docutils literal notranslate"><span class="pre">Robot.plot</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -7411,7 +7470,7 @@ being the corresponding joint torques.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot2.gravload_x">
-<span class="sig-name descname"><span class="pre">gravload_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.gravload_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">gravload_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.gravload_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space gravity load</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -7583,7 +7642,7 @@ Example:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot2.ikine_LM">
-<span class="sig-name descname"><span class="pre">ikine_LM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rlimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.ikine_LM" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_LM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rlimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.ikine_LM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics by Levenberg-Marquadt optimization
 (Robot superclass)</p>
 <dl class="field-list simple">
@@ -7688,7 +7747,7 @@ Section 8.4.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot2.ikine_LMS">
-<span class="sig-name descname"><span class="pre">ikine_LMS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.ikine_LMS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_LMS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.ikine_LMS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics by Levenberg-Marquadt optimization
 (Robot superclass)</p>
 <dl class="field-list simple">
@@ -7779,7 +7838,7 @@ October 2011, pp. 984-991.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot2.ikine_global">
-<span class="sig-name descname"><span class="pre">ikine_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.ikine_global" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.ikine_global" title="Permalink to this definition">¶</a></dt>
 <dd><div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Experimental code for using SciPy global optimizers.</p>
@@ -7790,7 +7849,7 @@ design will need a bit of thought.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot2.ikine_min">
-<span class="sig-name descname"><span class="pre">ikine_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stiffness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costfun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.ikine_min" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stiffness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costfun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.ikine_min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse kinematics by optimization with joint limits (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -7949,7 +8008,7 @@ the gear ratio.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ERobot.ERobot2.inertia_x">
-<span class="sig-name descname"><span class="pre">inertia_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.inertia_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">inertia_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ERobot.ERobot2.inertia_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space inertia matrix</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -9472,7 +9531,7 @@ end-effector position.</p></li>
 <dd><p>Bases: <a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" title="roboticstoolbox.robot.Link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.Link.Link</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ELink.BaseELink.copy">
-<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#BaseELink.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.BaseELink.copy" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#BaseELink.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.BaseELink.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Copy of link object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -9901,7 +9960,7 @@ centre of mass, inertia, friction, gear ratio and motor properties.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>        <span class="c1"># kinematic parameters</span>
-<span class="go">RevoluteDH:   theta=q,  d=0.15005, a=0.0203, alpha=-1.5707963267948966</span>
+<span class="go">RevoluteDH:   θ=q,  d=0.15005,  a=0.0203,  ⍺=-1.5707963267948966</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">dyn</span><span class="p">())</span>  <span class="c1"># dynamic parameters</span>
 <span class="go">m     =       4.8 </span>
 <span class="go">r     =     -0.02   -0.014     0.07 </span>
@@ -10258,6 +10317,22 @@ variable within a vector of joint coordinates.
 </div></blockquote>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ELink.ELink.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ELink.html#ELink.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy of link object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Shallow copy of link object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" title="roboticstoolbox.robot.Link.Link">Link</a></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">link.copy()</span></code> is a new Link subclass instance with a copy of all
+the parameters.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ELink.ELink.collision">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">collision</span></span><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.collision" title="Permalink to this definition">¶</a></dt>
@@ -10524,22 +10599,6 @@ shapes. The points returned are [x, y, z].</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.robot.ELink.ELink.copy">
-<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Copy of link object</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Shallow copy of link object</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" title="roboticstoolbox.robot.Link.Link">Link</a></p>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">link.copy()</span></code> is a new Link subclass instance with a copy of all
-the parameters.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ELink.ELink.dyn">
 <span class="sig-name descname"><span class="pre">dyn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink.dyn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inertial properties of link as a string</p>
@@ -10561,7 +10620,7 @@ centre of mass, inertia, friction, gear ratio and motor properties.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>        <span class="c1"># kinematic parameters</span>
-<span class="go">RevoluteDH:   theta=q,  d=0.15005, a=0.0203, alpha=-1.5707963267948966</span>
+<span class="go">RevoluteDH:   θ=q,  d=0.15005,  a=0.0203,  ⍺=-1.5707963267948966</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">dyn</span><span class="p">())</span>  <span class="c1"># dynamic parameters</span>
 <span class="go">m     =       4.8 </span>
 <span class="go">r     =     -0.02   -0.014     0.07 </span>
@@ -11232,7 +11291,7 @@ shapes. The points returned are [x, y, z].</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ELink.ELink2.copy">
-<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink2.copy" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ELink.ELink2.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Copy of link object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -11268,7 +11327,7 @@ centre of mass, inertia, friction, gear ratio and motor properties.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>        <span class="c1"># kinematic parameters</span>
-<span class="go">RevoluteDH:   theta=q,  d=0.15005, a=0.0203, alpha=-1.5707963267948966</span>
+<span class="go">RevoluteDH:   θ=q,  d=0.15005,  a=0.0203,  ⍺=-1.5707963267948966</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">dyn</span><span class="p">())</span>  <span class="c1"># dynamic parameters</span>
 <span class="go">m     =       4.8 </span>
 <span class="go">r     =     -0.02   -0.014     0.07 </span>
@@ -11730,6 +11789,15 @@ If <code class="docutils literal notranslate"><span class="pre">fast</span></cod
 They can be listed by:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;ETS&quot;</span><span class="p">)</span>
+<span class="go">   class          name          manufacturer      type  DoF  dims  structure  dynamics  geometry  keywords  </span>
+<span class="go">Panda         Panda          Franka Emika         ETS   7    3d    RRRRRRR                                  </span>
+<span class="go">Frankie       Frankie        Franka Emika, Omron  ETS   9    3d    RPRRRRRRR                      mobile    </span>
+<span class="go">Puma560       Puma560        Unimation            ETS   6    3d    RRRRRR                                   </span>
+<span class="go">Planar_Y      Planar-Y                            ETS   6    3d    RRRRRR                                   </span>
+<span class="go">Planar2       Planar2                             ETS   2    2d    RR                                       </span>
+<span class="go">GenericSeven  Generic Seven  Jesse&#39;s Imagination  ETS   7    3d    RRRRRRR                                  </span>
+<span class="go">Omni          Omni           Jesse                ETS   3    3d    RPP                  Y         mobile    </span>
+
 </pre></div>
 </div>
 <span class="target" id="module-roboticstoolbox.models.ETS"></span><dl class="py class">
@@ -11867,6 +11935,33 @@ Sequence, J. Haviland and P. Corke</p></li>
 using the elementary transform sequence (ETS).</p>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.models.ETS.Omni">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.ETS.</span></span><span class="sig-name descname"><span class="pre">Omni</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/ETS/Omni.html#Omni"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.ETS.Omni" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.ERobot.ERobot" title="roboticstoolbox.robot.ERobot.ERobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ERobot.ERobot</span></code></a></p>
+<p>A class an omnidirectional mobile robot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>et_list</strong> (<em>list of etb.robot.et</em>) – List of elementary transforms which represent the robot
+kinematics</p></li>
+<li><p><strong>q_idx</strong> (<em>list of int</em>) – List of indexes within the ets_list which correspond to
+joints</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the robot</p></li>
+<li><p><strong>manufacturer</strong> (<em>str</em><em>, </em><em>optional</em>) – Manufacturer of the robot</p></li>
+<li><p><strong>base</strong> (<em>float np.ndarray</em><em>(</em><em>4</em><em>,</em><em>4</em><em>)</em><em>, </em><em>optional</em>) – Location of the base is the world frame</p></li>
+<li><p><strong>tool</strong> (<em>float np.ndarray</em><em>(</em><em>4</em><em>,</em><em>4</em><em>)</em><em>, </em><em>optional</em>) – Offset of the flange of the robot to the end-effector</p></li>
+<li><p><strong>qz</strong> (<em>float np.ndarray</em><em>(</em><em>7</em><em>,</em><em>)</em>) – The zero joint angle configuration of the robot</p></li>
+<li><p><strong>qr</strong> (<em>float np.ndarray</em><em>(</em><em>7</em><em>,</em><em>)</em>) – The ready state joint angle configuration of the robot</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>References: [1] Kinematic Derivatives using the Elementary Transform</dt><dd><p>Sequence, J. Haviland and P. Corke</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="defined-from-urdf">
 <h3>Defined from URDF<a class="headerlink" href="#defined-from-urdf" title="Permalink to this headline">¶</a></h3>
@@ -11874,6 +11969,28 @@ using the elementary transform sequence (ETS).</p>
 standard or modified.  They can be listed by:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;URDF&quot;</span><span class="p">)</span>
+<span class="go">  class             name              manufacturer     type  DoF  dims                        structure  dynamics  geometry  keywords  </span>
+<span class="go">Panda       panda                  Franka Emika        URDF  7    3d    RRRRRRR                                    Y                   </span>
+<span class="go">Frankie     frankie                Franka Emika        URDF  9    3d    RPRRRRRRR                                  Y                   </span>
+<span class="go">UR3         UR3                    Universal Robotics  URDF  6    3d    RRRRRR                           Y         Y                   </span>
+<span class="go">UR5         UR5                    Universal Robotics  URDF  6    3d    RRRRRR                           Y         Y                   </span>
+<span class="go">UR10        UR10                   Universal Robotics  URDF  6    3d    RRRRRR                           Y         Y                   </span>
+<span class="go">Puma560     Puma560                Unimation           URDF  6    3d    RRRRRR                                     Y                   </span>
+<span class="go">px100       px100                  Interbotix          URDF  7    3d    RRRRRPP                          Y         Y                   </span>
+<span class="go">px150       px150                  Interbotix          URDF  8    3d    RRRRRRPP                         Y         Y                   </span>
+<span class="go">rx150       rx150                  Interbotix          URDF  8    3d    RRRRRRPP                         Y         Y                   </span>
+<span class="go">rx200       rx200                  Interbotix          URDF  8    3d    RRRRRRPP                         Y         Y                   </span>
+<span class="go">vx300       vx300                  Interbotix          URDF  8    3d    RRRRRRPP                         Y         Y                   </span>
+<span class="go">vx300s      vx300s                 Interbotix          URDF  9    3d    RRRRRRRPP                        Y         Y                   </span>
+<span class="go">wx200       wx200                  Interbotix          URDF  8    3d    RRRRRRPP                         Y         Y                   </span>
+<span class="go">wx250       wx250                  Interbotix          URDF  8    3d    RRRRRRPP                         Y         Y                   </span>
+<span class="go">wx250s      wx250s                 Interbotix          URDF  9    3d    RRRRRRRPP                        Y         Y                   </span>
+<span class="go">Mico        j2n4s300               Kinova              URDF  10   3d    RRRRRRRRRR                       Y         Y                   </span>
+<span class="go">PR2         pr2                    Willow Garage       URDF  31   3d    RRRRRRRRRRRRPRRRRRRRRRRRRRRRRRR  Y         Y                   </span>
+<span class="go">LBR         kuka_lbr_iiwa_14_r820  Kuka                URDF  7    3d    RRRRRRR                                    Y                   </span>
+<span class="go">KinovaGen3  gen3                   Kinova              URDF  7    3d    RRRRRRR                          Y         Y                   </span>
+<span class="go">YuMi        yumi                   ABB                 URDF  14   3d    RRRRRRRRRRRRRR                   Y         Y                   </span>
+
 </pre></div>
 </div>
 <span class="target" id="module-roboticstoolbox.models.URDF"></span><dl class="py class">
@@ -11934,21 +12051,22 @@ characteristics.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Frankie</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 <span class="go">ERobot: frankie (by Franka Emika), 9 joints (RPRRRRRRR), geometry, collision</span>
-<span class="go">┌───┬──────────────┬───────┬─────────────┬─────────────────────────────────────────────────────────────────────────────┐</span>
-<span class="go">│id │     link     │ joint │   parent    │                                     ETS                                     │</span>
-<span class="go">├───┼──────────────┼───────┼─────────────┼─────────────────────────────────────────────────────────────────────────────┤</span>
-<span class="go">│ 1 │ panda_base0  │       │ BASE        │ {panda_base0} = {BASE}                                                      │</span>
-<span class="go">│ 2 │ panda_base1  │     0 │ panda_base0 │ {panda_base1} = {panda_base0} ⊕ Rz(q0)                                      │</span>
-<span class="go">│ 3 │ panda_link0  │     1 │ panda_base1 │ {panda_link0} = {panda_base1} ⊕ tz(0.38) ⊕ tx(q1)                           │</span>
-<span class="go">│ 4 │ panda_link1  │     2 │ panda_link0 │ {panda_link1} = {panda_link0} ⊕ tz(0.333) ⊕ Rz(q2)                          │</span>
-<span class="go">│ 5 │ panda_link2  │     3 │ panda_link1 │ {panda_link2} = {panda_link1} ⊕ Rx(-90°) ⊕ Rz(q3)                           │</span>
-<span class="go">│ 6 │ panda_link3  │     4 │ panda_link2 │ {panda_link3} = {panda_link2} ⊕ ty(-0.316) ⊕ Rx(90°) ⊕ Rz(q4)               │</span>
-<span class="go">│ 7 │ panda_link4  │     5 │ panda_link3 │ {panda_link4} = {panda_link3} ⊕ tx(0.0825) ⊕ Rx(90°) ⊕ Rz(q5)               │</span>
-<span class="go">│ 8 │ panda_link5  │     6 │ panda_link4 │ {panda_link5} = {panda_link4} ⊕ tx(-0.0825) ⊕ ty(0.384) ⊕ Rx(-90°) ⊕ Rz(q6) │</span>
-<span class="go">│ 9 │ panda_link6  │     7 │ panda_link5 │ {panda_link6} = {panda_link5} ⊕ Rx(90°) ⊕ Rz(q7)                            │</span>
-<span class="go">│10 │ panda_link7  │     8 │ panda_link6 │ {panda_link7} = {panda_link6} ⊕ tx(0.088) ⊕ Rx(90°) ⊕ Rz(q8)                │</span>
-<span class="go">│11 │ @panda_link8 │       │ panda_link7 │ {panda_link8} = {panda_link7} ⊕ tz(0.107)                                   │</span>
-<span class="go">└───┴──────────────┴───────┴─────────────┴─────────────────────────────────────────────────────────────────────────────┘</span>
+<span class="go">┌───┬────────────────┬───────┬────────────────┬─────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │      link      │ joint │     parent     │                                     ETS                                     │</span>
+<span class="go">├───┼────────────────┼───────┼────────────────┼─────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 1 │ panda_base0    │       │ BASE           │ {panda_base0} = {BASE}                                                      │</span>
+<span class="go">│ 2 │ panda_base1    │     0 │ panda_base0    │ {panda_base1} = {panda_base0} ⊕ Rz(q0)                                      │</span>
+<span class="go">│ 3 │ panda_base_arm │     1 │ panda_base1    │ {panda_base_arm} = {panda_base1} ⊕ tx(q1)                                   │</span>
+<span class="go">│ 4 │ panda_link0    │       │ panda_base_arm │ {panda_link0} = {panda_base_arm} ⊕ tx(0.15) ⊕ tz(0.38)                      │</span>
+<span class="go">│ 5 │ panda_link1    │     2 │ panda_link0    │ {panda_link1} = {panda_link0} ⊕ tz(0.333) ⊕ Rz(q2)                          │</span>
+<span class="go">│ 6 │ panda_link2    │     3 │ panda_link1    │ {panda_link2} = {panda_link1} ⊕ Rx(-90°) ⊕ Rz(q3)                           │</span>
+<span class="go">│ 7 │ panda_link3    │     4 │ panda_link2    │ {panda_link3} = {panda_link2} ⊕ ty(-0.316) ⊕ Rx(90°) ⊕ Rz(q4)               │</span>
+<span class="go">│ 8 │ panda_link4    │     5 │ panda_link3    │ {panda_link4} = {panda_link3} ⊕ tx(0.0825) ⊕ Rx(90°) ⊕ Rz(q5)               │</span>
+<span class="go">│ 9 │ panda_link5    │     6 │ panda_link4    │ {panda_link5} = {panda_link4} ⊕ tx(-0.0825) ⊕ ty(0.384) ⊕ Rx(-90°) ⊕ Rz(q6) │</span>
+<span class="go">│10 │ panda_link6    │     7 │ panda_link5    │ {panda_link6} = {panda_link5} ⊕ Rx(90°) ⊕ Rz(q7)                            │</span>
+<span class="go">│11 │ panda_link7    │     8 │ panda_link6    │ {panda_link7} = {panda_link6} ⊕ tx(0.088) ⊕ Rx(90°) ⊕ Rz(q8)                │</span>
+<span class="go">│12 │ @panda_link8   │       │ panda_link7    │ {panda_link8} = {panda_link7} ⊕ tz(0.107)                                   │</span>
+<span class="go">└───┴────────────────┴───────┴────────────────┴─────────────────────────────────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
 <span class="go">│name │ q0  │ q1 │ q2  │ q3     │ q4  │ q5    │ q6  │ q7    │ q8   │</span>
@@ -12119,27 +12237,31 @@ characteristics.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="go">ERobot: Puma560 (by Unimation), 6 joints (RRRRRR), geometry</span>
-<span class="go">┌───┬────────┬───────┬────────┬──────────────────────────────────────────────────────────────────────────────┐</span>
-<span class="go">│id │  link  │ joint │ parent │                                     ETS                                      │</span>
-<span class="go">├───┼────────┼───────┼────────┼──────────────────────────────────────────────────────────────────────────────┤</span>
-<span class="go">│ 1 │ link1  │       │ BASE   │ {link1} = {BASE}                                                             │</span>
-<span class="go">│ 2 │ link2  │     0 │ link1  │ {link2} = {link1} ⊕ tz(0.6718) ⊕ Rx(90°) ⊕ Ry(q0)                            │</span>
-<span class="go">│ 3 │ link3  │     1 │ link2  │ {link3} = {link2} ⊕ Rz(q1)                                                   │</span>
-<span class="go">│ 4 │ link4  │     2 │ link3  │ {link4} = {link3} ⊕ tx(0.4318) ⊕ ty(-0.0203) ⊕ tz(0.1501) ⊕ Rz(90°) ⊕ Rz(q2) │</span>
-<span class="go">│ 5 │ link5  │     3 │ link4  │ {link5} = {link4} ⊕ Rz(90°) ⊕ Rx(90°) ⊕ Rz(q3)                               │</span>
-<span class="go">│ 6 │ link6  │     4 │ link5  │ {link6} = {link5} ⊕ tz(0.4331) ⊕ Rx(90°) ⊕ Rz(q4)                            │</span>
-<span class="go">│ 7 │ @link7 │     5 │ link6  │ {link7} = {link6} ⊕ ty(0.0558) ⊕ Rx(-90°) ⊕ Rz(q5)                           │</span>
-<span class="go">└───┴────────┴───────┴────────┴──────────────────────────────────────────────────────────────────────────────┘</span>
+<span class="go">ERobot: Puma560 (by Unimation), 6 joints (RRRRRR), geometry, collision</span>
+<span class="go">┌───┬────────┬───────┬────────┬─────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │  link  │ joint │ parent │                                     ETS                                     │</span>
+<span class="go">├───┼────────┼───────┼────────┼─────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│ 1 │ link1  │       │ BASE   │ {link1} = {BASE}                                                            │</span>
+<span class="go">│ 2 │ link2  │     0 │ link1  │ {link2} = {link1} ⊕ tz(0.5486) ⊕ Rx(90°) ⊕ Ry(q0)                           │</span>
+<span class="go">│ 3 │ link3  │     1 │ link2  │ {link3} = {link2} ⊕ ty(0.07493) ⊕ tz(0.1422) ⊕ Rz(q1)                       │</span>
+<span class="go">│ 4 │ link4  │     2 │ link3  │ {link4} = {link3} ⊕ tx(0.4318) ⊕ tz(0.0254) ⊕ Rz(90°) ⊕ Rz(q2)              │</span>
+<span class="go">│ 5 │ link5  │     3 │ link4  │ {link5} = {link4} ⊕ tx(0.3518) ⊕ tz(-0.0381) ⊕ Rz(-90°) ⊕ Rx(-90°) ⊕ Rz(q3) │</span>
+<span class="go">│ 6 │ link6  │     4 │ link5  │ {link6} = {link5} ⊕ tz(0.0803) ⊕ Rx(90°) ⊕ Rz(q4)                           │</span>
+<span class="go">│ 7 │ @link7 │     5 │ link6  │ {link7} = {link6} ⊕ ty(0.05334) ⊕ Rx(-90°) ⊕ Rz(q5)                         │</span>
+<span class="go">└───┴────────┴───────┴────────┴─────────────────────────────────────────────────────────────────────────────┘</span>
 
-<span class="go">┌─────┬─────┬──────┬───────┬─────┬──────┬─────┐</span>
-<span class="go">│name │ q0  │ q1   │ q2    │ q3  │ q4   │ q5  │</span>
-<span class="go">├─────┼─────┼──────┼───────┼─────┼──────┼─────┤</span>
-<span class="go">│  qz │  0° │  0°  │  0°   │  0° │  0°  │  0° │</span>
-<span class="go">│  qr │  0° │  90° │ -90°  │  0° │  0°  │  0° │</span>
-<span class="go">│  qs │  0° │  0°  │ -90°  │  0° │  0°  │  0° │</span>
-<span class="go">│  qn │  0° │  45° │  180° │  0° │  45° │  0° │</span>
-<span class="go">└─────┴─────┴──────┴───────┴─────┴──────┴─────┘</span>
+<span class="go">┌─────┬───────┬────────┬────────┬────────┬────────┬────────┐</span>
+<span class="go">│name │ q0    │ q1     │ q2     │ q3     │ q4     │ q5     │</span>
+<span class="go">├─────┼───────┼────────┼────────┼────────┼────────┼────────┤</span>
+<span class="go">│  qz │  0°   │  0°    │  0°    │  0°    │  0°    │  0°    │</span>
+<span class="go">│  ru │ -0°   │  45°   │  180°  │ -0°    │  45°   │  0°    │</span>
+<span class="go">│  rd │ -0°   │ -47.8° │  5.39° │ -180°  │  47.6° │  180°  │</span>
+<span class="go">│  lu │  152° │ -225°  │  5.39° │  145°  │  55.8° │  21.4° │</span>
+<span class="go">│  ld │  152° │ -132°  │  180°  │  38.6° │  49.3° │  152°  │</span>
+<span class="go">│  qr │  0°   │  90°   │ -90°   │  0°    │  0°    │  0°    │</span>
+<span class="go">│  qs │  0°   │  0°    │ -90°   │  0°    │  0°    │  0°    │</span>
+<span class="go">│  qn │  0°   │  45°   │  180°  │  0°    │  45°   │  0°    │</span>
+<span class="go">└─────┴───────┴────────┴────────┴────────┴────────┴────────┘</span>
 
 </pre></div>
 </div>
@@ -12821,12 +12943,34 @@ characteristics.</p>
 <p><code class="docutils literal notranslate"><span class="pre">YuMi()</span></code> is a class which imports an ABB YuMi (IRB14000) robot definition
 from a URDF file.  The model describes its kinematic and graphical
 characteristics.</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.10/x64/lib/python3.7/site-packages/spatialmath/base/argcheck.py&quot;, line 350, in getvector</span>
-<span class="go">    &quot;incorrect vector length: expected {}, got {}&quot;.format(dim, s)</span>
-<span class="go">ValueError: incorrect vector length: expected 17, got (14,)</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">NameError</span>: <span class="n">name &#39;robot&#39; is not defined</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">YuMi</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+<span class="go">ERobot: yumi (by ABB), 14 joints (RRRRRRRRRRRRRR), dynamics, geometry, collision</span>
+<span class="go">┌───┬─────────────────┬───────┬────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="go">│id │      link       │ joint │     parent     │                                                            ETS                                                            │</span>
+<span class="go">├───┼─────────────────┼───────┼────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="go">│23 │ world           │       │ BASE           │ {world} = {BASE}                                                                                                          │</span>
+<span class="go">│ 1 │ yumi_base_link  │       │ world          │ {yumi_base_link} = {world} ⊕ tz(0.1)                                                                                      │</span>
+<span class="go">│ 2 │ yumi_body       │       │ yumi_base_link │ {yumi_body} = {yumi_base_link}                                                                                            │</span>
+<span class="go">│ 3 │ yumi_link_1_r   │     0 │ yumi_body      │ {yumi_link_1_r} = {yumi_body} ⊕ tx(0.05355) ⊕ ty(-0.0725) ⊕ tz(0.4149) ⊕ Rz(-132.7°) ⊕ Ry(-32.56°) ⊕ Rx(-56.12°) ⊕ Rz(q0) │</span>
+<span class="go">│ 4 │ yumi_link_2_r   │     1 │ yumi_link_1_r  │ {yumi_link_2_r} = {yumi_link_1_r} ⊕ tx(0.03) ⊕ tz(0.1) ⊕ Rx(90°) ⊕ Rz(q1)                                                 │</span>
+<span class="go">│ 5 │ yumi_link_3_r   │     2 │ yumi_link_2_r  │ {yumi_link_3_r} = {yumi_link_2_r} ⊕ tx(-0.03) ⊕ ty(0.1728) ⊕ Rx(-90°) ⊕ Rz(q2)                                            │</span>
+<span class="go">│ 6 │ yumi_link_4_r   │     3 │ yumi_link_3_r  │ {yumi_link_4_r} = {yumi_link_3_r} ⊕ tx(-0.04188) ⊕ tz(0.07873) ⊕ Ry(-90°) ⊕ Rx(90°) ⊕ Rz(q3)                              │</span>
+<span class="go">│ 7 │ yumi_link_5_r   │     4 │ yumi_link_4_r  │ {yumi_link_5_r} = {yumi_link_4_r} ⊕ tx(0.0405) ⊕ ty(0.1646) ⊕ Rx(-90°) ⊕ Rz(q4)                                           │</span>
+<span class="go">│ 8 │ yumi_link_6_r   │     5 │ yumi_link_5_r  │ {yumi_link_6_r} = {yumi_link_5_r} ⊕ tx(-0.027) ⊕ tz(0.1004) ⊕ Rx(90°) ⊕ Rz(q5)                                            │</span>
+<span class="go">│ 9 │ yumi_link_7_r   │     6 │ yumi_link_6_r  │ {yumi_link_7_r} = {yumi_link_6_r} ⊕ tx(0.027) ⊕ ty(0.029) ⊕ Rx(-90°) ⊕ Rz(q6)                                             │</span>
+<span class="go">│17 │ @gripper_r_base │       │ yumi_link_7_r  │ {gripper_r_base} = {yumi_link_7_r} ⊕ tz(0.007) ⊕ Rz(180°)                                                                 │</span>
+<span class="go">│10 │ yumi_link_1_l   │     7 │ yumi_body      │ {yumi_link_1_l} = {yumi_body} ⊕ tx(0.05355) ⊕ ty(0.0725) ⊕ tz(0.4149) ⊕ Rz(132.8°) ⊕ Ry(-32.75°) ⊕ Rx(56.04°) ⊕ Rz(q7)    │</span>
+<span class="go">│11 │ yumi_link_2_l   │     8 │ yumi_link_1_l  │ {yumi_link_2_l} = {yumi_link_1_l} ⊕ tx(0.03) ⊕ tz(0.1) ⊕ Rx(90°) ⊕ Rz(q8)                                                 │</span>
+<span class="go">│12 │ yumi_link_3_l   │     9 │ yumi_link_2_l  │ {yumi_link_3_l} = {yumi_link_2_l} ⊕ tx(-0.03) ⊕ ty(0.1728) ⊕ Rx(-90°) ⊕ Rz(q9)                                            │</span>
+<span class="go">│13 │ yumi_link_4_l   │    10 │ yumi_link_3_l  │ {yumi_link_4_l} = {yumi_link_3_l} ⊕ tx(-0.04188) ⊕ tz(0.07873) ⊕ Ry(-90°) ⊕ Rx(90°) ⊕ Rz(q10)                             │</span>
+<span class="go">│14 │ yumi_link_5_l   │    11 │ yumi_link_4_l  │ {yumi_link_5_l} = {yumi_link_4_l} ⊕ tx(0.0405) ⊕ ty(0.1646) ⊕ Rx(-90°) ⊕ Rz(q11)                                          │</span>
+<span class="go">│15 │ yumi_link_6_l   │    12 │ yumi_link_5_l  │ {yumi_link_6_l} = {yumi_link_5_l} ⊕ tx(-0.027) ⊕ tz(0.1004) ⊕ Rx(90°) ⊕ Rz(q12)                                           │</span>
+<span class="go">│16 │ yumi_link_7_l   │    13 │ yumi_link_6_l  │ {yumi_link_7_l} = {yumi_link_6_l} ⊕ tx(0.027) ⊕ ty(0.029) ⊕ Rx(-90°) ⊕ Rz(q13)                                            │</span>
+<span class="go">│20 │ @gripper_l_base │       │ yumi_link_7_l  │ {gripper_l_base} = {yumi_link_7_l} ⊕ tz(0.007) ⊕ Rz(180°)                                                                 │</span>
+<span class="go">└───┴─────────────────┴───────┴────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘</span>
+
 </pre></div>
 </div>
 <p>Defined joint configurations are:</p>
@@ -12865,7 +13009,7 @@ characteristics.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 07-Jun-2021.
+        Last updated on 13-Sep-2021.
       </span>
 
     </p>

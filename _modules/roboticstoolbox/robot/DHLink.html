@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
 </ul>
 
             
@@ -174,6 +175,8 @@
 <span class="n">_eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+
+
 <span class="k">def</span> <span class="nf">_check_rne</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    @_check_rne decorator</span>
@@ -192,6 +195,7 @@
 
 <span class="sd">    :seealso: :func:`Link._listen_dyn`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">wrapper_check_rne</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_rne_ob</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_dynchanged</span><span class="p">:</span>
@@ -199,7 +203,9 @@
             <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_init_rne</span><span class="p">()</span>
         <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_rne_changed</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">wrapper_check_rne</span>
+
 
 <span class="c1"># --------------------------------------------------------------#</span>
 
@@ -209,7 +215,10 @@
 
     <span class="k">def</span> <span class="nf">_issymbol</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sym</span><span class="o">.</span><span class="n">Expr</span><span class="p">)</span>
+
+
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+
     <span class="k">def</span> <span class="nf">_issymbol</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
         <span class="k">return</span> <span class="kc">False</span>
 
@@ -226,6 +235,7 @@
         <span class="k">return</span> <span class="n">sym</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
 
 <span class="c1"># --------------------------------------------------------------#</span>
 
@@ -278,15 +288,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">sigma</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">mdh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mdh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
 
         <span class="c1"># TODO</span>
         <span class="c1">#  probably should make DHLink(link) return a copy</span>
@@ -328,7 +331,8 @@
                 <span class="n">manufacturer</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">manufacturer</span><span class="p">,</span>
                 <span class="n">base</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">base</span><span class="p">,</span>
                 <span class="n">tool</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">tool</span><span class="p">,</span>
-                <span class="n">gravity</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
+                <span class="n">gravity</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">gravity</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot add a Link with a non Link object&quot;</span><span class="p">)</span>
@@ -345,12 +349,16 @@
             <span class="n">qvar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">:   theta=</span><span class="si">{</span><span class="n">qvar</span><span class="si">}{</span><span class="n">offset</span><span class="si">}</span><span class="s2">,  d=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="si">}</span><span class="s2">, &quot;</span> \
-                <span class="sa">f</span><span class="s2">&quot;a=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="si">}</span><span class="s2">, alpha=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">:   θ=</span><span class="si">{</span><span class="n">qvar</span><span class="si">}{</span><span class="n">offset</span><span class="si">}</span><span class="s2">,  d=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; a=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="si">}</span><span class="s2">,  ⍺=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">:  theta=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">,  d=</span><span class="si">{</span><span class="n">qvar</span><span class="si">}{</span><span class="n">offset</span><span class="si">}</span><span class="s2">, &quot;</span> \
-                <span class="sa">f</span><span class="s2">&quot; a=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="si">}</span><span class="s2">,  &quot;</span> \
-                <span class="sa">f</span><span class="s2">&quot;alpha=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">:  θ=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="si">}</span><span class="s2">,  d=</span><span class="si">{</span><span class="n">qvar</span><span class="si">}{</span><span class="n">offset</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; a=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="si">}</span><span class="s2">,  &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;⍺=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">s</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -359,13 +367,13 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;theta&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;theta&quot;</span><span class="p">,</span> <span class="s2">&quot;θ&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;alpha&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="s2">&quot;⍺&quot;</span><span class="p">)</span>
         <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_params</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
 
-<span class="c1"># -------------------------------------------------------------------------- #</span>
+    <span class="c1"># -------------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">theta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -388,7 +396,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_theta</span> <span class="o">=</span> <span class="n">theta_new</span>
 
-<span class="c1"># -------------------------------------------------------------------------- #</span>
+    <span class="c1"># -------------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -411,7 +419,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">=</span> <span class="n">d_new</span>
 
-<span class="c1"># -------------------------------------------------------------------------- #</span>
+    <span class="c1"># -------------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -430,7 +438,8 @@
     <span class="nd">@_listen_dyn</span>
     <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">a_new</span>
-<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="c1"># -------------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -450,7 +459,7 @@
     <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_alpha</span> <span class="o">=</span> <span class="n">alpha_new</span>
 
-<span class="c1"># -------------------------------------------------------------------------- #</span>
+    <span class="c1"># -------------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -472,7 +481,8 @@
     <span class="nd">@_listen_dyn</span>
     <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigma_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sigma</span> <span class="o">=</span> <span class="n">sigma_new</span>
-<span class="c1"># -------------------------------------------------------------------------- #</span>
+
+    <span class="c1"># -------------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mdh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -495,7 +505,7 @@
     <span class="k">def</span> <span class="nf">mdh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mdh_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mdh</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mdh_new</span><span class="p">)</span>
 
-<span class="c1"># -------------------------------------------------------------------------- #</span>
+    <span class="c1"># -------------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -520,7 +530,7 @@
     <span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset_new</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">offset_new</span>
 
-<span class="c1"># -------------------------------------------------------------------------- #</span>
+    <span class="c1"># -------------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="DHLink.A"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -584,20 +594,24 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># standard DH</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-                <span class="p">[</span><span class="n">ct</span><span class="p">,</span> <span class="o">-</span><span class="n">st</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="n">st</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">ct</span><span class="p">],</span>
-                <span class="p">[</span><span class="n">st</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="o">-</span><span class="n">ct</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">st</span><span class="p">],</span>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sa</span><span class="p">,</span> <span class="n">ca</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-            <span class="p">])</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">[</span><span class="n">ct</span><span class="p">,</span> <span class="o">-</span><span class="n">st</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="n">st</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">ct</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">st</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="o">-</span><span class="n">ct</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">st</span><span class="p">],</span>
+                    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sa</span><span class="p">,</span> <span class="n">ca</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span>
+                    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># modified DH</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-                <span class="p">[</span><span class="n">ct</span><span class="p">,</span> <span class="o">-</span><span class="n">st</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">],</span>
-                <span class="p">[</span><span class="n">st</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="o">-</span><span class="n">sa</span><span class="p">,</span> <span class="o">-</span><span class="n">sa</span> <span class="o">*</span> <span class="n">d</span><span class="p">],</span>
-                <span class="p">[</span><span class="n">st</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="n">ca</span><span class="p">,</span> <span class="n">ca</span> <span class="o">*</span> <span class="n">d</span><span class="p">],</span>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-            <span class="p">])</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">[</span><span class="n">ct</span><span class="p">,</span> <span class="o">-</span><span class="n">st</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">st</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="o">-</span><span class="n">sa</span><span class="p">,</span> <span class="o">-</span><span class="n">sa</span> <span class="o">*</span> <span class="n">d</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">st</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="n">ca</span><span class="p">,</span> <span class="n">ca</span> <span class="o">*</span> <span class="n">d</span><span class="p">],</span>
+                    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
@@ -685,6 +699,7 @@
 
 <span class="c1"># -------------------------------------------------------------------------- #</span>
 
+
 <div class="viewcode-block" id="RevoluteDH"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.RevoluteDH">[docs]</a><span class="k">class</span> <span class="nc">RevoluteDH</span><span class="p">(</span><span class="n">DHLink</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for revolute links using standard DH convention</span>
@@ -735,23 +750,25 @@
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
 
         <span class="n">theta</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">sigma</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">mdh</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">mdh</span><span class="o">=</span><span class="n">mdh</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="n">qlim</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+            <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+            <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span>
+            <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+            <span class="n">mdh</span><span class="o">=</span><span class="n">mdh</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+            <span class="n">qlim</span><span class="o">=</span><span class="n">qlim</span><span class="p">,</span>
+            <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PrismaticDH"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.PrismaticDH">[docs]</a><span class="k">class</span> <span class="nc">PrismaticDH</span><span class="p">(</span><span class="n">DHLink</span><span class="p">):</span>
@@ -806,23 +823,25 @@
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
 
         <span class="n">d</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">mdh</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">mdh</span><span class="o">=</span><span class="n">mdh</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="n">qlim</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+            <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span>
+            <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+            <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+            <span class="n">mdh</span><span class="o">=</span><span class="n">mdh</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+            <span class="n">qlim</span><span class="o">=</span><span class="n">qlim</span><span class="p">,</span>
+            <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RevoluteMDH"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.RevoluteMDH">[docs]</a><span class="k">class</span> <span class="nc">RevoluteMDH</span><span class="p">(</span><span class="n">DHLink</span><span class="p">):</span>
@@ -875,23 +894,25 @@
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
 
         <span class="n">theta</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">sigma</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">mdh</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">mdh</span><span class="o">=</span><span class="n">mdh</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="n">qlim</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+            <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+            <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span>
+            <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+            <span class="n">mdh</span><span class="o">=</span><span class="n">mdh</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+            <span class="n">qlim</span><span class="o">=</span><span class="n">qlim</span><span class="p">,</span>
+            <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PrismaticMDH"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.PrismaticMDH">[docs]</a><span class="k">class</span> <span class="nc">PrismaticMDH</span><span class="p">(</span><span class="n">DHLink</span><span class="p">):</span>
@@ -946,23 +967,25 @@
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
 
         <span class="n">d</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">mdh</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">mdh</span><span class="o">=</span><span class="n">mdh</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="n">qlim</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+            <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span>
+            <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+            <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+            <span class="n">mdh</span><span class="o">=</span><span class="n">mdh</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+            <span class="n">qlim</span><span class="o">=</span><span class="n">qlim</span><span class="p">,</span>
+            <span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -976,7 +999,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 07-Jun-2021.
+        Last updated on 13-Sep-2021.
       </span>
 
     </p>

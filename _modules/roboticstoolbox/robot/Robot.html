@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
 </ul>
 
             
@@ -187,6 +188,7 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
     <span class="k">pass</span>
 
+<span class="n">_default_backend</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="c1"># TODO maybe this needs to be abstract</span>
 <span class="c1"># ikine functions need: fkine, jacobe, qlim methods from subclass</span>
@@ -512,6 +514,33 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;some joint limits not defined&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">high</span><span class="o">=</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,))</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">default_backend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get default graphical backend</span>
+
+<span class="sd">        :return: backend name</span>
+<span class="sd">        :rtype: str</span>
+
+<span class="sd">        Get the default graphical backend, used when no explicit backend is</span>
+<span class="sd">        passed to ``Robot.plot``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_default_backend</span>
+
+    <span class="nd">@default_backend</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">default_backend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">be</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set default graphical backend</span>
+
+<span class="sd">        :param be: backend name</span>
+<span class="sd">        :type be: str</span>
+
+<span class="sd">        Set the default graphical backend, used when no explicit backend is</span>
+<span class="sd">        passed to ``Robot.plot``.  The default set here will be overridden if</span>
+<span class="sd">        the particular ``Robot`` subclass cannot support it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_default_backend</span> <span class="o">=</span> <span class="n">be</span>
+
 <div class="viewcode-block" id="Robot.addconfiguration"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.addconfiguration">[docs]</a>    <span class="k">def</span> <span class="nf">addconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;rad&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a named joint configuration (Robot superclass)</span>
@@ -543,9 +572,13 @@
         <span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
             <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">theta</span> <span class="o">*</span> <span class="n">deg</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\u00b0</span><span class="s2">&quot;</span>
-            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
-                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">theta</span> <span class="o">*</span> <span class="n">deg</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\u00b0</span><span class="s2">&quot;</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">fmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">theta</span> <span class="o">*</span> <span class="n">deg</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\u00b0</span><span class="s2">&quot;</span>
+                <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="c1"># pragma nocover</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">theta</span> <span class="o">*</span> <span class="n">deg</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\u00b0</span><span class="s2">&quot;</span>
 
         <span class="c1"># show named configurations</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_configdict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1072,6 +1105,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">verifymatrix</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
 
+        <span class="n">n</span> <span class="o">=</span> <span class="n">J</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
         <span class="k">if</span> <span class="n">H</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian0</span><span class="p">(</span><span class="n">J0</span><span class="o">=</span><span class="n">J</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1083,9 +1118,9 @@
         <span class="n">H</span> <span class="o">=</span> <span class="n">H</span><span class="p">[</span><span class="n">axes</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
 
         <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">J</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">J</span><span class="p">))</span>
-        <span class="n">Jm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">Jm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
             <span class="n">c</span> <span class="o">=</span> <span class="n">J</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">H</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">])</span>
             <span class="n">Jm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">manipulability</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="s2">&quot;F&quot;</span><span class="p">))</span> <span class="o">@</span> <span class="n">b</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
 
@@ -1379,7 +1414,7 @@
     <span class="c1"># TODO probably should be a static method</span>
     <span class="k">def</span> <span class="nf">_get_graphical_backend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
-        <span class="n">default</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_backend</span>
 
         <span class="c1"># figure out the right default</span>
         <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1387,8 +1422,11 @@
                 <span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;pyplot&quot;</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot2</span><span class="p">):</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;pyplot2&quot;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;swift&quot;</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasgeometry</span><span class="p">:</span>
+                    <span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;swift&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;pyplot&quot;</span>
 
         <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -1428,7 +1466,6 @@
                 <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;vpython&quot;</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;VPython is not installed, &quot;</span> <span class="s2">&quot;install it using pip or conda&quot;</span><span class="p">)</span>
                 <span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;pyplot&quot;</span>
-
         <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">backend</span> <span class="o">=</span> <span class="n">default</span>
 
@@ -2146,7 +2183,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 07-Jun-2021.
+        Last updated on 13-Sep-2021.
       </span>
 
     </p>

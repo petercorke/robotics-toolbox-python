@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../arm.html">Manipulator arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blocks.html">bdsim blocks</a></li>
 </ul>
 
             
@@ -162,8 +163,10 @@
   <h1>Source code for roboticstoolbox.models.URDF.YuMi</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ELink</span> <span class="kn">import</span> <span class="n">ELink</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ERobot</span> <span class="kn">import</span> <span class="n">ERobot</span>
+<span class="kn">import</span> <span class="nn">spatialmath</span> <span class="k">as</span> <span class="nn">sm</span>
 
 
 <div class="viewcode-block" id="YuMi"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.URDF.YuMi">[docs]</a><span class="k">class</span> <span class="nc">YuMi</span><span class="p">(</span><span class="n">ERobot</span><span class="p">):</span>
@@ -194,14 +197,52 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">links</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">URDF_read</span><span class="p">(</span><span class="s2">&quot;yumi_description/urdf/yumi.urdf&quot;</span><span class="p">)</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">links</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;ABB&quot;</span><span class="p">,</span> <span class="n">gripper_links</span><span class="o">=</span><span class="p">[</span><span class="n">links</span><span class="p">[</span><span class="mi">20</span><span class="p">]]</span>
+        <span class="n">links</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">urdf_string</span><span class="p">,</span> <span class="n">urdf_filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">URDF_read</span><span class="p">(</span>
+            <span class="s2">&quot;yumi_description/urdf/yumi.urdf&quot;</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">14</span><span class="p">,)))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">]))</span></div>
+        <span class="c1"># We wish to add an intermediate link between gripper_r_base and</span>
+        <span class="c1"># @gripper_r_finger_r/l</span>
+        <span class="c1"># This is because gripper_r_base contains a revolute joint which is</span>
+        <span class="c1"># a part of the core kinematic chain and not the gripper.</span>
+        <span class="c1"># So we wish for gripper_r_base to be part of the robot and</span>
+        <span class="c1"># @gripper_r_finger_r/l to be in the gripper underneath a parent ELink</span>
+
+        <span class="n">gripper_r_base</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
+        <span class="n">gripper_l_base</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="mi">19</span><span class="p">]</span>
+
+        <span class="c1"># Find the finger links</span>
+        <span class="n">r_gripper_links</span> <span class="o">=</span> <span class="p">[</span><span class="n">link</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">gripper_r_base</span><span class="p">]</span>
+        <span class="n">l_gripper_links</span> <span class="o">=</span> <span class="p">[</span><span class="n">link</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">gripper_l_base</span><span class="p">]</span>
+
+        <span class="c1"># New intermediate links</span>
+        <span class="n">r_gripper</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;r_gripper&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">gripper_l_base</span><span class="p">)</span>
+        <span class="n">l_gripper</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;l_gripper&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">gripper_r_base</span><span class="p">)</span>
+        <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r_gripper</span><span class="p">)</span>
+        <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l_gripper</span><span class="p">)</span>
+
+        <span class="c1"># Set the finger link parent to be the new gripper base link</span>
+        <span class="k">for</span> <span class="n">g_link</span> <span class="ow">in</span> <span class="n">r_gripper_links</span><span class="p">:</span>
+            <span class="n">g_link</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">r_gripper</span>
+
+        <span class="k">for</span> <span class="n">g_link</span> <span class="ow">in</span> <span class="n">l_gripper_links</span><span class="p">:</span>
+            <span class="n">g_link</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">l_gripper</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">links</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;ABB&quot;</span><span class="p">,</span>
+            <span class="n">gripper_links</span><span class="o">=</span><span class="p">[</span><span class="n">r_gripper</span><span class="p">,</span> <span class="n">l_gripper</span><span class="p">],</span>
+            <span class="n">urdf_string</span><span class="o">=</span><span class="n">urdf_string</span><span class="p">,</span>
+            <span class="n">urdf_filepath</span><span class="o">=</span><span class="n">urdf_filepath</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Set the default tool transform for the end-effectors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tool</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SE3</span><span class="o">.</span><span class="n">Tz</span><span class="p">(</span><span class="mf">0.13</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tool</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">SE3</span><span class="o">.</span><span class="n">Tz</span><span class="p">(</span><span class="mf">0.13</span><span class="p">)</span></div>
+
+        <span class="c1"># self.addconfiguration(&quot;qz&quot;, np.zeros((14,)))</span>
+        <span class="c1"># self.addconfiguration(&quot;qr&quot;, np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]))</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
@@ -221,7 +262,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 07-Jun-2021.
+        Last updated on 13-Sep-2021.
       </span>
 
     </p>

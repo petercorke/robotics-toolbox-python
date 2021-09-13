@@ -105,9 +105,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="mobile_vehicle_animation.html">Mobile robot animations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_planner.html">Mobile robot planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile_planner.html">Mobile robot path planning</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
 </ul>
 
             
@@ -193,15 +194,15 @@
 <blockquote>
 <div><dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">Bicycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steer_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.413716694115407</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Bicycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">Bicycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steer_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.413716694115407</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Bicycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steer_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.413716694115407</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Bicycle.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steer_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.413716694115407</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Bicycle.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new bicycle kinematic model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>l</strong> (<em>float</em><em>, </em><em>optional</em>) – wheel base, defaults to 1</p></li>
+<li><p><strong>L</strong> (<em>float</em><em>, </em><em>optional</em>) – wheel base, defaults to 1</p></li>
 <li><p><strong>steer_max</strong> (<em>float</em><em>, </em><em>optional</em>) – [description], defaults to <span class="math notranslate nohighlight">\(0.45\pi\)</span></p></li>
 <li><p><strong>**kwargs</strong> – <p>additional arguments passed to <a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle" title="roboticstoolbox.mobile.Vehicle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vehicle</span></code></a>
 constructor</p>
@@ -209,7 +210,7 @@ constructor</p>
 </ul>
 </dd>
 <dt class="field-even">Seealso</dt>
-<dd class="field-even"><p><a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle" title="roboticstoolbox.mobile.Vehicle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vehicle</span></code></a></p>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Vehicle</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -229,9 +230,43 @@ constructor</p>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.radius_min">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">radius_min</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.radius_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vehicle turning radius</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>radius of minimum possible turning circle</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.curvature_max" title="roboticstoolbox.mobile.Bicycle.curvature_max"><code class="xref py py-meth docutils literal notranslate"><span class="pre">curvature_max()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.curvature_max">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">curvature_max</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.curvature_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vehicle maximum path curature</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>maximum curvature</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.radius_min" title="roboticstoolbox.mobile.Bicycle.radius_min"><code class="xref py py-meth docutils literal notranslate"><span class="pre">radius_min()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.steer_max">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">steer_max</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.steer_max" title="Permalink to this definition">¶</a></dt>
-<dd><p>Vehicle maximum steering wheel angle</p>
+<dd><p>Vehicle maximum steered wheel angle</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>maximum angle</p>
@@ -244,14 +279,14 @@ constructor</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Bicycle.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.f" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Bicycle.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.f" title="Permalink to this definition">¶</a></dt>
 <dd><p>Predict next state based on odometry</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
 <li><p><strong>odo</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – vehicle odometry <span class="math notranslate nohighlight">\((\delta_d, \delta_\theta)\)</span></p></li>
-<li><p><strong>w</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – [description], defaults to (0,0)</p></li>
+<li><p><strong>v</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – additive odometry noise, defaults to (0,0)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -262,8 +297,10 @@ constructor</p>
 </dd>
 </dl>
 <p>Returns the predicted next state based on current state and odometry 
-value.  <code class="docutils literal notranslate"><span class="pre">w</span></code> is a random variable that represents additive
+value.  <code class="docutils literal notranslate"><span class="pre">v</span></code> is a random variable that represents additive
 odometry noise for simulation purposes.</p>
+<div class="math notranslate nohighlight">
+\[f: \vec{x}_k, \vec{d}, \vec{v} \mapsto \vec{x}_{k+1}\]</div>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">Bicycle</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>  <span class="c1"># default bicycle model</span>
@@ -275,11 +312,16 @@ odometry noise for simulation purposes.</p>
 <p class="admonition-title">Note</p>
 <p>This is the state update equation used for EKF localization.</p>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.Fx" title="roboticstoolbox.mobile.Bicycle.Fx"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Fx()</span></code></a> <a class="reference internal" href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.Fv" title="roboticstoolbox.mobile.Bicycle.Fv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Fv()</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.Fx">
-<span class="sig-name descname"><span class="pre">Fx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Bicycle.Fx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.Fx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Fx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Bicycle.Fx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.Fx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Jacobian df/dx</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -306,7 +348,7 @@ the given odometry.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.Fv">
-<span class="sig-name descname"><span class="pre">Fv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Bicycle.Fv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.Fv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Fv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Bicycle.Fv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.Fv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Jacobian df/dv</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -333,7 +375,7 @@ the given odometry.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.deriv">
-<span class="sig-name descname"><span class="pre">deriv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Bicycle.deriv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.deriv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">deriv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Bicycle.deriv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.deriv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time derivative of state</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -351,15 +393,11 @@ the given odometry.</p>
 </dl>
 <p>Returns the time derivative of state (3x1) at the state <code class="docutils literal notranslate"><span class="pre">x</span></code> with 
 inputs <code class="docutils literal notranslate"><span class="pre">u</span></code>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Vehicle speed and steering limits are not applied here</p>
-</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.u_limited">
-<span class="sig-name descname"><span class="pre">u_limited</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Bicycle.u_limited"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.u_limited" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">u_limited</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Bicycle.u_limited"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.u_limited" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -481,15 +519,11 @@ SciPy interp1d</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.init">
-<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.init" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.init" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize for simulation (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x0</strong> (<em>array_like</em><em>(</em><em>3</em><em>) or </em><em>array_like</em><em>(</em><em>2</em><em>)</em>) – Initial state, defaults to value given to Vehicle constructor</p></li>
-<li><p><strong>animation</strong> (<em>VehicleAnimation subclass</em><em>, </em><em>optional</em>) – vehicle animation object, defaults to None</p></li>
-<li><p><strong>plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Enable plotting, defaults to False</p></li>
-</ul>
+<dd class="field-odd"><p><strong>x0</strong> (<em>array_like</em><em>(</em><em>3</em><em>) or </em><em>array_like</em><em>(</em><em>2</em><em>)</em>) – Initial state, defaults to value given to Vehicle constructor</p>
 </dd>
 </dl>
 <p>Performs the following initializations:</p>
@@ -588,7 +622,7 @@ is reset at the start of each simulation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.plot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'box'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>[summary] (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -601,18 +635,68 @@ is reset at the start of each simulation.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.plot_x_y">
-<span class="sig-name descname"><span class="pre">plot_x_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.plot_x_y" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.plot_xy">
+<span class="sig-name descname"><span class="pre">plot_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.plot_xy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.plot_xyt_t">
-<span class="sig-name descname"><span class="pre">plot_xyt_t</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.plot_xyt_t" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.plot_xyt">
+<span class="sig-name descname"><span class="pre">plot_xyt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.plot_xyt" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.polygon">
+<span class="sig-name descname"><span class="pre">polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.polygon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.q">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get vehicle state/configuration (superclass method)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Vehicle state <span class="math notranslate nohighlight">\((x, y,    heta)\)</span></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(3)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.random">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">random</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.random" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get private random number generator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>NumPy random number generator</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Generator</p>
+</dd>
+</dl>
+<p>Has methods including:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">integers(low,</span> <span class="pre">high,</span> <span class="pre">size,</span> <span class="pre">endpoint)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">random(size)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uniform</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">normal(mean,</span> <span class="pre">std,</span> <span class="pre">size)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">multivariate_normal(mean,</span> <span class="pre">covar,</span> <span class="pre">size)</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>The generator is initialized with the seed provided at constructor
+time every time <code class="docutils literal notranslate"><span class="pre">init</span></code> is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.init" title="roboticstoolbox.mobile.Bicycle.init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">init()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.run" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulate motion of vehicle (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -668,7 +752,7 @@ calling <a class="reference internal" href="mobile_vehicle_bicycle.html#robotics
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.step">
-<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.step" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Step simulator by one time step (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -679,9 +763,8 @@ calling <a class="reference internal" href="mobile_vehicle_bicycle.html#robotics
 </dd>
 </dl>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">veh.step(vel,</span> <span class="pre">steer)</span></code> for a Bicycle vehicle model</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">veh.step((vel,</span> <span class="pre">steer))</span></code> as above but control is a tuple</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">veh.step(vel,</span> <span class="pre">vel_diff)</span></code> for a Unicycle vehicle model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">veh.step((vel,</span> <span class="pre">steer))</span></code> for a Bicycle vehicle model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">veh.step((vel,</span> <span class="pre">vel_diff))</span></code> for a Unicycle vehicle model</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">veh.step()</span></code> as above but control is taken from the <code class="docutils literal notranslate"><span class="pre">control</span></code>
 attribute which might be a function or driver agent.</p></li>
 </ul>
@@ -691,16 +774,14 @@ attribute which might be a function or driver agent.</p></li>
 <li><p>Returns the odometry</p></li>
 </ol>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">Bicycle</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>  <span class="c1"># default bicycle model</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>  <span class="c1"># one step: v=1, γ=0.2</span>
-<span class="go">array([0.1   , 0.0203])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">x</span>
-<span class="go">array([0.1   , 0.    , 0.0203])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>  <span class="c1"># another step: v=1, γ=0.2</span>
-<span class="go">array([0.1   , 0.0203])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">x</span>
-<span class="go">array([0.2   , 0.002 , 0.0405])</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad control specified</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/Vehicle.py&quot;</span>, line <span class="m">494</span>, in <span class="n">step</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_control</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/Vehicle.py&quot;</span>, line <span class="m">570</span>, in <span class="n">eval_control</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad control specified&#39;</span><span class="p">)</span>
+<span class="gr">ValueError</span>: <span class="n">bad control specified</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -745,6 +826,22 @@ method if <code class="docutils literal notranslate"><span class="pre">stop</spa
 </dd>
 </dl>
 <p>Set by <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass constructor.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bicycle.workspace">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">workspace</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Bicycle.workspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of robot workspace</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>workspace bounds [xmin, xmax, ymin, ymax]</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(4)</p>
+</dd>
+</dl>
+<p>Returns the bounds of the workspace as specified by constructor
+option <code class="docutils literal notranslate"><span class="pre">workspace</span></code></p>
 </dd></dl>
 
 <dl class="py property">
@@ -812,35 +909,69 @@ run.</p>
 <h2>Unicycle model<a class="headerlink" href="#unicycle-model" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">Unicycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Unicycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle" title="roboticstoolbox.mobile.vehicle.Vehicle"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.vehicle.Vehicle</span></code></a></p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">Unicycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.Vehicle.VehicleBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Unicycle.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new unicycle kinematic model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>w</strong> (<em>float</em><em>, </em><em>optional</em>) – vehicle width, defaults to 1</p></li>
+<li><p><strong>W</strong> (<em>float</em><em>, </em><em>optional</em>) – vehicle width, defaults to 1</p></li>
 <li><p><strong>**kwargs</strong> – <p>additional arguments passed to <a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle" title="roboticstoolbox.mobile.Vehicle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vehicle</span></code></a>
 constructor</p>
 </p></li>
 </ul>
 </dd>
 <dt class="field-even">Seealso</dt>
-<dd class="field-even"><p><a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle" title="roboticstoolbox.mobile.Vehicle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vehicle</span></code></a></p>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Vehicle</span></code></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Unicycle.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.f" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict next state based on odometry</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>odo</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – vehicle odometry <span class="math notranslate nohighlight">\((\delta_d, \delta_\theta)\)</span></p></li>
+<li><p><strong>v</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – additive odometry noise, defaults to (0,0)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>predicted vehicle state</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(3)</p>
+</dd>
+</dl>
+<p>Returns the predicted next state based on current state and odometry 
+value.  <code class="docutils literal notranslate"><span class="pre">v</span></code> is a random variable that represents additive
+odometry noise for simulation purposes.</p>
+<div class="math notranslate nohighlight">
+\[f: \vec{x}_k, \vec{d}, \vec{v} \mapsto \vec{x}_{k+1}\]</div>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">TypeError: &#39;float&#39; object cannot be interpreted as an integer</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is the state update equation used for EKF localization.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.Fx" title="roboticstoolbox.mobile.Unicycle.Fx"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Fx()</span></code></a> <a class="reference internal" href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.Fv" title="roboticstoolbox.mobile.Unicycle.Fv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Fv()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.Fx">
-<span class="sig-name descname"><span class="pre">Fx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Unicycle.Fx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.Fx" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Fx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle.Fx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.Fx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Jacobian df/dx</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -867,7 +998,7 @@ the given odometry.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.Fv">
-<span class="sig-name descname"><span class="pre">Fv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Unicycle.Fv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.Fv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Fv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle.Fv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.Fv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Jacobian df/dv</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -894,7 +1025,7 @@ the given odometry.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.deriv">
-<span class="sig-name descname"><span class="pre">deriv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Unicycle.deriv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.deriv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">deriv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle.deriv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.deriv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time derivative of state</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -920,7 +1051,7 @@ inputs <code class="docutils literal notranslate"><span class="pre">u</span></co
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.u_limited">
-<span class="sig-name descname"><span class="pre">u_limited</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Unicycle.u_limited"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.u_limited" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">u_limited</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle.u_limited"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.u_limited" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1042,15 +1173,11 @@ SciPy interp1d</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.init">
-<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.init" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.init" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize for simulation (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x0</strong> (<em>array_like</em><em>(</em><em>3</em><em>) or </em><em>array_like</em><em>(</em><em>2</em><em>)</em>) – Initial state, defaults to value given to Vehicle constructor</p></li>
-<li><p><strong>animation</strong> (<em>VehicleAnimation subclass</em><em>, </em><em>optional</em>) – vehicle animation object, defaults to None</p></li>
-<li><p><strong>plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Enable plotting, defaults to False</p></li>
-</ul>
+<dd class="field-odd"><p><strong>x0</strong> (<em>array_like</em><em>(</em><em>3</em><em>) or </em><em>array_like</em><em>(</em><em>2</em><em>)</em>) – Initial state, defaults to value given to Vehicle constructor</p>
 </dd>
 </dl>
 <p>Performs the following initializations:</p>
@@ -1149,7 +1276,7 @@ is reset at the start of each simulation.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.plot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'box'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>[summary] (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1162,18 +1289,68 @@ is reset at the start of each simulation.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.plot_x_y">
-<span class="sig-name descname"><span class="pre">plot_x_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.plot_x_y" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.plot_xy">
+<span class="sig-name descname"><span class="pre">plot_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.plot_xy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.plot_xyt_t">
-<span class="sig-name descname"><span class="pre">plot_xyt_t</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.plot_xyt_t" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.plot_xyt">
+<span class="sig-name descname"><span class="pre">plot_xyt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.plot_xyt" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.polygon">
+<span class="sig-name descname"><span class="pre">polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.polygon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.q">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get vehicle state/configuration (superclass method)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Vehicle state <span class="math notranslate nohighlight">\((x, y,    heta)\)</span></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(3)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.random">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">random</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.random" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get private random number generator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>NumPy random number generator</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Generator</p>
+</dd>
+</dl>
+<p>Has methods including:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">integers(low,</span> <span class="pre">high,</span> <span class="pre">size,</span> <span class="pre">endpoint)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">random(size)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uniform</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">normal(mean,</span> <span class="pre">std,</span> <span class="pre">size)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">multivariate_normal(mean,</span> <span class="pre">covar,</span> <span class="pre">size)</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>The generator is initialized with the seed provided at constructor
+time every time <code class="docutils literal notranslate"><span class="pre">init</span></code> is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.init" title="roboticstoolbox.mobile.Unicycle.init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">init()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.run" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulate motion of vehicle (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1229,7 +1406,7 @@ calling <a class="reference internal" href="mobile_vehicle_unicycle.html#robotic
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.step">
-<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.step" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Step simulator by one time step (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1240,9 +1417,8 @@ calling <a class="reference internal" href="mobile_vehicle_unicycle.html#robotic
 </dd>
 </dl>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">veh.step(vel,</span> <span class="pre">steer)</span></code> for a Bicycle vehicle model</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">veh.step((vel,</span> <span class="pre">steer))</span></code> as above but control is a tuple</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">veh.step(vel,</span> <span class="pre">vel_diff)</span></code> for a Unicycle vehicle model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">veh.step((vel,</span> <span class="pre">steer))</span></code> for a Bicycle vehicle model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">veh.step((vel,</span> <span class="pre">vel_diff))</span></code> for a Unicycle vehicle model</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">veh.step()</span></code> as above but control is taken from the <code class="docutils literal notranslate"><span class="pre">control</span></code>
 attribute which might be a function or driver agent.</p></li>
 </ul>
@@ -1252,16 +1428,14 @@ attribute which might be a function or driver agent.</p></li>
 <li><p>Returns the odometry</p></li>
 </ol>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">Bicycle</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>  <span class="c1"># default bicycle model</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>  <span class="c1"># one step: v=1, γ=0.2</span>
-<span class="go">array([0.1   , 0.0203])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">x</span>
-<span class="go">array([0.1   , 0.    , 0.0203])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>  <span class="c1"># another step: v=1, γ=0.2</span>
-<span class="go">array([0.1   , 0.0203])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">x</span>
-<span class="go">array([0.2   , 0.002 , 0.0405])</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad control specified</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/Vehicle.py&quot;</span>, line <span class="m">494</span>, in <span class="n">step</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_control</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/Vehicle.py&quot;</span>, line <span class="m">570</span>, in <span class="n">eval_control</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad control specified&#39;</span><span class="p">)</span>
+<span class="gr">ValueError</span>: <span class="n">bad control specified</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -1306,6 +1480,22 @@ method if <code class="docutils literal notranslate"><span class="pre">stop</spa
 </dd>
 </dl>
 <p>Set by <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass constructor.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.workspace">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">workspace</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.workspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of robot workspace</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>workspace bounds [xmin, xmax, ymin, ymax]</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(4)</p>
+</dd>
+</dl>
+<p>Returns the bounds of the workspace as specified by constructor
+option <code class="docutils literal notranslate"><span class="pre">workspace</span></code></p>
 </dd></dl>
 
 <dl class="py property">
@@ -1370,489 +1560,10 @@ run.</p>
 </div>
 <div class="section" id="superclass">
 <h2>Superclass<a class="headerlink" href="#superclass" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
+<dl class="py attribute">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">Vehicle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">covar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accel_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">covar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accel_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Superclass for vehicle kinematic models</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>covar</strong> (<em>ndarray</em><em>(</em><em>2</em><em>,</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – odometry covariance, defaults to zero</p></li>
-<li><p><strong>speed_max</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum speed, defaults to <span class="math notranslate nohighlight">\(\infty\)</span></p></li>
-<li><p><strong>accel_max</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum acceleration, defaults to <span class="math notranslate nohighlight">\(\infty\)</span></p></li>
-<li><p><strong>x0</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – Initial state, defaults to (0,0,0)</p></li>
-<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – sample update interval, defaults to 0.1</p></li>
-<li><p><strong>control</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>interp1d</em><em>, </em><em>VehicleDriver</em>) – vehicle control inputs, defaults to None</p></li>
-<li><p><strong>animation</strong> (<em>VehicleAnimation subclass</em><em>, </em><em>optional</em>) – Graphical animation of vehicle, defaults to None</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – print lots of info, defaults to False</p></li>
-<li><p><strong>dim</strong> – dimensions of 2D plot area, defaults to (-10:10) x (-10:10),
-see <code class="xref py py-func docutils literal notranslate"><span class="pre">plotvol2()</span></code></p></li>
-</ul>
-</dd>
-</dl>
-<p>This is an abstract superclass that simulates the motion of a mobile
-robot under the action of a controller.  The controller provides
-control inputs to the vehicle, and the output odometry is returned.
-The true state, effectively unknowable in practice, is computed
-and accessible.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle" title="roboticstoolbox.mobile.Bicycle"><code class="xref py py-func docutils literal notranslate"><span class="pre">Bicycle()</span></code></a>, <a class="reference internal" href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle" title="roboticstoolbox.mobile.Unicycle"><code class="xref py py-func docutils literal notranslate"><span class="pre">Unicycle()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.x">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.x" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get vehicle state/configuration (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Vehicle state <span class="math notranslate nohighlight">\((x, y,    heta)\)</span></p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>ndarray(3)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.x0">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">x0</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.x0" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get vehicle initial state/configuration (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Vehicle state <span class="math notranslate nohighlight">\((x, y,    heta)\)</span></p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>ndarray(3)</p>
-</dd>
-</dl>
-<p>The state is set to this value at the beginning of each simulation
-run.</p>
-<p>Set by <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass constructor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.run" title="roboticstoolbox.mobile.Vehicle.run"><code class="xref py py-func docutils literal notranslate"><span class="pre">run()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.x_hist">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">x_hist</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.x_hist" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get vehicle state/configuration history (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Vehicle state history</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>ndarray(n,3)</p>
-</dd>
-</dl>
-<p>The state at each time step resulting from a simulation
-run.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.run" title="roboticstoolbox.mobile.Vehicle.run"><code class="xref py py-func docutils literal notranslate"><span class="pre">run()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.speed_max">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">speed_max</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.speed_max" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get maximum speed of vehicle (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>maximum speed</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>float</p>
-</dd>
-</dl>
-<p>Set by <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass constructor.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.accel_max">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">accel_max</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.accel_max" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get maximum acceleration of vehicle (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>maximum acceleration</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>float</p>
-</dd>
-</dl>
-<p>Set by <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass constructor.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.dt">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.dt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get sample time (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>discrete time step for simulation</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>float</p>
-</dd>
-</dl>
-<p>Set by <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass constructor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.run" title="roboticstoolbox.mobile.Vehicle.run"><code class="xref py py-func docutils literal notranslate"><span class="pre">run()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.verbose">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.verbose" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get verbosity (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>verbosity level</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>bool</p>
-</dd>
-</dl>
-<p>Set by <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass constructor.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.control">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">control</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.control" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get vehicle control (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>current control</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>2-tuple, callable, interp1d or VehicleDriver</p>
-</dd>
-</dl>
-<p>Control can be:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>a constant tuple as the control inputs to the vehicle</p></li>
-<li><p>a function called as f(vehicle, t, x) that returns a tuple</p></li>
-<li><p>an interpolator called as f(t) that returns a tuple, see
-SciPy interp1d</p></li>
-<li><p>a driver agent, subclass of <code class="xref py py-func docutils literal notranslate"><span class="pre">VehicleDriver()</span></code></p></li>
-</ul>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.eval_control" title="roboticstoolbox.mobile.Vehicle.eval_control"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval_control()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.deriv">
-<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">deriv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.deriv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.deriv" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.add_driver">
-<span class="sig-name descname"><span class="pre">add_driver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">driver</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.add_driver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.add_driver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a driver agent (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>driver</strong> (<em>VehicleDriver subclass</em>) – a driver agent object</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">RandomPath()</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simulate motion of vehicle (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>N</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of simulation steps, defaults to 1000</p></li>
-<li><p><strong>x0</strong> (<em>array_like</em><em>(</em><em>3</em><em>) or </em><em>array_like</em><em>(</em><em>2</em><em>)</em>) – Initial state, defaults to value given to Vehicle constructor</p></li>
-<li><p><strong>animation</strong> (<em>VehicleAnimation subclass</em><em>, </em><em>optional</em>) – vehicle animation object, defaults to None</p></li>
-<li><p><strong>plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Enable plotting, defaults to False</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>State trajectory, each row is <span class="math notranslate nohighlight">\((x,y,     heta)\)</span>.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ndarray(n,3)</p>
-</dd>
-</dl>
-<p>Runs the vehicle simulation for <code class="docutils literal notranslate"><span class="pre">N</span></code> timesteps and optionally plots
-an animation.</p>
-<p>The control inputs are provied by <code class="docutils literal notranslate"><span class="pre">control</span></code> which can be:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>a constant tuple as the control inputs to the vehicle</p></li>
-<li><p>a function called as <code class="docutils literal notranslate"><span class="pre">f(vehicle,</span> <span class="pre">t,</span> <span class="pre">x)</span></code> that returns a tuple</p></li>
-<li><p>an interpolator called as f(t) that returns a tuple, see
-SciPy interp1d</p></li>
-<li><p>a driver agent, subclass of <code class="xref py py-func docutils literal notranslate"><span class="pre">VehicleDriver()</span></code></p></li>
-</ul>
-</div></blockquote>
-<p>The simulation can be stopped prematurely by the control function
-calling <a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.stopif" title="roboticstoolbox.mobile.Vehicle.stopif"><code class="xref py py-func docutils literal notranslate"><span class="pre">stopif()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.init" title="roboticstoolbox.mobile.Vehicle.init"><code class="xref py py-func docutils literal notranslate"><span class="pre">init()</span></code></a>, <a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.step" title="roboticstoolbox.mobile.Vehicle.step"><code class="xref py py-func docutils literal notranslate"><span class="pre">step()</span></code></a>, <a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.control" title="roboticstoolbox.mobile.Vehicle.control"><code class="xref py py-func docutils literal notranslate"><span class="pre">control()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.init">
-<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.init" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize for simulation (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x0</strong> (<em>array_like</em><em>(</em><em>3</em><em>) or </em><em>array_like</em><em>(</em><em>2</em><em>)</em>) – Initial state, defaults to value given to Vehicle constructor</p></li>
-<li><p><strong>animation</strong> (<em>VehicleAnimation subclass</em><em>, </em><em>optional</em>) – vehicle animation object, defaults to None</p></li>
-<li><p><strong>plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – Enable plotting, defaults to False</p></li>
-</ul>
-</dd>
-</dl>
-<p>Performs the following initializations:</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li><p>Clears the state history</p></li>
-<li><p>Sets state <span class="math notranslate nohighlight">\(x = x_0\)</span></p></li>
-<li><p>If a driver is attached, initialize it</p></li>
-<li><p>If plotting is enabled, initialize that</p></li>
-</ol>
-</div></blockquote>
-<p>If <code class="docutils literal notranslate"><span class="pre">plot</span></code> is set and no animation object is given, use a default
-<code class="docutils literal notranslate"><span class="pre">VehiclePolygon('car')</span></code></p>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">VehicleAnimation()</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.step">
-<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Step simulator by one time step (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>odometry <span class="math notranslate nohighlight">\((\delta_d, \delta_     heta)\)</span></p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>ndarray(2)</p>
-</dd>
-</dl>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">veh.step(vel,</span> <span class="pre">steer)</span></code> for a Bicycle vehicle model</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">veh.step((vel,</span> <span class="pre">steer))</span></code> as above but control is a tuple</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">veh.step(vel,</span> <span class="pre">vel_diff)</span></code> for a Unicycle vehicle model</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">veh.step()</span></code> as above but control is taken from the <code class="docutils literal notranslate"><span class="pre">control</span></code>
-attribute which might be a function or driver agent.</p></li>
-</ul>
-<ol class="arabic simple">
-<li><p>Integrates the vehicle forward one timestep</p></li>
-<li><p>Updates the stored state and state history</p></li>
-<li><p>Returns the odometry</p></li>
-</ol>
-<p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">Bicycle</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>  <span class="c1"># default bicycle model</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>  <span class="c1"># one step: v=1, γ=0.2</span>
-<span class="go">array([0.1   , 0.0203])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">x</span>
-<span class="go">array([0.1   , 0.    , 0.0203])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>  <span class="c1"># another step: v=1, γ=0.2</span>
-<span class="go">array([0.1   , 0.0203])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">x</span>
-<span class="go">array([0.2   , 0.002 , 0.0405])</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Vehicle control input limits are applied.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.control" title="roboticstoolbox.mobile.Vehicle.control"><code class="xref py py-func docutils literal notranslate"><span class="pre">control()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">update()</span></code>, <a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.run" title="roboticstoolbox.mobile.Vehicle.run"><code class="xref py py-func docutils literal notranslate"><span class="pre">run()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.eval_control">
-<span class="sig-name descname"><span class="pre">eval_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.eval_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.eval_control" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate vehicle control input (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>control</strong> (<em>[</em><em>type</em><em>]</em>) – vehicle control</p></li>
-<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y,   heta)\)</span></p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ValueError</strong> – bad control</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>vehicle control inputs</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>ndarray(2)</p>
-</dd>
-</dl>
-<p>Evaluates the control for this time step and state. Control can be:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>a constant 2-tuple as the control inputs to the vehicle</p></li>
-<li><p>a function called as <code class="docutils literal notranslate"><span class="pre">f(vehicle,</span> <span class="pre">t,</span> <span class="pre">x)</span></code> that returns a tuple</p></li>
-<li><p>an interpolator called as f(t) that returns a tuple, see
-SciPy interp1d</p></li>
-<li><p>a <code class="docutils literal notranslate"><span class="pre">VehicleDriver</span></code> subclass object</p></li>
-</ul>
-</div></blockquote>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Vehicle steering, speed and acceleration limits are applied.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.stopif">
-<span class="sig-name descname"><span class="pre">stopif</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stop</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.stopif"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.stopif" title="Permalink to this definition">¶</a></dt>
-<dd><p>Stop the simulation (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>stop</strong> (<em>bool</em>) – stop condition</p>
-</dd>
-</dl>
-<p>A control function can stop the simulation initated by the <code class="docutils literal notranslate"><span class="pre">run</span></code>
-method if <code class="docutils literal notranslate"><span class="pre">stop</span></code> is True.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.run" title="roboticstoolbox.mobile.Vehicle.run"><code class="xref py py-func docutils literal notranslate"><span class="pre">run()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>[summary] (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>[</em><em>type</em><em>]</em><em>, </em><em>optional</em>) – [description], defaults to None</p></li>
-<li><p><strong>block</strong> (<em>bool</em><em>, </em><em>optional</em>) – [description], defaults to True</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.plot_x_y">
-<span class="sig-name descname"><span class="pre">plot_x_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.plot_x_y"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.plot_x_y" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.plot_xyt_t">
-<span class="sig-name descname"><span class="pre">plot_xyt_t</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.plot_xyt_t"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.plot_xyt_t" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.limits_va">
-<span class="sig-name descname"><span class="pre">limits_va</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.limits_va"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.limits_va" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply velocity and acceleration limits (superclass method)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>v</strong> (<em>float</em>) – commanded velocity</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>allowed velocity</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This function is stateful, requires previous velocity,
-<code class="docutils literal notranslate"><span class="pre">_v_prev</span></code> attribute, to enable acceleration limiting.  This
-is reset at the start of each simulation.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.mobile.Vehicle.path">
-<span class="sig-name descname"><span class="pre">path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/vehicle.html#Vehicle.path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle.path" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><p>Compute path by integration (superclass method)</p>
-<dl class="field-list">
-<dt class="field-odd">param t</dt>
-<dd class="field-odd"><p>[description], defaults to None</p>
-</dd>
-<dt class="field-even">type t</dt>
-<dd class="field-even"><p>[type], optional</p>
-</dd>
-<dt class="field-odd">param u</dt>
-<dd class="field-odd"><p>[description], defaults to None</p>
-</dd>
-<dt class="field-even">type u</dt>
-<dd class="field-even"><p>[type], optional</p>
-</dd>
-<dt class="field-odd">param x0</dt>
-<dd class="field-odd"><p>initial state, defaults to (0,0,0)</p>
-</dd>
-<dt class="field-even">type x0</dt>
-<dd class="field-even"><p>array_like(3), optional</p>
-</dd>
-<dt class="field-odd">return</dt>
-<dd class="field-odd"><p>time vector and state history</p>
-</dd>
-<dt class="field-even">rtype</dt>
-<dd class="field-even"><p>(ndarray(1), ndarray(n,3))</p>
-<blockquote>
-<div><p>% XF = V.path(TF, U) is the final state of the vehicle (3x1) from the initial</p>
-</div></blockquote>
-<p>% state (0,0,0) with the control inputs U (vehicle specific).  TF is  a scalar to 
-% specify the total integration time.
-%
-% XP = V.path(TV, U) is the trajectory of the vehicle (Nx3) from the initial
-% state (0,0,0) with the control inputs U (vehicle specific).  T is a vector (N) of 
-% times for which elements of the trajectory will be computed.
-%
-% XP = V.path(T, U, X0) as above but specify the initial state.
-%
-% Notes::
-% - Integration is performed using ODE45.
-% - The ODE being integrated is given by the deriv method of the vehicle object.</p>
-<blockquote>
-<div><p># t, x = veh.path(5, u=control)</p>
-</div></blockquote>
-</dd>
-</dl>
-</div></blockquote>
-<p># print(t)</p>
-</dd></dl>
-
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">Vehicle</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Vehicle" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of &lt;module ‘roboticstoolbox.mobile.Vehicle’ from ‘/opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/Vehicle.py’&gt;</p>
 </dd></dl>
 
 </div>
@@ -1874,7 +1585,7 @@ is reset at the start of each simulation.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 07-Jun-2021.
+        Last updated on 13-Sep-2021.
       </span>
 
     </p>

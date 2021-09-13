@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../arm.html">Manipulator arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blocks.html">bdsim blocks</a></li>
 </ul>
 
             
@@ -170,6 +171,7 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.Connector</span> <span class="kn">import</span> <span class="n">Connector</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot.RobotPlot2</span> <span class="kn">import</span> <span class="n">RobotPlot2</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot.EllipsePlot</span> <span class="kn">import</span> <span class="n">EllipsePlot</span>
+<span class="kn">import</span> <span class="nn">time</span>
 
 <span class="n">_mpl</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -229,6 +231,7 @@
         <span class="c1"># Create a 2D axes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;white&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">get_current_fig_manager</span><span class="p">()</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Robotics Toolbox for Python (Figure </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xbound</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ybound</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
@@ -535,7 +538,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 07-Jun-2021.
+        Last updated on 13-Sep-2021.
       </span>
 
     </p>

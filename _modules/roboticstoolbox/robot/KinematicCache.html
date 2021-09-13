@@ -1,0 +1,647 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>roboticstoolbox.robot.KinematicCache &mdash; Robotics Toolbox for Python  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
+          
+
+          
+            
+            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Robotics Toolbox for Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>roboticstoolbox.robot.KinematicCache</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for roboticstoolbox.robot.KinematicCache</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="kn">import</span> <span class="nn">timeit</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="KinematicCache"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache">[docs]</a><span class="k">class</span> <span class="nc">KinematicCache</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Kinematic cache</span>
+
+<span class="sd">    Many robot kinematic (and dynamic operations) have dependencies. For</span>
+<span class="sd">    example, computing the world-frame Jacobian requires the</span>
+<span class="sd">    forward kinematics, computing operational space acceleration requires</span>
+<span class="sd">    the Jacobian.  To optimize computation time it becomes difficult to keep</span>
+<span class="sd">    track of all the dependencies.</span>
+
+<span class="sd">    The ``KinematicCache`` acts as a proxy for a ``Robot`` subclass object</span>
+<span class="sd">    and implements a subset of its methods, just those that concerned with, or</span>
+<span class="sd">    using kinematics.</span>
+
+<span class="sd">    For everycall a hash is computed for ``q`` and relevant arguments such as</span>
+<span class="sd">    ``end`` and the value of kinematic operation is looked up in the cache.  If</span>
+<span class="sd">    it is not in the cache it will be computed and added to the cache.</span>
+
+<span class="sd">    For example::</span>
+
+<span class="sd">        robot = models.ETS.Panda()</span>
+<span class="sd">        kc = KinematicCache(robot)</span>
+
+<span class="sd">        q = robot.qr</span>
+<span class="sd">        T = kc.fkine(q)</span>
+<span class="sd">        J = kc.jacob0(q)</span>
+<span class="sd">        Ix = kc.inertia_x(q)</span>
+<span class="sd">        J = kc.jacob0(q)</span>
+<span class="sd">    </span>
+<span class="sd">    The ``fkine`` method will be a cache miss and the forward kinematics will be</span>
+<span class="sd">    computed.  The ``jacob0`` method will be a cache miss but the required</span>
+<span class="sd">    forward kinematics are in the cache and will be used.  The ``inertia_x``</span>
+<span class="sd">    method will be a cache miss but the required Jacobian is in the cache and</span>
+<span class="sd">    will be used. The final ``jacob0`` method will be a cache hit and the</span>
+<span class="sd">    previously computed value will be returned.</span>
+
+<span class="sd">    The cost of computing the hash is small compared to the cost of the</span>
+<span class="sd">    kinematic operations and not having to keep track of saved values makes code</span>
+<span class="sd">    cleaner.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="KinematicCache.__init__"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">,</span> <span class="n">cachesize</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create kinematic cache instance</span>
+
+<span class="sd">        :param robot: robot to be cached</span>
+<span class="sd">        :type robot: Robot subclass instance</span>
+<span class="sd">        :param cachesize: maximum length of cache, defaults to 16</span>
+<span class="sd">        :type cachesize: int, optional</span>
+
+<span class="sd">        The cache is an ordered dictionary indexed by function, joint angles and</span>
+<span class="sd">        method arguments.  If you use N different cached functions at each</span>
+<span class="sd">        timestep then ``cachesize`` should be at least N.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span> <span class="o">=</span> <span class="n">robot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cachesize</span> <span class="o">=</span> <span class="n">cachesize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;KinematicCache(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Length of kinematic cache</span>
+
+<span class="sd">        :return: number of cache entries</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        This is the length of the cache dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">)</span>
+
+<div class="viewcode-block" id="KinematicCache.cache"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.cache">[docs]</a>    <span class="k">def</span> <span class="nf">cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display kinematic cache</span>
+
+<span class="sd">        :return: cache entries, one per line</span>
+<span class="sd">        :rtype: str</span>
+
+<span class="sd">        The cache dictionary is displayed.  Oldest entries are first.</span>
+<span class="sd">        For example, the display::</span>
+
+<span class="sd">            fkine_all   : 0x59913cdb1a5be5c0, (None,)</span>
+<span class="sd">            fkine       : 0xb9cd1db3d2a255e0, (None,)</span>
+<span class="sd">            fkine_all   : 0xb9cd1db3d2a255e0, (None,)</span>
+<span class="sd">            fkine       : 0x639cf014e2baaafb, (None,)</span>
+
+<span class="sd">        shows the kinematic function, the joint configuration hash, and any</span>
+<span class="sd">        additional arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">12s</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="si">:</span><span class="s2">#0x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+    <span class="k">def</span> <span class="nf">_qhash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute joint configuration hash</span>
+
+<span class="sd">        :param q: joint configuration :type q: ndarray(N) :return: hash :rtype:</span>
+<span class="sd">        int</span>
+
+<span class="sd">        Returns an integer hash of the joint configuration and trims the cache</span>
+<span class="sd">        to length of ``cachesize``</span>
+
+<span class="sd">        .. note:: Uses ``hash(q.tobytes(&#39;C&#39;))`` as the hash, takes around 250us.</span>
+
+<span class="sd">        .. note:: Hashing and cache trimming could be a separate methods, but</span>
+<span class="sd">            since hash has to be computed for every cached kinematic function</span>
+<span class="sd">            it&#39;s quicker to merge both functions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># cache is an ordered dict, new entries go on the end to old entries</span>
+        <span class="c1"># are popped from the front (last=False)</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cachesize</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="o">.</span><span class="n">popitem</span><span class="p">(</span><span class="n">last</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># compute and return the hash</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">))</span>
+
+    <span class="c1"># TODO:</span>
+    <span class="c1"># this needs to accept a common subset of arguments for DHRobot and ERobot classes.</span>
+    <span class="c1"># that means end, tool and start.  Need to rationalise these</span>
+    <span class="c1"># end can be ELink or str, means we have to make Elink hashable</span>
+    <span class="c1"># if tool is allowed, then SE3 needs to be hashable, probably not a bad idea</span>
+<div class="viewcode-block" id="KinematicCache.fkine"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cached forward kinematics</span>
+
+<span class="sd">        :param q: Joint configuration</span>
+<span class="sd">        :type q: ndarray(n)</span>
+<span class="sd">        :param end: specific end-effector, defaults to None</span>
+<span class="sd">        :type end: str or ELink instance</span>
+<span class="sd">        :return: forward kinematics</span>
+<span class="sd">        :rtype: SE3 instance</span>
+
+<span class="sd">        :seealso: :func:`DHRobot.fkine`, :func:`ERobot.fkine`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># compute the key we use for cache lookup</span>
+        <span class="n">qhash</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;fkine&quot;</span><span class="p">,</span> <span class="n">qhash</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+            <span class="c1"># cache miss, check if we have fkine_all() result</span>
+            <span class="n">key_fkall</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;fkine_all&quot;</span><span class="p">,</span> <span class="n">qhash</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key_fkall</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+                <span class="c1"># we do, take just the EE pose and cache that</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key_fkall</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># nothing cached, compute fkine() the hard way and cache it</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="c1"># return the cached value</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KinematicCache.fkine_all"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.fkine_all">[docs]</a>    <span class="k">def</span> <span class="nf">fkine_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cached forward kinematics for all frames</span>
+
+<span class="sd">        :param q: joint configuration</span>
+<span class="sd">        :type q: ndarray(n)</span>
+<span class="sd">        :param end: specific end effector, defaults to None</span>
+<span class="sd">        :type end: str or ELink instance, optional</span>
+<span class="sd">        :return: all link frames including base</span>
+<span class="sd">        :rtype: multi-valuedSE3 instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;fkine_all&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">end</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+            <span class="c1"># cache miss, compute it</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">fkine_all</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KinematicCache.jacob0"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.jacob0">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cached world-frame Jacobian</span>
+
+<span class="sd">        :param q: joint configuration</span>
+<span class="sd">        :type q: ndarray(n)</span>
+<span class="sd">        :param end: specific end effector, defaults to None</span>
+<span class="sd">        :type end: str or ELink instance, optional</span>
+<span class="sd">        :param half: return half Jacobian: &#39;trans&#39; or &#39;rot&#39;</span>
+<span class="sd">        :type half: str</span>
+<span class="sd">        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)</span>
+<span class="sd">        :type analytical: str</span>
+<span class="sd">        :return: Jacobian in world frame</span>
+<span class="sd">        :rtype: ndarray(6, n)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># NOTE: we could write</span>
+        <span class="c1">#  def jacob0(self, q, **kwargs):</span>
+        <span class="c1">#      key = (&#39;jacob0&#39;, self._qhash(q), tuple(kwargs.keys()))</span>
+        <span class="c1"># which is more elegant/compact but the order of the kw arguments would</span>
+        <span class="c1"># then become important</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;jacob0&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">end</span><span class="p">,</span> <span class="n">analytical</span><span class="p">,</span> <span class="n">half</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+            <span class="c1"># cache miss, compute it</span>
+
+            <span class="c1"># get fkine from the cache if possible</span>
+            <span class="c1"># TODO: fkine() will have to compute the hash again, maybe pass it</span>
+            <span class="c1"># down as argument _qhash</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span>
+                <span class="n">q</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="n">half</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="n">analytical</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KinematicCache.jacob0_inv"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.jacob0_inv">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cached world-frame Jacobian inverse</span>
+
+<span class="sd">        :param q: joint configuration</span>
+<span class="sd">        :type q: ndarray(n)</span>
+<span class="sd">        :param end: specific end effector, defaults to None</span>
+<span class="sd">        :type end: str or ELink instance, optional</span>
+<span class="sd">        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)</span>
+<span class="sd">        :type analytical: str</span>
+<span class="sd">        :return: Inverse Jacobian in world frame</span>
+<span class="sd">        :rtype: ndarray(6, n)</span>
+
+<span class="sd">        .. note:: Robot objects don&#39;t have this method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;jacob0_inv&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">end</span><span class="p">,</span> <span class="n">analytical</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+            <span class="c1"># cache miss, compute it</span>
+
+            <span class="c1"># get Jacobian from cache</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="n">analytical</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KinematicCache.jacob0_pinv"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.jacob0_pinv">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0_pinv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cached world-frame Jacobian pseudo inverse</span>
+
+<span class="sd">        :param q: joint configuration</span>
+<span class="sd">        :type q: ndarray(n)</span>
+<span class="sd">        :param end: specific end effector, defaults to None</span>
+<span class="sd">        :type end: str or ELink instance, optional</span>
+<span class="sd">        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)</span>
+<span class="sd">        :type analytical: str</span>
+<span class="sd">        :return: Pseudo inverse Jacobian in world frame</span>
+<span class="sd">        :rtype: ndarray(6, n)</span>
+
+<span class="sd">        .. note:: Robot objects don&#39;t have this method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;jacob0_pinv&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">end</span><span class="p">,</span> <span class="n">analytical</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+            <span class="c1"># cache miss, compute it</span>
+
+            <span class="c1"># get Jacobian from cache</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="n">analytical</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+    <span class="c1"># TODO jacobe doesnt support end for DHRobot, should it have analytical</span>
+<div class="viewcode-block" id="KinematicCache.jacobe"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.jacobe">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cached world-frame Jacobian</span>
+
+<span class="sd">        :param q: joint configuration</span>
+<span class="sd">        :type q: ndarray(n)</span>
+<span class="sd">        :param end: specific end effector, defaults to None</span>
+<span class="sd">        :type end: str or ELink instance, optional</span>
+<span class="sd">        :param half: return half Jacobian: &#39;trans&#39; or &#39;rot&#39;</span>
+<span class="sd">        :type half: str</span>
+<span class="sd">        :return: Jacobian in end-effector-frame</span>
+<span class="sd">        :rtype: ndarray(6, n)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># NOTE: we could write</span>
+        <span class="c1">#  def jacob0(self, q, **kwargs):</span>
+        <span class="c1">#      key = (&#39;jacob0&#39;, self._qhash(q), tuple(kwargs.keys()))</span>
+        <span class="c1"># which is more elegant/compact but the order of the kw arguments would</span>
+        <span class="c1"># then become important</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;jacobe&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">end</span><span class="p">,</span> <span class="n">half</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+            <span class="c1"># cache miss, compute it</span>
+
+            <span class="c1"># get fkine from the cache if possible</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="p">,</span> <span class="n">DHRobot</span><span class="p">):</span>
+                <span class="n">T</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># actually not needed for DHRobot case</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KinematicCache.jacobe_inv"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.jacobe_inv">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cached end-effector-frame Jacobian inverse</span>
+
+<span class="sd">        :param q: joint configuration</span>
+<span class="sd">        :type q: ndarray(n)</span>
+<span class="sd">        :param end: specific end effector, defaults to None</span>
+<span class="sd">        :type end: str or ELink instance, optional</span>
+<span class="sd">        :return: Inverse Jacobian in end-effector-frame</span>
+<span class="sd">        :rtype: ndarray(6, n)</span>
+
+<span class="sd">        .. note:: Robot objects don&#39;t have this method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;jacobe_inv&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">end</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+            <span class="c1"># cache miss, compute it</span>
+
+            <span class="c1"># get Jacobian from cache</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KinematicCache.jacobe_pinv"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.jacobe_pinv">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe_pinv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cached end-effector-frame Jacobian pseudo inverse</span>
+
+<span class="sd">        :param q: joint configuration</span>
+<span class="sd">        :type q: ndarray(n)</span>
+<span class="sd">        :param end: specific end effector, defaults to None</span>
+<span class="sd">        :type end: str or ELink instance, optional</span>
+<span class="sd">        :return: Pseudo inverse Jacobian in end-effector-frame</span>
+<span class="sd">        :rtype: ndarray(6, n)</span>
+
+<span class="sd">        .. note:: Robot objects don&#39;t have this method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;jacob0_pinv&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">end</span><span class="p">,</span> <span class="n">analytical</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+            <span class="c1"># cache miss, compute it</span>
+
+            <span class="c1"># get Jacobian from cache</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KinematicCache.coriolis"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.coriolis">[docs]</a>    <span class="k">def</span> <span class="nf">coriolis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;coriolis&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">qd</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+            <span class="c1"># cache miss, compute it</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coriolis</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">coriolis_x</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KinematicCache.inertia_x"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.inertia_x">[docs]</a>    <span class="k">def</span> <span class="nf">inertia_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">pinv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="s2">&quot;rpy-xyz&quot;</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;inertia_x&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">pinv</span><span class="p">,</span> <span class="n">analytical</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+            <span class="c1"># cache miss, compute it</span>
+
+            <span class="c1"># get Jacobian inv or pinv from cache</span>
+            <span class="k">if</span> <span class="n">pinv</span><span class="p">:</span>
+                <span class="n">Ji</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe0_pinv</span><span class="p">(</span><span class="n">analytical</span><span class="o">=</span><span class="n">analytical</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Ji</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe0_inv</span><span class="p">(</span><span class="n">analytical</span><span class="o">=</span><span class="n">analytical</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">inertia_x</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">Ji</span><span class="o">=</span><span class="n">Ji</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KinematicCache.coriolis_x"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.coriolis_x">[docs]</a>    <span class="k">def</span> <span class="nf">coriolis_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="n">pinv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="s2">&quot;rpy-xyz&quot;</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;coriolis_x&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">qd</span><span class="p">),</span> <span class="n">pinv</span><span class="p">,</span> <span class="n">analytical</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+            <span class="c1"># cache miss, compute it</span>
+
+            <span class="c1"># get Jacobian inv or pinv from cache</span>
+            <span class="k">if</span> <span class="n">pinv</span><span class="p">:</span>
+                <span class="n">Ji</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe0_pinv</span><span class="p">(</span><span class="n">analytical</span><span class="o">=</span><span class="n">analytical</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Ji</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe0_inv</span><span class="p">(</span><span class="n">analytical</span><span class="o">=</span><span class="n">analytical</span><span class="p">)</span>
+            <span class="c1"># get inertia, Jacobian dot and Coriolis from cache</span>
+            <span class="n">Mx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inertia_x</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">pinv</span><span class="o">=</span><span class="n">pinv</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="n">analytical</span><span class="p">)</span>
+            <span class="n">Jd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob_dot</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="n">analytical</span><span class="p">))</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coriolis</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">coriolis_x</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="n">pinv</span><span class="p">,</span> <span class="n">analytical</span><span class="p">,</span> 
+                <span class="n">J</span><span class="p">,</span> <span class="n">Ji</span><span class="p">,</span> <span class="n">Jd</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">Mx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KinematicCache.gravload_x"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.gravload_x">[docs]</a>    <span class="k">def</span> <span class="nf">gravload_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">pinv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">analytical</span><span class="o">=</span><span class="s2">&quot;rpy-xyz&quot;</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;gravload_x&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_qhash</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="n">pinv</span><span class="p">,</span> <span class="n">analytical</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">:</span>
+            <span class="c1"># cache miss, compute it</span>
+
+            <span class="c1"># get Jacobian inv or pinv from cache</span>
+            <span class="k">if</span> <span class="n">pinv</span><span class="p">:</span>
+                <span class="n">Ji</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe0_pinv</span><span class="p">(</span><span class="n">analytical</span><span class="o">=</span><span class="n">analytical</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Ji</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacobe0_inv</span><span class="p">(</span><span class="n">analytical</span><span class="o">=</span><span class="n">analytical</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">gravload_x</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">Ji</span><span class="o">=</span><span class="n">Ji</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span>
+
+    <span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+    <span class="n">kc</span> <span class="o">=</span> <span class="n">KinematicCache</span><span class="p">(</span><span class="n">panda</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">kc</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qr</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qr</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qr</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qr</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">timething</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">1_000</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span><span class="n">stmt</span><span class="o">=</span><span class="n">statement</span><span class="p">,</span> <span class="nb">globals</span><span class="o">=</span><span class="nb">globals</span><span class="p">(),</span> <span class="n">number</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">statement</span><span class="si">:</span><span class="s2">&gt;25s</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">t</span> <span class="o">/</span> <span class="n">N</span> <span class="o">*</span> <span class="mf">1e6</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">μs&quot;</span><span class="p">)</span>
+
+    <span class="n">timething</span><span class="p">(</span><span class="s2">&quot;kc._qhash(q)&quot;</span><span class="p">,</span> <span class="mi">1_000_000</span><span class="p">)</span>
+    <span class="n">timething</span><span class="p">(</span><span class="s2">&quot;panda.fkine(panda.qr)&quot;</span><span class="p">,</span> <span class="mi">1_000</span><span class="p">)</span>
+    <span class="n">timething</span><span class="p">(</span><span class="s2">&quot;kc.fkine(panda.qr)&quot;</span><span class="p">,</span> <span class="mi">1_000_000</span><span class="p">)</span>
+
+    <span class="n">kc</span><span class="o">.</span><span class="n">fkine_all</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kc</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">kc</span><span class="o">.</span><span class="n">cache</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">50</span><span class="p">):</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+        <span class="n">kc</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">kc</span><span class="o">.</span><span class="n">fkine_all</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kc</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">kc</span><span class="o">.</span><span class="n">cache</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">
+        Last updated on 13-Sep-2021.
+      </span>
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'G-11Q6WJM565', 'auto');
+    
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>

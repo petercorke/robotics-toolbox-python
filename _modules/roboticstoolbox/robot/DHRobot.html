@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
 </ul>
 
             
@@ -166,7 +167,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
-<span class="kn">from</span> <span class="nn">roboticstoolbox.tools.data</span> <span class="kn">import</span> <span class="n">path_to_datafile</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.tools.data</span> <span class="kn">import</span> <span class="n">rtb_path_to_datafile</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -268,7 +269,7 @@
 
         <span class="c1"># load meshes if required</span>
         <span class="k">if</span> <span class="n">meshdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">meshdir</span> <span class="o">=</span> <span class="n">path_to_datafile</span><span class="p">(</span><span class="n">meshdir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meshdir</span> <span class="o">=</span> <span class="n">rtb_path_to_datafile</span><span class="p">(</span><span class="n">meshdir</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">basemesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshdir</span> <span class="o">/</span> <span class="s2">&quot;link0.stl&quot;</span>
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
                 <span class="n">link</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshdir</span> <span class="o">/</span> <span class="s2">&quot;link</span><span class="si">{:d}</span><span class="s2">.stl&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
@@ -912,9 +913,9 @@
             <span class="c1"># MDH case</span>
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">tw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Twist3</span><span class="o">.</span><span class="n">Revolute</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+                    <span class="n">tw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Twist3</span><span class="o">.</span><span class="n">UnitRevolute</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">tw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Twist3</span><span class="o">.</span><span class="n">Prismatic</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
+                    <span class="n">tw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Twist3</span><span class="o">.</span><span class="n">UnitPrismatic</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># DH case</span>
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">link</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -922,15 +923,15 @@
                     <span class="c1"># first link case</span>
                     <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="c1"># revolute</span>
-                        <span class="n">tw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Twist3</span><span class="o">.</span><span class="n">Revolute</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                        <span class="n">tw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Twist3</span><span class="o">.</span><span class="n">UnitRevolute</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">tw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Twist3</span><span class="o">.</span><span class="n">Prismatic</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>  <span class="c1"># prismatic</span>
+                        <span class="n">tw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Twist3</span><span class="o">.</span><span class="n">UnitPrismatic</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>  <span class="c1"># prismatic</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># subsequent links</span>
                     <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">tw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Twist3</span><span class="o">.</span><span class="n">Revolute</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">T</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>  <span class="c1"># revolute</span>
+                        <span class="n">tw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Twist3</span><span class="o">.</span><span class="n">UnitRevolute</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">T</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>  <span class="c1"># revolute</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">tw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Twist3</span><span class="o">.</span><span class="n">Prismatic</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>  <span class="c1"># prismatic</span>
+                        <span class="n">tw</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Twist3</span><span class="o">.</span><span class="n">UnitPrismatic</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>  <span class="c1"># prismatic</span>
 
         <span class="k">return</span> <span class="n">tw</span><span class="p">,</span> <span class="n">T</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
@@ -966,7 +967,7 @@
 
         <span class="k">return</span> <span class="n">ets</span></div>
 
-<div class="viewcode-block" id="DHRobot.fkine"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<div class="viewcode-block" id="DHRobot.fkine"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward kinematics</span>
 
@@ -1102,7 +1103,7 @@
             <span class="n">Tall</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Tj</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Tall</span></div>
 
-<div class="viewcode-block" id="DHRobot.jacobe"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacobe">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DHRobot.jacobe"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacobe">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Jacobian in end-effector frame</span>
 
@@ -1577,8 +1578,8 @@
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">Rb</span> <span class="o">=</span> <span class="n">t2r</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-                <span class="n">w</span> <span class="o">=</span> <span class="n">Rb</span> <span class="o">@</span> <span class="n">wd</span>
-                <span class="n">wd</span> <span class="o">=</span> <span class="n">Rb</span> <span class="o">@</span> <span class="n">wdd</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">Rb</span> <span class="o">@</span> <span class="n">w</span>
+                <span class="n">wd</span> <span class="o">=</span> <span class="n">Rb</span> <span class="o">@</span> <span class="n">wd</span>
                 <span class="n">vd</span> <span class="o">=</span> <span class="n">Rb</span> <span class="o">@</span> <span class="n">gravity</span>
 
             <span class="c1"># ----------------  initialize some variables ----------------- #</span>
@@ -1949,7 +1950,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 07-Jun-2021.
+        Last updated on 13-Sep-2021.
       </span>
 
     </p>

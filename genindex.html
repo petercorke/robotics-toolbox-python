@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="arm.html">Manipulator arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
 </ul>
 
             
@@ -209,13 +210,13 @@
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.__init__">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.__init__">[1]</a>
 </li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.__init__">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.__init__">[1]</a>
-</li>
         <li><a href="mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleIcon.__init__">(roboticstoolbox.mobile.VehicleIcon method)</a>
 </li>
         <li><a href="mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleMarker.__init__">(roboticstoolbox.mobile.VehicleMarker method)</a>
 </li>
         <li><a href="mobile_vehicle_animation.html#roboticstoolbox.mobile.VehiclePolygon.__init__">(roboticstoolbox.mobile.VehiclePolygon method)</a>
+</li>
+        <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.__init__">(roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
 </li>
         <li><a href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.__init__">(roboticstoolbox.tools.trajectory.Trajectory method)</a>
 </li>
@@ -289,8 +290,6 @@
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.accel_max">(roboticstoolbox.mobile.Unicycle property)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.accel_max">[1]</a>
 </li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.accel_max">(roboticstoolbox.mobile.Vehicle property)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.accel_max">[1]</a>
-</li>
       </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.accel_x">accel_x() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
 
@@ -322,8 +321,6 @@
 
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.add_driver">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.add_driver">[1]</a>
-</li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.add_driver">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.add_driver">[1]</a>
 </li>
       </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.addconfiguration">addconfiguration() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
@@ -400,20 +397,14 @@
 </li>
       <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle">Bicycle (class in roboticstoolbox.mobile)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle">[1]</a>
 </li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2">Bug2 (class in roboticstoolbox.mobile)</a>
-</li>
   </ul></td>
 </tr></table>
 
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.check_query">check_query() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.check_query">(roboticstoolbox.mobile.DXform method)</a>
+      <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.cache">cache() (roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
 </li>
-      </ul></li>
       <li><a href="arm_erobot.html#roboticstoolbox.robot.ELink.BaseELink.children">children (roboticstoolbox.robot.ELink.BaseELink property)</a>
 
       <ul>
@@ -498,14 +489,14 @@
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ELink.ELink2.collision">(roboticstoolbox.robot.ELink.ELink2 property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="arm_ets.html#roboticstoolbox.robot.ETS.ETS.compile">compile() (roboticstoolbox.robot.ETS.ETS method)</a>
 
       <ul>
         <li><a href="arm_ets.html#roboticstoolbox.robot.ETS.ETS2.compile">(roboticstoolbox.robot.ETS.ETS2 method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.config_validate">config_validate() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
 </li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.configurations_str">configurations_str() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
@@ -524,8 +515,6 @@
 
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.control">(roboticstoolbox.mobile.Unicycle property)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.control">[1]</a>
-</li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.control">(roboticstoolbox.mobile.Vehicle property)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.control">[1]</a>
 </li>
       </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.control_type">control_type (roboticstoolbox.robot.DHRobot.DHRobot property)</a>
@@ -571,6 +560,8 @@
 </li>
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.coriolis">(roboticstoolbox.robot.ERobot.ERobot2 method)</a>
 </li>
+        <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.coriolis">(roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
+</li>
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.coriolis">(roboticstoolbox.robot.Robot.Robot method)</a>
 </li>
       </ul></li>
@@ -583,10 +574,16 @@
 </li>
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.coriolis_x">(roboticstoolbox.robot.ERobot.ERobot2 method)</a>
 </li>
+        <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.coriolis_x">(roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
+</li>
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.coriolis_x">(roboticstoolbox.robot.Robot.Robot method)</a>
 </li>
       </ul></li>
       <li><a href="arm_trajectory.html#roboticstoolbox.tools.trajectory.ctraj">ctraj() (in module roboticstoolbox.tools.trajectory)</a>
+</li>
+      <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.curvature_max">curvature_max (roboticstoolbox.mobile.Bicycle property)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.curvature_max">[1]</a>
+</li>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner">CurvaturePolyPlanner (class in roboticstoolbox.mobile)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -600,14 +597,24 @@
         <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.d">(roboticstoolbox.robot.DHRobot.DHRobot property)</a>
 </li>
       </ul></li>
+      <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.default_backend">default_backend (roboticstoolbox.robot.DHRobot.DHRobot property)</a>
+
+      <ul>
+        <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.default_backend">(roboticstoolbox.robot.ERobot.BaseERobot property)</a>
+</li>
+        <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.default_backend">(roboticstoolbox.robot.ERobot.ERobot property)</a>
+</li>
+        <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.default_backend">(roboticstoolbox.robot.ERobot.ERobot2 property)</a>
+</li>
+        <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.default_backend">(roboticstoolbox.robot.Robot.Robot property)</a>
+</li>
+      </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.delete_rne">delete_rne() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
 </li>
       <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.deriv">deriv() (roboticstoolbox.mobile.Bicycle method)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.deriv">[1]</a>
 
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.deriv">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.deriv">[1]</a>
-</li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.deriv">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.deriv">[1]</a>
 </li>
       </ul></li>
       <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.dfs_links">dfs_links() (roboticstoolbox.robot.ERobot.BaseERobot method)</a>
@@ -624,7 +631,7 @@
 </li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.dhunique">dhunique() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
 </li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.distance_map">distance_map (roboticstoolbox.mobile.DXform property)</a>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner">DistanceTransformPlanner (class in roboticstoolbox.mobile)</a>
 </li>
       <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.dotfile">dotfile() (roboticstoolbox.robot.ERobot.BaseERobot method)</a>
 
@@ -634,18 +641,18 @@
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.dotfile">(roboticstoolbox.robot.ERobot.ERobot2 method)</a>
 </li>
       </ul></li>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.DstarPlanner">DstarPlanner (class in roboticstoolbox.mobile)</a>
+</li>
       <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.dt">dt (roboticstoolbox.mobile.Bicycle property)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.dt">[1]</a>
 
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.dt">(roboticstoolbox.mobile.Unicycle property)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.dt">[1]</a>
 </li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.dt">(roboticstoolbox.mobile.Vehicle property)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.dt">[1]</a>
-</li>
       </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform">DXform (class in roboticstoolbox.mobile)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner">DubinsPlanner (class in roboticstoolbox.mobile)</a>
+</li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHLink.dyn">dyn() (roboticstoolbox.robot.DHLink method)</a>
 
       <ul>
@@ -700,8 +707,6 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.edge">edge (roboticstoolbox.mobile.Bug2 property)</a>
-</li>
       <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.ee_links">ee_links (roboticstoolbox.robot.ERobot.BaseERobot property)</a>
 
       <ul>
@@ -767,8 +772,6 @@
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.eval_control">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.eval_control">[1]</a>
 </li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.eval_control">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.eval_control">[1]</a>
-</li>
       </ul></li>
   </ul></td>
 </tr></table>
@@ -815,6 +818,8 @@
 </li>
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.fkine">(roboticstoolbox.robot.ERobot.ERobot2 method)</a>
 </li>
+        <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.fkine">(roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
+</li>
       </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine_all">fkine_all() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
 
@@ -825,11 +830,13 @@
 </li>
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.fkine_all">(roboticstoolbox.robot.ERobot.ERobot2 method)</a>
 </li>
-      </ul></li>
-      <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine_path">fkine_path() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
+        <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.fkine_all">(roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine_path">fkine_path() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
+</li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHLink.flip">flip (roboticstoolbox.robot.DHLink property)</a>
 
       <ul>
@@ -914,16 +921,16 @@
 </li>
       <li><a href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.getframe">getframe() (roboticstoolbox.backends.PyPlot.PyPlot method)</a>
 </li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.goal">goal (roboticstoolbox.mobile.Bug2 property)</a>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner.goal">goal (roboticstoolbox.mobile.CurvaturePolyPlanner property)</a>
 
       <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.goal">(roboticstoolbox.mobile.DXform property)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner.goal">(roboticstoolbox.mobile.DubinsPlanner property)</a>
 </li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.goal_change">goal_change() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.goal_change">(roboticstoolbox.mobile.DXform method)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.goal">(roboticstoolbox.mobile.LatticePlanner property)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.QuinticPolyPlanner.goal">(roboticstoolbox.mobile.QuinticPolyPlanner property)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner.goal">(roboticstoolbox.mobile.ReedsSheppPlanner property)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -961,6 +968,8 @@
 </li>
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.gravload_x">(roboticstoolbox.robot.ERobot.ERobot2 method)</a>
 </li>
+        <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.gravload_x">(roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
+</li>
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.gravload_x">(roboticstoolbox.robot.Robot.Robot method)</a>
 </li>
       </ul></li>
@@ -970,8 +979,6 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.h">h (roboticstoolbox.mobile.Bug2 property)</a>
-</li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.hascollision">hascollision (roboticstoolbox.robot.DHRobot.DHRobot property)</a>
 
       <ul>
@@ -1064,6 +1071,8 @@
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Link.Link.I">(roboticstoolbox.robot.Link.Link property)</a>
 </li>
       </ul></li>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.icoord">icoord() (roboticstoolbox.mobile.LatticePlanner method)</a>
+</li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.ikine_6s">ikine_6s() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
 </li>
       <li><a href="arm_dh.html#roboticstoolbox.models.DH.Puma560.ikine_a">ikine_a() (roboticstoolbox.models.DH.Puma560 method)</a>
@@ -1149,13 +1158,9 @@
 </li>
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.inertia_x">(roboticstoolbox.robot.ERobot.ERobot2 method)</a>
 </li>
-        <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.inertia_x">(roboticstoolbox.robot.Robot.Robot method)</a>
+        <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.inertia_x">(roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
 </li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.inflate">inflate (roboticstoolbox.mobile.Bug2 property)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.inflate">(roboticstoolbox.mobile.DXform property)</a>
+        <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.inertia_x">(roboticstoolbox.robot.Robot.Robot method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1165,17 +1170,9 @@
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.init">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.init">[1]</a>
 </li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.init">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.init">[1]</a>
-</li>
       </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.models.DH.IRB140">IRB140 (class in roboticstoolbox.models.DH)</a>
 </li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.is_occupied">is_occupied() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.is_occupied">(roboticstoolbox.mobile.DXform method)</a>
-</li>
-      </ul></li>
       <li><a href="arm_ets.html#roboticstoolbox.robot.ETS.ETS.isconstant">isconstant (roboticstoolbox.robot.ETS.ETS property)</a>
 
       <ul>
@@ -1274,8 +1271,6 @@
 <h2 id="J">J</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.j">j (roboticstoolbox.mobile.Bug2 property)</a>
-</li>
       <li><a href="arm_dh.html#roboticstoolbox.models.DH.Jaco">Jaco (class in roboticstoolbox.models.DH)</a>
 </li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacob0">jacob0() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
@@ -1287,7 +1282,13 @@
 </li>
         <li><a href="arm_ets.html#roboticstoolbox.robot.ETS.ETS.jacob0">(roboticstoolbox.robot.ETS.ETS method)</a>
 </li>
+        <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.jacob0">(roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
+</li>
       </ul></li>
+      <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.jacob0_inv">jacob0_inv() (roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
+</li>
+      <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.jacob0_pinv">jacob0_pinv() (roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
+</li>
       <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacob0v">jacob0v() (roboticstoolbox.robot.ERobot.ERobot method)</a>
 </li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacob_dot">jacob_dot() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
@@ -1309,8 +1310,14 @@
 </li>
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.jacobe">(roboticstoolbox.robot.ERobot.ERobot2 method)</a>
 </li>
+        <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.jacobe">(roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
+</li>
       </ul></li>
+      <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.jacobe_inv">jacobe_inv() (roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
+</li>
       <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobe_new">jacobe_new() (roboticstoolbox.robot.ERobot.ERobot method)</a>
+</li>
+      <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache.jacobe_pinv">jacobe_pinv() (roboticstoolbox.robot.KinematicCache.KinematicCache method)</a>
 </li>
       <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.jacobev">jacobev() (roboticstoolbox.robot.ERobot.ERobot method)</a>
 </li>
@@ -1326,6 +1333,8 @@
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.jacobm">(roboticstoolbox.robot.Robot.Robot method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="arm_erobot.html#roboticstoolbox.robot.ELink.BaseELink.jindex">jindex (roboticstoolbox.robot.ELink.BaseELink property)</a>
 
       <ul>
@@ -1334,8 +1343,6 @@
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ELink.ELink2.jindex">(roboticstoolbox.robot.ELink.ELink2 property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHLink.Jm">Jm (roboticstoolbox.robot.DHLink property)</a>
 
       <ul>
@@ -1398,7 +1405,7 @@
 <h2 id="K">K</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.k">k (roboticstoolbox.mobile.Bug2 property)</a>
+      <li><a href="arm_superclass.html#roboticstoolbox.robot.KinematicCache.KinematicCache">KinematicCache (class in roboticstoolbox.robot.KinematicCache)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -1414,6 +1421,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.l">l (roboticstoolbox.mobile.Bicycle property)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.l">[1]</a>
 </li>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.LatticePlanner">LatticePlanner (class in roboticstoolbox.mobile)</a>
+</li>
       <li><a href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.launch">launch() (roboticstoolbox.backends.PyPlot.PyPlot method)</a>
 
       <ul>
@@ -1426,8 +1435,6 @@
 
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.limits_va">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.limits_va">[1]</a>
-</li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.limits_va">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.limits_va">[1]</a>
 </li>
       </ul></li>
       <li><a href="arm_superclass.html#roboticstoolbox.robot.Link.Link">Link (class in roboticstoolbox.robot.Link)</a>
@@ -1498,8 +1505,6 @@
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Link.Link.m">(roboticstoolbox.robot.Link.Link property)</a>
 </li>
       </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.m_line">m_line (roboticstoolbox.mobile.Bug2 property)</a>
-</li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.manipulability">manipulability() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
 
       <ul>
@@ -1532,14 +1537,6 @@
         <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.mdh">(roboticstoolbox.robot.DHRobot.DHRobot property)</a>
 </li>
       </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.message">message() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.message">(roboticstoolbox.mobile.DXform method)</a>
-</li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.metric">metric (roboticstoolbox.mobile.DXform property)</a>
-</li>
       <li><a href="arm_dh.html#roboticstoolbox.models.DH.Mico">Mico (class in roboticstoolbox.models.DH)</a>
 
       <ul>
@@ -1552,6 +1549,8 @@
       <ul>
         <li><a href="arm_backend_pyplot.html#module-roboticstoolbox.backends.PyPlot">roboticstoolbox.backends.PyPlot</a>
 </li>
+        <li><a href="mobile_planner.html#module-roboticstoolbox.mobile">roboticstoolbox.mobile</a>
+</li>
         <li><a href="arm_dh.html#module-roboticstoolbox.models.DH">roboticstoolbox.models.DH</a>
 </li>
         <li><a href="arm_erobot.html#module-roboticstoolbox.models.ETS">roboticstoolbox.models.ETS</a>
@@ -1561,6 +1560,8 @@
         <li><a href="arm_erobot.html#module-roboticstoolbox.robot.ELink">roboticstoolbox.robot.ELink</a>
 </li>
         <li><a href="arm_erobot.html#module-roboticstoolbox.robot.ERobot">roboticstoolbox.robot.ERobot</a>
+</li>
+        <li><a href="arm_superclass.html#module-roboticstoolbox.robot.KinematicCache">roboticstoolbox.robot.KinematicCache</a>
 </li>
         <li><a href="arm_superclass.html#module-roboticstoolbox.robot.Link">roboticstoolbox.robot.Link</a>
 </li>
@@ -1617,12 +1618,6 @@
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.name">(roboticstoolbox.robot.Robot.Robot property)</a>
 </li>
       </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.navigate_init">navigate_init() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.navigate_init">(roboticstoolbox.mobile.DXform method)</a>
-</li>
-      </ul></li>
       <li><a href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.naxes">naxes (roboticstoolbox.tools.trajectory.Trajectory property)</a>
 </li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.nbranches">nbranches (roboticstoolbox.robot.DHRobot.DHRobot property)</a>
@@ -1645,12 +1640,6 @@
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ELink.ELink.nchildren">(roboticstoolbox.robot.ELink.ELink property)</a>
 </li>
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ELink.ELink2.nchildren">(roboticstoolbox.robot.ELink.ELink2 property)</a>
-</li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.next">next() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.next">(roboticstoolbox.mobile.DXform method)</a>
 </li>
       </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.nlinks">nlinks (roboticstoolbox.robot.DHRobot.DHRobot property)</a>
@@ -1693,26 +1682,18 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.occ_grid">occ_grid (roboticstoolbox.mobile.Bug2 property)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.occ_grid">(roboticstoolbox.mobile.DXform property)</a>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.OccGrid">OccGrid (in module roboticstoolbox.mobile)</a>
 </li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.occ_grid_nav">occ_grid_nav (roboticstoolbox.mobile.Bug2 property)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.occ_grid_nav">(roboticstoolbox.mobile.DXform property)</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHLink.offset">offset (roboticstoolbox.robot.DHLink property)</a>
 
       <ul>
         <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.offset">(roboticstoolbox.robot.DHRobot.DHRobot property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="arm_erobot.html#roboticstoolbox.models.ETS.Omni">Omni (class in roboticstoolbox.models.ETS)</a>
+</li>
       <li><a href="arm_dh.html#roboticstoolbox.models.DH.Orion5">Orion5 (class in roboticstoolbox.models.DH)</a>
 </li>
   </ul></td>
@@ -1745,8 +1726,6 @@
 
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.path">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.path">[1]</a>
-</li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.path">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.path">[1]</a>
 </li>
       </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.pay">pay() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
@@ -1797,10 +1776,12 @@
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.perturb">(roboticstoolbox.robot.Robot.Robot method)</a>
 </li>
       </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.plan">plan() (roboticstoolbox.mobile.Bug2 method)</a>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner.plan">plan() (roboticstoolbox.mobile.DistanceTransformPlanner method)</a>
 
       <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.plan">(roboticstoolbox.mobile.DXform method)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DstarPlanner.plan">(roboticstoolbox.mobile.DstarPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.PRMPlanner.plan">(roboticstoolbox.mobile.PRMPlanner method)</a>
 </li>
       </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.models.DH.Planar2">Planar2 (class in roboticstoolbox.models.DH)</a>
@@ -1816,13 +1797,29 @@
       <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.plot">plot() (roboticstoolbox.mobile.Bicycle method)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.plot">[1]</a>
 
       <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.plot">(roboticstoolbox.mobile.Bug2 method)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner.plot">(roboticstoolbox.mobile.CurvaturePolyPlanner method)</a>
 </li>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.plot">(roboticstoolbox.mobile.DXform method)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner.plot">(roboticstoolbox.mobile.DistanceTransformPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DstarPlanner.plot">(roboticstoolbox.mobile.DstarPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner.plot">(roboticstoolbox.mobile.DubinsPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.plot">(roboticstoolbox.mobile.LatticePlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.PRMPlanner.plot">(roboticstoolbox.mobile.PRMPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.QuinticPolyPlanner.plot">(roboticstoolbox.mobile.QuinticPolyPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner.plot">(roboticstoolbox.mobile.ReedsSheppPlanner method)</a>
 </li>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.plot">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.plot">[1]</a>
 </li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.plot">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.plot">[1]</a>
+        <li><a href="mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleIcon.plot">(roboticstoolbox.mobile.VehicleIcon method)</a>
+</li>
+        <li><a href="mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleMarker.plot">(roboticstoolbox.mobile.VehicleMarker method)</a>
+</li>
+        <li><a href="mobile_vehicle_animation.html#roboticstoolbox.mobile.VehiclePolygon.plot">(roboticstoolbox.mobile.VehiclePolygon method)</a>
 </li>
         <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.plot">(roboticstoolbox.robot.DHRobot.DHRobot method)</a>
 </li>
@@ -1835,14 +1832,6 @@
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.plot">(roboticstoolbox.robot.Robot.Robot method)</a>
 </li>
         <li><a href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.plot">(roboticstoolbox.tools.trajectory.Trajectory method)</a>
-</li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.plot_3d">plot_3d() (roboticstoolbox.mobile.DXform method)</a>
-</li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.plot_bg">plot_bg() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.plot_bg">(roboticstoolbox.mobile.DXform method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1871,14 +1860,6 @@
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.plot_fellipse">(roboticstoolbox.robot.Robot.Robot method)</a>
 </li>
       </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.plot_fg">plot_fg() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.plot_fg">(roboticstoolbox.mobile.DXform method)</a>
-</li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.plot_m_line">plot_m_line() (roboticstoolbox.mobile.Bug2 method)</a>
-</li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.plot_vellipse">plot_vellipse() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
 
       <ul>
@@ -1891,20 +1872,22 @@
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.plot_vellipse">(roboticstoolbox.robot.Robot.Robot method)</a>
 </li>
       </ul></li>
-      <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.plot_x_y">plot_x_y() (roboticstoolbox.mobile.Bicycle method)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.plot_x_y">[1]</a>
+      <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.plot_xy">plot_xy() (roboticstoolbox.mobile.Bicycle method)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.plot_xy">[1]</a>
 
       <ul>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.plot_x_y">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.plot_x_y">[1]</a>
-</li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.plot_x_y">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.plot_x_y">[1]</a>
+        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.plot_xy">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.plot_xy">[1]</a>
 </li>
       </ul></li>
-      <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.plot_xyt_t">plot_xyt_t() (roboticstoolbox.mobile.Bicycle method)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.plot_xyt_t">[1]</a>
+      <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.plot_xyt">plot_xyt() (roboticstoolbox.mobile.Bicycle method)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.plot_xyt">[1]</a>
 
       <ul>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.plot_xyt_t">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.plot_xyt_t">[1]</a>
+        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.plot_xyt">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.plot_xyt">[1]</a>
 </li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.plot_xyt_t">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.plot_xyt_t">[1]</a>
+      </ul></li>
+      <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.polygon">polygon() (roboticstoolbox.mobile.Bicycle method)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.polygon">[1]</a>
+
+      <ul>
+        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.polygon">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.polygon">[1]</a>
 </li>
       </ul></li>
       <li><a href="arm_ets.html#roboticstoolbox.robot.ETS.ETS.pop">pop() (roboticstoolbox.robot.ETS.ETS method)</a>
@@ -1931,28 +1914,42 @@
       </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHLink.PrismaticMDH">PrismaticMDH (class in roboticstoolbox.robot.DHLink)</a>
 </li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.private">private (roboticstoolbox.mobile.Bug2 property)</a>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.PRMPlanner">PRMPlanner (class in roboticstoolbox.mobile)</a>
+</li>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner.progress_end">progress_end() (roboticstoolbox.mobile.CurvaturePolyPlanner method)</a>
 
       <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.private">(roboticstoolbox.mobile.DXform property)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner.progress_end">(roboticstoolbox.mobile.DubinsPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.progress_end">(roboticstoolbox.mobile.LatticePlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.QuinticPolyPlanner.progress_end">(roboticstoolbox.mobile.QuinticPolyPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner.progress_end">(roboticstoolbox.mobile.ReedsSheppPlanner method)</a>
 </li>
       </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.progress">progress() (roboticstoolbox.mobile.Bug2 static method)</a>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner.progress_next">progress_next() (roboticstoolbox.mobile.CurvaturePolyPlanner method)</a>
 
       <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.progress">(roboticstoolbox.mobile.DXform static method)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner.progress_next">(roboticstoolbox.mobile.DubinsPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.progress_next">(roboticstoolbox.mobile.LatticePlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.QuinticPolyPlanner.progress_next">(roboticstoolbox.mobile.QuinticPolyPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner.progress_next">(roboticstoolbox.mobile.ReedsSheppPlanner method)</a>
 </li>
       </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.progress_delete">progress_delete() (roboticstoolbox.mobile.Bug2 static method)</a>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner.progress_start">progress_start() (roboticstoolbox.mobile.CurvaturePolyPlanner method)</a>
 
       <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.progress_delete">(roboticstoolbox.mobile.DXform static method)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner.progress_start">(roboticstoolbox.mobile.DubinsPlanner method)</a>
 </li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.progress_init">progress_init() (roboticstoolbox.mobile.Bug2 static method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.progress_init">(roboticstoolbox.mobile.DXform static method)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.progress_start">(roboticstoolbox.mobile.LatticePlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.QuinticPolyPlanner.progress_start">(roboticstoolbox.mobile.QuinticPolyPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner.progress_start">(roboticstoolbox.mobile.ReedsSheppPlanner method)</a>
 </li>
       </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.models.DH.Puma560">Puma560 (class in roboticstoolbox.models.DH)</a>
@@ -1977,9 +1974,13 @@
 <h2 id="Q">Q</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.q">q (roboticstoolbox.robot.DHRobot.DHRobot property)</a>
+      <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.q">q (roboticstoolbox.mobile.Bicycle property)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.q">[1]</a>
 
       <ul>
+        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.q">(roboticstoolbox.mobile.Unicycle property)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.q">[1]</a>
+</li>
+        <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.q">(roboticstoolbox.robot.DHRobot.DHRobot property)</a>
+</li>
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.q">(roboticstoolbox.robot.ERobot.BaseERobot property)</a>
 </li>
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.q">(roboticstoolbox.robot.ERobot.ERobot property)</a>
@@ -2019,8 +2020,6 @@
         <li><a href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.qdd">(roboticstoolbox.tools.trajectory.Trajectory property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHLink.qlim">qlim (roboticstoolbox.robot.DHLink property)</a>
 
       <ul>
@@ -2043,6 +2042,8 @@
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.qlim">(roboticstoolbox.robot.Robot.Robot property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="arm_trajectory.html#roboticstoolbox.tools.trajectory.qplot">qplot() (in module roboticstoolbox.tools.trajectory)</a>
 
       <ul>
@@ -2061,12 +2062,26 @@
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.qrandom">(roboticstoolbox.robot.Robot.Robot property)</a>
 </li>
       </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.query">query() (roboticstoolbox.mobile.Bug2 method)</a>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner.query">query() (roboticstoolbox.mobile.CurvaturePolyPlanner method)</a>
 
       <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.query">(roboticstoolbox.mobile.DXform method)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner.query">(roboticstoolbox.mobile.DistanceTransformPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DstarPlanner.query">(roboticstoolbox.mobile.DstarPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner.query">(roboticstoolbox.mobile.DubinsPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.query">(roboticstoolbox.mobile.LatticePlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.PRMPlanner.query">(roboticstoolbox.mobile.PRMPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.QuinticPolyPlanner.query">(roboticstoolbox.mobile.QuinticPolyPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner.query">(roboticstoolbox.mobile.ReedsSheppPlanner method)</a>
 </li>
       </ul></li>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.QuinticPolyPlanner">QuinticPolyPlanner (class in roboticstoolbox.mobile)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -2089,28 +2104,24 @@
       </ul></li>
       <li><a href="arm_ets.html#roboticstoolbox.robot.ETS.ETS2.r">r() (roboticstoolbox.robot.ETS.ETS2 class method)</a>
 </li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.rand">rand() (roboticstoolbox.mobile.Bug2 method)</a>
+      <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.radius_min">radius_min (roboticstoolbox.mobile.Bicycle property)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.radius_min">[1]</a>
+</li>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner.randinit">randinit() (roboticstoolbox.mobile.CurvaturePolyPlanner method)</a>
 
       <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.rand">(roboticstoolbox.mobile.DXform method)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner.randinit">(roboticstoolbox.mobile.DubinsPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.randinit">(roboticstoolbox.mobile.LatticePlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.QuinticPolyPlanner.randinit">(roboticstoolbox.mobile.QuinticPolyPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner.randinit">(roboticstoolbox.mobile.ReedsSheppPlanner method)</a>
 </li>
       </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.rand_stream">rand_stream (roboticstoolbox.mobile.Bug2 property)</a>
+      <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.random">random (roboticstoolbox.mobile.Bicycle property)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.random">[1]</a>
 
       <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.rand_stream">(roboticstoolbox.mobile.DXform property)</a>
-</li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.randi">randi() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.randi">(roboticstoolbox.mobile.DXform method)</a>
-</li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.randn">randn() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.randn">(roboticstoolbox.mobile.DXform method)</a>
+        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.random">(roboticstoolbox.mobile.Unicycle property)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.random">[1]</a>
 </li>
       </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.reach">reach (roboticstoolbox.robot.DHRobot.DHRobot property)</a>
@@ -2123,16 +2134,12 @@
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.reach">(roboticstoolbox.robot.ERobot.ERobot2 property)</a>
 </li>
       </ul></li>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner">ReedsSheppPlanner (class in roboticstoolbox.mobile)</a>
+</li>
       <li><a href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.remove">remove() (roboticstoolbox.backends.PyPlot.PyPlot method)</a>
 
       <ul>
         <li><a href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot2.remove">(roboticstoolbox.backends.PyPlot.PyPlot2 method)</a>
-</li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.reset">reset (roboticstoolbox.mobile.Bug2 property)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.reset">(roboticstoolbox.mobile.DXform property)</a>
 </li>
       </ul></li>
       <li><a href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.reset">reset() (roboticstoolbox.backends.PyPlot.PyPlot method)</a>
@@ -2161,10 +2168,10 @@
         <li><a href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot.revolutejoints">(roboticstoolbox.robot.Robot.Robot property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHLink.RevoluteMDH">RevoluteMDH (class in roboticstoolbox.robot.DHLink)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.rne">rne() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
 
       <ul>
@@ -2180,6 +2187,13 @@
 
       <ul>
         <li><a href="arm_backend_pyplot.html#module-roboticstoolbox.backends.PyPlot">module</a>
+</li>
+      </ul></li>
+      <li>
+    roboticstoolbox.mobile
+
+      <ul>
+        <li><a href="mobile_planner.html#module-roboticstoolbox.mobile">module</a>
 </li>
       </ul></li>
       <li>
@@ -2218,6 +2232,13 @@
 </li>
       </ul></li>
       <li>
+    roboticstoolbox.robot.KinematicCache
+
+      <ul>
+        <li><a href="arm_superclass.html#module-roboticstoolbox.robot.KinematicCache">module</a>
+</li>
+      </ul></li>
+      <li>
     roboticstoolbox.robot.Link
 
       <ul>
@@ -2243,8 +2264,6 @@
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.run">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.run">[1]</a>
 </li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.run">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.run">[1]</a>
-</li>
       </ul></li>
       <li><a href="arm_ets.html#roboticstoolbox.robot.ETS.ETS.rx">rx() (roboticstoolbox.robot.ETS.ETS class method)</a>
 </li>
@@ -2266,18 +2285,6 @@
 </li>
       <li><a href="arm_ets.html#roboticstoolbox.robot.ETS.ETS.SE3">SE3() (roboticstoolbox.robot.ETS.ETS class method)</a>
 </li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.seed">seed (roboticstoolbox.mobile.Bug2 property)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.seed">(roboticstoolbox.mobile.DXform property)</a>
-</li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.seed_0">seed_0 (roboticstoolbox.mobile.Bug2 property)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.seed_0">(roboticstoolbox.mobile.DXform property)</a>
-</li>
-      </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.segments">segments() (roboticstoolbox.robot.DHRobot.DHRobot method)</a>
 
       <ul>
@@ -2286,18 +2293,6 @@
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.segments">(roboticstoolbox.robot.ERobot.ERobot method)</a>
 </li>
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2.segments">(roboticstoolbox.robot.ERobot.ERobot2 method)</a>
-</li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.select_goal">select_goal() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.select_goal">(roboticstoolbox.mobile.DXform method)</a>
-</li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.show_distance">show_distance() (roboticstoolbox.mobile.Bug2 static method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.show_distance">(roboticstoolbox.mobile.DXform static method)</a>
 </li>
       </ul></li>
       <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.showgraph">showgraph() (roboticstoolbox.robot.ERobot.BaseERobot method)</a>
@@ -2315,34 +2310,24 @@
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.speed_max">(roboticstoolbox.mobile.Unicycle property)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.speed_max">[1]</a>
 </li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.speed_max">(roboticstoolbox.mobile.Vehicle property)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.speed_max">[1]</a>
+      </ul></li>
+      <li><a href="arm_dh.html#roboticstoolbox.models.DH.Stanford">Stanford (class in roboticstoolbox.models.DH)</a>
+</li>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner.start">start (roboticstoolbox.mobile.CurvaturePolyPlanner property)</a>
+
+      <ul>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner.start">(roboticstoolbox.mobile.DubinsPlanner property)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.start">(roboticstoolbox.mobile.LatticePlanner property)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.QuinticPolyPlanner.start">(roboticstoolbox.mobile.QuinticPolyPlanner property)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner.start">(roboticstoolbox.mobile.ReedsSheppPlanner property)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.spin_count">spin_count (roboticstoolbox.mobile.Bug2 property)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.spin_count">(roboticstoolbox.mobile.DXform property)</a>
-</li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.spinner">spinner() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.spinner">(roboticstoolbox.mobile.DXform method)</a>
-</li>
-      </ul></li>
-      <li><a href="arm_dh.html#roboticstoolbox.models.DH.Stanford">Stanford (class in roboticstoolbox.models.DH)</a>
-</li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.start">start (roboticstoolbox.mobile.Bug2 property)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.start">(roboticstoolbox.mobile.DXform property)</a>
-</li>
-      </ul></li>
       <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.steer_max">steer_max (roboticstoolbox.mobile.Bicycle property)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.steer_max">[1]</a>
-</li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.step">step (roboticstoolbox.mobile.Bug2 property)</a>
 </li>
       <li><a href="arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.step">step() (roboticstoolbox.backends.PyPlot.PyPlot method)</a>
 
@@ -2353,15 +2338,11 @@
 </li>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.step">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.step">[1]</a>
 </li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.step">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.step">[1]</a>
-</li>
       </ul></li>
       <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.stopif">stopif() (roboticstoolbox.mobile.Bicycle method)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.stopif">[1]</a>
 
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.stopif">(roboticstoolbox.mobile.Unicycle method)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.stopif">[1]</a>
-</li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.stopif">(roboticstoolbox.mobile.Vehicle method)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.stopif">[1]</a>
 </li>
       </ul></li>
       <li><a href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.structure">structure (roboticstoolbox.robot.DHRobot.DHRobot property)</a>
@@ -2462,12 +2443,6 @@
 </li>
       <li><a href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory">Trajectory (class in roboticstoolbox.tools.trajectory)</a>
 </li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.transform">transform (roboticstoolbox.mobile.Bug2 property)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.transform">(roboticstoolbox.mobile.DXform property)</a>
-</li>
-      </ul></li>
       <li><a href="arm_erobot.html#roboticstoolbox.robot.ELink.BaseELink.Ts">Ts (roboticstoolbox.robot.ELink.BaseELink property)</a>
 
       <ul>
@@ -2538,7 +2513,11 @@
       </ul></li>
       <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.URDF">URDF() (roboticstoolbox.robot.ERobot.ERobot class method)</a>
 </li>
+      <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.urdf_filepath">urdf_filepath (roboticstoolbox.robot.ERobot.ERobot property)</a>
+</li>
       <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.URDF_read">URDF_read() (roboticstoolbox.robot.ERobot.ERobot static method)</a>
+</li>
+      <li><a href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.urdf_string">urdf_string (roboticstoolbox.robot.ERobot.ERobot property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2554,7 +2533,19 @@
         <li><a href="arm_erobot.html#roboticstoolbox.robot.ELink.ELink2.v">(roboticstoolbox.robot.ELink.ELink2 property)</a>
 </li>
       </ul></li>
-      <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle">Vehicle (class in roboticstoolbox.mobile)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle">[1]</a>
+      <li><a href="mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner.validate_endpoint">validate_endpoint() (roboticstoolbox.mobile.CurvaturePolyPlanner method)</a>
+
+      <ul>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner.validate_endpoint">(roboticstoolbox.mobile.DubinsPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.validate_endpoint">(roboticstoolbox.mobile.LatticePlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.QuinticPolyPlanner.validate_endpoint">(roboticstoolbox.mobile.QuinticPolyPlanner method)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner.validate_endpoint">(roboticstoolbox.mobile.ReedsSheppPlanner method)</a>
+</li>
+      </ul></li>
+      <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle">Vehicle (in module roboticstoolbox.mobile)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle">[1]</a>
 </li>
       <li><a href="mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleIcon">VehicleIcon (class in roboticstoolbox.mobile)</a>
 </li>
@@ -2579,19 +2570,17 @@
       <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.verbose">verbose (roboticstoolbox.mobile.Bicycle property)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.verbose">[1]</a>
 
       <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.verbose">(roboticstoolbox.mobile.Bug2 property)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner.verbose">(roboticstoolbox.mobile.CurvaturePolyPlanner property)</a>
 </li>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.verbose">(roboticstoolbox.mobile.DXform property)</a>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner.verbose">(roboticstoolbox.mobile.DubinsPlanner property)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.verbose">(roboticstoolbox.mobile.LatticePlanner property)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.QuinticPolyPlanner.verbose">(roboticstoolbox.mobile.QuinticPolyPlanner property)</a>
+</li>
+        <li><a href="mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner.verbose">(roboticstoolbox.mobile.ReedsSheppPlanner property)</a>
 </li>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.verbose">(roboticstoolbox.mobile.Unicycle property)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.verbose">[1]</a>
-</li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.verbose">(roboticstoolbox.mobile.Vehicle property)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.verbose">[1]</a>
-</li>
-      </ul></li>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.verbosity">verbosity() (roboticstoolbox.mobile.Bug2 method)</a>
-
-      <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.verbosity">(roboticstoolbox.mobile.DXform method)</a>
 </li>
       </ul></li>
       <li><a href="arm_erobot.html#roboticstoolbox.models.URDF.vx300">vx300 (class in roboticstoolbox.models.URDF)</a>
@@ -2604,10 +2593,10 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="mobile_planner.html#roboticstoolbox.mobile.Bug2.w2g">w2g (roboticstoolbox.mobile.Bug2 property)</a>
+      <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.workspace">workspace (roboticstoolbox.mobile.Bicycle property)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.workspace">[1]</a>
 
       <ul>
-        <li><a href="mobile_planner.html#roboticstoolbox.mobile.DXform.w2g">(roboticstoolbox.mobile.DXform property)</a>
+        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.workspace">(roboticstoolbox.mobile.Unicycle property)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.workspace">[1]</a>
 </li>
       </ul></li>
   </ul></td>
@@ -2629,15 +2618,11 @@
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.x">(roboticstoolbox.mobile.Unicycle property)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.x">[1]</a>
 </li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.x">(roboticstoolbox.mobile.Vehicle property)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.x">[1]</a>
-</li>
       </ul></li>
       <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Bicycle.x0">x0 (roboticstoolbox.mobile.Bicycle property)</a>, <a href="mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.x0">[1]</a>
 
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.x0">(roboticstoolbox.mobile.Unicycle property)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.x0">[1]</a>
-</li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.x0">(roboticstoolbox.mobile.Vehicle property)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.x0">[1]</a>
 </li>
       </ul></li>
   </ul></td>
@@ -2646,8 +2631,6 @@
 
       <ul>
         <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Unicycle.x_hist">(roboticstoolbox.mobile.Unicycle property)</a>, <a href="mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.x_hist">[1]</a>
-</li>
-        <li><a href="mobile_vehicle.html#roboticstoolbox.mobile.Vehicle.x_hist">(roboticstoolbox.mobile.Vehicle property)</a>, <a href="mobile_vehicle_vehicle.html#roboticstoolbox.mobile.Vehicle.x_hist">[1]</a>
 </li>
       </ul></li>
   </ul></td>
@@ -2674,7 +2657,7 @@
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 07-Jun-2021.
+        Last updated on 13-Sep-2021.
       </span>
 
     </p>

@@ -103,6 +103,7 @@
 <li class="toctree-l3"><a class="reference internal" href="arm_erobot.html">ERobot models</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Superclasses</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#robot">Robot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-roboticstoolbox.robot.KinematicCache">Kinematic cache</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#link">Link</a></li>
 </ul>
 </li>
@@ -113,6 +114,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
 </ul>
 
             
@@ -258,7 +260,7 @@ from the base to the tool.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># print the 2nd link</span>
-<span class="go">RevoluteDH:   theta=q,  d=0, a=0.4318, alpha=0.0</span>
+<span class="go">RevoluteDH:   θ=q,  d=0,  a=0.4318,  ⍺=0.0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">link</span><span class="o">.</span><span class="n">a</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">robot</span><span class="p">])</span>  <span class="c1"># print all the a_j values</span>
 <span class="go">[0, 0.4318, 0.0203, 0, 0, 0]</span>
 </pre></div>
@@ -454,6 +456,22 @@ limits set for the robot.</p>
 <dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.Robot.Robot.qlim" title="roboticstoolbox.robot.Robot.Robot.qlim"><code class="xref py py-func docutils literal notranslate"><span class="pre">Robot.qlim()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">Link.qlim()</span></code></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.default_backend">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">default_backend</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.default_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get default graphical backend</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>backend name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p>Get the default graphical backend, used when no explicit backend is
+passed to <code class="docutils literal notranslate"><span class="pre">Robot.plot</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1069,30 +1087,6 @@ not set for:</p>
 </div>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.q">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.q" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get/set robot joint configuration (Robot superclass)</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">robot.q</span></code> is the robot joint configuration</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>robot joint configuration</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>ndarray(n,)</p>
-</dd>
-</dl>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">robot.q</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the joint configuration</p></li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>???</p>
-</div>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.accel">
 <span class="sig-name descname"><span class="pre">accel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">torque</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.accel" title="Permalink to this definition">¶</a></dt>
@@ -1274,7 +1268,7 @@ velocity but it is eliminated in the computation of this value.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.coriolis_x">
-<span class="sig-name descname"><span class="pre">coriolis_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.coriolis_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">coriolis_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Jd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Mx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.coriolis_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space Coriolis and centripetal term</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1334,7 +1328,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </table>
 </div></blockquote>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad representation specified</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad analytical value specified</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -1603,7 +1597,7 @@ being the corresponding joint torques.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.gravload_x">
-<span class="sig-name descname"><span class="pre">gravload_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.gravload_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">gravload_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.gravload_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space gravity load</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1687,7 +1681,7 @@ being the corresponding joint torques.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.ikine_LM">
-<span class="sig-name descname"><span class="pre">ikine_LM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rlimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_LM" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_LM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rlimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_LM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics by Levenberg-Marquadt optimization
 (Robot superclass)</p>
 <dl class="field-list simple">
@@ -1792,7 +1786,7 @@ Section 8.4.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.ikine_LMS">
-<span class="sig-name descname"><span class="pre">ikine_LMS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_LMS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_LMS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_LMS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics by Levenberg-Marquadt optimization
 (Robot superclass)</p>
 <dl class="field-list simple">
@@ -1883,7 +1877,7 @@ October 2011, pp. 984-991.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.ikine_global">
-<span class="sig-name descname"><span class="pre">ikine_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_global" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_global" title="Permalink to this definition">¶</a></dt>
 <dd><div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Experimental code for using SciPy global optimizers.</p>
@@ -1894,7 +1888,7 @@ design will need a bit of thought.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.ikine_min">
-<span class="sig-name descname"><span class="pre">ikine_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stiffness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costfun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_min" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stiffness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costfun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.ikine_min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse kinematics by optimization with joint limits (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2053,7 +2047,7 @@ the gear ratio.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.inertia_x">
-<span class="sig-name descname"><span class="pre">inertia_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.inertia_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">inertia_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.inertia_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space inertia matrix</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2372,6 +2366,30 @@ is: r2 = puma.perturb(0.1)</p>
 <dd class="field-odd"><p><a class="reference internal" href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot">DHRobot</a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.q">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get/set robot joint configuration (Robot superclass)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.q</span></code> is the robot joint configuration</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot joint configuration</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,)</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">robot.q</span> <span class="pre">=</span> <span class="pre">...</span></code> checks and sets the joint configuration</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>???</p>
+</div>
 </dd></dl>
 
 <dl class="py property">
@@ -2900,6 +2918,292 @@ damper becomes active</p></li>
 </dd></dl>
 
 </div>
+<div class="section" id="module-roboticstoolbox.robot.KinematicCache">
+<span id="kinematic-cache"></span><h2>Kinematic cache<a class="headerlink" href="#module-roboticstoolbox.robot.KinematicCache" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.KinematicCache.</span></span><span class="sig-name descname"><span class="pre">KinematicCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cachesize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Kinematic cache</p>
+<p>Many robot kinematic (and dynamic operations) have dependencies. For
+example, computing the world-frame Jacobian requires the
+forward kinematics, computing operational space acceleration requires
+the Jacobian.  To optimize computation time it becomes difficult to keep
+track of all the dependencies.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">KinematicCache</span></code> acts as a proxy for a <code class="docutils literal notranslate"><span class="pre">Robot</span></code> subclass object
+and implements a subset of its methods, just those that concerned with, or
+using kinematics.</p>
+<p>For everycall a hash is computed for <code class="docutils literal notranslate"><span class="pre">q</span></code> and relevant arguments such as
+<code class="docutils literal notranslate"><span class="pre">end</span></code> and the value of kinematic operation is looked up in the cache.  If
+it is not in the cache it will be computed and added to the cache.</p>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">robot</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ETS</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="n">kc</span> <span class="o">=</span> <span class="n">KinematicCache</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+
+<span class="n">q</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">qr</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">kc</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="n">J</span> <span class="o">=</span> <span class="n">kc</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="n">Ix</span> <span class="o">=</span> <span class="n">kc</span><span class="o">.</span><span class="n">inertia_x</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+<span class="n">J</span> <span class="o">=</span> <span class="n">kc</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">fkine</span></code> method will be a cache miss and the forward kinematics will be
+computed.  The <code class="docutils literal notranslate"><span class="pre">jacob0</span></code> method will be a cache miss but the required
+forward kinematics are in the cache and will be used.  The <code class="docutils literal notranslate"><span class="pre">inertia_x</span></code>
+method will be a cache miss but the required Jacobian is in the cache and
+will be used. The final <code class="docutils literal notranslate"><span class="pre">jacob0</span></code> method will be a cache hit and the
+previously computed value will be returned.</p>
+<p>The cost of computing the hash is small compared to the cost of the
+kinematic operations and not having to keep track of saved values makes code
+cleaner.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cachesize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create kinematic cache instance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>robot</strong> (<em>Robot subclass instance</em>) – robot to be cached</p></li>
+<li><p><strong>cachesize</strong> (<em>int</em><em>, </em><em>optional</em>) – maximum length of cache, defaults to 16</p></li>
+</ul>
+</dd>
+</dl>
+<p>The cache is an ordered dictionary indexed by function, joint angles and
+method arguments.  If you use N different cached functions at each
+timestep then <code class="docutils literal notranslate"><span class="pre">cachesize</span></code> should be at least N.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.cache">
+<span class="sig-name descname"><span class="pre">cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display kinematic cache</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>cache entries, one per line</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p>The cache dictionary is displayed.  Oldest entries are first.
+For example, the display:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fkine_all</span>   <span class="p">:</span> <span class="mh">0x59913cdb1a5be5c0</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,)</span>
+<span class="n">fkine</span>       <span class="p">:</span> <span class="mh">0xb9cd1db3d2a255e0</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,)</span>
+<span class="n">fkine_all</span>   <span class="p">:</span> <span class="mh">0xb9cd1db3d2a255e0</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,)</span>
+<span class="n">fkine</span>       <span class="p">:</span> <span class="mh">0x639cf014e2baaafb</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,)</span>
+</pre></div>
+</div>
+<p>shows the kinematic function, the joint configuration hash, and any
+additional arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.fkine">
+<span class="sig-name descname"><span class="pre">fkine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.fkine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.fkine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cached forward kinematics</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – Joint configuration</p></li>
+<li><p><strong>end</strong> (<em>str</em><em> or </em><em>ELink instance</em>) – specific end-effector, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>forward kinematics</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>SE3 instance</p>
+</dd>
+<dt class="field-even">Seealso</dt>
+<dd class="field-even"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DHRobot.fkine()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">ERobot.fkine()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.fkine_all">
+<span class="sig-name descname"><span class="pre">fkine_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.fkine_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.fkine_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cached forward kinematics for all frames</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – joint configuration</p></li>
+<li><p><strong>end</strong> (<em>str</em><em> or </em><em>ELink instance</em><em>, </em><em>optional</em>) – specific end effector, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>all link frames including base</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>multi-valuedSE3 instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.jacob0">
+<span class="sig-name descname"><span class="pre">jacob0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">half</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.jacob0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.jacob0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cached world-frame Jacobian</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – joint configuration</p></li>
+<li><p><strong>end</strong> (<em>str</em><em> or </em><em>ELink instance</em><em>, </em><em>optional</em>) – specific end effector, defaults to None</p></li>
+<li><p><strong>half</strong> (<em>str</em>) – return half Jacobian: ‘trans’ or ‘rot’</p></li>
+<li><p><strong>analytical</strong> (<em>str</em>) – return analytical Jacobian instead of geometric Jacobian (default)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Jacobian in world frame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6, n)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.jacob0_inv">
+<span class="sig-name descname"><span class="pre">jacob0_inv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.jacob0_inv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.jacob0_inv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cached world-frame Jacobian inverse</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – joint configuration</p></li>
+<li><p><strong>end</strong> (<em>str</em><em> or </em><em>ELink instance</em><em>, </em><em>optional</em>) – specific end effector, defaults to None</p></li>
+<li><p><strong>analytical</strong> (<em>str</em>) – return analytical Jacobian instead of geometric Jacobian (default)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Inverse Jacobian in world frame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6, n)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Robot objects don’t have this method.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.jacob0_pinv">
+<span class="sig-name descname"><span class="pre">jacob0_pinv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.jacob0_pinv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.jacob0_pinv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cached world-frame Jacobian pseudo inverse</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – joint configuration</p></li>
+<li><p><strong>end</strong> (<em>str</em><em> or </em><em>ELink instance</em><em>, </em><em>optional</em>) – specific end effector, defaults to None</p></li>
+<li><p><strong>analytical</strong> (<em>str</em>) – return analytical Jacobian instead of geometric Jacobian (default)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Pseudo inverse Jacobian in world frame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6, n)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Robot objects don’t have this method.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.jacobe">
+<span class="sig-name descname"><span class="pre">jacobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">half</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.jacobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.jacobe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cached world-frame Jacobian</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – joint configuration</p></li>
+<li><p><strong>end</strong> (<em>str</em><em> or </em><em>ELink instance</em><em>, </em><em>optional</em>) – specific end effector, defaults to None</p></li>
+<li><p><strong>half</strong> (<em>str</em>) – return half Jacobian: ‘trans’ or ‘rot’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Jacobian in end-effector-frame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6, n)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.jacobe_inv">
+<span class="sig-name descname"><span class="pre">jacobe_inv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.jacobe_inv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.jacobe_inv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cached end-effector-frame Jacobian inverse</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – joint configuration</p></li>
+<li><p><strong>end</strong> (<em>str</em><em> or </em><em>ELink instance</em><em>, </em><em>optional</em>) – specific end effector, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Inverse Jacobian in end-effector-frame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6, n)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Robot objects don’t have this method.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.jacobe_pinv">
+<span class="sig-name descname"><span class="pre">jacobe_pinv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.jacobe_pinv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.jacobe_pinv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cached end-effector-frame Jacobian pseudo inverse</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ndarray</em><em>(</em><em>n</em><em>)</em>) – joint configuration</p></li>
+<li><p><strong>end</strong> (<em>str</em><em> or </em><em>ELink instance</em><em>, </em><em>optional</em>) – specific end effector, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Pseudo inverse Jacobian in end-effector-frame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(6, n)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Robot objects don’t have this method.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.coriolis">
+<span class="sig-name descname"><span class="pre">coriolis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.coriolis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.coriolis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.inertia_x">
+<span class="sig-name descname"><span class="pre">inertia_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.inertia_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.inertia_x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.coriolis_x">
+<span class="sig-name descname"><span class="pre">coriolis_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.coriolis_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.coriolis_x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache.gravload_x">
+<span class="sig-name descname"><span class="pre">gravload_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache.gravload_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache.gravload_x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="link">
 <h2>Link<a class="headerlink" href="#link" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">ERobot</span></code> is defined by a tree of <code class="docutils literal notranslate"><span class="pre">ELink</span></code> subclass objects.</p>
@@ -2991,7 +3295,7 @@ centre of mass, inertia, friction, gear ratio and motor properties.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>        <span class="c1"># kinematic parameters</span>
-<span class="go">RevoluteDH:   theta=q,  d=0.15005, a=0.0203, alpha=-1.5707963267948966</span>
+<span class="go">RevoluteDH:   θ=q,  d=0.15005,  a=0.0203,  ⍺=-1.5707963267948966</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">dyn</span><span class="p">())</span>  <span class="c1"># dynamic parameters</span>
 <span class="go">m     =       4.8 </span>
 <span class="go">r     =     -0.02   -0.014     0.07 </span>
@@ -3488,7 +3792,7 @@ shapes. The points returned are [x, y, z].</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 07-Jun-2021.
+        Last updated on 13-Sep-2021.
       </span>
 
     </p>

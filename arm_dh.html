@@ -114,6 +114,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
 </ul>
 
             
@@ -668,7 +669,7 @@ to be zero.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.fkine">
-<span class="sig-name descname"><span class="pre">fkine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.fkine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.fkine" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fkine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.fkine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.fkine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Forward kinematics</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -795,7 +796,7 @@ kinematics are computed.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.jacobe">
-<span class="sig-name descname"><span class="pre">jacobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">half</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.jacobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.jacobe" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">jacobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">half</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot.jacobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.jacobe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Manipulator Jacobian in end-effector frame</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1459,7 +1460,7 @@ velocity but it is eliminated in the computation of this value.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.coriolis_x">
-<span class="sig-name descname"><span class="pre">coriolis_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.coriolis_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">coriolis_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Jd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Mx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.coriolis_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space Coriolis and centripetal term</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1519,7 +1520,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </table>
 </div></blockquote>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad representation specified</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad analytical value specified</span>
 </pre></div>
 </div>
 <p><strong>Trajectory operation</strong></p>
@@ -1545,6 +1546,22 @@ velocity but it is eliminated in the computation of this value.</p></li>
 <dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot.coriolis" title="roboticstoolbox.robot.DHRobot.DHRobot.coriolis"><code class="xref py py-func docutils literal notranslate"><span class="pre">coriolis()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot.inertia_x" title="roboticstoolbox.robot.DHRobot.DHRobot.inertia_x"><code class="xref py py-func docutils literal notranslate"><span class="pre">inertia_x()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot.hessian0" title="roboticstoolbox.robot.DHRobot.DHRobot.hessian0"><code class="xref py py-func docutils literal notranslate"><span class="pre">hessian0()</span></code></a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.default_backend">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">default_backend</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.default_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get default graphical backend</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>backend name</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p>Get the default graphical backend, used when no explicit backend is
+passed to <code class="docutils literal notranslate"><span class="pre">Robot.plot</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1868,7 +1885,7 @@ being the corresponding joint torques.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.gravload_x">
-<span class="sig-name descname"><span class="pre">gravload_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.gravload_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">gravload_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.gravload_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space gravity load</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2025,7 +2042,7 @@ being the corresponding joint torques.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.ikine_LM">
-<span class="sig-name descname"><span class="pre">ikine_LM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rlimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_LM" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_LM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rlimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_LM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics by Levenberg-Marquadt optimization
 (Robot superclass)</p>
 <dl class="field-list simple">
@@ -2130,7 +2147,7 @@ Section 8.4.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.ikine_LMS">
-<span class="sig-name descname"><span class="pre">ikine_LMS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_LMS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_LMS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_LMS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numerical inverse kinematics by Levenberg-Marquadt optimization
 (Robot superclass)</p>
 <dl class="field-list simple">
@@ -2221,7 +2238,7 @@ October 2011, pp. 984-991.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.ikine_global">
-<span class="sig-name descname"><span class="pre">ikine_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_global" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_global" title="Permalink to this definition">¶</a></dt>
 <dd><div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Experimental code for using SciPy global optimizers.</p>
@@ -2232,7 +2249,7 @@ design will need a bit of thought.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.ikine_min">
-<span class="sig-name descname"><span class="pre">ikine_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stiffness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costfun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_min" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ikine_min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stiffness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">costfun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.ikine_min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inverse kinematics by optimization with joint limits (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2391,7 +2408,7 @@ the gear ratio.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.inertia_x">
-<span class="sig-name descname"><span class="pre">inertia_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.inertia_x" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">inertia_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rpy-xyz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ji</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.inertia_x" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operational space inertia matrix</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -4201,7 +4218,7 @@ centre of mass, inertia, friction, gear ratio and motor properties.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>        <span class="c1"># kinematic parameters</span>
-<span class="go">RevoluteDH:   theta=q,  d=0.15005, a=0.0203, alpha=-1.5707963267948966</span>
+<span class="go">RevoluteDH:   θ=q,  d=0.15005,  a=0.0203,  ⍺=-1.5707963267948966</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">dyn</span><span class="p">())</span>  <span class="c1"># dynamic parameters</span>
 <span class="go">m     =       4.8 </span>
 <span class="go">r     =     -0.02   -0.014     0.07 </span>
@@ -4783,6 +4800,31 @@ rigid-body inertial parameters, motor and transmission parameters.</p>
 standard or modified.  They can be listed by:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">mtype</span><span class="o">=</span><span class="s2">&quot;DH&quot;</span><span class="p">)</span>
+<span class="go"> class        name          manufacturer     type  DoF  dims   structure  dynamics  geometry          keywords          </span>
+<span class="go">Panda     Panda          Franka Emika        DH    7    3d    RRRRRRR     Y         Y                                   </span>
+<span class="go">Puma560   Puma 560       Unimation           DH    6    3d    RRRRRR      Y         Y         dynamics, symbolic, mesh  </span>
+<span class="go">Stanford  Stanford arm   Victor Scheinman    DH    6    3d    RRPRRR      Y                   dynamics                  </span>
+<span class="go">Ball      ball                               DH    10   3d    RRRRRRRRRR  Y                                             </span>
+<span class="go">Hyper     Hyper10                            DH    10   3d    RRRRRRRRRR  Y                   symbolic                  </span>
+<span class="go">Coil      Hyper10                            DH    10   3d    RRRRRRRRRR  Y                   symbolic                  </span>
+<span class="go">Cobra600  Cobra600       Adept               DH    4    3d    RRPR        Y                                             </span>
+<span class="go">IRB140    IRB 140        ABB                 DH    6    3d    RRRRRR      Y         Y                                   </span>
+<span class="go">KR5       KR5            KUKA                DH    6    3d    RRRRRR      Y         Y                                   </span>
+<span class="go">Orion5    Orion 5        RAWR Robotics       DH    4    3d    RRRR        Y                                             </span>
+<span class="go">Planar3   Planar 3 link                      DH    3    3d    RRR         Y                   planar                    </span>
+<span class="go">Planar2   Planar 2 link                      DH    2    3d    RR          Y                   planar                    </span>
+<span class="go">LWR4      LWR-IV         Kuka                DH    7    3d    RRRRRRR     Y                                             </span>
+<span class="go">Sawyer    Sawyer         Rethink Robotics    DH    6    3d    RRRRRR      Y                   redundant, symbolic       </span>
+<span class="go">UR3       UR3            Universal Robotics  DH    6    3d    RRRRRR      Y                   dynamics, symbolic        </span>
+<span class="go">UR5       UR5            Universal Robotics  DH    6    3d    RRRRRR      Y                   dynamics, symbolic        </span>
+<span class="go">UR10      UR10           Universal Robotics  DH    6    3d    RRRRRR      Y                   dynamics, symbolic        </span>
+<span class="go">Mico      Mico           Kinova              DH    6    3d    RRRRRR      Y                   symbolic                  </span>
+<span class="go">Jaco      Jaco           Kinova              DH    6    3d    RRRRRR      Y                   symbolic                  </span>
+<span class="go">Baxter    Baxter-left    Rethink Robotics    DH    7    3d    RRRRRRR     Y                                             </span>
+<span class="go">TwoLink   2 link                             DH    2    3d    RR          Y                   planar, dynamics          </span>
+<span class="go">Hyper3d   Hyper3d10                          DH    10   3d    RRRRRRRRRR  Y                   symbolic                  </span>
+<span class="go">P8        P8                                 DH    8    3d    PPRRRRRR    Y                   mobile, redundant         </span>
+
 </pre></div>
 </div>
 <span class="target" id="module-roboticstoolbox.models.DH"></span><dl class="py class">
@@ -4809,9 +4851,9 @@ conventions.</p>
 <span class="go">┃  0.088 ┃  90.0° ┃  q7 ┃ 0.107 ┃ -166.0° ┃ 166.0° ┃</span>
 <span class="go">┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
-<span class="go">┌─────┬───────────────────────────────────────┐</span>
-<span class="go">│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │</span>
-<span class="go">└─────┴───────────────────────────────────────┘</span>
+<span class="go">┌─────┬──────┐</span>
+<span class="go">│tool │ None │</span>
+<span class="go">└─────┴──────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
@@ -5506,10 +5548,10 @@ conventions.</p>
 <span class="go">┃ q4 ┃     0 ┃   0.126 ┃  0.0° ┃   45.0° ┃ 315.0° ┃</span>
 <span class="go">┗━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
-<span class="go">┌─────┬──────────────────────────────────────┐</span>
-<span class="go">│base │ t = 0.03, 0, 0; rpy/xyz = 0°, 0°, 0° │</span>
-<span class="go">│tool │ t = 0, 0, 0; rpy/xyz = 0°, 90°, 0°   │</span>
-<span class="go">└─────┴──────────────────────────────────────┘</span>
+<span class="go">┌─────┬──────┐</span>
+<span class="go">│base │ None │</span>
+<span class="go">│tool │ None │</span>
+<span class="go">└─────┴──────┘</span>
 
 <span class="go">┌─────┬─────┬──────┬───────┬───────┐</span>
 <span class="go">│name │ q0  │ q1   │ q2    │ q3    │</span>
@@ -5661,9 +5703,9 @@ conventions.</p>
 <span class="go">┃ q7 ┃    0 ┃  0 ┃   0.0° ┃ -166.0° ┃ 166.0° ┃</span>
 <span class="go">┗━━━━┻━━━━━━┻━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
 
-<span class="go">┌─────┬───────────────────────────────────────┐</span>
-<span class="go">│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │</span>
-<span class="go">└─────┴───────────────────────────────────────┘</span>
+<span class="go">┌─────┬──────┐</span>
+<span class="go">│tool │ None │</span>
+<span class="go">└─────┴──────┘</span>
 
 <span class="go">┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐</span>
 <span class="go">│name │ q0  │ q1  │ q2  │ q3  │ q4  │ q5  │ q6  │</span>
@@ -6291,7 +6333,7 @@ arm.</p>
     <p>
         &#169; Copyright 2020, Jesse Haviland and Peter Corke.
       <span class="lastupdated">
-        Last updated on 07-Jun-2021.
+        Last updated on 13-Sep-2021.
       </span>
 
     </p>
