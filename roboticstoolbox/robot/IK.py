@@ -5,6 +5,7 @@
 
 import numpy as np
 from collections import namedtuple
+
 # from roboticstoolbox.tools.null import null
 import roboticstoolbox as rtb
 from spatialmath import base
@@ -13,6 +14,7 @@ import scipy.optimize as opt
 import math
 import qpsolvers as qp
 from roboticstoolbox.tools.p_servo import p_servo
+
 # iksol = namedtuple("IKsolution", "q, success, reason, iterations, residual",
 #     defaults=(None, False, None, None, None)) # Py >= 3.7 only
 iksol = namedtuple("IKsolution", "q, success, reason, iterations, residual")
@@ -21,10 +23,7 @@ iksol = namedtuple("IKsolution", "q, success, reason, iterations, residual")
 
 
 class IKMixin:
-
-    def ikine_mmc(
-            self, T,
-            q0=None):
+    def ikine_mmc(self, T, q0=None):
 
         arrived = False
 
@@ -104,20 +103,23 @@ class IKMixin:
 
         return q
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     def ikine_LM(
-            self, T,
-            q0=None,
-            mask=None,
-            ilimit=500,
-            rlimit=100,
-            tol=1e-10,
-            L=0.1,
-            Lmin=0,
-            search=False,
-            slimit=100,
-            transpose=None):
+        self,
+        T,
+        q0=None,
+        mask=None,
+        ilimit=500,
+        rlimit=100,
+        tol=1e-10,
+        L=0.1,
+        Lmin=0,
+        search=False,
+        slimit=100,
+        transpose=None,
+        end=None,
+    ):
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization
         (Robot superclass)
@@ -245,7 +247,10 @@ class IKMixin:
         """  # noqa E501
 
         if not isinstance(T, SE3):
-            raise TypeError('argument must be SE3')
+            raise TypeError("argument must be SE3")
+
+        if isinstance(self, rtb.DHRobot):
+            end = None
 
         solutions = []
 
@@ -259,7 +264,7 @@ class IKMixin:
             for k in range(slimit):
                 # choose a random joint coordinate
                 q0_k = np.random.rand(self.n) * qspan + qlim[0, :]
-                print('search starts at ', q0_k)
+                print("search starts at ", q0_k)
 
                 # recurse into the solver
                 solution = self.ikine_LM(
@@ -273,7 +278,8 @@ class IKMixin:
                     Lmin,
                     False,
                     slimit,
-                    transpose)
+                    transpose,
+                )
 
                 if solution.success:
                     q0 = solution.q
@@ -295,13 +301,15 @@ class IKMixin:
         if mask is not None:
             mask = base.getvector(mask, 6)
             if not self.n >= np.sum(mask):
-                raise ValueError('Number of robot DOF must be >= the number '
-                                 'of 1s in the mask matrix')
+                raise ValueError(
+                    "Number of robot DOF must be >= the number "
+                    "of 1s in the mask matrix"
+                )
         else:
             mask = np.ones(6)
         W = np.diag(mask)
 
-        tcount = 0    # Total iteration count
+        tcount = 0  # Total iteration count
         rejcount = 0  # Rejected step count
         nm = 0
         revolutes = self.revolutejoints
@@ -319,20 +327,20 @@ class IKMixin:
                     failure = f"iteration limit {ilimit} exceeded"
                     break
 
-                e = base.tr2delta(self.fkine(q).A, Tk.A)
+                e = base.tr2delta(self.fkine(q, end=end).A, Tk.A)
 
                 # Are we there yet?
                 if base.norm(W @ e) < tol:
                     break
 
                 # Compute the Jacobian
-                J = self.jacobe(q)
+                J = self.jacobe(q, end=end)
 
                 JtJ = J.T @ W @ J
 
                 if transpose is not None:
                     # Do the simple Jacobian transpose with constant gain
-                    dq = transpose * J.T @ e    # lgtm [py/multiple-definition]
+                    dq = transpose * J.T @ e  # lgtm [py/multiple-definition]
                     q += dq
                 else:
                     # Do the damped inverse Gauss-Newton with
@@ -340,16 +348,19 @@ class IKMixin:
                     # dq = np.linalg.inv(
                     #     JtJ + ((Li + Lmin) * np.eye(self.n))
                     # ) @ J.T @ W @ e
-                    dq = np.linalg.inv(
-                        JtJ + ((Li + Lmin) * np.diag(np.diag(JtJ)))
-                    ) @ J.T @ W @ e
+                    dq = (
+                        np.linalg.inv(JtJ + ((Li + Lmin) * np.diag(np.diag(JtJ))))
+                        @ J.T
+                        @ W
+                        @ e
+                    )
                     # print(J.T @ W @ e)
 
                     # Compute possible new value of
                     qnew = q + dq
 
                     # And figure out the new error
-                    enew = base.tr2delta(self.fkine(qnew).A, Tk.A)
+                    enew = base.tr2delta(self.fkine(qnew, end=end).A, Tk.A)
 
                     # Was it a good update?
                     if np.linalg.norm(W @ enew) < np.linalg.norm(W @ e):
@@ -371,7 +382,7 @@ class IKMixin:
                 q[k] -= 2 * np.pi
 
                 k = np.logical_and(q < -np.pi, revolutes)
-                q[k] += + 2 * np.pi
+                q[k] += +2 * np.pi
 
                 nm = np.linalg.norm(W @ e)
                 # qs = ", ".join(["{:8.3f}".format(qi) for qi in q])
@@ -392,19 +403,13 @@ class IKMixin:
                 np.array([sol.success for sol in solutions]),
                 [sol.reason for sol in solutions],
                 np.array([sol.iterations for sol in solutions]),
-                np.array([sol.residual for sol in solutions])
+                np.array([sol.residual for sol in solutions]),
             )
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     def ikine_LMS(
-            self, T,
-            q0=None,
-            mask=None,
-            ilimit=500,
-            tol=1e-10,
-            wN=1e-3,
-            Lmin=0
+        self, T, q0=None, mask=None, ilimit=500, tol=1e-10, wN=1e-3, Lmin=0, end=None
     ):
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization
@@ -511,7 +516,10 @@ class IKMixin:
         """  # noqa E501
 
         if not isinstance(T, SE3):
-            raise TypeError('argument must be SE3')
+            raise TypeError("argument must be SE3")
+
+        if isinstance(self, rtb.DHRobot):
+            end = None
 
         solutions = []
 
@@ -523,8 +531,10 @@ class IKMixin:
         if mask is not None:
             mask = base.getvector(mask, 6)
             if not self.n >= np.sum(mask):
-                raise ValueError('Number of robot DOF must be >= the number '
-                                 'of 1s in the mask matrix')
+                raise ValueError(
+                    "Number of robot DOF must be >= the number "
+                    "of 1s in the mask matrix"
+                )
         else:
             mask = np.ones(6)
         W = np.diag(mask)
@@ -544,7 +554,7 @@ class IKMixin:
                     failure = f"iteration limit {ilimit} exceeded"
                     break
 
-                e = _angle_axis(self.fkine(q).A, Tk.A)
+                e = _angle_axis(self.fkine(q, end=end).A, Tk.A)
 
                 # Are we there yet?
                 E = 0.5 * e.T @ W @ e
@@ -552,10 +562,10 @@ class IKMixin:
                     break
 
                 # Compute the Jacobian and projection matrices
-                J = self.jacob0(q)
+                J = self.jacob0(q, end=end)
                 WN = E * np.eye(self.n) + wN * np.eye(self.n)
                 H = J.T @ W @ J + WN  # n x n
-                g = J.T @ W @ e       # n x 1
+                g = J.T @ W @ e  # n x 1
 
                 # Compute new value of q
                 q += np.linalg.inv(H) @ g  # n x 1
@@ -570,7 +580,7 @@ class IKMixin:
                 q[k] -= 2 * np.pi
 
                 k = np.logical_and(q < -np.pi, revolutes)
-                q[k] += + 2 * np.pi
+                q[k] += +2 * np.pi
 
                 # qs = ", ".join(["{:8.3f}".format(qi) for qi in q])
                 # print(f"|e|={E:8.2g}, det(H)={np.linalg.det(H)}: q={qs}")
@@ -590,14 +600,24 @@ class IKMixin:
                 np.array([sol.success for sol in solutions]),
                 [sol.reason for sol in solutions],
                 np.array([sol.iterations for sol in solutions]),
-                np.array([sol.residual for sol in solutions])
+                np.array([sol.residual for sol in solutions]),
             )
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     def ikine_min(
-            self, T, q0=None, qlim=False, ilimit=1000,
-            tol=1e-16, method=None, stiffness=0, costfun=None, options={}):
+        self,
+        T,
+        q0=None,
+        qlim=False,
+        ilimit=1000,
+        tol=1e-16,
+        method=None,
+        stiffness=0,
+        costfun=None,
+        options={},
+        end=None,
+    ):
         r"""
         Inverse kinematics by optimization with joint limits (Robot superclass)
 
@@ -703,7 +723,10 @@ class IKMixin:
         """  # noqa E501
 
         if not isinstance(T, SE3):
-            raise TypeError('argument must be SE3')
+            raise TypeError("argument must be SE3")
+
+        if isinstance(self, rtb.DHRobot):
+            end = None
 
         if q0 is None:
             q0 = np.zeros((self.n))
@@ -715,35 +738,35 @@ class IKMixin:
         wr = 1 / self.reach
         weight = np.r_[wr, wr, wr, 1, 1, 1]
 
-        optdict = {'maxiter': ilimit}
+        optdict = {"maxiter": ilimit}
         if options is not None and isinstance(options, dict):
             optdict.update(options)
         else:
-            raise ValueError('options must be a dict')
+            raise ValueError("options must be a dict")
 
         if qlim:
             # dealing with joint limits
             bounds = opt.Bounds(self.qlim[0, :], self.qlim[1, :])
 
             if method is None:
-                method = 'trust-constr'
+                method = "trust-constr"
         else:
             # no joint limits
             if method is None:
-                method = 'SLSQP'
+                method = "SLSQP"
             bounds = None
 
         def cost(q, T, weight, costfun, stiffness):
             # T, weight, costfun, stiffness = args
-            e = _angle_axis(self.fkine(q).A, T) * weight
-            E = (e**2).sum()
+            e = _angle_axis(self.fkine(q, end=end).A, T) * weight
+            E = (e ** 2).sum()
 
             if stiffness > 0:
                 # Enforce a continuity constraint on joints, minimum bend
-                E += np.sum(np.diff(q)**2) * stiffness
+                E += np.sum(np.diff(q) ** 2) * stiffness
 
             if costfun is not None:
-                E += (e**2).sum() + costfun(q)
+                E += (e ** 2).sum() + costfun(q)
 
             return E
 
@@ -755,7 +778,7 @@ class IKMixin:
                 bounds=bounds,
                 method=method,
                 tol=tol,
-                options=options
+                options=options,
             )
 
             # trust-constr seems to work better than L-BFGS-B which often
@@ -772,11 +795,11 @@ class IKMixin:
         else:
             return solutions
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     def ikine_global(
-            self, T, qlim=False, ilimit=1000,
-            tol=1e-16, method=None, options={}):
+        self, T, qlim=False, ilimit=1000, tol=1e-16, method=None, options={}, end=None
+    ):
         r"""
         .. warning:: Experimental code for using SciPy global optimizers.
 
@@ -792,7 +815,10 @@ class IKMixin:
         # dual_annealing: bounds
 
         if not isinstance(T, SE3):
-            raise TypeError('argument must be SE3')
+            raise TypeError("argument must be SE3")
+
+        if isinstance(self, rtb.DHRobot):
+            end = None
 
         solutions = []
 
@@ -802,29 +828,32 @@ class IKMixin:
         optdict = {}
 
         if method is None:
-            method = 'differential-evolution'
+            method = "differential-evolution"
 
-        if method == 'brute':
+        if method == "brute":
             # requires a tuple of tuples
-            optdict['ranges'] = tuple([tuple(li.qlim) for li in self])
+            optdict["ranges"] = tuple([tuple(li.qlim) for li in self])
         else:
-            optdict['bounds'] = tuple([tuple(li.qlim) for li in self])
+            optdict["bounds"] = tuple([tuple(li.qlim) for li in self])
 
-        if method not in ['basinhopping', 'brute', 'differential_evolution',
-                          'shgo', 'dual_annealing']:
-            raise ValueError('unknown global optimizer requested')
+        if method not in [
+            "basinhopping",
+            "brute",
+            "differential_evolution",
+            "shgo",
+            "dual_annealing",
+        ]:
+            raise ValueError("unknown global optimizer requested")
 
         global_minimizer = opt.__dict__[method]
 
         def cost(q, T, weight):
             # T, weight, costfun, stiffness = args
-            e = _angle_axis(self.fkine(q).A, T) * weight
-            return (e**2).sum()
+            e = _angle_axis(self.fkine(q, end=end).A, T) * weight
+            return (e ** 2).sum()
 
         for _ in T:
-            res = global_minimizer(
-                cost,
-                **optdict)
+            res = global_minimizer(cost, **optdict)
 
             solution = iksol(res.x, res.success, res.message, res.nit, res.fun)
             solutions.append(solution)
@@ -875,14 +904,11 @@ def _angle_axis_sekiguchi(T, Td):
             if R[1, 0] > 0 and R[2, 1] > 0 and R[0, 2] > 0:
                 a = np.pi / np.sqrt(2) * np.sqrt(np.diag(R) + 1)
             elif R[1, 0] > 0:  # (2)
-                a = np.pi / np.sqrt(2) * np.sqrt(
-                    np.diag(R) @ np.r_[1, 1, -1] + 1)
+                a = np.pi / np.sqrt(2) * np.sqrt(np.diag(R) @ np.r_[1, 1, -1] + 1)
             elif R[0, 2] > 0:  # (3)
-                a = np.pi / np.sqrt(2) * np.sqrt(
-                    np.diag(R) @ np.r_[1, -1, 1] + 1)
+                a = np.pi / np.sqrt(2) * np.sqrt(np.diag(R) @ np.r_[1, -1, 1] + 1)
             elif R[2, 1] > 0:  # (4)
-                a = np.pi / np.sqrt(2) * np.sqrt(
-                    np.diag(R) @ np.r_[-1, 1, 1] + 1)
+                a = np.pi / np.sqrt(2) * np.sqrt(np.diag(R) @ np.r_[-1, 1, 1] + 1)
     else:
         # non-diagonal matrix case
         ln = base.norm(li)
@@ -916,4 +942,4 @@ if __name__ == "__main__":  # pragma nocover
     # print(robot.fkine(sol.q))
     # robot.plot(sol.q)
 
-    sol = robot.ikine_global(T, method='brute')
+    sol = robot.ikine_global(T, method="brute")

@@ -4,7 +4,7 @@
 """
 
 from collections import namedtuple
-from roboticstoolbox.tools.data import path_to_datafile
+from roboticstoolbox.tools.data import rtb_path_to_datafile
 import warnings
 import copy
 import numpy as np
@@ -106,7 +106,7 @@ class DHRobot(Robot):
 
         # load meshes if required
         if meshdir is not None:
-            self.meshdir = path_to_datafile(meshdir)
+            self.meshdir = rtb_path_to_datafile(meshdir)
             self.basemesh = self.meshdir / "link0.stl"
             for j, link in enumerate(self._links, start=1):
                 link.mesh = self.meshdir / "link{:d}.stl".format(j)
@@ -750,9 +750,9 @@ class DHRobot(Robot):
             # MDH case
             for j, link in enumerate(self):
                 if link.sigma == 0:
-                    tw[j] = Twist3.Revolute(T[j].a, T[j].t)
+                    tw[j] = Twist3.UnitRevolute(T[j].a, T[j].t)
                 else:
-                    tw[j] = Twist3.Prismatic(T[j].a)
+                    tw[j] = Twist3.UnitPrismatic(T[j].a)
         else:
             # DH case
             for j, link in enumerate(self):
@@ -760,15 +760,15 @@ class DHRobot(Robot):
                     # first link case
                     if link.sigma == 0:
                         # revolute
-                        tw[j] = Twist3.Revolute([0, 0, 1], [0, 0, 0])
+                        tw[j] = Twist3.UnitRevolute([0, 0, 1], [0, 0, 0])
                     else:
-                        tw[j] = Twist3.Prismatic([0, 0, 1])  # prismatic
+                        tw[j] = Twist3.UnitPrismatic([0, 0, 1])  # prismatic
                 else:
                     # subsequent links
                     if link.sigma == 0:
-                        tw[j] = Twist3.Revolute(T[j - 1].a, T[j - 1].t)  # revolute
+                        tw[j] = Twist3.UnitRevolute(T[j - 1].a, T[j - 1].t)  # revolute
                     else:
-                        tw[j] = Twist3.Prismatic(T[j - 1].a)  # prismatic
+                        tw[j] = Twist3.UnitPrismatic(T[j - 1].a)  # prismatic
 
         return tw, T[-1]
 
@@ -804,7 +804,7 @@ class DHRobot(Robot):
 
         return ets
 
-    def fkine(self, q):
+    def fkine(self, q, **kwargs):
         """
         Forward kinematics
 
@@ -940,7 +940,7 @@ class DHRobot(Robot):
             Tall.append(Tj)
         return Tall
 
-    def jacobe(self, q, half=None):
+    def jacobe(self, q, half=None, **kwargs):
         r"""
         Manipulator Jacobian in end-effector frame
 
@@ -1415,8 +1415,8 @@ class DHRobot(Robot):
 
             if self._base is not None:
                 Rb = t2r(self.base.A).T
-                w = Rb @ wd
-                wd = Rb @ wdd
+                w = Rb @ w
+                wd = Rb @ wd
                 vd = Rb @ gravity
 
             # ----------------  initialize some variables ----------------- #

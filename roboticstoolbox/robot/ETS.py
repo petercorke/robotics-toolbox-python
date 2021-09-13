@@ -1132,12 +1132,14 @@ class ETS(BaseETS):
 
         # this method is 3x faster than using lambda x: transl(x, 0, 0)
         def axis_func(eta):
+            # fmt: off
             return np.array([
                 [1, 0, 0, eta],
                 [0, 1, 0, 0],
                 [0, 0, 1, 0],
                 [0, 0, 0, 1]
             ])
+            # fmt: on
 
         return cls(axis='tx', axis_func=axis_func, eta=eta, **kwargs)
 
@@ -1165,12 +1167,14 @@ class ETS(BaseETS):
         :SymPy: supported
         """
         def axis_func(eta):
+            # fmt: off
             return np.array([
                 [1, 0, 0, 0],
                 [0, 1, 0, eta],
                 [0, 0, 1, 0],
                 [0, 0, 0, 1]
             ])
+            # fmt: on
 
         return cls(axis='ty', eta=eta, axis_func=axis_func, **kwargs)
 
@@ -1200,12 +1204,14 @@ class ETS(BaseETS):
         :SymPy: supported
         """
         def axis_func(eta):
+            # fmt: off
             return np.array([
                 [1, 0, 0, 0],
                 [0, 1, 0, 0],
                 [0, 0, 1, eta],
                 [0, 0, 0, 1]
             ])
+            # fmt: on
 
         return cls(axis='tz', axis_func=axis_func, eta=eta, **kwargs)
 

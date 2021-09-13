@@ -32,12 +32,17 @@ class Frankie(ERobot):
 
     def __init__(self):
 
-        links, name = self.URDF_read(
+        links, name, urdf_string, urdf_filepath = self.URDF_read(
             "franka_description/robots/frankie_arm_hand.urdf.xacro"
         )
 
         super().__init__(
-            links, name=name, manufacturer="Franka Emika", gripper_links=links[11]
+            links,
+            name=name,
+            manufacturer="Franka Emika",
+            gripper_links=links[12],
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
         )
 
         self.grippers[0].tool = SE3(0, 0, 0.1034)

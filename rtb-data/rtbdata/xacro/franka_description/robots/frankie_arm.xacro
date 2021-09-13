@@ -15,6 +15,20 @@
     </link>
     <link name="${arm_id}_base1">
     </link>
+    <link name="${arm_id}_base_arm">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://${description_pkg}/meshes/visual/omron.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0.19" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.68 0.47 0.38" />
+        </geometry>
+      </collision>
+    </link>
     <joint name="${arm_id}_base_joint1" type="revolute">
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <parent link="${arm_id}_base0"/>
@@ -23,29 +37,21 @@
       <limit effort="87" lower="-999999" upper="999999" velocity="4.0"/>
     </joint>
     <joint name="${arm_id}_base_joint2" type="prismatic">
-      <origin rpy="0 0 0" xyz="0 0 0.38"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <parent link="${arm_id}_base1"/>
-      <child link="${arm_id}_link0"/>
+      <child link="${arm_id}_base_arm"/>
       <axis xyz="1 0 0"/>
       <limit effort="87" lower="-999999" upper="999999" velocity="4.0"/>
     </joint>
+    <joint name="${arm_id}_base_arm_joint" type="fixed">
+      <origin rpy="0 0 0" xyz="0.15 0 0.38"/>
+      <parent link="${arm_id}_base_arm"/>
+      <child link="${arm_id}_link0"/>
+    </joint>
+
     <link name="${arm_id}_link0">
       <visual>
-        <!-- <origin xyz="0 0 -0.15" rpy="0 0 0"/> -->
-        <origin xyz="0 0 -0.38" rpy="0 0 0"/>
-        <geometry>
-          <!-- <box size="0.6 0.4 0.3" /> -->
-          <mesh filename="package://${description_pkg}/meshes/visual/omron.dae"/>
-        </geometry>
-      </visual>
-      <collision>
-        <origin xyz="0 0 -0.19" rpy="0 0 0"/>
-        <geometry>
-          <box size="0.68 0.47 0.38" />
-        </geometry>
-      </collision>
-      <visual>
-        <origin xyz="0.15 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
           <mesh filename="package://${description_pkg}/meshes/visual/link0.dae"/>
         </geometry>
@@ -96,7 +102,7 @@
     </link>
     <joint name="${arm_id}_joint1" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
-      <origin rpy="0 0 0" xyz="0.15 0 0.333"/>
+      <origin rpy="0 0 0" xyz="0 0 0.333"/>
       <parent link="${arm_id}_link0"/>
       <child link="${arm_id}_link1"/>
       <axis xyz="0 0 1"/>

@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 import time
 
-from bdsim.components import TransferBlock, block
+from bdsim.components import TransferBlock
 from bdsim.graphics import GraphicsBlock
 
 from spatialmath import base
+from roboticstoolbox import Bicycle, Unicycle
 
 # ------------------------------------------------------------------------ #
-@block
 class Bicycle(TransferBlock):
     """
     :blockname:`BICYCLE`
@@ -19,20 +19,25 @@ class Bicycle(TransferBlock):
     .. table::
        :align: left
     
-       +------------+---------+---------+
-       | inputs     | outputs |  states |
-       +------------+---------+---------+
-       | 2          | 3       | 3       |
-       +------------+---------+---------+
-       | float      | float   |         | 
-       +------------+---------+---------+
+    +------------+------------+---------+
+    | inputs     | outputs    |  states |
+    +------------+------------+---------+
+    | 2          | 1          | 3       |
+    +------------+------------+---------+
+    | float      | ndarray(3) |         | 
+    +------------+------------+---------+
     """
 
+    nin = 2
+    nout = 1
+
     def __init__(self, *inputs, x0=None, L=1, vlim=1, slim=1, **kwargs):
-        """
+        r"""
+        Create a vehicle model with Bicycle kinematics.
+
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
-        :param x0: Inital state, defaults to 0
+        :param x0: Inital state, defaults to None
         :type x0: array_like, optional
         :param L: Wheelbase, defaults to 1
         :type L: float, optional
@@ -43,31 +48,26 @@ class Bicycle(TransferBlock):
         :param ``**kwargs``: common Block options
         :return: a BICYCLE block
         :rtype: Bicycle instance
-        
-        Create a vehicle model with Bicycle kinematics.
+
         
         Bicycle kinematic model with state :math:`[x, y, \theta]`.  
         
-        The block has two input ports:
+        **Block ports**
             
-            1. Vehicle speed (metres/sec).  The velocity limit ``vlim`` is
-               applied to the magnitude of this input.
-            2. Steering wheel angle (radians).  The steering limit ``slim``
-               is applied to the magnitude of this input.
+            :input v: Vehicle speed (metres/sec).  The velocity limit ``vlim`` is
+                applied to the magnitude of this input.
+            :input γ: Steering wheel angle (radians).  The steering limit ``slim``
+                is applied to the magnitude of this input.
             
-        and three output ports:
-            
-            1. x position in the world frame (metres)
-            2. y positon in the world frame (metres)
-            3. heading angle with respect to the world frame (radians)
+            :output q: configuration (x, y, θ)
 
+        :seealso: :class:`Unicycle` :class:`DiffSteer`
         """
-        super().__init__(nin=2, nout=3, inputs=inputs, **kwargs)
+        super().__init__(inputs=inputs, **kwargs)
 
         self.nstates = 3
         self.vlim = vlim
         self.slim = slim
-        self.type = 'bicycle'
 
         self.L = L
         if x0 is None:
@@ -81,7 +81,7 @@ class Bicycle(TransferBlock):
         self.state_names(('x', 'y', r'$\theta$'))
         
     def output(self, t):
-        return list(self._x)
+        return [self._x]  # one output which is ndarray(3)
     
     def deriv(self):
         theta = self._x[2]
@@ -96,7 +96,6 @@ class Bicycle(TransferBlock):
         return xd
     
 # ------------------------------------------------------------------------ #
-@block
 class Unicycle(TransferBlock):
     """
     :blockname:`UNICYCLE`
@@ -104,46 +103,47 @@ class Unicycle(TransferBlock):
     .. table::
        :align: left
     
-       +------------+---------+---------+
-       | inputs     | outputs |  states |
-       +------------+---------+---------+
-       | 2          | 3       | 3       |
-       +------------+---------+---------+
-       | float      | float   |         | 
-       +------------+---------+---------+
+    +------------+---------+---------+
+    | inputs     | outputs |  states |
+    +------------+---------+---------+
+    | 2          | 3       | 3       |
+    +------------+---------+---------+
+    | float      | float   |         | 
+    +------------+---------+---------+
     """
+    nin = 2
+    nout = 1
 
     def __init__(self, *inputs, x0=None, **kwargs):
         r"""
+        Create a vehicle model with Unicycle kinematics.
+
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
-        :param x0: Inital state, defaults to 0
+        :param x0: Inital state, defaults to None
         :type x0: array_like, optional
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
         :param ``**kwargs``: common Block options
         :return: a UNICYCLE block
         :rtype: Unicycle instance
-        
-        Create a vehicle model with Unicycle kinematics.
+
 
         Unicycle kinematic model with state :math:`[x, y, \theta]`.
-        
-        The block has two input ports:
             
-            1. Vehicle speed (metres/sec).
-            2. Angular velocity (radians/sec).
+        **Block ports**
             
-        and three output ports:
+            :input v: Vehicle speed (metres/sec).  The velocity limit ``vlim`` is
+                applied to the magnitude of this input.
+            :input ω: Angular velocity (radians/sec).  The steering limit ``slim``
+                is applied to the magnitude of this input.
             
-            1. x position in the world frame (metres)
-            2. y positon in the world frame (metres)
-            3. heading angle with respect to the world frame (radians)
+            :output q: configuration (x, y, θ)
 
+        :seealso: :class:`Bicycle` :class:`DiffSteer`
         """        
-        super().__init__(nin=2, nout=3, inputs=inputs, **kwargs)
+        super().__init__(inputs=inputs, **kwargs)
         self.nstates = 3
-        self.type = 'unicycle'
         
         if x0 is None:
             self._x0 = np.zeros((slef.nstates,))
@@ -152,7 +152,7 @@ class Unicycle(TransferBlock):
             self._x0 = x0
         
     def output(self, t):
-        return list(self._x)
+        return self._x
     
     def deriv(self):
         theta = self._x[2]
@@ -162,7 +162,6 @@ class Unicycle(TransferBlock):
         return xd
     
 # ------------------------------------------------------------------------ #
-@block
 class DiffSteer(TransferBlock):
     """
     :blockname:`DIFFSTEER`
@@ -170,49 +169,51 @@ class DiffSteer(TransferBlock):
     .. table::
        :align: left
     
-       +------------+---------+---------+
-       | inputs     | outputs |  states |
-       +------------+---------+---------+
-       | 2          | 3       | 3       |
-       +------------+---------+---------+
-       | float      | float   |         | 
-       +------------+---------+---------+
+    +------------+---------+---------+
+    | inputs     | outputs |  states |
+    +------------+---------+---------+
+    | 2          | 3       | 3       |
+    +------------+---------+---------+
+    | float      | float   |         | 
+    +------------+---------+---------+
     """
 
+    nin = 2
+    nout = 1
+
+    inlabels = ('ωL', 'ωR')
+    outlabels = ('q',)
+
     def __init__(self, *inputs, R=1, W=1, x0=None, **kwargs):
-        r"""
+        """
+        Create a differential steer vehicle model
+
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
-        :param x0: Inital state, defaults to 0
+        :param x0: Inital state, defaults to None
         :type x0: array_like, optional
         :param R: Wheel radius, defaults to 1
         :type R: float, optional
         :param W: Wheel separation in lateral direction, defaults to 1
-        :type R: float, optional
+        :type W: float, optional
         :param ``**kwargs``: common Block options
         :return: a DIFFSTEER block
         :rtype: DifSteer instance
         
-        Create a differential steer vehicle model with Unicycle kinematics, with inputs
-        given as wheel angular velocity.
-        
-        Unicycle kinematic model with state :math:`[x, y, \theta]`.
+        Unicycle kinematic model with state :math:`[x, y, \theta]`, with
+        with inputs given as wheel angular velocity.
 
-        The block has two input ports:
-            
-            1. Left-wheel angular velocity (radians/sec).
-            2. Right-wheel angular velocity (radians/sec).
-            
-        and three output ports:
-            
-            1. x position in the world frame (metres)
-            2. y positon in the world frame (metres)
-            3. heading angle with respect to the world frame (radians)
+        **Block ports**
 
-        Note:
+            :input ωL: Left-wheel angular velocity (radians/sec).
+            :input ωR: Right-wheel angular velocity (radians/sec).
+              
+            :output q: configuration (x, y, θ)
 
-            - wheel velocity is defined such that if both are positive the vehicle
+        .. note:: Wheel velocity is defined such that if both are positive the vehicle
               moves forward.
+
+        :seealso: :class:`Bicycle` :class:`Unicycle`
         """
         super().__init__(nin=2, nout=3, inputs=inputs, **kwargs)
         self.nstates = 3
@@ -227,7 +228,7 @@ class DiffSteer(TransferBlock):
             self._x0 = x0
         
     def output(self, t):
-        return list(self._x)
+        return self._x
     
     def deriv(self):
         theta = self._x[2]
@@ -239,7 +240,6 @@ class DiffSteer(TransferBlock):
     
 # ------------------------------------------------------------------------ #
 
-@block
 class VehiclePlot(GraphicsBlock):
     """
     :blockname:`VEHICLEPLOT`
@@ -247,26 +247,33 @@ class VehiclePlot(GraphicsBlock):
     .. table::
        :align: left
     
-       +--------+---------+---------+
-       | inputs | outputs |  states |
-       +--------+---------+---------+
-       | 3      | 0       | 0       |
-       +--------+---------+---------+
-       | float  |         |         | 
-       +--------+---------+---------+
+    +--------+---------+---------+
+    | inputs | outputs |  states |
+    +--------+---------+---------+
+    | 3      | 0       | 0       |
+    +--------+---------+---------+
+    | float  |         |         | 
+    +--------+---------+---------+
     """
-    
+
+    nin = 1
+    nout = 0
+
+    inlabels = ('q',)
+
     # TODO add ability to render an image instead of an outline
     
     def __init__(self, *inputs, path=True, pathstyle=None, shape='triangle', color="blue", fill="white", size=1, scale='auto', labels=['X', 'Y'], square=True, init=None, **kwargs):
         """
+        Create a vehicle animation
+
         :param ``*inputs``: Optional incoming connections
         :type ``*inputs``: Block or Plug
         :param path: plot path taken by vehicle, defaults to True
         :type path: bool, optional
         :param pathstyle: linestyle for path, defaults to None
         :type pathstyle: str or dict, optional
-        :param shape: vehicle shape: 'triangle' (default) or 'box'
+        :param shape: vehicle shape, one of: 'triangle' [default], 'box'
         :type shape: str, optional
         :param color: vehicle outline color, defaults to "blue"
         :type color: str, optional
@@ -275,9 +282,9 @@ class VehiclePlot(GraphicsBlock):
         :param size: length of vehicle, defaults to 1
         :type size: float, optional
         :param scale: x- and y-axis scale, defaults to 'auto'
-        :type scale: 2- or 4-element sequence
-        :param labels: axis labels (xlabel, ylabel)
-        :type labels: 2-element tuple or list
+        :type scale: array_like(2) or array_like(4), optional
+        :param labels: axis labels (xlabel, ylabel), defaults to ["X","Y"]
+        :type labels: array_like(2) or list
         :param square: Set aspect ratio to 1, defaults to True
         :type square: bool, optional
         :param init: initialize graphics, defaults to None
@@ -286,8 +293,11 @@ class VehiclePlot(GraphicsBlock):
         :return: A VEHICLEPLOT block
         :rtype: VehiclePlot instance
 
-
         Create a vehicle animation similar to the figure below.
+
+        **Block ports**
+
+            :input qL: configuration (x, y, θ)
         
         Notes:
             
@@ -309,7 +319,7 @@ class VehiclePlot(GraphicsBlock):
         super().__init__(nin=3, inputs=inputs, **kwargs)
         self.xdata = []
         self.ydata = []
-        self.type = 'vehicle'
+        self.type = 'vehicleplot'
         if init is not None:
             assert callable(init), 'graphics init function must be callable'
         self.init = init
@@ -343,61 +353,63 @@ class VehiclePlot(GraphicsBlock):
         self.vertices = np.array(vertices)
 
         
-    def start(self, **kwargs):
+    def start(self, state=None, **kwargs):
         # create the plot
         super().reset()
-        if self.bd.options.graphics:
-            self.fig = self.create_figure()
+        try:
+            print('graphics start')
+            self.fig = self.create_figure(state)
+            print('fig created')
             self.ax = self.fig.gca()
-            if self.square:
-                self.ax.set_aspect('equal')
+            print('axes')
+        except:
+            print('aaargh')
+        if self.square:
+            self.ax.set_aspect('equal')
+        print('done')
 
-            args = []
-            kwargs = {}
-            if self.path:
-                style = self.pathstyle
-                if isinstance(style, dict):
-                    kwargs = style
-                elif isinstance(style, str):
-                    args = [style]
-                self.line, = self.ax.plot(self.xdata, self.ydata, *args, **kwargs)
-            poly = Polygon(self.vertices, closed=True, edgecolor=self.color, facecolor=self.fill)
-            self.vehicle = self.ax.add_patch(poly)
+        args = []
+        kwargs = {}
+        if self.path:
+            style = self.pathstyle
+            if isinstance(style, dict):
+                kwargs = style
+            elif isinstance(style, str):
+                args = [style]
+            self.line, = self.ax.plot(self.xdata, self.ydata, *args, **kwargs)
+        poly = Polygon(self.vertices, closed=True, edgecolor=self.color, facecolor=self.fill)
+        self.vehicle = self.ax.add_patch(poly)
 
-            self.ax.grid(True)
-            self.ax.set_xlabel(self.labels[0])
-            self.ax.set_ylabel(self.labels[1])
-            self.ax.set_title(self.name)
-            if self.scale != 'auto':
-                self.ax.set_xlim(*self.scale[0:2])
-                self.ax.set_ylim(*self.scale[2:4])
-            if self.init is not None:
-                self.init(self.ax)
-                
-            plt.draw()
-            plt.show(block=False)
+        self.ax.grid(True)
+        self.ax.set_xlabel(self.labels[0])
+        self.ax.set_ylabel(self.labels[1])
+        self.ax.set_title(self.name)
+        if self.scale != 'auto':
+            self.ax.set_xlim(*self.scale[0:2])
+            self.ax.set_ylim(*self.scale[2:4])
+        if self.init is not None:
+            self.init(self.ax)
+            
+        plt.draw()
+        plt.show(block=False)
 
-            super().start()
+        super().start()
         
-    def step(self):
+    def step(self, state=None, **kwargs):
         # inputs are set
-        if self.bd.options.graphics:
-            self.xdata.append(self.inputs[0])
-            self.ydata.append(self.inputs[1])
-            #plt.figure(self.fig.number)
-            if self.path:
-                self.line.set_data(self.xdata, self.ydata)
-            T = base.transl2(self.inputs[0], self.inputs[1]) @ base.trot2(self.inputs[2])
-            new = base.h2e(T @ self.vertices_hom)
-            self.vehicle.set_xy(new.T)
-        
-            if self.bd.options.animation:
-                self.fig.canvas.flush_events()
-        
-            if self.scale == 'auto':
-                self.ax.relim()
-                self.ax.autoscale_view()
-            super().step()
+        self.xdata.append(self.inputs[0])
+        self.ydata.append(self.inputs[1])
+        #plt.figure(self.fig.number)
+        if self.path:
+            self.line.set_data(self.xdata, self.ydata)
+        T = base.transl2(self.inputs[0], self.inputs[1]) @ base.trot2(self.inputs[2])
+        new = base.h2e(T @ self.vertices_hom)
+        self.vehicle.set_xy(new.T)
+    
+        if self.scale == 'auto':
+            self.ax.relim()
+            self.ax.autoscale_view()
+        super().step(state=state)
         
     def done(self, block=False, **kwargs):
         if self.bd.options.graphics:

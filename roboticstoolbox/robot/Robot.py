@@ -25,6 +25,7 @@ try:
 except ImportError:  # pragma nocover
     pass
 
+_default_backend = None
 
 # TODO maybe this needs to be abstract
 # ikine functions need: fkine, jacobe, qlim methods from subclass
@@ -350,6 +351,33 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             raise ValueError("some joint limits not defined")
         return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
 
+    @property
+    def default_backend(self):
+        """
+        Get default graphical backend
+
+        :return: backend name
+        :rtype: str
+
+        Get the default graphical backend, used when no explicit backend is
+        passed to ``Robot.plot``.
+        """
+        return _default_backend
+
+    @default_backend.setter
+    def default_backend(self, be):
+        """
+        Set default graphical backend
+
+        :param be: backend name
+        :type be: str
+
+        Set the default graphical backend, used when no explicit backend is
+        passed to ``Robot.plot``.  The default set here will be overridden if
+        the particular ``Robot`` subclass cannot support it.
+        """
+        _default_backend = be
+
     def addconfiguration(self, name, q, unit="rad"):
         """
         Add a named joint configuration (Robot superclass)
@@ -381,9 +409,13 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         def angle(theta, fmt=None):
 
             if fmt is not None:
-                return fmt.format(theta * deg) + "\u00b0"
-            else:  # pragma nocover
-                return str(theta * deg) + "\u00b0"
+                try:
+                    return fmt.format(theta * deg) + "\u00b0"
+                except TypeError:
+                    pass
+
+            # pragma nocover
+            return str(theta * deg) + "\u00b0"
 
         # show named configurations
         if len(self._configdict) > 0:
@@ -910,6 +942,8 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         else:
             verifymatrix(J, (6, self.n))
 
+        n = J.shape[1]
+
         if H is None:
             H = self.hessian0(J0=J, start=start, end=end)
         else:
@@ -921,9 +955,9 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         H = H[axes, :, :]
 
         b = np.linalg.inv(J @ np.transpose(J))
-        Jm = np.zeros((self.n, 1))
+        Jm = np.zeros((n, 1))
 
-        for i in range(self.n):
+        for i in range(n):
             c = J @ np.transpose(H[:, :, i])
             Jm[i, 0] = manipulability * np.transpose(c.flatten("F")) @ b.flatten("F")
 
@@ -1217,7 +1251,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     # TODO probably should be a static method
     def _get_graphical_backend(self, backend=None):
 
-        default = None
+        default = self.default_backend
 
         # figure out the right default
         if backend is None:
@@ -1225,8 +1259,11 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                 default = "pyplot"
             elif isinstance(self, rtb.ERobot2):
                 default = "pyplot2"
-            else:
-                default = "swift"
+            elif isinstance(self, rtb.ERobot):
+                if self.hasgeometry:
+                    default = "swift"
+                else:
+                    default = "pyplot"
 
         if backend is not None:
             backend = backend.lower()
@@ -1266,7 +1303,6 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                 if backend == "vpython":
                     print("VPython is not installed, " "install it using pip or conda")
                 backend = "pyplot"
-
         if backend is None:
             backend = default
 

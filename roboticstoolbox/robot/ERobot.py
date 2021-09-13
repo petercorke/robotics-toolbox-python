@@ -19,7 +19,7 @@ from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
-from roboticstoolbox.tools.data import path_to_datafile
+from roboticstoolbox.tools.data import rtb_path_to_datafile
 
 from pathlib import PurePosixPath
 from ansitable import ANSITable, Column
@@ -895,20 +895,19 @@ graph [rankdir=LR];
         tool = None
         if end is None:
 
-            # if we have a gripper, use it
-            if len(self.grippers) == 1:
+            if len(self.grippers) > 0:
                 end = self.grippers[0].links[0]
                 tool = self.grippers[0].tool
-            elif len(self.grippers) > 1:
-                # if more than one gripper, user must choose
-                raise ValueError("Must specify which gripper")
+                if len(self.grippers) > 1:
+                    # Warn user: more than one gripper
+                    print("More than one gripper present, using robot.grippers[0]")
 
             # no grippers, use ee link if just one
-            elif len(self.ee_links) == 1:
+            elif len(self.ee_links) > 0:
                 end = self.ee_links[0]
-            else:
-                # if more than one EE, user must choose
-                raise ValueError("Must specify which end-effector")
+                if len(self.ee_links) > 1:
+                    # Warn user: more than one EE
+                    print("More than one end-effector present, using robot.ee_links[0]")
 
             # Cache result
             self._cache_end = end
@@ -976,7 +975,10 @@ graph [rankdir=LR];
 
 
 class ERobot(BaseERobot):
-    def __init__(self, arg, **kwargs):
+    def __init__(self, arg, urdf_string=None, urdf_filepath=None, **kwargs):
+
+        self._urdf_string = urdf_string
+        self._urdf_filepath = urdf_filepath
 
         if isinstance(arg, DHRobot):
             # we're passed a DHRobot object
@@ -1003,8 +1005,19 @@ class ERobot(BaseERobot):
             links = arg
 
         elif isinstance(arg, ERobot):
-            # we're passed an ERobot, clone it
-            links = [link.copy() for link in arg]
+            # We're passed an ERobot, clone it
+            # We need to preserve the parent link as we copy
+            links = []
+
+            def dfs(node, node_copy):
+                for child in node.children:
+                    child_copy = child.copy(node_copy)
+                    links.append(child_copy)
+                    dfs(child, child_copy)
+
+            link0 = arg.links[0]
+            links.append(arg.links[0].copy())
+            dfs(link0, links[0])
 
         else:
             raise TypeError("constructor argument must be ETS or list of ELink")
@@ -1028,7 +1041,7 @@ class ERobot(BaseERobot):
         If ``gripper`` is specified, links from that link outward are removed
         from the rigid-body tree and folded into a ``Gripper`` object.
         """
-        links, name = ERobot.URDF_read(file_path)
+        links, name, _, _ = ERobot.URDF_read(file_path)
 
         if gripper is not None:
             if isinstance(gripper, int):
@@ -1043,9 +1056,23 @@ class ERobot(BaseERobot):
             else:
                 raise TypeError("bad argument passed as gripper")
 
-        links, name = ERobot.URDF_read(file_path)
+        links, name, urdf_string, urdf_filepath = ERobot.URDF_read(file_path)
 
-        return cls(links, name=name, gripper_links=gripper)
+        return cls(
+            links,
+            name=name,
+            gripper_links=gripper,
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
+        )
+
+    @property
+    def urdf_string(self):
+        return self._urdf_string
+
+    @property
+    def urdf_filepath(self):
+        return self._urdf_filepath
 
     # --------------------------------------------------------------------- #
 
@@ -1090,7 +1117,7 @@ class ERobot(BaseERobot):
     #     path.reverse()
     #     return path
 
-    def _to_dict(self, show_robot=True, show_collision=False):
+    def _to_dict(self, robot_alpha=1.0, collision_alpha=0.0):
 
         self._set_link_fk(self.q)
 
@@ -1098,46 +1125,50 @@ class ERobot(BaseERobot):
 
         for link in self.links:
 
-            if show_robot:
+            if robot_alpha > 0:
                 for gi in link.geometry:
+                    gi.set_alpha(robot_alpha)
                     ob.append(gi.to_dict())
-            if show_collision:
+            if collision_alpha > 0:
                 for gi in link.collision:
+                    gi.set_alpha(collision_alpha)
                     ob.append(gi.to_dict())
 
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
 
-                if show_robot:
+                if robot_alpha > 0:
                     for gi in link.geometry:
+                        gi.set_alpha(robot_alpha)
                         ob.append(gi.to_dict())
-                if show_collision:
+                if collision_alpha > 0:
                     for gi in link.collision:
+                        gi.set_alpha(collision_alpha)
                         ob.append(gi.to_dict())
 
         return ob
 
-    def _fk_dict(self, show_robot=True, show_collision=False):
+    def _fk_dict(self, robot_alpha=1.0, collision_alpha=0.0):
         ob = []
 
         # Do the robot
         for link in self.links:
 
-            if show_robot:
+            if robot_alpha > 0:
                 for gi in link.geometry:
                     ob.append(gi.fk_dict())
-            if show_collision:
+            if collision_alpha > 0:
                 for gi in link.collision:
                     ob.append(gi.fk_dict())
 
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
-                if show_robot:
+                if robot_alpha > 0:
                     for gi in link.geometry:
                         ob.append(gi.fk_dict())
-                if show_collision:
+                if collision_alpha > 0:
                     for gi in link.collision:
                         ob.append(gi.fk_dict())
 
@@ -1195,7 +1226,7 @@ class ERobot(BaseERobot):
         """
 
         # get the path to the class that defines the robot
-        base_path = path_to_datafile("xacro")
+        base_path = rtb_path_to_datafile("xacro")
         # print("*** urdf_to_ets_args: ", classpath)
         # add on relative path to get to the URDF or xacro file
         # base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
@@ -1213,9 +1244,10 @@ class ERobot(BaseERobot):
                 print("error parsing URDF file", file_path)
                 raise e
         else:  # pragma nocover
-            urdf = URDF.loadstr(open(file_path).read(), file_path)
+            urdf_string = open(file_path).read()
+            urdf = URDF.loadstr(urdf_string, file_path)
 
-        return urdf.elinks, urdf.name
+        return urdf.elinks, urdf.name, urdf_string, file_path
 
     # --------------------------------------------------------------------- #
 
@@ -1261,6 +1293,9 @@ class ERobot(BaseERobot):
               Sequence, J. Haviland and P. Corke
         """
 
+        if start is not None:
+            include_base = False
+
         # Use c extension to calculate fkine
         if fast:
             path, _, etool = self.get_path(end, start, _fknm=True)
@@ -1272,10 +1307,10 @@ class ERobot(BaseERobot):
             T = np.empty((4, 4))
             fknm.fkine(m, path, q, etool, tool, T)
 
-            if not include_base:
-                return T
-            else:
+            if self._base is not None and start is None and include_base == True:
                 return self.base.A @ T
+            else:
+                return T
 
         # Otherwise use Python method
         # we work with NumPy arrays not SE2/3 classes for speed
@@ -1326,7 +1361,11 @@ class ERobot(BaseERobot):
                     break
 
             # add base transform if it is set
-            if self._base is not None and start == self.base_link:
+            if (
+                self._base is not None
+                and start == self.base_link
+                and include_base == True
+            ):
                 Tk = self.base.A @ Tk
 
             # cast to pose class and append

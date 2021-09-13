@@ -127,7 +127,6 @@ class Link(ABC):
         self.mesh = mesh
 
         # Link dynamic Parameters
-
         def dynpar(self, name, value, default):
             if value is None:
                 value = default
@@ -167,8 +166,17 @@ class Link(ABC):
         """
         new = copy.copy(self)
         for k, v in self.__dict__.items():
+            # print(k)
             if k.startswith("_") and isinstance(v, np.ndarray):
                 setattr(new, k, np.copy(v))
+
+        # if isinstance(self, rtb.ELink):
+        #     new._geometry = [shape.copy() for shape in self._geometry]
+        #     new._collision = [shape.copy() for shape in self._collision]
+
+        # print(new._geometry[0]._wT)
+        # print(self._geometry[0]._wT)
+
         return new
 
     def _copy(self):
@@ -282,13 +290,20 @@ class Link(ABC):
 
         return dyn
 
-    def _format(self, l, name, ignorevalue=0, indices=None):  # noqa  # pragma nocover
+    def _format(
+        self, l, name, symbol=None, ignorevalue=None, indices=None
+    ):  # noqa  # pragma nocover
+        # if value == ignorevalue then don't display it
+
         v = getattr(self, name)
         s = None
         if v is None:
             return
         if isscalar(v) and v != ignorevalue:
-            s = f"{name}={v:.3g}"
+            if symbol is not None:
+                s = f"{symbol}={v:.3g}"
+            else:
+                s = f"{name}={v:.3g}"
         elif isinstance(v, np.ndarray):
             if np.linalg.norm(v, ord=np.inf) > 0:
                 if indices is not None:
@@ -301,7 +316,7 @@ class Link(ABC):
     def _params(self):  # pragma nocover
         l = []  # noqa
         self._format(l, "name")
-        self._format(l, "flip", False)
+        self._format(l, "flip", ignorevalue=False)
         self._format(l, "qlim")
         self._format(l, "m")
         self._format(l, "r")

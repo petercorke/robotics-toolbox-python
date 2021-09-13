@@ -9,6 +9,47 @@ from spatialmath import base
 import matplotlib.pyplot as plt
 
 
+class ShapePlot():
+
+    def __init__(self, shape, wireframe=True, **kwargs):
+
+        self.shape = shape  # reference to the spatialgeom shape
+        self.wireframe = wireframe
+        self.args = kwargs
+        self.mpl = None
+
+    def plot(self):
+        if ax is None:
+            ax = self.ax
+
+        if ax is None:
+            fig = plt.figure()
+            ax = plt.axes(projection="3d")
+            self.ax = ax
+
+        self.draw()
+
+    def draw(self, ax=None):
+        # TODO only remove and redraw if base has changed
+        if self.mpl is not None:
+            self.mpl.remove()
+
+        if self.shape.stype == 'box':
+            # scale
+            self.mpl = base.plot_cuboid(sides=self.shape.scale, 
+                pose=self.shape.base, ax=ax)
+
+        elif self.shape.stype == 'sphere':
+            print(self.shape.base.t)
+            self.mpl = base.plot_sphere(self.shape.radius, pose=self.shape.base, ax=ax)
+
+        elif self.shape.stype == 'cylinder':
+            # radius, length
+            pass
+
+    def make(self):
+        pass
+
 class EllipsePlot:
     def __init__(self, robot, q, etype, opt="trans", centre=[0, 0, 0], scale=1):
 

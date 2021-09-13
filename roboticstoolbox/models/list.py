@@ -6,7 +6,7 @@ from ansitable import ANSITable, Column
 # import importlib
 
 
-def list(keywords=None, dof=None, mtype=None):
+def list(keywords=None, dof=None, mtype=None, border=None):
     """
     Display all robot models in summary form
 
@@ -38,7 +38,7 @@ def list(keywords=None, dof=None, mtype=None):
     # module = importlib.import_module(
     #   '.' + os.path.splitext(file)[0], package='bdsim.blocks')
 
-    def make_table(border):
+    def make_table(border=None):
         table = ANSITable(
             Column("class", headalign="^", colalign="<"),
             Column("name", headalign="^", colalign="<"),
@@ -100,11 +100,11 @@ def list(keywords=None, dof=None, mtype=None):
 
         table.print()
 
-    # make_table(border='')
+    make_table(border=border)
 
 
 if __name__ == "__main__":  # pragma nocover
-    list()
-    list(keywords=("dynamics",))
+    list(border='ascii')
+    list(keywords=("dynamics",), border='thin')
     list(dof=6)
     list(keywords=("dynamics",), dof=6)

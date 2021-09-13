@@ -59,10 +59,14 @@ class BaseELink(Link):
                 parent = f" [{self.parent.name}]"
             return f"{name}[{self.name}({parent}): {self.ets()}] "
 
-    def copy(self):
+    def copy(self, parent=None):
         new = super().copy()
+
+        new._geometry = [shape.copy() for shape in self._geometry]
+        new._collision = [shape.copy() for shape in self._collision]
+
         # invalidate references to parent, child
-        new._parent = None
+        new._parent = parent
         new._children = []
         return new
 
@@ -397,6 +401,11 @@ class ELink(BaseELink):
         self._fk = np.eye(4)
 
         self._init_fknm()
+
+    def copy(self, parent=None):
+        new = super().copy(parent)
+        new._init_fknm()
+        return new
 
     def _get_fknm(self):
         isflip = False

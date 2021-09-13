@@ -8,8 +8,9 @@ import numpy as np
 from roboticstoolbox.backends.Connector import Connector
 
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
-from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
+from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
 from spatialmath.base.argcheck import getvector
+from spatialgeometry import Shape
 # from roboticstoolbox.tools import Ticker
 
 _mpl = False
@@ -65,6 +66,7 @@ class PyPlot(Connector):
         super(PyPlot, self).__init__()
         self.robots = []
         self.ellipses = []
+        self.shapes = []
 
         if not _mpl:    # pragma nocover
             raise ImportError(
@@ -109,6 +111,7 @@ class PyPlot(Connector):
         self.ax = self.fig.add_subplot(
             111, projection='3d', proj_type=projection)
         self.ax.set_facecolor('white')
+        self.ax.figure.canvas.set_window_title(f"Robotics Toolbox for Python (Figure {self.ax.figure.number})")
 
         self.ax.set_xbound(-0.5, 0.5)
         self.ax.set_ybound(-0.5, 0.5)
@@ -169,12 +172,36 @@ class PyPlot(Connector):
 
         super().step()
 
-        self._step_robots(dt)
+        # update the robot's state
+        for rpl in self.robots:
+            robot = rpl.robot
+
+            if rpl.readonly or robot.control_type == 'p':
+                pass            # pragma: no cover
+            elif robot.control_type == 'v':
+                for i in range(robot.n):
+                    robot.q[i] += robot.qd[i] * (dt)
+            elif robot.control_type == 'a':     # pragma: no cover
+                pass
+            else:            # pragma: no cover
+                raise ValueError(
+                    'Invalid robot.control_type. '
+                    'Must be one of \'p\', \'v\', or \'a\'')
 
         # plt.ioff()
 
-        self._draw_ellipses()
-        self._draw_robots()
+        # update all ellipses
+        for ellipse in self.ellipses:
+            ellipse.draw()
+
+        # update all shapes
+        for shape in self.shapes:
+            shape.draw()
+
+        # update all robots
+        for robot in self.robots:
+            robot.draw()
+
         self._set_axes_equal()
 
         # update time and display it on plot
@@ -191,8 +218,6 @@ class PyPlot(Connector):
         else:
             plt.draw()
             plt.pause(dt)
-
-        self._update_robots()
 
     def reset(self):
         """
@@ -284,18 +309,24 @@ class PyPlot(Connector):
         elif isinstance(ob, EllipsePlot):
             ob.ax = self.ax
             self.ellipses.append(ob)
-            self.ellipses[len(self.ellipses) - 1].draw()
+            self.ellipses[-1].draw()
             id = len(self.ellipses)
 
-        plt.draw()
+        elif isinstance(ob, Shape):
+            # recreate the shape using matplotlib
+            self.shapes.append(ShapePlot(ob))
+            self.shapes[-1].draw(ax=self.ax)
+            id = len(self.shapes)
+
+        plt.draw()  # matplotlib refresh
         plt.show(block=False)
 
         self._set_axes_equal()
         return id
 
-    def remove(self):
+    def remove(self, id):
         """
-        Remove a robot to the graphical scene
+        Remove a robot or shape from the graphical scene
 
         :param id: The id of the robot to remove. Can be either the DHLink or
             GraphicalRobot
@@ -361,40 +392,7 @@ class PyPlot(Connector):
     #  Private methods
     #
 
-    def _step_robots(self, dt):
 
-        for rpl in self.robots:
-            robot = rpl.robot
-
-            if rpl.readonly or robot.control_type == 'p':
-                pass            # pragma: no cover
-
-            elif robot.control_type == 'v':
-
-                for i in range(robot.n):
-                    robot.q[i] += robot.qd[i] * (dt)
-
-            elif robot.control_type == 'a':     # pragma: no cover
-                pass
-
-            else:            # pragma: no cover
-                # Should be impossible to reach
-                raise ValueError(
-                    'Invalid robot.control_type. '
-                    'Must be one of \'p\', \'v\', or \'a\'')
-
-    def _update_robots(self):
-        pass
-
-    def _draw_robots(self):
-
-        for i in range(len(self.robots)):
-            self.robots[i].draw()
-
-    def _draw_ellipses(self):
-
-        for i in range(len(self.ellipses)):
-            self.ellipses[i].draw()
 
     # def _plot_handler(self, sig, frame):
     #     try:

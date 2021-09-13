@@ -13,7 +13,6 @@ import spatialmath as sm
 
 
 class TestELink(unittest.TestCase):
-
     def test_str_ets(self):
         rx = rp.ETS.rx(1.543)
         ry = rp.ETS.ry(1.543)
@@ -21,7 +20,7 @@ class TestELink(unittest.TestCase):
 
         l0 = rp.ELink(rx * ry * tz)
 
-        ans = 'ELink[Rx(88.41°) ⊕ Ry(88.41°) ⊕ tz(1)] '
+        ans = "ELink[Rx(88.41°) ⊕ Ry(88.41°) ⊕ tz(1)] "
 
         self.assertEqual(str(l0), ans)
 
@@ -89,17 +88,9 @@ class TestELink(unittest.TestCase):
         l1 = rp.ELink(I=[0, 1, 2, 3, 4, 5])
         l2 = rp.ELink(I=np.eye(3))
 
-        I0 = np.array([
-            [1, 0, 0],
-            [0, 2, 0],
-            [0, 0, 3]
-        ])
+        I0 = np.array([[1, 0, 0], [0, 2, 0], [0, 0, 3]])
 
-        I1 = np.array([
-            [0, 3, 5],
-            [3, 1, 4],
-            [5, 4, 2]
-        ])
+        I1 = np.array([[0, 3, 5], [3, 1, 4], [5, 4, 2]])
 
         I2 = np.eye(3)
 
@@ -137,8 +128,8 @@ class TestELink(unittest.TestCase):
 
     def test_dyn(self):
         l0 = rp.ELink(
-            Tc=[0.4, -0.43], G=-62.61, qlim=[-2.79, 2.79],
-            I=np.diag([0, 0.35, 0]))
+            Tc=[0.4, -0.43], G=-62.61, qlim=[-2.79, 2.79], I=np.diag([0, 0.35, 0])
+        )
 
         s0 = l0.dyn()
 
@@ -153,7 +144,8 @@ Jm    =         0
 B     =         0 
 Tc    =       0.4(+)    -0.43(-) 
 G     =       -63 
-qlim  =      -2.8 to      2.8""")
+qlim  =      -2.8 to      2.8""",
+        )
 
     def test_properties(self):
         l0 = rp.ELink()
@@ -190,7 +182,7 @@ qlim  =      -2.8 to      2.8""")
 
     def test_collision_fail(self):
         l0 = rp.ELink()
-        col = gm.Box([1, 1, 1])
+        col = gm.Cuboid([1, 1, 1])
         l0.collision = col
 
         with self.assertRaises(TypeError):
@@ -201,7 +193,7 @@ qlim  =      -2.8 to      2.8""")
 
     def test_geometry_fail(self):
         l0 = rp.ELink()
-        col = gm.Box([1, 1, 1])
+        col = gm.Cuboid([1, 1, 1])
         l0.geometry = col
         l0.geometry = [col, col]
 
@@ -212,8 +204,8 @@ qlim  =      -2.8 to      2.8""")
             l0.geometry = 1
 
     def test_dist(self):
-        s0 = gm.Box([1, 1, 1], base=sm.SE3(0, 0, 0))
-        s1 = gm.Box([1, 1, 1], base=sm.SE3(3, 0, 0))
+        s0 = gm.Cuboid([1, 1, 1], base=sm.SE3(0, 0, 0))
+        s1 = gm.Cuboid([1, 1, 1], base=sm.SE3(3, 0, 0))
         p = rp.models.Panda()
         link = p.links[3]
 
@@ -226,8 +218,8 @@ qlim  =      -2.8 to      2.8""")
         self.assertAlmostEqual(d2, None)
 
     def test_collided(self):
-        s0 = gm.Box([1, 1, 1], base=sm.SE3(0, 0, 0))
-        s1 = gm.Box([1, 1, 1], base=sm.SE3(3, 0, 0))
+        s0 = gm.Cuboid([1, 1, 1], base=sm.SE3(0, 0, 0))
+        s1 = gm.Cuboid([1, 1, 1], base=sm.SE3(3, 0, 0))
         p = rp.models.Panda()
         link = p.links[3]
         c0 = link.collided(s0)
@@ -237,6 +229,6 @@ qlim  =      -2.8 to      2.8""")
         self.assertFalse(c1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     unittest.main()

@@ -854,7 +854,8 @@ class DynamicsMixin:
         else:
             return taug
 
-    def inertia_x(self, q=None, pinv=False, analytical="rpy-xyz"):
+    def inertia_x(self, q=None, pinv=False, analytical="rpy-xyz", 
+            Ji=None):
         r"""
         Operational space inertia matrix
 
@@ -915,23 +916,34 @@ class DynamicsMixin:
         if q.shape[1] != 6:
             pinv = True
 
-        Mt = np.zeros((q.shape[0], 6, 6))
-
-        for k, qk in enumerate(q):
-            Ja = self.jacob0(qk, analytical=analytical)
-            if pinv:
-                Ji = np.linalg.pinv(Ja)
-            else:
-                Ji = np.linalg.inv(Ja)
-            M = self.inertia(qk)
-            Mt[k, :, :] = Ji.T @ M @ Ji
-
         if q.shape[0] == 1:
-            return Mt[0, :, :]
+            # single q case
+            if Ji is None:
+                Ja = self.jacob0(q[0, :], analytical=analytical)
+                if pinv:
+                    Ji = np.linalg.pinv(Ja)
+                else:
+                    Ji = np.linalg.inv(Ja)
+            M = self.inertia(q[0, :])
+            return Ji.T @ M @ Ji
+
         else:
+            # trajectory case
+            Mt = np.zeros((q.shape[0], 6, 6))
+
+            for k, qk in enumerate(q):
+                Ja = self.jacob0(qk, analytical=analytical)
+                if pinv:
+                    Ji = np.linalg.pinv(Ja)
+                else:
+                    Ji = np.linalg.inv(Ja)
+                M = self.inertia(qk)
+                Mt[k, :, :] = Ji.T @ M @ Ji
+
             return Mt
 
-    def coriolis_x(self, q, qd, pinv=False, analytical="rpy-xyz"):
+    def coriolis_x(self, q, qd, pinv=False, analytical="rpy-xyz",
+        J=None, Ji=None, Jd=None, C=None, Mx=None):
         r"""
         Operational space Coriolis and centripetal term
 
@@ -1005,30 +1017,45 @@ class DynamicsMixin:
         if n != 6:
             pinv = True
 
-        Ct = np.zeros((q.shape[0], 6, 6))
-
-        for k, (qk, qdk) in enumerate(zip(q, qd)):
-            J = self.jacob0(qk)
-            T = rot2jac(self.fkine(qk).A, representation=analytical)
-            Ja = T @ J
-
-            C = self.coriolis(qk, qdk)
-            Mx = self.inertia_x(qk)
-            Jd = self.jacob_dot(qk, qdk, J0=J)
-            # A = 1
-
-            if pinv:
-                Ji = np.linalg.pinv(Ja)
-            else:
-                Ji = np.linalg.inv(Ja)
-            Ct[k, :, :] = Ji.T @ (C - Mx @ Jd) @ Ji
-
         if q.shape[0] == 1:
-            return Ct[0, :, :]
+            # single q case
+            if Ji is None:
+                Ja = self.jacob0(q[0, :], analytical=analytical)
+                if pinv:
+                    Ji = np.linalg.pinv(Ja)
+                else:
+                    Ji = np.linalg.inv(Ja)
+            if C is None:
+                C = self.coriolis(q[0, :], qd[0, :])
+            if Mx is None:
+                Mx = self.inertia_x(q[0, :])
+            if Jd is None:
+                Jd = self.jacob_dot(q[0, :], qd[0, :], J0=Ja)
+            return Ji.T @ (C - Mx @ Jd) @ Ji
         else:
+            # trajectory case
+            Ct = np.zeros((q.shape[0], 6, 6))
+
+            for k, (qk, qdk) in enumerate(zip(q, qd)):
+                J = self.jacob0(qk)
+                T = rot2jac(self.fkine(qk).A, representation=analytical)
+                Ja = T @ J
+
+                C = self.coriolis(qk, qdk)
+                Mx = self.inertia_x(qk)
+                Jd = self.jacob_dot(qk, qdk, J0=J)
+                # A = 1
+
+                if pinv:
+                    Ji = np.linalg.pinv(Ja)
+                else:
+                    Ji = np.linalg.inv(Ja)
+                Ct[k, :, :] = Ji.T @ (C - Mx @ Jd) @ Ji
+
             return Ct
 
-    def gravload_x(self, q=None, gravity=None, pinv=False, analytical="rpy-xyz"):
+    def gravload_x(self, q=None, gravity=None, pinv=False, analytical="rpy-xyz",
+    Ji=None):
         """
         Operational space gravity load
 
@@ -1100,22 +1127,32 @@ class DynamicsMixin:
         # else:
         #     gravity = getvector(gravity, 3)
 
-        taug = np.zeros((q.shape[0], self.n))
-        # z = np.zeros(self.n)
-
-        for k, qk in enumerate(q):
-            Ja = self.jacob0(qk, analytical=analytical)
-            G = self.gravload(qk)
-            if pinv:
-                Ji = np.linalg.pinv(Ja)
-            else:
-                Ji = np.linalg.inv(Ja)
-
-            taug[k, :] = Ji.T @ G
-
         if q.shape[0] == 1:
-            return taug[0, :]
+            # single q case
+            if Ji is None:
+                Ja = self.jacob0(q[0, :], analytical=analytical)
+                if pinv:
+                    Ji = np.linalg.pinv(Ja)
+                else:
+                    Ji = np.linalg.inv(Ja)
+            G = self.gravload(q[0, :])
+            return Ji.T @ G
+
         else:
+            # trajectory case
+            taug = np.zeros((q.shape[0], self.n))
+            # z = np.zeros(self.n)
+
+            for k, qk in enumerate(q):
+                Ja = self.jacob0(qk, analytical=analytical)
+                G = self.gravload(qk)
+                if pinv:
+                    Ji = np.linalg.pinv(Ja)
+                else:
+                    Ji = np.linalg.inv(Ja)
+
+                taug[k, :] = Ji.T @ G
+
             return taug
 
     def accel_x(self, q, xd, wrench, gravity=None, pinv=False, analytical="rpy-xyz"):
