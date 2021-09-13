@@ -11,13 +11,13 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 req = [
     'numpy>=1.18.0',
-    'spatialmath-python>=0.9.6',
-    'spatialgeometry>=0.1.2',
+    'spatialmath-python>=0.11',
+    'spatialgeometry>=0.2.0',
     'pgraph-python',
     'scipy',
     'matplotlib',
     'ansitable',
-    'swift-sim>=0.9.5',
+    'swift-sim>=0.10.0',
     'qpsolvers',
     'rtb-data'
 ]
@@ -95,7 +95,7 @@ fknm = Extension(
 setup(
     name='roboticstoolbox-python',
 
-    version='0.10.1',
+    version='0.11.0',
 
     description='A Python library for robotic education and research',
 
