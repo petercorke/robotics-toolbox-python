@@ -892,20 +892,19 @@ graph [rankdir=LR];
         tool = None
         if end is None:
 
-            # if we have a gripper, use it
-            if len(self.grippers) == 1:
+            if len(self.grippers) > 0:
                 end = self.grippers[0].links[0]
                 tool = self.grippers[0].tool
-            elif len(self.grippers) > 1:
-                # if more than one gripper, user must choose
-                raise ValueError("Must specify which gripper")
+                if len(self.grippers) > 1:
+                    # Warn user: more than one gripper
+                    print("More than one gripper present, using robot.grippers[0]")
 
             # no grippers, use ee link if just one
-            elif len(self.ee_links) == 1:
+            elif len(self.ee_links) > 0:
                 end = self.ee_links[0]
-            else:
-                # if more than one EE, user must choose
-                raise ValueError("Must specify which end-effector")
+                if len(self.ee_links) > 1:
+                    # Warn user: more than one EE
+                    print("More than one end-effector present, using robot.ee_links[0]")
 
             # Cache result
             self._cache_end = end
