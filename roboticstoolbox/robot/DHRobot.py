@@ -1415,8 +1415,8 @@ class DHRobot(Robot):
 
             if self._base is not None:
                 Rb = t2r(self.base.A).T
-                w = Rb @ wd
-                wd = Rb @ wdd
+                w = Rb @ w
+                wd = Rb @ wd
                 vd = Rb @ gravity
 
             # ----------------  initialize some variables ----------------- #
