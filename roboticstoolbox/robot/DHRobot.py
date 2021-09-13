@@ -1465,7 +1465,7 @@ class DHRobot(Robot):
                         # revolute axis
                         w_ = Rt @ w + z0 * qd_k[j]
                         wd_ = Rt @ wd + z0 * qdd_k[j] + _cross(Rt @ w, z0 * qd_k[j])
-                        vd_ = Rt @ _cross(wd, pstar) + _cross(w, _cross(w, pstar)) + vd
+                        vd_ = Rt @ (_cross(wd, pstar) + _cross(w, _cross(w, pstar)) + vd)
                     else:
                         # prismatic axis
                         w_ = Rt @ w
