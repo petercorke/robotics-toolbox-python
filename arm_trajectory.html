@@ -1,80 +1,39 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Trajectories &mdash; Robotics Toolbox for Python  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Mobile robots" href="mobile.html" />
     <link rel="prev" title="Swift" href="arm_backend_swift.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> Robotics Toolbox for Python
-          
-
-          
-            
             <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -82,18 +41,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="arm.html">Manipulator arms</a><ul class="current">
@@ -106,92 +54,44 @@
 <li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Robotics Toolbox for Python</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content style-external-links">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="arm.html">Manipulator arms</a> &raquo;</li>
-        
       <li>Trajectories</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/arm_trajectory.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
-  </ul>
-
-  
-  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
-      
-        <a href="mobile.html" class="btn btn-neutral float-right" title="Mobile robots" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-      
-      
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
         <a href="arm_backend_swift.html" class="btn btn-neutral float-left" title="Swift" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-      
+        <a href="mobile.html" class="btn btn-neutral float-right" title="Mobile robots" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
   </div>
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="module-roboticstoolbox.tools.trajectory">
-<span id="trajectories"></span><h1>Trajectories<a class="headerlink" href="#module-roboticstoolbox.tools.trajectory" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="module-roboticstoolbox.tools.trajectory">
+<span id="trajectories"></span><h1>Trajectories<a class="headerlink" href="#module-roboticstoolbox.tools.trajectory" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">Trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">istime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">Trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">istime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A container class for trajectory data.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">istime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">istime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Construct a new trajectory instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -224,19 +124,19 @@ with respect to <code class="docutils literal notranslate"><span class="pre">t</
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.__str__">
-<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__str__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__str__" title="Permalink to this definition"></a></dt>
 <dd><p>Return str(self).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__repr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__repr__" title="Permalink to this definition"></a></dt>
 <dd><p>Return repr(self).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.__len__">
-<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__len__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__len__" title="Permalink to this definition"></a></dt>
 <dd><p>Length of trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -250,7 +150,7 @@ with respect to <code class="docutils literal notranslate"><span class="pre">t</
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.q">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.q" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.q" title="Permalink to this definition"></a></dt>
 <dd><p>Position trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -269,7 +169,7 @@ applications.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.qd">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qd</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.qd" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qd</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.qd" title="Permalink to this definition"></a></dt>
 <dd><p>Velocity trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -288,7 +188,7 @@ applications.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.qdd">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qdd</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.qdd" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qdd</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.qdd" title="Permalink to this definition"></a></dt>
 <dd><p>Velocity trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -307,7 +207,7 @@ applications.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.naxes">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">naxes</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.naxes" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">naxes</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.naxes" title="Permalink to this definition"></a></dt>
 <dd><p>Number of axes in the trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -321,7 +221,7 @@ applications.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">textargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.plot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">textargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.plot" title="Permalink to this definition"></a></dt>
 <dd><p>Plot trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -344,7 +244,7 @@ plot depends on the function that created it.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.qplot">
-<span class="sig-name descname"><span class="pre">qplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.qplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.qplot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">qplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.qplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.qplot" title="Permalink to this definition"></a></dt>
 <dd><p>Plot multi-axis trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -362,17 +262,17 @@ plot depends on the function that created it.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.__dict__">
-<span class="sig-name descname"><span class="pre">__dict__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">mappingproxy({'__module__':</span> <span class="pre">'roboticstoolbox.tools.trajectory',</span> <span class="pre">'__doc__':</span> <span class="pre">'\n</span>&#160;&#160;&#160; <span class="pre">A</span> <span class="pre">container</span> <span class="pre">class</span> <span class="pre">for</span> <span class="pre">trajectory</span> <span class="pre">data.\n</span>&#160;&#160;&#160; <span class="pre">',</span> <span class="pre">'__init__':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.__init__&gt;,</span> <span class="pre">'__str__':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.__str__&gt;,</span> <span class="pre">'__repr__':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.__repr__&gt;,</span> <span class="pre">'__len__':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.__len__&gt;,</span> <span class="pre">'q':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'qd':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'qdd':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'naxes':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'plot':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.plot&gt;,</span> <span class="pre">'qplot':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.qplot&gt;,</span> <span class="pre">'__dict__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__dict__'</span> <span class="pre">of</span> <span class="pre">'Trajectory'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__weakref__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__weakref__'</span> <span class="pre">of</span> <span class="pre">'Trajectory'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__annotations__':</span> <span class="pre">{}})</span></em><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__dict__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__dict__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">mappingproxy({'__module__':</span> <span class="pre">'roboticstoolbox.tools.trajectory',</span> <span class="pre">'__doc__':</span> <span class="pre">'\n</span>&#160;&#160;&#160; <span class="pre">A</span> <span class="pre">container</span> <span class="pre">class</span> <span class="pre">for</span> <span class="pre">trajectory</span> <span class="pre">data.\n</span>&#160;&#160;&#160; <span class="pre">',</span> <span class="pre">'__init__':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.__init__&gt;,</span> <span class="pre">'__str__':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.__str__&gt;,</span> <span class="pre">'__repr__':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.__repr__&gt;,</span> <span class="pre">'__len__':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.__len__&gt;,</span> <span class="pre">'q':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'qd':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'qdd':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'naxes':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'plot':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.plot&gt;,</span> <span class="pre">'qplot':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.qplot&gt;,</span> <span class="pre">'__dict__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__dict__'</span> <span class="pre">of</span> <span class="pre">'Trajectory'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__weakref__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__weakref__'</span> <span class="pre">of</span> <span class="pre">'Trajectory'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__annotations__':</span> <span class="pre">{}})</span></em><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__dict__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.__module__">
-<span class="sig-name descname"><span class="pre">__module__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'roboticstoolbox.tools.trajectory'</span></em><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__module__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__module__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'roboticstoolbox.tools.trajectory'</span></em><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__module__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.__weakref__">
-<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__weakref__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__weakref__" title="Permalink to this definition"></a></dt>
 <dd><p>list of weak references to the object (if defined)</p>
 </dd></dl>
 
@@ -380,7 +280,7 @@ plot depends on the function that created it.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.tpoly">
-<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">tpoly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#tpoly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.tpoly" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">tpoly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#tpoly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.tpoly" title="Permalink to this definition"></a></dt>
 <dd><p>Generate scalar polynomial trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -444,12 +344,12 @@ P. Corke, Springer 2011.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.tpoly_func">
-<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">tpoly_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#tpoly_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.tpoly_func" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">tpoly_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#tpoly_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.tpoly_func" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.lspb">
-<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">lspb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#lspb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.lspb" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">lspb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#lspb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.lspb" title="Permalink to this definition"></a></dt>
 <dd><p>Scalar trapezoidal trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -526,12 +426,12 @@ and time scaling is based on the first and last element.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.lspb_func">
-<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">lspb_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#lspb_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.lspb_func" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">lspb_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#lspb_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.lspb_func" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.jtraj">
-<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">jtraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#jtraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.jtraj" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">jtraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#jtraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.jtraj" title="Permalink to this definition"></a></dt>
 <dd><p>Compute a joint-space trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -575,7 +475,7 @@ linearly.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.mtraj">
-<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">mtraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tfunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#mtraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.mtraj" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">mtraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tfunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#mtraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.mtraj" title="Permalink to this definition"></a></dt>
 <dd><p>Multi-axis trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -628,7 +528,7 @@ time scaling is based on the first and last element.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.qplot">
-<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">qplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unwrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#qplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.qplot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">qplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unwrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#qplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.qplot" title="Permalink to this definition"></a></dt>
 <dd><p>Plot trajectory data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -667,7 +567,7 @@ time given the time vector T (Mx1).</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.ctraj">
-<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">ctraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#ctraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.ctraj" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">ctraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#ctraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.ctraj" title="Permalink to this definition"></a></dt>
 <dd><p>Cartesian trajectory between two poses</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -723,12 +623,12 @@ Peter Corke, Springer 2011</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.cmstraj">
-<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">cmstraj</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#cmstraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.cmstraj" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">cmstraj</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#cmstraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.cmstraj" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.mstraj">
-<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">mstraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viapoints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tacc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tsegment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#mstraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.mstraj" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">mstraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viapoints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tacc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tsegment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#mstraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.mstraj" title="Permalink to this definition"></a></dt>
 <dd><p>Multi-segment multi-axis trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -820,70 +720,50 @@ maximum speed.</p></li>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="mobile.html" class="btn btn-neutral float-right" title="Mobile robots" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="arm_backend_swift.html" class="btn btn-neutral float-left" title="Swift" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mobile.html" class="btn btn-neutral float-right" title="Mobile robots" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">
-        Last updated on 13-Sep-2021.
-      </span>
-
-    </p>
+    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-Sep-2021.
+      </span></p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
-
-  
-  
-    
     <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
     <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-    ga('create', 'G-11Q6WJM565', 'auto');
-    
-    ga('send', 'pageview');
-    </script>
-
-    
-   
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
 
 </body>
 </html>

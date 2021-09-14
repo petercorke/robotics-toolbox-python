@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>roboticstoolbox.models.URDF.Mico &mdash; Robotics Toolbox for Python  documentation</title>
+  <title>roboticstoolbox.models.URDF.FrankieOmni &mdash; Robotics Toolbox for Python  documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
@@ -59,7 +59,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../../index.html">Module code</a> &raquo;</li>
-      <li>roboticstoolbox.models.URDF.Mico</li>
+      <li>roboticstoolbox.models.URDF.FrankieOmni</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -68,31 +68,34 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for roboticstoolbox.models.URDF.Mico</h1><div class="highlight"><pre>
+  <h1>Source code for roboticstoolbox.models.URDF.FrankieOmni</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ERobot</span> <span class="kn">import</span> <span class="n">ERobot</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
 
 
-<div class="viewcode-block" id="Mico"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.URDF.Mico">[docs]</a><span class="k">class</span> <span class="nc">Mico</span><span class="p">(</span><span class="n">ERobot</span><span class="p">):</span>
+<div class="viewcode-block" id="FrankieOmni"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.URDF.FrankieOmni">[docs]</a><span class="k">class</span> <span class="nc">FrankieOmni</span><span class="p">(</span><span class="n">ERobot</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class that imports a Mico URDF model</span>
+<span class="sd">    Class that imports an Omnidirectional Frankie URDF model</span>
 
-<span class="sd">    ``Panda()`` is a class which imports a Kinova Mico robot definition</span>
+<span class="sd">    ``FrankieOmni()`` is a class which imports a FrankieOmni robot definition</span>
 <span class="sd">    from a URDF file.  The model describes its kinematic and graphical</span>
 <span class="sd">    characteristics.</span>
 
 <span class="sd">    .. runblock:: pycon</span>
 
 <span class="sd">        &gt;&gt;&gt; import roboticstoolbox as rtb</span>
-<span class="sd">        &gt;&gt;&gt; robot = rtb.models.URDF.Mico()</span>
+<span class="sd">        &gt;&gt;&gt; robot = rtb.models.URDF.FrankieOmni()</span>
 <span class="sd">        &gt;&gt;&gt; print(robot)</span>
 
 <span class="sd">    Defined joint configurations are:</span>
 
 <span class="sd">    - qz, zero joint angle configuration, &#39;L&#39; shaped configuration</span>
 <span class="sd">    - qr, vertical &#39;READY&#39; configuration</span>
+<span class="sd">    - qs, arm is stretched out in the x-direction</span>
+<span class="sd">    - qn, arm is at a nominal non-singular configuration</span>
 
 <span class="sd">    .. codeauthor:: Jesse Haviland</span>
 <span class="sd">    .. sectionauthor:: Peter Corke</span>
@@ -101,27 +104,60 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">links</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">urdf_string</span><span class="p">,</span> <span class="n">urdf_filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">URDF_read</span><span class="p">(</span>
-            <span class="s2">&quot;kinova_description/urdf/j2n4s300_standalone.xacro&quot;</span>
+            <span class="s2">&quot;franka_description/robots/frankieOmni_arm_hand.urdf.xacro&quot;</span>
         <span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">links</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Kinova&quot;</span><span class="p">,</span>
+            <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Franka Emika&quot;</span><span class="p">,</span>
+            <span class="n">gripper_links</span><span class="o">=</span><span class="n">links</span><span class="p">[</span><span class="mi">12</span><span class="p">],</span>
             <span class="n">urdf_string</span><span class="o">=</span><span class="n">urdf_string</span><span class="p">,</span>
             <span class="n">urdf_filepath</span><span class="o">=</span><span class="n">urdf_filepath</span><span class="p">,</span>
         <span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tool</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1034</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">qdlim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="mf">4.0</span><span class="p">,</span>
+                <span class="mf">4.0</span><span class="p">,</span>
+                <span class="mf">4.0</span><span class="p">,</span>
+                <span class="mf">2.1750</span><span class="p">,</span>
+                <span class="mf">2.1750</span><span class="p">,</span>
+                <span class="mf">2.1750</span><span class="p">,</span>
+                <span class="mf">2.1750</span><span class="p">,</span>
+                <span class="mf">2.6100</span><span class="p">,</span>
+                <span class="mf">2.6100</span><span class="p">,</span>
+                <span class="mf">2.6100</span><span class="p">,</span>
+                <span class="mf">3.0</span><span class="p">,</span>
+                <span class="mf">3.0</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
-            <span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
+            <span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">])</span>
         <span class="p">)</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
-    <span class="n">robot</span> <span class="o">=</span> <span class="n">Mico</span><span class="p">()</span>
+    <span class="n">robot</span> <span class="o">=</span> <span class="n">FrankieOmni</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">robot</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">isjoint</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">robot</span><span class="o">.</span><span class="n">grippers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">isjoint</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="p">))</span>
 </pre></div>
 
            </div>
