@@ -27,39 +27,38 @@ A Python implementation of the <a href="https://github.com/petercorke/robotics-t
 </tr>
 </table>
 
-
 ## Synopsis
 
 This toolbox brings robotics-specific functionality to Python, and leverages
 Python's advantages of portability, ubiquity and support, and the capability of
-the open-source ecosystem for linear algebra (numpy, scipy),  graphics
+the open-source ecosystem for linear algebra (numpy, scipy), graphics
 (matplotlib, three.js, WebGL), interactive development (jupyter, jupyterlab,
 mybinder.org), and documentation (sphinx).
 
 The Toolbox provides tools for representing the kinematics and dynamics of
-serial-link manipulators  - you can easily create your own in Denavit-Hartenberg
+serial-link manipulators - you can easily create your own in Denavit-Hartenberg
 form, import a URDF file, or use over 30 supplied models for well-known
 contemporary robots from Franka-Emika, Kinova, Universal Robotics, Rethink as
 well as classical robots such as the Puma 560 and the Stanford arm.
 
 The toolbox will also support mobile robots with functions for robot motion models
-(unicycle, bicycle), path planning algorithms (bug, distance transform, D*,
+(unicycle, bicycle), path planning algorithms (bug, distance transform, D\*,
 PRM), kinodynamic planning (lattice, RRT), localization (EKF, particle filter),
 map building (EKF) and simultaneous localization and mapping (EKF).
 
 The Toolbox provides:
 
-  * code that is mature and provides a point of comparison for other
-    implementations of the same algorithms;
-  * routines which are generally written in a straightforward manner which
-    allows for easy understanding, perhaps at the expense of computational
-    efficiency;
-  * source code which can be read for learning and teaching;
-  * backward compatability with the Robotics Toolbox for MATLAB
+- code that is mature and provides a point of comparison for other
+  implementations of the same algorithms;
+- routines which are generally written in a straightforward manner which
+  allows for easy understanding, perhaps at the expense of computational
+  efficiency;
+- source code which can be read for learning and teaching;
+- backward compatability with the Robotics Toolbox for MATLAB
 
 The Toolbox leverages the [Spatial Maths Toolbox for Python](https://github.com/petercorke/spatialmath-python) to
 provide support for data types such as SO(n) and SE(n) matrices, quaternions, twists and spatial vectors.
-  
+
 ## Code Example
 
 We will load a model of the Franka-Emika Panda robot defined classically using
@@ -97,14 +96,15 @@ print(robot)
 T = robot.fkine(robot.qz)  # forward kinematics
 print(T)
 
-	   0.707107    0.707107    0           0.088        
-	   0.707107   -0.707107    0           0            
-	   0           0          -1           0.823        
-	   0           0           0           1          
+	   0.707107    0.707107    0           0.088
+	   0.707107   -0.707107    0           0
+	   0           0          -1           0.823
+	   0           0           0           1
 ```
+
 (Python prompts are not shown to make it easy to copy+paste the code, console output is indented)
 
-We can solve inverse kinematics very easily.  We first choose an SE(3) pose
+We can solve inverse kinematics very easily. We first choose an SE(3) pose
 defined in terms of position and orientation (end-effector z-axis down (A=-Z) and finger
 orientation parallel to y-axis (O=+Y)).
 
@@ -119,11 +119,11 @@ print(sol)
 q_pickup = sol.q
 print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
 
-	Out[35]: 
-		-1            9.43001e-14  2.43909e-12  0.7          
-		 9.43759e-14  1            7.2574e-13   0.2          
-		-2.43913e-12  7.2575e-13  -1            0.1          
-		 0            0            0            1 
+	Out[35]:
+		-1            9.43001e-14  2.43909e-12  0.7
+		 9.43759e-14  1            7.2574e-13   0.2
+		-2.43913e-12  7.2575e-13  -1            0.1
+		 0            0            0            1
 ```
 
 Note that because this robot is redundant we don't have any control over the arm configuration apart from end-effector pose, ie. we can't control the elbow height.
@@ -137,9 +137,9 @@ robot.plot(qt.q, movie='panda1.gif')
 
 ![Panda trajectory animation](./docs/figs/panda1.gif)
 
-which uses the default matplotlib backend.  Grey arrows show the joint axes and the colored frame shows the end-effector pose.
+which uses the default matplotlib backend. Grey arrows show the joint axes and the colored frame shows the end-effector pose.
 
-Let's now load a URDF model of the same robot. The kinematic representation is no longer 
+Let's now load a URDF model of the same robot. The kinematic representation is no longer
 based on Denavit-Hartenberg parameters, it is now a rigid-body tree.
 
 ```python
@@ -172,7 +172,7 @@ print(robot)    # display the model
 The symbol `@` indicates the link as an end-effector, a leaf node in the rigid-body
 tree.
 
-We can instantiate our robot inside a browser-based 3d-simulation environment.  
+We can instantiate our robot inside a browser-based 3d-simulation environment.
 
 ```python
 from roboticstoolbox.backends.Swift import Swift  # instantiate 3D browser-based visualizer
@@ -238,9 +238,19 @@ The toolbox is incredibly useful for developing and prototyping algorithms for r
 
 ### Publication List
 
+J. Haviland, N. Sünderhauf and P. Corke, "**A Holistic Approach to Reactive Mobile Manipulation**,". In the video, the robot is controlled using the Robotics toolbox for Python and features a recording from the [Swift](https://github.com/jhavl/swift) Simulator.
+
+[[Arxiv Paper](https://arxiv.org/abs/2109.04749)] [[Project Website](https://jhavl.github.io/holistic/)] [[Video](https://youtu.be/-DXBQPeLIV4)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/roboticstoolbox/examples/holistic_mm_non_holonomic.py)]
+
+<p>
+  <a href="https://youtu.be/-DXBQPeLIV4">
+    <img src="https://github.com/petercorke/robotics-toolbox-python/raw/master/docs/figs/holistic_youtube.png" width="560">
+  </a>
+</p>
+
 J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for Reactive Motion Control of Manipulators**," in _IEEE Robotics and Automation Letters_, doi: 10.1109/LRA.2021.3056060. In the video, the robot is controlled using the Robotics toolbox for Python and features a recording from the [Swift](https://github.com/jhavl/swift) Simulator.
 
-[[Arxiv Paper](https://arxiv.org/abs/2010.08686)] [[IEEE Xplore](https://ieeexplore.ieee.org/document/9343718)] [[Project Website](https://jhavl.github.io/neo/)] [[Video](https://youtu.be/jSLPJBr8QTY)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/examples/neo.py)]
+[[Arxiv Paper](https://arxiv.org/abs/2010.08686)] [[IEEE Xplore](https://ieeexplore.ieee.org/document/9343718)] [[Project Website](https://jhavl.github.io/neo/)] [[Video](https://youtu.be/jSLPJBr8QTY)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/roboticstoolbox/examples/neo.py)]
 
 <p>
   <a href="https://youtu.be/jSLPJBr8QTY">
@@ -250,7 +260,7 @@ J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for
 
 **A Purely-Reactive Manipulability-Maximising Motion Controller**, J. Haviland and P. Corke. In the video, the robot is controlled using the Robotics toolbox for Python.
 
-[[Paper](https://arxiv.org/abs/2002.11901)] [[Project Website](https://jhavl.github.io/mmc/)] [[Video](https://youtu.be/Vu_rcPlaADI)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/examples/mmc.py)]
+[[Paper](https://arxiv.org/abs/2002.11901)] [[Project Website](https://jhavl.github.io/mmc/)] [[Video](https://youtu.be/Vu_rcPlaADI)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/roboticstoolbox/examples/mmc.py)]
 
 <p>
   <a href="https://youtu.be/Vu_rcPlaADI">
@@ -263,4 +273,3 @@ J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for
 ## Common Issues
 
 See the common issues with fixes [here](https://github.com/petercorke/robotics-toolbox-python/wiki/Common-Issues).
-
