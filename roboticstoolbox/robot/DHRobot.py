@@ -1536,7 +1536,7 @@ class DHRobot(Robot):
                     nn_ = (
                         R @ nn
                         + _cross(pstar, R @ f)
-                        + _cross(pstar, Fm[:, j])
+                        + _cross(r, Fm[:, j])
                         + Nm[:, j]
                     )
                     f = f_
