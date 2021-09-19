@@ -867,7 +867,7 @@ class JTraj(SourceBlock):
                 "qdd",
             )
         )
-        self.T = T
+
 
         q0 = base.getvector(q0)
         qf = base.getvector(qf)
@@ -893,11 +893,22 @@ class JTraj(SourceBlock):
         self.qd0 = qd0
         self.qdf = qf
 
-    def start(self):
+        # call start now, so that output works when called by compile
+        # set T to 1 just for now
+        if T is None:
+            self.T = 1
+        self.start()
+        self.T = T
+        
+
+    def start(self, state=None):
 
         if self.T is None:
-            self.T = self.bd.state.T
+            # use simulation tmax
+            self.T = state.T
+
         tscal = self.T
+        self.tscal = tscal
 
         q0 = self.q0
         qf = self.qf
@@ -928,8 +939,9 @@ class JTraj(SourceBlock):
 
     def output(self, t=None):
 
-        tscal = self.T
-        tt = np.array([t ** 5, t ** 4, t ** 3, t ** 2, t, 1]).T
+        tscal = self.tscal
+        ts = t / tscal
+        tt = np.array([ts ** 5, ts ** 4, ts ** 3, ts ** 2, ts, 1]).T
 
         qt = tt @ self.coeffs
 
