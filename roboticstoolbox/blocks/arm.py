@@ -941,6 +941,85 @@ class JTraj(SourceBlock):
 
         return [qt, qdt, qddt]
 
+# ------------------------------------------------------------------------ #
+
+class LSPB(SourceBlock):
+    """
+    :blockname:`LSPB`
+
+    .. table::
+       :align: left
+
+    +------------+------------+---------+
+    | inputs     | outputs    |  states |
+    +------------+------------+---------+
+    | 0          | 3          | 0       |
+    +------------+------------+---------+
+    |            | float      |         |
+    +------------+------------+---------+
+    """
+
+    nin = 0
+    nout = 3
+
+    def __init__(self, q0, qf, V=None, T=None, *inputs, **kwargs):
+        """
+        Compute a joint-space trajectory
+
+        :param q0: initial joint coordinate
+        :type q0: array_like(n)
+        :param qf: final joint coordinate
+        :type qf: array_like(n)
+        :param T: time vector or number of steps, defaults to None
+        :type T: array_like or int, optional
+        :param ``*inputs``: Optional incoming connections
+        :type ``*inputs``: Block or Plug
+        :param ``**kwargs``: common Block options
+        :return: LSPB block
+        :rtype: LSPB instance
+
+        - ``tg = jtraj(q0, qf, N)`` is a joint space trajectory where the joint
+        coordinates vary from ``q0`` (M) to ``qf`` (M).  A quintic (5th order)
+        polynomial is used with default zero boundary conditions for velocity and
+        acceleration.  Time is assumed to vary from 0 to 1 in ``N`` steps.
+
+        - ``tg = jtraj(q0, qf, t)`` as above but ``t`` is a uniformly-spaced time
+        vector
+
+        The return value is an object that contains position, velocity and
+        acceleration data.
+
+        Notes:
+
+        - The time vector, if given, scales the velocity and acceleration outputs
+        assuming that the time vector starts at zero and increases
+        linearly.
+
+        :seealso: :func:`ctraj`, :func:`qplot`, :func:`~SerialLink.jtraj`
+        """
+        super().__init__(nout=3, **kwargs)
+        self.type = "source"
+        self.outport_names(
+            (
+                "q",
+                "qd",
+                "qdd",
+            )
+        )
+        self.T = T
+        self.q0 = q0
+        self.qf = qf
+
+    def start(self):
+
+        if self.T is None:
+            self.T = self.bd.state.T
+        self.lspbfunc = lspb_func(self.q0, self.qf, self.T)
+
+    def output(self, t=None):
+        return self.lspbfunc(t)
+
+# ------------------------------------------------------------------------ #
 
 class CirclePath(SourceBlock):
     """
