@@ -1,3 +1,4 @@
+from typing import Type
 import numpy as np
 from math import sin, cos, atan2, tan, sqrt, pi
 
@@ -9,7 +10,7 @@ from bdsim.components import TransferBlock
 from bdsim.graphics import GraphicsBlock
 
 from spatialmath import base
-from roboticstoolbox import Bicycle, Unicycle
+from roboticstoolbox import mobile
 
 # ------------------------------------------------------------------------ #
 class Bicycle(TransferBlock):
@@ -30,22 +31,25 @@ class Bicycle(TransferBlock):
 
     nin = 2
     nout = 1
+    inlabels = ('v', 'γ')
+    outlabels = ('q',)
 
-    def __init__(self, *inputs, x0=None, L=1, vlim=1, slim=1, **kwargs):
+    def __init__(self, L=1, speed_max=np.inf, accel_max=np.inf, steer_max=0.45 * pi, 
+        x0=None, **blockargs):
         r"""
         Create a vehicle model with Bicycle kinematics.
 
-        :param ``*inputs``: Optional incoming connections
-        :type ``*inputs``: Block or Plug
-        :param x0: Inital state, defaults to None
-        :type x0: array_like, optional
         :param L: Wheelbase, defaults to 1
         :type L: float, optional
-        :param vlim: Velocity limit, defaults to 1
-        :type vlim: float, optional
-        :param slim: Steering limit, defaults to 1
-        :type slim: float, optional
-        :param ``**kwargs``: common Block options
+        :param speed_max: Velocity limit, defaults to 1
+        :type speed_max: float, optional
+        :param accel_max: maximum acceleration, defaults to math.inf
+        :type accel_max: float, optional
+        :param steer_max: maximum steering angle, defaults to math.pi*0.45
+        :type steer_max: float, optional
+        :param x0: Inital state, defaults to None
+        :type x0: array_like, optional
+        :param ``**blockargs``: common Block options
         :return: a BICYCLE block
         :rtype: Bicycle instance
 
@@ -61,15 +65,16 @@ class Bicycle(TransferBlock):
             
             :output q: configuration (x, y, θ)
 
-        :seealso: :class:`Unicycle` :class:`DiffSteer`
+        :seealso: :class:`mobile.Bicycle` :class:`DiffSteer`
         """
-        super().__init__(inputs=inputs, **kwargs)
+        # TODO: add option to model the effect of steering arms, responds to
+        #  gamma dot
+        
+        super().__init__(nstates=3, **blockargs)
 
-        self.nstates = 3
-        self.vlim = vlim
-        self.slim = slim
+        self.vehicle = mobile.Bicycle(L=L,
+            steer_max=steer_max, speed_max=speed_max, accel_max=accel_max)
 
-        self.L = L
         if x0 is None:
             self._x0 = np.zeros((self.nstates,))
         else:
@@ -106,31 +111,37 @@ class Unicycle(TransferBlock):
     +------------+---------+---------+
     | inputs     | outputs |  states |
     +------------+---------+---------+
-    | 2          | 3       | 3       |
+    | 2          | 1       | 3       |
     +------------+---------+---------+
     | float      | float   |         | 
     +------------+---------+---------+
     """
     nin = 2
     nout = 1
+    inlabels = ('v', 'ω')
+    outlabels = ('q',)
 
-    def __init__(self, *inputs, x0=None, **kwargs):
+    def __init__(self, w=1, speed_max=np.inf, accel_max=np.inf, steer_max=None, 
+        a=0, x0=None, **blockargs):
         r"""
         Create a vehicle model with Unicycle kinematics.
 
-        :param ``*inputs``: Optional incoming connections
-        :type ``*inputs``: Block or Plug
+        :param w: vehicle width, defaults to 1
+        :type w: float, optional
+        :param speed_max: Velocity limit, defaults to 1
+        :type speed_max: float, optional
+        :param accel_max: maximum acceleration, defaults to math.inf
+        :type accel_max: float, optional
+        :param steer_max: maximum steering rate, defaults to 1
+        :type steer_max: float, optional
         :param x0: Inital state, defaults to None
         :type x0: array_like, optional
-        :param ``*inputs``: Optional incoming connections
-        :type ``*inputs``: Block or Plug
-        :param ``**kwargs``: common Block options
+        :param ``**blockargs``: common Block options
         :return: a UNICYCLE block
         :rtype: Unicycle instance
 
-
         Unicycle kinematic model with state :math:`[x, y, \theta]`.
-            
+
         **Block ports**
             
             :input v: Vehicle speed (metres/sec).  The velocity limit ``vlim`` is
@@ -184,19 +195,24 @@ class DiffSteer(TransferBlock):
     inlabels = ('ωL', 'ωR')
     outlabels = ('q',)
 
-    def __init__(self, *inputs, R=1, W=1, x0=None, **kwargs):
+    def __init__(self, w=1, R=1, speed_max=np.inf, accel_max=np.inf, steer_max=None, 
+        a=0, x0=None, **blockargs):
         """
         Create a differential steer vehicle model
 
-        :param ``*inputs``: Optional incoming connections
-        :type ``*inputs``: Block or Plug
-        :param x0: Inital state, defaults to None
-        :type x0: array_like, optional
+        :param w: vehicle width, defaults to 1
+        :type w: float, optional
         :param R: Wheel radius, defaults to 1
         :type R: float, optional
-        :param W: Wheel separation in lateral direction, defaults to 1
-        :type W: float, optional
-        :param ``**kwargs``: common Block options
+        :param speed_max: Velocity limit, defaults to 1
+        :type speed_max: float, optional
+        :param accel_max: maximum acceleration, defaults to math.inf
+        :type accel_max: float, optional
+        :param steer_max: maximum steering rate, defaults to 1
+        :type steer_max: float, optional
+        :param x0: Inital state, defaults to None
+        :type x0: array_like, optional
+        :param ``**blockargs``: common Block options
         :return: a DIFFSTEER block
         :rtype: DifSteer instance
         
@@ -250,9 +266,9 @@ class VehiclePlot(GraphicsBlock):
     +--------+---------+---------+
     | inputs | outputs |  states |
     +--------+---------+---------+
-    | 3      | 0       | 0       |
+    | 1      | 0       | 0       |
     +--------+---------+---------+
-    | float  |         |         | 
+    | ndarray|         |         | 
     +--------+---------+---------+
     """
 
@@ -263,33 +279,21 @@ class VehiclePlot(GraphicsBlock):
 
     # TODO add ability to render an image instead of an outline
     
-    def __init__(self, *inputs, path=True, pathstyle=None, shape='triangle', color="blue", fill="white", size=1, scale='auto', labels=['X', 'Y'], square=True, init=None, **kwargs):
+    def __init__(self, animation=None, path=None, labels=['X', 'Y'], square=True, init=None, scale=True, **blockargs):
         """
         Create a vehicle animation
 
-        :param ``*inputs``: Optional incoming connections
-        :type ``*inputs``: Block or Plug
-        :param path: plot path taken by vehicle, defaults to True
-        :type path: bool, optional
-        :param pathstyle: linestyle for path, defaults to None
-        :type pathstyle: str or dict, optional
-        :param shape: vehicle shape, one of: 'triangle' [default], 'box'
-        :type shape: str, optional
-        :param color: vehicle outline color, defaults to "blue"
-        :type color: str, optional
-        :param fill: vehicle fill color, defaults to "white"
-        :type fill: str, optional
-        :param size: length of vehicle, defaults to 1
-        :type size: float, optional
-        :param scale: x- and y-axis scale, defaults to 'auto'
-        :type scale: array_like(2) or array_like(4), optional
+        :param animation: Graphical animation of vehicle, defaults to None
+        :type animation: VehicleAnimation subclass, optional
+        :param path: linestyle to plot path taken by vehicle, defaults to None
+        :type path: str or dict, optional
         :param labels: axis labels (xlabel, ylabel), defaults to ["X","Y"]
         :type labels: array_like(2) or list
         :param square: Set aspect ratio to 1, defaults to True
         :type square: bool, optional
         :param init: initialize graphics, defaults to None
         :type init: callable, optional
-        :param ``**kwargs``: common Block options
+        :param ``**blockargs``: common Block options
         :return: A VEHICLEPLOT block
         :rtype: VehiclePlot instance
 
@@ -297,7 +301,7 @@ class VehiclePlot(GraphicsBlock):
 
         **Block ports**
 
-            :input qL: configuration (x, y, θ)
+            :input q: configuration (x, y, θ)
         
         Notes:
             
@@ -305,9 +309,7 @@ class VehiclePlot(GraphicsBlock):
               and can be used to draw application specific detail on the
               plot. In the example below, this is the dot and star.
             - A dynamic trail, showing path to date can be animated if
-              the option ``path`` is True.
-            - Two shapes of vehicle can be drawn, a narrow triangle and a box
-              (as seen below).
+              the option ``path`` is set to a linestyle.
         
         .. figure:: ../../figs/rvc4_4.gif
            :width: 500px

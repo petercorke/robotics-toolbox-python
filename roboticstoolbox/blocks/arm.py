@@ -38,6 +38,8 @@ class FKine(FunctionBlock):
 
     nin = 1
     nout = 1
+    inlabels = ('q',)
+    outlabels = ('T',)
 
     def __init__(self, robot=None, args={}, *inputs, **kwargs):
         """
@@ -90,6 +92,8 @@ class IKine(FunctionBlock):
 
     nin = 1
     nout = 1
+    inlabels = ('T',)
+    outlabels = ('q',)
 
     def __init__(
         self, robot=None, q0=None, useprevious=True, ik=None, *inputs, **kwargs
@@ -429,14 +433,17 @@ class TR2T(FunctionBlock):
 
     nin = 1
     nout = 3
+    inlabels = ('T',)
+    outlabels = ('x', 'y', 'z')
 
     def __init__(self, *inputs, **kwargs):
         """
         :param T: the transform
         :type T: SE3
-        :param ``*inputs``: Optional incoming connections
-        :type ``*inputs``: Block or Plug
-        :param ``**kwargs``: common Block options
+        :param inputs: Optional incoming connections
+        :type inputs: Block or Plug
+        :param kwargs: common Block options
+        :type kwargs: dict
         :return: a POINT2TR block
         :rtype: Point2Tr instance
 
@@ -640,7 +647,8 @@ class ArmPlot(GraphicsBlock):
         :type robot: Robot subclass
         :param backend: RTB backend name, defaults to 'pyplot'
         :type backend: str, optional
-        :param ``**kwargs``: common Block options
+        :param kwargs: common Block options
+        :type kwargs: dict
         :return: An ARMPLOT block
         :rtype: ArmPlot instance
 
@@ -736,28 +744,16 @@ class Traj(FunctionBlock):
         A block that generates a trajectory using a trapezoidal or quintic
         polynomial profile.
 
-        A simple triangle function with domain [0,10] and range [0,1] can be
-        defined by::
-
-            INTERPOLATE(x=(0,5,10), y=(0,1,0))
-
-        We might also express this as::
-
-            INTERPOLATE(xy=[(0,0), (5,1), (10,0)])
-
-        The distance along the trajectory comes from:
-
-        - Input port 0
-        - Simulation time, if ``time=True``.  In this case the block has no
-          input ports and is a ``Source`` not a ``Function``.
         """
         self.time = time
         if time:
-            nin = 0
-            self.blockclass = "source"
-        else:
             nin = 1
-        super().__init__(nin=nin, inputs=inputs, **kwargs)
+            blockclass = "function"
+        else:
+            nin = 0
+            blockclass = "source"
+            
+        super().__init__(nin=nin, blockclass=blockclass, inputs=inputs, **kwargs)
 
         y0 = base.getvector(y0)
         yf = base.getvector(yf)
@@ -801,6 +797,7 @@ class Traj(FunctionBlock):
 
         return [np.hstack(y), np.hstack(yd), np.hstack(ydd)]
 
+# ------------------------------------------------------------------------ #
 
 class JTraj(SourceBlock):
     """
@@ -820,6 +817,7 @@ class JTraj(SourceBlock):
 
     nin = 0
     nout = 3
+    outlabels = ('q', 'qd', 'qdd')
 
     def __init__(self, q0, qf, qd0=None, qdf=None, T=None, *inputs, **kwargs):
         """

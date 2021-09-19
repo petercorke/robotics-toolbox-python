@@ -335,7 +335,8 @@ class MultiRotorMixer(FunctionBlock):
         :type maxw: float
         :param minw: minimum rotor speed in rad/s, defaults to 5
         :type minw: float
-        :param ``**kwargs``: common Block options
+        :param kwargs: common Block options
+        :type kwargs: dict
         :return: a MULTIROTORMIXER block
         :rtype: MultiRotorMixer instance
 
