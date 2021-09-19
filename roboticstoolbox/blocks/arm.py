@@ -699,6 +699,7 @@ class ArmPlot(GraphicsBlock):
 
             super().done()
 
+# ------------------------------------------------------------------------ #
 
 
 class Traj(FunctionBlock):
@@ -782,7 +783,7 @@ class Traj(FunctionBlock):
             self.trajfuncs.append(trajfunc(self.y0[i], self.yf[i], self.T))
 
     def output(self, t=None):
-        if not self.time:
+        if self.time:
             t = self.inputs[0]
 
         out = []
