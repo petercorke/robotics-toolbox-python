@@ -672,26 +672,25 @@ class ArmPlot(GraphicsBlock):
         self.q0 = q0
         self.env = None
 
-    def start(self, **kwargs):
+    def start(self, state, **kwargs):
         # create the plot
         super().reset()
-        if self.bd.options.graphics:
-            self.fig = self.create_figure()
+        if state.options.graphics:
+            self.fig = self.create_figure(state)
             self.env = self.robot.plot(
                 self.q0, backend=self.backend, fig=self.fig, block=False
             )
             super().start()
 
-    def step(self):
+    def step(self, state):
         # inputs are set
-        if self.bd.options.graphics:
 
-            self.robot.q = self.inputs[0]
+        self.robot.q = self.inputs[0]
 
-            if self.bd.options.animation:
-                self.env.step()
+        if state.options.animation:
+            self.env.step()
 
-            super().step()
+        super().step(state)
 
     def done(self, block=False, **kwargs):
         if self.bd.options.graphics:
