@@ -103,7 +103,7 @@ class PyPlot(Connector):
             self.fig = plt.figure(name)
         else:
             self.fig = fig
-            self.fig.canvas.set_window_title(name)
+            self.fig.canvas.manager.set_window_title(name)
 
         self.fig.subplots_adjust(left=-0.09, bottom=0, top=1, right=0.99)
 
@@ -111,7 +111,7 @@ class PyPlot(Connector):
         self.ax = self.fig.add_subplot(
             111, projection='3d', proj_type=projection)
         self.ax.set_facecolor('white')
-        self.ax.figure.canvas.set_window_title(f"Robotics Toolbox for Python (Figure {self.ax.figure.number})")
+        self.ax.figure.canvas.manager.set_window_title(f"Robotics Toolbox for Python (Figure {self.ax.figure.number})")
 
         self.ax.set_xbound(-0.5, 0.5)
         self.ax.set_ybound(-0.5, 0.5)
