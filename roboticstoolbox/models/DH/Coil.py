@@ -67,7 +67,7 @@ class Coil(DHRobot):
 
         super().__init__(
             links,
-            name="Hyper" + str(N),
+            name="Coil" + str(N),
             keywords=('symbolic',),
             symbolic=symbolic
         )
