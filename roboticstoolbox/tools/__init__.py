@@ -10,7 +10,6 @@ from roboticstoolbox.tools.trajectory import (
     ctraj,
     lspb,
     lspb_func,
-    qplot,
     mstraj,
 )
 from roboticstoolbox.tools.numerical import jacobian_numerical, hessian_numerical
@@ -21,7 +20,7 @@ from roboticstoolbox.tools.data import (
     rtb_load_jsonfile,
     rtb_path_to_datafile,
 )
-
+from roboticstoolbox.tools.plot import xplot
 from roboticstoolbox.tools.params import rtb_set_param, rtb_get_param
 
 __all__ = [
@@ -34,7 +33,7 @@ __all__ = [
     "ctraj",
     "lspb",
     "lspb_func",
-    "qplot",
+    "xplot",
     "mtraj",
     "mstraj",
     "jsingu",
