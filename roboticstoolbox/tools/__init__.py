@@ -22,6 +22,7 @@ from roboticstoolbox.tools.data import (
     rtb_path_to_datafile,
 )
 
+from roboticstoolbox.tools.params import rtb_set_param, rtb_get_param
 
 __all__ = [
     "null",
@@ -43,4 +44,6 @@ __all__ = [
     "rtb_load_matfile",
     "rtb_load_jsonfile",
     "rtb_path_to_datafile",
+    "rtb_set_param",
+    "rtb_get_param",
 ]

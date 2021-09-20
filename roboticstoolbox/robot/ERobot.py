@@ -20,6 +20,7 @@ from roboticstoolbox.tools import URDF
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.tools.data import rtb_path_to_datafile
+from roboticstoolbox.tools.params import rtb_get_param
 
 from pathlib import PurePosixPath
 from ansitable import ANSITable, Column
@@ -31,7 +32,6 @@ from spatialmath import (
 )
 
 import fknm
-
 
 class BaseERobot(Robot):
 
@@ -276,13 +276,16 @@ class BaseERobot(Robot):
             - The robot base frame is denoted as ``BASE`` and is equal to the
               robot's ``base`` attribute.
         """
+        unicode = rtb_get_param("unicode")
+        border = "thin" if unicode else "ascii"
+
         table = ANSITable(
             Column("id", headalign="^", colalign=">"),
             Column("link", headalign="^", colalign="<"),
             Column("joint", headalign="^", colalign=">"),
             Column("parent", headalign="^", colalign="<"),
             Column("ETS", headalign="^", colalign="<"),
-            border="thin",
+            border=border,
         )
         for link in self:
             color = "" if link.isjoint else "<<blue>>"
@@ -294,7 +297,7 @@ class BaseERobot(Robot):
                 parent_name = link.parent.name
             s = ets.__str__(f"q{link._jindex}")
             if len(s) > 0:
-                s = " \u2295 " + s
+                s = " \u2295 " if unicode else " * " + s  # \oplus
 
             if link.isjoint:
                 # if link._joint_name is not None:
@@ -330,7 +333,7 @@ class BaseERobot(Robot):
         s += "\n"
 
         s += str(table)
-        s += self.configurations_str()
+        s += self.configurations_str(border=border)
 
         return s
 

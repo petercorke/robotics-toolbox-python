@@ -12,6 +12,7 @@ from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
     issymbol, tr2jac, transl2, trot2, removesmall, trinv, trinv2, \
     verifymatrix, iseye, tr2jac2
+from roboticstoolbox import rtb_get_param
 
 class BaseETS(UserList, ABC):
 
@@ -654,6 +655,7 @@ class BaseETS(UserList, ABC):
         es = []
         j = 0
         c = 0
+        unicode = rtb_get_param("unicode")
 
         if q is None:
             if len(self.joints()) > 1:
@@ -695,8 +697,10 @@ class BaseETS(UserList, ABC):
 
             es.append(s)
 
-        return " \u2295 ".join(es)
-
+        if unicode:
+            return " \u2295 ".join(es)
+        else:
+            return " * ".join(es)
     # redefine * operator to concatenate the internal lists
     def __add__(self, rest):
         self.__mul__(rest)

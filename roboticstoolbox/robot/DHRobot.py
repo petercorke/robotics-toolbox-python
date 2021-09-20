@@ -11,6 +11,7 @@ import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.DHLink import DHLink  # HACK
+from roboticstoolbox import rtb_set_param
 from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix
 
 # from spatialmath import base
@@ -22,6 +23,7 @@ import spatialmath.base.symbolic as sym
 from ansitable import ANSITable, Column
 from scipy.linalg import block_diag
 from roboticstoolbox.robot.DHLink import _check_rne
+from roboticstoolbox import rtb_get_param
 from frne import init, frne, delete
 
 iksol = namedtuple("IKsolution", "q, success, reason")
@@ -125,6 +127,8 @@ class DHRobot(Robot):
         :rtype: str
         """
 
+        unicode = rtb_get_param("unicode")
+        border = "thin" if unicode else "ascii"
         s = f"DHRobot: {self.name}"
 
         if self.manufacturer is not None and len(self.manufacturer) > 0:
@@ -187,7 +191,7 @@ class DHRobot(Robot):
                 Column("θⱼ", headalign="^"),
                 Column("dⱼ", headalign="^"),
                 *qlim_columns,
-                border="thick",
+                border=border,
             )
             for j, L in enumerate(self):
                 if has_qlim:
@@ -209,7 +213,7 @@ class DHRobot(Robot):
                 Column("aⱼ", headalign="^"),
                 Column("⍺ⱼ", headalign="^"),
                 *qlim_columns,
-                border="thick",
+                border=border,
             )
             for j, L in enumerate(self):
                 if has_qlim:
@@ -235,7 +239,7 @@ class DHRobot(Robot):
             table = ANSITable(
                 Column("", colalign=">"),
                 Column("", colalign="<"),
-                border="thin",
+                border=border,
                 header=False,
             )
             if self._base is not None:
@@ -251,7 +255,7 @@ class DHRobot(Robot):
             s += "\n" + str(table)
 
         # show named configurations
-        s += self.configurations_str()
+        s += self.configurations_str(border=border)
 
         return s
 

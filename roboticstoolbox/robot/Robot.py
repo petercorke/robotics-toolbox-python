@@ -402,7 +402,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         self._configdict[name] = v
         setattr(self, name, v)
 
-    def configurations_str(self):
+    def configurations_str(self, border="thin"):
         deg = 180 / np.pi
 
         # TODO: factor this out of DHRobot
@@ -425,7 +425,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                     Column(f"q{j:d}", colalign="<", headalign="<")
                     for j in range(self.n)
                 ],
-                border="thin",
+                border=border,
             )
 
             for name, q in self._configdict.items():

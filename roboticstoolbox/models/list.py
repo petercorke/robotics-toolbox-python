@@ -1,5 +1,6 @@
 from typing import Type
 from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.tools import rtb_get_param
 from roboticstoolbox.robot.ERobot import ERobot2
 from ansitable import ANSITable, Column
 
@@ -38,6 +39,9 @@ def list(keywords=None, dof=None, mtype=None, border=None):
     # module = importlib.import_module(
     #   '.' + os.path.splitext(file)[0], package='bdsim.blocks')
 
+    unicode = rtb_get_param("unicode")
+    if not unicode:
+        border = "ascii"
     def make_table(border=None):
         table = ANSITable(
             Column("class", headalign="^", colalign="<"),
