@@ -34,7 +34,7 @@ class ShapePlot():
         if self.mpl is not None:
             self.mpl.remove()
 
-        if self.shape.stype == 'box':
+        if self.shape.stype == 'cuboid':
             # scale
             self.mpl = base.plot_cuboid(sides=self.shape.scale, 
                 pose=self.shape.base, ax=ax)
