@@ -2,6 +2,11 @@ from pathlib import Path
 import sys
 import importlib
 
+base_path = importlib.import_module("rtbdata").__path__[0]
+
+def set_base_path(path):
+    global base_path
+    base_path = path
 
 def rtb_load_matfile(filename):
     """
@@ -118,10 +123,7 @@ def rtb_path_to_datafile(*filename, local=True):
         if p.exists():
             return p
 
-    # otherwise, look for it in rtbdata
-
-    rtbdata = importlib.import_module("rtbdata")
-    root = Path(rtbdata.__path__[0])
+    root = Path(base_path)
     
     path = root / filename
     if path.exists():
