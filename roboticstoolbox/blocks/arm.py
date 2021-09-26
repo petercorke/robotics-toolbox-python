@@ -1057,49 +1057,44 @@ class CirclePath(SourceBlock):
         radius=1,
         centre=(0, 0, 0),
         pose=None,
-        phase=0,
         frequency=1,
         unit="rps",
-        *inputs,
+        phase=0,
         **kwargs
     ):
         """
 
-        :param y0: initial value
-        :type y0: array_like(m)
-        :param yf: final value
-        :type yf: array_like(m)
-        :param time: x is simulation time, defaults to False
-        :type time: bool, optional
-        :param traj: trajectory type, one of: 'lspb' [default], 'tpoly'
-        :type traj: str, optional
-        :param ``*inputs``: Optional incoming connections
-        :type ``*inputs``: Block or Plug
-        :param ``**kwargs``: common Block options
+        :param radius: radius of circle, defaults to 1
+        :type radius: float
+        :param centre: center of circle, defaults to (0, 0, 0)
+        :type centre: array_like(3)
+        :param pose: SE3 pose of output, defaults to None
+        :type pose: SE3
+        :param frequency: rotational frequency, defaults to 1
+        :type frequency: float
+        :param unit: unit for frequency: "rps" [default] or "rad"
+        :type unit: str
+        :param phase: phase
+        :type phase: float
+        :param kwargs: common Block options
+        :type kwargs: dict
         :return: TRAJ block
         :rtype: Traj instance
 
-        Create a trajectory block.
+        Create a circular motion block.
 
-        A block that generates a trajectory using a trapezoidal or quintic
-        polynomial profile.
+        The block outputs the coordinates of a point moving in a circle of
+        radius ``r`` centred at ``centre`` and parallel to the xy-plane.
 
-        A simple triangle function with domain [0,10] and range [0,1] can be
-        defined by::
+        By default the output is a 3-vector :math:`(x, y, z)` but if 
+        ``pose`` is an ``SE3`` instance the output is a copy of that pose with
+        its translation set to the coordinate of the moving point.  This is the
+        motion of a frame with fixed orientation following a circular path.
 
-            INTERPOLATE(x=(0,5,10), y=(0,1,0))
-
-        We might also express this as::
-
-            INTERPOLATE(xy=[(0,0), (5,1), (10,0)])
-
-        The distance along the trajectory comes from:
-
-        - Input port 0
-        - Simulation time, if ``time=True``.  In this case the block has no
-          input ports and is a ``Source`` not a ``Function``.
         """
 
+        # TODO
+        # flag to rotate the frame rather than just translate it
         super().__init__(**kwargs)
 
         if unit == "rps":
