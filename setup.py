@@ -3,14 +3,14 @@ import os
 
 # fmt: off
 import pip
-pip.main(['install', 'numpy>=1.18.0'])
+pip.main(['install', 'numpy>=1.17.4'])
 import numpy
 # fmt: on
 
 here = os.path.abspath(os.path.dirname(__file__))
 
 req = [
-    "numpy>=1.18.0",
+    "numpy>=1.17.4",
     "spatialmath-python>=0.11",
     "spatialgeometry>=0.2.0",
     "pgraph-python",
