@@ -1126,11 +1126,11 @@ class CirclePath(SourceBlock):
         theta = t * self.omega + self.phase
         x = self.radius * cos(theta) + self.centre[0]
         y = self.radius * sin(theta) + self.centre[1]
-        p = [x, y, self.centre[2]]
+        p = (x, y, self.centre[2])
 
         if self.pose is not None:
-            p = self.pose * [x, y, 0]
-            p = p.flatten()
+            pp = SE3.Rt(self.pose.R, p)
+            p = pp
 
         return [p]
 
