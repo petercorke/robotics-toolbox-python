@@ -94,32 +94,3 @@ if __name__ == '__main__':   # pragma nocover
     robot = Panda()
     print(robot)
 
-    print(robot.n, robot.M)
-    print(robot.elinks)
-    print(robot.q_idx)
-    for link in robot:
-        print(link.name, link)
-        print(link.ets, link.v, link.isjoint)
-        print(link.parent, link.child)
-        print(link.Ts)
-        print(link.geometry, link.collision)
-
-        print()
-
-    from ansitable import ANSITable, Column
-
-    table = ANSITable(
-        Column("link"),
-        Column("parent"),
-        Column("ETS", headalign="^", colalign="<"),
-        border="thin")
-    for link in robot:
-        if link.isjoint:
-            color = ""
-        else:
-            color = "<<blue>>"
-        table.row(
-            color + link.name,
-            link.parent.name if link.parent is not None else "-",
-            link.ets * link.v if link.v is not None else link.ets)
-    table.print()
