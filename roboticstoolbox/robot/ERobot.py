@@ -297,7 +297,8 @@ class BaseERobot(Robot):
                 parent_name = link.parent.name
             s = ets.__str__(f"q{link._jindex}")
             if len(s) > 0:
-                s = " \u2295 " if unicode else " * " + s  # \oplus
+                op = " \u2295 " if unicode else " * "  # \oplus
+                s = op + s
 
             if link.isjoint:
                 # if link._joint_name is not None:
