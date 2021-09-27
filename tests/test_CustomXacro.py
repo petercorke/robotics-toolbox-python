@@ -57,7 +57,7 @@ class TestCustomXacro(unittest.TestCase):
         copy_tree(panda_xacro, franka_dir)
 
         # Make our custom robot
-        robot = CustomPanda(xacro_path)
+        robot = CustomPanda(xacro_dir)
 
         nt.assert_almost_equal(
             robot.qr, np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
