@@ -33,6 +33,7 @@ from spatialmath import (
 
 import fknm
 
+
 class BaseERobot(Robot):
 
     """
@@ -1214,20 +1215,32 @@ class ERobot(BaseERobot):
     # --------------------------------------------------------------------- #
 
     @staticmethod
-    def URDF_read(file_path, tld=None):
+    def URDF_read(file_path, tld=None, xacro_tld=None):
         """
         Read a URDF file as ELinks
         :param file_path: File path relative to the xacro folder
         :type file_path: str, in Posix file path fprmat
-        :param tld: top-level directory, defaults to None
+        :param tld: A custom top-level directory which holds the xacro data,
+            defaults to None
         :type tld: str, optional
+        :param xacro_tld: A custom top-level within the xacro data,
+            defaults to None
+        :type xacro_tld: str, optional
         :return: Links and robot name
         :rtype: tuple(ELink list, str)
         File should be specified relative to ``RTBDATA/URDF/xacro``
+
+        .. note:: If ``tld`` is not supplied, filepath pointing to xacro data should
+            be directly under ``RTBDATA/URDF/xacro`` OR under ``./xacro`` relative
+            to the model file calling this method. If ``tld`` is supplied, then
+            ```file_path``` needs to be relative to ``tld``
         """
 
         # get the path to the class that defines the robot
-        base_path = rtb_path_to_datafile("xacro")
+        if tld is None:
+            base_path = rtb_path_to_datafile("xacro")
+        else:
+            base_path = PurePosixPath(tld)
         # print("*** urdf_to_ets_args: ", classpath)
         # add on relative path to get to the URDF or xacro file
         # base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
@@ -1236,9 +1249,9 @@ class ERobot(BaseERobot):
 
         if ext == ".xacro":
             # it's a xacro file, preprocess it
-            if tld is not None:
-                tld = base_path / PurePosixPath(tld)
-            urdf_string = xacro.main(file_path, tld)
+            if xacro_tld is not None:
+                xacro_tld = base_path / PurePosixPath(xacro_tld)
+            urdf_string = xacro.main(file_path, xacro_tld)
             try:
                 urdf = URDF.loadstr(urdf_string, file_path)
             except BaseException as e:
