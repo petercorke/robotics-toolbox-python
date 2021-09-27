@@ -56,9 +56,6 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         self._reach = None
         self._base = base
 
-        # if base is None:
-        #     self.base = SE3()
-
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError("keywords must be a list or tuple")
         else:
@@ -1051,8 +1048,6 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
     @base.setter
     def base(self, T):
-        # if not isinstance(T, SE3):
-        #     T = SE3(T)
         if T is None:
             self._base = T
         elif isinstance(self, rtb.ERobot2):
@@ -1096,9 +1091,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
     @tool.setter
     def tool(self, T):
-        # if not isinstance(T, SE3):
-        #     T = SE3(T)
-        # this is allowed to be none, it's helpful for symbolics rather than
+        # This is allowed to be none, it's helpful for symbolics rather than
         # having an identity matrix
         if T is None or isinstance(T, SE3):
             self._tool = T
