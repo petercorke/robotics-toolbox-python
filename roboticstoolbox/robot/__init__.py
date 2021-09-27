@@ -9,6 +9,7 @@ from roboticstoolbox.robot.DHLink import (
     PrismaticMDH,
 )
 from roboticstoolbox.robot.ERobot import ERobot, ERobot2
+from roboticstoolbox.robot.FastRobot import FastRobot
 from roboticstoolbox.robot.ELink import ELink, ELink2
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.Gripper import Gripper
@@ -29,6 +30,7 @@ __all__ = [
     "ELink2",
     "ERobot",
     "ERobot2",
+    "FastRobot",
     "ETS",
     "ETS2",
     "Gripper",
