@@ -8,7 +8,7 @@ class PR2(ERobot):
     def __init__(self):
 
         links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "pr2_description/robots/pr2.urdf.xacro", "pr2_description"
+            "pr2_description/robots/pr2.urdf.xacro", xacro_tld="pr2_description"
         )
 
         super().__init__(
