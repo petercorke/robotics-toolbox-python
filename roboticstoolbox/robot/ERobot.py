@@ -1281,13 +1281,13 @@ class ERobot(BaseERobot):
                 xacro_tld = base_path / PurePosixPath(xacro_tld)
             urdf_string = xacro.main(file_path, xacro_tld)
             try:
-                urdf = URDF.loadstr(urdf_string, file_path)
+                urdf = URDF.loadstr(urdf_string, file_path, base_path)
             except BaseException as e:
                 print("error parsing URDF file", file_path)
                 raise e
         else:  # pragma nocover
             urdf_string = open(file_path).read()
-            urdf = URDF.loadstr(urdf_string, file_path)
+            urdf = URDF.loadstr(urdf_string, file_path, base_path)
 
         return urdf.elinks, urdf.name, urdf_string, file_path
 

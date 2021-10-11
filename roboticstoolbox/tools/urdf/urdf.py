@@ -13,9 +13,13 @@ import xml.etree.ElementTree as ET
 import spatialmath as sm
 from io import BytesIO
 from roboticstoolbox.tools.data import rtb_path_to_datafile
+from pathlib import PurePosixPath
 
 
 from .utils import parse_origin, configure_origin
+
+# Global variable for the base path of the robot meshes
+_base_path = None
 
 
 class URDFType(object):
@@ -292,10 +296,15 @@ class Mesh(URDFType):
     @filename.setter
     def filename(self, value):
 
+        global _base_path
+
         if value.startswith("package://"):
             value = value.replace("package://", "")
 
-        value = rtb_path_to_datafile("xacro", value)
+        if _base_path is None:
+            value = rtb_path_to_datafile("xacro", value)
+        else:
+            value = _base_path / PurePosixPath(value)
 
         self._filename = str(value)
 
@@ -1895,7 +1904,7 @@ class URDF(URDFType):
         return URDF._from_xml(node, path)
 
     @staticmethod
-    def loadstr(str_obj, file_obj):
+    def loadstr(str_obj, file_obj, base_path=None):
         """Load a URDF from a file.
         Parameters
         ----------
@@ -1909,6 +1918,11 @@ class URDF(URDFType):
         urdf : :class:`.URDF`
             The parsed URDF.
         """
+        global _base_path
+
+        if base_path is not None:
+            _base_path = base_path
+
         if isinstance(str_obj, str):
             if os.path.isfile(file_obj):
                 parser = ET.XMLParser()
