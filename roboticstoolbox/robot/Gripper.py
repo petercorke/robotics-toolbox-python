@@ -8,14 +8,8 @@ import spatialmath as sm
 from spatialmath.base.argcheck import getvector
 
 
-class Gripper():
-
-    def __init__(
-            self,
-            elinks,
-            name='',
-            tool=None
-            ):
+class Gripper:
+    def __init__(self, elinks, name="", tool=None):
 
         self._n = 0
 
@@ -34,7 +28,7 @@ class Gripper():
         self._links = elinks
 
         # assign the joint indices
-        if all([link.jindex is None for link in elinks]):
+        if all([link.jindex is None for link in elinks if link.isjoint]):
 
             jindex = [0]  # "mutable integer" hack
 
@@ -45,24 +39,26 @@ class Gripper():
                     jindex[0] += 1
 
             # visit all links in DFS order
-            self.dfs_links(
-                elinks[0], lambda link: visit_link(link, jindex))
+            self.dfs_links(elinks[0], lambda link: visit_link(link, jindex))
 
-        elif all([link.jindex is not None for link in elinks]):
+        elif all([link.jindex is not None for link in elinks if link.isjoint]):
             # jindex set on all, check they are unique and sequential
             jset = set(range(self.n))
             for link in elinks:
-                if link.jindex not in jset:
-                    raise ValueError(
-                        'gripper joint index {link.jindex} was '
-                        'repeated or out of range')
-                jset -= set([link.jindex])
-            if len(jset) > 0:   # pragma nocover # is impossible
-                raise ValueError('gripper joints {jset} were not assigned')
+                if link.isjoint:
+                    if link.jindex not in jset:
+                        raise ValueError(
+                            "gripper joint index {link.jindex} was "
+                            "repeated or out of range"
+                        )
+                    jset -= set([link.jindex])
+            if len(jset) > 0:  # pragma nocover # is impossible
+                raise ValueError("gripper joints {jset} were not assigned")
         else:
             # must be a mixture of ELinks with/without jindex
             raise ValueError(
-                'all gripper links must have a jindex, or none have a jindex')
+                "all gripper links must have a jindex, or none have a jindex"
+            )
 
     def dfs_links(self, start, func=None):
         """
@@ -116,7 +112,7 @@ class Gripper():
     def q(self, q_new):
         self._q = getvector(q_new, self.n)
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     @property
     def links(self):
@@ -134,7 +130,7 @@ class Gripper():
         """
         return self._links
 
-# --------------------------------------------------------------------- #
+    # --------------------------------------------------------------------- #
 
     @property
     def name(self):
