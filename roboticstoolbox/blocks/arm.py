@@ -1066,13 +1066,13 @@ class CirclePath(SourceBlock):
 
         :param radius: radius of circle, defaults to 1
         :type radius: float
-        :param centre: center of circle, defaults to (0, 0, 0)
+        :param centre: center of circle, defaults to [0,0,0]
         :type centre: array_like(3)
         :param pose: SE3 pose of output, defaults to None
         :type pose: SE3
         :param frequency: rotational frequency, defaults to 1
         :type frequency: float
-        :param unit: unit for frequency: "rps" [default] or "rad"
+        :param unit: unit for frequency, one of: 'rps' [default], 'rad'
         :type unit: str
         :param phase: phase
         :type phase: float
