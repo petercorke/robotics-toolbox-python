@@ -21,6 +21,7 @@ from roboticstoolbox.models.DH.Baxter import Baxter
 from roboticstoolbox.models.DH.TwoLink import TwoLink
 from roboticstoolbox.models.DH.Hyper3d import Hyper3d
 from roboticstoolbox.models.DH.P8 import P8
+from roboticstoolbox.models.DH.AL5D import AL5D
 
 
 __all__ = [
@@ -47,4 +48,5 @@ __all__ = [
     'Baxter',
     'TwoLink',
     'P8',
+    'AL5D',
 ]
