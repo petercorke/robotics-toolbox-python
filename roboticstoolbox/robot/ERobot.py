@@ -979,52 +979,80 @@ graph [rankdir=LR];
 class ERobot(BaseERobot):
     def __init__(self, arg, urdf_string=None, urdf_filepath=None, **kwargs):
 
-        self._urdf_string = urdf_string
-        self._urdf_filepath = urdf_filepath
-
-        if isinstance(arg, DHRobot):
-            # we're passed a DHRobot object
-            # TODO handle dynamic parameters if given
-            arg = arg.ets()
-
-        if isinstance(arg, ETS):
-            # we're passed an ETS string
-            links = []
-            # chop it up into segments, a link frame after every joint
-            parent = None
-            for j, ets_j in enumerate(arg.split()):
-                elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
-                if (
-                    elink.qlim is None
-                    and elink.v is not None
-                    and elink.v.qlim is not None
-                ):
-                    elink.qlim = elink.v.qlim
-                parent = elink
-                links.append(elink)
-
-        elif islistof(arg, ELink):
-            links = arg
-
-        elif isinstance(arg, ERobot):
+        if isinstance(arg, ERobot):
             # We're passed an ERobot, clone it
             # We need to preserve the parent link as we copy
             links = []
+
+            gripper_parents = []
+
+            # Make a list of old gripper links
+            for gripper in arg.grippers:
+                gripper_parents.append(gripper.links[0].name)
+
+            gripper_links = []
+            # print(arg.grippers[0].links[0])
 
             def dfs(node, node_copy):
                 for child in node.children:
                     child_copy = child.copy(node_copy)
                     links.append(child_copy)
+
+                    # If this link was a gripper link, add to the list
+                    if child_copy.name in gripper_parents:
+                        gripper_links.append(child_copy)
+
                     dfs(child, child_copy)
 
             link0 = arg.links[0]
             links.append(arg.links[0].copy())
             dfs(link0, links[0])
 
-        else:
-            raise TypeError("constructor argument must be ETS or list of ELink")
+            # print(gripper_links[0].jindex)
 
-        super().__init__(links, **kwargs)
+            super().__init__(links, gripper_links=gripper_links, **kwargs)
+
+            for i, gripper in enumerate(self.grippers):
+                gripper.tool = arg.grippers[i].tool.copy()
+
+            # if arg.qdlim is not None:
+            #     self.qdlim = arg.qdlim
+
+            self._urdf_string = arg.urdf_string
+            self._urdf_filepath = arg.urdf_filepath
+
+        else:
+            self._urdf_string = urdf_string
+            self._urdf_filepath = urdf_filepath
+
+            if isinstance(arg, DHRobot):
+                # we're passed a DHRobot object
+                # TODO handle dynamic parameters if given
+                arg = arg.ets()
+
+            if isinstance(arg, ETS):
+                # we're passed an ETS string
+                links = []
+                # chop it up into segments, a link frame after every joint
+                parent = None
+                for j, ets_j in enumerate(arg.split()):
+                    elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
+                    if (
+                        elink.qlim is None
+                        and elink.v is not None
+                        and elink.v.qlim is not None
+                    ):
+                        elink.qlim = elink.v.qlim
+                    parent = elink
+                    links.append(elink)
+
+            elif islistof(arg, ELink):
+                links = arg
+
+            else:
+                raise TypeError("constructor argument must be ETS or list of ELink")
+
+            super().__init__(links, **kwargs)
 
         # Cached paths through links
         # TODO Add listners on setters to reset cache
@@ -1253,13 +1281,13 @@ class ERobot(BaseERobot):
                 xacro_tld = base_path / PurePosixPath(xacro_tld)
             urdf_string = xacro.main(file_path, xacro_tld)
             try:
-                urdf = URDF.loadstr(urdf_string, file_path)
+                urdf = URDF.loadstr(urdf_string, file_path, base_path)
             except BaseException as e:
                 print("error parsing URDF file", file_path)
                 raise e
         else:  # pragma nocover
             urdf_string = open(file_path).read()
-            urdf = URDF.loadstr(urdf_string, file_path)
+            urdf = URDF.loadstr(urdf_string, file_path, base_path)
 
         return urdf.elinks, urdf.name, urdf_string, file_path
 
