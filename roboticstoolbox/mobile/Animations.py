@@ -52,6 +52,7 @@ during simulation::
 
     """
 
+
 class VehicleAnimationBase(ABC):
     """
     Class to support animation of a vehicle on Matplotlib plot
@@ -66,7 +67,7 @@ class VehicleAnimationBase(ABC):
 
         a.add()
         a.update(q)
-    
+
     adds an instance of the animation shape to the plot and subsequent calls
     to ``update`` will animate it.
 
@@ -86,7 +87,7 @@ class VehicleAnimationBase(ABC):
             veh.run(animation=a)
 
     """
-    
+
     def __init__(self):
         self._object = None
         self._ax = None
@@ -142,10 +143,11 @@ class VehicleAnimationBase(ABC):
         if self._object is not None:
             self._object.remove()
 
+
 # ========================================================================= #
 
-class VehicleMarker(VehicleAnimationBase):
 
+class VehicleMarker(VehicleAnimationBase):
     def __init__(self, **kwargs):
         """
         Create graphical animation of vehicle as a Matplotlib marker
@@ -170,13 +172,12 @@ class VehicleMarker(VehicleAnimationBase):
         super().__init__()
         if len(kwargs) == 0:
             kwargs = {
-                'marker': 'o',
-                'markerfacecolor': 'r',
-                'markeredgecolor': 'w',
-                'markersize': 12
+                "marker": "o",
+                "markerfacecolor": "r",
+                "markeredgecolor": "w",
+                "markersize": 12,
             }
         self._args = kwargs
-        
 
     def _update(self, x):
         self._object.set_xdata(x[0])
@@ -187,11 +188,12 @@ class VehicleMarker(VehicleAnimationBase):
             x = (0, 0)
         self._object = plt.plot(x[0], x[1], **self._args)[0]
 
+
 # ========================================================================= #
 
-class VehiclePolygon(VehicleAnimationBase):
 
-    def __init__(self, shape='car', scale=1, **kwargs):
+class VehiclePolygon(VehicleAnimationBase):
+    def __init__(self, shape="car", scale=1, **kwargs):
         """
         Create graphical animation of vehicle as a polygon
 
@@ -207,7 +209,7 @@ class VehiclePolygon(VehicleAnimationBase):
         :return: animation object
         :rtype: VehicleAnimation
 
-        Creates an object that can be passed to a ``Vehicle`` subclass to 
+        Creates an object that can be passed to a ``Vehicle`` subclass to
         depict the moving robot as a polygon during simulation.
 
         For example, a red filled car-shaped polygon is::
@@ -233,30 +235,34 @@ class VehiclePolygon(VehicleAnimationBase):
             h = 0.3
             t = 0.8  # start of head taper
             c = 0.5  # centre x coordinate
-            w = 1    # width in x direction
+            w = 1  # width in x direction
 
         if isinstance(shape, str):
-            if shape == 'car':
-                self._coords = np.array([
-                    [-c,     h],
-                    [t - c,  h],
-                    [w - c,  0],
-                    [t - c, -h],
-                    [-c,    -h],
-                ]).T
-            elif shape == 'triangle':
-                self._coords = np.array([
-                    [-c,  h],
-                    [ w,  0],
-                    [-c, -h],
-                ]).T
+            if shape == "car":
+                self._coords = np.array(
+                    [
+                        [-c, h],
+                        [t - c, h],
+                        [w - c, 0],
+                        [t - c, -h],
+                        [-c, -h],
+                    ]
+                ).T
+            elif shape == "triangle":
+                self._coords = np.array(
+                    [
+                        [-c, h],
+                        [w, 0],
+                        [-c, -h],
+                    ]
+                ).T
             else:
-                raise ValueError('unknown vehicle shape name')
-            
+                raise ValueError("unknown vehicle shape name")
+
         elif isinstance(shape, np.ndarray) and shape.shape[1] == 2:
             self._coords = shape
         else:
-            raise TypeError('unknown shape argument')
+            raise TypeError("unknown shape argument")
         self._coords *= scale
         self._args = kwargs
 
@@ -268,16 +274,17 @@ class VehiclePolygon(VehicleAnimationBase):
         self._ax.add_patch(self._object)
 
     def _update(self, x):
-        
+
         if self._object is not None:
             # if animation is initialized
             xy = SE2(x) * self._coords
             self._object.set_xy(xy.T)
 
+
 # ========================================================================= #
 
-class VehicleIcon(VehicleAnimationBase):
 
+class VehicleIcon(VehicleAnimationBase):
     def __init__(self, filename, origin=None, scale=1, rotation=0):
         """
         Create graphical animation of vehicle as an icon
@@ -294,7 +301,7 @@ class VehicleIcon(VehicleAnimationBase):
         :return: animation object
         :rtype: VehicleAnimation
 
-        Creates an object that can be passed to a ``Vehicle`` subclass to 
+        Creates an object that can be passed to a ``Vehicle`` subclass to
         depict the moving robot as a polygon during simulation.
 
         For example, the image of a red car is::
@@ -331,8 +338,8 @@ class VehicleIcon(VehicleAnimationBase):
         middle of the icon image, (0.2, 0.5) moves it toward the back of the
         vehicle, (0.8, 0.5) moves it toward the front of the vehicle.
 
-        .. note:: 
-        
+        .. note::
+
             - The standard icons are kept in ``roboticstoolbox/data``
             - By default the image is assumed to contain a car parallel to
               the x-axis and facing right.  If the vehicle is facing upward
@@ -341,10 +348,12 @@ class VehicleIcon(VehicleAnimationBase):
         :seealso: :func:`~Vehicle`
         """
         super().__init__()
-        if '.' not in filename:
+        if "." not in filename:
             try:
                 # try the default folder first
-                image = rtb_load_data(Path("data") / Path(filename + ".png"), plt.imread)
+                image = rtb_load_data(
+                    Path("data") / Path(filename + ".png"), plt.imread
+                )
             except FileNotFoundError:
                 raise ValueError(f"{filename} is not a provided icon")
         else:
@@ -352,7 +361,7 @@ class VehicleIcon(VehicleAnimationBase):
                 image = plt.imread(filename)
             except FileNotFoundError:
                 raise ValueError(f"icon file {filename} not found")
-        
+
         self._rotation = rotation
         self._image = image
 
@@ -364,15 +373,13 @@ class VehicleIcon(VehicleAnimationBase):
         if image.shape[0] >= image.shape[1]:
             # width >= height
             self._width = scale
-            self._height =scale * image.shape[1] / image.shape[0]
+            self._height = scale * image.shape[1] / image.shape[0]
         else:
             # width < height
             self._height = scale
             self._width = scale * image.shape[0] / image.shape[1]
 
-
     def _add(self, ax=None, **kwargs):
-
         def imshow_affine(ax, z, *args, **kwargs):
             im = ax.imshow(z, *args, **kwargs)
             x1, x2, y1, y2 = im.get_extent()
@@ -380,33 +387,39 @@ class VehicleIcon(VehicleAnimationBase):
             return im
 
         self._ax = plt.gca()
-        extent = [  -self._origin[0] * self._height, 
-                    (1 - self._origin[0]) * self._height, 
-                    -self._origin[1] * self._width, 
-                    (1 - self._origin[1]) * self._width
-                ]
+        extent = [
+            -self._origin[0] * self._height,
+            (1 - self._origin[0]) * self._height,
+            -self._origin[1] * self._width,
+            (1 - self._origin[1]) * self._width,
+        ]
         self._ax = plt.gca()
 
         args = {}
-        if 'color' in kwargs and self._image.ndim == 2:
-            color = kwargs['color']
-            del kwargs['color']
+        if "color" in kwargs and self._image.ndim == 2:
+            color = kwargs["color"]
+            del kwargs["color"]
             rgb = colors.to_rgb(color)
-            cmapdata = {'red': [(0.0, 0.0, 0.0), (1.0, rgb[0], 0.0)],
-                        'green': [(0.0, 0.0, 0.0), (1.0, rgb[1], 0.0)],
-                        'blue': [(0.0, 0.0, 0.0), (1.0, rgb[2], 0.0)]
-                        }
-            cmap = colors.LinearSegmentedColormap('linear', segmentdata=cmapdata, N=256)
-            args = {'cmap': cmap}
+            cmapdata = {
+                "red": [(0.0, 0.0, 0.0), (1.0, rgb[0], 0.0)],
+                "green": [(0.0, 0.0, 0.0), (1.0, rgb[1], 0.0)],
+                "blue": [(0.0, 0.0, 0.0), (1.0, rgb[2], 0.0)],
+            }
+            cmap = colors.LinearSegmentedColormap("linear", segmentdata=cmapdata, N=256)
+            args = {"cmap": cmap}
         elif self._image.ndim == 2:
-            args = {'cmap': 'gray'}
-        if 'zorder' not in kwargs:
-            args['zorder'] = 3
-            
-        self._object = imshow_affine(self._ax, self._image,
-                            interpolation='none',
-                            extent=extent, clip_on=True,
-                            **{**kwargs, **args})
+            args = {"cmap": "gray"}
+        if "zorder" not in kwargs:
+            args["zorder"] = 3
+
+        self._object = imshow_affine(
+            self._ax,
+            self._image,
+            interpolation="none",
+            extent=extent,
+            clip_on=True,
+            **{**kwargs, **args},
+        )
 
     def _update(self, x):
 
@@ -415,11 +428,14 @@ class VehicleIcon(VehicleAnimationBase):
         center_x = 0
         center_y = 0
 
-        T = (mtransforms.Affine2D()
-                    .rotate_deg_around(center_x, center_y, np.degrees(x[2]) - self._rotation)
-                    .translate(x[0], x[1])
-                    + self._ax.transData)
+        T = (
+            mtransforms.Affine2D()
+            .rotate_deg_around(center_x, center_y, np.degrees(x[2]) - self._rotation)
+            .translate(x[0], x[1])
+            + self._ax.transData
+        )
         self._object.set_transform(T)
+
 
 if __name__ == "__main__":
     from math import pi
@@ -442,14 +458,14 @@ if __name__ == "__main__":
     print(veh.f([0, 0, 0], odo))
 
     def control(v, t, x):
-        goal = (6,6)
-        goal_heading = atan2(goal[1]-x[1], goal[0]-x[0])
+        goal = (6, 6)
+        goal_heading = atan2(goal[1] - x[1], goal[0] - x[0])
         d_heading = base.angdiff(goal_heading, x[2])
         v.stopif(base.norm(x[0:2] - goal) < 0.1)
 
         return (1, d_heading)
 
-    veh.control=RandomPath(10)
+    veh.control = RandomPath(10)
     p = veh.run(1000, plot=True)
     # plt.show()
     print(p)
@@ -464,7 +480,6 @@ if __name__ == "__main__":
 
     # ax.set_xlim(-5, 5)
     # ax.set_ylim(-5, 5)
-
 
     # v = VehicleAnimation.Polygon(shape='triangle', maxdim=0.1, color='r')
     # v = VehicleAnimation.Icon('car3.png', maxdim=2, centre=[0.3, 0.5])
