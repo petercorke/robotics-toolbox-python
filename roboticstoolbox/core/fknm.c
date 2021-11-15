@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 // forward defines
+static PyObject *ET_T(PyObject *self, PyObject *args);
 static PyObject *fkine_all(PyObject *self, PyObject *args);
 static PyObject *jacob0(PyObject *self, PyObject *args);
 static PyObject *jacobe(PyObject *self, PyObject *args);
@@ -41,6 +42,10 @@ int _inv(npy_float64 *m, npy_float64 *invOut);
 void _r2q(npy_float64 *r, npy_float64 *q);
 
 static PyMethodDef fknmMethods[] = {
+    {"ET_T",
+     (PyCFunction)ET_T,
+     METH_VARARGS,
+     "Link"},
     {"link_init",
      (PyCFunction)link_init,
      METH_VARARGS,
@@ -92,6 +97,39 @@ PyMODINIT_FUNC PyInit_fknm(void)
 {
     import_array();
     return PyModule_Create(&fknmmodule);
+}
+
+static PyObject *ET_T(PyObject *self, PyObject *args)
+{
+    npy_float64 *ret;
+    int jointtype, isflip;
+    double eta;
+
+    if (!PyArg_ParseTuple(args, "dii", &eta, &jointtype, &isflip))
+        return NULL;
+
+    // if (!(link = (Link *)PyCapsule_GetPointer(lo, "Link")))
+    //     return NULL;
+
+    npy_intp dims[2] = {4, 4};
+    int nd = 2;
+    PyObject *arr = PyArray_EMPTY(nd, &dims, NPY_DOUBLE, 0);
+
+    ret = (npy_float64 *)PyArray_DATA(arr);
+    // A(link, ret, eta);
+
+    if (isflip)
+    {
+        eta = -eta;
+    }
+
+    if (jointtype == 0)
+    {
+        rx(ret, eta);
+    }
+
+    // Py_RETURN_NONE;
+    return arr;
 }
 
 static PyObject *fkine_all(PyObject *self, PyObject *args)
@@ -1114,7 +1152,8 @@ int _inv(npy_float64 *m, npy_float64 *invOut)
 
     det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
 
-    if (det == 0) {
+    if (det == 0)
+    {
         free(inv);
         return 0;
     }
