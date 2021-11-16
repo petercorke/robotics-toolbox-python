@@ -82,34 +82,45 @@ if __name__ == "__main__":  # pragma nocover
 
     e1 = ET.Rx()
 
-    # e2 = ET.Ry(0.7)
+    e2 = ET.Ry(0.7)
 
-    # print(e1)
-    # print(e2)
+    # print(e1.T(0.7))
+    # print(e2.T())
+
+    ets = e1 * e2
+    q = np.array([1.0])
+    base = np.eye(4)
+    tool = np.eye(4)
+
+    print(ets.fkine(q, base, tool))
+    print(ets.fkine(q, None, None))
+    print(e1.T(1.0) @ e2.T())
+
+    # print(e1.__axis_to_number(e1.axis))
 
     # print(e1 * e2)
 
     # print(e1.T_OLD(x))
 
-    num = 1000000
-    q = np.random.rand(num)
+    # num = 1000000
+    # q = np.random.rand(num)
 
-    def step_old():
-        for i in range(num):
-            e1.T_OLD(q[i])
+    # def step_old():
+    #     for i in range(num):
+    #         e1.T_OLD(q[i])
 
-    def step_new():
-        # ls = []
-        for i in range(num):
-            e1.T(q[i])
+    # def step_new():
+    #     # ls = []
+    #     for i in range(num):
+    #         e1.T(q[i])
 
-        # res = map(e1.T, q)
-        # list(res)
+    #     # res = map(e1.T, q)
+    #     # list(res)
 
-        # ls = [e1.T(x) for x in q]
+    #     # ls = [e1.T(x) for x in q]
 
-    # cProfile.run("step_old()")
+    # # cProfile.run("step_old()")
 
-    cProfile.run("step_new()")
+    # cProfile.run("step_new()")
 
-    print(e1.T(x))
+    # print(e1.T(x))
