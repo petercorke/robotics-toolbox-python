@@ -17,8 +17,8 @@ class BaseET:
         axis=None,
         eta=None,
         axis_func=None,
+        jindex=None,
         unit="rad",
-        # j=None,
         flip=False,
         qlim=None,
     ):
@@ -27,15 +27,30 @@ class BaseET:
         self._axis_func = axis_func
         self._flip = flip
         self._qlim = qlim
+        self._jindex = jindex
 
         if eta is None:
             self._joint = True
-            self._T = None
+            self._T = np.eye(4)
         else:
             self._joint = False
             self._T = axis_func(eta)
 
-        self.__axis_number = self.__axis_to_number(axis)
+        # self.__axis_number = self.__axis_to_number(axis)
+
+        # Initialise the C object which holds ET data
+        # This returns a reference to said C data
+        self.__fknm = self.__init_c()
+
+    def __init_c(self):
+        if self.jindex is None:
+            jindex = 0
+        else:
+            jindex = self.jindex
+
+        return fknm.ET_init(
+            self.isjoint, self.isflip, jindex, self.__axis_to_number(self.axis), self._T
+        )
 
     def __mul__(self, other):
         return ETS([self, other])
@@ -62,6 +77,10 @@ class BaseET:
                 return 4
             elif axis[1] == "z":
                 return 5
+
+    @property
+    def fknm(self):
+        return self.__fknm
 
     @property
     def eta(self):
@@ -213,6 +232,29 @@ class BaseET:
     def qlim(self):
         return self._qlim
 
+    @property
+    def jindex(self):
+        """
+        Get ET joint index
+
+        :return: The assigmed joint index
+        :rtype: int or None
+
+        Allows an ET to be associated with a numbered joint in a robot.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tx()
+            >>> print(e)
+            >>> e = ET.tx(j=3)
+            >>> print(e)
+            >>> print(e.jindex)
+        """
+        return self._jindex
+
     def T(self, q=None):
         """
         Evaluate an elementary transformation
@@ -233,17 +275,17 @@ class BaseET:
             >>> e.T(0.7)
 
         """
-        if self._joint:
-            try:
-                # Try and use the C implementation, flip is handled in C
-                return fknm.ET_T(q, self.__axis_number, self._flip)
-            except TypeError:
-                # We can't use the fast version, lets use Python instead
+        try:
+            # Try and use the C implementation, flip is handled in C
+            return fknm.ET_T(self.__fknm, q)
+        except TypeError:
+            # We can't use the fast version, lets use Python instead
+            if self.isjoint:
                 if self.isflip:
                     q = -q
                 return self.axis_func(q)
-        else:
-            return self._T
+            else:
+                return self._T
 
 
 class ET(BaseET):
@@ -463,14 +505,24 @@ class ETS(UserList):
                 raise ValueError("bad arg")
             self.data = arg
 
+        self.__fknm = [et.fknm for et in self.data]
+        print(self.__fknm)
+
+        self.inv_mask = np.array([False, False])
+        self._m = len(self.data)
+
     def __str__(self):
         return " * ".join([str(e) for e in self.data])
 
     def __mul__(self, other):
         if isinstance(other, ET):
             return ETS([*self.data, other])
-        elif instance(other, ETS):
+        elif isinstance(other, ETS):
             return ETS([*self.data, *other.data])
 
     def __rmul__(self, other):
         return ETS([other, self.data])
+
+    def fkine(self, q, base=None, tool=None):
+
+        return fknm.ETS_fkine(self._m, self.__fknm, q, base, tool)
