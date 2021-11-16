@@ -14,6 +14,8 @@
 #include <stdio.h>
 
 // forward defines
+static PyObject *ETS_fkine(PyObject *self, PyObject *args);
+static PyObject *ET_init(PyObject *self, PyObject *args);
 static PyObject *ET_T(PyObject *self, PyObject *args);
 static PyObject *fkine_all(PyObject *self, PyObject *args);
 static PyObject *jacob0(PyObject *self, PyObject *args);
@@ -25,6 +27,8 @@ static PyObject *link_update(PyObject *self, PyObject *args);
 static PyObject *compose(PyObject *self, PyObject *args);
 static PyObject *r2q(PyObject *self, PyObject *args);
 
+void _ETS_fkine(PyObject *ets, int m, npy_float64 *q, npy_float64 *base, npy_float64 *tool, npy_float64 *ret);
+void _ET_T(ET *et, npy_float64 *ret, double eta);
 void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J);
 void _jacobe(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J);
 void _fkine(PyObject *links, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *ret);
@@ -42,6 +46,14 @@ int _inv(npy_float64 *m, npy_float64 *invOut);
 void _r2q(npy_float64 *r, npy_float64 *q);
 
 static PyMethodDef fknmMethods[] = {
+    {"ETS_fkine",
+     (PyCFunction)ETS_fkine,
+     METH_VARARGS,
+     "Link"},
+    {"ET_init",
+     (PyCFunction)ET_init,
+     METH_VARARGS,
+     "Link"},
     {"ET_T",
      (PyCFunction)ET_T,
      METH_VARARGS,
@@ -99,37 +111,119 @@ PyMODINIT_FUNC PyInit_fknm(void)
     return PyModule_Create(&fknmmodule);
 }
 
-static PyObject *ET_T(PyObject *self, PyObject *args)
+static PyObject *ETS_fkine(PyObject *self, PyObject *args)
 {
-    npy_float64 *ret;
-    int jointtype, isflip;
-    double eta;
-
-    if (!PyArg_ParseTuple(args, "dii", &eta, &jointtype, &isflip))
-        return NULL;
-
-    // if (!(link = (Link *)PyCapsule_GetPointer(lo, "Link")))
-    //     return NULL;
-
     npy_intp dims[2] = {4, 4};
     int nd = 2;
-    PyObject *arr = PyArray_EMPTY(nd, &dims, NPY_DOUBLE, 0);
+    npy_float64 *ret, *q, *base = NULL, *tool = NULL;
+    PyObject *py_q, *py_base, *py_tool;
+    PyObject *py_ret = PyArray_EMPTY(nd, &dims, NPY_DOUBLE, 0);
+    PyObject *ets;
+    int m;
 
-    ret = (npy_float64 *)PyArray_DATA(arr);
-    // A(link, ret, eta);
+    if (!PyArg_ParseTuple(
+            args, "iOOOO",
+            &m,
+            &ets,
+            &py_q,
+            &py_base,
+            &py_tool))
+        return NULL;
 
-    if (isflip)
+    q = (npy_float64 *)PyArray_DATA(py_q);
+    ret = (npy_float64 *)PyArray_DATA(py_ret);
+
+    if (py_base != Py_None)
     {
-        eta = -eta;
+        base = (npy_float64 *)PyArray_DATA(py_base);
     }
+
+    if (py_tool != Py_None)
+    {
+        tool = (npy_float64 *)PyArray_DATA(py_tool);
+    }
+
+    _ETS_fkine(ets, m, q, base, tool, ret);
+
+    return py_ret;
+}
+
+static PyObject *ET_init(PyObject *self, PyObject *args)
+{
+    ET *et;
+    int jointtype;
+    PyObject *ret;
+    PyArrayObject *py_T;
+
+    et = (ET *)PyMem_RawMalloc(sizeof(ET));
+
+    if (!PyArg_ParseTuple(args, "iiiiO!",
+                          &et->isjoint,
+                          &et->isflip,
+                          &et->jindex,
+                          &jointtype,
+                          &PyArray_Type, &py_T))
+        return NULL;
+
+    et->T = (npy_float64 *)PyArray_DATA(py_T);
+
+    et->axis = jointtype;
 
     if (jointtype == 0)
     {
-        rx(ret, eta);
+        et->op = rx;
+    }
+    else if (jointtype == 1)
+    {
+        et->op = ry;
+    }
+    else if (jointtype == 2)
+    {
+        et->op = rz;
+    }
+    else if (jointtype == 3)
+    {
+        et->op = tx;
+    }
+    else if (jointtype == 4)
+    {
+        et->op = ty;
+    }
+    else if (jointtype == 5)
+    {
+        et->op = tz;
     }
 
-    // Py_RETURN_NONE;
-    return arr;
+    ret = PyCapsule_New(et, "ET", NULL);
+    return ret;
+}
+
+static PyObject *ET_T(PyObject *self, PyObject *args)
+{
+    npy_intp dims[2] = {4, 4};
+    int nd = 2;
+    ET *et;
+    PyObject *py_et, *py_eta;
+    PyObject *py_ret = PyArray_EMPTY(nd, &dims, NPY_DOUBLE, 0);
+    double eta = 0;
+    npy_float64 *ret;
+
+    if (!PyArg_ParseTuple(args, "OO", &py_et, &py_eta))
+        return NULL;
+
+    if (!(et = (ET *)PyCapsule_GetPointer(py_et, "ET")))
+        return NULL;
+
+    if (py_eta != Py_None)
+    {
+        eta = (double)PyFloat_AsDouble(py_eta);
+    }
+
+    ret = (npy_float64 *)PyArray_DATA(py_ret);
+
+    _ET_T(et, ret, eta);
+
+    return py_ret;
 }
 
 static PyObject *fkine_all(PyObject *self, PyObject *args)
@@ -559,6 +653,67 @@ static PyObject *r2q(PyObject *self, PyObject *args)
     _r2q(r, q);
 
     Py_RETURN_NONE;
+}
+
+void _ETS_fkine(PyObject *ets, int m, npy_float64 *q, npy_float64 *base, npy_float64 *tool, npy_float64 *ret)
+{
+    npy_float64 *temp, *current;
+    ET *et;
+
+    temp = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    current = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    PyObject *iter_et = PyObject_GetIter(ets);
+
+    if (base != NULL)
+    {
+        copy(base, current);
+    }
+    else
+    {
+        _eye(current);
+    }
+
+    for (int i = 0; i < m; i++)
+    {
+        if (!(et = (ET *)PyCapsule_GetPointer(PyIter_Next(iter_et), "ET")))
+            return;
+
+        _ET_T(et, ret, q[et->jindex]);
+        mult(current, ret, temp);
+        copy(temp, current);
+    }
+
+    if (tool != NULL)
+    {
+        mult(current, tool, ret);
+    }
+    else
+    {
+        copy(current, ret);
+    }
+
+    Py_DECREF(iter_et);
+
+    free(temp);
+    free(current);
+}
+
+void _ET_T(ET *et, npy_float64 *ret, double eta)
+{
+    // Check if static and return static transform
+    if (!et->isjoint)
+    {
+        copy(et->T, ret);
+        return;
+    }
+
+    if (et->isflip)
+    {
+        eta = -eta;
+    }
+
+    // Calculate ET trasform based on eta
+    et->op(ret, eta);
 }
 
 void _jacobe(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J)
