@@ -506,7 +506,7 @@ class ETS(UserList):
             self.data = arg
 
         self.__fknm = [et.fknm for et in self.data]
-        print(self.__fknm)
+        # print(self.__fknm)
 
         self.inv_mask = np.array([False, False])
         self._m = len(self.data)
