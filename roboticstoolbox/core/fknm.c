@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 // forward defines
+static PyObject *ETS_jacob0(PyObject *self, PyObject *args);
 static PyObject *ETS_fkine(PyObject *self, PyObject *args);
 static PyObject *ET_init(PyObject *self, PyObject *args);
 static PyObject *ET_T(PyObject *self, PyObject *args);
@@ -27,6 +28,7 @@ static PyObject *link_update(PyObject *self, PyObject *args);
 static PyObject *compose(PyObject *self, PyObject *args);
 static PyObject *r2q(PyObject *self, PyObject *args);
 
+void _ETS_jacob0(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J);
 void _ETS_fkine(PyObject *ets, int m, npy_float64 *q, npy_float64 *base, npy_float64 *tool, npy_float64 *ret);
 void _ET_T(ET *et, npy_float64 *ret, double eta);
 void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J);
@@ -46,6 +48,10 @@ int _inv(npy_float64 *m, npy_float64 *invOut);
 void _r2q(npy_float64 *r, npy_float64 *q);
 
 static PyMethodDef fknmMethods[] = {
+    {"ETS_jacob0",
+     (PyCFunction)ETS_jacob0,
+     METH_VARARGS,
+     "Link"},
     {"ETS_fkine",
      (PyCFunction)ETS_fkine,
      METH_VARARGS,
@@ -109,6 +115,53 @@ PyMODINIT_FUNC PyInit_fknm(void)
 {
     import_array();
     return PyModule_Create(&fknmmodule);
+}
+
+static PyObject *ETS_jacob0(PyObject *self, PyObject *args)
+{
+    npy_float64 *J, *q, *T, *tool = NULL;
+    PyObject *py_q, *py_tool, *py_np_q, *py_np_tool;
+    PyObject *ets;
+    int m, n, tool_used = 0;
+
+    if (!PyArg_ParseTuple(
+            args, "iiOOO",
+            &m,
+            &n,
+            &ets,
+            &py_q,
+            &py_tool))
+        return NULL;
+
+    // Make our empty Jacobian
+    npy_intp dims[2] = {6, n};
+    PyObject *py_J = PyArray_EMPTY(2, &dims, NPY_DOUBLE, 0);
+
+    J = (npy_float64 *)PyArray_DATA(py_J);
+    // q = (npy_float64 *)PyArray_DATA(py_q);
+    // PyArray_Descr *dtype = PyArray_DescrFromObject(py_q, NULL);
+    // q = (npy_float64 *)malloc(sizeof(npy_float64) * n * 6);
+
+    py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+    q = (npy_float64 *)PyArray_DATA(py_np_q);
+
+    if (py_tool != Py_None)
+    {
+        tool_used = 1;
+        py_np_tool = (npy_float64 *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        tool = (npy_float64 *)PyArray_DATA(py_np_tool);
+    }
+
+    _ETS_jacob0(ets, m, n, q, tool, J);
+
+    Py_DECREF(py_np_q);
+
+    if (tool_used)
+    {
+        Py_DECREF(py_np_tool);
+    }
+
+    return py_J;
 }
 
 static PyObject *ETS_fkine(PyObject *self, PyObject *args)
@@ -653,6 +706,117 @@ static PyObject *r2q(PyObject *self, PyObject *args)
     _r2q(r, q);
 
     Py_RETURN_NONE;
+}
+
+void _ETS_jacob0(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J)
+{
+    ET *et;
+    npy_float64 *T = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *U = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *invU = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *temp = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *ret = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+
+    int j = 0;
+
+    _eye(U);
+
+    // Get the forward  kinematics into T
+    _ETS_fkine(ets, m, q, (npy_float64 *)NULL, tool, T);
+
+    PyObject *iter_et = PyObject_GetIter(ets);
+
+    for (int i = 0; i < m; i++)
+    {
+        if (!(et = (ET *)PyCapsule_GetPointer(PyIter_Next(iter_et), "ET")))
+            return;
+
+        if (et->isjoint)
+        {
+            _ET_T(et, ret, q[et->jindex]);
+            mult(U, ret, temp);
+            copy(temp, U);
+
+            if (i == m - 1 && tool != NULL)
+            {
+                mult(U, tool, temp);
+                copy(temp, U);
+            }
+
+            _inv(U, invU);
+            mult(invU, T, temp);
+
+            if (et->axis == 0)
+            {
+                J[0 * n + j] = U[0 * 4 + 2] * temp[1 * 4 + 3] - U[0 * 4 + 1] * temp[2 * 4 + 3];
+                J[1 * n + j] = U[1 * 4 + 2] * temp[1 * 4 + 3] - U[1 * 4 + 1] * temp[2 * 4 + 3];
+                J[2 * n + j] = U[2 * 4 + 2] * temp[1 * 4 + 3] - U[2 * 4 + 1] * temp[2 * 4 + 3];
+                J[3 * n + j] = U[0 * 4 + 2];
+                J[4 * n + j] = U[1 * 4 + 2];
+                J[5 * n + j] = U[2 * 4 + 2];
+            }
+            else if (et->axis == 1)
+            {
+                J[0 * n + j] = U[0 * 4 + 0] * temp[2 * 4 + 3] - U[0 * 4 + 2] * temp[0 * 4 + 3];
+                J[1 * n + j] = U[1 * 4 + 0] * temp[2 * 4 + 3] - U[1 * 4 + 2] * temp[0 * 4 + 3];
+                J[2 * n + j] = U[2 * 4 + 0] * temp[2 * 4 + 3] - U[2 * 4 + 2] * temp[0 * 4 + 3];
+                J[3 * n + j] = U[0 * 4 + 1];
+                J[4 * n + j] = U[1 * 4 + 1];
+                J[5 * n + j] = U[2 * 4 + 1];
+            }
+            else if (et->axis == 2)
+            {
+                J[0 * n + j] = U[0 * 4 + 1] * temp[0 * 4 + 3] - U[0 * 4 + 0] * temp[1 * 4 + 3];
+                J[1 * n + j] = U[1 * 4 + 1] * temp[0 * 4 + 3] - U[1 * 4 + 0] * temp[1 * 4 + 3];
+                J[2 * n + j] = U[2 * 4 + 1] * temp[0 * 4 + 3] - U[2 * 4 + 0] * temp[1 * 4 + 3];
+                J[3 * n + j] = U[0 * 4 + 2];
+                J[4 * n + j] = U[1 * 4 + 2];
+                J[5 * n + j] = U[2 * 4 + 2];
+            }
+            else if (et->axis == 3)
+            {
+                J[0 * n + j] = U[0 * 4 + 0];
+                J[1 * n + j] = U[1 * 4 + 0];
+                J[2 * n + j] = U[2 * 4 + 0];
+                J[3 * n + j] = 0.0;
+                J[4 * n + j] = 0.0;
+                J[5 * n + j] = 0.0;
+            }
+            else if (et->axis == 4)
+            {
+                J[0 * n + j] = U[0 * 4 + 1];
+                J[1 * n + j] = U[1 * 4 + 1];
+                J[2 * n + j] = U[2 * 4 + 1];
+                J[3 * n + j] = 0.0;
+                J[4 * n + j] = 0.0;
+                J[5 * n + j] = 0.0;
+            }
+            else if (et->axis == 5)
+            {
+                J[0 * n + j] = U[0 * 4 + 2];
+                J[1 * n + j] = U[1 * 4 + 2];
+                J[2 * n + j] = U[2 * 4 + 2];
+                J[3 * n + j] = 0.0;
+                J[4 * n + j] = 0.0;
+                J[5 * n + j] = 0.0;
+            }
+            j++;
+        }
+        else
+        {
+            _ET_T(et, ret, q[et->jindex]);
+            mult(U, ret, temp);
+            copy(temp, U);
+        }
+    }
+
+    Py_DECREF(iter_et);
+
+    free(T);
+    free(U);
+    free(temp);
+    free(ret);
+    free(invU);
 }
 
 void _ETS_fkine(PyObject *ets, int m, npy_float64 *q, npy_float64 *base, npy_float64 *tool, npy_float64 *ret)
