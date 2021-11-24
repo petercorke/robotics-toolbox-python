@@ -9,9 +9,6 @@ from spatialmath import base
 
 
 class BaseET:
-    # all the ET goodness goes in here, simpler because it's a singleton
-    # optimize the b***z out of this
-
     def __init__(
         self,
         axis=None,
@@ -508,8 +505,10 @@ class ETS(UserList):
         self.__fknm = [et.fknm for et in self.data]
         # print(self.__fknm)
 
-        self.inv_mask = np.array([False, False])
+        # self.inv_mask = np.array([False, False])
+
         self._m = len(self.data)
+        self._n = len([True for et in self.data if et.isjoint])
 
     def __str__(self):
         return " * ".join([str(e) for e in self.data])
@@ -525,4 +524,100 @@ class ETS(UserList):
 
     def fkine(self, q, base=None, tool=None):
 
-        return fknm.ETS_fkine(self._m, self.__fknm, q, base, tool)
+        try:
+            return fknm.ETS_fkine(self._m, self.__fknm, q, base, tool)
+        except:
+            pass
+
+    def jacob0(self, q, tool=None):
+        r"""
+        Manipulator geometric Jacobian in the base frame
+        :param q: Joint coordinate vector
+        :type q: ndarray(n)
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :type tool: SE3, optional
+        :return J: Manipulator Jacobian in the base frame
+        :rtype: ndarray(6,n)
+        - ``robot.jacob0(q)`` is the manipulator Jacobian matrix which maps
+          joint  velocity to end-effector spatial velocity expressed in the
+          end-effector frame.
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+
+        Example:
+        .. runblock:: pycon
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.ETS.Puma560()
+            >>> puma.jacob0([0, 0, 0, 0, 0, 0])
+        """  # noqa
+        pass
+
+        # Use c extension
+        try:
+            return fknm.ETS_jacob0(self._m, self._n, self.__fknm, q, tool)
+        except:
+            pass
+
+        # # Otherwise use Python
+        # if tool is None:
+        #     tool = SE3()
+
+        # path, n, _ = self.get_path(end, start)
+
+        # q = getvector(q, self.n)
+
+        # if T is None:
+        #     T = self.fkine(q, end=end, start=start, include_base=False) * tool
+
+        # T = T.A
+        # U = np.eye(4)
+        # j = 0
+        # J = np.zeros((6, n))
+        # zero = np.array([0, 0, 0])
+
+        # for link in path:
+
+        #     if link.isjoint:
+        #         U = U @ link.A(q[link.jindex], fast=True)
+
+        #         if link == end:
+        #             U = U @ tool.A
+
+        #         Tu = np.linalg.inv(U) @ T
+        #         n = U[:3, 0]
+        #         o = U[:3, 1]
+        #         a = U[:3, 2]
+        #         x = Tu[0, 3]
+        #         y = Tu[1, 3]
+        #         z = Tu[2, 3]
+
+        #         if link.v.axis == "Rz":
+        #             J[:3, j] = (o * x) - (n * y)
+        #             J[3:, j] = a
+
+        #         elif link.v.axis == "Ry":
+        #             J[:3, j] = (n * z) - (a * x)
+        #             J[3:, j] = o
+
+        #         elif link.v.axis == "Rx":
+        #             J[:3, j] = (a * y) - (o * z)
+        #             J[3:, j] = n
+
+        #         elif link.v.axis == "tx":
+        #             J[:3, j] = n
+        #             J[3:, j] = zero
+
+        #         elif link.v.axis == "ty":
+        #             J[:3, j] = o
+        #             J[3:, j] = zero
+
+        #         elif link.v.axis == "tz":
+        #             J[:3, j] = a
+        #             J[3:, j] = zero
+
+        #         j += 1
+        #     else:
+        #         A = link.A(fast=True)
+        #         if A is not None:
+        #             U = U @ A
