@@ -10,6 +10,9 @@ from roboticstoolbox.robot.etsnew import ET
 import sympy
 import cProfile
 import roboticstoolbox as rtb
+import spatialmath as sm
+
+import fknm
 
 
 class Panda(ERobot):
@@ -76,92 +79,128 @@ class Panda(ERobot):
 
 if __name__ == "__main__":  # pragma nocover
 
-    # robot = Panda()
-    # print(robot)
+    r = rtb.models.Panda()
+    # q = r.qr
+    # q = [0, -0.3, 0, -2.2, 0, 2, 0.78539816]
 
-    x = sympy.symbols("x")
-
-    e1 = ET.Rx()
-
-    e2 = ET.Ry(0.7)
-
+    # # ET
+    # x = sympy.symbols("x")
+    # e1 = ET.Rx()
+    # e2 = ET.Ry(0.7)
     # print(e1.T(0.7))
     # print(e2.T())
 
-    # ets = e1 * e2
-    q = np.array([1.0])
+    # Variables
     base = np.eye(4)
     tool = np.eye(4)
 
+    # # Fkine
     # print(ets.fkine(q, base, tool))
     # print(ets.fkine(q, None, None))
     # print(e1.T(1.0) @ e2.T())
 
+    # A Panda ETS
     ets = (
         ET.tz(0.333)
-        * ET.Rz()
+        * ET.Rz(jindex=0)
         * ET.Rx(-np.pi / 2)
-        * ET.Rz()
+        * ET.Rz(jindex=1)
         * ET.ty(-0.316)
         * ET.Rx(np.pi / 2)
-        * ET.Rz()
+        * ET.Rz(jindex=2)
         * ET.tx(0.0825)
         * ET.Rx(np.pi / 2)
-        * ET.Rz()
+        * ET.Rz(jindex=3)
         * ET.tx(-0.0825)
         * ET.ty(0.384)
         * ET.Rx(-np.pi / 2)
-        * ET.Rz()
+        * ET.Rz(jindex=4)
         * ET.Rx(np.pi / 2)
-        * ET.Rz()
+        * ET.Rz(jindex=5)
         * ET.tx(0.088)
         * ET.Rx(np.pi / 2)
-        * ET.Rz()
+        * ET.Rz(jindex=6)
         * ET.tz(0.107)
+        * ET.tz(0.1034)
     )
 
-    print(ets.fkine(q, base, tool))
-    # print(e1.__axis_to_number(e1.axis))
-
-    # print(e1 * e2)
-
-    # print(e1.T_OLD(x))
-
-    num = 1000000
-    # q = np.random.rand(num)
-
-    # def step_old():
-    #     for i in range(num):
-    #         e1.T_OLD(q[i])
-
-    # def step_new():
-    #     # ls = []
-    #     for i in range(num):
-    #         e1.T(q[i])
-
-    #     # res = map(e1.T, q)
-    #     # list(res)
-
-    #     # ls = [e1.T(x) for x in q]
-
-    def step():
-        for i in range(num):
-            ets.fkine(q, base, tool)
-
-    cProfile.run("step()")
-
-    r = rtb.models.Panda()
-
+    # Jacob 0
+    ql = [12.1, -45.3, 0, -2.2, 0, 2, 0.78539816]
     q = r.qr
+    # print(q.__array_interface__)
 
-    def step_old():
-        for i in range(num):
-            r.jacob0(q, fast=True)
+    # print(np.round(r.jacob0(q), 2))
+    # print(np.round(ets.jacob0(q), 2))
 
-    cProfile.run("step_old()")
+    tool = sm.SE3([sm.SE3(19.0, 0, 0), sm.SE3(17.0, 0, 0)])
 
-    # # cProfile.run("step_old()")
+    # tool = sm.SE3(19.0, 0, 0)
+    # tool = np.eye(4)
 
-    # cProfile.run("step_new()")
+    # print(tool[0].A)
 
-    # print(e1.T(x))
+    # # tool2 = sm.SE3(19.0, 0, 0)
+    # print(type(tool.data[0]))
+    # print(tool[0] is tool[0])
+
+    # tool[0].data[0].__array_interface__
+
+    # print(tool[0].__array_interface__)
+
+    # print(tool.__array_interface__)
+    # print(tool.__array_interface__ is tool.A.__array_interface__)
+    # # tool.A[:] = tool2.A.copy()
+    # # print(np.round(ets.jacob0(q, tool=np.eye(4)), 2)[0, 0:3])
+    # print(np.round(ets.jacob0(q, tool=tool[0]), 2)[0, 0:3])
+
+    # print(tool.A)
+
+    # for i in range(1000000000):
+    #     ets.jacob0(q)
+
+    # print(np.round(ets.jacob0(q), 2))
+    # print(type(q))
+    # print()
+    # q = np.array([12.1, 45.3, 0, -2.2, 0, 2, 0.78539816])
+
+    # print(np.round(ets.jacob0(q), 2)[0, 0:3])
+    # print(np.round(ets.jacob0(q), 2)[0, 0:3])
+    # print(np.round(ets.jacob0(q), 2)[0, 0:3])
+    # print(np.round(ets.jacob0(q), 2)[0, 0:3])
+    # print()
+    # q = np.array([[0, -0.3, 0, -2.2, 0, 2, 0.78539816]]).T
+    # print(np.round(ets.jacob0(q), 2))
+
+    # ets.sfuhsf = 28308
+    print(ets.__dict__)
+    # print(ets.__slots__)
+
+    # Profiling
+    num = 1000
+
+    # # Profile fkine
+    # def new():
+    #     for _ in range(num):
+    #         ets.fkine(q)
+
+    # def old():
+    #     for _ in range(num):
+    #         r.fkine(q, fast=True)
+
+    m = ets._m
+    n = ets._n
+    fk = ets._ETS__fknm
+
+    # Profile jacob0
+    def new():
+        for _ in range(num):
+            ets.jacob0(q)
+        # ets.jacob0(q)
+        # fknm.ETS_jacob0(m, n, fk, q, tool)
+
+    def old():
+        for _ in range(num):
+            r.jacob0(q)
+
+    cProfile.run("old()")
+    cProfile.run("new()")
