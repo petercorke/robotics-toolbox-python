@@ -14,6 +14,7 @@ from roboticstoolbox.robot.ELink import ELink, ELink2
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.KinematicCache import KinematicCache
+from roboticstoolbox.robot.ET import ET
 
 __all__ = [
     "Robot",
@@ -35,4 +36,5 @@ __all__ = [
     "ETS2",
     "Gripper",
     "KinematicCache",
+    "ET",
 ]
