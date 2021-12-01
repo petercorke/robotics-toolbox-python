@@ -6,7 +6,7 @@ from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ERobot import ERobot
 from roboticstoolbox.robot.ELink import ELink
 
-from roboticstoolbox.robot.etsnew import ET
+from roboticstoolbox.robot.ET import ET, BaseET
 import sympy
 import cProfile
 import roboticstoolbox as rtb
@@ -94,6 +94,10 @@ if __name__ == "__main__":  # pragma nocover
     base = np.eye(4)
     tool = np.eye(4)
 
+    # BaseET("Rx", eta=5.0)
+
+    # e = ET.
+
     # # Fkine
     # print(ets.fkine(q, base, tool))
     # print(ets.fkine(q, None, None))
@@ -123,6 +127,8 @@ if __name__ == "__main__":  # pragma nocover
         * ET.tz(0.107)
         * ET.tz(0.1034)
     )
+
+    print(repr(ET.Rz(jindex=5)))
 
     # Jacob 0
     ql = [12.1, -45.3, 0, -2.2, 0, 2, 0.78539816]
@@ -172,7 +178,7 @@ if __name__ == "__main__":  # pragma nocover
     # print(np.round(ets.jacob0(q), 2))
 
     # ets.sfuhsf = 28308
-    print(ets.__dict__)
+    # print(ets.__dict__)
     # print(ets.__slots__)
 
     # Profiling
@@ -187,20 +193,14 @@ if __name__ == "__main__":  # pragma nocover
     #     for _ in range(num):
     #         r.fkine(q, fast=True)
 
-    m = ets._m
-    n = ets._n
-    fk = ets._ETS__fknm
-
     # Profile jacob0
     def new():
         for _ in range(num):
             ets.jacob0(q)
-        # ets.jacob0(q)
-        # fknm.ETS_jacob0(m, n, fk, q, tool)
 
     def old():
         for _ in range(num):
             r.jacob0(q)
 
-    cProfile.run("old()")
-    cProfile.run("new()")
+    # cProfile.run("old()")
+    # cProfile.run("new()")
