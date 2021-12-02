@@ -128,7 +128,11 @@ if __name__ == "__main__":  # pragma nocover
         * ET.tz(0.1034)
     )
 
-    print(repr(ET.Rz(jindex=5)))
+    x = sympy.Symbol("x")
+    r1 = rtb.ET.Rx(flip=True)
+    print(r1.T(x))
+
+    # print(repr(ET.Rz(jindex=5)))
 
     # Jacob 0
     ql = [12.1, -45.3, 0, -2.2, 0, 2, 0.78539816]
