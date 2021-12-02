@@ -5,6 +5,7 @@ from spatialmath.base import trotx, troty, trotz, issymbol
 import fknm
 import sympy
 import math
+from copy import deepcopy
 
 # from spatialmath import base
 
@@ -81,6 +82,9 @@ class BaseET:
         self.__fknm = self.__init_c()
 
     def __init_c(self):
+        """
+        Super Private method which initialises a C object to hold ET Data
+        """
         if self.jindex is None:
             jindex = 0
         else:
@@ -127,6 +131,21 @@ class BaseET:
 
         return f"ET.{self.axis}({s_kwargs})"
 
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+
+        for k, v in self.__dict__.items():
+            if k != "_BaseET__fknm":
+                setattr(result, k, deepcopy(v, memo))
+
+        result.__fknm = result.__init_c()
+        return result
+
+    def __eq__(self, other):
+        return repr(self) == repr(other)
+
     def __axis_to_number(self, axis: str) -> int:
         """
         Private convenience function which converts the axis string to an
@@ -164,7 +183,7 @@ class BaseET:
 
         .. runblock:: pycon
 
-            >>> from roboticstoolbox import ETS
+            >>> from roboticstoolbox import ET
             >>> e = ET.tx(1)
             >>> e.eta
             >>> e = ET.Rx(90, 'deg')
@@ -210,7 +229,7 @@ class BaseET:
 
         .. runblock:: pycon
 
-            >>> from roboticstoolbox import ETS
+            >>> from roboticstoolbox import ET
             >>> e = ET.tx(1)
             >>> e.axis
             >>> e = ET.Rx(90, 'deg')
@@ -254,7 +273,7 @@ class BaseET:
 
         .. runblock:: pycon
 
-            >>> from roboticstoolbox import ETS
+            >>> from roboticstoolbox import ET
             >>> e = ET.tx()
             >>> e.T(1)
             >>> eflip = ET.tx(flip=True)
@@ -610,7 +629,8 @@ class ETS(UserList):
         if isinstance(arg, list):
             if not all([isinstance(a, ET) for a in arg]):
                 raise ValueError("bad arg")
-            self.data = arg
+            # Deep copy the ET's before saving them
+            self.data = [deepcopy(et) for et in arg]
 
         self.__fknm = [et.fknm for et in self.data]
 
@@ -663,7 +683,7 @@ class ETS(UserList):
         # Use c extension
         try:
             return fknm.ETS_jacob0(self._m, self._n, self.__fknm, q, tool)
-        except:
+        except TypeError:
             pass
 
         # # Otherwise use Python
