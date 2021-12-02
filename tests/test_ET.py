@@ -13,6 +13,7 @@ from spatialmath import SE3
 import unittest
 from roboticstoolbox.robot.ET import BaseET
 import sympy
+from copy import copy, deepcopy
 
 
 class TestET(unittest.TestCase):
@@ -221,6 +222,24 @@ class TestET(unittest.TestCase):
         nt.assert_array_almost_equal(r1.T(fl), sm.trotx(fl))
         nt.assert_array_almost_equal(r2.T(fl), sm.trotx(-fl))
         nt.assert_array_almost_equal(r1.T(x), sm.trotx(x))
+
+    def test_copy(self):
+        r1 = rtb.ET.Rx(flip=True)
+        r2 = copy(r1)
+        r3 = deepcopy(r1)
+
+        nt.assert_array_almost_equal(r1.T(1.0), sm.trotx(-1.0))
+        nt.assert_array_almost_equal(r2.T(1.0), sm.trotx(-1.0))
+        nt.assert_array_almost_equal(r3.T(1.0), sm.trotx(-1.0))
+
+        self.assertEqual(r1.fknm, r2.fknm)
+        self.assertNotEqual(r1.fknm, r3.fknm)
+
+    def test_eq(self):
+        r1 = rtb.ET.Rx(2.5)
+        r2 = rtb.ET.Rx(2.5)
+
+        self.assertEqual(r1, r2)
 
     # def test_str(self)
 
