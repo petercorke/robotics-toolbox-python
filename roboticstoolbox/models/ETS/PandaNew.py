@@ -11,6 +11,7 @@ import sympy
 import cProfile
 import roboticstoolbox as rtb
 import spatialmath as sm
+from copy import copy, deepcopy
 
 import fknm
 
@@ -129,8 +130,28 @@ if __name__ == "__main__":  # pragma nocover
     )
 
     x = sympy.Symbol("x")
-    r1 = rtb.ET.Rx(flip=True)
-    print(r1.T(x))
+    q1 = np.r_[x, r.qr[1:]]
+    q2 = r.qr
+    print(q1.dtype)
+    print(ets.jacob0(q1)[0, 0])
+    print(ets.jacob0(q2)[0, 0])
+    # print(q)
+
+    r1 = rtb.ET.Rx(2.5)
+    r4 = rtb.ET.Rx(2.5)
+    r2 = copy(r1)
+    r3 = deepcopy(r1)
+
+    ets = r1 * r3
+    print(r1 == r4)
+    # print(r1.fknm)
+
+    # print(r1.T(1.0))
+    # print(r2.T(1.0))
+    # print(r3.T(1.0))
+    # print(r1._BaseET__fknm)
+    # print(r2._BaseET__fknm)
+    # print(r3._BaseET__fknm)
 
     # print(repr(ET.Rz(jindex=5)))
 
