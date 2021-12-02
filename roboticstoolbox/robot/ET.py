@@ -5,20 +5,33 @@ from spatialmath.base import trotx, troty, trotz, issymbol
 import fknm
 import sympy
 import math
-from spatialmath import base
+
+# from spatialmath import base
+
+from spatialmath.base import getvector
 
 from spatialmath import SE3
 
 from typing import Optional, Callable, Union
 from numpy.typing import ArrayLike, NDArray
 
+try:  # pragma: no cover
+    import sympy
+
+    # Sym = sympy.Expr
+    Sym = sympy.core.symbol.Symbol
+
+except ImportError:  # pragma: no cover
+    # Sym = float
+    Sym = float
+
 
 class BaseET:
     def __init__(
         self,
         axis: str,
-        eta: Optional[float] = None,
-        axis_func: Optional[Callable[[float], NDArray[np.float64]]] = None,
+        eta: Union[float, Sym, None] = None,
+        axis_func: Optional[Callable[[Union[float, Sym]], NDArray[np.float64]]] = None,
         T: Optional[NDArray[np.float64]] = None,
         jindex: Optional[int] = None,
         unit: str = "rad",
@@ -30,26 +43,33 @@ class BaseET:
         if eta is None:
             self._eta = None
         else:
-            self.eta = eta
+            if axis[0] == "R" and unit.lower().startswith("deg"):
+                if not issymbol(eta):
+                    self.eta = np.deg2rad(float(eta))
+            else:
+                self.eta = eta
 
         self._axis_func = axis_func
         self._flip = flip
         self._jindex = jindex
         if qlim is not None:
-            qlim = np.array(qlim)
+            qlim = np.array(getvector(qlim, 2, out="array"))
+            # qlim = np.array(qlim)
         self._qlim = qlim
 
-        if eta is None:
-            self._joint = True
-            self._T = np.eye(4)
-            if axis_func is None:
-                raise TypeError("For a variable joint, axis_func must be specified")
+        if self.eta is None:
+            if T is None:
+                self._joint = True
+                self._T = np.eye(4)
+                if axis_func is None:
+                    raise TypeError("For a variable joint, axis_func must be specified")
+            else:
+                self._joint = False
+                self._T = T
         else:
             self._joint = False
             if axis_func is not None:
-                self._T = axis_func(float(eta))
-            elif T is not None:
-                self._T = T
+                self._T = axis_func(self.eta)
             else:
                 raise TypeError(
                     "For a static joint either both `eta` and `axis_func` "
@@ -107,7 +127,7 @@ class BaseET:
 
         return f"ET.{self.axis}({s_kwargs})"
 
-    def __axis_to_number(self, axis):
+    def __axis_to_number(self, axis: str) -> int:
         """
         Private convenience function which converts the axis string to an
         integer for faster processing in the C extensions
@@ -126,13 +146,14 @@ class BaseET:
                 return 4
             elif axis[1] == "z":
                 return 5
+        return 0
 
     @property
     def fknm(self):
         return self.__fknm
 
     @property
-    def eta(self) -> Union[float, None]:
+    def eta(self) -> Union[float, Sym, None]:
         """
         Get the transform constant
 
@@ -157,7 +178,7 @@ class BaseET:
         return self._eta
 
     @eta.setter
-    def eta(self, value: float) -> None:
+    def eta(self, value: Union[float, Sym]) -> None:
         """
         Set the transform constant
 
@@ -167,10 +188,14 @@ class BaseET:
         .. note:: No unit conversions are applied, it is assumed to be in
             radians.
         """
-        self._eta = float(value)
+        self._eta = value if issymbol(value) else float(value)
+
+        # self._eta = float(value)
 
     @property
-    def axis_func(self) -> Union[Callable[[float], NDArray[np.float64]], None]:
+    def axis_func(
+        self,
+    ) -> Union[Callable[[Union[float, Sym]], NDArray[np.float64]], None]:
         return self._axis_func
 
     @property
@@ -304,7 +329,7 @@ class BaseET:
         """
         return self._jindex
 
-    def T(self, q: float = 0.0) -> NDArray[np.float64]:
+    def T(self, q: Union[float, Sym] = 0.0) -> NDArray[np.float64]:
         """
         Evaluate an elementary transformation
 
@@ -331,13 +356,13 @@ class BaseET:
             # We can't use the fast version, lets use Python instead
             if self.isjoint:
                 if self.isflip:
-                    q = -q
+                    q = -1.0 * q
 
                 if self.axis_func is not None:
                     return self.axis_func(q)
-                else:
+                else:  # pragma: no cover
                     raise TypeError("axis_func not defined")
-            else:
+            else:  # pragma: no cover
                 return self._T
 
 
@@ -346,7 +371,9 @@ class ET(BaseET):
         super().__init__(**kwargs)
 
     @classmethod
-    def Rx(cls, eta: Optional[float] = None, unit: str = "rad", **kwargs) -> "ET":
+    def Rx(
+        cls, eta: Union[float, Sym, None] = None, unit: str = "rad", **kwargs
+    ) -> "ET":
         """
         Pure rotation about the x-axis
 
@@ -382,7 +409,9 @@ class ET(BaseET):
         return cls(axis="Rx", eta=eta, axis_func=trotx, unit=unit, **kwargs)
 
     @classmethod
-    def Ry(cls, eta: Optional[float] = None, unit: str = "rad", **kwargs) -> "ET":
+    def Ry(
+        cls, eta: Union[float, Sym, None] = None, unit: str = "rad", **kwargs
+    ) -> "ET":
         """
         Pure rotation about the y-axis
 
@@ -409,7 +438,9 @@ class ET(BaseET):
         return cls(axis="Ry", eta=eta, axis_func=troty, unit=unit, **kwargs)
 
     @classmethod
-    def Rz(cls, eta: Optional[float] = None, unit: str = "rad", **kwargs) -> "ET":
+    def Rz(
+        cls, eta: Union[float, Sym, None] = None, unit: str = "rad", **kwargs
+    ) -> "ET":
         """
         Pure rotation about the z-axis
 
@@ -436,7 +467,7 @@ class ET(BaseET):
         return cls(axis="Rz", eta=eta, axis_func=trotz, unit=unit, **kwargs)
 
     @classmethod
-    def tx(cls, eta: Optional[float] = None, **kwargs) -> "ET":
+    def tx(cls, eta: Union[float, Sym, None] = None, **kwargs) -> "ET":
         """
         Pure translation along the x-axis
 
@@ -473,7 +504,7 @@ class ET(BaseET):
         return cls(axis="tx", axis_func=axis_func, eta=eta, **kwargs)
 
     @classmethod
-    def ty(cls, eta: Optional[float] = None, **kwargs) -> "ET":
+    def ty(cls, eta: Union[float, Sym, None] = None, **kwargs) -> "ET":
         """
         Pure translation along the y-axis
 
@@ -511,7 +542,7 @@ class ET(BaseET):
         # return cls(SE3.Ty, axis='ty', eta=eta)
 
     @classmethod
-    def tz(cls, eta: Optional[float] = None, **kwargs) -> "ET":
+    def tz(cls, eta: Union[float, Sym, None] = None, **kwargs) -> "ET":
         """
         Pure translation along the z-axis
 
@@ -566,7 +597,9 @@ class ET(BaseET):
         :SymPy: supported
         """
 
-        return cls(axis="SE3", axis_func=None, eta=None, **kwargs)
+        trans = T.A if isinstance(T, SE3) else T
+
+        return cls(axis="SE3", T=trans, **kwargs)
 
 
 class ETS(UserList):
