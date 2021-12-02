@@ -136,13 +136,18 @@ static PyObject *ETS_jacob0(PyObject *self, PyObject *args)
     // Make our empty Jacobian
     npy_intp dims[2] = {6, n};
     PyObject *py_J = PyArray_EMPTY(2, &dims, NPY_DOUBLE, 0);
-
     J = (npy_float64 *)PyArray_DATA(py_J);
-    // q = (npy_float64 *)PyArray_DATA(py_q);
-    // PyArray_Descr *dtype = PyArray_DescrFromObject(py_q, NULL);
-    // q = (npy_float64 *)malloc(sizeof(npy_float64) * n * 6);
 
+    // if (PyArray_CheckExact(py_q))
+    // {
+    //     J[0] = 10.0;
+    // }
+    // else
+    // {
+    //     J[0] = 20.0;
+    // }
     py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+
     q = (npy_float64 *)PyArray_DATA(py_np_q);
 
     if (py_tool != Py_None)
@@ -151,6 +156,8 @@ static PyObject *ETS_jacob0(PyObject *self, PyObject *args)
         py_np_tool = (npy_float64 *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
         tool = (npy_float64 *)PyArray_DATA(py_np_tool);
     }
+
+    J[1] = PyArray_TYPE(py_np_q);
 
     _ETS_jacob0(ets, m, n, q, tool, J);
 
