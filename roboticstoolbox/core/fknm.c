@@ -269,11 +269,18 @@ static PyObject *ET_T(PyObject *self, PyObject *args)
 
     if (py_eta != Py_None)
     {
-        eta = (double)PyFloat_AsDouble(py_eta);
+        if (PyFloat_Check(py_eta))
+        {
+            eta = (double)PyFloat_AsDouble(py_eta);
+        }
+        else
+        {
+            PyErr_SetString(PyExc_TypeError, "Symbolic value");
+            return NULL;
+        }
     }
 
     ret = (npy_float64 *)PyArray_DATA(py_ret);
-
     _ET_T(et, ret, eta);
 
     return py_ret;
