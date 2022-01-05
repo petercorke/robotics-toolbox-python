@@ -4,12 +4,11 @@ import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
 from math import pi
 
-
 class AL5D(ERobot):
     """
-    Class that imports a Puma 560 URDF model
+    Class that imports a AL5D URDF model
 
-    ``Puma560()`` is a class which imports a Unimation Puma560 robot definition
+    ``AL5D()`` is a class which imports a Lynxmotion AL5D robot definition
     from a URDF file.  The model describes its kinematic and graphical
     characteristics.
 
@@ -22,16 +21,7 @@ class AL5D(ERobot):
     Defined joint configurations are:
 
     - qz, zero joint angle configuration, 'L' shaped configuration
-    - qr, vertical 'READY' configuration
-    - qs, arm is stretched out in the x-direction
-    - qn, arm is at a nominal non-singular configuration
-
-    .. warning:: This file has been modified so that the zero-angle pose is the
-        same as the DH model in the toolbox. ``j3`` rotation is changed from
-        -𝜋/2 to 𝜋/2.  Dimensions are also slightly different.  Both models
-        include the pedestal height.
-
-    .. note:: The original file is from https://github.com/nimasarli/puma560_description/blob/master/urdf/puma560_robot.urdf.xacro
+    - up, robot poiting upwards
 
     .. codeauthor:: Tassos Natsakis
     """
@@ -50,13 +40,12 @@ class AL5D(ERobot):
         )
 
         self.manufacturer = "Lynxmotion"
-        # self.ee_link = self.ets[9]
 
-        # zero angles, upper arm horizontal, lower up straight ahead
+        # zero angles, upper arm pointing up, lower arm straight ahead
         self.addconfiguration("qz", np.array([0, 0, 0, 0]))
 
-        # reference pose, arm to the right, elbow up
-        self.addconfiguration("ru", np.array([0.0000, 0.0000, 1.5707, 0.0000]))
+        # reference pose robot pointing upwards
+        self.addconfiguration("up", np.array([0.0000, 0.0000, 1.5707, 0.0000]))
 
 if __name__ == "__main__":  # pragma nocover
 
