@@ -1,7 +1,10 @@
+"""
+@author: Tassos Natsakis
+"""
+
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteMDH
 from spatialmath import SE3
-
 
 class AL5D(DHRobot):
     """
@@ -30,7 +33,6 @@ class AL5D(DHRobot):
     :References:
 
         - 'Reference of the robot <http://www.lynxmotion.com/c-130-al5d.aspx>'_
-        
 
     .. codeauthor:: Tassos Natsakis
     """  # noqa
@@ -52,7 +54,32 @@ class AL5D(DHRobot):
         alpha = [pi, pi/2, pi, pi]
         offset = [pi/2, pi, -0.0427, -0.0427-pi/2]
 
-        # mass data not yet available
+        # mass data as measured
+        mass = [0.187, 0.044, 0.207, 0.081]
+
+        # center of mass as calculated through CAD model
+        center_of_mass = [
+                [0.01724, -0.00389,  0.00468],
+                [0.07084,  0.00000,  0.00190],
+                [0.05615, -0.00251, -0.00080],
+                [0.04318,  0.00735, -0.00523],
+            ]
+
+        # moments of inertia are practically zero
+        moments_of_inertia = [
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0]
+            ]
+
+        joint_limits = [
+                [-pi/2, pi/2],
+                [-pi/2, pi/2],
+                [-pi,2, pi/2],
+                [-pi/2, pi/2],
+            ]
+
         links = []
 
         for j in range(4):
@@ -61,7 +88,12 @@ class AL5D(DHRobot):
                 a=a[j],
                 alpha=alpha[j],
                 offset=offset[j],
-                G=1
+                r=center_of_mass[j],
+                I=moments_of_inertia[j],
+                G=1,
+                B=0,
+                Tc=[0,0],
+                qlim=joint_limits[j]
             )
             links.append(link)
             
