@@ -100,7 +100,7 @@ class Trajectory:
     @property
     def qdd(self):
         """
-        Velocity trajectory
+        Acceleration trajectory
 
         :return: trajectory acceleration with one row per timestep, one column per axis
         :rtype: ndarray(n,m)
