@@ -17,6 +17,7 @@
 static PyObject *ETS_jacob0(PyObject *self, PyObject *args);
 static PyObject *ETS_fkine(PyObject *self, PyObject *args);
 static PyObject *ET_init(PyObject *self, PyObject *args);
+static PyObject *ET_update(PyObject *self, PyObject *args);
 static PyObject *ET_T(PyObject *self, PyObject *args);
 static PyObject *fkine_all(PyObject *self, PyObject *args);
 static PyObject *jacob0(PyObject *self, PyObject *args);
@@ -28,6 +29,7 @@ static PyObject *link_update(PyObject *self, PyObject *args);
 static PyObject *compose(PyObject *self, PyObject *args);
 static PyObject *r2q(PyObject *self, PyObject *args);
 
+int _check_array_type(PyObject *toCheck);
 void _ETS_jacob0(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J);
 void _ETS_fkine(PyObject *ets, int m, npy_float64 *q, npy_float64 *base, npy_float64 *tool, npy_float64 *ret);
 void _ET_T(ET *et, npy_float64 *ret, double eta);
@@ -54,6 +56,10 @@ static PyMethodDef fknmMethods[] = {
      "Link"},
     {"ETS_fkine",
      (PyCFunction)ETS_fkine,
+     METH_VARARGS,
+     "Link"},
+    {"ET_update",
+     (PyCFunction)ET_update,
      METH_VARARGS,
      "Link"},
     {"ET_init",
@@ -123,6 +129,7 @@ static PyObject *ETS_jacob0(PyObject *self, PyObject *args)
     PyObject *py_q, *py_tool, *py_np_q, *py_np_tool;
     PyObject *ets;
     int m, n, tool_used = 0;
+    PyArray_Descr *desc_q, *desc_tool;
 
     if (!PyArg_ParseTuple(
             args, "iiOOO",
@@ -138,26 +145,25 @@ static PyObject *ETS_jacob0(PyObject *self, PyObject *args)
     PyObject *py_J = PyArray_EMPTY(2, &dims, NPY_DOUBLE, 0);
     J = (npy_float64 *)PyArray_DATA(py_J);
 
-    // if (PyArray_CheckExact(py_q))
-    // {
-    //     J[0] = 10.0;
-    // }
-    // else
-    // {
-    //     J[0] = 20.0;
-    // }
+    // Make sure q is number array
+    if (!_check_array_type(py_q))
+        return NULL;
+
+    // Cast to numpy array
     py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
 
+    // Get data out
     q = (npy_float64 *)PyArray_DATA(py_np_q);
 
     if (py_tool != Py_None)
     {
+        if (!_check_array_type(py_tool))
+            return NULL;
+
         tool_used = 1;
         py_np_tool = (npy_float64 *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
         tool = (npy_float64 *)PyArray_DATA(py_np_tool);
     }
-
-    J[1] = PyArray_TYPE(py_np_q);
 
     _ETS_jacob0(ets, m, n, q, tool, J);
 
@@ -208,24 +214,86 @@ static PyObject *ETS_fkine(PyObject *self, PyObject *args)
     return py_ret;
 }
 
+static PyObject *ET_update(PyObject *self, PyObject *args)
+{
+    ET *et;
+    int jointtype;
+    PyObject *ret, *py_et;
+    PyArrayObject *py_T, *py_qlim;
+    int isjoint, isflip, jindex;
+
+    et = (ET *)PyMem_RawMalloc(sizeof(ET));
+
+    if (!PyArg_ParseTuple(args, "OiiiiO!O!",
+                          &py_et,
+                          &isjoint,
+                          &isflip,
+                          &jindex,
+                          &jointtype,
+                          &PyArray_Type, &py_T,
+                          &PyArray_Type, &py_qlim))
+        return NULL;
+
+    if (!(et = (ET *)PyCapsule_GetPointer(py_et, "ET")))
+        return NULL;
+
+    et->T = (npy_float64 *)PyArray_DATA(py_T);
+    et->qlim = (npy_float64 *)PyArray_DATA(py_qlim);
+    et->axis = jointtype;
+
+    et->isjoint = isjoint;
+    et->isflip = isflip;
+    et->jindex = jindex;
+
+    if (jointtype == 0)
+    {
+        et->op = rx;
+    }
+    else if (jointtype == 1)
+    {
+        et->op = ry;
+    }
+    else if (jointtype == 2)
+    {
+        et->op = rz;
+    }
+    else if (jointtype == 3)
+    {
+        et->op = tx;
+    }
+    else if (jointtype == 4)
+    {
+        et->op = ty;
+    }
+    else if (jointtype == 5)
+    {
+        et->op = tz;
+    }
+
+    ret = PyCapsule_New(et, "ET", NULL);
+    return ret;
+}
+
 static PyObject *ET_init(PyObject *self, PyObject *args)
 {
     ET *et;
     int jointtype;
     PyObject *ret;
-    PyArrayObject *py_T;
+    PyArrayObject *py_T, *py_qlim;
 
     et = (ET *)PyMem_RawMalloc(sizeof(ET));
 
-    if (!PyArg_ParseTuple(args, "iiiiO!",
+    if (!PyArg_ParseTuple(args, "iiiiO!O!",
                           &et->isjoint,
                           &et->isflip,
                           &et->jindex,
                           &jointtype,
-                          &PyArray_Type, &py_T))
+                          &PyArray_Type, &py_T,
+                          &PyArray_Type, &py_qlim))
         return NULL;
 
     et->T = (npy_float64 *)PyArray_DATA(py_T);
+    et->qlim = (npy_float64 *)PyArray_DATA(py_qlim);
 
     et->axis = jointtype;
 
@@ -720,6 +788,22 @@ static PyObject *r2q(PyObject *self, PyObject *args)
     _r2q(r, q);
 
     Py_RETURN_NONE;
+}
+
+int _check_array_type(PyObject *toCheck)
+{
+    PyArray_Descr *desc;
+
+    desc = PyArray_DescrFromObject(toCheck, NULL);
+
+    // Check if desc is a number or a sympy symbol
+    if (!PyDataType_ISNUMBER(desc))
+    {
+        PyErr_SetString(PyExc_TypeError, "Symbolic value");
+        return 0;
+    }
+
+    return 1;
 }
 
 void _ETS_jacob0(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J)
