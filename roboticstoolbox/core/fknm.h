@@ -28,7 +28,8 @@ struct ET
     int isflip;
     int jindex;
     int axis;
-    npy_float64 *T; /* link static transform */
+    npy_float64 *T;    /* link static transform */
+    npy_float64 *qlim; /* joint limits */
     void (*op)(npy_float64 *data, double eta);
 };
 
