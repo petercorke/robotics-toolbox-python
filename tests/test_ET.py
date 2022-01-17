@@ -241,6 +241,61 @@ class TestET(unittest.TestCase):
 
         self.assertEqual(r1, r2)
 
+    def test_update_jindex(self):
+        r1 = rtb.ET.Rx(2.5)
+        r1.jindex = 3
+        self.assertEqual(r1.jindex, 3)
+
+    def test_isrotation(self):
+        r1 = rtb.ET.Rx(2.5)
+        r2 = rtb.ET.tx(1.0)
+        r3 = rtb.ET.SE3(SE3.Rx(0.5) * SE3.Tx(1.0))
+        r4 = rtb.ET.Rx()
+
+        self.assertEqual(r1.isrotation, True)
+        self.assertEqual(r2.isrotation, False)
+        self.assertEqual(r3.isrotation, False)
+        self.assertEqual(r4.isrotation, True)
+
+    def test_istrasnslation(self):
+        r1 = rtb.ET.Rx(2.5)
+        r2 = rtb.ET.tx(1.0)
+        r3 = rtb.ET.SE3(SE3.Rx(0.5) * SE3.Tx(1.0))
+        r4 = rtb.ET.Rx()
+
+        self.assertEqual(r1.istranslation, False)
+        self.assertEqual(r2.istranslation, True)
+        self.assertEqual(r3.istranslation, False)
+        self.assertEqual(r4.istranslation, False)
+
+    def test_iselementary(self):
+        r1 = rtb.ET.Rx(2.5)
+        r2 = rtb.ET.tx(1.0)
+        r3 = rtb.ET.SE3(SE3.Rx(0.5) * SE3.Tx(1.0))
+        r4 = rtb.ET.Rx()
+
+        self.assertEqual(r1.iselementary, True)
+        self.assertEqual(r2.iselementary, True)
+        self.assertEqual(r3.iselementary, False)
+        self.assertEqual(r4.iselementary, True)
+
+    def test_inv(self):
+        se3 = SE3.Rx(0.5) * SE3.Tx(1.0)
+        r1 = rtb.ET.Rx(2.5)
+        r2 = rtb.ET.tx(1.0)
+        r3 = rtb.ET.SE3(se3)
+        r4 = rtb.ET.Rx()
+
+        r1i = r1.inv()
+        r2i = r2.inv()
+        r3i = r3.inv()
+        r4i = r4.inv()
+
+        nt.assert_almost_equal(r1i.T(), np.linalg.inv(SE3.Rx(2.5)))
+        nt.assert_almost_equal(r2i.T(), np.linalg.inv(SE3.Tx(1.0)))
+        nt.assert_almost_equal(r3i.T(), np.linalg.inv(se3))
+        nt.assert_almost_equal(r4i.T(5.0), np.linalg.inv(SE3.Rx(5.0)))
+
     # def test_str(self)
 
     # def test_ets_var(self):
