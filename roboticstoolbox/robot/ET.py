@@ -23,7 +23,6 @@ try:  # pragma: no cover
     Sym = sympy.core.symbol.Symbol
 
 except ImportError:  # pragma: no cover
-    # Sym = float
     Sym = float
 
 
@@ -55,7 +54,6 @@ class BaseET:
         self._jindex = jindex
         if qlim is not None:
             qlim = np.array(getvector(qlim, 2, out="array"))
-            # qlim = np.array(qlim)
         self._qlim = qlim
 
         if self.eta is None:
@@ -90,12 +88,49 @@ class BaseET:
         else:
             jindex = self.jindex
 
+        if self.qlim is None:
+            qlim = np.array([0, 0])
+        else:
+            qlim = self.qlim
+
         return fknm.ET_init(
-            self.isjoint, self.isflip, jindex, self.__axis_to_number(self.axis), self._T
+            self.isjoint,
+            self.isflip,
+            jindex,
+            self.__axis_to_number(self.axis),
+            self._T,
+            qlim,
+        )
+
+    def __update_c(self):
+        """
+        Super Private method which updates the C object which holds ET Data
+        """
+        if self.jindex is None:
+            jindex = 0
+        else:
+            jindex = self.jindex
+
+        if self.qlim is None:
+            qlim = np.array([0, 0])
+        else:
+            qlim = self.qlim
+
+        fknm.ET_update(
+            self.fknm,
+            self.isjoint,
+            self.isflip,
+            jindex,
+            self.__axis_to_number(self.axis),
+            self._T,
+            qlim,
         )
 
     def __mul__(self, other: Union["ET", "ETS"]) -> "ETS":
         return ETS([self, other])
+
+    def __add__(self, other: Union["ET", "ETS"]) -> "ETS":
+        return self.__mul__(other)
 
     def __str__(self):
 
@@ -209,8 +244,6 @@ class BaseET:
         """
         self._eta = value if issymbol(value) else float(value)
 
-        # self._eta = float(value)
-
     @property
     def axis_func(
         self,
@@ -296,7 +329,7 @@ class BaseET:
             >>> from roboticstoolbox import ET
             >>> e = ET.tx(1)
             >>> e.isrotation
-            >>> e = ET.Rx()
+            >>> e = ET.rx()
             >>> e.isrotation
         """
         return self.axis[0] == "R"
@@ -347,6 +380,62 @@ class BaseET:
             >>> print(e.jindex)
         """
         return self._jindex
+
+    @jindex.setter
+    def jindex(self, j):
+        if not isinstance(j, int) or j < 0:
+            raise TypeError(f"jindex is {j}, must be an int >= 0")
+        self._jindex = j
+        self.__update_c()
+
+    @property
+    def iselementary(self) -> bool:
+        """
+        Test if ET is an elementary transform
+
+        :return: True if an elementary transform
+        :rtype: bool
+
+        .. note:: ET's may not actually be "elementary", it can be a complex
+            mix of rotations and translations.
+
+        :seealso: :func:`compile`
+        """
+        return self.axis[0] != "S"
+
+    def inv(self):
+        r"""
+        Inverse of ET
+
+        :return: [description]
+        :rtype: ET instance
+
+        The inverse of a given ET.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz(2.5)
+            >>> print(e)
+            >>> print(e.inv())
+
+        """  # noqa
+
+        inv = deepcopy(self)
+
+        if inv.isjoint:
+            inv._flip ^= True
+        elif not inv.iselementary:
+            inv._T = np.linalg.inv(inv._T)
+        elif inv._eta is not None:
+            inv._T = np.linalg.inv(inv._T)
+            inv._eta = -inv._eta
+
+        inv.__update_c()
+
+        return inv
 
     def T(self, q: Union[float, Sym] = 0.0) -> NDArray[np.float64]:
         """
@@ -558,8 +647,6 @@ class ET(BaseET):
 
         return cls(axis="ty", eta=eta, axis_func=axis_func, **kwargs)
 
-        # return cls(SE3.Ty, axis='ty', eta=eta)
-
     @classmethod
     def tz(cls, eta: Union[float, Sym, None] = None, **kwargs) -> "ET":
         """
@@ -678,7 +765,6 @@ class ETS(UserList):
             >>> puma = rtb.models.ETS.Puma560()
             >>> puma.jacob0([0, 0, 0, 0, 0, 0])
         """  # noqa
-        pass
 
         # Use c extension
         try:
