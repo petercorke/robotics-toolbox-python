@@ -1,0 +1,6 @@
+# The dual_laser configuration of Ridgeback with
+# the optional SICK LMS100 series LIDAR on the
+# front and rear.
+
+RIDGEBACK_FRONT_SICK_LASER=1
+RIDGEBACK_REAR_SICK_LASER=1

@@ -1,0 +1,5 @@
+# The dual_laser configuration of Ridgeback with
+# the Hokuyo UST-10LX LIDAR on the front and rear
+
+RIDGEBACK_FRONT_HOKUYO_LASER=1
+RIDGEBACK_REAR_HOKUYO_LASER=1

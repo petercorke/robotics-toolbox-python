@@ -1,0 +1,4 @@
+# The base Ridgeback configuration has only the
+# front laser.
+
+RIDGEBACK_FRONT_HOKUYO_LASER=1
