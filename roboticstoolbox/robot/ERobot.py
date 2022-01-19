@@ -13,7 +13,9 @@ from spatialmath import SE3, SE2
 from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix, islistof
 
 from roboticstoolbox.robot.ELink import ELink, ELink2, BaseELink
-from roboticstoolbox.robot.ETS import ETS, ETS2
+
+# from roboticstoolbox.robot.ETS import ETS, ETS2
+from roboticstoolbox.robot.ET import ETS
 from roboticstoolbox.robot.DHRobot import DHRobot
 from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
@@ -32,6 +34,8 @@ from spatialmath import (
 )
 
 import fknm
+from typing import Optional, Union
+from functools import lru_cache
 
 
 class BaseERobot(Robot):
@@ -112,7 +116,7 @@ class BaseERobot(Robot):
         self, links, base_link=None, gripper_links=None, checkjindex=True, **kwargs
     ):
 
-        self._ets = []
+        # self._ets = []
         self._linkdict = {}
         self._n = 0
         self._ee_links = []
@@ -316,10 +320,12 @@ class BaseERobot(Robot):
                 parent_name,
                 f"{{{link.name}}} = {{{parent_name}}}{s}",
             )
-        if isinstance(self, ERobot):
-            classname = "ERobot"
-        elif isinstance(self, ERobot2):
+
+        if isinstance(self, ERobot2):
             classname = "ERobot2"
+        else:
+            classname = "ERobot"
+
         s = f"{classname}: {self.name}"
         if self.manufacturer is not None and len(self.manufacturer) > 0:
             s += f" (by {self.manufacturer})"
@@ -438,7 +444,7 @@ class BaseERobot(Robot):
     # TODO  get configuration string
 
     @property
-    def ee_links(self):
+    def ee_links(self) -> Union[list["ELink"], list["ELink2"]]:
         return self._ee_links
 
     # def add_ee(self, link):
@@ -479,7 +485,7 @@ class BaseERobot(Robot):
             for link in self.ee_links:
                 d = 0
                 while True:
-                    for et in link.ets():
+                    for et in link.ets:
                         if et.istranslation:
                             if et.isjoint:
                                 # the length of a prismatic joint depends on the
@@ -487,13 +493,13 @@ class BaseERobot(Robot):
                                 # or in the Link depending on how the robot
                                 # was constructed
                                 if link.qlim is not None:
-                                    d += max(link.qlim)
+                                    d += np.max(link.qlim)
                                 elif et.qlim is not None:
-                                    d += max(et.qlim)
+                                    d += np.max(et.qlim)
                             else:
                                 d += abs(et.eta)
                     link = link.parent
-                    if link is None:
+                    if link is None or isinstance(link, str):
                         d_all.append(d)
                         break
 
@@ -520,7 +526,51 @@ class BaseERobot(Robot):
 
     # --------------------------------------------------------------------- #
 
-    def ets(self, start=None, end=None, explored=None, path=None):
+    def _find_ets(self, start, end, explored, path) -> Union[ETS, None]:
+        """
+        Privade method which will recursively find the ETS of a path
+        see ets()
+        """
+
+        link = self._getlink(start, self.base_link)
+        end = self._getlink(end, self.ee_links[0])
+
+        toplevel = path is None
+        explored.add(link)
+
+        if link == end:
+            return path
+
+        # unlike regular DFS, the neighbours of the node are its children
+        # and its parent.
+
+        # visit child nodes below start
+        if toplevel:
+            path = link.ets
+
+        if link.children is not None:
+            for child in link.children:
+                if child not in explored:
+                    p = self._find_ets(child, end, explored, path * child.ets)
+                    if p is not None:
+                        return p
+
+        # we didn't find the node below, keep going up a level, and recursing
+        # down again
+        if toplevel:
+            path = None
+        if link.parent is not None:
+            parent = link.parent  # go up one level toward the root
+            if parent not in explored:
+                if path is None:
+                    p = self._find_ets(parent, end, explored, link.ets.inv())
+                else:
+                    p = self._find_ets(parent, end, explored, path * link.ets.inv())
+                if p is not None:
+                    return p
+
+    @lru_cache(maxsize=32)
+    def ets(self, start=None, end=None) -> ETS:
         """
         ERobot to ETS
 
@@ -546,45 +596,21 @@ class BaseERobot(Robot):
             >>> panda = rtb.models.ETS.Panda()
             >>> panda.ets()
         """
+
         link = self._getlink(start, self.base_link)
+
         if end is None and len(self.ee_links) > 1:
             raise ValueError("ambiguous, specify which end-effector is required")
         end = self._getlink(end, self.ee_links[0])
 
-        if explored is None:
-            explored = set()
-        toplevel = path is None
+        explored = set()
 
-        explored.add(link)
-        if link == end:
-            return path
+        ets = self._find_ets(link, end, explored, path=None)
 
-        # unlike regular DFS, the neighbours of the node are its children
-        # and its parent.
-
-        # visit child nodes below start
-        if toplevel:
-            path = link.ets()
-        for child in link.children:
-            if child not in explored:
-                p = self.ets(child, end, explored, path * child.ets())
-                if p is not None:
-                    return p
-
-        # we didn't find the node below, keep going up a level, and recursing
-        # down again
-        if toplevel:
-            path = None
-        if link.parent is not None:
-            parent = link.parent  # go up one level toward the root
-            if parent not in explored:
-                if path is None:
-                    p = self.ets(parent, end, explored, link.ets().inv())
-                else:
-                    p = self.ets(parent, end, explored, path * link.ets().inv())
-                if p is not None:
-                    return p
-        return None
+        if ets is None:
+            raise ValueError("Could not find the requested ETS in this robot")
+        else:
+            return ets
 
     # --------------------------------------------------------------------- #
 
@@ -935,7 +961,7 @@ graph [rankdir=LR];
 
         return end, start, tool
 
-    def _getlink(self, link, default=None):
+    def _getlink(self, link, default=None) -> Union[ELink, BaseELink]:
         """
         Validate reference to ELink
         :param link: link
@@ -1056,7 +1082,7 @@ class ERobot(BaseERobot):
 
         # Cached paths through links
         # TODO Add listners on setters to reset cache
-        self._reset_cache()
+        # self._reset_cache()
 
     @classmethod
     def URDF(cls, file_path, gripper=None):
@@ -1294,6 +1320,49 @@ class ERobot(BaseERobot):
     # --------------------------------------------------------------------- #
 
     def fkine(
+        self,
+        q,
+        end=None,
+        start=None,
+        tool=None,
+        include_base=True,
+    ):
+        """
+        Forward kinematics
+        :param q: Joint coordinates
+        :type q: ndarray(n) or ndarray(m,n)
+        :param end: end-effector or gripper to compute forward kinematics to
+        :type end: str or ELink or Gripper
+        :param start: the link to compute forward kinematics from
+        :type start: str or ELink
+        :param tool: tool transform, optional
+        :type tool: SE3
+        :return: The transformation matrix representing the pose of the
+            end-effector
+        :rtype: SE3 instance
+        - ``T = robot.fkine(q)`` evaluates forward kinematics for the robot at
+          joint configuration ``q``.
+        **Trajectory operation**:
+        If ``q`` has multiple rows (mxn), it is considered a trajectory and the
+        result is an ``SE3`` instance with ``m`` values.
+        .. note::
+            - For a robot with a single end-effector there is no need to
+              specify ``end``
+            - For a robot with multiple end-effectors, the ``end`` must
+              be specified.
+            - The robot's base tool transform, if set, is incorporated
+              into the result.
+            - A tool transform, if provided, is incorporated into the result.
+            - Works from the end-effector link to the base
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        """
+
+        ets = self.ets(start, end)
+        T = ets.fkine(q, self._base, tool, include_base)
+
+    def fkine_old(
         self,
         q,
         unit="rad",
@@ -2251,6 +2320,42 @@ class ERobot2(BaseERobot):
 
         # should just set it to None
         self.base = SE2()  # override superclass
+
+    @property
+    def base(self) -> SE2:
+        """
+        Get/set robot base transform (Robot superclass)
+
+        - ``robot.base`` is the robot base transform
+
+        :return: robot tool transform
+        :rtype: SE2 instance
+
+        - ``robot.base = ...`` checks and sets the robot base transform
+
+        .. note:: The private attribute ``_base`` will be None in the case of
+            no base transform, but this property will return ``SE3()`` which
+            is an identity matrix.
+        """
+        if self._base is None:
+            self._base = SE2()
+
+        # return a copy, otherwise somebody with
+        # reference to the base can change it
+        return self._base.copy()
+
+    @base.setter
+    def base(self, T):
+        if T is None:
+            self._base = T
+        elif isinstance(self, ERobot2):
+            # 2D robot
+            if isinstance(T, SE2):
+                self._base = T
+            elif SE2.isvalid(T):
+                self._tool = SE2(T, check=True)
+        else:
+            raise ValueError("base must be set to None (no tool) or SE2")
 
     def jacob0(self, q):
         return self.ets().jacob0(q)
