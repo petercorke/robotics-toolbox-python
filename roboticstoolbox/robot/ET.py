@@ -1,7 +1,7 @@
 from collections import UserList
 from abc import ABC
 import numpy as np
-from spatialmath.base import trotx, troty, trotz, issymbol
+from spatialmath.base import trotx, troty, trotz, issymbol, getmatrix
 import fknm
 import sympy
 import math
@@ -144,6 +144,8 @@ class BaseET:
         elif issymbol(self.eta):
             # Check if symbolic
             eta_str = f"{self.eta}"
+        elif self.isrotation and self.eta is not None:
+            eta_str = f"{self.eta * (180.0/np.pi):.2f}°"
         else:
             eta_str = f"{self.eta}"
 
@@ -711,13 +713,16 @@ class ET(BaseET):
 class ETS(UserList):
     # This is essentially just a container for a list of ET instances
 
-    def __init__(self, arg):
+    def __init__(self, arg=None):
         super().__init__()
         if isinstance(arg, list):
             if not all([isinstance(a, ET) for a in arg]):
                 raise ValueError("bad arg")
             # Deep copy the ET's before saving them
             self.data = [deepcopy(et) for et in arg]
+        else:
+            # Initialise with identity ET
+            self.data = [ET.SE3(np.eye(4))]
 
         self.__fknm = [et.fknm for et in self.data]
 
@@ -725,7 +730,7 @@ class ETS(UserList):
         self._n = len([True for et in self.data if et.isjoint])
 
     def __str__(self):
-        return " * ".join([str(e) for e in self.data])
+        return " ⊕ ".join([str(e) for e in self.data])
 
     def __mul__(self, other: Union["ET", "ETS"]) -> "ETS":
         if isinstance(other, ET):
@@ -736,14 +741,126 @@ class ETS(UserList):
     def __rmul__(self, other: Union["ET", "ETS"]) -> "ETS":
         return ETS([other, self.data])
 
-    def fkine(self, q, base=None, tool=None):
+    @property
+    def n(self):
+        """
+        Number of joints
+
+        :return: the number of joints in the ETS
+        :rtype: int
+
+        Counts the number of joints in the ETS.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS
+            >>> e = ETS.rx() * ETS.tx(1) * ETS.tz()
+            >>> e.n
+
+        :seealso: :func:`joints`
+        """
+
+        return self._n
+
+    def fkine(
+        self,
+        q: ArrayLike,
+        base: Union[NDArray[np.float64], SE3, None] = None,
+        tool: Union[NDArray[np.float64], SE3, None] = None,
+        include_base: bool = True,
+    ) -> NDArray[np.float64]:
+        """
+        Forward kinematics
+        :param q: Joint coordinates
+        :type q: ndarray(n) or ndarray(m,n)
+        :param base: base transform, optional
+        :type base: ndarray(4,4) or SE3
+        :param tool: tool transform, optional
+        :type tool: ndarray(4,4) or SE3
+        :return: The transformation matrix representing the pose of the
+            end-effector
+        :rtype: SE3 instance
+        - ``T = ets.fkine(q)`` evaluates forward kinematics for the robot at
+          joint configuration ``q``.
+        **Trajectory operation**:
+        If ``q`` has multiple rows (mxn), it is considered a trajectory and the
+        result is an ``SE3`` instance with ``m`` values.
+        .. note::
+            - The robot's base tool transform, if set, is incorporated
+              into the result.
+            - A tool transform, if provided, is incorporated into the result.
+            - Works from the end-effector link to the base
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        """
 
         try:
             return fknm.ETS_fkine(self._m, self.__fknm, q, base, tool)
         except:
             pass
 
-    def jacob0(self, q, tool=None):
+        q = getmatrix(q, (None, self.n))
+        l, _ = q.shape  # type: ignore
+        end = self.data[-1]
+
+        if base is None:
+            base = np.eye(4)
+        elif isinstance(base, SE3):
+            base = np.array(base.A)
+
+        if tool is None:
+            tool = np.eye(4)
+        elif isinstance(tool, SE3):
+            tool = np.array(tool.A)
+
+        if l > 1:
+            T = np.zeros((l, 4, 4))
+        else:
+            T = np.zeros((4, 4))
+        Tk = np.eye(4)
+
+        for k, qk in enumerate(q):  # type: ignore
+            link = end  # start with last link
+
+            # add tool if provided
+            A = link.T(qk[link.jindex])
+            if A is None:
+                Tk = tool
+            else:
+                if tool is None:
+                    Tk = A
+                elif A is not None:
+                    Tk = A @ tool
+
+            # add remaining links, back toward the base
+            for i in range(self.n - 2, -1, -1):
+                link = self.data[i]
+
+                A = link.T(qk[link.jindex])
+
+                if A is not None:
+                    Tk = A @ Tk
+
+            # add base transform if it is set
+            if include_base == True:
+                Tk = base @ Tk
+
+            # cast to pose class and append
+            if l > 1:
+                T[k, :, :] = Tk
+            else:
+                T = Tk
+
+        return T
+
+    def jacob0(
+        self,
+        q: ArrayLike,
+        tool: Union[NDArray[np.float64], SE3, None] = None,
+    ):
         r"""
         Manipulator geometric Jacobian in the base frame
         :param q: Joint coordinate vector
@@ -772,65 +889,144 @@ class ETS(UserList):
         except TypeError:
             pass
 
-        # # Otherwise use Python
-        # if tool is None:
-        #     tool = SE3()
+        # Otherwise use Python
+        if tool is None:
+            tool = np.eye(4)
+        elif isinstance(tool, SE3):
+            tool = np.array(tool.A)
 
-        # path, n, _ = self.get_path(end, start)
+        q = getvector(q, self.n)
 
-        # q = getvector(q, self.n)
+        T = self.fkine(q, include_base=False) @ tool
 
-        # if T is None:
-        #     T = self.fkine(q, end=end, start=start, include_base=False) * tool
+        U = np.eye(4)
+        j = 0
+        J = np.zeros((6, self.n))
+        zero = np.array([0, 0, 0])
+        end = self.data[-1]
 
-        # T = T.A
-        # U = np.eye(4)
-        # j = 0
-        # J = np.zeros((6, n))
-        # zero = np.array([0, 0, 0])
+        for link in self.data:
 
-        # for link in path:
+            if link.isjoint:
+                U = U @ link.T(q[link.jindex])  # type: ignore
 
-        #     if link.isjoint:
-        #         U = U @ link.A(q[link.jindex], fast=True)
+                if link == end:
+                    U = U @ tool
 
-        #         if link == end:
-        #             U = U @ tool.A
+                Tu = np.linalg.inv(U) @ T
+                n = U[:3, 0]
+                o = U[:3, 1]
+                a = U[:3, 2]
+                x = Tu[0, 3]
+                y = Tu[1, 3]
+                z = Tu[2, 3]
 
-        #         Tu = np.linalg.inv(U) @ T
-        #         n = U[:3, 0]
-        #         o = U[:3, 1]
-        #         a = U[:3, 2]
-        #         x = Tu[0, 3]
-        #         y = Tu[1, 3]
-        #         z = Tu[2, 3]
+                if link.v.axis == "Rz":
+                    J[:3, j] = (o * x) - (n * y)
+                    J[3:, j] = a
 
-        #         if link.v.axis == "Rz":
-        #             J[:3, j] = (o * x) - (n * y)
-        #             J[3:, j] = a
+                elif link.v.axis == "Ry":
+                    J[:3, j] = (n * z) - (a * x)
+                    J[3:, j] = o
 
-        #         elif link.v.axis == "Ry":
-        #             J[:3, j] = (n * z) - (a * x)
-        #             J[3:, j] = o
+                elif link.v.axis == "Rx":
+                    J[:3, j] = (a * y) - (o * z)
+                    J[3:, j] = n
 
-        #         elif link.v.axis == "Rx":
-        #             J[:3, j] = (a * y) - (o * z)
-        #             J[3:, j] = n
+                elif link.v.axis == "tx":
+                    J[:3, j] = n
+                    J[3:, j] = zero
 
-        #         elif link.v.axis == "tx":
-        #             J[:3, j] = n
-        #             J[3:, j] = zero
+                elif link.v.axis == "ty":
+                    J[:3, j] = o
+                    J[3:, j] = zero
 
-        #         elif link.v.axis == "ty":
-        #             J[:3, j] = o
-        #             J[3:, j] = zero
+                elif link.v.axis == "tz":
+                    J[:3, j] = a
+                    J[3:, j] = zero
 
-        #         elif link.v.axis == "tz":
-        #             J[:3, j] = a
-        #             J[3:, j] = zero
+                j += 1
+            else:
+                A = link.T()
+                if A is not None:
+                    U = U @ A
 
-        #         j += 1
-        #     else:
-        #         A = link.A(fast=True)
-        #         if A is not None:
-        #             U = U @ A
+        return J
+
+    def pop(self, i=-1):
+        """
+        Pop value
+
+        :param i: item in the list to pop, default is last
+        :type i: int
+        :return: the popped value
+        :rtype: instance of same type
+        :raises IndexError: if there are no values to pop
+
+        Removes a value from the value list and returns it.  The original
+        instance is modified.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.rz() * ET.tx(1) * ET.rz() * ET.tx(1)
+            >>> tail = e.pop()
+            >>> tail
+            >>> e
+        """
+        item = super().pop(i)
+        return item
+
+    @property
+    def m(self):
+        """
+        Number of transforms
+
+        :return: the number of transforms in the ETS
+        :rtype: int
+
+        Counts the number of transforms in the ETS.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rx() * ET.tx(1) * ET.tz()
+            >>> e.m
+
+        """
+
+        return self._m
+
+    def inv(self) -> "ETS":
+        r"""
+        Inverse of ETS
+
+        :return: [description]
+        :rtype: ETS instance
+
+        The inverse of a given ETS.  It is computed as the inverse of the
+        individual ETs in the reverse order.
+
+        .. math::
+
+            (\mathbf{E}_0, \mathbf{E}_1 \cdots \mathbf{E}_{n-1} )^{-1} = (\mathbf{E}_{n-1}^{-1}, \mathbf{E}_{n-2}^{-1} \cdots \mathbf{E}_0^{-1}{n-1} )
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ETS
+            >>> e = ET.Rz(j=2) * ET.tx(1) * ET.Rx(j=3,flip=True) * ET.tx(1)
+            >>> print(e)
+            >>> print(e.inv())
+            >>> q = [1,2,3,4]
+
+        .. note:: It is essential to use explicit joint indices to account for
+            the reversed order of the transforms.
+        """  # noqa
+
+        return ETS([et.inv() for et in reversed(self.data)])
