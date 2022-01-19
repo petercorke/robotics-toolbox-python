@@ -16,6 +16,7 @@ from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
+from typing import Optional, Union
 
 try:
     from matplotlib import colors
@@ -1021,7 +1022,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     # --------------------------------------------------------------------- #
 
     @property
-    def base(self):
+    def base(self) -> SE3:
         """
         Get/set robot base transform (Robot superclass)
 
@@ -1037,10 +1038,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             is an identity matrix.
         """
         if self._base is None:
-            if isinstance(self, rtb.ERobot2):
-                self._base = SE2()
-            else:
-                self._base = SE3()
+            self._base = SE3()
 
         # return a copy, otherwise somebody with
         # reference to the base can change it
@@ -1050,12 +1048,6 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     def base(self, T):
         if T is None:
             self._base = T
-        elif isinstance(self, rtb.ERobot2):
-            # 2D robot
-            if isinstance(T, SE2):
-                self._base = T
-            elif SE2.isvalid(T):
-                self._tool = SE2(T, check=True)
         elif isinstance(self, rtb.Robot):
             # all other 3D robots
             if isinstance(T, SE3):
