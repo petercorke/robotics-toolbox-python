@@ -185,7 +185,7 @@ static PyObject *ETS_fkine(PyObject *self, PyObject *args)
     PyObject *py_q, *py_base, *py_tool;
     PyObject *py_ret = PyArray_EMPTY(nd, &dims, NPY_DOUBLE, 0);
     PyObject *ets;
-    int m;
+    int m, n;
 
     if (!PyArg_ParseTuple(
             args, "iOOOO",
