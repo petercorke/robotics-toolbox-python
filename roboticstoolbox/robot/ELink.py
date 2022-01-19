@@ -5,18 +5,41 @@
 
 from spatialmath import SE3, SE2
 from spatialgeometry import Shape
-from roboticstoolbox.robot.ETS import ETS, ETS2
+
+# from roboticstoolbox.robot.ETS import ETS, ETS2
+from roboticstoolbox.robot.ET import ET, ETS
 from roboticstoolbox.robot.Link import Link
 import numpy as np
 import fknm
 
+from typing import Optional, Union
+from numpy.typing import ArrayLike, NDArray
+
 
 class BaseELink(Link):
-    def __init__(self, name=None, parent=None, joint_name=None, **kwargs):
+    def __init__(
+        self,
+        ets: "ETS" = ETS(),
+        name: str = None,
+        parent: Union["BaseELink", str, None] = None,
+        joint_name: str = None,
+        **kwargs,
+    ):
 
         super().__init__(**kwargs)
 
+        # check we have an ETS
+        if not isinstance(ets, ETS):
+            raise TypeError("The ets argument must be of type ETS")
+
+        if ets.n > 1:
+            raise ValueError("An elementary link can only have one joint variable")
+
+        if ets.n == 1 and not ets[-1].isjoint:
+            raise ValueError("Variable link must be at the end of the ETS")
+
         self._name = name
+        self._ets = ets
 
         if parent is not None:
             if isinstance(parent, (str, BaseELink)):
@@ -27,18 +50,21 @@ class BaseELink(Link):
             self._parent = None
 
         self._joint_name = joint_name
-
-        self._jindex = None
         self._children = []
+        self._init_Ts()
 
     def __repr__(self):
         name = self.__class__.__name__
         if self.name is None:
-            s = f"ets={self.ets()}"
+            s = f"ets={self.ets}"
         else:
-            s = f"{self.name}, ets={self.ets()}"
-        if self.parent is not None:
-            s += f", parent={self.parent.name}"
+            s = f"{self.name}, ets={self.ets}"
+        if self.parent is None:
+            parent = ""
+        elif isinstance(self.parent, str):
+            parent = f" [{self.parent}]"
+        else:
+            parent = f" [{self.parent.name}]"
         args = [s] + super()._params()
         return name + "(" + ", ".join(args) + ")"
 
@@ -51,13 +77,15 @@ class BaseELink(Link):
         name = self.__class__.__name__
 
         if self.name is None:
-            return f"{name}[{self.ets()}] "
+            return f"{name}[{self.ets}] "
         else:
             if self.parent is None:
                 parent = ""
+            elif isinstance(self.parent, str):
+                parent = f" [{self.parent}]"
             else:
                 parent = f" [{self.parent.name}]"
-            return f"{name}[{self.name}({parent}): {self.ets()}] "
+            return f"{name}[{self.name}({parent}): {self.ets}] "
 
     def copy(self, parent=None):
         new = super().copy()
@@ -70,29 +98,48 @@ class BaseELink(Link):
         new._children = []
         return new
 
+    def _init_Ts(self):
+        # Compute the leading, constant, part of the ETS
+
+        # Ts can not be equal to None otherwise things seem
+        # to break everywhere, so initialise Ts np be identity
+        T = np.eye(4)
+
+        for et in self._ets:
+            # constant transforms only
+            if et.isjoint:
+                break
+            else:
+                T = T @ et.T()
+
+        self._Ts = T
+
     @property
     def v(self):
         """
         Variable part of link ETS
         :return: joint variable transform
-        :rtype: ETS instance
+        :rtype: ET instance
         The ETS for each ELink comprises a constant part (possible the
         identity) followed by an optional joint variable transform.
         This property returns the latter.
         .. runblock:: pycon
             >>> from roboticstoolbox import ELink, ETS
-            >>> link = ELink( ETS.tz(0.333) * ETS.rx(90, 'deg') * ETS.rz() )
+            >>> link = ELink( ET.tz(0.333) * ET.Rx(90, 'deg') * ETS.Rz() )
             >>> print(link.v)
         """
-        return self._v
+        if self.isjoint:
+            return self._ets[-1]
+        else:
+            return None
 
-    @v.setter
-    def v(self, new):
-        if not isinstance(new, ETS) and new is not None:
-            raise TypeError("v must be an ETS object")
+    # @v.setter
+    # def v(self, new):
+    #     if not isinstance(new, ETS) and new is not None:
+    #         raise TypeError("v must be an ETS object")
 
-        self._v = new
-        self._update_fknm()
+    #     self._v = new
+    #     self._update_fknm()
 
     @property
     def Ts(self):
@@ -105,10 +152,10 @@ class BaseELink(Link):
         This property returns the constant part.  If no constant part
         is given, this returns an identity matrix.
         .. runblock:: pycon
-            >>> from roboticstoolbox import ELink, ETS
-            >>> link = ELink( ETS.tz(0.333) * ETS.rx(90, 'deg') * ETS.rz() )
+            >>> from roboticstoolbox import ELink, ET
+            >>> link = ELink( ETS.tz(0.333) * ETS.Rx(90, 'deg') * ETS.Rz() )
             >>> link.Ts
-            >>> link = ELink( ETS.rz() )
+            >>> link = ELink( ET.Rz() )
             >>> link.Ts
         """
         return self._Ts
@@ -128,7 +175,7 @@ class BaseELink(Link):
             >>> robot[1].isjoint  # link with joint
             >>> robot[8].isjoint  # static link
         """
-        return self._v is not None
+        return self._ets[-1].isjoint
 
     @property
     def jindex(self):
@@ -146,25 +193,16 @@ class BaseELink(Link):
         .. note:: ``jindex`` values must be a sequence of integers starting
             at zero.
         """
-        return self._jindex
+        return self._ets[-1]._jindex
 
     @jindex.setter
     def jindex(self, j):
-        self._jindex = j
-        try:
-            self._update_fknm()
-        except AttributeError:
-            # ELink2 doesnt have this
-            pass
-
-    # def isrevolute(self):
-    #     """
-    #     Checks if the joint is of revolute type
-
-    #     :return: Ture if is revolute
-    #     :rtype: bool
-    #     """
-    #     return self.v.isrevolute
+        self._ets[-1].jindex = j
+        # try:
+        #     self._update_fknm()
+        # except AttributeError:
+        #     # ELink2 doesnt have this
+        #     pass
 
     @property
     def isprismatic(self):
@@ -173,7 +211,7 @@ class BaseELink(Link):
         :return: True if is prismatic
         :rtype: bool
         """
-        return self.isjoint and self.v.istranslation
+        return self._ets[-1].isjoint and self._ets[-1].istranslation
 
     @property
     def isrevolute(self):
@@ -182,22 +220,10 @@ class BaseELink(Link):
         :return: True if is revolute
         :rtype: bool
         """
-        return self.isjoint and self.v.isrotation
-
-    # @property
-    # def ets(self):
-    #     return self._ets
-
-    # @property
-    # def parent_name(self):
-    #     return self._parent_name
-
-    # @property
-    # def child_name(self):
-    #     return self._child_name
+        return self._ets[-1].isjoint and self._ets[-1].isrotation
 
     @property
-    def parent(self):
+    def parent(self) -> Union["BaseELink", str, None]:
         """
         Parent link
         :return: Link's parent
@@ -212,7 +238,7 @@ class BaseELink(Link):
         return self._parent
 
     @property
-    def children(self):
+    def children(self) -> Union[list["BaseELink"], None]:
         """
         List of child links
         :return: child links
@@ -231,9 +257,9 @@ class BaseELink(Link):
         """
         return len(self._children)
 
-    @property
-    def M(self):
-        return self._M
+    # @property
+    # def m(self):
+    #     return self._ets.m
 
     @property
     def geometry(self):
@@ -262,7 +288,8 @@ class BaseELink(Link):
         """
         return self._collision
 
-    def ets(self):
+    @property
+    def ets(self) -> "ETS":
         """
         Link transform in ETS form
 
@@ -270,21 +297,12 @@ class BaseELink(Link):
         :rtype: ETS or ETS2 instance
 
         The sequence:
-
             - has at least one element
             - may include zero or more constant transforms
             - no more than one variable transform, which if present will
               be last in the sequence
         """
-        if self.v is None:
-            # no variable transform, return the constant part
-            return self._ets
-        else:
-            if self.jindex is not None:
-                # inherit the jindex of the link if known
-                self.v.jindex = self.jindex
-            # return concatenation of constant and variable parts
-            return self._ets * self.v
+        return self._ets
 
     @collision.setter
     def collision(self, coll):
@@ -358,205 +376,144 @@ class ELink(BaseELink):
     :seealso: :class:`Link`, :class:`DHLink`
     """
 
-    def __init__(self, ets=ETS(), v=None, jindex=None, **kwargs):
+    def __init__(self, ets=ETS(), jindex=None, **kwargs):
 
         # process common options
-        super().__init__(**kwargs)
+        super().__init__(ets=ets, **kwargs)
 
-        # check we have an ETS
-        if not isinstance(ets, ETS):
-            raise TypeError("The ets argument must be of type ETS")
-
-        self._ets = ets
-
-        if v is None and len(ets) > 0 and ets[-1].isjoint:
-            v = ets.pop()
+        # Set the jindex
+        if len(ets) > 0 and ets[-1].isjoint:
             if jindex is not None:
-                v.jindex = jindex
-                self.jindex = jindex
-            elif jindex is None and v.jindex is not None:
-                self.jindex = v.jindex
-
-        # Initialise the static transform representing the constant
-        # component of the ETS
-        self._init_Ts()
-
-        # Check the variable joint
-        if v is None:
-            self._joint = False
-        elif not isinstance(v, ETS):
-            raise TypeError("v must be of type ETS")
-        elif not v[0].isjoint:
-            raise ValueError("v must be a variable ETS")
-        elif len(v) > 1:
-            raise ValueError("An elementary link can only have one joint variable")
-        else:
-            self._joint = True
-
-        self._v = v
+                ets[-1].jindex = jindex
 
         # Private variable, can be written to but never replaced!
         # The c will adjust the inside of this array with a reference
         # to this specific array. If replaced --> segfault
-        self._fk = np.eye(4)
+        # self._fk = np.eye(4)
 
-        self._init_fknm()
+        # self._init_fknm()
 
-    def copy(self, parent=None):
-        new = super().copy(parent)
-        new._init_fknm()
-        return new
+    # def copy(self, parent=None):
+    #     new = super().copy(parent)
+    #     new._init_fknm()
+    #     return new
 
-    def _get_fknm(self):
-        isflip = False
-        axis = 0
-        jindex = 0
+    # def _get_fknm(self):
+    #     isflip = False
+    #     axis = 0
+    #     jindex = 0
 
-        if self.isjoint:
-            isflip = self._v.isflip
-            jindex = self.jindex
+    #     if self.isjoint:
+    #         isflip = self._v.isflip
+    #         jindex = self.jindex
 
-            if jindex is None:
-                jindex = 0
+    #         if jindex is None:
+    #             jindex = 0
 
-            if self._v.axis == "Rx":
-                axis = 0
-            elif self._v.axis == "Ry":
-                axis = 1
-            elif self._v.axis == "Rz":
-                axis = 2
-            elif self._v.axis == "tx":
-                axis = 3
-            elif self._v.axis == "ty":
-                axis = 4
-            elif self._v.axis == "tz":
-                axis = 5
+    #         if self._v.axis == "Rx":
+    #             axis = 0
+    #         elif self._v.axis == "Ry":
+    #             axis = 1
+    #         elif self._v.axis == "Rz":
+    #             axis = 2
+    #         elif self._v.axis == "tx":
+    #             axis = 3
+    #         elif self._v.axis == "ty":
+    #             axis = 4
+    #         elif self._v.axis == "tz":
+    #             axis = 5
 
-        if self.parent is None:
-            parent = None
-        else:
-            parent = self.parent._fknm
+    #     if self.parent is None:
+    #         parent = None
+    #     else:
+    #         parent = self.parent._fknm
 
-        shape_base = []
-        shape_wT = []
-        shape_sT = []
-        shape_sq = []
+    #     shape_base = []
+    #     shape_wT = []
+    #     shape_sT = []
+    #     shape_sq = []
 
-        for shap in self.geometry:
-            shape_base.append(shap._base)
-            shape_wT.append(shap._wT)
-            shape_sT.append(shap._sT)
-            shape_sq.append(shap._sq)
+    #     for shap in self.geometry:
+    #         shape_base.append(shap._base)
+    #         shape_wT.append(shap._wT)
+    #         shape_sT.append(shap._sT)
+    #         shape_sq.append(shap._sq)
 
-        for shap in self.collision:
-            shape_base.append(shap._base)
-            shape_wT.append(shap._wT)
-            shape_sT.append(shap._sT)
-            shape_sq.append(shap._sq)
+    #     for shap in self.collision:
+    #         shape_base.append(shap._base)
+    #         shape_wT.append(shap._wT)
+    #         shape_sT.append(shap._sT)
+    #         shape_sq.append(shap._sq)
 
-        return isflip, axis, jindex, parent, shape_base, shape_wT, shape_sT, shape_sq
+    #     return isflip, axis, jindex, parent, shape_base, shape_wT, shape_sT, shape_sq
 
-    def _init_fknm(self):
-        if isinstance(self.parent, str):
-            # Initialise later
-            return
+    # def _init_fknm(self):
+    #     if isinstance(self.parent, str):
+    #         # Initialise later
+    #         return
 
-        (
-            isflip,
-            axis,
-            jindex,
-            parent,
-            shape_base,
-            shape_wT,
-            shape_sT,
-            shape_sq,
-        ) = self._get_fknm()
+    #     (
+    #         isflip,
+    #         axis,
+    #         jindex,
+    #         parent,
+    #         shape_base,
+    #         shape_wT,
+    #         shape_sT,
+    #         shape_sq,
+    #     ) = self._get_fknm()
 
-        self._fknm = fknm.link_init(
-            self.isjoint,
-            isflip,
-            axis,
-            jindex,
-            len(shape_base),
-            self._Ts,
-            self._fk,
-            shape_base,
-            shape_wT,
-            shape_sT,
-            shape_sq,
-            parent,
-        )
+    #     self._fknm = fknm.link_init(
+    #         self.isjoint,
+    #         isflip,
+    #         axis,
+    #         jindex,
+    #         len(shape_base),
+    #         self._Ts,
+    #         self._fk,
+    #         shape_base,
+    #         shape_wT,
+    #         shape_sT,
+    #         shape_sq,
+    #         parent,
+    #     )
 
-    def _update_fknm(self):
+    # def _update_fknm(self):
 
-        # Check if not initialized yet
-        try:
-            if self._fknm is None:
-                self._init_fknm()
-                return
-        except AttributeError:
-            return
+    #     # Check if not initialized yet
+    #     try:
+    #         if self._fknm is None:
+    #             self._init_fknm()
+    #             return
+    #     except AttributeError:
+    #         return
 
-        (
-            isflip,
-            axis,
-            jindex,
-            parent,
-            shape_base,
-            shape_wT,
-            shape_sT,
-            shape_sq,
-        ) = self._get_fknm()
+    #     (
+    #         isflip,
+    #         axis,
+    #         jindex,
+    #         parent,
+    #         shape_base,
+    #         shape_wT,
+    #         shape_sT,
+    #         shape_sq,
+    #     ) = self._get_fknm()
 
-        fknm.link_update(
-            self._fknm,
-            self.isjoint,
-            isflip,
-            axis,
-            jindex,
-            len(shape_base),
-            self._Ts,
-            self._fk,
-            shape_base,
-            shape_wT,
-            shape_sT,
-            shape_sq,
-            parent,
-        )
-
-    def _init_Ts(self):
-        # Number of transforms in the ETS excluding the joint variable
-        self._M = len(self._ets)
-
-        # Compute the leading, constant, part of the ETS
-        # TODO probably should use ETS.compile()
-
-        if isinstance(self._ets, ETS):
-            # first = True
-            # T = None
-
-            # Ts can not be equal to None otherwise things seem
-            # to break everywhere, so initialise Ts np be identity
-            T = np.eye(4)
-
-            for et in self._ets:
-                # constant transforms only
-                if et.isjoint:
-                    raise ValueError("The transforms in ets must be constant")
-
-                # if first:
-                #     T = et.T()
-                #     first = False
-                # else:
-                #     T = T @ et.T()
-
-                T = T @ et.T()
-
-            self._Ts = T
-
-        elif isinstance(self._ets, SE3):
-            self._Ts = self._ets
-            raise RuntimeError("this shouldnt happen")
+    #     fknm.link_update(
+    #         self._fknm,
+    #         self.isjoint,
+    #         isflip,
+    #         axis,
+    #         jindex,
+    #         len(shape_base),
+    #         self._Ts,
+    #         self._fk,
+    #         shape_base,
+    #         shape_wT,
+    #         shape_sT,
+    #         shape_sq,
+    #         parent,
+    #     )
 
     @property
     def geometry(self):
@@ -603,7 +560,7 @@ class ELink(BaseELink):
             raise TypeError("Geometry must be of Shape class or list of Shape")
 
         self._collision = new_coll
-        self._update_fknm()
+        # self._update_fknm()
 
     @geometry.setter
     def geometry(self, geom):
@@ -622,19 +579,19 @@ class ELink(BaseELink):
             raise TypeError("Geometry must be of Shape class or list of Shape")
 
         self._geometry = new_geom
-        self._update_fknm()
+        # self._update_fknm()
 
-    @property
-    def fk(self):
-        """
-        The forward kinemtics up to and including this link
-        This value can be accessed after calling fkine_all(q)
-        from the robot object.
-        """
+    # @property
+    # def fk(self):
+    #     """
+    #     The forward kinemtics up to and including this link
+    #     This value can be accessed after calling fkine_all(q)
+    #     from the robot object.
+    #     """
 
-        return SE3(self._fk, check=False)
+    #     return SE3(self._fk, check=False)
 
-    def A(self, q=0.0, fast=False):
+    def T(self, q: Optional[float] = None) -> NDArray[np.float64]:
         """
         Link transform matrix
         :param q: Joint coordinate (radians or metres). Not required for links
@@ -652,136 +609,110 @@ class ELink(BaseELink):
         If ``fast`` is False return an ``SE2`` or ``SE3`` instance.
         """
 
-        # Use c extension
-        if fast:
-            if not np.isscalar(q):
-                q = 0.0
-            T = np.empty((4, 4))
-            fknm.link_A(q, self._fknm, T)
-            return T
-
-        # Otherwise use Python implementation
         if self.isjoint:
-            # a variable joint
-            if q is None:
-                raise ValueError("q is required for variable joints")
-
-            # premultiply variable part by constant part if present
-            Ts = self.Ts
-            if Ts is None:
-                T = self.v.T(q)
-            else:
-                T = Ts @ self.v.T(q)
+            return self._Ts @ self._ets[-1].T(q)
         else:
-            # a fixed joint
-            T = self.Ts
-
-        if T is None:
-            return SE3()
-        else:
-            return SE3(T, check=False)
+            return self._Ts
 
 
 class ELink2(BaseELink):
-    def __init__(self, ets=ETS2(), v=None, jindex=None, **kwargs):
-
-        # process common options
-        super().__init__(**kwargs)
-
-        # check we have an ETS
-        if not isinstance(ets, ETS2):
-            raise TypeError("The ets argument must be of type ETS2")
-
-        self._ets = ets
-
-        if v is None and len(ets) > 0 and ets[-1].isjoint:
-            v = ets.pop()
-            if jindex is not None:
-                v.jindex = jindex
-            elif jindex is None and v.jindex is not None:
-                jindex = v.jindex
-
-        # Initialise the static transform representing the constant
-        # component of the ETS
-        self._init_Ts()
-
-        # Check the variable joint
-        if v is None:
-            self._joint = False
-        elif not isinstance(v, ETS2):
-            raise TypeError("v must be of type ETS2")
-        elif not v[0].isjoint:
-            raise ValueError("v must be a variable ETS")
-        elif len(v) > 1:
-            raise ValueError("An elementary link can only have one joint variable")
-        else:
-            self._joint = True
-
-        self._v = v
-
-    def _init_Ts(self):
-        # Number of transforms in the ETS excluding the joint variable
-        self._M = len(self._ets)
-
-        # Compute the leading, constant, part of the ETS
-        # TODO probably should use ETS.compile()
-
-        if isinstance(self._ets, ETS2):
-            # first = True
-            # T = None
-            T = np.eye(3)
-
-            for et in self._ets:
-                # constant transforms only
-                if et.isjoint:
-                    raise ValueError("The transforms in ets must be constant")
-
-                T = T @ et.T()
-
-            self._Ts = T
-
-        elif isinstance(self._ets, SE3):
-            self._Ts = self._ets
-            raise RuntimeError("this shouldnt happen")
-
-    def A(self, q=0.0, **kwargs):
-        """
-        Link transform matrix
-        :param q: Joint coordinate (radians or metres). Not required for links
-            with no variable
-        :type q: float
-        :param fast: return NumPy array instead of ``SE3``
-        :type param: bool
-        :return T: link frame transformation matrix
-        :rtype T: SE3 or ndarray(4,4)
-        ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body
-          transformation from the previous to the current link frame to
-          the next, which depends on the joint coordinate ``q``.
-        If ``fast`` is True return a NumPy array, either SE(2) or SE(3).
-        A value of None means that it is the identity matrix.
-        If ``fast`` is False return an ``SE2`` or ``SE3`` instance.
-        """
-
-        if self.isjoint:
-            # a variable joint
-            if q is None:
-                raise ValueError("q is required for variable joints")
-
-            # premultiply variable part by constant part if present
-            Ts = self.Ts
-            if Ts is None:
-                T = self.v.T(q)
-            else:
-                T = Ts @ self.v.T(q)
-        else:
-            # a fixed joint
-            T = self.Ts
-
-        if T is None:
-            return SE2()
-        else:
-            return SE2(T, check=False)
+    def __init__(self, ets=ETS(), v=None, jindex=None, **kwargs):
+        pass
 
 
-# l0 = ELink(qlim=[-1, 1])
-# print(l0.qlim)
+#         # process common options
+#         super().__init__(**kwargs)
+
+#         # check we have an ETS
+#         if not isinstance(ets, ETS2):
+#             raise TypeError("The ets argument must be of type ETS2")
+
+#         self._ets = ets
+
+#         if v is None and len(ets) > 0 and ets[-1].isjoint:
+#             v = ets.pop()
+#             if jindex is not None:
+#                 v.jindex = jindex
+#             elif jindex is None and v.jindex is not None:
+#                 jindex = v.jindex
+
+#         # Initialise the static transform representing the constant
+#         # component of the ETS
+#         self._init_Ts()
+
+#         # Check the variable joint
+#         if v is None:
+#             self._joint = False
+#         elif not isinstance(v, ETS2):
+#             raise TypeError("v must be of type ETS2")
+#         elif not v[0].isjoint:
+#             raise ValueError("v must be a variable ETS")
+#         elif len(v) > 1:
+#             raise ValueError("An elementary link can only have one joint variable")
+#         else:
+#             self._joint = True
+
+#         self._v = v
+
+#     def _init_Ts(self):
+#         # Number of transforms in the ETS excluding the joint variable
+#         self._M = len(self._ets)
+
+#         # Compute the leading, constant, part of the ETS
+#         # TODO probably should use ETS.compile()
+
+#         if isinstance(self._ets, ETS2):
+#             # first = True
+#             # T = None
+#             T = np.eye(3)
+
+#             for et in self._ets:
+#                 # constant transforms only
+#                 if et.isjoint:
+#                     raise ValueError("The transforms in ets must be constant")
+
+#                 T = T @ et.T()
+
+#             self._Ts = T
+
+#         elif isinstance(self._ets, SE3):
+#             self._Ts = self._ets
+#             raise RuntimeError("this shouldnt happen")
+
+#     def A(self, q=0.0, **kwargs):
+#         """
+#         Link transform matrix
+#         :param q: Joint coordinate (radians or metres). Not required for links
+#             with no variable
+#         :type q: float
+#         :param fast: return NumPy array instead of ``SE3``
+#         :type param: bool
+#         :return T: link frame transformation matrix
+#         :rtype T: SE3 or ndarray(4,4)
+#         ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body
+#           transformation from the previous to the current link frame to
+#           the next, which depends on the joint coordinate ``q``.
+#         If ``fast`` is True return a NumPy array, either SE(2) or SE(3).
+#         A value of None means that it is the identity matrix.
+#         If ``fast`` is False return an ``SE2`` or ``SE3`` instance.
+#         """
+
+#         if self.isjoint:
+#             # a variable joint
+#             if q is None:
+#                 raise ValueError("q is required for variable joints")
+
+#             # premultiply variable part by constant part if present
+#             Ts = self.Ts
+#             if Ts is None:
+#                 T = self.v.T(q)
+#             else:
+#                 T = Ts @ self.v.T(q)
+#         else:
+#             # a fixed joint
+#             T = self.Ts
+
+#         if T is None:
+#             return SE2()
+#         else:
+#             return SE2(T, check=False)
