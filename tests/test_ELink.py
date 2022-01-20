@@ -6,74 +6,74 @@ Created on Fri May 1 14:04:04 2020
 
 import numpy.testing as nt
 import numpy as np
-import roboticstoolbox as rp
+import roboticstoolbox as rtb
 import spatialgeometry as gm
 import unittest
 import spatialmath as sm
 
 
 class TestELink(unittest.TestCase):
-    def test_str_ets(self):
-        rx = rp.ETS.rx(1.543)
-        ry = rp.ETS.ry(1.543)
-        tz = rp.ETS.tz(1)
+    def test_str_et(self):
+        rx = rtb.ET.Rx(1.543)
+        ry = rtb.ET.Ry(1.543)
+        tz = rtb.ET.tz(1)
 
-        l0 = rp.ELink(rx * ry * tz)
+        l0 = rtb.ELink(rx * ry * tz)
 
-        ans = "ELink[Rx(88.41°) ⊕ Ry(88.41°) ⊕ tz(1)] "
+        ans = "ELink[Rx(88.41°) ⊕ Ry(88.41°) ⊕ tz(1.0)] "
 
         self.assertEqual(str(l0), ans)
 
     def test_init(self):
-        rx = rp.ETS.rx(1.543)
-        ry = rp.ETS.ry(1.543)
-        tz = rp.ETS.tz()
-        ty = rp.ETS.ty()
+        rx = rtb.ET.Rx(1.543)
+        ry = rtb.ET.Ry(1.543)
+        tz = rtb.ET.tz()
+        ty = rtb.ET.ty()
 
         with self.assertRaises(ValueError):
-            rp.ELink(rx * ry * tz * ty)
+            rtb.ELink(rx * ry * tz * ty)
 
     def test_init_fail(self):
-        rx = rp.ETS.rx(1.543)
-        ty = rp.ETS.ty()
+        rx = rtb.ET.Rx(1.543)
+        ty = rtb.ET.ty()
 
         with self.assertRaises(TypeError):
-            rp.ELink([rx, ty])
+            rtb.ELink([rx, ty])
 
     def test_A(self):
-        rx = rp.ETS.rx(1.543)
-        ry = rp.ETS.ry(1.543)
-        tz = rp.ETS.tz(1)
+        rx = rtb.ET.Rx(1.543)
+        ry = rtb.ET.Ry(1.543)
+        tz = rtb.ET.tz(1)
 
-        l0 = rp.ELink(rx * ry * tz)
+        l0 = rtb.ELink(rx * ry * tz)
 
         ans = sm.SE3.Rx(1.543) * sm.SE3.Ry(1.543) * sm.SE3.Tz(1)
 
-        nt.assert_array_almost_equal(l0.A().A, ans.A)
+        nt.assert_array_almost_equal(l0.T(), ans.A)
 
     def test_A2(self):
-        rx = rp.ETS.rx(np.pi)
-        ry = rp.ETS.ry(np.pi)
-        tz = rp.ETS.tz()
+        rx = rtb.ET.Rx(np.pi)
+        ry = rtb.ET.Ry(np.pi)
+        tz = rtb.ET.tz()
 
-        l0 = rp.ELink(rx * ry, tz)
+        l0 = rtb.ELink(rx * ry * tz)
 
         ans = sm.SE3.Rx(np.pi) * sm.SE3.Ry(np.pi) * sm.SE3.Tz(1.2)
 
-        nt.assert_array_almost_equal(l0.A(1.2).A, ans.A)
-        l0.A()
+        nt.assert_array_almost_equal(l0.T(1.2), ans.A)
+        l0.T()
 
     def test_qlim(self):
-        l0 = rp.ELink(qlim=[-1, 1])
+        l0 = rtb.ELink(qlim=[-1, 1])
 
         self.assertEqual(l0.islimit(-0.9), False)
         self.assertEqual(l0.islimit(-1.9), True)
         self.assertEqual(l0.islimit(2.9), True)
 
     def test_Tc(self):
-        l0 = rp.ELink(Tc=1)
-        l1 = rp.ELink(Tc=[1])
-        l2 = rp.ELink(Tc=[1, 2])
+        l0 = rtb.ELink(Tc=1)
+        l1 = rtb.ELink(Tc=[1])
+        l2 = rtb.ELink(Tc=[1, 2])
 
         Tc0 = np.array([1, -1])
         Tc1 = np.array([1, -1])
@@ -84,9 +84,9 @@ class TestELink(unittest.TestCase):
         nt.assert_array_almost_equal(l2.Tc, Tc2)
 
     def test_I(self):
-        l0 = rp.ELink(I=[1, 2, 3])
-        l1 = rp.ELink(I=[0, 1, 2, 3, 4, 5])
-        l2 = rp.ELink(I=np.eye(3))
+        l0 = rtb.ELink(I=[1, 2, 3])
+        l1 = rtb.ELink(I=[0, 1, 2, 3, 4, 5])
+        l2 = rtb.ELink(I=np.eye(3))
 
         I0 = np.array([[1, 0, 0], [0, 2, 0], [0, 0, 3]])
 
@@ -99,7 +99,7 @@ class TestELink(unittest.TestCase):
         nt.assert_array_almost_equal(l2.I, I2)
 
     def test_friction(self):
-        l0 = rp.ELink(Tc=[2, -1], B=3, G=2)
+        l0 = rtb.ELink(Tc=[2, -1], B=3, G=2)
 
         tau = -124
         tau2 = 122
@@ -108,10 +108,10 @@ class TestELink(unittest.TestCase):
         nt.assert_almost_equal(l0.friction(-10), tau2)
 
     def test_nofriction(self):
-        l0 = rp.ELink(Tc=2, B=3)
-        l1 = rp.ELink(Tc=2, B=3)
-        l2 = rp.ELink(Tc=2, B=3)
-        l3 = rp.ELink(Tc=2, B=3)
+        l0 = rtb.ELink(Tc=2, B=3)
+        l1 = rtb.ELink(Tc=2, B=3)
+        l2 = rtb.ELink(Tc=2, B=3)
+        l3 = rtb.ELink(Tc=2, B=3)
 
         n0 = l1.nofriction()
         n1 = l2.nofriction(viscous=True)
@@ -127,7 +127,7 @@ class TestELink(unittest.TestCase):
         nt.assert_array_almost_equal(n2.Tc, l0.Tc)
 
     def test_dyn(self):
-        l0 = rp.ELink(
+        l0 = rtb.ELink(
             Tc=[0.4, -0.43], G=-62.61, qlim=[-2.79, 2.79], I=np.diag([0, 0.35, 0])
         )
 
@@ -148,7 +148,7 @@ qlim  =      -2.8 to      2.8""",
         )
 
     def test_properties(self):
-        l0 = rp.ELink()
+        l0 = rtb.ELink()
 
         self.assertEqual(l0.m, 0.0)
         nt.assert_array_almost_equal(l0.r, np.zeros(3))
@@ -157,16 +157,16 @@ qlim  =      -2.8 to      2.8""",
     def test_fail_parent(self):
 
         with self.assertRaises(TypeError):
-            rp.ELink(parent=1)
+            rtb.ELink(parent=1)
 
     def test_setB(self):
-        l0 = rp.ELink()
+        l0 = rtb.ELink()
 
         with self.assertRaises(TypeError):
             l0.B = [1, 2]
 
     def test_collision(self):
-        p = rp.models.Panda()
+        p = rtb.models.Panda()
         link = p.links[1]
         col = link.collision[0]
 
@@ -181,7 +181,7 @@ qlim  =      -2.8 to      2.8""",
         self.assertEqual(col.length, 2)
 
     def test_collision_fail(self):
-        l0 = rp.ELink()
+        l0 = rtb.ELink()
         col = gm.Cuboid([1, 1, 1])
         l0.collision = col
 
@@ -192,7 +192,7 @@ qlim  =      -2.8 to      2.8""",
             l0.collision = 1
 
     def test_geometry_fail(self):
-        l0 = rp.ELink()
+        l0 = rtb.ELink()
         col = gm.Cuboid([1, 1, 1])
         l0.geometry = col
         l0.geometry = [col, col]
@@ -206,7 +206,7 @@ qlim  =      -2.8 to      2.8""",
     def test_dist(self):
         s0 = gm.Cuboid([1, 1, 1], base=sm.SE3(0, 0, 0))
         s1 = gm.Cuboid([1, 1, 1], base=sm.SE3(3, 0, 0))
-        p = rp.models.Panda()
+        p = rtb.models.Panda()
         link = p.links[3]
 
         d0, _, _ = link.closest_point(s0)
@@ -220,7 +220,7 @@ qlim  =      -2.8 to      2.8""",
     def test_collided(self):
         s0 = gm.Cuboid([1, 1, 1], base=sm.SE3(0, 0, 0))
         s1 = gm.Cuboid([1, 1, 1], base=sm.SE3(3, 0, 0))
-        p = rp.models.Panda()
+        p = rtb.models.Panda()
         link = p.links[3]
         c0 = link.collided(s0)
         c1 = link.collided(s1)
