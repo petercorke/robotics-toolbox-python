@@ -798,7 +798,7 @@ class ETS(UserList):
         """
 
         try:
-            return fknm.ETS_fkine(self._m, self.__fknm, q, base, tool)
+            return fknm.ETS_fkine(self._m, self.__fknm, q, base, tool, include_base)
         except:
             pass
 
