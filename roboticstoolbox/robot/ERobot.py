@@ -15,7 +15,7 @@ from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix, islist
 from roboticstoolbox.robot.ELink import ELink, ELink2, BaseELink
 
 # from roboticstoolbox.robot.ETS import ETS, ETS2
-from roboticstoolbox.robot.ET import ETS
+from roboticstoolbox.robot.ET import ET, ETS
 from roboticstoolbox.robot.DHRobot import DHRobot
 from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
@@ -115,6 +115,9 @@ class BaseERobot(Robot):
     def __init__(
         self, links, base_link=None, gripper_links=None, checkjindex=True, **kwargs
     ):
+        self._path_cache_fknm = {}
+        self._path_cache = {}
+        self._eye_fknm = np.eye(4)
 
         # self._ets = []
         self._linkdict = {}
@@ -692,7 +695,7 @@ class BaseERobot(Robot):
             # if joint??
             T = Tparent
             while True:
-                T *= link.A(q[link.jindex])
+                T *= link.T(q[link.jindex])
                 Tall[link.number] = T
 
                 if link.nchildren == 1:
@@ -1082,7 +1085,7 @@ class ERobot(BaseERobot):
 
         # Cached paths through links
         # TODO Add listners on setters to reset cache
-        # self._reset_cache()
+        self._reset_cache()
 
     @classmethod
     def URDF(cls, file_path, gripper=None):
@@ -1154,24 +1157,6 @@ class ERobot(BaseERobot):
             self._cache_grippers.append(cache)
 
         self._cache_m = len(self._cache_links_fknm)
-
-    # def dfs_path(self, l1, l2):
-    #     path = []
-    #     visited = [l1]
-
-    #     def vis_children(link):
-    #         visited.append(link)
-
-    #         for li in link.child:
-    #             if li not in visited:
-
-    #                 if li == l2 or vis_children(li):
-    #                     path.append(li)
-    #                     return True
-    #     vis_children(l1)
-    #     path.append(l1)
-    #     path.reverse()
-    #     return path
 
     def _to_dict(self, robot_alpha=1.0, collision_alpha=0.0):
 
@@ -1360,7 +1345,7 @@ class ERobot(BaseERobot):
         """
 
         ets = self.ets(start, end)
-        T = ets.fkine(q, self._base, tool, include_base)
+        return ets.fkine(q, self._base, tool, include_base)
 
     def fkine_old(
         self,
@@ -1447,7 +1432,7 @@ class ERobot(BaseERobot):
             link = end  # start with last link
 
             # add tool if provided
-            A = link.A(qk[link.jindex], fast=True)
+            A = link.T(qk[link.jindex])
             if A is None:
                 Tk = tool
             else:
@@ -1463,7 +1448,7 @@ class ERobot(BaseERobot):
                 if link is None:
                     break
 
-                A = link.A(qk[link.jindex], fast=True)
+                A = link.T(qk[link.jindex])
 
                 if A is not None:
                     Tk = A @ Tk
@@ -1951,38 +1936,6 @@ class ERobot(BaseERobot):
             d.append(pd)
 
         return d[-1]
-
-    # def third(self, q=None, J0=None, end=None, start=None):
-    #     end, start = self._get_limit_links(end, start)
-    #     path, n = self.get_path(end, start)
-
-    #     def cross(a, b):
-    #         x = a[1] * b[2] - a[2] * b[1]
-    #         y = a[2] * b[0] - a[0] * b[2]
-    #         z = a[0] * b[1] - a[1] * b[0]
-    #         return np.array([x, y, z])
-
-    #     if J0 is None:
-    #         q = getvector(q, n)
-    #         J0 = self.jacob0(q, end=end)
-    #     else:
-    #         verifymatrix(J0, (6, n))
-
-    #     H0 = self.hessian0(q, J0, end, start)
-
-    #     L = np.zeros((6, n, n, n))
-
-    #     for l in range(n):
-    #         for k in range(n):
-    #             for j in range(n):
-
-    #                 L[:3, j, k, l] = cross(H0[3:, k, l], J0[:3, j]) + \
-    #                     cross(J0[3:, k], H0[:3, j, l])
-
-    #                 L[3:, j, k, l] = cross(H0[3:, k, l], J0[3:, j]) + \
-    #                     cross(J0[3:, k], H0[3:, j, l])
-
-    #     return L
 
     def hessian0(self, q=None, J0=None, end=None, start=None):
         r"""
@@ -2472,9 +2425,9 @@ class ERobot2(BaseERobot):
 
 if __name__ == "__main__":  # pragma nocover
 
-    e1 = ELink(ETS.rz(), jindex=0)
-    e2 = ELink(ETS.rz(), jindex=1, parent=e1)
-    e3 = ELink(ETS.rz(), jindex=2, parent=e2)
-    e4 = ELink(ETS.rz(), jindex=5, parent=e3)
+    e1 = ELink(ETS(ET.Rz()), jindex=0)
+    e2 = ELink(ETS(ET.Rz()), jindex=1, parent=e1)
+    e3 = ELink(ETS(ET.Rz()), jindex=2, parent=e2)
+    e4 = ELink(ETS(ET.Rz()), jindex=5, parent=e3)
 
     ERobot([e1, e2, e3, e4])
