@@ -389,131 +389,130 @@ class ELink(BaseELink):
         # Private variable, can be written to but never replaced!
         # The c will adjust the inside of this array with a reference
         # to this specific array. If replaced --> segfault
-        # self._fk = np.eye(4)
-
-        # self._init_fknm()
+        self._fk = np.eye(4)
+        self._init_fknm()
 
     # def copy(self, parent=None):
     #     new = super().copy(parent)
     #     new._init_fknm()
     #     return new
 
-    # def _get_fknm(self):
-    #     isflip = False
-    #     axis = 0
-    #     jindex = 0
+    def _get_fknm(self):
+        isflip = False
+        axis = 0
+        jindex = 0
 
-    #     if self.isjoint:
-    #         isflip = self._v.isflip
-    #         jindex = self.jindex
+        if self.isjoint:
+            isflip = self.ets[-1].isflip
+            jindex = self.jindex
 
-    #         if jindex is None:
-    #             jindex = 0
+            if jindex is None:
+                jindex = 0
 
-    #         if self._v.axis == "Rx":
-    #             axis = 0
-    #         elif self._v.axis == "Ry":
-    #             axis = 1
-    #         elif self._v.axis == "Rz":
-    #             axis = 2
-    #         elif self._v.axis == "tx":
-    #             axis = 3
-    #         elif self._v.axis == "ty":
-    #             axis = 4
-    #         elif self._v.axis == "tz":
-    #             axis = 5
+            if self.ets[-1].axis == "Rx":
+                axis = 0
+            elif self.ets[-1].axis == "Ry":
+                axis = 1
+            elif self.ets[-1].axis == "Rz":
+                axis = 2
+            elif self.ets[-1].axis == "tx":
+                axis = 3
+            elif self.ets[-1].axis == "ty":
+                axis = 4
+            elif self.ets[-1].axis == "tz":
+                axis = 5
 
-    #     if self.parent is None:
-    #         parent = None
-    #     else:
-    #         parent = self.parent._fknm
+        if self.parent is None:
+            parent = None
+        else:
+            parent = self.parent._fknm
 
-    #     shape_base = []
-    #     shape_wT = []
-    #     shape_sT = []
-    #     shape_sq = []
+        shape_base = []
+        shape_wT = []
+        shape_sT = []
+        shape_sq = []
 
-    #     for shap in self.geometry:
-    #         shape_base.append(shap._base)
-    #         shape_wT.append(shap._wT)
-    #         shape_sT.append(shap._sT)
-    #         shape_sq.append(shap._sq)
+        for shap in self.geometry:
+            shape_base.append(shap._base)
+            shape_wT.append(shap._wT)
+            shape_sT.append(shap._sT)
+            shape_sq.append(shap._sq)
 
-    #     for shap in self.collision:
-    #         shape_base.append(shap._base)
-    #         shape_wT.append(shap._wT)
-    #         shape_sT.append(shap._sT)
-    #         shape_sq.append(shap._sq)
+        for shap in self.collision:
+            shape_base.append(shap._base)
+            shape_wT.append(shap._wT)
+            shape_sT.append(shap._sT)
+            shape_sq.append(shap._sq)
 
-    #     return isflip, axis, jindex, parent, shape_base, shape_wT, shape_sT, shape_sq
+        return isflip, axis, jindex, parent, shape_base, shape_wT, shape_sT, shape_sq
 
-    # def _init_fknm(self):
-    #     if isinstance(self.parent, str):
-    #         # Initialise later
-    #         return
+    def _init_fknm(self):
+        if isinstance(self.parent, str):
+            # Initialise later
+            return
 
-    #     (
-    #         isflip,
-    #         axis,
-    #         jindex,
-    #         parent,
-    #         shape_base,
-    #         shape_wT,
-    #         shape_sT,
-    #         shape_sq,
-    #     ) = self._get_fknm()
+        (
+            isflip,
+            axis,
+            jindex,
+            parent,
+            shape_base,
+            shape_wT,
+            shape_sT,
+            shape_sq,
+        ) = self._get_fknm()
 
-    #     self._fknm = fknm.link_init(
-    #         self.isjoint,
-    #         isflip,
-    #         axis,
-    #         jindex,
-    #         len(shape_base),
-    #         self._Ts,
-    #         self._fk,
-    #         shape_base,
-    #         shape_wT,
-    #         shape_sT,
-    #         shape_sq,
-    #         parent,
-    #     )
+        self._fknm = fknm.link_init(
+            self.isjoint,
+            isflip,
+            axis,
+            jindex,
+            len(shape_base),
+            self._Ts,
+            self._fk,
+            shape_base,
+            shape_wT,
+            shape_sT,
+            shape_sq,
+            parent,
+        )
 
-    # def _update_fknm(self):
+    def _update_fknm(self):
 
-    #     # Check if not initialized yet
-    #     try:
-    #         if self._fknm is None:
-    #             self._init_fknm()
-    #             return
-    #     except AttributeError:
-    #         return
+        # Check if not initialized yet
+        try:
+            if self._fknm is None:
+                self._init_fknm()
+                return
+        except AttributeError:
+            return
 
-    #     (
-    #         isflip,
-    #         axis,
-    #         jindex,
-    #         parent,
-    #         shape_base,
-    #         shape_wT,
-    #         shape_sT,
-    #         shape_sq,
-    #     ) = self._get_fknm()
+        (
+            isflip,
+            axis,
+            jindex,
+            parent,
+            shape_base,
+            shape_wT,
+            shape_sT,
+            shape_sq,
+        ) = self._get_fknm()
 
-    #     fknm.link_update(
-    #         self._fknm,
-    #         self.isjoint,
-    #         isflip,
-    #         axis,
-    #         jindex,
-    #         len(shape_base),
-    #         self._Ts,
-    #         self._fk,
-    #         shape_base,
-    #         shape_wT,
-    #         shape_sT,
-    #         shape_sq,
-    #         parent,
-    #     )
+        fknm.link_update(
+            self._fknm,
+            self.isjoint,
+            isflip,
+            axis,
+            jindex,
+            len(shape_base),
+            self._Ts,
+            self._fk,
+            shape_base,
+            shape_wT,
+            shape_sT,
+            shape_sq,
+            parent,
+        )
 
     @property
     def geometry(self):
