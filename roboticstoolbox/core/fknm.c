@@ -140,33 +140,43 @@ static PyObject *ETS_jacob0(PyObject *self, PyObject *args)
             &py_tool))
         return NULL;
 
+    // Inputs can be:
+    // None - Even q
+    // Not arrays - Will raise exception
+    // Have symbolic data - Will raise exception
+    // q can be 1D or 2D, assumes dimesnions correct (n, 1xn or nx1)
+    // tool can be SE3s or 4x4 numpy array
+
     // Make our empty Jacobian
     npy_intp dims[2] = {6, n};
     PyObject *py_J = PyArray_EMPTY(2, &dims, NPY_DOUBLE, 0);
     J = (npy_float64 *)PyArray_DATA(py_J);
 
     // Make sure q is number array
+    // Cast to numpy array
+    // Get data out
     if (!_check_array_type(py_q))
         return NULL;
-
-    // Cast to numpy array
     py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
-
-    // Get data out
     q = (npy_float64 *)PyArray_DATA(py_np_q);
 
+    // Check if tool is None
+    // Make sure tool is number array
+    // Cast to numpy array
+    // Get data out
     if (py_tool != Py_None)
     {
         if (!_check_array_type(py_tool))
             return NULL;
-
         tool_used = 1;
         py_np_tool = (npy_float64 *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
         tool = (npy_float64 *)PyArray_DATA(py_np_tool);
     }
 
+    // Do the job
     _ETS_jacob0(ets, m, n, q, tool, J);
 
+    // Free the memory
     Py_DECREF(py_np_q);
 
     if (tool_used)
@@ -179,37 +189,123 @@ static PyObject *ETS_jacob0(PyObject *self, PyObject *args)
 
 static PyObject *ETS_fkine(PyObject *self, PyObject *args)
 {
-    npy_intp dims[2] = {4, 4};
-    int nd = 2;
-    npy_float64 *ret, *q, *base = NULL, *tool = NULL;
-    PyObject *py_q, *py_base, *py_tool;
-    PyObject *py_ret = PyArray_EMPTY(nd, &dims, NPY_DOUBLE, 0);
+    npy_intp dim2[2] = {4, 4}, dim3[3] = {1, 4, 4};
+    int include_base, m, n, q_nd, trajn = 1, tool_used = 0, base_used = 0, nd = 2;
+    npy_float64 *ret, *retp, *q, *qp, *base = NULL, *tool = NULL;
+    PyObject *py_q, *py_base, *py_tool, *py_np_q, *py_np_tool, *py_np_base;
+    PyObject *py_ret;
     PyObject *ets;
-    int m, n;
+    npy_intp *q_shape;
 
     if (!PyArg_ParseTuple(
-            args, "iOOOO",
+            args, "iOOOOi",
             &m,
             &ets,
             &py_q,
             &py_base,
-            &py_tool))
+            &py_tool,
+            &include_base))
         return NULL;
 
-    q = (npy_float64 *)PyArray_DATA(py_q);
+    // Inputs can be:
+    // None - Even q
+    // Not arrays - Will raise exception
+    // Have symbolic data - Will raise exception
+    // q can be 2D or 1D, but assumes dimesnions correct (n, 1xn or nx1)
+    // base and tool can be SE3s or 4x4 numpy array
+
+    // Make sure q is number array
+    // Cast to numpy array
+    // Get data out
+    if (!_check_array_type(py_q))
+        return NULL;
+    py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+    q = (npy_float64 *)PyArray_DATA(py_np_q);
+
+    // Check the dimesnions of q
+    q_nd = PyArray_NDIM(py_np_q);
+    q_shape = PyArray_SHAPE(py_np_q);
+
+    // Work out how long the trajectory is
+    if (q_nd > 1)
+    {
+        if (q_shape[0] == 1)
+        {
+            // We have a single q vector
+            trajn = 1;
+            n = q_shape[1];
+        }
+        else if (q_shape[1] == 1)
+        {
+            // We have a single q vector
+            trajn = 1;
+            n = q_shape[0];
+        }
+        else
+        {
+            // We have a trajectory of q
+            trajn = q_shape[0];
+            n = q_shape[1];
+        }
+    }
+
+    // Allocate return array
+    if (trajn == 1)
+    {
+        py_ret = PyArray_EMPTY(2, &dim2, NPY_DOUBLE, 0);
+    }
+    else
+    {
+        dim3[0] = trajn;
+        py_ret = PyArray_EMPTY(3, &dim3, NPY_DOUBLE, 0);
+    }
+
+    // Get numpy reference to return array
     ret = (npy_float64 *)PyArray_DATA(py_ret);
 
+    // Check if base is None
+    // Make sure base is number array
+    // Cast to numpy array
+    // Get data out
     if (py_base != Py_None)
     {
-        base = (npy_float64 *)PyArray_DATA(py_base);
+        if (!_check_array_type(py_base))
+            return NULL;
+
+        if (include_base)
+        {
+            base_used = 1;
+            py_np_base = (npy_float64 *)PyArray_FROMANY(py_base, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+            base = (npy_float64 *)PyArray_DATA(py_np_base);
+        }
     }
 
     if (py_tool != Py_None)
     {
-        tool = (npy_float64 *)PyArray_DATA(py_tool);
+        if (!_check_array_type(py_tool))
+            return NULL;
+        tool_used = 1;
+        py_np_tool = (npy_float64 *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        tool = (npy_float64 *)PyArray_DATA(py_np_tool);
     }
 
-    _ETS_fkine(ets, m, q, base, tool, ret);
+    // Do the actual job
+    for (int i = 0; i < trajn; i++)
+    {
+        // Get pointers to the new section of return array and q array
+        retp = ret + (4 * 4 * i);
+        qp = q + (n * i);
+        _ETS_fkine(ets, m, qp, base, tool, retp);
+    }
+
+    // Free memory
+    Py_DECREF(py_np_q);
+
+    if (tool_used)
+        Py_DECREF(py_np_tool);
+
+    if (base_used)
+        Py_DECREF(py_np_base);
 
     return py_ret;
 }
