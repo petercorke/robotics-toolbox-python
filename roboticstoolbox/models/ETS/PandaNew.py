@@ -138,4 +138,4 @@ if __name__ == "__main__":  # pragma nocover
 
     # Don't include the base
     r.base = b2
-    nt.assert_almost_equal((man * t2).A, r.fkine(q1, tool=t2))
+    nt.assert_almost_equal((man * t2).A, r.fkine(q1, tool=t2, include_base=False))
