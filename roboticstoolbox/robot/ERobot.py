@@ -309,10 +309,6 @@ class BaseERobot(Robot):
                 s = op + s
 
             if link.isjoint:
-                # if link._joint_name is not None:
-                #     jname = link._joint_name
-                # else:
-                #     jname = link.jindex
                 jname = link.jindex
             else:
                 jname = ""
@@ -447,7 +443,7 @@ class BaseERobot(Robot):
     # TODO  get configuration string
 
     @property
-    def ee_links(self) -> Union[list["ELink"], list["ELink2"]]:
+    def ee_links(self) -> list["ELink"]:
         return self._ee_links
 
     # def add_ee(self, link):
@@ -573,7 +569,9 @@ class BaseERobot(Robot):
                     return p
 
     @lru_cache(maxsize=32)
-    def ets(self, start=None, end=None) -> ETS:
+    def ets(
+        self, start: Union[ELink, str, None] = None, end: Union[ELink, str, None] = None
+    ) -> ETS:
         """
         ERobot to ETS
 
@@ -964,7 +962,9 @@ graph [rankdir=LR];
 
         return end, start, tool
 
-    def _getlink(self, link, default=None) -> Union[ELink, BaseELink]:
+    def _getlink(
+        self, link: Union[ELink, str, None], default: Union[ELink, str, None] = None
+    ) -> ELink:
         """
         Validate reference to ELink
         :param link: link
@@ -1343,9 +1343,7 @@ class ERobot(BaseERobot):
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
         """
-
-        ets = self.ets(start, end)
-        return ets.fkine(q, self._base, tool, include_base)
+        return self.ets(start, end).fkine(q, self._base, tool, include_base)
 
     def fkine_old(
         self,
@@ -2309,6 +2307,10 @@ class ERobot2(BaseERobot):
                 self._tool = SE2(T, check=True)
         else:
             raise ValueError("base must be set to None (no tool) or SE2")
+
+    @property
+    def ee_links(self) -> list["ELink2"]:
+        return self._ee_links
 
     def jacob0(self, q):
         return self.ets().jacob0(q)
