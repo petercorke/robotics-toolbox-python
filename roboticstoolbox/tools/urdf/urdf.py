@@ -1715,6 +1715,7 @@ class URDF(URDFType):
                 rpy = tr2rpy(R_total)
 
                 ets = rtb.ET.SE3(SE3(trans) * SE3.RPY(rpy))
+
                 joint.axis = [0, 0, 1]
 
             # variable part of link transform
