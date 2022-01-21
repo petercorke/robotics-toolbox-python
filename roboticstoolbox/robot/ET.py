@@ -1,7 +1,7 @@
 from collections import UserList
 from abc import ABC
 import numpy as np
-from spatialmath.base import trotx, troty, trotz, issymbol, getmatrix
+from spatialmath.base import trotx, troty, trotz, issymbol, getmatrix, tr2rpy
 import fknm
 import sympy
 import math
@@ -146,6 +146,18 @@ class BaseET:
             eta_str = f"{self.eta}"
         elif self.isrotation and self.eta is not None:
             eta_str = f"{self.eta * (180.0/np.pi):.2f}°"
+        elif not self.iselementary:
+            T = self.T()
+            rpy = tr2rpy(T) * 180.0 / np.pi
+            zeros = np.zeros(3)
+            if T[:3, -1].any() and rpy.any():
+                eta_str = f"xyzrpy: {T[0, -1]}, {T[1, -1]}, {T[2, -1]}, {rpy[0]}°, {rpy[1]}°, {rpy[2]}°"
+            elif T[:3, -1].any():
+                eta_str = f"xyz: {T[0, -1]}, {T[1, -1]}, {T[2, -1]}"
+            elif rpy.any():
+                eta_str = f"rpy: {rpy[0]}°, {rpy[1]}°, {rpy[2]}°"
+            else:
+                eta_str = ""
         else:
             eta_str = f"{self.eta}"
 
