@@ -17,8 +17,8 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -113,7 +113,7 @@ Denavit-Hartenberg notation.</p>
 </map><p>The various <a class="reference internal" href="#dh-models"><span class="std std-ref">Models</span></a> all subclass this class.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.DHRobot.</span></span><span class="sig-name descname"><span class="pre">DHRobot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.DHRobot.</span></span><span class="sig-name descname"><span class="pre">DHRobot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHRobot.html#DHRobot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot" title="roboticstoolbox.robot.Robot.Robot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.Robot.Robot</span></code></a></p>
 <p>Class for robots defined using Denavit-Hartenberg notation</p>
 <dl class="field-list simple">
@@ -149,7 +149,7 @@ M.Spong, S. Hutchinson &amp; M. Vidyasagar, Wiley 2006.</p></li>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.mdh">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">mdh</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.mdh" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mdh</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.mdh" title="Permalink to this definition"></a></dt>
 <dd><p>Modified Denavit-Hartenberg status</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -174,7 +174,7 @@ notation</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.d">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">d</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.d" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">d</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.d" title="Permalink to this definition"></a></dt>
 <dd><p>Link offset values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -200,7 +200,7 @@ notation</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.a">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">a</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.a" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">a</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.a" title="Permalink to this definition"></a></dt>
 <dd><p>Link length values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -226,7 +226,7 @@ notation</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.theta">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">theta</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.theta" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">theta</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.theta" title="Permalink to this definition"></a></dt>
 <dd><p>Joint angle values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -252,7 +252,7 @@ notation</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.alpha">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.alpha" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.alpha" title="Permalink to this definition"></a></dt>
 <dd><p>Link twist values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -278,7 +278,7 @@ notation</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.r">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">r</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.r" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.r" title="Permalink to this definition"></a></dt>
 <dd><p>Link centre of mass values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -301,7 +301,7 @@ notation</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.offset">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.offset" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.offset" title="Permalink to this definition"></a></dt>
 <dd><p>Joint offset values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -322,7 +322,7 @@ notation</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.reach">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">reach</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.reach" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reach</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.reach" title="Permalink to this definition"></a></dt>
 <dd><p>Reach of the robot</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -354,7 +354,7 @@ subsequently change this will not be reflected.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.nbranches">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nbranches</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.nbranches" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nbranches</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.nbranches" title="Permalink to this definition"></a></dt>
 <dd><p>Number of branches</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1190,7 +1190,7 @@ numbers of joints.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.base">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">base</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.base" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">base</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.base" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot base transform (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.base</span></code> is the robot base transform</p></li>
@@ -1277,7 +1277,7 @@ shapes. The points returned are [x, y, z].</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.control_type">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">control_type</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.control_type" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">control_type</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.control_type" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot control mode (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.control_type</span></code> is the robot control mode</p></li>
@@ -1449,7 +1449,7 @@ velocity but it is eliminated in the computation of this value.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.default_backend">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">default_backend</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.default_backend" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_backend</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.default_backend" title="Permalink to this definition"></a></dt>
 <dd><p>Get default graphical backend</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1721,7 +1721,7 @@ joints 1 and 3.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.gravity">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">gravity</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.gravity" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gravity</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.gravity" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set default gravitational acceleration (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.name</span></code> is the default gravitational acceleration</p></li>
@@ -1868,7 +1868,7 @@ being the corresponding joint torques.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.hascollision">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hascollision</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.hascollision" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hascollision</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.hascollision" title="Permalink to this definition"></a></dt>
 <dd><p>Robot has collision model (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1895,7 +1895,7 @@ being the corresponding joint torques.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.hasdynamics">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hasdynamics</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.hasdynamics" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasdynamics</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.hasdynamics" title="Permalink to this definition"></a></dt>
 <dd><p>Robot has dynamic parameters (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1914,7 +1914,7 @@ being the corresponding joint torques.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.hasgeometry">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hasgeometry</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.hasgeometry" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasgeometry</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.hasgeometry" title="Permalink to this definition"></a></dt>
 <dd><p>Robot has geometry model (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -2673,7 +2673,7 @@ matplotlib documentation.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.links">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">links</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.links" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">links</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.links" title="Permalink to this definition"></a></dt>
 <dd><p>Robot links (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -2803,7 +2803,7 @@ The International Journal of Robotics Research.
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.manufacturer">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">manufacturer</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.manufacturer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">manufacturer</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.manufacturer" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot manufacturer’s name (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.manufacturer</span></code> is the robot manufacturer’s name</p></li>
@@ -2823,7 +2823,7 @@ The International Journal of Robotics Research.
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.n">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">n</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.n" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.n" title="Permalink to this definition"></a></dt>
 <dd><p>Number of joints (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -2849,7 +2849,7 @@ The International Journal of Robotics Research.
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.name">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.name" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.name" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot name (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.name</span></code> is the robot name</p></li>
@@ -2869,7 +2869,7 @@ The International Journal of Robotics Research.
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.nlinks">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nlinks</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.nlinks" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nlinks</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.nlinks" title="Permalink to this definition"></a></dt>
 <dd><p>Number of links (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -3291,7 +3291,7 @@ end-effector position.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.prismaticjoints">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">prismaticjoints</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.prismaticjoints" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prismaticjoints</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.prismaticjoints" title="Permalink to this definition"></a></dt>
 <dd><p>Revolute joints as bool array</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -3319,7 +3319,7 @@ are not included.  <code class="docutils literal notranslate"><span class="pre">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.q">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.q" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.q" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot joint configuration (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.q</span></code> is the robot joint configuration</p></li>
@@ -3343,7 +3343,7 @@ are not included.  <code class="docutils literal notranslate"><span class="pre">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.qd">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qd</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.qd" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qd</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.qd" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot joint velocity (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.qd</span></code> is the robot joint velocity</p></li>
@@ -3367,7 +3367,7 @@ are not included.  <code class="docutils literal notranslate"><span class="pre">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.qdd">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qdd</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.qdd" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qdd</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.qdd" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot joint acceleration (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.qdd</span></code> is the robot joint acceleration</p></li>
@@ -3391,7 +3391,7 @@ are not included.  <code class="docutils literal notranslate"><span class="pre">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.qlim">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qlim</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.qlim" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qlim</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.qlim" title="Permalink to this definition"></a></dt>
 <dd><p>Joint limits (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -3424,7 +3424,7 @@ not set for:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.qrandom">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qrandom</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.qrandom" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qrandom</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.qrandom" title="Permalink to this definition"></a></dt>
 <dd><p>Return a random joint configuration</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -3446,7 +3446,7 @@ limits set for the robot.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.revolutejoints">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">revolutejoints</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.revolutejoints" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">revolutejoints</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.revolutejoints" title="Permalink to this definition"></a></dt>
 <dd><p>Revolute joints as bool array</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -3474,7 +3474,7 @@ are not included.  <code class="docutils literal notranslate"><span class="pre">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.structure">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">structure</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.structure" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">structure</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.structure" title="Permalink to this definition"></a></dt>
 <dd><p>Return the joint structure string</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -3598,7 +3598,7 @@ performed columnwise.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHRobot.DHRobot.tool">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">tool</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.tool" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tool</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHRobot.DHRobot.tool" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot tool transform (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.tool</span></code> is the robot name</p></li>
@@ -3708,7 +3708,7 @@ end-effector position.</p></li>
 <area shape="rect" id="node2" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" target="_top" title="Link superclass" alt="" coords="129,80,209,105"/>
 </map><dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.</span></span><span class="sig-name descname"><span class="pre">DHLink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHLink.html#DHLink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHLink" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.</span></span><span class="sig-name descname"><span class="pre">DHLink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHLink.html#DHLink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHLink" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" title="roboticstoolbox.robot.Link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.Link.Link</span></code></a></p>
 <p>A link superclass for all robots defined using Denavit-Hartenberg notation.
 A Link object holds all information related to a robot joint and link such
@@ -3743,12 +3743,12 @@ transmission parameters.</p>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.isjoint">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">isjoint</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.isjoint" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isjoint</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.isjoint" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.theta">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">theta</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.theta" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">theta</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.theta" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set joint angle</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -3769,7 +3769,7 @@ transmission parameters.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.d">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">d</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.d" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">d</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.d" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set link offset</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -3790,7 +3790,7 @@ transmission parameters.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.a">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">a</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.a" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">a</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.a" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set link length</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -3811,7 +3811,7 @@ transmission parameters.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.alpha">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.alpha" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.alpha" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set link twist</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -3832,7 +3832,7 @@ transmission parameters.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.sigma">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">sigma</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.sigma" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sigma</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.sigma" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set joint type</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -3859,7 +3859,7 @@ transmission parameters.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.mdh">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">mdh</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.mdh" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mdh</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.mdh" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set kinematic convention</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -3883,7 +3883,7 @@ notation (eg. Siciliano, Spong, Paul textbooks).</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.B">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">B</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.B" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">B</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.B" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set motor viscous friction</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.B</span></code> is the motor viscous friction</p></li>
@@ -3910,7 +3910,7 @@ notation (eg. Siciliano, Spong, Paul textbooks).</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.G">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">G</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.G" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">G</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.G" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set gear ratio</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.G</span></code> is the transmission gear ratio</p></li>
@@ -3942,7 +3942,7 @@ notation (eg. Siciliano, Spong, Paul textbooks).</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.I">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">I</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.I" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">I</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.I" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set link inertia</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.I</span></code> is the link inertia</p></li>
@@ -3977,7 +3977,7 @@ axes parallel to those of the link frame.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.Jm">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">Jm</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.Jm" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Jm</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.Jm" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set motor inertia</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.Jm</span></code> is the motor inertia</p></li>
@@ -4001,7 +4001,7 @@ axes parallel to those of the link frame.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.Tc">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">Tc</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.Tc" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Tc</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.Tc" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set motor Coulomb friction</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.Tc</span></code> is the motor Coulomb friction</p></li>
@@ -4140,7 +4140,7 @@ centre of mass, inertia, friction, gear ratio and motor properties.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.flip">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">flip</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.flip" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">flip</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.flip" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set joint flip</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.flip</span></code> is the joint flip status</p></li>
@@ -4226,7 +4226,7 @@ joints 1 and 3.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.hasdynamics">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hasdynamics</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.hasdynamics" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasdynamics</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.hasdynamics" title="Permalink to this definition"></a></dt>
 <dd><p>Link has dynamic parameters (Link superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -4281,7 +4281,7 @@ by <code class="docutils literal notranslate"><span class="pre">link</span></cod
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.m">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.m" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.m" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set link mass</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.m</span></code> is the link mass</p></li>
@@ -4301,7 +4301,7 @@ by <code class="docutils literal notranslate"><span class="pre">link</span></cod
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.name">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.name" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.name" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set link name</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.name</span></code> is the link name</p></li>
@@ -4343,7 +4343,7 @@ which can cause problems for numerical integration.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.qlim">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qlim</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.qlim" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qlim</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.qlim" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set joint limits</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.qlim</span></code> is the joint limits</p></li>
@@ -4375,7 +4375,7 @@ which can cause problems for numerical integration.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.r">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">r</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.r" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.r" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set link centre of mass</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.r</span></code> is the link centre of mass</p></li>
@@ -4397,7 +4397,7 @@ frame.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.offset">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.offset" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.offset" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set joint variable offset</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.offset</span></code> is the joint variable offset</p></li>
@@ -4471,7 +4471,7 @@ Denavit-Hartenberg parameters.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.isrevolute">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">isrevolute</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.isrevolute" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isrevolute</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.isrevolute" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if the joint is of revolute type</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -4488,7 +4488,7 @@ Denavit-Hartenberg parameters.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.isprismatic">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">isprismatic</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.isprismatic" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isprismatic</span></span><a class="headerlink" href="#roboticstoolbox.robot.DHLink.isprismatic" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if the joint is of prismatic type</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -4514,7 +4514,7 @@ Denavit-Hartenberg parameters.</p></li>
 <h3>Revolute - standard DH<a class="headerlink" href="#revolute-standard-dh" title="Permalink to this headline"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.RevoluteDH">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.DHLink.</span></span><span class="sig-name descname"><span class="pre">RevoluteDH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHLink.html#RevoluteDH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHLink.RevoluteDH" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.DHLink.</span></span><span class="sig-name descname"><span class="pre">RevoluteDH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHLink.html#RevoluteDH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHLink.RevoluteDH" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHLink" title="roboticstoolbox.robot.DHLink.DHLink"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHLink.DHLink</span></code></a></p>
 <p>Class for revolute links using standard DH convention</p>
 <dl class="field-list simple">
@@ -4559,7 +4559,7 @@ rigid-body inertial parameters, motor and transmission parameters.</p>
 <h3>Prismatic - standard DH<a class="headerlink" href="#prismatic-standard-dh" title="Permalink to this headline"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.PrismaticDH">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.DHLink.</span></span><span class="sig-name descname"><span class="pre">PrismaticDH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHLink.html#PrismaticDH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHLink.PrismaticDH" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.DHLink.</span></span><span class="sig-name descname"><span class="pre">PrismaticDH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHLink.html#PrismaticDH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHLink.PrismaticDH" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHLink" title="roboticstoolbox.robot.DHLink.DHLink"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHLink.DHLink</span></code></a></p>
 <p>Class for prismatic link using standard DH convention</p>
 <dl class="field-list simple">
@@ -4605,7 +4605,7 @@ rigid-body inertial parameters, motor and transmission parameters.</p>
 <h3>Revolute - modified DH<a class="headerlink" href="#revolute-modified-dh" title="Permalink to this headline"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.RevoluteMDH">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.DHLink.</span></span><span class="sig-name descname"><span class="pre">RevoluteMDH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHLink.html#RevoluteMDH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHLink.RevoluteMDH" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.DHLink.</span></span><span class="sig-name descname"><span class="pre">RevoluteMDH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHLink.html#RevoluteMDH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHLink.RevoluteMDH" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHLink" title="roboticstoolbox.robot.DHLink.DHLink"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHLink.DHLink</span></code></a></p>
 <p>Class for revolute links using modified DH convention</p>
 <dl class="field-list simple">
@@ -4650,7 +4650,7 @@ rigid-body inertial parameters, motor and transmission parameters.</p>
 <h3>Prismatic - modified DH<a class="headerlink" href="#prismatic-modified-dh" title="Permalink to this headline"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.DHLink.PrismaticMDH">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.DHLink.</span></span><span class="sig-name descname"><span class="pre">PrismaticMDH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHLink.html#PrismaticMDH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHLink.PrismaticMDH" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.DHLink.</span></span><span class="sig-name descname"><span class="pre">PrismaticMDH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/DHLink.html#PrismaticMDH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.DHLink.PrismaticMDH" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHLink" title="roboticstoolbox.robot.DHLink.DHLink"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHLink.DHLink</span></code></a></p>
 <p>Class for prismatic link using modified DH convention</p>
 <dl class="field-list simple">
@@ -4728,7 +4728,7 @@ standard or modified.  They can be listed by:</p>
 </div>
 <span class="target" id="module-roboticstoolbox.models.DH"></span><dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Panda">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Panda</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Panda.html#Panda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Panda" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Panda</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Panda.html#Panda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Panda" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>A class representing the Panda robot arm.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Panda()</span></code> is a class which models a Franka-Emika Panda robot and
@@ -4783,7 +4783,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Puma560">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Puma560</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Puma560.html#Puma560"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Puma560" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Puma560</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Puma560.html#Puma560"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Puma560" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a Puma 560 manipulator</p>
 <dl class="field-list simple">
@@ -4932,7 +4932,7 @@ GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Stanford">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Stanford</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Stanford.html#Stanford"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Stanford" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Stanford</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Stanford.html#Stanford"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Stanford" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a Stanford arm manipulator</p>
 <p><code class="docutils literal notranslate"><span class="pre">Stanford()</span></code> is a class which models a Unimation Puma560 robot and
@@ -4993,7 +4993,7 @@ for robot research”, IJCAI, 1973.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Ball">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Ball</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Ball.html#Ball"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Ball" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Ball</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Ball.html#Ball"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Ball" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a ball manipulator</p>
 <dl class="field-list simple">
@@ -5064,7 +5064,7 @@ Int. J. Robotics Research, 18(9), pp 876-892.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Coil">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Coil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Coil.html#Coil"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Coil" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Coil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Coil.html#Coil"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Coil" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Create model of a coil manipulator</p>
 <dl class="field-list simple">
@@ -5133,7 +5133,7 @@ Int. J. Robotics Research, 18(9), pp 876-892.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Hyper">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Hyper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Hyper.html#Hyper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Hyper" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Hyper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Hyper.html#Hyper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Hyper" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Create model of a hyper redundant planar manipulator</p>
 <dl class="field-list simple">
@@ -5199,7 +5199,7 @@ Int. J. Robotics Research, 18(9), pp 876-892.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Hyper3d">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Hyper3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Hyper3d.html#Hyper3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Hyper3d" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Hyper3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Hyper3d.html#Hyper3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Hyper3d" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Create model of a hyper redundant manipulator</p>
 <dl class="field-list simple">
@@ -5265,7 +5265,7 @@ Int. J. Robotics Research, 18(9), pp 876-892.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Cobra600">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Cobra600</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Cobra600.html#Cobra600"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Cobra600" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Cobra600</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Cobra600.html#Cobra600"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Cobra600" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a Adept Cobra 600 SCARA manipulator</p>
 <p><code class="docutils literal notranslate"><span class="pre">Cobra600()</span></code> is a class which models an Adept Cobra 600 SCARA robot and
@@ -5308,7 +5308,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.IRB140">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">IRB140</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/IRB140.html#IRB140"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.IRB140" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">IRB140</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/IRB140.html#IRB140"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.IRB140" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models an ABB  IRB140 manipulator</p>
 <p><code class="docutils literal notranslate"><span class="pre">IRB140()</span></code> is a class which models a Unimation Puma560 robot and
@@ -5367,7 +5367,7 @@ A. Djuric and R. J. Urbanic</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.KR5">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">KR5</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/KR5.html#KR5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.KR5" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">KR5</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/KR5.html#KR5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.KR5" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a Kuka KR5 manipulator</p>
 <p><code class="docutils literal notranslate"><span class="pre">KR5()</span></code> is a class which models a Kuka KR5 robot and
@@ -5428,7 +5428,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Orion5">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Orion5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Orion5.html#Orion5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Orion5" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Orion5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Orion5.html#Orion5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Orion5" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a RAWR robotics Orion5 manipulator</p>
 <p><code class="docutils literal notranslate"><span class="pre">Orion5()</span></code> is a class which models a RAWR Robotics Orion5 robot and
@@ -5491,7 +5491,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Planar3">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Planar3</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Planar3.html#Planar3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Planar3" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Planar3</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Planar3.html#Planar3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Planar3" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a planar 3-link robot</p>
 <p><code class="docutils literal notranslate"><span class="pre">Planar2()</span></code> is a class which models a 3-link planar robot and
@@ -5534,7 +5534,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Planar2">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Planar2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Planar2.html#Planar2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Planar2" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Planar2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Planar2.html#Planar2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Planar2" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a planar 2-link robot</p>
 <p><code class="docutils literal notranslate"><span class="pre">Planar2()</span></code> is a class which models a 2-link planar robot and
@@ -5580,7 +5580,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.LWR4">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">LWR4</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/LWR4.html#LWR4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.LWR4" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">LWR4</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/LWR4.html#LWR4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.LWR4" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a LWR-IV manipulator</p>
 <p><code class="docutils literal notranslate"><span class="pre">LWR4()</span></code> is a class which models a Kuka LWR-IV robot and
@@ -5637,7 +5637,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.UR3">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">UR3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/UR3.html#UR3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.UR3" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">UR3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/UR3.html#UR3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.UR3" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a Universal Robotics UR3 manipulator</p>
 <dl class="field-list simple">
@@ -5698,7 +5698,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.UR5">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">UR5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/UR5.html#UR5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.UR5" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">UR5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/UR5.html#UR5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.UR5" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a Universal Robotics UR5 manipulator</p>
 <dl class="field-list simple">
@@ -5759,7 +5759,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.UR10">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">UR10</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/UR10.html#UR10"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.UR10" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">UR10</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/UR10.html#UR10"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.UR10" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a Universal Robotics UR10 manipulator</p>
 <dl class="field-list simple">
@@ -5820,7 +5820,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Sawyer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Sawyer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Sawyer.html#Sawyer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Sawyer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Sawyer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Sawyer.html#Sawyer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Sawyer" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a Sawyer manipulator</p>
 <dl class="field-list simple">
@@ -5871,7 +5871,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Mico">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Mico</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Mico.html#Mico"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Mico" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Mico</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Mico.html#Mico"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Mico" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a  Kinova Mico manipulator</p>
 <dl class="field-list simple">
@@ -5935,7 +5935,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Jaco">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Jaco</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Jaco.html#Jaco"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Jaco" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Jaco</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Jaco.html#Jaco"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Jaco" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a  Kinova Jaco manipulator</p>
 <dl class="field-list simple">
@@ -5999,7 +5999,7 @@ conventions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.Baxter">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Baxter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Baxter.html#Baxter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Baxter" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">Baxter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/Baxter.html#Baxter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.Baxter" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a Baxter manipulator</p>
 <dl class="field-list simple">
@@ -6069,7 +6069,7 @@ Z. Ju, C. Yang, H. Ma, Chinese Control Conf, 2015.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.TwoLink">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">TwoLink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/TwoLink.html#TwoLink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.TwoLink" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">TwoLink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/TwoLink.html#TwoLink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.TwoLink" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a 2-link robot moving in the vertical plane</p>
 <dl class="field-list simple">
@@ -6163,7 +6163,7 @@ All mass is concentrated at the joints.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.models.DH.P8">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">P8</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/P8.html#P8"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.P8" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.models.DH.</span></span><span class="sig-name descname"><span class="pre">P8</span></span><a class="reference internal" href="_modules/roboticstoolbox/models/DH/P8.html#P8"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.models.DH.P8" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.DHRobot.DHRobot</span></code></a></p>
 <p>Class that models a Puma robot on an XY base</p>
 <p><code class="docutils literal notranslate"><span class="pre">P8()</span></code> is an object which models an 8-axis robot comprising a Puma 560
@@ -6228,7 +6228,7 @@ arm.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 14-Sep-2021.
+      <span class="lastupdated">Last updated on 22-Jan-2022.
       </span></p>
   </div>
 

@@ -17,8 +17,8 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -75,7 +75,7 @@
 <h1>Unicycle model<a class="headerlink" href="#unicycle-model" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">Unicycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">Unicycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.Vehicle.VehicleBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.__init__">
@@ -222,7 +222,7 @@ inputs <code class="docutils literal notranslate"><span class="pre">u</span></co
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.accel_max">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">accel_max</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.accel_max" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">accel_max</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.accel_max" title="Permalink to this definition"></a></dt>
 <dd><p>Get maximum acceleration of vehicle (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -253,7 +253,7 @@ inputs <code class="docutils literal notranslate"><span class="pre">u</span></co
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.control">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">control</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.control" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">control</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.control" title="Permalink to this definition"></a></dt>
 <dd><p>Get vehicle control (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -282,7 +282,7 @@ SciPy interp1d</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.dt">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.dt" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.dt" title="Permalink to this definition"></a></dt>
 <dd><p>Get sample time (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -471,7 +471,7 @@ is reset at the start of each simulation.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.q">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.q" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.q" title="Permalink to this definition"></a></dt>
 <dd><p>Get vehicle state/configuration (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -485,7 +485,7 @@ is reset at the start of each simulation.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.random">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">random</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.random" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.random" title="Permalink to this definition"></a></dt>
 <dd><p>Get private random number generator</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -557,7 +557,7 @@ calling <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.sto
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.speed_max">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">speed_max</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.speed_max" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">speed_max</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.speed_max" title="Permalink to this definition"></a></dt>
 <dd><p>Get maximum speed of vehicle (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -597,9 +597,9 @@ attribute which might be a function or driver agent.</p></li>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">ValueError: bad control specified</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/Vehicle.py&quot;</span>, line <span class="m">494</span>, in <span class="n">step</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.12/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/Vehicle.py&quot;</span>, line <span class="m">494</span>, in <span class="n">step</span>
     <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_control</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/Vehicle.py&quot;</span>, line <span class="m">570</span>, in <span class="n">eval_control</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.12/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/Vehicle.py&quot;</span>, line <span class="m">570</span>, in <span class="n">eval_control</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad control specified&#39;</span><span class="p">)</span>
 <span class="gr">ValueError</span>: <span class="n">bad control specified</span>
 </pre></div>
@@ -635,7 +635,7 @@ method if <code class="docutils literal notranslate"><span class="pre">stop</spa
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.verbose">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.verbose" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.verbose" title="Permalink to this definition"></a></dt>
 <dd><p>Get verbosity (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -650,7 +650,7 @@ method if <code class="docutils literal notranslate"><span class="pre">stop</spa
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.workspace">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">workspace</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.workspace" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">workspace</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.workspace" title="Permalink to this definition"></a></dt>
 <dd><p>Size of robot workspace</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -666,7 +666,7 @@ option <code class="docutils literal notranslate"><span class="pre">workspace</s
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.x">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.x" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.x" title="Permalink to this definition"></a></dt>
 <dd><p>Get vehicle state/configuration (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -680,7 +680,7 @@ option <code class="docutils literal notranslate"><span class="pre">workspace</s
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.x0">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">x0</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.x0" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x0</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.x0" title="Permalink to this definition"></a></dt>
 <dd><p>Get vehicle initial state/configuration (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -702,7 +702,7 @@ run.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.x_hist">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">x_hist</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.x_hist" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_hist</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.x_hist" title="Permalink to this definition"></a></dt>
 <dd><p>Get vehicle state/configuration history (superclass method)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -734,7 +734,7 @@ run.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 14-Sep-2021.
+      <span class="lastupdated">Last updated on 22-Jan-2022.
       </span></p>
   </div>
 

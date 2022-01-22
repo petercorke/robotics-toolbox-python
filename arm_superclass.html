@@ -17,8 +17,8 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -106,11 +106,11 @@
 </map><p>The various models <a class="reference internal" href="arm_erobot.html#e-models"><span class="std std-ref">ERobot models</span></a> all subclass this class.</p>
 <span class="target" id="module-roboticstoolbox.robot.Robot"></span><dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.Robot.</span></span><span class="sig-name descname"><span class="pre">Robot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'noname'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">manufacturer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.Robot.</span></span><span class="sig-name descname"><span class="pre">Robot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">links</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'noname'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">manufacturer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gravity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbolic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Robot.html#Robot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.Dynamics.DynamicsMixin</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.IK.IKMixin</span></code></p>
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.gravity">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">gravity</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.gravity" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gravity</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.gravity" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set default gravitational acceleration (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.name</span></code> is the default gravitational acceleration</p></li>
@@ -186,7 +186,7 @@ dynamic parameters is invalid.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.n">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">n</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.n" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.n" title="Permalink to this definition"></a></dt>
 <dd><p>Number of joints (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -212,7 +212,7 @@ dynamic parameters is invalid.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.nlinks">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nlinks</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.nlinks" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nlinks</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.nlinks" title="Permalink to this definition"></a></dt>
 <dd><p>Number of links (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -238,7 +238,7 @@ dynamic parameters is invalid.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.nbranches">
-<em class="property"><span class="pre">abstract</span> <span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">nbranches</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.nbranches" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nbranches</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.nbranches" title="Permalink to this definition"></a></dt>
 <dd><p>Number of branches (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -264,7 +264,7 @@ dynamic parameters is invalid.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.hasdynamics">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hasdynamics</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.hasdynamics" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasdynamics</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.hasdynamics" title="Permalink to this definition"></a></dt>
 <dd><p>Robot has dynamic parameters (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -283,7 +283,7 @@ dynamic parameters is invalid.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.hasgeometry">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hasgeometry</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.hasgeometry" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasgeometry</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.hasgeometry" title="Permalink to this definition"></a></dt>
 <dd><p>Robot has geometry model (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -310,7 +310,7 @@ dynamic parameters is invalid.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.hascollision">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hascollision</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.hascollision" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hascollision</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.hascollision" title="Permalink to this definition"></a></dt>
 <dd><p>Robot has collision model (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -337,7 +337,7 @@ dynamic parameters is invalid.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.qrandom">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qrandom</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qrandom" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qrandom</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qrandom" title="Permalink to this definition"></a></dt>
 <dd><p>Return a random joint configuration</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -359,7 +359,7 @@ limits set for the robot.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.default_backend">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">default_backend</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.default_backend" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_backend</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.default_backend" title="Permalink to this definition"></a></dt>
 <dd><p>Get default graphical backend</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -404,7 +404,7 @@ passed to <code class="docutils literal notranslate"><span class="pre">Robot.plo
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.structure">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">structure</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.structure" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">structure</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.structure" title="Permalink to this definition"></a></dt>
 <dd><p>Return the joint structure string</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -435,7 +435,7 @@ are not included.  <code class="docutils literal notranslate"><span class="pre">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.revolutejoints">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">revolutejoints</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.revolutejoints" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">revolutejoints</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.revolutejoints" title="Permalink to this definition"></a></dt>
 <dd><p>Revolute joints as bool array</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -473,7 +473,7 @@ are not included.  <code class="docutils literal notranslate"><span class="pre">
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.prismaticjoints">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">prismaticjoints</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.prismaticjoints" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prismaticjoints</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.prismaticjoints" title="Permalink to this definition"></a></dt>
 <dd><p>Revolute joints as bool array</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -840,7 +840,7 @@ Sequence, J. Haviland and P. Corke</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.name">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.name" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.name" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot name (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.name</span></code> is the robot name</p></li>
@@ -860,7 +860,7 @@ Sequence, J. Haviland and P. Corke</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.manufacturer">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">manufacturer</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.manufacturer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">manufacturer</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.manufacturer" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot manufacturer’s name (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.manufacturer</span></code> is the robot manufacturer’s name</p></li>
@@ -880,7 +880,7 @@ Sequence, J. Haviland and P. Corke</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.links">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">links</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.links" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">links</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.links" title="Permalink to this definition"></a></dt>
 <dd><p>Robot links (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -903,7 +903,7 @@ than the list of links, ie. the following are equivalent:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.base">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">base</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.base" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">base</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.base" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot base transform (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.base</span></code> is the robot base transform</p></li>
@@ -929,7 +929,7 @@ is an identity matrix.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.tool">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">tool</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.tool" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tool</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.tool" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot tool transform (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.tool</span></code> is the robot name</p></li>
@@ -955,7 +955,7 @@ is an identity matrix.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.qlim">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qlim</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qlim" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qlim</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qlim" title="Permalink to this definition"></a></dt>
 <dd><p>Joint limits (Robot superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -2269,7 +2269,7 @@ is: r2 = puma.perturb(0.1)</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.q">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.q" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.q" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot joint configuration (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.q</span></code> is the robot joint configuration</p></li>
@@ -2293,7 +2293,7 @@ is: r2 = puma.perturb(0.1)</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.qd">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qd</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qd" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qd</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qd" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot joint velocity (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.qd</span></code> is the robot joint velocity</p></li>
@@ -2317,7 +2317,7 @@ is: r2 = puma.perturb(0.1)</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.qdd">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qdd</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qdd" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qdd</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.qdd" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot joint acceleration (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.qdd</span></code> is the robot joint acceleration</p></li>
@@ -2341,7 +2341,7 @@ is: r2 = puma.perturb(0.1)</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Robot.Robot.control_type">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">control_type</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.control_type" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">control_type</span></span><a class="headerlink" href="#roboticstoolbox.robot.Robot.Robot.control_type" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set robot control mode (Robot superclass)</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">robot.control_type</span></code> is the robot control mode</p></li>
@@ -2821,7 +2821,7 @@ damper becomes active</p></li>
 <span id="kinematic-cache"></span><h2>Kinematic cache<a class="headerlink" href="#module-roboticstoolbox.robot.KinematicCache" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.KinematicCache.KinematicCache">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.KinematicCache.</span></span><span class="sig-name descname"><span class="pre">KinematicCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cachesize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.KinematicCache.</span></span><span class="sig-name descname"><span class="pre">KinematicCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cachesize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/KinematicCache.html#KinematicCache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.KinematicCache.KinematicCache" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Kinematic cache</p>
 <p>Many robot kinematic (and dynamic operations) have dependencies. For
@@ -3111,7 +3111,7 @@ additional arguments.</p>
 <area shape="rect" id="node1" href="#roboticstoolbox.robot.Link.Link" target="_top" title="Link superclass" alt="" coords="129,5,209,31"/>
 </map><span class="target" id="module-roboticstoolbox.robot.Link"></span><dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Link.Link">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.Link.</span></span><span class="sig-name descname"><span class="pre">Link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Jm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">G</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Link.html#Link"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.Link.Link" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.Link.</span></span><span class="sig-name descname"><span class="pre">Link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Jm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">G</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/Link.html#Link"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.Link.Link" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Link superclass</p>
 <dl class="field-list simple">
@@ -3318,7 +3318,7 @@ joints 1 and 3.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Link.Link.name">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.name" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.name" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set link name</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.name</span></code> is the link name</p></li>
@@ -3338,7 +3338,7 @@ joints 1 and 3.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Link.Link.qlim">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">qlim</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.qlim" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qlim</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.qlim" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set joint limits</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.qlim</span></code> is the joint limits</p></li>
@@ -3370,7 +3370,7 @@ joints 1 and 3.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Link.Link.hasdynamics">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hasdynamics</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.hasdynamics" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hasdynamics</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.hasdynamics" title="Permalink to this definition"></a></dt>
 <dd><p>Link has dynamic parameters (Link superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -3397,7 +3397,7 @@ have been assigned:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Link.Link.flip">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">flip</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.flip" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">flip</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.flip" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set joint flip</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.flip</span></code> is the joint flip status</p></li>
@@ -3432,7 +3432,7 @@ have been assigned:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Link.Link.m">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.m" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.m" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set link mass</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.m</span></code> is the link mass</p></li>
@@ -3452,7 +3452,7 @@ have been assigned:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Link.Link.r">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">r</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.r" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.r" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set link centre of mass</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.r</span></code> is the link centre of mass</p></li>
@@ -3474,7 +3474,7 @@ frame.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Link.Link.I">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">I</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.I" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">I</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.I" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set link inertia</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.I</span></code> is the link inertia</p></li>
@@ -3509,7 +3509,7 @@ axes parallel to those of the link frame.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Link.Link.Jm">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">Jm</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.Jm" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Jm</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.Jm" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set motor inertia</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.Jm</span></code> is the motor inertia</p></li>
@@ -3533,7 +3533,7 @@ axes parallel to those of the link frame.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Link.Link.B">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">B</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.B" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">B</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.B" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set motor viscous friction</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.B</span></code> is the motor viscous friction</p></li>
@@ -3560,7 +3560,7 @@ axes parallel to those of the link frame.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Link.Link.Tc">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">Tc</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.Tc" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Tc</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.Tc" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set motor Coulomb friction</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.Tc</span></code> is the motor Coulomb friction</p></li>
@@ -3596,7 +3596,7 @@ be <span class="math notranslate nohighlight">\(&lt; 0\)</span>.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.Link.Link.G">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">G</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.G" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">G</span></span><a class="headerlink" href="#roboticstoolbox.robot.Link.Link.G" title="Permalink to this definition"></a></dt>
 <dd><p>Get/set gear ratio</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">link.G</span></code> is the transmission gear ratio</p></li>
@@ -3687,7 +3687,7 @@ shapes. The points returned are [x, y, z].</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 14-Sep-2021.
+      <span class="lastupdated">Last updated on 22-Jan-2022.
       </span></p>
   </div>
 

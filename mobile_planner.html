@@ -17,8 +17,8 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -165,7 +165,7 @@
 <h3>Distance transform planner<a class="headerlink" href="#distance-transform-planner" title="Permalink to this headline"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">DistanceTransformPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occgrid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'euclidean'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DistanceTransformPlanner.html#DistanceTransformPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">DistanceTransformPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occgrid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'euclidean'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DistanceTransformPlanner.html#DistanceTransformPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></p>
 <p>Distance transform path planner</p>
 <dl class="field-list simple">
@@ -356,7 +356,7 @@ both of:</p>
 <h3>D* planner<a class="headerlink" href="#d-planner" title="Permalink to this headline"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">DstarPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occ_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DstarPlanner.html#DstarPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">DstarPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occ_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DstarPlanner.html#DstarPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></p>
 <p>D* path planner</p>
 <dl class="field-list simple">
@@ -547,7 +547,7 @@ both of:</p>
 <h3>PRM planner<a class="headerlink" href="#prm-planner" title="Permalink to this headline"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.PRMPlanner">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">PRMPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occ_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/PRMPlanner.html#PRMPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PRMPlanner" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">PRMPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occ_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/PRMPlanner.html#PRMPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PRMPlanner" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></p>
 <p>Distance transform path planner</p>
 <dl class="field-list simple">
@@ -740,7 +740,7 @@ both of:</p>
 <h3>Lattice planner<a class="headerlink" href="#lattice-planner" title="Permalink to this headline"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">LatticePlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">costs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/LatticePlanner.html#LatticePlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">LatticePlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">costs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/LatticePlanner.html#LatticePlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></p>
 <p>Lattice planner</p>
 <dl class="field-list simple">
@@ -934,7 +934,7 @@ both of:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner.goal">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.goal" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.goal" title="Permalink to this definition"></a></dt>
 <dd><p>Goal point or configuration used for planning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -968,7 +968,7 @@ both of:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner.start">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.start" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.start" title="Permalink to this definition"></a></dt>
 <dd><p>Start point or configuration used for planning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -987,7 +987,7 @@ both of:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner.verbose">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.verbose" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner.verbose" title="Permalink to this definition"></a></dt>
 <dd><p>Get verbosity</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1013,7 +1013,7 @@ start and goal configuration <span class="math notranslate nohighlight">\((x, y,
 <h3>Dubins path planner<a class="headerlink" href="#dubins-path-planner" title="Permalink to this headline"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.DubinsPlanner">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">DubinsPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curvature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DubinsPlanner.html#DubinsPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DubinsPlanner" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">DubinsPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curvature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DubinsPlanner.html#DubinsPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DubinsPlanner" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></p>
 <p>Dubins path planner</p>
 <dl class="field-list simple">
@@ -1123,7 +1123,7 @@ left turn, right turn or straight line respectively.</p></td>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.DubinsPlanner.goal">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DubinsPlanner.goal" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DubinsPlanner.goal" title="Permalink to this definition"></a></dt>
 <dd><p>Goal point or configuration used for planning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1247,7 +1247,7 @@ both of:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.DubinsPlanner.start">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DubinsPlanner.start" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DubinsPlanner.start" title="Permalink to this definition"></a></dt>
 <dd><p>Start point or configuration used for planning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1266,7 +1266,7 @@ both of:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.DubinsPlanner.verbose">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DubinsPlanner.verbose" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.DubinsPlanner.verbose" title="Permalink to this definition"></a></dt>
 <dd><p>Get verbosity</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1287,7 +1287,7 @@ message channel.</p>
 <h3>Reeds-Shepp path planner<a class="headerlink" href="#reeds-shepp-path-planner" title="Permalink to this headline"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.ReedsSheppPlanner">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">ReedsSheppPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curvature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/ReedsSheppPlanner.html#ReedsSheppPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.ReedsSheppPlanner" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">ReedsSheppPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curvature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/ReedsSheppPlanner.html#ReedsSheppPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.ReedsSheppPlanner" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></p>
 <p>Reeds-Shepp path planner</p>
 <dl class="field-list simple">
@@ -1399,7 +1399,7 @@ backwards.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.ReedsSheppPlanner.goal">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ReedsSheppPlanner.goal" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ReedsSheppPlanner.goal" title="Permalink to this definition"></a></dt>
 <dd><p>Goal point or configuration used for planning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1523,7 +1523,7 @@ both of:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.ReedsSheppPlanner.start">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ReedsSheppPlanner.start" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ReedsSheppPlanner.start" title="Permalink to this definition"></a></dt>
 <dd><p>Start point or configuration used for planning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1542,7 +1542,7 @@ both of:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.ReedsSheppPlanner.verbose">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ReedsSheppPlanner.verbose" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ReedsSheppPlanner.verbose" title="Permalink to this definition"></a></dt>
 <dd><p>Get verbosity</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1563,7 +1563,7 @@ message channel.</p>
 <h3>Curvature-polynomial planner<a class="headerlink" href="#curvature-polynomial-planner" title="Permalink to this headline"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.CurvaturePolyPlanner">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">CurvaturePolyPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curvature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/CurvaturePolyPlanner.html#CurvaturePolyPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.CurvaturePolyPlanner" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">CurvaturePolyPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curvature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/CurvaturePolyPlanner.html#CurvaturePolyPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.CurvaturePolyPlanner" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.CurvaturePolyPlanner.query">
@@ -1596,7 +1596,7 @@ message channel.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.CurvaturePolyPlanner.goal">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.CurvaturePolyPlanner.goal" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.CurvaturePolyPlanner.goal" title="Permalink to this definition"></a></dt>
 <dd><p>Goal point or configuration used for planning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1720,7 +1720,7 @@ both of:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.CurvaturePolyPlanner.start">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.CurvaturePolyPlanner.start" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.CurvaturePolyPlanner.start" title="Permalink to this definition"></a></dt>
 <dd><p>Start point or configuration used for planning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1739,7 +1739,7 @@ both of:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.CurvaturePolyPlanner.verbose">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.CurvaturePolyPlanner.verbose" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.CurvaturePolyPlanner.verbose" title="Permalink to this definition"></a></dt>
 <dd><p>Get verbosity</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1760,7 +1760,7 @@ message channel.</p>
 <h3>Quintic-polynomial planner<a class="headerlink" href="#quintic-polynomial-planner" title="Permalink to this headline"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.QuinticPolyPlanner">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">QuinticPolyPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_jerk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/QuinticPolyPlanner.html#QuinticPolyPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.QuinticPolyPlanner" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">QuinticPolyPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_jerk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/QuinticPolyPlanner.html#QuinticPolyPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.QuinticPolyPlanner" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></p>
 <p>Quintic polynomial path planner</p>
 <dl class="field-list simple">
@@ -1886,7 +1886,7 @@ of <code class="docutils literal notranslate"><span class="pre">min_t</span></co
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.QuinticPolyPlanner.goal">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.QuinticPolyPlanner.goal" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.QuinticPolyPlanner.goal" title="Permalink to this definition"></a></dt>
 <dd><p>Goal point or configuration used for planning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -2010,7 +2010,7 @@ both of:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.QuinticPolyPlanner.start">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.QuinticPolyPlanner.start" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.QuinticPolyPlanner.start" title="Permalink to this definition"></a></dt>
 <dd><p>Start point or configuration used for planning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -2029,7 +2029,7 @@ both of:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.QuinticPolyPlanner.verbose">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.QuinticPolyPlanner.verbose" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.QuinticPolyPlanner.verbose" title="Permalink to this definition"></a></dt>
 <dd><p>Get verbosity</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -2057,7 +2057,7 @@ message channel.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.OccGrid">
 <span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">OccGrid</span></span><a class="headerlink" href="#roboticstoolbox.mobile.OccGrid" title="Permalink to this definition"></a></dt>
-<dd><p>alias of &lt;module ‘roboticstoolbox.mobile.OccGrid’ from ‘/opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/OccGrid.py’&gt;</p>
+<dd><p>alias of &lt;module ‘roboticstoolbox.mobile.OccGrid’ from ‘/opt/hostedtoolcache/Python/3.7.12/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/OccGrid.py’&gt;</p>
 </dd></dl>
 
 </section>
@@ -2076,7 +2076,7 @@ message channel.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 14-Sep-2021.
+      <span class="lastupdated">Last updated on 22-Jan-2022.
       </span></p>
   </div>
 

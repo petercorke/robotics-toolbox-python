@@ -17,8 +17,8 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -168,7 +168,7 @@ Peter I. Corke, IEEE Transactions on Robotics, 23(3), pp 590-594, June 2007.</p>
 <h2>ETS - 3D<a class="headerlink" href="#ets-3d" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></span><span class="sig-name descname"><span class="pre">ETS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></span><span class="sig-name descname"><span class="pre">ETS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ETS.BaseETS</span></code></p>
 <p>This class implements an elementary transform sequence (ETS) for 3D</p>
 <dl class="field-list simple">
@@ -226,7 +226,7 @@ J. Haviland and P. Corke</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.rx">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">rx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.rx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.rx" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.rx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.rx" title="Permalink to this definition"></a></dt>
 <dd><p>Pure rotation about the x-axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -263,7 +263,7 @@ this case.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.ry">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">ry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.ry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.ry" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.ry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.ry" title="Permalink to this definition"></a></dt>
 <dd><p>Pure rotation about the y-axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -300,7 +300,7 @@ this case.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.rz">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">rz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.rz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.rz" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.rz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.rz" title="Permalink to this definition"></a></dt>
 <dd><p>Pure rotation about the z-axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -337,7 +337,7 @@ this case.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.tx">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">tx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.tx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.tx" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.tx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.tx" title="Permalink to this definition"></a></dt>
 <dd><p>Pure translation along the x-axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -373,7 +373,7 @@ can be set in this case.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.ty">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">ty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.ty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.ty" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.ty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.ty" title="Permalink to this definition"></a></dt>
 <dd><p>Pure translation along the y-axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -409,7 +409,7 @@ can be set in this case.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.tz">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">tz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.tz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.tz" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.tz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.tz" title="Permalink to this definition"></a></dt>
 <dd><p>Pure translation along the z-axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -549,7 +549,7 @@ frame.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.eta">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">eta</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.eta" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eta</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.eta" title="Permalink to this definition"></a></dt>
 <dd><p>Get the transform constant</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -580,7 +580,7 @@ stored internally in radians</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.n">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">n</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.n" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.n" title="Permalink to this definition"></a></dt>
 <dd><p>Number of joints</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -628,7 +628,7 @@ stored internally in radians</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.isjoint">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">isjoint</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.isjoint" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isjoint</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.isjoint" title="Permalink to this definition"></a></dt>
 <dd><p>Test if ET is a joint</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -652,7 +652,7 @@ stored internally in radians</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.isconstant">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">isconstant</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.isconstant" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isconstant</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.isconstant" title="Permalink to this definition"></a></dt>
 <dd><p>Test if ET is a compilation constant</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -679,7 +679,7 @@ mix of rotations and translations.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.axis">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">axis</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.axis" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axis</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.axis" title="Permalink to this definition"></a></dt>
 <dd><p>The transform type and axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -996,7 +996,7 @@ ETs are compounded, leading to a constant ET which is denoted by
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.SE3">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">SE3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.SE3" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SE3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.SE3" title="Permalink to this definition"></a></dt>
 <dd><p>Convert an SE3 to an ETS</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1050,7 +1050,7 @@ amounts of x- and z-axis rotation.</p>
 <h2>ETS - 2D<a class="headerlink" href="#ets-2d" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></span><span class="sig-name descname"><span class="pre">ETS2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></span><span class="sig-name descname"><span class="pre">ETS2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ETS.BaseETS</span></code></p>
 <p>This class implements an elementary transform sequence (ETS) for 2D</p>
 <dl class="field-list simple">
@@ -1107,7 +1107,7 @@ J. Haviland and P. Corke</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.r">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">r</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.r"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.r" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rad'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.r"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.r" title="Permalink to this definition"></a></dt>
 <dd><p>Pure rotation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1145,7 +1145,7 @@ xy-plane.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.tx">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">tx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.tx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.tx" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.tx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.tx" title="Permalink to this definition"></a></dt>
 <dd><p>Pure translation along the x-axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1178,7 +1178,7 @@ can be set in this case.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.eta">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">eta</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.eta" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eta</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.eta" title="Permalink to this definition"></a></dt>
 <dd><p>Get the transform constant</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1209,7 +1209,7 @@ stored internally in radians</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.n">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">n</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.n" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.n" title="Permalink to this definition"></a></dt>
 <dd><p>Number of joints</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1257,7 +1257,7 @@ stored internally in radians</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.isjoint">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">isjoint</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.isjoint" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isjoint</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.isjoint" title="Permalink to this definition"></a></dt>
 <dd><p>Test if ET is a joint</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1281,7 +1281,7 @@ stored internally in radians</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.isconstant">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">isconstant</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.isconstant" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isconstant</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.isconstant" title="Permalink to this definition"></a></dt>
 <dd><p>Test if ET is a compilation constant</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1308,7 +1308,7 @@ mix of rotations and translations.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.axis">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">axis</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.axis" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axis</span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.axis" title="Permalink to this definition"></a></dt>
 <dd><p>The transform type and axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1625,7 +1625,7 @@ ETs are compounded, leading to a constant ET which is denoted by
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.ty">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">ty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.ty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.ty" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.ty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.ty" title="Permalink to this definition"></a></dt>
 <dd><p>Pure translation along the y-axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1673,7 +1673,7 @@ can be set in this case.</p></li>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 14-Sep-2021.
+      <span class="lastupdated">Last updated on 22-Jan-2022.
       </span></p>
   </div>
 
