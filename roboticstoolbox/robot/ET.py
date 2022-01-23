@@ -1,6 +1,6 @@
 import numpy as np
 from spatialmath.base import trotx, troty, trotz, issymbol, tr2rpy, trot2, transl2
-import fknm
+from fknm import ET_T, ET_init, ET_update
 from copy import deepcopy
 
 # from roboticstoolbox.robot.ETS import ETS
@@ -89,7 +89,7 @@ class BaseET:
         else:
             qlim = self.qlim
 
-        return fknm.ET_init(
+        return ET_init(
             self.isjoint,
             self.isflip,
             jindex,
@@ -112,7 +112,7 @@ class BaseET:
         else:
             qlim = self.qlim
 
-        fknm.ET_update(
+        ET_update(
             self.fknm,
             self.isjoint,
             self.isflip,
@@ -479,7 +479,7 @@ class BaseET:
         """
         try:
             # Try and use the C implementation, flip is handled in C
-            return fknm.ET_T(self.__fknm, q)
+            return ET_T(self.__fknm, q)
         except TypeError:
             # We can't use the fast version, lets use Python instead
             if self.isjoint:
