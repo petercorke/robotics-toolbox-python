@@ -196,6 +196,9 @@ class BaseET:
         Private convenience function which converts the axis string to an
         integer for faster processing in the C extensions
         """
+        if isinstance(self, ET2):
+            return 0
+
         if axis[0] == "R":
             if axis[1] == "x":
                 return 0
@@ -828,3 +831,34 @@ class ET2(BaseET):
         trans = T.A if isinstance(T, SE2) else T
 
         return cls(axis="SE2", T=trans, **kwargs)
+
+    def T(self, q: Union[float, Sym] = 0.0) -> NDArray[np.float64]:
+        """
+        Evaluate an elementary transformation
+
+        :param q: Is used if this ET2 is variable (a joint)
+        :type q: float (radians), required for variable ET's
+        :return: The SE(2) matrix value of the ET2
+        :rtype:  ndarray(3,3)
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET2
+            >>> e = ET2.tx(1)
+            >>> e.T()
+            >>> e = ET2.tx()
+            >>> e.T(0.7)
+
+        """
+        if self.isjoint:
+            if self.isflip:
+                q = -1.0 * q
+
+            if self.axis_func is not None:
+                return self.axis_func(q)
+            else:  # pragma: no cover
+                raise TypeError("axis_func not defined")
+        else:  # pragma: no cover
+            return self._T
