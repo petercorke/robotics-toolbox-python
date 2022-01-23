@@ -90,14 +90,25 @@ class TestET(unittest.TestCase):
         r2 = rtb.ET.tz(x)
         r3 = rtb.ET.tz(jindex=3)
 
-        self.assertEqual(str(rx), "Rx(1.543)")
-        self.assertEqual(str(ry), "Ry(1.543)")
-        self.assertEqual(str(rz), "Rz(1.543)")
+        self.assertEqual(str(rx), "Rx(88.41°)")
+        self.assertEqual(str(ry), "Ry(88.41°)")
+        self.assertEqual(str(rz), "Rz(88.41°)")
         self.assertEqual(str(tx), "tx(1.543)")
         self.assertEqual(str(ty), "ty(1.543)")
         self.assertEqual(str(tz), "tz(1.543)")
         self.assertEqual(str(r2), "tz(x)")
         self.assertEqual(str(r3), "tz(q3)")
+
+    def test_str_se3(self):
+        a = rtb.ET.SE3(SE3(1.0, 0, 0))
+        b = rtb.ET.SE3(SE3.RPY(1.0, 2.0, 3.00))
+        c = rtb.ET.SE3(SE3(1.0, 0, 0) * SE3.RPY(1.0, 2.0, 3.00))
+
+        self.assertEqual(str(a), "SE3(xyz: 1.00, 0.00, 0.00)")
+        self.assertEqual(str(b), "SE3(rpy: -122.70°, 65.41°, -8.11°)")
+        self.assertEqual(
+            str(c), "SE3(xyzrpy: 1.00, 0.00, 0.00, -122.70°, 65.41°, -8.11°)"
+        )
 
     def test_repr(self):
         rx = rtb.ET.Rx(1.543, jindex=5, flip=True, qlim=[-1, 1])
@@ -190,6 +201,12 @@ class TestET(unittest.TestCase):
 
     def test_ets(self):
         ets = rtb.ET.Rx(1) * rtb.ET.tx(2)
+
+        nt.assert_array_almost_equal(ets[0].T(), sm.trotx(1))
+        nt.assert_array_almost_equal(ets[1].T(), sm.transl(2, 0, 0))
+
+    def test_ets_add(self):
+        ets = rtb.ET.Rx(1) + rtb.ET.tx(2)
 
         nt.assert_array_almost_equal(ets[0].T(), sm.trotx(1))
         nt.assert_array_almost_equal(ets[1].T(), sm.transl(2, 0, 0))
@@ -295,6 +312,34 @@ class TestET(unittest.TestCase):
         nt.assert_almost_equal(r2i.T(), np.linalg.inv(SE3.Tx(1.0)))
         nt.assert_almost_equal(r3i.T(), np.linalg.inv(se3))
         nt.assert_almost_equal(r4i.T(5.0), np.linalg.inv(SE3.Rx(5.0)))
+
+    def test_with_qlim(self):
+        r1 = rtb.ET.Rx(2.5, qlim=(1, -1))
+        r2 = rtb.ET.Rx(2.5, qlim=[1, -1])
+        r3 = rtb.ET.Rx(2.5, qlim=np.array([1, -1]))
+
+        nt.assert_almost_equal(r1.qlim, np.array([1, -1]))
+        nt.assert_almost_equal(r2.qlim, np.array([1, -1]))
+        nt.assert_almost_equal(r3.qlim, np.array([1, -1]))
+
+    def test_update_qlim(self):
+        r1 = rtb.ET.Rx(2.5, qlim=(1, -1))
+        r2 = rtb.ET.Rx(2.5, qlim=[1, -1])
+        r3 = rtb.ET.Rx(2.5, qlim=np.array([1, -1]))
+
+        r1.qlim = (-2, 2)
+        r2.qlim = [-2, 2]
+        r3.qlim = np.array([-2, 2])
+
+        nt.assert_almost_equal(r1.qlim, np.array([-2, 2]))
+        nt.assert_almost_equal(r2.qlim, np.array([-2, 2]))
+        nt.assert_almost_equal(r3.qlim, np.array([-2, 2]))
+
+    def test_jindex_error(self):
+        r1 = rtb.ET.Rx(2.5)
+
+        with self.assertRaises(ValueError):
+            r1.jindex = -2
 
     # def test_str(self)
 
