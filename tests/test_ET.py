@@ -72,8 +72,6 @@ class TestET(unittest.TestCase):
         nt.assert_array_almost_equal(rtb.ET.tz(0).T(), sm.transl(0, 0, 0))
 
     def test_SE3(self):
-        fl = 1.543
-
         T = SE3.Rx(0.3) * SE3.Rz(0.3) * SE3.Ry(0.3)
 
         nt.assert_array_almost_equal(rtb.ET.SE3(T).T(), T.A)
@@ -341,13 +339,19 @@ class TestET(unittest.TestCase):
         with self.assertRaises(ValueError):
             r1.jindex = -2
 
-    # def test_str(self)
+    def test_et2_T(self):
+        fl = 1.543
+        rx = rtb.ET2.R()
+        tx = rtb.ET2.tx()
+        ty = rtb.ET2.ty()
+        se = rtb.ET2.SE2(sm.trot2(fl) @ sm.transl2(fl, 0))
+        tyf = rtb.ET2.ty(flip=True)
 
-    # def test_ets_var(self):
-    #     ets = rtb.ETS.rx() * rtb.ETS.tx()
-
-    #     nt.assert_array_almost_equal(ets[0].T(1), sm.trotx(1))
-    #     nt.assert_array_almost_equal(ets[1].T(2), sm.transl(2, 0, 0))
+        nt.assert_array_almost_equal(rx.T(fl), sm.trot2(fl))
+        nt.assert_array_almost_equal(tx.T(fl), sm.transl2(fl, 0))
+        nt.assert_array_almost_equal(ty.T(fl), sm.transl2(0, fl))
+        nt.assert_array_almost_equal(se.T(), sm.trot2(fl) @ sm.transl2(fl, 0))
+        nt.assert_array_almost_equal(tyf.T(fl), sm.transl2(0, -fl))
 
 
 if __name__ == "__main__":
