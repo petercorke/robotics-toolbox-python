@@ -1,11 +1,10 @@
 from collections import UserList
-from abc import ABC
 import numpy as np
 from spatialmath.base import trotx, troty, trotz, issymbol, getmatrix, tr2rpy
 import fknm
 import sympy
-import math
 from copy import deepcopy
+from roboticstoolbox import rtb_get_param
 
 # from spatialmath import base
 
@@ -741,8 +740,115 @@ class ETS(UserList):
         self._m = len(self.data)
         self._n = len([True for et in self.data if et.isjoint])
 
-    def __str__(self):
-        return " ⊕ ".join([str(e) for e in self.data])
+    # def __str__(self):
+    #     return " ⊕ ".join([str(e) for e in self.data])
+
+    def __str__(self, q=None):
+        """
+        Pretty prints the ETS
+
+        :param q: control how joint variables are displayed
+        :type q: str
+        :return: Pretty printed ETS
+        :rtype: str
+
+        ``q`` controls how the joint variables are displayed:
+
+        - None, format depends on number of joint variables
+            - one, display joint variable as q
+            - more, display joint variables as q0, q1, ...
+            - if a joint index was provided, use this value
+        - "", display all joint variables as empty parentheses ``()``
+        - "θ", display all joint variables as ``(θ)``
+        - format string with passed joint variables ``(j, j+1)``, so "θ{0}"
+          would display joint variables as θ0, θ1, ... while "θ{1}" would
+          display joint variables as θ1, θ2, ...  ``j`` is either the joint
+          index, if provided, otherwise a sequential value.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rz()
+            >>> print(e[:2])
+            >>> print(e)
+            >>> print(e.__str__(""))
+            >>> print(e.__str__("θ{0}"))  # numbering from 0
+            >>> print(e.__str__("θ{1}"))  # numbering from 1
+            >>> # explicit joint indices
+            >>> e = ET.Rz(j=3) * ET.tx(1) * ET.Rz(j=4)
+            >>> print(e)
+            >>> print(e.__str__("θ{0}"))
+
+        .. note:: Angular parameters are converted to degrees, except if they
+            are symbolic.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> from spatialmath.base import symbol
+            >>> theta, d = symbol('theta, d')
+            >>> e = ET.Rx(theta) * ET.tx(2) * ET.Rx(45, 'deg') * \
+            >>>     ET.Ry(0.2) * ET.ty(d)
+            >>> str(e)
+
+        :SymPy: supported
+        """
+        es = []
+        j = 0
+        c = 0
+        s = None
+        unicode = rtb_get_param("unicode")
+
+        if q is None:
+            if len(self.joints()) > 1:
+                q = "q{0}"
+            else:
+                q = "q"
+
+        # For et in the object, display it, data comes from properties
+        # which come from the named tuple
+        for et in self:
+
+            if et.isjoint:
+                if q is not None:
+                    if et.jindex is None:
+                        _j = j
+                    else:
+                        _j = et.jindex
+                    qvar = q.format(
+                        _j, _j + 1
+                    )  # lgtm [py/str-format/surplus-argument]  # noqa
+                else:
+                    qvar = ""
+                if et.isflip:
+                    s = f"{et.axis}(-{qvar})"
+                else:
+                    s = f"{et.axis}({qvar})"
+                j += 1
+
+            elif et.isrotation:
+                if issymbol(et.eta):
+                    s = f"{et.axis}({et.eta:.4g})"
+                else:
+                    s = f"{et.axis}({et.eta * 180 / np.pi:.4g}°)"
+
+            elif et.istranslation:
+                s = f"{et.axis}({et.eta:.4g})"
+
+            elif et.isconstant:
+                s = f"C{c}"
+                c += 1
+
+            es.append(s)
+
+        if unicode:
+            return " \u2295 ".join(es)
+        else:
+            return " * ".join(es)
 
     def __mul__(self, other: Union["ET", "ETS"]) -> "ETS":
         if isinstance(other, ET):
@@ -753,8 +859,59 @@ class ETS(UserList):
     def __rmul__(self, other: Union["ET", "ETS"]) -> "ETS":
         return ETS([other, self.data])
 
+    def __imul__(self, rest: "ETS"):
+        return self + rest
+
+    def __add__(self, rest):
+        self.__mul__(rest)
+
+    # redefine so that indexing returns an ET type
+    def __getitem__(self, i) -> Union[list[ET], ET]:
+        """
+        Index or slice an ETS
+
+        :param i: the index or slince
+        :type i: int or slice
+        :return: Elementary transform
+        :rtype: ET
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+            >>> e[0]
+            >>> e[1]
+            >>> e[1:3]
+
+        """
+        return self.data[i]  # can be [2] or slice, eg. [3:5]
+
     @property
-    def n(self):
+    def structure(self) -> str:
+        """
+        Joint structure string
+
+        :return: A string indicating the joint types
+        :rtype: str
+
+        A string comprising the characters 'R' or 'P' which indicate the types
+        of joints in order from left to right.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.tz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+            >>> e.structure
+
+        """
+        return "".join(["R" if self.data[i].isrotation else "P" for i in self.joints()])
+
+    @property
+    def n(self) -> int:
         """
         Number of joints
 
@@ -809,10 +966,10 @@ class ETS(UserList):
               Sequence, J. Haviland and P. Corke
         """
 
-        try:
-            return fknm.ETS_fkine(self._m, self.__fknm, q, base, tool, include_base)
-        except:
-            pass
+        # try:
+        #     return fknm.ETS_fkine(self._m, self.__fknm, q, base, tool, include_base)
+        # except:
+        #     pass
 
         q = getmatrix(q, (None, self.n))
         l, _ = q.shape  # type: ignore
@@ -983,7 +1140,7 @@ class ETS(UserList):
         .. runblock:: pycon
 
             >>> from roboticstoolbox import ET
-            >>> e = ET.rz() * ET.tx(1) * ET.rz() * ET.tx(1)
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
             >>> tail = e.pop()
             >>> tail
             >>> e
@@ -1042,3 +1199,138 @@ class ETS(UserList):
         """  # noqa
 
         return ETS([et.inv() for et in reversed(self.data)])
+
+    def joints(self) -> list[int]:
+        """
+        Get index of joint transforms
+
+        :return: indices of transforms that are joints
+        :rtype: list of int
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+            >>> e.joints()
+
+        """
+        return np.where([e.isjoint for e in self])[0]
+
+    def jointset(self) -> set[int]:
+        """
+        Get set of joint indices
+
+        :return: set of unique joint indices
+        :rtype: set
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz(j=1) * ET.tx(j=2) * ET.Rz(j=1) * ET.tx(1)
+            >>> e.jointset()
+        """
+        return set([self[j].jindex for j in self.joints()])  # type: ignore
+
+    def split(self) -> list["ETS"]:
+        """
+        Split ETS into link segments
+
+        Returns a list of ETS, each one, apart from the last,
+        ends with a variable ET.
+        """
+        segments = []
+        start = 0
+        for j, k in enumerate(self.joints()):
+            ets_j = self[start : k + 1]
+            start = k + 1
+            segments.append(ets_j)
+        tail = self[start:]
+
+        if isinstance(tail, list):
+            tail_len = len(tail)
+        elif tail is not None:
+            tail_len = 1
+        else:
+            tail_len = 0
+
+        if tail_len > 0:
+            segments.append(tail)
+
+        return segments
+
+    def compile(self) -> "ETS":
+        """
+        Compile an ETS
+
+        :return: optimised ETS
+        :rtype: ETS
+
+        Perform constant folding for faster evaluation.  Consecutive constant
+        ETs are compounded, leading to a constant ET which is denoted by
+        ``SE3`` when displayed.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.ETS.Panda()
+            >>> ets = robot.ets()
+            >>> ets
+            >>> ets.compile()
+
+        :seealso: :func:`isconstant`
+        """
+        const = None
+        ets = ETS()
+
+        for et in self:
+
+            if et.isjoint:
+                # a joint
+                if const is not None:
+                    # flush the constant
+                    if not np.all(const == np.eye(4)):
+                        ets *= ET.SE3(const)
+                    const = None
+                ets *= et  # emit the joint ET
+            else:
+                # not a joint
+                if const is None:
+                    const = et.T()
+                else:
+                    const = const @ et.T()
+
+        if const is not None:
+            # flush the constant, tool transform
+            if not np.all(const == np.eye(4)):
+                ets *= ET.SE3(const)
+        return ets
+
+    def insert(self, i: int = -1, et: ET = None) -> None:
+        """
+        Insert value
+
+        :param i: insert an ET into the ETS, default is at the end
+        :type i: int
+        :param et: the elementary transform to insert
+        :type et: ET
+
+        Inserts an ET into the ET sequence.  The inserted value is at position
+        ``i``.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+            >>> f = ET.Ry()
+            >>> e.insert(2, f)
+            >>> e
+        """
+        self.data.insert(i, et)
