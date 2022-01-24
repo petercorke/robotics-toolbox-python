@@ -669,9 +669,9 @@ void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, 
                 J[0 * n + j] = U[0 * 4 + 2] * temp[1 * 4 + 3] - U[0 * 4 + 1] * temp[2 * 4 + 3];
                 J[1 * n + j] = U[1 * 4 + 2] * temp[1 * 4 + 3] - U[1 * 4 + 1] * temp[2 * 4 + 3];
                 J[2 * n + j] = U[2 * 4 + 2] * temp[1 * 4 + 3] - U[2 * 4 + 1] * temp[2 * 4 + 3];
-                J[3 * n + j] = U[0 * 4 + 2];
-                J[4 * n + j] = U[1 * 4 + 2];
-                J[5 * n + j] = U[2 * 4 + 2];
+                J[3 * n + j] = U[0 * 4 + 0];
+                J[4 * n + j] = U[1 * 4 + 0];
+                J[5 * n + j] = U[2 * 4 + 0];
             }
             else if (link->axis == 1)
             {
