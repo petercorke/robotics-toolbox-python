@@ -590,7 +590,7 @@ class ELink(BaseELink):
 
     #     return SE3(self._fk, check=False)
 
-    def T(self, q: Optional[float] = None) -> NDArray[np.float64]:
+    def T(self, q: float = 0.0) -> NDArray[np.float64]:
         """
         Link transform matrix
         :param q: Joint coordinate (radians or metres). Not required for links
