@@ -6,148 +6,180 @@ Created on Fri May 1 14:04:04 2020
 """
 
 import numpy.testing as nt
-import roboticstoolbox as rp
-import spatialmath.base as sm
+import roboticstoolbox as rtb
+import numpy as np
+
+# import spatialmath.base as sm
+from spatialmath import SE3
 import unittest
+import sympy
 
 
 class TestETS(unittest.TestCase):
+    def test_bad_arg(self):
+        rx = rtb.ET.Rx(1.543)
+        ry = rtb.ET.Ry(1.543)
 
-    # def test_fail(self):
-    #     self.assertRaises(ValueError, rp.ETS.rx)
-
-    def test_TRx(self):
-        fl = 1.543
-
-        nt.assert_array_almost_equal(rp.ETS.rx(fl).T(), sm.trotx(fl))
-        nt.assert_array_almost_equal(rp.ETS.rx(-fl).T(), sm.trotx(-fl))
-        nt.assert_array_almost_equal(rp.ETS.rx(0).T(), sm.trotx(0))
-
-    def test_TRy(self):
-        fl = 1.543
-
-        nt.assert_array_almost_equal(rp.ETS.ry(fl).T(), sm.troty(fl))
-        nt.assert_array_almost_equal(rp.ETS.ry(-fl).T(), sm.troty(-fl))
-        nt.assert_array_almost_equal(rp.ETS.ry(0).T(), sm.troty(0))
-
-    def test_TRz(self):
-        fl = 1.543
-
-        nt.assert_array_almost_equal(rp.ETS.rz(fl).T(), sm.trotz(fl))
-        nt.assert_array_almost_equal(rp.ETS.rz(-fl).T(), sm.trotz(-fl))
-        nt.assert_array_almost_equal(rp.ETS.rz(0).T(), sm.trotz(0))
-
-    def test_Ttx(self):
-        fl = 1.543
-
-        nt.assert_array_almost_equal(rp.ETS.tx(fl).T(), sm.transl(fl, 0, 0))
-        nt.assert_array_almost_equal(
-            rp.ETS.tx(-fl).T(), sm.transl(-fl, 0, 0))
-        nt.assert_array_almost_equal(rp.ETS.tx(0).T(), sm.transl(0, 0, 0))
-
-    def test_Tty(self):
-        fl = 1.543
-
-        nt.assert_array_almost_equal(rp.ETS.ty(fl).T(), sm.transl(0, fl, 0))
-        nt.assert_array_almost_equal(
-            rp.ETS.ty(-fl).T(), sm.transl(0, -fl, 0))
-        nt.assert_array_almost_equal(rp.ETS.ty(0).T(), sm.transl(0, 0, 0))
-
-    def test_Ttz(self):
-        fl = 1.543
-
-        nt.assert_array_almost_equal(rp.ETS.tz(fl).T(), sm.transl(0, 0, fl))
-        nt.assert_array_almost_equal(
-            rp.ETS.tz(-fl).T(), sm.transl(0, 0, -fl))
-        nt.assert_array_almost_equal(rp.ETS.tz(0).T(), sm.transl(0, 0, 0))
+        with self.assertRaises(TypeError):
+            rtb.ETS([rx, ry, 1.0])
 
     def test_str(self):
-        rx = rp.ETS.rx(1.543)
-        ry = rp.ETS.ry(1.543)
-        rz = rp.ETS.rz(1.543)
-        tx = rp.ETS.tx(1.543)
-        ty = rp.ETS.ty(1.543)
-        tz = rp.ETS.tz(1.543)
+        rx = rtb.ET.Rx(1.543)
+        ry = rtb.ET.Ry(1.543)
+        rz = rtb.ET.Rz(1.543)
+        a = rtb.ET.Rx()
+        b = rtb.ET.Ry()
+        c = rtb.ET.Rz()
+        d = rtb.ET.tx(1.0)
+        e = rtb.ET.SE3(SE3.Rx(1.0))
+        ets = rx * ry * rz * d
+        ets2 = rx * a * b * c
+        ets3 = d * e
 
-        self.assertEqual(str(rx), 'Rx(88.41°)')
-        self.assertEqual(str(ry), 'Ry(88.41°)')
-        self.assertEqual(str(rz), 'Rz(88.41°)')
-        self.assertEqual(str(tx), 'tx(1.543)')
-        self.assertEqual(str(ty), 'ty(1.543)')
-        self.assertEqual(str(tz), 'tz(1.543)')
-        self.assertEqual(str(rx), repr(rx))
-        self.assertEqual(str(ry), repr(ry))
-        self.assertEqual(str(rz), repr(rz))
-        self.assertEqual(str(tx), repr(tx))
-        self.assertEqual(str(ty), repr(ty))
-        self.assertEqual(str(tz), repr(tz))
+        self.assertEqual(str(ets), "Rx(88.41°) ⊕ Ry(88.41°) ⊕ Rz(88.41°) ⊕ tx(1)")
+        self.assertEqual(str(ets2), "Rx(88.41°) ⊕ Rx(q0) ⊕ Ry(q1) ⊕ Rz(q2)")
+        self.assertEqual(str(ets3), "tx(1) ⊕ SE3(rpy: 57.30°, -0.00°, 0.00°)")
+        self.assertEqual(
+            ets2.__str__(q="θ{0}"), "Rx(88.41°) ⊕ Rx(θ0) ⊕ Ry(θ1) ⊕ Rz(θ2)"
+        )
 
-    def test_str_q(self):
-        rx = rp.ETS.rx()
-        ry = rp.ETS.ry()
-        rz = rp.ETS.rz()
-        tx = rp.ETS.tx()
-        ty = rp.ETS.ty()
-        tz = rp.ETS.tz()
+    def test_str_jindex(self):
+        rx = rtb.ET.Rx(1.543)
+        a = rtb.ET.Rx(jindex=2)
+        b = rtb.ET.Ry(jindex=5)
+        c = rtb.ET.Rz(jindex=7)
+        ets = rx * a * b * c
 
-        self.assertEqual(str(rx), 'Rx(q)')
-        self.assertEqual(str(ry), 'Ry(q)')
-        self.assertEqual(str(rz), 'Rz(q)')
-        self.assertEqual(str(tx), 'tx(q)')
-        self.assertEqual(str(ty), 'ty(q)')
-        self.assertEqual(str(tz), 'tz(q)')
-        self.assertEqual(str(rx), repr(rx))
-        self.assertEqual(str(ry), repr(ry))
-        self.assertEqual(str(rz), repr(rz))
-        self.assertEqual(str(tx), repr(tx))
-        self.assertEqual(str(ty), repr(ty))
-        self.assertEqual(str(tz), repr(tz))
+        self.assertEqual(str(ets), "Rx(88.41°) ⊕ Rx(q2) ⊕ Ry(q5) ⊕ Rz(q7)")
 
-    def test_T_real(self):
-        fl = 1.543
-        rx = rp.ETS.rx(fl)
-        ry = rp.ETS.ry(fl)
-        rz = rp.ETS.rz(fl)
-        tx = rp.ETS.tx(fl)
-        ty = rp.ETS.ty(fl)
-        tz = rp.ETS.tz(fl)
+    def test_str_flip(self):
+        rx = rtb.ET.Rx(1.543)
+        a = rtb.ET.Rx(jindex=2, flip=True)
+        b = rtb.ET.Ry(jindex=5)
+        c = rtb.ET.Rz(jindex=7)
+        ets = rx * a * b * c
 
-        nt.assert_array_almost_equal(rx.T(), sm.trotx(fl))
-        nt.assert_array_almost_equal(ry.T(), sm.troty(fl))
-        nt.assert_array_almost_equal(rz.T(), sm.trotz(fl))
-        nt.assert_array_almost_equal(tx.T(), sm.transl(fl, 0, 0))
-        nt.assert_array_almost_equal(ty.T(), sm.transl(0, fl, 0))
-        nt.assert_array_almost_equal(tz.T(), sm.transl(0, 0, fl))
+        self.assertEqual(str(ets), "Rx(88.41°) ⊕ Rx(-q2) ⊕ Ry(q5) ⊕ Rz(q7)")
 
-    def test_T_real_2(self):
-        fl = 1.543
-        rx = rp.ETS.rx()
-        ry = rp.ETS.ry()
-        rz = rp.ETS.rz()
-        tx = rp.ETS.tx()
-        ty = rp.ETS.ty()
-        tz = rp.ETS.tz()
+    def test_str_sym(self):
+        x = sympy.Symbol("x")
+        rx = rtb.ET.Rx(x)
+        a = rtb.ET.Rx(jindex=2)
+        b = rtb.ET.Ry(jindex=5)
+        c = rtb.ET.Rz(jindex=7)
+        ets = rx * a * b * c
 
-        nt.assert_array_almost_equal(rx.T(fl), sm.trotx(fl))
-        nt.assert_array_almost_equal(ry.T(fl), sm.troty(fl))
-        nt.assert_array_almost_equal(rz.T(fl), sm.trotz(fl))
-        nt.assert_array_almost_equal(tx.T(fl), sm.transl(fl, 0, 0))
-        nt.assert_array_almost_equal(ty.T(fl), sm.transl(0, fl, 0))
-        nt.assert_array_almost_equal(tz.T(fl), sm.transl(0, 0, fl))
+        self.assertEqual(str(ets), "Rx(x) ⊕ Rx(q2) ⊕ Ry(q5) ⊕ Rz(q7)")
 
-    def test_ets(self):
-        ets = rp.ETS.rx(1) * rp.ETS.tx(2)
+    def ets_mul(self):
+        rx = rtb.ET.Rx(1.543)
+        ry = rtb.ET.Ry(1.543)
+        rz = rtb.ET.Rz(1.543)
+        a = rtb.ET.Rx()
+        b = rtb.ET.Ry()
 
-        nt.assert_array_almost_equal(ets[0].T(), sm.trotx(1))
-        nt.assert_array_almost_equal(ets[1].T(), sm.transl(2, 0, 0))
+        ets1 = rx * ry
+        ets2 = a * b
 
-    def test_ets_var(self):
-        ets = rp.ETS.rx() * rp.ETS.tx()
+        self.assertIsInstance(ets1 * ets2, rtb.ETS)
+        self.assertIsInstance(ets1 * rz, rtb.ETS)
+        self.assertIsInstance(rz * ets1, rtb.ETS)
+        self.assertIsInstance(ets1 + ets2, rtb.ETS)
 
-        nt.assert_array_almost_equal(ets[0].T(1), sm.trotx(1))
-        nt.assert_array_almost_equal(ets[1].T(2), sm.transl(2, 0, 0))
+        ets2 *= rz
+        self.assertIsInstance(ets2, rtb.ETS)
+
+    def test_n(self):
+        rx = rtb.ET.Rx(1.543)
+        ry = rtb.ET.Ry(1.543)
+        rz = rtb.ET.Rz(1.543)
+        a = rtb.ET.Rx()
+        b = rtb.ET.Ry()
+
+        ets1 = rx * ry
+        ets2 = a * b
+        ets3 = a * b * ry
+
+        self.assertEqual(ets1.n, 0)
+        self.assertEqual(ets2.n, 2)
+        self.assertEqual(ets3.n, 2)
+        self.assertEqual(ets1.structure, "")
+        self.assertEqual(ets2.structure, "RR")
+
+    def test_fkine(self):
+        q = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+        rx = rtb.ET.Rx(1.543)
+        ry = rtb.ET.Ry(1.543)
+        rz = rtb.ET.Rz(1.543)
+        tx = rtb.ET.tx(1.543)
+        ty = rtb.ET.ty(1.543)
+        tz = rtb.ET.tz(1.543)
+        a = rtb.ET.Rx(jindex=0)
+        b = rtb.ET.Ry(jindex=1)
+        c = rtb.ET.Rz(jindex=2)
+        d = rtb.ET.tx(jindex=3)
+        e = rtb.ET.ty(jindex=4)
+        f = rtb.ET.tz(jindex=5)
+
+        r = rx * ry * rz * tx * ty * tz * a * b * c * d * e * f
+
+        ans = (
+            SE3.Rx(1.543)
+            * SE3.Ry(1.543)
+            * SE3.Rz(1.543)
+            * SE3.Tx(1.543)
+            * SE3.Ty(1.543)
+            * SE3.Tz(1.543)
+            * SE3.Rx(q[0])
+            * SE3.Ry(q[1])
+            * SE3.Rz(q[2])
+            * SE3.Tx(q[3])
+            * SE3.Ty(q[4])
+            * SE3.Tz(q[5])
+        )
+
+        nt.assert_almost_equal(r.fkine(q), ans.A)
+
+    def test_fkine_sym(self):
+        x = sympy.Symbol("x")
+        y = sympy.Symbol("y")
+        z = sympy.Symbol("z")
+
+        q = np.array([y, z])
+        qt = np.array([[1.0, y], [z, y], [x, 2.0]])
+        a = rtb.ET.Rx(x)
+        b = rtb.ET.Ry(jindex=0)
+        c = rtb.ET.tz(jindex=1)
+
+        r = a * b * c
+
+        ans1 = SE3.Rx(x) * SE3.Ry(q[0]) * SE3.Tz(q[1])
+        ans2 = SE3.Rx(x) * SE3.Ry(1.0) * SE3.Tz(y)
+        ans3 = SE3.Rx(x) * SE3.Ry(z) * SE3.Tz(y)
+        ans4 = SE3.Rx(x) * SE3.Ry(x) * SE3.Tz(2.0)
+
+        fk_traj = r.fkine(qt)
+
+        nt.assert_almost_equal(r.fkine(q), ans1.A)
+        nt.assert_almost_equal(fk_traj[0], ans2.A)
+        nt.assert_almost_equal(fk_traj[1], ans3.A)
+        nt.assert_almost_equal(fk_traj[2], ans4.A)
+
+        base = SE3.Rx(1.0)
+        tool = SE3.Tz(0.5)
+        ans5 = base * ans1
+
+        r2 = rtb.ETS([rtb.ET.Rx(jindex=0)])
+
+        nt.assert_almost_equal(r.fkine(q, base=base), ans5.A)
+        nt.assert_almost_equal(r.fkine(q, base=base.A), ans5.A)  # type: ignore
+
+        q2 = [y]
+        ans6 = SE3.Rx(y) * tool
+        nt.assert_almost_equal(r2.fkine(q2, tool=tool), ans6)  # type: ignore
+        nt.assert_almost_equal(r2.fkine(q2, tool=tool.A), ans6)  # type: ignore
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     unittest.main()
