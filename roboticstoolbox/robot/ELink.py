@@ -6,8 +6,8 @@
 from spatialmath import SE3, SE2
 from spatialgeometry import Shape
 
-# from roboticstoolbox.robot.ETS import ETS, ETS2
-from roboticstoolbox.robot.ET import ET, ETS
+from roboticstoolbox.robot.ETS import ETS  # , #ETS2
+from roboticstoolbox.robot.ET import ET  # , ETS
 from roboticstoolbox.robot.Link import Link
 import numpy as np
 import fknm
