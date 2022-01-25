@@ -50,6 +50,8 @@ class TestET(unittest.TestCase):
         nt.assert_array_almost_equal(rtb.ET.Rz(-fl).T(), sm.trotz(-fl))
         nt.assert_array_almost_equal(rtb.ET.Rz(0).T(), sm.trotz(0))
 
+        nt.assert_array_almost_equal(rtb.ET.Rz().T(fl), sm.trotz(fl))
+
     def test_Ttx(self):
         fl = 1.543
 
