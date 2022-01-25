@@ -62,8 +62,8 @@ class TestETS(unittest.TestCase):
 
     def test_empty(self):
         r = rtb.ETS()
-        self.assertEquals(r.n, 0)
-        self.assertEquals(r.m, 0)
+        self.assertEqual(r.n, 0)
+        self.assertEqual(r.m, 0)
 
     def test_str(self):
         rx = rtb.ET.Rx(1.543)
@@ -202,6 +202,9 @@ class TestETS(unittest.TestCase):
 
         fk_traj = r.fkine(qt)
 
+        print(fk_traj[0])
+        print(ans2)
+
         nt.assert_almost_equal(r.fkine(q), ans1.A)
         nt.assert_almost_equal(fk_traj[0], ans2.A)
         nt.assert_almost_equal(fk_traj[1], ans3.A)
@@ -221,7 +224,7 @@ class TestETS(unittest.TestCase):
         nt.assert_almost_equal(r2.fkine(q2, tool=tool), ans6)  # type: ignore
         nt.assert_almost_equal(r2.fkine(q2, tool=tool.A), ans6)  # type: ignore
 
-    def test_jacob0(self):
+    def test_jacob0_panda(self):
         deg = np.pi / 180
         mm = 1e-3
         tool_offset = (103) * mm
@@ -502,6 +505,51 @@ class TestETS(unittest.TestCase):
 
         nt.assert_almost_equal(r.fkine(q), r2.fkine(q))
         nt.assert_almost_equal(r.fkine(q), r3.fkine(q))
+
+    def test_jacob0(self):
+        q = [0]
+        rx = rtb.ETS(rtb.ET.Rx())
+        ry = rtb.ETS(rtb.ET.Ry())
+        rz = rtb.ETS(rtb.ET.Rz())
+        tx = rtb.ETS(rtb.ET.tx())
+        ty = rtb.ETS(rtb.ET.ty())
+        tz = rtb.ETS(rtb.ET.tz())
+
+        r = tx + ty + tz + rx + ry + rz
+
+        nt.assert_almost_equal(tx.jacob0(q), np.array([[1, 0, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(ty.jacob0(q), np.array([[0, 1, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(tz.jacob0(q), np.array([[0, 0, 1, 0, 0, 0]]).T)
+        nt.assert_almost_equal(rx.jacob0(q), np.array([[0, 0, 0, 1, 0, 0]]).T)
+        nt.assert_almost_equal(ry.jacob0(q), np.array([[0, 0, 0, 0, 1, 0]]).T)
+        nt.assert_almost_equal(rz.jacob0(q), np.array([[0, 0, 0, 0, 0, 1]]).T)
+        nt.assert_almost_equal(r.jacob0(q), np.eye(6))
+
+    def test_jacob0_sym(self):
+        x = sympy.Symbol("x")
+        q1 = np.array([x, x])
+        q2 = np.array([0, x])
+        rx = rtb.ETS(rtb.ET.Rx(jindex=0))
+        ry = rtb.ETS(rtb.ET.Ry(jindex=0))
+        rz = rtb.ETS(rtb.ET.Rz(jindex=0))
+        tx = rtb.ETS(rtb.ET.tx(jindex=0))
+        ty = rtb.ETS(rtb.ET.ty(jindex=0))
+        tz = rtb.ETS(rtb.ET.tz(jindex=1))
+        a = rtb.ETS(rtb.ET.SE3(np.eye(4)))
+
+        r = tx + ty + tz + rx + ry + rz + a
+
+        print(r.jacob0(q2))
+
+        nt.assert_almost_equal(tx.jacob0(q1), np.array([[1, 0, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(ty.jacob0(q1), np.array([[0, 1, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(tz.jacob0(q1), np.array([[0, 0, 1, 0, 0, 0]]).T)
+        nt.assert_almost_equal(rx.jacob0(q1), np.array([[0, 0, 0, 1, 0, 0]]).T)
+        nt.assert_almost_equal(ry.jacob0(q1), np.array([[0, 0, 0, 0, 1, 0]]).T)
+        nt.assert_almost_equal(rz.jacob0(q1), np.array([[0, 0, 0, 0, 0, 1]]).T)
+        nt.assert_almost_equal(r.jacob0(q2), np.eye(6))
+        nt.assert_almost_equal(r.jacob0(q2, tool=SE3()), np.eye(6))
+        nt.assert_almost_equal(r.jacob0(q2, tool=SE3().A), np.eye(6))
 
 
 if __name__ == "__main__":
