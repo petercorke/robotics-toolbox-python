@@ -48,21 +48,31 @@ class ETS(UserList):
     def __init__(self, arg=None):
         super().__init__()
         if isinstance(arg, list):
-            if not all([isinstance(a, ET) for a in arg]):
-                raise TypeError("bad arg")
-            # Deep copy the ET's before saving them
-            self.data = [deepcopy(et) for et in arg]
-        else:
-            # Initialise with identity ET
-            self.data = [ET.SE3(np.eye(4))]
+            for item in arg:
+                if isinstance(item, ET):
+                    self.data.append(deepcopy(item))
+                elif isinstance(item, ETS):
+                    for ets_item in item:
+                        self.data.append(deepcopy(ets_item))
+                else:
+                    raise TypeError("bad arg")
+        elif isinstance(arg, ET):
+            self.data.append(deepcopy(arg))
+        elif isinstance(arg, ETS):
+            for ets_item in arg:
+                self.data.append(deepcopy(ets_item))
+        elif arg is None:
+            self.data = []
 
-        self.__fknm = [et.fknm for et in self.data]
-
-        self._m = len(self.data)
-        self._n = len([True for et in self.data if et.isjoint])
+        self.__update_internals()
 
     # def __str__(self):
     #     return " ⊕ ".join([str(e) for e in self.data])
+
+    def __update_internals(self):
+        self.__fknm = [et.fknm for et in self.data]
+        self._m = len(self.data)
+        self._n = len([True for et in self.data if et.isjoint])
 
     def __str__(self, q: str = None):
         """
@@ -184,8 +194,8 @@ class ETS(UserList):
     def __imul__(self, rest: "ETS"):
         return self + rest  # pragma: nocover
 
-    def __add__(self, rest):
-        self.__mul__(rest)  # pragma: nocover
+    def __add__(self, rest) -> "ETS":
+        return self.__mul__(rest)  # pragma: nocover
 
     # redefine so that indexing returns an ET type
     def __getitem__(self, i) -> ET:
@@ -466,6 +476,7 @@ class ETS(UserList):
             >>> e
         """
         item = super().pop(i)
+        self.__update_internals()
         return item
 
     @property
@@ -564,17 +575,19 @@ class ETS(UserList):
         """
         segments = []
         start = 0
+
         for j, k in enumerate(self.joints()):
             ets_j = self[start : k + 1]
             start = k + 1
             segments.append(ets_j)
+
         tail = self[start:]
 
         if isinstance(tail, list):
             tail_len = len(tail)
-        elif tail is not None:
+        elif tail is not None:  # pragma: nocover
             tail_len = 1
-        else:
+        else:  # pragma: nocover
             tail_len = 0
 
         if tail_len > 0:
@@ -631,16 +644,20 @@ class ETS(UserList):
                 ets *= ET.SE3(const)
         return ets
 
-    def insert(self, i: int = -1, et: ET = None) -> None:
+    def insert(
+        self,
+        arg: Union[ET, "ETS"],
+        i: int = -1,
+    ) -> None:
         """
         Insert value
 
-        :param i: insert an ET into the ETS, default is at the end
+        :param i: insert an ET or ETS into the ETS, default is at the end
         :type i: int
-        :param et: the elementary transform to insert
-        :type et: ET
+        :param arg: the elementary transform or sequence to insert
+        :type arg: ET
 
-        Inserts an ET into the ET sequence.  The inserted value is at position
+        Inserts an ET or ETS into the ET sequence.  The inserted value is at position
         ``i``.
 
         Example:
@@ -650,10 +667,17 @@ class ETS(UserList):
             >>> from roboticstoolbox import ET
             >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
             >>> f = ET.Ry()
-            >>> e.insert(2, f)
+            >>> e.insert(f, 2)
             >>> e
         """
-        self.data.insert(i, et)
+
+        if isinstance(arg, ET):
+            self.data.insert(i, arg)
+        elif isinstance(arg, ETS):
+            for j, et in enumerate(arg):
+                self.data.insert(i + j, et)
+
+        self.__update_internals()
 
 
 # class BaseETS(UserList, ABC):
