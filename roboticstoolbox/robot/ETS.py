@@ -303,7 +303,7 @@ class ETS(UserList):
         except:
             pass
 
-        q = getmatrix(q, (None, self.n))
+        q = getmatrix(q, (None, None))
         l, _ = q.shape  # type: ignore
         end = self.data[-1]
 
@@ -326,8 +326,8 @@ class ETS(UserList):
         for k, qk in enumerate(q):  # type: ignore
             link = end  # start with last link
 
-            # add tool if provided
-            A = link.T(qk[link.jindex])
+            jindex = 0 if link.jindex is None and link.isjoint else link.jindex
+            A = link.T(qk[jindex])
 
             if A is None:
                 Tk = tool  # pragma: nocover
@@ -338,7 +338,8 @@ class ETS(UserList):
             for i in range(self.m - 2, -1, -1):
                 link = self.data[i]
 
-                A = link.T(qk[link.jindex])
+                jindex = 0 if link.jindex is None and link.isjoint else link.jindex
+                A = link.T(qk[jindex])
 
                 if A is not None:
                     Tk = A @ Tk
@@ -349,7 +350,7 @@ class ETS(UserList):
 
             # append
             if l > 1:
-                T[k] = Tk
+                T[k, :, :] = Tk
             else:
                 T = Tk
 
@@ -394,25 +395,26 @@ class ETS(UserList):
         elif isinstance(tool, SE3):
             tool = np.array(tool.A)
 
-        q = getvector(q, self.n)
+        q = getvector(q, None)
 
         T = self.fkine(q, include_base=False) @ tool
 
         U = np.eye(4)
         j = 0
-        J = np.zeros((6, self.n))
+        J = np.zeros((6, self.n), dtype="object")
         zero = np.array([0, 0, 0])
         end = self.data[-1]
 
         for link in self.data:
+            jindex = 0 if link.jindex is None and link.isjoint else link.jindex
 
             if link.isjoint:
-                U = U @ link.T(q[link.jindex])  # type: ignore
+                U = U @ link.T(q[jindex])  # type: ignore
 
                 if link == end:
                     U = U @ tool
 
-                Tu = np.linalg.inv(U) @ T
+                Tu = SE3(U, check=False).inv().A @ T
                 n = U[:3, 0]
                 o = U[:3, 1]
                 a = U[:3, 2]
@@ -420,27 +422,27 @@ class ETS(UserList):
                 y = Tu[1, 3]
                 z = Tu[2, 3]
 
-                if link.v.axis == "Rz":
+                if link.axis == "Rz":
                     J[:3, j] = (o * x) - (n * y)
                     J[3:, j] = a
 
-                elif link.v.axis == "Ry":
+                elif link.axis == "Ry":
                     J[:3, j] = (n * z) - (a * x)
                     J[3:, j] = o
 
-                elif link.v.axis == "Rx":
+                elif link.axis == "Rx":
                     J[:3, j] = (a * y) - (o * z)
                     J[3:, j] = n
 
-                elif link.v.axis == "tx":
+                elif link.axis == "tx":
                     J[:3, j] = n
                     J[3:, j] = zero
 
-                elif link.v.axis == "ty":
+                elif link.axis == "ty":
                     J[:3, j] = o
                     J[3:, j] = zero
 
-                elif link.v.axis == "tz":
+                elif link.axis == "tz":
                     J[:3, j] = a
                     J[3:, j] = zero
 
