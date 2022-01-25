@@ -14,8 +14,8 @@ from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix, islist
 
 from roboticstoolbox.robot.ELink import ELink, ELink2, BaseELink
 
-# from roboticstoolbox.robot.ETS import ETS, ETS2
-from roboticstoolbox.robot.ET import ET, ETS
+from roboticstoolbox.robot.ETS import ETS  # , ETS2
+from roboticstoolbox.robot.ET import ET  # , ETS
 from roboticstoolbox.robot.DHRobot import DHRobot
 from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
