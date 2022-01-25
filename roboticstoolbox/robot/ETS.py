@@ -38,7 +38,7 @@ from roboticstoolbox import rtb_get_param
 from roboticstoolbox.robot.ET import ET
 from spatialmath.base import getvector
 from spatialmath import SE3
-from typing import Union
+from typing import Type, Union
 from numpy.typing import ArrayLike, NDArray
 
 
@@ -49,7 +49,7 @@ class ETS(UserList):
         super().__init__()
         if isinstance(arg, list):
             if not all([isinstance(a, ET) for a in arg]):
-                raise ValueError("bad arg")
+                raise TypeError("bad arg")
             # Deep copy the ET's before saving them
             self.data = [deepcopy(et) for et in arg]
         else:
@@ -64,7 +64,7 @@ class ETS(UserList):
     # def __str__(self):
     #     return " ⊕ ".join([str(e) for e in self.data])
 
-    def __str__(self, q=None):
+    def __str__(self, q: str = None):
         """
         Pretty prints the ETS
 
@@ -132,7 +132,7 @@ class ETS(UserList):
 
         # For et in the object, display it, data comes from properties
         # which come from the named tuple
-        for et in self:
+        for et in self.data:
 
             if et.isjoint:
                 if q is not None:
@@ -143,8 +143,9 @@ class ETS(UserList):
                     qvar = q.format(
                         _j, _j + 1
                     )  # lgtm [py/str-format/surplus-argument]  # noqa
-                else:
-                    qvar = ""
+                # else:
+                #     qvar = ""
+
                 if et.isflip:
                     s = f"{et.axis}(-{qvar})"
                 else:
@@ -153,41 +154,41 @@ class ETS(UserList):
 
             elif et.isrotation:
                 if issymbol(et.eta):
-                    s = f"{et.axis}({et.eta:.4g})"
+                    s = f"{et.axis}({et.eta})"
                 else:
                     s = f"{et.axis}({et.eta * 180 / np.pi:.4g}°)"
 
             elif et.istranslation:
                 s = f"{et.axis}({et.eta:.4g})"
 
-            elif et.isconstant:
-                s = f"C{c}"
+            elif not et.iselementary:
+                s = str(et)
                 c += 1
 
             es.append(s)
 
         if unicode:
             return " \u2295 ".join(es)
-        else:
+        else:  # pragma: nocover
             return " * ".join(es)
 
     def __mul__(self, other: Union["ET", "ETS"]) -> "ETS":
         if isinstance(other, ET):
             return ETS([*self.data, other])
-        elif isinstance(other, ETS):
-            return ETS([*self.data, *other.data])
+        else:
+            return ETS([*self.data, *other.data])  # pragma: nocover
 
     def __rmul__(self, other: Union["ET", "ETS"]) -> "ETS":
-        return ETS([other, self.data])
+        return ETS([other, self.data])  # pragma: nocover
 
     def __imul__(self, rest: "ETS"):
-        return self + rest
+        return self + rest  # pragma: nocover
 
     def __add__(self, rest):
-        self.__mul__(rest)
+        self.__mul__(rest)  # pragma: nocover
 
     # redefine so that indexing returns an ET type
-    def __getitem__(self, i) -> Union[list[ET], ET]:
+    def __getitem__(self, i) -> ET:
         """
         Index or slice an ETS
 
@@ -287,10 +288,10 @@ class ETS(UserList):
               Sequence, J. Haviland and P. Corke
         """
 
-        # try:
-        #     return fknm.ETS_fkine(self._m, self.__fknm, q, base, tool, include_base)
-        # except:
-        #     pass
+        try:
+            return fknm.ETS_fkine(self._m, self.__fknm, q, base, tool, include_base)
+        except:
+            pass
 
         q = getmatrix(q, (None, self.n))
         l, _ = q.shape  # type: ignore
@@ -307,9 +308,9 @@ class ETS(UserList):
             tool = np.array(tool.A)
 
         if l > 1:
-            T = np.zeros((l, 4, 4))
+            T = np.zeros((l, 4, 4), dtype=object)
         else:
-            T = np.zeros((4, 4))
+            T = np.zeros((4, 4), dtype=object)
         Tk = np.eye(4)
 
         for k, qk in enumerate(q):  # type: ignore
@@ -317,16 +318,14 @@ class ETS(UserList):
 
             # add tool if provided
             A = link.T(qk[link.jindex])
+
             if A is None:
-                Tk = tool
+                Tk = tool  # pragma: nocover
             else:
-                if tool is None:
-                    Tk = A
-                elif A is not None:
-                    Tk = A @ tool
+                Tk = A @ tool
 
             # add remaining links, back toward the base
-            for i in range(self.n - 2, -1, -1):
+            for i in range(self.m - 2, -1, -1):
                 link = self.data[i]
 
                 A = link.T(qk[link.jindex])
@@ -338,9 +337,9 @@ class ETS(UserList):
             if include_base == True:
                 Tk = base @ Tk
 
-            # cast to pose class and append
+            # append
             if l > 1:
-                T[k, :, :] = Tk
+                T[k] = Tk
             else:
                 T = Tk
 
