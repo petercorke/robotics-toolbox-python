@@ -1,10 +1,8 @@
 import numpy as np
-from spatialmath.base import trotx, troty, trotz, issymbol, tr2rpy, trot2, transl2
-from fknm import ET_T, ET_init, ET_update
-from copy import deepcopy
-
-# from roboticstoolbox.robot.ETS import ETS
 import roboticstoolbox as rtb
+from spatialmath.base import trotx, troty, trotz, issymbol, tr2rpy, trot2, transl2
+from copy import deepcopy
+from fknm import ET_T, ET_init, ET_update
 from spatialmath.base import getvector
 from spatialmath import SE3, SE2
 from typing import Optional, Callable, Union
