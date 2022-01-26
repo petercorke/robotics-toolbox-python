@@ -1,6 +1,15 @@
 import numpy as np
 import roboticstoolbox as rtb
-from spatialmath.base import trotx, troty, trotz, issymbol, tr2rpy, trot2, transl2
+from spatialmath.base import (
+    trotx,
+    troty,
+    trotz,
+    issymbol,
+    tr2rpy,
+    trot2,
+    transl2,
+    tr2xyt,
+)
 from copy import deepcopy
 from fknm import ET_T, ET_init, ET_update
 from spatialmath.base import getvector
@@ -135,17 +144,23 @@ class BaseET:
         elif self.isrotation and self.eta is not None:
             eta_str = f"{self.eta * (180.0/np.pi):.2f}°"
         elif not self.iselementary:
-            T = self.T()
-            rpy = tr2rpy(T) * 180.0 / np.pi
-            zeros = np.zeros(3)
-            if T[:3, -1].any() and rpy.any():
-                eta_str = f"xyzrpy: {T[0, -1]:.2f}, {T[1, -1]:.2f}, {T[2, -1]:.2f}, {rpy[0]:.2f}°, {rpy[1]:.2f}°, {rpy[2]:.2f}°"
-            elif T[:3, -1].any():
-                eta_str = f"xyz: {T[0, -1]:.2f}, {T[1, -1]:.2f}, {T[2, -1]:.2f}"
-            elif rpy.any():
-                eta_str = f"rpy: {rpy[0]:.2f}°, {rpy[1]:.2f}°, {rpy[2]:.2f}°"
-            else:
-                eta_str = ""  # pragma: nocover
+            if isinstance(self, ET):
+                T = self.T()
+                rpy = tr2rpy(T) * 180.0 / np.pi
+                if T[:3, -1].any() and rpy.any():
+                    eta_str = f"xyzrpy: {T[0, -1]:.2f}, {T[1, -1]:.2f}, {T[2, -1]:.2f}, {rpy[0]:.2f}°, {rpy[1]:.2f}°, {rpy[2]:.2f}°"
+                elif T[:3, -1].any():
+                    eta_str = f"xyz: {T[0, -1]:.2f}, {T[1, -1]:.2f}, {T[2, -1]:.2f}"
+                elif rpy.any():
+                    eta_str = f"rpy: {rpy[0]:.2f}°, {rpy[1]:.2f}°, {rpy[2]:.2f}°"
+                else:
+                    eta_str = ""  # pragma: nocover
+            elif isinstance(self, ET2):
+                T = self.T()
+                xyt = tr2xyt(T)
+                xyt[2] *= 180 / np.pi
+                eta_str = f"xyθ: {xyt[0]:.2f}, {xyt[1]:.2f}, {xyt[2]:.2f}°"
+
         else:
             eta_str = f"{self.eta}"
 
