@@ -335,11 +335,11 @@ class BaseETS(UserList):
         start = 0
 
         for j, k in enumerate(self.joints()):
-            ets_j = self[start : k + 1]
+            ets_j = self.data[start : k + 1]
             start = k + 1
             segments.append(ets_j)
 
-        tail = self[start:]
+        tail = self.data[start:]
 
         if isinstance(tail, list):
             tail_len = len(tail)
@@ -391,6 +391,44 @@ class BaseETS(UserList):
 
         return self.__class__([et.inv() for et in reversed(self.data)])
 
+    @overload
+    def __getitem__(self: "ETS", i: int) -> ET:  # pragma: nocover
+        ...
+
+    @overload
+    def __getitem__(self: "ETS", i: slice) -> list[ET]:  # pragma: nocover
+        ...
+
+    @overload
+    def __getitem__(self: "ETS2", i: int) -> ET2:  # pragma: nocover
+        ...
+
+    @overload
+    def __getitem__(self: "ETS2", i: slice) -> list[ET2]:  # pragma: nocover
+        ...
+
+    def __getitem__(self, i):
+        """
+        Index or slice an ETS
+
+        :param i: the index or slince
+        :type i: int or slice
+        :return: Elementary transform
+        :rtype: ET
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+            >>> e[0]
+            >>> e[1]
+            >>> e[1:3]
+
+        """
+        return self.data[i]  # can be [2] or slice, eg. [3:5]
+
 
 class ETS(BaseETS):
     """
@@ -428,7 +466,12 @@ class ETS(BaseETS):
         :func:`ty`, :func:`tz`
     """
 
-    def __init__(self, arg: Union[list[Union["ETS", ET]], ET, "ETS", None] = None):
+    def __init__(
+        self,
+        arg: Union[
+            list[Union["ETS", ET]], list[ET], list["ETS"], ET, "ETS", None
+        ] = None,
+    ):
         super().__init__()
         if isinstance(arg, list):
             for item in arg:
@@ -451,14 +494,6 @@ class ETS(BaseETS):
 
         super()._update_internals()
 
-    @property
-    def data(self) -> list[ET]:
-        return self._data
-
-    @data.setter
-    def data(self, new_data):
-        self._data = new_data
-
     def __mul__(self, other: Union["ET", "ETS"]) -> "ETS":
         if isinstance(other, ET):
             return ETS([*self.data, other])
@@ -473,28 +508,6 @@ class ETS(BaseETS):
 
     def __add__(self, rest) -> "ETS":
         return self.__mul__(rest)  # pragma: nocover
-
-    def __getitem__(self, i) -> ET:
-        """
-        Index or slice an ETS
-
-        :param i: the index or slince
-        :type i: int or slice
-        :return: Elementary transform
-        :rtype: ET
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-            >>> e[0]
-            >>> e[1]
-            >>> e[1:3]
-
-        """
-        return self.data[i]  # can be [2] or slice, eg. [3:5]
 
     def fkine(
         self,
@@ -843,7 +856,12 @@ class ETS2(BaseETS):
     :seealso: :func:`r`, :func:`tx`, :func:`ty`
     """
 
-    def __init__(self, arg: Union[list[Union["ETS2", ET2]], ET2, "ETS2", None] = None):
+    def __init__(
+        self,
+        arg: Union[
+            list[Union["ETS2", ET2]], list[ET2], list["ETS2"], ET2, "ETS2", None
+        ] = None,
+    ):
         super().__init__()
         if isinstance(arg, list):
             for item in arg:
@@ -881,28 +899,6 @@ class ETS2(BaseETS):
 
     def __add__(self, rest) -> "ETS2":
         return self.__mul__(rest)  # pragma: nocover
-
-    def __getitem__(self, i) -> ET2:
-        """
-        Index or slice an ETS
-
-        :param i: the index or slince
-        :type i: int or slice
-        :return: Elementary transform
-        :rtype: ET
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET2
-            >>> e = ET2.R() * ET2.tx(1) * ET2.R() * ET2.tx(1)
-            >>> e[0]
-            >>> e[1]
-            >>> e[1:3]
-
-        """
-        return self.data[i]  # can be [2] or slice, eg. [3:5]
 
     def compile(self) -> "ETS2":
         """
@@ -1019,7 +1015,7 @@ class ETS2(BaseETS):
 
         q = getmatrix(q, (None, None))
         l, _ = q.shape  # type: ignore
-        end = self.data[-1]
+        end = self[-1]
 
         if base is None:
             base = np.eye(3)
@@ -1070,60 +1066,58 @@ class ETS2(BaseETS):
 
         return T
 
+    def jacob0(self, q):
 
-#     def jacob0(self, q, T=None):
+        # very inefficient implementation, just put a 1 in last row
+        # if its a rotation joint
+        q = getvector(q)
 
-#         # very inefficient implementation, just put a 1 in last row
-#         # if its a rotation joint
-#         q = getvector(q)
+        j = 0
+        J = np.zeros((3, self.n))
+        etjoints = self.joints()
 
-#         # E = np.zeros((3, 3))
-#         j = 0
-#         J = np.zeros((3, self.n))
-#         etjoints = self.joints()
+        if not all([self[i].jindex for i in etjoints]):
+            # not all joints have a jindex it is required, set them
+            for j in range(self.n):
+                i = etjoints[j]
+                self[i].jindex = j
 
-#         if not all([self[i].jindex for i in etjoints]):
-#             # not all joints have a jindex it is required, set them
-#             for j in range(self.n):
-#                 i = etjoints[j]
-#                 self[i].jindex = j
+        for j in range(self.n):
+            i = etjoints[j]
 
-#         for j in range(self.n):
-#             i = etjoints[j]
+            if self[i].jindex is not None:
+                jindex = self[i].jindex
+            else:
+                jindex = 0  # pragma: nocover
 
-#             axis = self[i].axis
-#             if axis == 'R':
-#                 dTdq = np.array([
-#                     [0, -1, 0],
-#                     [1,  0, 0],
-#                     [0,  0, 0]
-#                 ]) @ self[i].eval(q).A
-#             elif axis == 'tx':
-#                 dTdq = np.array([
-#                     [0, 0, 1],
-#                     [0, 0, 0],
-#                     [0, 0, 0]
-#                 ])
-#             elif axis == 'ty':
-#                 dTdq = np.array([
-#                     [0, 0, 0],
-#                     [0, 0, 1],
-#                     [0, 0, 0]
-#                 ])
+            # jindex = 0 if self[i].jindex is None else self[i].jindex
 
-#             E0 = self[:i]
-#             if len(E0) > 0:
-#                 dTdq = E0.eval(q).A @ dTdq
+            axis = self[i].axis
+            if axis == "R":
+                dTdq = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 0]]) @ self[i].T(
+                    q[jindex]  # type: ignore
+                )
+            elif axis == "tx":
+                dTdq = np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]])
+            elif axis == "ty":
+                dTdq = np.array([[0, 0, 0], [0, 0, 1], [0, 0, 0]])
+            else:  # pragma: nocover
+                raise TypeError("Invalid axes")
 
-#             Ef = self[i+1:]
-#             if len(Ef) > 0:
-#                 dTdq = dTdq @ Ef.eval(q).A
+            E0 = ETS2(self[:i])
+            if len(E0) > 0:
+                dTdq = E0.fkine(q) @ dTdq
 
-#             T = self.eval(q).A
-#             dRdt = dTdq[:2, :2] @ T[:2, :2].T
-#             J[:, j] = np.r_[dTdq[:2, 2].T, dRdt[1, 0]]
+            Ef = ETS2(self[i + 1 :])
+            if len(Ef) > 0:
+                dTdq = dTdq @ Ef.fkine(q)
 
-#         return J
+            T = self.fkine(q)
+            dRdt = dTdq[:2, :2] @ T[:2, :2].T
+            J[:, j] = np.r_[dTdq[:2, 2].T, dRdt[1, 0]]
+
+        return J
+
 
 #     def jacobe(self, q=None, T=None):
 #         r"""
