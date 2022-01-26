@@ -120,12 +120,6 @@ class BaseET:
             qlim,
         )
 
-    def __mul__(self, other: "ET") -> "rtb.ETS":
-        return rtb.ETS([self, other])
-
-    def __add__(self, other: "ET") -> "rtb.ETS":
-        return self.__mul__(other)
-
     def __str__(self):
 
         eta_str = ""
@@ -496,6 +490,12 @@ class ET(BaseET):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def __mul__(self, other: "ET") -> "rtb.ETS":
+        return rtb.ETS([self, other])
+
+    def __add__(self, other: "ET") -> "rtb.ETS":
+        return self.__mul__(other)
+
     @classmethod
     def Rx(
         cls, eta: Union[float, Sym, None] = None, unit: str = "rad", **kwargs
@@ -721,6 +721,12 @@ class ET(BaseET):
 class ET2(BaseET):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    def __mul__(self, other: "ET2") -> "rtb.ETS2":
+        return rtb.ETS2([self, other])
+
+    def __add__(self, other: "ET2") -> "rtb.ETS2":
+        return self.__mul__(other)
 
     @classmethod
     def R(
