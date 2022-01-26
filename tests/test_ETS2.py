@@ -78,14 +78,14 @@ class TestETS2(unittest.TestCase):
         b = rtb.ET2.R()
         c = rtb.ET2.R()
         d = rtb.ET2.tx(1.0)
-        e = rtb.ET2.SE2(SE2(1.0))
+        e = rtb.ET2.SE2(SE2(1.0, unit="rad"))
         ets = rx * ry * rz * d
         ets2 = rx * a * b * c
         ets3 = d * e
 
         self.assertEqual(str(ets), "R(88.41°) ⊕ R(88.41°) ⊕ R(88.41°) ⊕ tx(1)")
         self.assertEqual(str(ets2), "R(88.41°) ⊕ R(q0) ⊕ R(q1) ⊕ R(q2)")
-        self.assertEqual(str(ets3), "tx(1) ⊕ SE2(rpy: 57.30°, -0.00°, 0.00°)")
+        self.assertEqual(str(ets3), "tx(1) ⊕ SE2(xyθ: 0.00, 0.00, 57.30°)")
         self.assertEqual(ets2.__str__(q="θ{0}"), "R(88.41°) ⊕ R(θ0) ⊕ R(θ1) ⊕ R(θ2)")
 
     def test_str_jindex(self):
@@ -185,10 +185,10 @@ class TestETS2(unittest.TestCase):
 
         nt.assert_almost_equal(r.fkine(q), ans.A)
 
-    def test_fkine_sym(self):
-        x = sympy.Symbol("x")
-        y = sympy.Symbol("y")
-        z = sympy.Symbol("z")
+    def test_fkine2(self):
+        x = 1.0
+        y = 2.0
+        z = 3.0
 
         q = np.array([y, z])
         qt = np.array([[1.0, y], [z, y], [x, 2.0]])
@@ -204,11 +204,8 @@ class TestETS2(unittest.TestCase):
         ans4 = SE2(x) * SE2(x) * SE2.Tx(2.0)
 
         fk_traj = r.fkine(qt)
-
-        print(fk_traj[0])
-        print(ans2)
-
         nt.assert_almost_equal(r.fkine(q), ans1.A)
+
         nt.assert_almost_equal(fk_traj[0], ans2.A)
         nt.assert_almost_equal(fk_traj[1], ans3.A)
         nt.assert_almost_equal(fk_traj[2], ans4.A)
@@ -418,49 +415,41 @@ class TestETS2(unittest.TestCase):
         nt.assert_almost_equal(r.fkine(q), r5.fkine(q))
 
     def test_jacob0(self):
-        q = [0]
-        rx = rtb.ETS2(rtb.ET2.R())
-        ry = rtb.ETS2(rtb.ET2.R())
-        rz = rtb.ETS2(rtb.ET2.R())
-        tx = rtb.ETS2(rtb.ET2.tx())
-        ty = rtb.ETS2(rtb.ET2.ty())
-        tx = rtb.ETS2(rtb.ET2.tx())
-
-        r = tx + ty + tx + rx + ry + rz
-
-        nt.assert_almost_equal(tx.jacob0(q), np.array([[1, 0, 0, 0, 0, 0]]).T)
-        nt.assert_almost_equal(ty.jacob0(q), np.array([[0, 1, 0, 0, 0, 0]]).T)
-        nt.assert_almost_equal(tx.jacob0(q), np.array([[0, 0, 1, 0, 0, 0]]).T)
-        nt.assert_almost_equal(rx.jacob0(q), np.array([[0, 0, 0, 1, 0, 0]]).T)
-        nt.assert_almost_equal(ry.jacob0(q), np.array([[0, 0, 0, 0, 1, 0]]).T)
-        nt.assert_almost_equal(rz.jacob0(q), np.array([[0, 0, 0, 0, 0, 1]]).T)
-        nt.assert_almost_equal(r.jacob0(q), np.eye(6))
-
-    def test_jacob0_sym(self):
-        x = sympy.Symbol("x")
-        q1 = np.array([x, x])
-        q2 = np.array([0, x])
-        rx = rtb.ETS2(rtb.ET2.R(jindex=0))
-        ry = rtb.ETS2(rtb.ET2.R(jindex=0))
-        rz = rtb.ETS2(rtb.ET2.R(jindex=0))
-        tx = rtb.ETS2(rtb.ET2.tx(jindex=0))
-        ty = rtb.ETS2(rtb.ET2.ty(jindex=0))
+        q = [0, 0, 0]
+        r = rtb.ETS2(rtb.ET2.R(jindex=0))
         tx = rtb.ETS2(rtb.ET2.tx(jindex=1))
-        a = rtb.ETS2(rtb.ET2.SE2(np.eye(4)))
+        ty = rtb.ETS2(rtb.ET2.ty(jindex=2))
 
-        r = tx + ty + tx + rx + ry + rz + a
+        r2 = tx + ty + r
 
-        print(r.jacob0(q2))
+        nt.assert_almost_equal(tx.jacob0(q), np.array([[1, 0, 0]]).T)
+        nt.assert_almost_equal(ty.jacob0(q), np.array([[0, 1, 0]]).T)
+        nt.assert_almost_equal(r.jacob0(q), np.array([[0, 0, 1]]).T)
+        nt.assert_almost_equal(r2.jacob0(q), np.eye(3))
 
-        nt.assert_almost_equal(tx.jacob0(q1), np.array([[1, 0, 0, 0, 0, 0]]).T)
-        nt.assert_almost_equal(ty.jacob0(q1), np.array([[0, 1, 0, 0, 0, 0]]).T)
-        nt.assert_almost_equal(tx.jacob0(q1), np.array([[0, 0, 1, 0, 0, 0]]).T)
-        nt.assert_almost_equal(rx.jacob0(q1), np.array([[0, 0, 0, 1, 0, 0]]).T)
-        nt.assert_almost_equal(ry.jacob0(q1), np.array([[0, 0, 0, 0, 1, 0]]).T)
-        nt.assert_almost_equal(rz.jacob0(q1), np.array([[0, 0, 0, 0, 0, 1]]).T)
-        nt.assert_almost_equal(r.jacob0(q2), np.eye(6))
-        nt.assert_almost_equal(r.jacob0(q2, tool=SE2()), np.eye(6))
-        nt.assert_almost_equal(r.jacob0(q2, tool=SE2().A), np.eye(6))
+    # def test_jacob0_sym(self):
+    #     x = sympy.Symbol("x")
+    #     q1 = np.array([x, x])
+    #     q2 = np.array([0, x])
+    #     r = rtb.ETS2(rtb.ET2.R(jindex=0))
+    #     tx = rtb.ETS2(rtb.ET2.tx(jindex=0))
+    #     ty = rtb.ETS2(rtb.ET2.ty(jindex=0))
+    #     tx = rtb.ETS2(rtb.ET2.tx(jindex=1))
+    #     a = rtb.ETS2(rtb.ET2.SE2(np.eye(4)))
+
+    #     r = tx + ty + tx + rx + ry + rz + a
+
+    #     print(r.jacob0(q2))
+
+    #     nt.assert_almost_equal(tx.jacob0(q1), np.array([[1, 0, 0, 0, 0, 0]]).T)
+    #     nt.assert_almost_equal(ty.jacob0(q1), np.array([[0, 1, 0, 0, 0, 0]]).T)
+    #     nt.assert_almost_equal(tx.jacob0(q1), np.array([[0, 0, 1, 0, 0, 0]]).T)
+    #     nt.assert_almost_equal(rx.jacob0(q1), np.array([[0, 0, 0, 1, 0, 0]]).T)
+    #     nt.assert_almost_equal(ry.jacob0(q1), np.array([[0, 0, 0, 0, 1, 0]]).T)
+    #     nt.assert_almost_equal(rz.jacob0(q1), np.array([[0, 0, 0, 0, 0, 1]]).T)
+    #     nt.assert_almost_equal(r.jacob0(q2), np.eye(6))
+    #     nt.assert_almost_equal(r.jacob0(q2, tool=SE2()), np.eye(6))
+    #     nt.assert_almost_equal(r.jacob0(q2, tool=SE2().A), np.eye(6))
 
 
 if __name__ == "__main__":
