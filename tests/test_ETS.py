@@ -21,7 +21,10 @@ class TestETS(unittest.TestCase):
         ry = rtb.ET.Ry(1.543)
 
         with self.assertRaises(TypeError):
-            rtb.ETS([rx, ry, 1.0])
+            rtb.ETS([rx, ry, 1.0])  # type: ignore
+
+        with self.assertRaises(TypeError):
+            rtb.ETS(1.0)  # type: ignore
 
     def test_args(self):
         deg = np.pi / 180
@@ -427,7 +430,7 @@ class TestETS(unittest.TestCase):
             self.assertEqual(link, segs3[i])
 
     def test_compile(self):
-        q = [1.0, 2, 3, 4, 5, 6]
+        q = [0, 1.0, 2, 3, 4, 5, 6]
         deg = np.pi / 180
         mm = 1e-3
         tool_offset = (103) * mm
@@ -497,14 +500,25 @@ class TestETS(unittest.TestCase):
         ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
 
         r = l0 * l1 * l2 * l3 * l4 * l5 * l6 * ee
+
         r2 = l0 * l1 * l2 * l3 * l4 * l6 * ee
         r2.insert(l5, 14)
+
         r3 = l0 * l1 * l2 * l3 * l4 * l5 * l6
-        r3.insert(rtb.ET.tz(tool_offset))
-        r3.insert(rtb.ET.Rz(-np.pi / 4))
+        r3.insert(ee)
+
+        r4 = l0 * l1 * l2 * l3 * l4 * l5 * l6
+        r4.insert(rtb.ET.tz(tool_offset))
+        r4.insert(rtb.ET.Rz(-np.pi / 4))
+
+        r5 = l0 * l1 * l2 * l3 * l4 * l6 * ee
+        r5.insert(rtb.ET.Rx(90 * deg), 14)
+        r5.insert(rtb.ET.Rz(jindex=5), 15)
 
         nt.assert_almost_equal(r.fkine(q), r2.fkine(q))
         nt.assert_almost_equal(r.fkine(q), r3.fkine(q))
+        nt.assert_almost_equal(r.fkine(q), r4.fkine(q))
+        nt.assert_almost_equal(r.fkine(q), r5.fkine(q))
 
     def test_jacob0(self):
         q = [0]
