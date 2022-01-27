@@ -604,7 +604,7 @@ class ETS(BaseETS):
         self,
         q: ArrayLike,
         tool: Union[NDArray[np.float64], SE3, None] = None,
-    ):
+    ) -> NDArray[np.float64]:
         r"""
         Jacobian in base frame
 
@@ -723,6 +723,45 @@ class ETS(BaseETS):
                     U = U @ A
 
         return J
+
+    def jacobe(
+        self,
+        q: ArrayLike,
+        tool: Union[NDArray[np.float64], SE3, None] = None,
+    ) -> NDArray[np.float64]:
+        r"""
+        Manipulator geometric Jacobian in the end-effector frame
+
+        :param q: Joint coordinate vector
+        :type q: ndarray(n)
+
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :type tool: SE3, optional
+
+        :return J: Manipulator Jacobian in the end-effector frame
+        :rtype: ndarray(6,n)
+
+        - ``ets.jacobe(q)`` is the manipulator Jacobian matrix which maps
+          joint  velocity to end-effector spatial velocity expressed in the
+          end-effector frame.
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+
+        .. warning:: This is the **geometric Jacobian** as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a
+            velocity twist as per the text by Lynch & Park.
+        """  # noqa
+
+        # Use c extension
+        try:
+            return fknm.ETS_jacobe(self._m, self._n, self._fknm, q, tool)
+        except TypeError:
+            pass
+
+        T = self.fkine(q, tool=tool, include_base=False)
+        return tr2jac(T.T) @ self.jacob0(q, tool=tool)
 
     def compile(self) -> "ETS":
         """
@@ -1066,7 +1105,10 @@ class ETS2(BaseETS):
 
         return T
 
-    def jacob0(self, q):
+    def jacob0(
+        self,
+        q: ArrayLike,
+    ):
 
         # very inefficient implementation, just put a 1 in last row
         # if its a rotation joint
@@ -1118,34 +1160,29 @@ class ETS2(BaseETS):
 
         return J
 
+    def jacobe(
+        self,
+        q: ArrayLike,
+    ):
+        r"""
+        Jacobian in base frame
 
-#     def jacobe(self, q=None, T=None):
-#         r"""
-#         Jacobian in base frame
+        :param q: joint coordinates
+        :type q: array_like
+        :return: Jacobian matrix
+        :rtype: ndarray(6,n)
 
-#         :param q: joint coordinates
-#         :type q: array_like
-#         :param T: ETS value as an SE(3) matrix if known
-#         :type T: ndarray(4,4)
-#         :return: Jacobian matrix
-#         :rtype: ndarray(6,n)
+        ``jacobe(q)`` is the manipulator Jacobian matrix which maps joint
+        velocity to end-effector spatial velocity.
 
-#         ``jacobe(q)`` is the manipulator Jacobian matrix which maps joint
-#         velocity to end-effector spatial velocity.
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}`.
 
-#         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
-#         is related to joint velocity by :math:`{}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}`.
+        :seealso: :func:`jacob`, :func:`hessian0`
+        """  # noqa
 
-#         If ``ets.eval(q)`` is already computed it can be passed in as ``T`` to
-#         reduce computation time.
-
-#         :seealso: :func:`jacob`, :func:`hessian0`
-#         """  # noqa
-
-#         if T is None:
-#             T = self.eval(q)
-
-#         return tr2jac2(T.A.T) @ self.jacob0(q, T)
+        T = self.fkine(q, include_base=False)
+        return tr2jac2(T.T) @ self.jacob0(q)
 
 
 #     @property
@@ -1166,33 +1203,6 @@ class ETS2(BaseETS):
 #             else:
 #                 return np.r_[0, 0, 1, 0, 0, 0]
 
-#     def jacobe(self, q=None, T=None):
-#         r"""
-#         Jacobian in base frame
-
-#         :param q: joint coordinates
-#         :type q: array_like
-#         :param T: ETS value as an SE(3) matrix if known
-#         :type T: ndarray(4,4)
-#         :return: Jacobian matrix
-#         :rtype: ndarray(6,n)
-
-#         ``jacobe(q)`` is the manipulator Jacobian matrix which maps joint
-#         velocity to end-effector spatial velocity.
-
-#         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
-#         is related to joint velocity by :math:`{}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}`.
-
-#         If ``ets.eval(q)`` is already computed it can be passed in as ``T`` to
-#         reduce computation time.
-
-#         :seealso: :func:`jacob`, :func:`hessian0`
-#         """  # noqa
-
-#         if T is None:
-#             T = self.eval(q)
-
-#         return tr2jac(T.A.T) @ self.jacob0(q, T)
 
 #     def hessian0(self, q=None, J0=None):
 #         r"""
