@@ -427,6 +427,19 @@ class TestETS2(unittest.TestCase):
         nt.assert_almost_equal(r.jacob0(q), np.array([[0, 0, 1]]).T)
         nt.assert_almost_equal(r2.jacob0(q), np.eye(3))
 
+    def test_jacobe(self):
+        q = [0, 0, 0]
+        r = rtb.ETS2(rtb.ET2.R(jindex=0))
+        tx = rtb.ETS2(rtb.ET2.tx(jindex=1))
+        ty = rtb.ETS2(rtb.ET2.ty(jindex=2))
+
+        r2 = tx + ty + r
+
+        nt.assert_almost_equal(tx.jacobe(q), np.array([[1, 0, 0]]).T)
+        nt.assert_almost_equal(ty.jacobe(q), np.array([[0, 1, 0]]).T)
+        nt.assert_almost_equal(r.jacobe(q), np.array([[0, 0, 1]]).T)
+        nt.assert_almost_equal(r2.jacobe(q), np.eye(3))
+
     # def test_jacob0_sym(self):
     #     x = sympy.Symbol("x")
     #     q1 = np.array([x, x])
