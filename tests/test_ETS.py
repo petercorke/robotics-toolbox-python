@@ -11,6 +11,7 @@ import numpy as np
 
 # import spatialmath.base as sm
 from spatialmath import SE3
+from spatialmath.base import tr2jac
 import unittest
 import sympy
 
@@ -330,6 +331,41 @@ class TestETS(unittest.TestCase):
         nt.assert_array_almost_equal(r.jacob0(q4), ans)
         self.assertRaises(TypeError, r.jacob0, "Wfgsrth")
 
+    def test_jacobe_panda(self):
+        deg = np.pi / 180
+        mm = 1e-3
+        tool_offset = (103) * mm
+
+        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
+        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
+        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
+        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+        l4 = (
+            rtb.ET.tx(-0.0825)
+            * rtb.ET.Rx(-90 * deg)
+            * rtb.ET.tz(0.384)
+            * rtb.ET.Rz(jindex=4)
+        )
+        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+        l6 = (
+            rtb.ET.tx(0.088)
+            * rtb.ET.Rx(90 * deg)
+            * rtb.ET.tz(0.107)
+            * rtb.ET.Rz(jindex=6)
+        )
+        ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
+
+        r = l0 + l1 + l2 + l3 + l4 + l5 + l6 + ee
+
+        q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+        q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
+        q3 = np.expand_dims(q1, 0)
+        q4 = np.expand_dims(q1, 1)
+
+        ans = tr2jac(r.fkine(q1).T) @ r.jacob0(q1)
+
+        nt.assert_array_almost_equal(r.jacobe(q1), ans)
+
     def test_pop(self):
         q = [1.0, 2.0, 3.0]
         a = rtb.ET.Rx(jindex=0)
@@ -539,6 +575,25 @@ class TestETS(unittest.TestCase):
         nt.assert_almost_equal(rz.jacob0(q), np.array([[0, 0, 0, 0, 0, 1]]).T)
         nt.assert_almost_equal(r.jacob0(q), np.eye(6))
 
+    def test_jacobe(self):
+        q = [0]
+        rx = rtb.ETS(rtb.ET.Rx())
+        ry = rtb.ETS(rtb.ET.Ry())
+        rz = rtb.ETS(rtb.ET.Rz())
+        tx = rtb.ETS(rtb.ET.tx())
+        ty = rtb.ETS(rtb.ET.ty())
+        tz = rtb.ETS(rtb.ET.tz())
+
+        r = tx + ty + tz + rx + ry + rz
+
+        nt.assert_almost_equal(tx.jacobe(q), np.array([[1, 0, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(ty.jacobe(q), np.array([[0, 1, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(tz.jacobe(q), np.array([[0, 0, 1, 0, 0, 0]]).T)
+        nt.assert_almost_equal(rx.jacobe(q), np.array([[0, 0, 0, 1, 0, 0]]).T)
+        nt.assert_almost_equal(ry.jacobe(q), np.array([[0, 0, 0, 0, 1, 0]]).T)
+        nt.assert_almost_equal(rz.jacobe(q), np.array([[0, 0, 0, 0, 0, 1]]).T)
+        nt.assert_almost_equal(r.jacobe(q), np.eye(6))
+
     def test_jacob0_sym(self):
         x = sympy.Symbol("x")
         q1 = np.array([x, x])
@@ -564,6 +619,32 @@ class TestETS(unittest.TestCase):
         nt.assert_almost_equal(r.jacob0(q2), np.eye(6))
         nt.assert_almost_equal(r.jacob0(q2, tool=SE3()), np.eye(6))
         nt.assert_almost_equal(r.jacob0(q2, tool=SE3().A), np.eye(6))
+
+    def test_jacobe_sym(self):
+        x = sympy.Symbol("x")
+        q1 = np.array([x, x])
+        q2 = np.array([0, x])
+        rx = rtb.ETS(rtb.ET.Rx(jindex=0))
+        ry = rtb.ETS(rtb.ET.Ry(jindex=0))
+        rz = rtb.ETS(rtb.ET.Rz(jindex=0))
+        tx = rtb.ETS(rtb.ET.tx(jindex=0))
+        ty = rtb.ETS(rtb.ET.ty(jindex=0))
+        tz = rtb.ETS(rtb.ET.tz(jindex=1))
+        a = rtb.ETS(rtb.ET.SE3(np.eye(4)))
+
+        r = tx + ty + tz + rx + ry + rz + a
+
+        print(r.jacobe(q2))
+
+        nt.assert_almost_equal(tx.jacobe(q1), np.array([[1, 0, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(ty.jacobe(q1), np.array([[0, 1, 0, 0, 0, 0]]).T)
+        nt.assert_almost_equal(tz.jacobe(q1), np.array([[0, 0, 1, 0, 0, 0]]).T)
+        nt.assert_almost_equal(rx.jacobe(q1), np.array([[0, 0, 0, 1, 0, 0]]).T)
+        nt.assert_almost_equal(ry.jacobe(q1), np.array([[0, 0, 0, 0, 1, 0]]).T)
+        nt.assert_almost_equal(rz.jacobe(q1), np.array([[0, 0, 0, 0, 0, 1]]).T)
+        nt.assert_almost_equal(r.jacobe(q2), np.eye(6))
+        nt.assert_almost_equal(r.jacobe(q2, tool=SE3()), np.eye(6))
+        nt.assert_almost_equal(r.jacobe(q2, tool=SE3().A), np.eye(6))
 
 
 if __name__ == "__main__":
