@@ -15,6 +15,7 @@
 
 // forward defines
 static PyObject *ETS_jacob0(PyObject *self, PyObject *args);
+static PyObject *ETS_jacobe(PyObject *self, PyObject *args);
 static PyObject *ETS_fkine(PyObject *self, PyObject *args);
 static PyObject *ET_init(PyObject *self, PyObject *args);
 static PyObject *ET_update(PyObject *self, PyObject *args);
@@ -31,6 +32,7 @@ static PyObject *r2q(PyObject *self, PyObject *args);
 
 int _check_array_type(PyObject *toCheck);
 void _ETS_jacob0(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J);
+void _ETS_jacobe(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J);
 void _ETS_fkine(PyObject *ets, int m, npy_float64 *q, npy_float64 *base, npy_float64 *tool, npy_float64 *ret);
 void _ET_T(ET *et, npy_float64 *ret, double eta);
 void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, npy_float64 *tool, npy_float64 *J);
@@ -46,10 +48,14 @@ void tx(npy_float64 *data, double eta);
 void ty(npy_float64 *data, double eta);
 void tz(npy_float64 *data, double eta);
 void _eye(npy_float64 *data);
-int _inv(npy_float64 *m, npy_float64 *invOut);
+void _inv(npy_float64 *m, npy_float64 *invOut);
 void _r2q(npy_float64 *r, npy_float64 *q);
 
 static PyMethodDef fknmMethods[] = {
+    {"ETS_jacobe",
+     (PyCFunction)ETS_jacobe,
+     METH_VARARGS,
+     "Link"},
     {"ETS_jacob0",
      (PyCFunction)ETS_jacob0,
      METH_VARARGS,
@@ -175,6 +181,70 @@ static PyObject *ETS_jacob0(PyObject *self, PyObject *args)
 
     // Do the job
     _ETS_jacob0(ets, m, n, q, tool, J);
+
+    // Free the memory
+    Py_DECREF(py_np_q);
+
+    if (tool_used)
+    {
+        Py_DECREF(py_np_tool);
+    }
+
+    return py_J;
+}
+
+static PyObject *ETS_jacobe(PyObject *self, PyObject *args)
+{
+    npy_float64 *J, *q, *T, *tool = NULL;
+    PyObject *py_q, *py_tool, *py_np_q, *py_np_tool;
+    PyObject *ets;
+    int m, n, tool_used = 0;
+    PyArray_Descr *desc_q, *desc_tool;
+
+    if (!PyArg_ParseTuple(
+            args, "iiOOO",
+            &m,
+            &n,
+            &ets,
+            &py_q,
+            &py_tool))
+        return NULL;
+
+    // Inputs can be:
+    // None - Even q
+    // Not arrays - Will raise exception
+    // Have symbolic data - Will raise exception
+    // q can be 1D or 2D, assumes dimesnions correct (n, 1xn or nx1)
+    // tool can be SE3s or 4x4 numpy array
+
+    // Make our empty Jacobian
+    npy_intp dims[2] = {6, n};
+    PyObject *py_J = PyArray_EMPTY(2, &dims, NPY_DOUBLE, 0);
+    J = (npy_float64 *)PyArray_DATA(py_J);
+
+    // Make sure q is number array
+    // Cast to numpy array
+    // Get data out
+    if (!_check_array_type(py_q))
+        return NULL;
+    py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+    q = (npy_float64 *)PyArray_DATA(py_np_q);
+
+    // Check if tool is None
+    // Make sure tool is number array
+    // Cast to numpy array
+    // Get data out
+    if (py_tool != Py_None)
+    {
+        if (!_check_array_type(py_tool))
+            return NULL;
+        tool_used = 1;
+        py_np_tool = (npy_float64 *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        tool = (npy_float64 *)PyArray_DATA(py_np_tool);
+    }
+
+    // Do the job
+    _ETS_jacobe(ets, m, n, q, tool, J);
 
     // Free the memory
     Py_DECREF(py_np_q);
@@ -1013,6 +1083,115 @@ void _ETS_jacob0(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool,
     free(invU);
 }
 
+void _ETS_jacobe(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J)
+{
+    ET *et;
+    npy_float64 *T = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *U = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *temp = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *ret = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+
+    int j = n - 1;
+
+    _eye(U);
+
+    // Get the forward  kinematics into T
+    _ETS_fkine(ets, m, q, (npy_float64 *)NULL, tool, T);
+
+    PyList_Reverse(ets);
+    PyObject *iter_et = PyObject_GetIter(ets);
+
+    if (tool != NULL)
+    {
+        mult(tool, U, temp);
+        copy(temp, U);
+    }
+
+    for (int i = 0; i < m; i++)
+    {
+        if (!(et = (ET *)PyCapsule_GetPointer(PyIter_Next(iter_et), "ET")))
+            return;
+
+        if (et->isjoint)
+        {
+            if (et->axis == 0)
+            {
+                J[0 * n + j] = U[2 * 4 + 0] * U[1 * 4 + 3] - U[1 * 4 + 0] * U[2 * 4 + 3];
+                J[1 * n + j] = U[2 * 4 + 1] * U[1 * 4 + 3] - U[1 * 4 + 1] * U[2 * 4 + 3];
+                J[2 * n + j] = U[2 * 4 + 2] * U[1 * 4 + 3] - U[1 * 4 + 2] * U[2 * 4 + 3];
+                J[3 * n + j] = U[0 * 4 + 0];
+                J[4 * n + j] = U[0 * 4 + 1];
+                J[5 * n + j] = U[0 * 4 + 2];
+            }
+            else if (et->axis == 1)
+            {
+                J[0 * n + j] = U[0 * 4 + 0] * U[2 * 4 + 3] - U[2 * 4 + 0] * U[0 * 4 + 3];
+                J[1 * n + j] = U[0 * 4 + 1] * U[2 * 4 + 3] - U[2 * 4 + 1] * U[0 * 4 + 3];
+                J[2 * n + j] = U[0 * 4 + 2] * U[2 * 4 + 3] - U[2 * 4 + 2] * U[0 * 4 + 3];
+                J[3 * n + j] = U[1 * 4 + 0];
+                J[4 * n + j] = U[1 * 4 + 1];
+                J[5 * n + j] = U[1 * 4 + 2];
+            }
+            else if (et->axis == 2)
+            {
+                J[0 * n + j] = U[1 * 4 + 0] * U[0 * 4 + 3] - U[0 * 4 + 0] * U[1 * 4 + 3];
+                J[1 * n + j] = U[1 * 4 + 1] * U[0 * 4 + 3] - U[0 * 4 + 1] * U[1 * 4 + 3];
+                J[2 * n + j] = U[1 * 4 + 2] * U[0 * 4 + 3] - U[0 * 4 + 2] * U[1 * 4 + 3];
+                J[3 * n + j] = U[2 * 4 + 0];
+                J[4 * n + j] = U[2 * 4 + 1];
+                J[5 * n + j] = U[2 * 4 + 2];
+            }
+            else if (et->axis == 3)
+            {
+                J[0 * n + j] = U[0 * 4 + 0];
+                J[1 * n + j] = U[0 * 4 + 1];
+                J[2 * n + j] = U[0 * 4 + 2];
+                J[3 * n + j] = 0.0;
+                J[4 * n + j] = 0.0;
+                J[5 * n + j] = 0.0;
+            }
+            else if (et->axis == 4)
+            {
+                J[0 * n + j] = U[1 * 4 + 0];
+                J[1 * n + j] = U[1 * 4 + 1];
+                J[2 * n + j] = U[1 * 4 + 2];
+                J[3 * n + j] = 0.0;
+                J[4 * n + j] = 0.0;
+                J[5 * n + j] = 0.0;
+            }
+            else if (et->axis == 5)
+            {
+                J[0 * n + j] = U[2 * 4 + 0];
+                J[1 * n + j] = U[2 * 4 + 1];
+                J[2 * n + j] = U[2 * 4 + 2];
+                J[3 * n + j] = 0.0;
+                J[4 * n + j] = 0.0;
+                J[5 * n + j] = 0.0;
+            }
+
+            _ET_T(et, ret, q[et->jindex]);
+            mult(ret, U, temp);
+            copy(temp, U);
+            j--;
+        }
+        else
+        {
+            _ET_T(et, ret, q[et->jindex]);
+            mult(ret, U, temp);
+            copy(temp, U);
+        }
+    }
+
+    PyList_Reverse(ets);
+
+    Py_DECREF(iter_et);
+
+    free(T);
+    free(U);
+    free(temp);
+    free(ret);
+}
+
 void _ETS_fkine(PyObject *ets, int m, npy_float64 *q, npy_float64 *base, npy_float64 *tool, npy_float64 *ret)
 {
     npy_float64 *temp, *current;
@@ -1545,139 +1724,28 @@ void _eye(npy_float64 *data)
     data[15] = 1;
 }
 
-int _inv(npy_float64 *m, npy_float64 *invOut)
+void _inv(npy_float64 *m, npy_float64 *inv)
 {
-    npy_float64 *inv = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
-    double det;
-    int i;
+    inv[0] = m[0];
+    inv[1] = m[4];
+    inv[2] = m[8];
 
-    inv[0] = m[5] * m[10] * m[15] -
-             m[5] * m[11] * m[14] -
-             m[9] * m[6] * m[15] +
-             m[9] * m[7] * m[14] +
-             m[13] * m[6] * m[11] -
-             m[13] * m[7] * m[10];
+    inv[4] = m[1];
+    inv[5] = m[5];
+    inv[6] = m[9];
 
-    inv[4] = -m[4] * m[10] * m[15] +
-             m[4] * m[11] * m[14] +
-             m[8] * m[6] * m[15] -
-             m[8] * m[7] * m[14] -
-             m[12] * m[6] * m[11] +
-             m[12] * m[7] * m[10];
+    inv[8] = m[2];
+    inv[9] = m[6];
+    inv[10] = m[10];
 
-    inv[8] = m[4] * m[9] * m[15] -
-             m[4] * m[11] * m[13] -
-             m[8] * m[5] * m[15] +
-             m[8] * m[7] * m[13] +
-             m[12] * m[5] * m[11] -
-             m[12] * m[7] * m[9];
+    inv[3] = -(inv[0] * m[3] + inv[1] * m[7] + inv[2] * m[11]);
+    inv[7] = -(inv[4] * m[3] + inv[5] * m[7] + inv[6] * m[11]);
+    inv[11] = -(inv[8] * m[3] + inv[9] * m[7] + inv[10] * m[11]);
 
-    inv[12] = -m[4] * m[9] * m[14] +
-              m[4] * m[10] * m[13] +
-              m[8] * m[5] * m[14] -
-              m[8] * m[6] * m[13] -
-              m[12] * m[5] * m[10] +
-              m[12] * m[6] * m[9];
-
-    inv[1] = -m[1] * m[10] * m[15] +
-             m[1] * m[11] * m[14] +
-             m[9] * m[2] * m[15] -
-             m[9] * m[3] * m[14] -
-             m[13] * m[2] * m[11] +
-             m[13] * m[3] * m[10];
-
-    inv[5] = m[0] * m[10] * m[15] -
-             m[0] * m[11] * m[14] -
-             m[8] * m[2] * m[15] +
-             m[8] * m[3] * m[14] +
-             m[12] * m[2] * m[11] -
-             m[12] * m[3] * m[10];
-
-    inv[9] = -m[0] * m[9] * m[15] +
-             m[0] * m[11] * m[13] +
-             m[8] * m[1] * m[15] -
-             m[8] * m[3] * m[13] -
-             m[12] * m[1] * m[11] +
-             m[12] * m[3] * m[9];
-
-    inv[13] = m[0] * m[9] * m[14] -
-              m[0] * m[10] * m[13] -
-              m[8] * m[1] * m[14] +
-              m[8] * m[2] * m[13] +
-              m[12] * m[1] * m[10] -
-              m[12] * m[2] * m[9];
-
-    inv[2] = m[1] * m[6] * m[15] -
-             m[1] * m[7] * m[14] -
-             m[5] * m[2] * m[15] +
-             m[5] * m[3] * m[14] +
-             m[13] * m[2] * m[7] -
-             m[13] * m[3] * m[6];
-
-    inv[6] = -m[0] * m[6] * m[15] +
-             m[0] * m[7] * m[14] +
-             m[4] * m[2] * m[15] -
-             m[4] * m[3] * m[14] -
-             m[12] * m[2] * m[7] +
-             m[12] * m[3] * m[6];
-
-    inv[10] = m[0] * m[5] * m[15] -
-              m[0] * m[7] * m[13] -
-              m[4] * m[1] * m[15] +
-              m[4] * m[3] * m[13] +
-              m[12] * m[1] * m[7] -
-              m[12] * m[3] * m[5];
-
-    inv[14] = -m[0] * m[5] * m[14] +
-              m[0] * m[6] * m[13] +
-              m[4] * m[1] * m[14] -
-              m[4] * m[2] * m[13] -
-              m[12] * m[1] * m[6] +
-              m[12] * m[2] * m[5];
-
-    inv[3] = -m[1] * m[6] * m[11] +
-             m[1] * m[7] * m[10] +
-             m[5] * m[2] * m[11] -
-             m[5] * m[3] * m[10] -
-             m[9] * m[2] * m[7] +
-             m[9] * m[3] * m[6];
-
-    inv[7] = m[0] * m[6] * m[11] -
-             m[0] * m[7] * m[10] -
-             m[4] * m[2] * m[11] +
-             m[4] * m[3] * m[10] +
-             m[8] * m[2] * m[7] -
-             m[8] * m[3] * m[6];
-
-    inv[11] = -m[0] * m[5] * m[11] +
-              m[0] * m[7] * m[9] +
-              m[4] * m[1] * m[11] -
-              m[4] * m[3] * m[9] -
-              m[8] * m[1] * m[7] +
-              m[8] * m[3] * m[5];
-
-    inv[15] = m[0] * m[5] * m[10] -
-              m[0] * m[6] * m[9] -
-              m[4] * m[1] * m[10] +
-              m[4] * m[2] * m[9] +
-              m[8] * m[1] * m[6] -
-              m[8] * m[2] * m[5];
-
-    det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
-
-    if (det == 0)
-    {
-        free(inv);
-        return 0;
-    }
-
-    det = 1.0 / det;
-
-    for (i = 0; i < 16; i++)
-        invOut[i] = inv[i] * det;
-
-    free(inv);
-    return 1;
+    inv[12] = 0;
+    inv[13] = 0;
+    inv[14] = 0;
+    inv[15] = 1;
 }
 
 void _r2q(npy_float64 *r, npy_float64 *q)
