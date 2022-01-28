@@ -763,6 +763,80 @@ class ETS(BaseETS):
         T = self.fkine(q, tool=tool, include_base=False)
         return tr2jac(T.T) @ self.jacob0(q, tool=tool)
 
+    def hessian0(
+        self,
+        q: ArrayLike,
+        tool: Union[NDArray[np.float64], SE3, None] = None,
+    ) -> NDArray[np.float64]:
+        r"""
+        Manipulator Hessian
+
+        The manipulator Hessian tensor maps joint acceleration to end-effector
+        spatial acceleration, expressed in the world-coordinate frame. This
+        function calulcates this based on the ETS of the robot.
+        
+        One of J0 or q
+        is required. Supply J0 if already calculated to save computation time
+
+        :param q: The joint angles/configuration of the robot.
+        :type q: float ndarray(n)
+        :param J0: The manipulator Jacobian in the 0 frame
+        :type J0: float ndarray(6,n)
+
+        :return: The manipulator Hessian in 0 frame
+        :rtype: float ndarray(6,n,n)
+
+        This method computes the manipulator Hessian in the base frame.  If
+        we take the time derivative of the differential kinematic relationship
+        .. math::
+            \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
+            \alpha &= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}
+        where
+        .. math::
+            \dmat{J} = \mat{H} \dvec{q}
+        and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
+        Hessian tensor.
+        The elements of the Hessian are
+        .. math::
+            \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
+        where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
+        of the spatial velocity vector.
+        Similarly, we can write
+        .. math::
+            \mat{J}_{i,j} = \frac{d u_i}{d q_j}
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        """
+
+        # Use c extension
+        try:
+            return fknm.ETS_hessian0(self._m, self._n, self._fknm, q, tool)
+        except TypeError:
+            pass
+
+        def cross(a, b):
+            x = a[1] * b[2] - a[2] * b[1]
+            y = a[2] * b[0] - a[0] * b[2]
+            z = a[0] * b[1] - a[1] * b[0]
+            return np.array([x, y, z])
+
+        n = self.n
+        q = getvector(q, None)
+        J0 = self.jacob0(q)
+        H = np.zeros((n, 6, n))
+
+        for j in range(n):
+            for i in range(j, n):
+
+                H[j, :3, i] = cross(J0[3:, j], J0[:3, i])
+                H[j, 3:, i] = cross(J0[3:, j], J0[3:, i])
+
+                if i != j:
+                    H[i, :3, j] = H[j, :3, i]
+
+        return H
+
     def compile(self) -> "ETS":
         """
         Compile an ETS
