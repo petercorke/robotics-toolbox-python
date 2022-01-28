@@ -14,6 +14,8 @@
 #include <stdio.h>
 
 // forward defines
+static PyObject *ETS_hessian0(PyObject *self, PyObject *args);
+static PyObject *ETS_hessiane(PyObject *self, PyObject *args);
 static PyObject *ETS_jacob0(PyObject *self, PyObject *args);
 static PyObject *ETS_jacobe(PyObject *self, PyObject *args);
 static PyObject *ETS_fkine(PyObject *self, PyObject *args);
@@ -31,6 +33,7 @@ static PyObject *compose(PyObject *self, PyObject *args);
 static PyObject *r2q(PyObject *self, PyObject *args);
 
 int _check_array_type(PyObject *toCheck);
+void _ETS_hessian0(int n, npy_float64 *J, npy_float64 *H);
 void _ETS_jacob0(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J);
 void _ETS_jacobe(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J);
 void _ETS_fkine(PyObject *ets, int m, npy_float64 *q, npy_float64 *base, npy_float64 *tool, npy_float64 *ret);
@@ -50,8 +53,13 @@ void tz(npy_float64 *data, double eta);
 void _eye(npy_float64 *data);
 void _inv(npy_float64 *m, npy_float64 *invOut);
 void _r2q(npy_float64 *r, npy_float64 *q);
+void _cross(npy_float64 *a, npy_float64 *b, npy_float64 *ret, int n);
 
 static PyMethodDef fknmMethods[] = {
+    {"ETS_hessian0",
+     (PyCFunction)ETS_hessian0,
+     METH_VARARGS,
+     "Link"},
     {"ETS_jacobe",
      (PyCFunction)ETS_jacobe,
      METH_VARARGS,
@@ -127,6 +135,76 @@ PyMODINIT_FUNC PyInit_fknm(void)
 {
     import_array();
     return PyModule_Create(&fknmmodule);
+}
+
+static PyObject *ETS_hessian0(PyObject *self, PyObject *args)
+{
+    npy_float64 *H, *J, *q, *T, *tool = NULL;
+    PyObject *py_q, *py_tool, *py_np_q, *py_np_tool;
+    PyObject *ets;
+    int m, n, tool_used = 0;
+    PyArray_Descr *desc_q, *desc_tool;
+
+    if (!PyArg_ParseTuple(
+            args, "iiOOO",
+            &m,
+            &n,
+            &ets,
+            &py_q,
+            &py_tool))
+        return NULL;
+
+    // Inputs can be:
+    // None - Even q
+    // Not arrays - Will raise exception
+    // Have symbolic data - Will raise exception
+    // q can be 1D or 2D, assumes dimesnions correct (n, 1xn or nx1)
+    // tool can be SE3s or 4x4 numpy array
+
+    // Make our empty Jacobian
+    npy_intp dimsJ[2] = {6, n};
+    PyObject *py_J = PyArray_EMPTY(2, &dimsJ, NPY_DOUBLE, 0);
+    J = (npy_float64 *)PyArray_DATA(py_J);
+
+    // Make our empty Hessian
+    npy_intp dimsH[3] = {n, 6, n};
+    PyObject *py_H = PyArray_EMPTY(3, &dimsH, NPY_DOUBLE, 0);
+    H = (npy_float64 *)PyArray_DATA(py_H);
+
+    // Make sure q is number array
+    // Cast to numpy array
+    // Get data out
+    if (!_check_array_type(py_q))
+        return NULL;
+    py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+    q = (npy_float64 *)PyArray_DATA(py_np_q);
+
+    // Check if tool is None
+    // Make sure tool is number array
+    // Cast to numpy array
+    // Get data out
+    if (py_tool != Py_None)
+    {
+        if (!_check_array_type(py_tool))
+            return NULL;
+        tool_used = 1;
+        py_np_tool = (npy_float64 *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        tool = (npy_float64 *)PyArray_DATA(py_np_tool);
+    }
+
+    // Do the job
+    _ETS_jacob0(ets, m, n, q, tool, J);
+    _ETS_hessian0(n, J, H);
+
+    // Free the memory
+    Py_DECREF(py_np_q);
+
+    if (tool_used)
+    {
+        Py_DECREF(py_np_tool);
+    }
+
+    return py_H;
 }
 
 static PyObject *ETS_jacob0(PyObject *self, PyObject *args)
@@ -972,6 +1050,33 @@ int _check_array_type(PyObject *toCheck)
     return 1;
 }
 
+void _ETS_hessian0(int n, npy_float64 *J, npy_float64 *H)
+{
+    int a, b;
+    int n2 = 2 * n, n3 = 3 * n, n4 = 4 * n, n5 = 5 * n;
+
+    for (int j = 0; j < n; j++)
+    {
+        a = j * 6 * n;
+        for (int i = j; i < n; i++)
+        {
+            b = i * 6 * n;
+            _cross(J + j + n3, J + i, H + a + i, n);
+            _cross(J + j + n3, J + i + n3, H + a + i + n3, n);
+
+            if (i != j)
+            {
+                H[b + j] = H[a + i];
+                H[b + j + n] = H[a + i + n];
+                H[b + j + n2] = H[a + i + n2];
+                H[b + j + n3] = 0;
+                H[b + j + n4] = 0;
+                H[b + j + n5] = 0;
+            }
+        }
+    }
+}
+
 void _ETS_jacob0(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J)
 {
     ET *et;
@@ -1779,4 +1884,14 @@ void _r2q(npy_float64 *r, npy_float64 *q)
         q[1] = -q[1];
     if (r[1 * 4 + 0] < r[0 * 4 + 1])
         q[2] = -q[2];
+}
+
+void _cross(npy_float64 *a, npy_float64 *b, npy_float64 *ret, int n)
+{
+    ret[0] = a[1 * n] * b[2 * n] - a[2 * n] * b[1 * n];
+    ret[1 * n] = a[2 * n] * b[0] - a[0] * b[2 * n];
+    ret[2 * n] = a[0] * b[1 * n] - a[1 * n] * b[0];
+    // ret[0] = b[0 * n];
+    // ret[1 * n] = b[1 * n];
+    // ret[2 * n] = b[2 * n];
 }
