@@ -33,7 +33,7 @@ static PyObject *compose(PyObject *self, PyObject *args);
 static PyObject *r2q(PyObject *self, PyObject *args);
 
 int _check_array_type(PyObject *toCheck);
-void _ETS_hessian0(int n, npy_float64 *J, npy_float64 *H);
+void _ETS_hessian(int n, npy_float64 *J, npy_float64 *H);
 void _ETS_jacob0(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J);
 void _ETS_jacobe(PyObject *ets, int m, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J);
 void _ETS_fkine(PyObject *ets, int m, npy_float64 *q, npy_float64 *base, npy_float64 *tool, npy_float64 *ret);
@@ -58,6 +58,10 @@ void _cross(npy_float64 *a, npy_float64 *b, npy_float64 *ret, int n);
 static PyMethodDef fknmMethods[] = {
     {"ETS_hessian0",
      (PyCFunction)ETS_hessian0,
+     METH_VARARGS,
+     "Link"},
+    {"ETS_hessiane",
+     (PyCFunction)ETS_hessiane,
      METH_VARARGS,
      "Link"},
     {"ETS_jacobe",
@@ -140,64 +144,85 @@ PyMODINIT_FUNC PyInit_fknm(void)
 static PyObject *ETS_hessian0(PyObject *self, PyObject *args)
 {
     npy_float64 *H, *J, *q, *T, *tool = NULL;
-    PyObject *py_q, *py_tool, *py_np_q, *py_np_tool;
+    PyObject *py_q, *py_J, *py_tool, *py_np_q, *py_np_tool, *py_np_J;
     PyObject *ets;
-    int m, n, tool_used = 0;
+    int m, n, tool_used = 0, J_used = 0, q_used = 0;
     PyArray_Descr *desc_q, *desc_tool;
 
     if (!PyArg_ParseTuple(
-            args, "iiOOO",
+            args, "iiOOOO",
             &m,
             &n,
             &ets,
             &py_q,
+            &py_J,
             &py_tool))
         return NULL;
 
-    // Inputs can be:
-    // None - Even q
-    // Not arrays - Will raise exception
-    // Have symbolic data - Will raise exception
-    // q can be 1D or 2D, assumes dimesnions correct (n, 1xn or nx1)
-    // tool can be SE3s or 4x4 numpy array
+    // Check if J is None
+    // Make sure J is number array
+    // Cast to numpy array
+    // Get data out
+    if (py_J != Py_None)
+    {
+        if (!_check_array_type(py_J))
+            return NULL;
+        J_used = 1;
+        py_np_J = (npy_float64 *)PyArray_FROMANY(py_J, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        J = (npy_float64 *)PyArray_DATA(py_np_J);
+    }
+    else
+    {
+        // Now we must use q instead
+        // Make sure q is number array
+        // Cast to numpy array
+        // Get data out
+        if (!_check_array_type(py_q))
+            return NULL;
+        q_used = 1;
+        py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        q = (npy_float64 *)PyArray_DATA(py_np_q);
 
-    // Make our empty Jacobian
-    npy_intp dimsJ[2] = {6, n};
-    PyObject *py_J = PyArray_EMPTY(2, &dimsJ, NPY_DOUBLE, 0);
-    J = (npy_float64 *)PyArray_DATA(py_J);
+        // Make our empty Jacobian
+        npy_intp dimsJ[2] = {6, n};
+        PyObject *py_J = PyArray_EMPTY(2, &dimsJ, NPY_DOUBLE, 0);
+        J = (npy_float64 *)PyArray_DATA(py_J);
+
+        // Check if tool is None
+        // Make sure tool is number array
+        // Cast to numpy array
+        // Get data out
+        if (py_tool != Py_None)
+        {
+            if (!_check_array_type(py_tool))
+                return NULL;
+            tool_used = 1;
+            py_np_tool = (npy_float64 *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+            tool = (npy_float64 *)PyArray_DATA(py_np_tool);
+        }
+
+        // Calculate the Jacobian
+        _ETS_jacob0(ets, m, n, q, tool, J);
+    }
 
     // Make our empty Hessian
     npy_intp dimsH[3] = {n, 6, n};
     PyObject *py_H = PyArray_EMPTY(3, &dimsH, NPY_DOUBLE, 0);
     H = (npy_float64 *)PyArray_DATA(py_H);
 
-    // Make sure q is number array
-    // Cast to numpy array
-    // Get data out
-    if (!_check_array_type(py_q))
-        return NULL;
-    py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
-    q = (npy_float64 *)PyArray_DATA(py_np_q);
-
-    // Check if tool is None
-    // Make sure tool is number array
-    // Cast to numpy array
-    // Get data out
-    if (py_tool != Py_None)
-    {
-        if (!_check_array_type(py_tool))
-            return NULL;
-        tool_used = 1;
-        py_np_tool = (npy_float64 *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
-        tool = (npy_float64 *)PyArray_DATA(py_np_tool);
-    }
-
     // Do the job
-    _ETS_jacob0(ets, m, n, q, tool, J);
-    _ETS_hessian0(n, J, H);
+    _ETS_hessian(n, J, H);
 
     // Free the memory
-    Py_DECREF(py_np_q);
+    if (q_used)
+    {
+        Py_DECREF(py_np_q);
+    }
+
+    if (J_used)
+    {
+        Py_DECREF(py_np_J);
+    }
 
     if (tool_used)
     {
@@ -205,6 +230,99 @@ static PyObject *ETS_hessian0(PyObject *self, PyObject *args)
     }
 
     return py_H;
+    // return Py_None;
+}
+
+static PyObject *ETS_hessiane(PyObject *self, PyObject *args)
+{
+    npy_float64 *H, *J, *q, *T, *tool = NULL;
+    PyObject *py_q, *py_J, *py_tool, *py_np_q, *py_np_tool, *py_np_J;
+    PyObject *ets;
+    int m, n, tool_used = 0, J_used = 0, q_used = 0;
+    PyArray_Descr *desc_q, *desc_tool;
+
+    if (!PyArg_ParseTuple(
+            args, "iiOOOO",
+            &m,
+            &n,
+            &ets,
+            &py_q,
+            &py_J,
+            &py_tool))
+        return NULL;
+
+    // Check if J is None
+    // Make sure J is number array
+    // Cast to numpy array
+    // Get data out
+    if (py_J != Py_None)
+    {
+        if (!_check_array_type(py_J))
+            return NULL;
+        J_used = 1;
+        py_np_J = (npy_float64 *)PyArray_FROMANY(py_J, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        J = (npy_float64 *)PyArray_DATA(py_np_J);
+    }
+    else
+    {
+        // Now we must use q instead
+        // Make sure q is number array
+        // Cast to numpy array
+        // Get data out
+        if (!_check_array_type(py_q))
+            return NULL;
+        q_used = 1;
+        py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        q = (npy_float64 *)PyArray_DATA(py_np_q);
+
+        // Make our empty Jacobian
+        npy_intp dimsJ[2] = {6, n};
+        PyObject *py_J = PyArray_EMPTY(2, &dimsJ, NPY_DOUBLE, 0);
+        J = (npy_float64 *)PyArray_DATA(py_J);
+
+        // Check if tool is None
+        // Make sure tool is number array
+        // Cast to numpy array
+        // Get data out
+        if (py_tool != Py_None)
+        {
+            if (!_check_array_type(py_tool))
+                return NULL;
+            tool_used = 1;
+            py_np_tool = (npy_float64 *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+            tool = (npy_float64 *)PyArray_DATA(py_np_tool);
+        }
+
+        // Calculate the Jacobian
+        _ETS_jacobe(ets, m, n, q, tool, J);
+    }
+
+    // Make our empty Hessian
+    npy_intp dimsH[3] = {n, 6, n};
+    PyObject *py_H = PyArray_EMPTY(3, &dimsH, NPY_DOUBLE, 0);
+    H = (npy_float64 *)PyArray_DATA(py_H);
+
+    // Do the job
+    _ETS_hessian(n, J, H);
+
+    // Free the memory
+    if (q_used)
+    {
+        Py_DECREF(py_np_q);
+    }
+
+    if (J_used)
+    {
+        Py_DECREF(py_np_J);
+    }
+
+    if (tool_used)
+    {
+        Py_DECREF(py_np_tool);
+    }
+
+    return py_H;
+    // return Py_None;
 }
 
 static PyObject *ETS_jacob0(PyObject *self, PyObject *args)
@@ -1050,7 +1168,7 @@ int _check_array_type(PyObject *toCheck)
     return 1;
 }
 
-void _ETS_hessian0(int n, npy_float64 *J, npy_float64 *H)
+void _ETS_hessian(int n, npy_float64 *J, npy_float64 *H)
 {
     int a, b;
     int n2 = 2 * n, n3 = 3 * n, n4 = 4 * n, n5 = 5 * n;
