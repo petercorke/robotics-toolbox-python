@@ -896,32 +896,32 @@ class ETS(BaseETS):
         except TypeError:
             pass
 
-        # def cross(a, b):
-        #     x = a[1] * b[2] - a[2] * b[1]
-        #     y = a[2] * b[0] - a[0] * b[2]
-        #     z = a[0] * b[1] - a[1] * b[0]
-        #     return np.array([x, y, z])
+        def cross(a, b):
+            x = a[1] * b[2] - a[2] * b[1]
+            y = a[2] * b[0] - a[0] * b[2]
+            z = a[0] * b[1] - a[1] * b[0]
+            return np.array([x, y, z])
 
-        # n = self.n
+        n = self.n
 
-        # if Je is None:
-        #     q = getvector(q, None)
-        #     Je = self.jacobe(q, tool=tool)
-        # else:
-        #     verifymatrix(Je, (6, self.n))
+        if Je is None:
+            q = getvector(q, None)
+            Je = self.jacobe(q, tool=tool)
+        else:
+            verifymatrix(Je, (6, self.n))
 
-        # H = np.zeros((n, 6, n))
+        H = np.zeros((n, 6, n))
 
-        # for j in range(n):
-        #     for i in range(j, n):
+        for j in range(n):
+            for i in range(j, n):
 
-        #         H[j, :3, i] = cross(Je[3:, j], Je[:3, i])
-        #         H[j, 3:, i] = cross(Je[3:, j], Je[3:, i])
+                H[j, :3, i] = cross(Je[3:, j], Je[:3, i])
+                H[j, 3:, i] = cross(Je[3:, j], Je[3:, i])
 
-        #         if i != j:
-        #             H[i, :3, j] = H[j, :3, i]
+                if i != j:
+                    H[i, :3, j] = H[j, :3, i]
 
-        # return H
+        return H
 
     def compile(self) -> "ETS":
         """
