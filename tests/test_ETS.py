@@ -1086,10 +1086,6 @@ class TestETS(unittest.TestCase):
 
         J = r.jacob0(q1)
 
-        # print(np.round(ans_new, 1))
-        # print(np.round(r.hessian0(q1), 1))
-        # print(r.jacob0(q1))
-
         nt.assert_array_almost_equal(r.hessian0(q1), ans_new)
         nt.assert_array_almost_equal(r.hessian0(q2), ans_new)
         nt.assert_array_almost_equal(r.hessian0(q3), ans_new)
