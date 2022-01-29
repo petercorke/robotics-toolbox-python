@@ -232,7 +232,6 @@ class BaseET:
         Get the transform constant
 
         :return: The constant η if set
-        :rtype: float, symbolic or None
 
         Example:
 
@@ -257,7 +256,6 @@ class BaseET:
         Set the transform constant
 
         :param value: The transform constant η
-        :type value: float, symbolic or None
 
         .. note:: No unit conversions are applied, it is assumed to be in
             radians.
@@ -276,7 +274,6 @@ class BaseET:
         The transform type and axis
 
         :return: The transform type and axis
-        :rtype: str
 
         Example:
 
@@ -297,7 +294,6 @@ class BaseET:
         Test if ET is a joint
 
         :return: True if a joint
-        :rtype: bool
 
         Example:
 
@@ -317,7 +313,6 @@ class BaseET:
         Test if ET joint is flipped
 
         :return: True if joint is flipped
-        :rtype: bool
 
         A flipped joint uses the negative of the joint variable, ie. it rotates
         or moves in the opposite direction.
@@ -340,7 +335,6 @@ class BaseET:
         Test if ET is a rotation
 
         :return: True if a rotation
-        :rtype: bool
 
         Example:
 
@@ -360,7 +354,6 @@ class BaseET:
         Test if ET is a translation
 
         :return: True if a translation
-        :rtype: bool
 
         Example:
 
@@ -391,7 +384,6 @@ class BaseET:
         Get ET joint index
 
         :return: The assigmed joint index
-        :rtype: int or None
 
         Allows an ET to be associated with a numbered joint in a robot.
 
@@ -421,7 +413,6 @@ class BaseET:
         Test if ET is an elementary transform
 
         :return: True if an elementary transform
-        :rtype: bool
 
         .. note:: ET's may not actually be "elementary", it can be a complex
             mix of rotations and translations.
@@ -434,8 +425,7 @@ class BaseET:
         r"""
         Inverse of ET
 
-        :return: [description]
-        :rtype: ET instance
+        :return: Inverse of the ET
 
         The inverse of a given ET.
 
@@ -469,9 +459,8 @@ class BaseET:
         Evaluate an elementary transformation
 
         :param q: Is used if this ET is variable (a joint)
-        :type q: float (radians), required for variable ET's
+
         :return: The SE(3) or SE(2) matrix value of the ET
-        :rtype:  ndarray(4,4) or ndarray(3,3)
 
         Example:
 
@@ -519,15 +508,11 @@ class ET(BaseET):
         Pure rotation about the x-axis
 
         :param η: rotation about the x-axis
-        :type η: float
         :param unit: angular unit, "rad" [default] or "deg"
-        :type unit: str
         :param j: Explicit joint number within the robot
-        :type j: int, optional
         :param flip: Joint moves in opposite direction
-        :type flip: bool
+
         :return: An elementary transform
-        :rtype: ET instance
 
         - ``ET.Rx(η)`` is an elementary rotation about the x-axis by a
           constant angle η
@@ -549,15 +534,11 @@ class ET(BaseET):
         Pure rotation about the y-axis
 
         :param η: rotation about the y-axis
-        :type η: float
         :param unit: angular unit, "rad" [default] or "deg"
-        :type unit: str
         :param j: Explicit joint number within the robot
-        :type j: int, optional
         :param flip: Joint moves in opposite direction
-        :type flip: bool
+
         :return: An elementary transform
-        :rtype: ET instance
 
         - ``ET.Ry(η)`` is an elementary rotation about the y-axis by a
           constant angle η
@@ -578,15 +559,11 @@ class ET(BaseET):
         Pure rotation about the z-axis
 
         :param η: rotation about the z-axis
-        :type η: float
         :param unit: angular unit, "rad" [default] or "deg"
-        :type unit: str
         :param j: Explicit joint number within the robot
-        :type j: int, optional
         :param flip: Joint moves in opposite direction
-        :type flip: bool
+
         :return: An elementary transform
-        :rtype: ET instance
 
         - ``ET.Rz(η)`` is an elementary rotation about the z-axis by a
           constant angle η
@@ -605,13 +582,10 @@ class ET(BaseET):
         Pure translation along the x-axis
 
         :param η: translation distance along the z-axis
-        :type η: float
         :param j: Explicit joint number within the robot
-        :type j: int, optional
         :param flip: Joint moves in opposite direction
-        :type flip: bool
+
         :return: An elementary transform
-        :rtype: ET instance
 
         - ``ET.tx(η)`` is an elementary translation along the x-axis by a
           distance constant η
@@ -642,13 +616,10 @@ class ET(BaseET):
         Pure translation along the y-axis
 
         :param η: translation distance along the y-axis
-        :type η: float
         :param j: Explicit joint number within the robot
-        :type j: int, optional
         :param flip: Joint moves in opposite direction
-        :type flip: bool
+
         :return: An elementary transform
-        :rtype: ET instance
 
         - ``ET.ty(η)`` is an elementary translation along the y-axis by a
           distance constant η
@@ -678,13 +649,10 @@ class ET(BaseET):
         Pure translation along the z-axis
 
         :param η: translation distance along the z-axis
-        :type η: float
         :param j: Explicit joint number within the robot
-        :type j: int, optional
         :param flip: Joint moves in opposite direction
-        :type flip: bool
+
         :return: An elementary transform
-        :rtype: ET instance
 
         - ``ET.tz(η)`` is an elementary translation along the z-axis by a
           distance constant η
@@ -714,9 +682,8 @@ class ET(BaseET):
         A static SE3
 
         :param T: The SE3 trnasformation matrix
-        :type T: float
+
         :return: An elementary transform
-        :rtype: ET instance
 
         - ``ET.T(η)`` is an elementary translation along the z-axis by a
           distance constant η
@@ -751,15 +718,11 @@ class ET2(BaseET):
         Pure rotation
 
         :param η: rotation angle
-        :type η: float
         :param unit: angular unit, "rad" [default] or "deg"
-        :type unit: str
         :param j: Explicit joint number within the robot
-        :type j: int, optional
         :param flip: Joint moves in opposite direction
-        :type flip: bool
+
         :return: An elementary transform
-        :rtype: ET2 instance
 
         - ``ET2.R(η)`` is an elementary rotation by a constant angle η
         - ``ET2.R()`` is an elementary rotation by a variable angle, i.e. a
@@ -783,13 +746,10 @@ class ET2(BaseET):
         Pure translation along the x-axis
 
         :param η: translation distance along the z-axis
-        :type η: float
         :param j: Explicit joint number within the robot
-        :type j: int, optional
         :param flip: Joint moves in opposite direction
-        :type flip: bool
+
         :return: An elementary transform
-        :rtype: ET2 instance
 
         - ``ET2.tx(η)`` is an elementary translation along the x-axis by a
           distance constant η
@@ -809,13 +769,10 @@ class ET2(BaseET):
         Pure translation along the y-axis
 
         :param η: translation distance along the y-axis
-        :type η: float
         :param j: Explicit joint number within the robot
-        :type j: int, optional
         :param flip: Joint moves in opposite direction
-        :type flip: bool
+
         :return: An elementary transform
-        :rtype: ET2 instance
 
         - ``ET2.tx(η)`` is an elementary translation along the y-axis by a
           distance constant η
@@ -833,9 +790,8 @@ class ET2(BaseET):
         A static SE2
 
         :param T: The SE2 trnasformation matrix
-        :type T: float
+
         :return: An elementary transform
-        :rtype: ET2 instance
 
         - ``ET2.T(η)`` is an elementary translation along the z-axis by a
           distance constant η
@@ -856,9 +812,8 @@ class ET2(BaseET):
         Evaluate an elementary transformation
 
         :param q: Is used if this ET2 is variable (a joint)
-        :type q: float (radians), required for variable ET's
+
         :return: The SE(2) matrix value of the ET2
-        :rtype:  ndarray(3,3)
 
         Example:
 
