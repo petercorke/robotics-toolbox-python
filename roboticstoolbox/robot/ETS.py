@@ -225,8 +225,8 @@ class BaseETS(UserList):
 
         .. runblock:: pycon
 
-            >>> from roboticstoolbox import ETS
-            >>> e = ETS.rx() * ETS.tx(1) * ETS.tz()
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rx() * ET.tx(1) * ET.tz()
             >>> e.n
 
         :seealso: :func:`joints`
@@ -376,11 +376,10 @@ class BaseETS(UserList):
 
         .. runblock:: pycon
 
-            >>> from roboticstoolbox import ETS
+            >>> from roboticstoolbox import ET
             >>> e = ET.Rz(jindex=2) * ET.tx(1) * ET.Rx(jindex=3,flip=True) * ET.tx(1)
             >>> print(e)
             >>> print(e.inv())
-            >>> q = [1,2,3,4]
 
         .. note:: It is essential to use explicit joint indices to account for
             the reversed order of the transforms.
@@ -599,6 +598,7 @@ class ETS(BaseETS):
     ) -> NDArray[np.float64]:
         """
         Forward kinematics
+
         :param q: Joint coordinates
         :param base: base transform, optional
         :param tool: tool transform, optional
@@ -1016,10 +1016,10 @@ class ETS2(BaseETS):
 
         .. runblock:: pycon
 
-            >>> from roboticstoolbox import ETS2 as ETS
-            >>> e = ETS.r(0.3)  # a single ET, rotation about z
+            >>> from roboticstoolbox import ETS2 as ET2
+            >>> e = ET2.R(0.3)  # a single ET, rotation about z
             >>> len(e)
-            >>> e = ETS.r(0.3) * ETS.tx(2)  # an ETS
+            >>> e = ET2.R(0.3) * ET2.tx(2)  # an ETS
             >>> len(e)                      # of length 2
             >>> e[1]                        # an ET sliced from the ETS
 
