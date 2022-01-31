@@ -11,6 +11,7 @@ import webbrowser
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix, islistof
+import spatialmath.base as smb
 
 from roboticstoolbox.robot.ELink import ELink, ELink2, BaseELink
 from roboticstoolbox.robot.ETS import ETS, ETS2
@@ -1616,26 +1617,19 @@ class ERobot(BaseERobot):
         if analytical is not None and half != "trans":
 
             if analytical == "rpy/xyz":
-                rpy = tr2rpy(T, order="xyz")
-                A = rpy2jac(rpy, order="xyz")
+                gamma = smb.tr2rpy(T, order="xyz")
             elif analytical == "rpy/zyx":
-                rpy = tr2rpy(T, order="zyx")
-                A = rpy2jac(rpy, order="zyx")
+                gamma = smb.tr2rpy(T, order="zyx")
             elif analytical == "eul":
-                eul = tr2eul(T)
-                A = eul2jac(eul)
+                gamma = smb.tr2eul(T)
             elif analytical == "exp":
                 # TODO: move to SMTB.base, Horner form with skew(v)
-                (theta, v) = trlog(t2r(T))
-                A = (
-                    np.eye(3, 3)
-                    - (1 - math.cos(theta)) / theta * skew(v)
-                    + (theta - math.sin(theta)) / theta * skew(v) ** 2
-                )
+                gamma = smb.trlog(smb.t2r(T), twist=True)
             else:
                 raise ValueError("bad analyical value specified")
 
-            J = block_diag(np.eye(3, 3), np.linalg.inv(A)) @ J
+            A = smb.angvelxform(gamma, representation=analytical)
+            J = A @ J
 
         # TODO optimize computation above if half matrix is returned
 

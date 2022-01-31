@@ -15,7 +15,7 @@ from roboticstoolbox import rtb_set_param
 from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix
 
 # from spatialmath import base
-from spatialmath.base import tr2jac, tr2eul, tr2rpy, t2r, eul2jac, rpy2jac
+from spatialmath.base import tr2jac, tr2eul, tr2rpy, t2r, eul2jac, rpy2jac, trlog, angvelxform
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
 
@@ -1083,26 +1083,19 @@ class DHRobot(Robot):
         if analytical is not None:
 
             if analytical == "rpy/xyz":
-                rpy = tr2rpy(T, "xyz")
-                A = rpy2jac(rpy, "xyz")
+                gamma = tr2rpy(T, order="xyz")
             elif analytical == "rpy/zyx":
-                rpy = tr2rpy(T, "zyx")
-                A = rpy2jac(rpy, "zyx")
+                gamma = tr2rpy(T, order="zyx")
             elif analytical == "eul":
-                eul = tr2eul(T)
-                A = eul2jac(eul)
+                gamma = tr2eul(T)
             elif analytical == "exp":
                 # TODO: move to SMTB.base, Horner form with skew(v)
-                (theta, v) = trlog(t2r(T))
-                A = (
-                    np.eye(3, 3)
-                    - (1 - math.cos(theta)) / theta * skew(v)
-                    + (theta - math.sin(theta)) / theta * skew(v) ** 2
-                )
+                gamma = trlog(t2r(T), twist=True)
             else:
                 raise ValueError("bad analytical value specified")
 
-            J0 = block_diag(np.eye(3, 3), np.linalg.inv(A)) @ J0
+            A = angvelxform(gamma, representation=analytical, full=True)
+            J0 = A @ J0
 
         # TODO optimize computation above if half matrix is returned
 
