@@ -16,7 +16,9 @@ from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
-from typing import Optional, Union
+from typing import Optional, Union, overload
+from spatialgeometry import Shape
+from numpy.typing import ArrayLike, NDArray
 
 try:
     from matplotlib import colors
@@ -1003,6 +1005,22 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
     # --------------------------------------------------------------------- #
 
+    # @overload
+    # def links(self: rtb.ERobot) -> list[rtb.ELink]:
+    #     ...
+
+    # @overload
+    # def links(self: rtb.ERobot2) -> list[rtb.ELink2]:
+    #     ...
+
+    # @overload
+    # def links(self: rtb.DHRobot) -> list[rtb.DHLink]:
+    #     ...
+
+    # @overload
+    # def links(self: "Robot") -> list[rtb.Link]:
+    #     ...
+
     @property
     def links(self):
         """
@@ -1873,25 +1891,29 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
     # --------------------------------------------------------------------- #
 
-    def closest_point(self, q, shape, inf_dist=1.0, skip=False):
+    def closest_point(
+        self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip=False
+    ) -> tuple[
+        Union[int, None],
+        Union[NDArray[np.float64], None],
+        Union[NDArray[np.float64], None],
+    ]:
         """
         closest_point(shape, inf_dist) returns the minimum euclidean
         distance between this robot and shape, provided it is less than
         inf_dist. It will also return the points on self and shape in the
         world frame which connect the line of length distance between the
         shapes. If the distance is negative then the shapes are collided.
+
         :param shape: The shape to compare distance to
-        :type shape: Shape
         :param inf_dist: The minimum distance within which to consider
             the shape
-        :type inf_dist: float
         :param skip: Skip setting all shape transforms based on q, use this
             option if using this method in conjuction with Swift to save time
-        :type skip: boolean
+
         :returns: d, p1, p2 where d is the distance between the shapes,
             p1 and p2 are the points in the world frame on the respective
             shapes. The points returned are [x, y, z].
-        :rtype: float, ndarray(1x3), ndarray(1x3)
         """
 
         if not skip:
