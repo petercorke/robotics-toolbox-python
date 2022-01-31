@@ -2178,9 +2178,9 @@ class ERobot(BaseERobot):
         return Ain, bin
 
     # inverse dynamics (recursive Newton-Euler) using spatial vector notation
-    def rne(robot, q, qd, qdd, symbolic=False, gravity=None):
+    def rne(self, q, qd, qdd, symbolic=False, gravity=None):
 
-        n = robot.n
+        n = self.n
 
         # allocate intermediate variables
         Xup = SE3.Alloc(n)
@@ -2190,23 +2190,41 @@ class ERobot(BaseERobot):
         a = SpatialAcceleration.Alloc(n)
         f = SpatialForce.Alloc(n)
         I = SpatialInertia.Alloc(n)  # noqa
-        s = [None for i in range(n)]  # joint motion subspace
+        s = []  # joint motion subspace
+
         if symbolic:
             Q = np.empty((n,), dtype="O")  # joint torque/force
         else:
             Q = np.empty((n,))  # joint torque/force
 
+        # A temp variable to handle static joints
+        Ts = np.eye(4)
+
+        # A counter through joints
+        j = 0
+
         # initialize intermediate variables
-        for j, link in enumerate(robot):
-            I[j] = SpatialInertia(m=link.m, r=link.r)
-            if symbolic and link.Ts is None:
-                Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
+        for link in self.links:
+            if link.isjoint:
+                I[j] = SpatialInertia(m=link.m, r=link.r)
+                if symbolic and link.Ts is None:
+                    Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
+                else:
+                    Xtree[j] = Ts * SE3(link.Ts, check=False)
+
+                if link.v is not None:
+                    s.append(link.v.s)
+
+                # Increment the joint counter
+                j += 1
+
+                # Reset the Ts tracker
+                Ts = np.eye(4)
             else:
-                Xtree[j] = SE3(link.Ts, check=False)
-            s[j] = link.v.s
+                Ts *= SE3(link.Ts, check=False)
 
         if gravity is None:
-            a_grav = -SpatialAcceleration(robot.gravity)
+            a_grav = -SpatialAcceleration(self.gravity)
         else:
             a_grav = -SpatialAcceleration(gravity)
 
@@ -2215,13 +2233,13 @@ class ERobot(BaseERobot):
             vJ = SpatialVelocity(s[j] * qd[j])
 
             # transform from parent(j) to j
-            Xup[j] = robot[j].A(q[j]).inv()
+            Xup[j] = self[j].A(q[j]).inv()
 
-            if robot[j].parent is None:
+            if self[j].parent is None:
                 v[j] = vJ
                 a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qdd[j])
             else:
-                jp = robot[j].parent.jindex
+                jp = self[j].parent.jindex
                 v[j] = Xup[j] * v[jp] + vJ
                 a[j] = Xup[j] * a[jp] + SpatialAcceleration(s[j] * qdd[j]) + v[j] @ vJ
 
@@ -2233,8 +2251,8 @@ class ERobot(BaseERobot):
             # next line could be np.dot(), but fails for symbolic arguments
             Q[j] = np.sum(f[j].A * s[j])
 
-            if robot[j].parent is not None:
-                jp = robot[j].parent.jindex
+            if self[j].parent is not None:
+                jp = self[j].parent.jindex
                 f[jp] = f[jp] + Xup[j] * f[j]
 
         return Q
