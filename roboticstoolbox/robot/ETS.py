@@ -1,46 +1,33 @@
 #!/usr/bin/env python3
+
 """
 @author: Jesse Haviland
 @author: Peter Corke
 """
+
 from collections import UserList
-from types import SimpleNamespace
-import copy
-from abc import ABC, abstractclassmethod, abstractmethod
 from attr import attributes
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import (
     getvector,
-    getunit,
-    trotx,
-    troty,
-    trotz,
     issymbol,
     tr2jac,
-    transl2,
-    trot2,
-    removesmall,
-    trinv,
-    trinv2,
     verifymatrix,
-    iseye,
     tr2jac2,
 )
 from roboticstoolbox import rtb_get_param
 
 from collections import UserList
 import numpy as np
-from spatialmath.base import trotx, troty, trotz, issymbol, getmatrix, tr2rpy
+from spatialmath.base import issymbol, getmatrix
 import fknm
-import sympy
 from copy import deepcopy
 from roboticstoolbox import rtb_get_param
 from roboticstoolbox.robot.ET import ET, ET2
 from spatialmath.base import getvector
 from spatialmath import SE3
-from typing import Type, Union, overload
-
+from typing import Union, overload
 from numpy.typing import ArrayLike, NDArray
 
 
@@ -58,6 +45,7 @@ class BaseETS(UserList):
         Pretty prints the ETS
 
         :param q: control how joint variables are displayed
+        :type q: ArrayLike
         :return: Pretty printed ETS
 
         ``q`` controls how the joint variables are displayed:
@@ -282,11 +270,11 @@ class BaseETS(UserList):
         self._data = new_data
 
     @overload
-    def pop(self: "ETS", i: int = -1) -> ET:
+    def pop(self: "ETS", i: int = -1) -> ET:  # pragma: nocover
         ...
 
     @overload
-    def pop(self: "ETS2", i: int = -1) -> ET2:
+    def pop(self: "ETS2", i: int = -1) -> ET2:  # pragma: nocover
         ...
 
     def pop(self, i=-1):
@@ -600,6 +588,7 @@ class ETS(BaseETS):
         Forward kinematics
 
         :param q: Joint coordinates
+        :type q: ArrayLike
         :param base: base transform, optional
         :param tool: tool transform, optional
 
@@ -688,6 +677,7 @@ class ETS(BaseETS):
         Jacobian in base frame
 
         :param q: Joint coordinate vector
+        :type q: ArrayLike
         :param tool: a static tool transformation matrix to apply to the
             end of end, defaults to None
         :return J: Manipulator Jacobian in the base frame
@@ -809,6 +799,7 @@ class ETS(BaseETS):
         Manipulator geometric Jacobian in the end-effector frame
 
         :param q: Joint coordinate vector
+        :type q: ArrayLike
         :param tool: a static tool transformation matrix to apply to the
             end of end, defaults to None
 
@@ -852,7 +843,10 @@ class ETS(BaseETS):
         is required. Supply J0 if already calculated to save computation time
 
         :param q: The joint angles/configuration of the robot.
+        :type q: ArrayLike
         :param J0: The manipulator Jacobian in the 0 frame
+        :param tool: a static tool transformation matrix to apply to the
+            end frame, defaults to None
 
         :return: The manipulator Hessian in 0 frame
 
@@ -929,7 +923,10 @@ class ETS(BaseETS):
         is required. Supply Je if already calculated to save computation time
 
         :param q: The joint angles/configuration of the robot.
+        :type q: ArrayLike
         :param Je: The manipulator Jacobian in the ee frame
+        :param tool: a static tool transformation matrix to apply to the
+            end frame, defaults to None
 
         :return: The manipulator Hessian in ee frame
 
@@ -1161,6 +1158,7 @@ class ETS2(BaseETS):
         """
         Forward kinematics
         :param q: Joint coordinates
+        :type q: ArrayLike
         :param base: base transform, optional
         :param tool: tool transform, optional
 
@@ -1298,6 +1296,7 @@ class ETS2(BaseETS):
         Jacobian in base frame
 
         :param q: joint coordinates
+        :type q: ArrayLike
         :return: Jacobian matrix
 
         ``jacobe(q)`` is the manipulator Jacobian matrix which maps joint
