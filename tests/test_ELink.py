@@ -20,7 +20,7 @@ class TestELink(unittest.TestCase):
 
         l0 = rtb.ELink(rx * ry * tz)
 
-        ans = "ELink[Rx(88.41°) ⊕ Ry(88.41°) ⊕ tz(1.0)] "
+        ans = "ELink[Rx(88.41°) ⊕ Ry(88.41°) ⊕ tz(1)] "
 
         self.assertEqual(str(l0), ans)
 
@@ -186,10 +186,10 @@ qlim  =      -2.8 to      2.8""",
         l0.collision = col
 
         with self.assertRaises(TypeError):
-            l0.collision = [1, 1, 1]
+            l0.collision = [1, 1, 1]  # type: ignore
 
         with self.assertRaises(TypeError):
-            l0.collision = 1
+            l0.collision = 1  # type: ignore
 
     def test_geometry_fail(self):
         l0 = rtb.ELink()
@@ -198,10 +198,10 @@ qlim  =      -2.8 to      2.8""",
         l0.geometry = [col, col]
 
         with self.assertRaises(TypeError):
-            l0.geometry = [1, 1, 1]
+            l0.geometry = [1, 1, 1]  # type: ignore
 
         with self.assertRaises(TypeError):
-            l0.geometry = 1
+            l0.geometry = 1  # type: ignore
 
     def test_dist(self):
         s0 = gm.Cuboid([1, 1, 1], base=sm.SE3(0, 0, 0))
