@@ -68,7 +68,7 @@ class Panda(ERobot):
 
 if __name__ == "__main__":  # pragma nocover
 
-    r = rtb.models.ETS.Panda()
+    r = rtb.models.Panda()
 
     deg = np.pi / 180
     mm = 1e-3
