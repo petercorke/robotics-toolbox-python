@@ -56,6 +56,10 @@ def xplot(
         t = x
         q = y
 
+    if q.ndim == 1:
+        # if 1D, make it Nx1
+        q = q[:, np.newaxis]
+
     if t.ndim != 1 or q.shape[0] != t.shape[0]:
         raise ValueError("dimensions of arguments are not consistent")
 
