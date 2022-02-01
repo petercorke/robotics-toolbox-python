@@ -15,6 +15,7 @@ import numpy as np
 from spatialmath.base import getvector, verifymatrix, isscalar, getmatrix, t2r, rot2jac
 from scipy import integrate, interpolate
 from spatialmath.base import symbolic as sym
+from roboticstoolbox import rtb_get_param
 
 from ansitable import ANSITable, Column
 import warnings
@@ -64,6 +65,7 @@ class DynamicsMixin:
             >>> robot.links[2].dyntable()
             >>> robot.dyntable()
         """
+        unicode = rtb_get_param('unicode')
         table = ANSITable(
             Column("j", colalign=">", headalign="^"),
             Column("m", colalign="<", headalign="^"),
@@ -73,7 +75,7 @@ class DynamicsMixin:
             Column("B", colalign="<", headalign="^"),
             Column("Tc", colalign="<", headalign="^"),
             Column("G", colalign="<", headalign="^"),
-            border="thin",
+            border="thin" if unicode else "ascii",
         )
 
         for j, link in enumerate(self):
