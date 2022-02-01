@@ -6,6 +6,7 @@
 import numpy as np
 import spatialmath as sm
 from spatialmath.base.argcheck import getvector
+from roboticstoolbox.robot.ELink import ELink
 
 
 class Gripper:
@@ -115,7 +116,7 @@ class Gripper:
     # --------------------------------------------------------------------- #
 
     @property
-    def links(self):
+    def links(self) -> list[ELink]:
         """
         Gripper links
 
