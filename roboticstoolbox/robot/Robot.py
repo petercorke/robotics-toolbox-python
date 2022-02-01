@@ -386,14 +386,13 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         """
         _default_backend = be
 
-    def addconfiguration(self, name: str, q: NDArray[np.float64], unit: str = "rad"):
+    def addconfiguration(self, name: str, q: ArrayLike, unit: str = "rad"):
         """
         Add a named joint configuration (Robot superclass)
 
         :param name: Name of the joint configuration
-        :type name: str
         :param q: Joint configuration
-        :type q: ndarray(n) or list
+        :type q: Arraylike
 
         Example:
 
