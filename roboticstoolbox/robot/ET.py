@@ -728,6 +728,17 @@ class ET2(BaseET):
     def __add__(self, other: "ET2") -> "rtb.ETS2":
         return self.__mul__(other)
 
+    @property
+    def s(self) -> NDArray[np.float64]:  # pragma: nocover
+        if self.axis[0] == "R":
+            return np.array([0, 0, 0, 1])
+        if self.axis[1] == "x":
+            return np.array([1, 0, 0, 0])
+        elif self.axis[1] == "y":
+            return np.array([0, 1, 0, 0])
+        else:
+            return np.array([0, 0, 1, 0])
+
     @classmethod
     def R(
         cls, eta: Union[float, Sym, None] = None, unit: str = "rad", **kwargs
