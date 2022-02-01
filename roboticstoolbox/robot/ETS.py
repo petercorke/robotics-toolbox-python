@@ -684,12 +684,15 @@ class BaseETS(UserList, ABC):
 
             elif et.isrotation:
                 if issymbol(et.eta):
-                    s = f"{et.axis}({et.eta:.4g})"
+                    s = f"{et.axis}({et.eta})"
                 else:
                     s = f"{et.axis}({et.eta * 180 / np.pi:.4g}°)"
 
             elif et.istranslation:
-                s = f"{et.axis}({et.eta:.4g})"
+                if issymbol(et.eta):
+                    s = f"{et.axis}({et.eta})"
+                else:
+                    s = f"{et.axis}({et.eta:.4g})"
 
             elif et.isconstant:
                 s = f"C{c}"
