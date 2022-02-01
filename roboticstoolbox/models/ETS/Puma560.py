@@ -1,5 +1,6 @@
 from roboticstoolbox import ET as ET
 from roboticstoolbox import ERobot
+import numpy as np
 
 
 class Puma560(ERobot):
@@ -56,8 +57,11 @@ class Puma560(ERobot):
             e, name="Puma560", manufacturer="Unimation", comment="ETS-based model"
         )
 
-        self.addconfiguration("qz", [0, 0, 0, 0, 0, 0])
-        self.addconfiguration("qbent", [0, -90, 90, 0, 0, 0], "deg")
+        self.qr = np.array([0, -np.pi / 2, np.pi / 2, 0, 0, 0])
+        self.qz = np.zeros(6)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

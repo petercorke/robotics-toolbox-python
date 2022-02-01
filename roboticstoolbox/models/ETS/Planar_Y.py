@@ -53,8 +53,11 @@ class Planar_Y(ERobot):
 
         super().__init__(elinks, name="Planar-Y")
 
-        self.addconfiguration("qz", [0, 0, 0, 0, 0, 0])
-        self.addconfiguration("qy", [0, 0, np.pi / 4, 0, -np.pi / 4, 0])
+        self.qr = np.array([0, 0, np.pi / 4, 0, -np.pi / 4, 0])
+        self.qz = np.zeros(6)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

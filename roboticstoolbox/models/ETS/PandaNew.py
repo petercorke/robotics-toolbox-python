@@ -62,25 +62,34 @@ class Panda(ERobot):
 
         super(Panda, self).__init__(elinks, name="Panda", manufacturer="Franka Emika")
 
-        self.qz = np.array([0, 0, 0, 0, 0, 0, 0])
         self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        self.qz = np.zeros(7)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover
 
     r = rtb.models.Panda()
+    r2 = rtb.models.ETS.Panda()
 
-    # r.ets()
+    print(r2)
 
-    for link in r:
-        print(link.name)
+    # r2.addconfiguration("ready", [1, 2, 3, 4, 4], "deg")
+    # qq = r2.configs["my_q"]
 
-    for link in r.grippers[0].links:
-        print(link.name)
+    # # r.ets()
 
-    print()
+    # for link in r:
+    #     print(link.name)
 
-    print(r.ets(start="panda_hand", end=r.links[0]))
+    # for link in r.grippers[0].links:
+    #     print(link.name)
+
+    # print()
+
+    # print(r.ets(start="panda_hand", end=r.links[0]))
 
     # a = r.qz
 

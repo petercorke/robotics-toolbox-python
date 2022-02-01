@@ -47,7 +47,8 @@ class GenericSeven(ERobot):
             elinks, name="Generic Seven", manufacturer="Jesse's Imagination"
         )
 
-        # self.addconfiguration(
-        #     "qz", np.array([0, 0, 0, 0, 0, 0, 0]))
-        # self.addconfiguration(
-        #     "qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi/4]))
+        self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        self.qz = np.zeros(7)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)

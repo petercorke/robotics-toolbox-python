@@ -2,6 +2,7 @@
 
 import numpy as np
 from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ERobot import ERobot
 from roboticstoolbox.robot.ELink import ELink
 
@@ -37,9 +38,11 @@ class XYPanda(ERobot):
         mm = 1e-3
         tool_offset = (103) * mm
 
-        lx = ELink(ET.tx(), name="link-x", parent=None, qlim=[-workspace, workspace])
+        lx = ELink(
+            ETS(ET.tx()), name="link-x", parent=None, qlim=[-workspace, workspace]
+        )
 
-        ly = ELink(ET.ty(), name="link-y", parent=lx, qlim=[-workspace, workspace])
+        ly = ELink(ETS(ET.ty()), name="link-y", parent=lx, qlim=[-workspace, workspace])
 
         l0 = ELink(ET.tz(0.333) * ET.Rz(), name="link0", parent=ly)
 
@@ -69,10 +72,11 @@ class XYPanda(ERobot):
 
         super().__init__(elinks, name="XYPanda", manufacturer="Franka Emika")
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0]))
-        self.addconfiguration(
-            "qr", np.array([0, 0, 0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
-        )
+        self.qr = np.array([0, 0, 0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        self.qz = np.zeros(9)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

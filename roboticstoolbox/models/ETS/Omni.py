@@ -62,7 +62,11 @@ class Omni(ERobot):
             gripper_links=g0,
         )
 
-        self.addconfiguration("qz", np.array([0, 0, 0]))
+        self.qr = np.array([0, 0, 0])
+        self.qz = np.zeros(3)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

@@ -35,7 +35,11 @@ class Planar2(ERobot2):
 
         super().__init__([l0, l1, l2], name="Planar2", comment="Planar 2D manipulator")
 
-        self.addconfiguration("qz", [0, 0])
+        self.qr = np.array([0, 0])
+        self.qz = np.zeros(2)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover
