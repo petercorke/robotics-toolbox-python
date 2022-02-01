@@ -1025,7 +1025,7 @@ class DynamicsMixin:
             if C is None:
                 C = self.coriolis(q[0, :], qd[0, :])
             if Mx is None:
-                Mx = self.inertia_x(q[0, :])
+                Mx = self.inertia_x(q[0, :], Ji=Ji)
             if Jd is None:
                 Jd = self.jacob_dot(q[0, :], qd[0, :], J0=Ja)
             return Ji.T @ (C - Mx @ Jd) @ Ji
@@ -1034,19 +1034,18 @@ class DynamicsMixin:
             Ct = np.zeros((q.shape[0], 6, 6))
 
             for k, (qk, qdk) in enumerate(zip(q, qd)):
-                J = self.jacob0(qk)
-                T = rot2jac(self.fkine(qk).A, representation=analytical)
-                Ja = T @ J
+
+                if Ji is None:
+                    Ja = self.jacob0(q[0, :], analytical=representation)
+                    if pinv:
+                        Ji = np.linalg.pinv(Ja)
+                    else:
+                        Ji = np.linalg.inv(Ja)
 
                 C = self.coriolis(qk, qdk)
-                Mx = self.inertia_x(qk)
+                Mx = self.inertia_x(qk, Ji=Ji)
                 Jd = self.jacob_dot(qk, qdk, J0=J)
-                # A = 1
 
-                if pinv:
-                    Ji = np.linalg.pinv(Ja)
-                else:
-                    Ji = np.linalg.inv(Ja)
                 Ct[k, :, :] = Ji.T @ (C - Mx @ Jd) @ Ji
 
             return Ct
