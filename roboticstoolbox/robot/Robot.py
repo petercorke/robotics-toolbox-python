@@ -109,6 +109,10 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         self._dynchanged = False
 
+        # Set up named configuration property
+        # Add qz config
+        self._configs = {}
+
         # URDF Parser Attempt
         # # Search mesh dir for meshes
         # if urdfdir is not None:
@@ -248,6 +252,10 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         """
         return self._nlinks
 
+    @property
+    def configs(self) -> dict[str, NDArray[np.float64]]:
+        return self._configs
+
     @abstractproperty
     def nbranches(self):
         """
@@ -378,7 +386,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         """
         _default_backend = be
 
-    def addconfiguration(self, name, q, unit="rad"):
+    def addconfiguration(self, name: str, q: NDArray[np.float64], unit: str = "rad"):
         """
         Add a named joint configuration (Robot superclass)
 
@@ -399,8 +407,21 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         """
         v = getvector(q, self.n)
         v = getunit(v, unit)
-        self._configdict[name] = v
-        setattr(self, name, v)
+        v = np.array(v)
+        self._configs[name] = v
+
+    def logconfiguration(self, name: str, q: NDArray[np.float64]):
+        """
+        Log a named joint configuration (Robot superclass)
+
+        Used in robot model init method to store the qr configuration
+
+        :param name: Name of the joint configuration
+        :type name: str
+        :param q: Joint configuration
+        :type q: ndarray(n) or list
+        """
+        self._configs[name] = q
 
     def configurations_str(self, border="thin"):
         deg = 180 / np.pi
@@ -418,7 +439,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             return str(theta * deg) + "\u00b0"
 
         # show named configurations
-        if len(self._configdict) > 0:
+        if len(self._configs) > 0:
             table = ANSITable(
                 Column("name", colalign=">"),
                 *[
@@ -428,7 +449,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                 border=border,
             )
 
-            for name, q in self._configdict.items():
+            for name, q in self._configs.items():
                 qlist = []
                 for j, c in enumerate(self.structure):
                     if c == "P":
