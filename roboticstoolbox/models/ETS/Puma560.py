@@ -1,4 +1,4 @@
-from roboticstoolbox import ETS as ET
+from roboticstoolbox import ET as ET
 from roboticstoolbox import ERobot
 
 
@@ -36,24 +36,31 @@ class Puma560(ERobot):
         l5 = 0.0837
         l6 = 0.4318
 
-        e = ET.tz(l1) * ET.rz() * ET.ty(l2) * ET.ry() * ET.tz(l3) * \
-            ET.tx(l4) * ET.ty(l5) * ET.ry() * ET.tz(l6) * ET.rz() * \
-            ET.ry() * ET.rz() * ET.tx(0.2)
-
-        super().__init__(
-            e,
-            name='Puma560',
-            manufacturer='Unimation',
-            comment='ETS-based model'
+        e = (
+            ET.tz(l1)
+            * ET.Rz()
+            * ET.ty(l2)
+            * ET.Ry()
+            * ET.tz(l3)
+            * ET.tx(l4)
+            * ET.ty(l5)
+            * ET.Ry()
+            * ET.tz(l6)
+            * ET.Rz()
+            * ET.Ry()
+            * ET.Rz()
+            * ET.tx(0.2)
         )
 
-        self.addconfiguration(
-            "qz", [0, 0, 0, 0, 0, 0])
-        self.addconfiguration(
-            "qbent", [0, -90, 90, 0, 0, 0], 'deg')
+        super().__init__(
+            e, name="Puma560", manufacturer="Unimation", comment="ETS-based model"
+        )
+
+        self.addconfiguration("qz", [0, 0, 0, 0, 0, 0])
+        self.addconfiguration("qbent", [0, -90, 90, 0, 0, 0], "deg")
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     robot = Puma560()
     print(robot)

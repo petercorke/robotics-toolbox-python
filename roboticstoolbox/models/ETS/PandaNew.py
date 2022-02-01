@@ -62,80 +62,94 @@ class Panda(ERobot):
 
         super(Panda, self).__init__(elinks, name="Panda", manufacturer="Franka Emika")
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0]))
-        self.addconfiguration("qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]))
+        self.qz = np.array([0, 0, 0, 0, 0, 0, 0])
+        self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
 
 if __name__ == "__main__":  # pragma nocover
 
     r = rtb.models.Panda()
 
-    deg = np.pi / 180
-    mm = 1e-3
-    tool_offset = (103) * mm
+    # r.ets()
 
-    q1 = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
-    q2 = np.array([[0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]])
-    q3 = np.array([[0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]]).T
-    q4 = [0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]
-    q5 = np.r_[q2, q2, q2, q2]
+    for link in r:
+        print(link.name)
 
-    man = (
-        SE3.Tz(0.333)
-        * SE3.Rz(q1[0])
-        * SE3.Rx(-90 * deg)
-        * SE3.Rz(q1[1])
-        * SE3.Rx(90 * deg)
-        * SE3.Tz(0.316)
-        * SE3.Rz(q1[2])
-        * SE3.Tx(0.0825)
-        * SE3.Rx(90 * deg)
-        * SE3.Rz(q1[3])
-        * SE3.Tx(-0.0825)
-        * SE3.Rx(-90 * deg)
-        * SE3.Tz(0.384)
-        * SE3.Rz(q1[4])
-        * SE3.Rx(90 * deg)
-        * SE3.Rz(q1[5])
-        * SE3.Tx(0.088)
-        * SE3.Rx(90 * deg)
-        * SE3.Tz(0.107)
-        * SE3.Rz(q1[6])
-        * SE3.Tz(tool_offset)
-        * SE3.Rz(-np.pi / 4)
-    )
+    for link in r.grippers[0].links:
+        print(link.name)
 
-    print(man)
+    print()
 
-    # Normal q
-    nt.assert_almost_equal(man.A, r.fkine(q1))
-    nt.assert_almost_equal(man.A, r.fkine(q2))
-    nt.assert_almost_equal(man.A, r.fkine(q3))
-    nt.assert_almost_equal(man.A, r.fkine(q4))
+    print(r.ets())
 
-    # Traj q
-    fk_traj = r.fkine(q5)
-    for fk in fk_traj:
-        nt.assert_almost_equal(man.A, fk)
+    # a = r.qz
 
-    # Tool
-    t1 = np.eye(4) * SE3.Ty(0.3).A
-    t2 = SE3(t1, check=False)
-    nt.assert_almost_equal(man.A @ t1, r.fkine(q1, tool=t1))
-    nt.assert_almost_equal((man * t2).A, r.fkine(q1, tool=t2))
+    # deg = np.pi / 180
+    # mm = 1e-3
+    # tool_offset = (103) * mm
 
-    # Base
-    b1 = np.eye(4) * SE3.Tx(0.3).A
-    b2 = SE3(b1, check=False)
-    r.base = b1
-    nt.assert_almost_equal(b1 @ man.A, r.fkine(q1))
-    r.base = b2
-    nt.assert_almost_equal((b2 * man).A, r.fkine(q1))
+    # q1 = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+    # q2 = np.array([[0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]])
+    # q3 = np.array([[0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]]).T
+    # q4 = [0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]
+    # q5 = np.r_[q2, q2, q2, q2]
 
-    # Base and tool
-    r.base = b2
-    nt.assert_almost_equal((b2 * man * t2).A, r.fkine(q1, tool=t2))
+    # man = (
+    #     SE3.Tz(0.333)
+    #     * SE3.Rz(q1[0])
+    #     * SE3.Rx(-90 * deg)
+    #     * SE3.Rz(q1[1])
+    #     * SE3.Rx(90 * deg)
+    #     * SE3.Tz(0.316)
+    #     * SE3.Rz(q1[2])
+    #     * SE3.Tx(0.0825)
+    #     * SE3.Rx(90 * deg)
+    #     * SE3.Rz(q1[3])
+    #     * SE3.Tx(-0.0825)
+    #     * SE3.Rx(-90 * deg)
+    #     * SE3.Tz(0.384)
+    #     * SE3.Rz(q1[4])
+    #     * SE3.Rx(90 * deg)
+    #     * SE3.Rz(q1[5])
+    #     * SE3.Tx(0.088)
+    #     * SE3.Rx(90 * deg)
+    #     * SE3.Tz(0.107)
+    #     * SE3.Rz(q1[6])
+    #     * SE3.Tz(tool_offset)
+    #     * SE3.Rz(-np.pi / 4)
+    # )
 
-    # Don't include the base
-    r.base = b2
-    nt.assert_almost_equal((man * t2).A, r.fkine(q1, tool=t2, include_base=False))
+    # print(man)
+
+    # # Normal q
+    # nt.assert_almost_equal(man.A, r.fkine(q1))
+    # nt.assert_almost_equal(man.A, r.fkine(q2))
+    # nt.assert_almost_equal(man.A, r.fkine(q3))
+    # nt.assert_almost_equal(man.A, r.fkine(q4))
+
+    # # Traj q
+    # fk_traj = r.fkine(q5)
+    # for fk in fk_traj:
+    #     nt.assert_almost_equal(man.A, fk)
+
+    # # Tool
+    # t1 = np.eye(4) * SE3.Ty(0.3).A
+    # t2 = SE3(t1, check=False)
+    # nt.assert_almost_equal(man.A @ t1, r.fkine(q1, tool=t1))
+    # nt.assert_almost_equal((man * t2).A, r.fkine(q1, tool=t2))
+
+    # # Base
+    # b1 = np.eye(4) * SE3.Tx(0.3).A
+    # b2 = SE3(b1, check=False)
+    # r.base = b1
+    # nt.assert_almost_equal(b1 @ man.A, r.fkine(q1))
+    # r.base = b2
+    # nt.assert_almost_equal((b2 * man).A, r.fkine(q1))
+
+    # # Base and tool
+    # r.base = b2
+    # nt.assert_almost_equal((b2 * man * t2).A, r.fkine(q1, tool=t2))
+
+    # # Don't include the base
+    # r.base = b2
+    # nt.assert_almost_equal((man * t2).A, r.fkine(q1, tool=t2, include_base=False))

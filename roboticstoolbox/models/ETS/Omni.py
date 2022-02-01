@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ERobot import ERobot
 from roboticstoolbox.robot.ELink import ELink
@@ -39,11 +40,11 @@ class Omni(ERobot):
 
         l, w, h = 0.55, 0.40, 0.35
 
-        b0 = ELink(v=ETS.rz(), name="base0", parent=None, qlim=[-1000, 1000])
+        b0 = ELink(ETS(ET.Rz()), name="base0", parent=None, qlim=[-1000, 1000])
 
-        b1 = ELink(v=ETS.tx(), name="base1", parent=b0, qlim=[-1000, 1000])
+        b1 = ELink(ETS(ET.tx()), name="base1", parent=b0, qlim=[-1000, 1000])
 
-        b2 = ELink(v=ETS.ty(), name="base2", parent=b1, qlim=[-1000, 1000])
+        b2 = ELink(ETS(ET.ty()), name="base2", parent=b1, qlim=[-1000, 1000])
 
         g0 = ELink(name="gripper", parent=b2)
 
