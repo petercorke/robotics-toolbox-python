@@ -11,7 +11,9 @@ import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base import getvector, getunit, trotx, troty, trotz, \
     issymbol, tr2jac, transl2, trot2, removesmall, trinv, trinv2, \
-    verifymatrix, iseye, tr2jac2
+    verifymatrix, iseye, tr2jac2, \
+    tr2rpy, tr2eul, trlog, angvelxform
+
 from roboticstoolbox import rtb_get_param
 
 class BaseETS(UserList, ABC):
@@ -1222,7 +1224,7 @@ class ETS(BaseETS):
 
         return cls(axis='tz', axis_func=axis_func, eta=eta, **kwargs)
 
-    def jacob0(self, q=None, T=None):
+    def jacob0(self, q=None, T=None, analytical=None):
         r"""
         Jacobian in base frame
 
@@ -1334,6 +1336,24 @@ class ETS(BaseETS):
                 # constant transform
                 U = U @ et.T()
 
+        # compute rotational transform if analytical Jacobian required
+        if analytical is not None:
+
+            if analytical == "rpy/xyz":
+                gamma = tr2rpy(T, order="xyz")
+            elif analytical == "rpy/zyx":
+                gamma = tr2rpy(T, order="zyx")
+            elif analytical == "eul":
+                gamma = tr2eul(T)
+            elif analytical == "exp":
+                # TODO: move to SMTB.base, Horner form with skew(v)
+                gamma = trlog(t2r(T), twist=True)
+            else:
+                raise ValueError("bad analyical value specified")
+
+            A = angvelxform(gamma, representation=analytical)
+            J = A @ J
+
         return J
 
     def jacobe(self, q=None, T=None):
@@ -1364,7 +1384,7 @@ class ETS(BaseETS):
 
         return tr2jac(T.A.T) @ self.jacob0(q, T)
 
-    def hessian0(self, q=None, J0=None):
+    def hessian0(self, q=None, J0=None, analytical=None):
         r"""
         Hessian in base frame
 
@@ -1425,7 +1445,7 @@ class ETS(BaseETS):
             else:
                 q = getvector(q, n)
 
-            J0 = self.jacob0(q)
+            J0 = self.jacob0(q, analytical=None)
         else:
             verifymatrix(J0, (6, n))
 
@@ -1667,6 +1687,13 @@ class ETS2(BaseETS):
 
 if __name__ == "__main__":
 
+
+    import sympy
+
+    theta = sympy.symbols('theta')
+
+    e = ETS.rx(theta)
+    print(e)
     # print(ETS.rx(0.2))
     # print(ETS.rx(45, 'deg'))
     # print(ETS.tz(0.75))
