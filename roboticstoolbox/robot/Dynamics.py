@@ -854,7 +854,7 @@ class DynamicsMixin:
         else:
             return taug
 
-    def inertia_x(self, q=None, pinv=False, analytical="rpy-xyz", 
+    def inertia_x(self, q=None, pinv=False, representation="rpy/xyz", 
             Ji=None):
         r"""
         Operational space inertia matrix
@@ -919,7 +919,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0(q[0, :], analytical=analytical)
+                Ja = self.jacob0(q[0, :], analytical=representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -932,7 +932,7 @@ class DynamicsMixin:
             Mt = np.zeros((q.shape[0], 6, 6))
 
             for k, qk in enumerate(q):
-                Ja = self.jacob0(qk, analytical=analytical)
+                Ja = self.jacob0(qk, analytical=representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -942,7 +942,7 @@ class DynamicsMixin:
 
             return Mt
 
-    def coriolis_x(self, q, qd, pinv=False, analytical="rpy-xyz",
+    def coriolis_x(self, q, qd, pinv=False, representation="rpy/xyz",
         J=None, Ji=None, Jd=None, C=None, Mx=None):
         r"""
         Operational space Coriolis and centripetal term
@@ -1020,7 +1020,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0(q[0, :], analytical=analytical)
+                Ja = self.jacob0(q[0, :], analytical=representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -1054,8 +1054,8 @@ class DynamicsMixin:
 
             return Ct
 
-    def gravload_x(self, q=None, gravity=None, pinv=False, analytical="rpy-xyz",
-    Ji=None):
+    def gravload_x(self, q=None, gravity=None, pinv=False, representation="rpy/xyz",
+                    Ji=None):
         """
         Operational space gravity load
 
@@ -1130,7 +1130,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0(q[0, :], analytical=analytical)
+                Ja = self.jacob0(q[0, :], analytical=representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -1144,7 +1144,7 @@ class DynamicsMixin:
             # z = np.zeros(self.n)
 
             for k, qk in enumerate(q):
-                Ja = self.jacob0(qk, analytical=analytical)
+                Ja = self.jacob0(qk, analytical=representation)
                 G = self.gravload(qk)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
@@ -1155,7 +1155,7 @@ class DynamicsMixin:
 
             return taug
 
-    def accel_x(self, q, xd, wrench, gravity=None, pinv=False, analytical="rpy-xyz"):
+    def accel_x(self, q, xd, wrench, gravity=None, pinv=False, representation="rpy/xyz"):
         r"""
         Operational space acceleration due to applied wrench
 
@@ -1222,9 +1222,7 @@ class DynamicsMixin:
 
         for k, (qk, xdk, wk) in enumerate(zip(q, xd, w)):
 
-            J = self.jacob0(qk)
-            T = rot2jac(self.fkine(qk).A, representation=analytical)
-            Ja = T @ J
+            Ja = self.jacob0(qk, analytical=representation)
             if pinv:
                 Ji = np.linalg.pinv(Ja)
             else:
