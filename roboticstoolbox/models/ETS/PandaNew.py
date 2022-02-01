@@ -80,7 +80,7 @@ if __name__ == "__main__":  # pragma nocover
 
     print()
 
-    print(r.ets())
+    print(r.ets(start="panda_hand", end=r.links[0]))
 
     # a = r.qz
 

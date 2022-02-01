@@ -650,9 +650,6 @@ class BaseERobot(Robot):
             else:
                 end_link = self._getlink(end, self.ee_links[0])
 
-        print(link.name)
-        print(end_link.name)
-
         explored = set()
 
         ets = self._find_ets(link, end, explored, path=None)
