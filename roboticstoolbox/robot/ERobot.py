@@ -2174,7 +2174,7 @@ class ERobot(BaseERobot):
         for j, link in enumerate(robot):
             I[j] = SpatialInertia(m=link.m, r=link.r)
             if symbolic and link.Ts is None:
-                Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
+                Xtree[j] = SE3(np.eye(4, dtype="int"), check=False)
             else:
                 Xtree[j] = SE3(link.Ts, check=False)
             s[j] = link.v.s
