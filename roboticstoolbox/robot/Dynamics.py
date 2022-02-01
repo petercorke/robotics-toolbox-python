@@ -638,7 +638,7 @@ class DynamicsMixin:
                     B += link.Tc[0] / qd[j]
                 elif qd < 0:
                     B += link.Tc[1] / qd[j]
-            tf.append((J, B))
+            tf.append(((1,), (J, B)))
 
         return tf
 
