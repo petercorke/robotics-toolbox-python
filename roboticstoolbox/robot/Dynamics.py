@@ -186,11 +186,11 @@ class DynamicsMixin:
         self,
         T,
         q0,
-        torqfun=None,
-        targs=None,
+        torque=None,
+        torque_args={},
         qd0=None,
         solver="RK45",
-        sargs=None,
+        solver_args={},
         dt=None,
         progress=False,
     ):
@@ -203,15 +203,15 @@ class DynamicsMixin:
         :type q0: array_like
         :param qd0: initial joint velocities, assumed zero if not given
         :type qd0: array_like
-        :param torqfun: a function that computes torque as a function of time
+        :param torque: a function that computes torque as a function of time
         and/or state
-        :type torqfun: callable
-        :param targs: argumments passed to ``torqfun``
-        :type targs: dict
+        :type torque: callable
+        :param torque_args: positional arguments passed to ``torque``
+        :type torque_args: dict
         :type solver: name of scipy solver to use, RK45 is the default
         :param solver: str
-        :type sargs: arguments passed to the solver
-        :param sargs: dict
+        :type solver_args: arguments passed to the solver
+        :param solver_args: dict
         :type dt: time step for results
         :param dt: float
         :param progress: show progress bar, default False
@@ -270,8 +270,7 @@ class DynamicsMixin:
                 def myfunc(robot, t, q, qd, qstar, P, D):
                     return (qstar - q) * P + qd * D  # P, D are (6,)
 
-                targs = {'qstar': VALUE, 'P': VALUE, 'D': VALUE}
-                tg = robot.fdyn(10, q0, myfunc, targs=targs) )
+                tg = robot.fdyn(10, q0, myfunc, torque_args=(qstar, P, D)) )
 
         Many integrators have variable step length which is problematic if we
         want to animate the result.  If ``dt`` is specified then the solver
@@ -303,13 +302,9 @@ class DynamicsMixin:
             qd0 = np.zeros((n,))
         else:
             qd0 = getvector(qd0, n)
-        if torqfun is not None:
-            if not callable(torqfun):
+        if torque is not None:
+            if not callable(torque):
                 raise ValueError("torque function must be callable")
-        if sargs is None:
-            sargs = {}
-        if targs is None:
-            targs = {}
 
         # concatenate q and qd into the initial state vector
         x0 = np.r_[q0, qd0]
@@ -318,11 +313,11 @@ class DynamicsMixin:
         scipy_integrator = integrate.__dict__[solver]
 
         integrator = scipy_integrator(
-            lambda t, y: self._fdyn(t, y, torqfun, targs),
+            lambda t, y: self._fdyn(t, y, torque, torque_args),
             t0=0.0,
             y0=x0,
             t_bound=T,
-            **sargs,
+            **solver_args,
         )
 
         # initialize list of time and states
