@@ -11,6 +11,7 @@ from spatialmath.base.argcheck import (
     getunit,
     verifymatrix,
 )
+import spatialmath.base as smb
 from ansitable import ANSITable, Column
 from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
@@ -840,7 +841,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         else:
             return w
 
-    def jacob_dot(self, q=None, qd=None, J0=None):
+    def jacob_dot(self, q=None, qd=None, J0=None, analytical=None):
         r"""
         Derivative of Jacobian
 
@@ -875,6 +876,25 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         Jd = np.zeros((6, n))
         for i in range(n):
             Jd += H[:, :, i] * qd[i]
+
+        # compute rotational transform if analytical Jacobian required
+        if analytical is not None:
+            T = self.fkine(q).A
+            if analytical == "rpy/xyz":
+                gamma = smb.tr2rpy(T, order="xyz")
+            elif analytical == "rpy/zyx":
+                gamma = smb.tr2rpy(T, order="zyx")
+            elif analytical == "eul":
+                gamma = smb.tr2eul(T)
+            elif analytical == "exp":
+                # TODO: move to SMTB.base, Horner form with skew(v)
+                gamma = smb.trlog(smb.t2r(T), twist=True)
+            else:
+                raise ValueError("bad analyical value specified")
+
+            xd = self.jacob0(qd, analytical=analytical) @ qd
+            A = smb.angvelxform_dot(gamma, xd[3:],  full=True, representation=analytical)
+            Jd = A @ Jd
 
         return Jd
 
