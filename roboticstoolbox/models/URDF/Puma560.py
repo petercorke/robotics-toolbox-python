@@ -53,23 +53,35 @@ class Puma560(ERobot):
         self.manufacturer = "Unimation"
         # self.ee_link = self.ets[9]
 
+        # ready pose, arm up
+        self.qr = np.array([0, pi / 2, -pi / 2, 0, 0, 0])
+        self.qz = np.zeros(6)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
+
         # zero angles, upper arm horizontal, lower up straight up
         self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
 
         # reference pose, arm to the right, elbow up
-        self.addconfiguration("ru", np.array([-0.0000, 0.7854, 3.1416, -0.0000, 0.7854, 0.0000]))
+        self.addconfiguration(
+            "ru", np.array([-0.0000, 0.7854, 3.1416, -0.0000, 0.7854, 0.0000])
+        )
 
         # reference pose, arm to the right, elbow up
-        self.addconfiguration("rd", np.array([-0.0000, -0.8335, 0.0940, -3.1416, 0.8312, 3.1416]))
+        self.addconfiguration(
+            "rd", np.array([-0.0000, -0.8335, 0.0940, -3.1416, 0.8312, 3.1416])
+        )
 
         # reference pose, arm to the left, elbow up
-        self.addconfiguration("lu", np.array([2.6486, -3.9270, 0.0940, 2.5326, 0.9743, 0.3734]))
+        self.addconfiguration(
+            "lu", np.array([2.6486, -3.9270, 0.0940, 2.5326, 0.9743, 0.3734])
+        )
 
         # reference pose, arm to the left, elbow down
-        self.addconfiguration("ld", np.array([2.6486, -2.3081, 3.1416, 0.6743, 0.8604, 2.6611]))
-
-        # ready pose, arm up
-        self.addconfiguration("qr", np.array([0, pi / 2, -pi / 2, 0, 0, 0]))
+        self.addconfiguration(
+            "ld", np.array([2.6486, -2.3081, 3.1416, 0.6743, 0.8604, 2.6611])
+        )
 
         # straight and horizontal
         self.addconfiguration("qs", np.array([0, 0, -pi / 2, 0, 0, 0]))

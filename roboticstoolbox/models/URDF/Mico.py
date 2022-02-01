@@ -56,8 +56,11 @@ class Mico(ERobot):
             urdf_filepath=urdf_filepath,
         )
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0]))
-        self.addconfiguration("qr", np.array([0, 45, 60, 0]) * np.pi / 180)
+        self.qr = np.array([0, 45, 60, 0]) * np.pi / 180
+        self.qz = np.zeros(4)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

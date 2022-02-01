@@ -4,6 +4,7 @@ import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
 from roboticstoolbox.robot.ELink import ELink
 from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ET import ET
 from spatialmath import SE3
 
 
@@ -43,7 +44,7 @@ class FrankieOmni(ERobot):
         )
 
         base_link = links_base[9]
-        base_arm = ELink(ETS.tz(0.28), name="base_arm", parent=base_link)
+        base_arm = ELink(ETS(ET.tz(0.28)), name="base_arm", parent=base_link)
 
         links_panda[0]._parent = base_arm
         links_panda[0]._update_fknm()
@@ -78,11 +79,11 @@ class FrankieOmni(ERobot):
             ]
         )
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+        self.qr = np.array([0, 0, 0, 0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        self.qz = np.zeros(10)
 
-        self.addconfiguration(
-            "qr", np.array([0, 0, 0, 0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
-        )
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

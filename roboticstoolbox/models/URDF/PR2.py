@@ -24,7 +24,11 @@ class PR2(ERobot):
 
         self.manufacturer = "Willow Garage"
 
+        self.qr = np.zeros(31)
         self.qz = np.zeros(31)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover
