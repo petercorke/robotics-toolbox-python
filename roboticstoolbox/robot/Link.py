@@ -2,7 +2,7 @@ import copy
 from abc import ABC
 import numpy as np
 from functools import wraps
-from spatialmath.base import getvector, isscalar, isvector, ismatrix
+from spatialmath.base import getvector, isscalar, isvector, ismatrix, issymbol
 from ansitable import ANSITable, Column
 
 
@@ -213,11 +213,10 @@ class Link(ABC):
             "        | {:8.2g} {:8.2g} {:8.2g} | \n"
             "I     = | {:8.2g} {:8.2g} {:8.2g} | \n"
             "        | {:8.2g} {:8.2g} {:8.2g} | \n"
+            "G     =  {:8.2g} \n"
             "Jm    =  {:8.2g} \n"
             "B     =  {:8.2g} \n"
-            "Tc    =  {:8.2g}(+) {:8.2g}(-) \n"
-            "G     =  {:8.2g} \n"
-            "qlim  =  {:8.2g} to {:8.2g}".format(
+            "Tc    =  {:8.2g}(+) {:8.2g}(-) \n".format(
                 self.m,
                 self.r[0],
                 self.r[1],
@@ -231,13 +230,12 @@ class Link(ABC):
                 self.I[2, 0],
                 self.I[2, 1],
                 self.I[2, 2],
+                self.G,
                 self.Jm,
                 self.B,
                 self.Tc[0],
                 self.Tc[1],
-                self.G,
-                self.qlim[0],
-                self.qlim[1],
+
             )
         )
 
@@ -272,10 +270,20 @@ class Link(ABC):
         )
 
         def format(l, fmt, val):  # noqa
+
             if isinstance(val, np.ndarray):
-                s = ", ".join([fmt.format(v) for v in val])
+                out = []
+                for v in val:
+                    if issymbol(v):
+                        out.append(str(v))
+                    else:
+                        out.append(fmt.format(v))
+                s = ", ".join(out)
             else:
-                s = fmt.format(val)
+                if issymbol(val):
+                    s = str(val)
+                else:
+                    s = fmt.format(val)
             l.append(s)
 
         dyn = []
