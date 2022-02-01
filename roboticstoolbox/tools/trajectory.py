@@ -201,7 +201,7 @@ class Trajectory:
         ax.set_xlim(0, max(self.t))
 
         if self.istime:
-            if self.name in ("traj", "mtraj", "mstraj"):
+            if self.name in ("traj", "mtraj", "mstraj", "jtraj"):
                 symbol = "q"
             else:
                 symbol = "s"
@@ -211,7 +211,7 @@ class Trajectory:
 
         # plot velocity
         ax = plt.subplot(3, 1, 2)
-        ax.plot(self.t, self.sd, "-o", **plotopts)
+        ax.plot(self.t, self.sd, **plotopts)
         ax.grid(True)
         ax.set_xlim(0, max(self.t))
 
@@ -222,7 +222,7 @@ class Trajectory:
 
         # plot acceleration
         ax = plt.subplot(3, 1, 3)
-        ax.plot(self.t, self.sdd, "-o", **plotopts)
+        ax.plot(self.t, self.sdd, **plotopts)
         ax.grid(True)
         ax.set_xlim(0, max(self.t))
 
@@ -533,7 +533,9 @@ def jtraj(q0, qf, t, qd0=None, qd1=None):
     if isinstance(t, int):
         tscal = 1.0
         ts = np.linspace(0, 1, t)  # normalized time from 0 -> 1
+        tv = ts * t
     else:
+        tv = t.flatten()
         tscal = max(t)
         ts = t.flatten() / tscal
 
@@ -580,7 +582,7 @@ def jtraj(q0, qf, t, qd0=None, qd1=None):
     )
     qddt = tt @ coeffs / tscal ** 2
 
-    return Trajectory("jtraj", t, qt, qdt, qddt, istime=True)
+    return Trajectory("jtraj", tv, qt, qdt, qddt, istime=True)
 
 
 def mtraj(tfunc, q0, qf, t):
@@ -998,13 +1000,19 @@ def mstraj(
 
 if __name__ == "__main__":
 
-    t = tpoly(0, 1, 50)
-    t.plot()
+    # t = tpoly(0, 1, 50)
+    # t.plot()
 
-    t = tpoly(0, 1, np.linspace(0, 1, 50))
-    t.plot()
+    # t = tpoly(0, 1, np.linspace(0, 1, 50))
+    # t.plot()
 
-    t = lspb(0, 1, 50)
-    t.plot()
-    t = lspb(0, 1, np.linspace(0, 1, 50))
-    t.plot(block=True)
+    # t = lspb(0, 1, 50)
+    # t.plot()
+    # t = lspb(0, 1, np.linspace(0, 1, 50))
+    # t.plot(block=True)
+
+    from roboticstoolbox import *
+    puma = models.DH.Puma560()
+
+    traj = jtraj(puma.qz, puma.qr, 100)
+    traj.plot(block=True)
