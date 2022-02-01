@@ -15,6 +15,11 @@ from spatialmath.base import (
     tr2jac,
     verifymatrix,
     tr2jac2,
+    tr2rpy,
+    tr2eul,
+    trlog,
+    t2r,
+    angvelxform,
 )
 from roboticstoolbox import rtb_get_param
 
@@ -985,6 +990,65 @@ class ETS(BaseETS):
                     H[i, :3, j] = H[j, :3, i]
 
         return H
+
+    def jacob0_analytic(
+        self,
+        q: ArrayLike,
+        tool: Union[NDArray[np.float64], SE3, None] = None,
+        analytic: str = "rpy-xyz",
+    ):
+        r"""
+        Manipulator analytical Jacobian in the base frame
+
+        :param q: Joint coordinate vector
+        :type q: ArrayLike
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :param analytic: describes the rotational representation
+
+        :return J: Manipulator Jacobian in the base frame
+
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+
+        ``analytic`` can be one of:
+            =============  ==================================
+            Value          Rotational representation
+            =============  ==================================
+            ``'rpy-xyz'``  RPY angular rates in XYZ order
+            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'eul'``      Euler angular rates in ZYZ order
+            ``'exp'``      exponential coordinate rates
+            =============  ==================================
+
+        Example:
+        .. runblock:: pycon
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.ETS.Puma560()
+            >>> puma.jacob0_analytic([0, 0, 0, 0, 0, 0])
+
+        """  # noqa
+
+        T = self.fkine(q, tool=tool)
+        J = self.jacob0(q, tool=tool)
+
+        # compute rotational transform if analytical Jacobian required
+        if analytic == "rpy/xyz":
+            gamma = tr2rpy(T, order="xyz")
+        elif analytic == "rpy/zyx":
+            gamma = tr2rpy(T, order="zyx")
+        elif analytic == "eul":
+            gamma = tr2eul(T)
+        elif analytic == "exp":
+            # TODO: move to SMTB.base, Horner form with skew(v)
+            gamma = trlog(t2r(T), twist=True)
+        else:
+            raise ValueError("bad analyical value specified")
+
+        A = angvelxform(gamma, representation=analytic)
+        J = A @ J
+
+        return J
 
 
 class ETS2(BaseETS):
