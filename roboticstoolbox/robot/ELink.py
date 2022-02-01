@@ -532,8 +532,8 @@ class ELink(BaseELink):
         # TODO probably should use ETS.compile()
 
         if isinstance(self._ets, ETS):
-            # first = True
-            # T = None
+            first = True
+            T = None
 
             # Ts can not be equal to None otherwise things seem
             # to break everywhere, so initialise Ts np be identity
@@ -544,13 +544,12 @@ class ELink(BaseELink):
                 if et.isjoint:
                     raise ValueError("The transforms in ets must be constant")
 
-                # if first:
-                #     T = et.T()
-                #     first = False
-                # else:
-                #     T = T @ et.T()
-
-                T = T @ et.T()
+                # this logic works for numeric and symbolic matrices
+                if first:
+                    T = et.T()
+                    first = False
+                else:
+                    T = T @ et.T()
 
             self._Ts = T
 
