@@ -9,8 +9,7 @@ from spatialmath import base
 import matplotlib.pyplot as plt
 
 
-class ShapePlot():
-
+class ShapePlot:
     def __init__(self, shape, wireframe=True, **kwargs):
 
         self.shape = shape  # reference to the spatialgeom shape
@@ -34,21 +33,23 @@ class ShapePlot():
         if self.mpl is not None:
             self.mpl.remove()
 
-        if self.shape.stype == 'cuboid':
+        if self.shape.stype == "cuboid":
             # scale
-            self.mpl = base.plot_cuboid(sides=self.shape.scale, 
-                pose=self.shape.base, ax=ax)
+            self.mpl = base.plot_cuboid(
+                sides=self.shape.scale, pose=self.shape.base, ax=ax
+            )
 
-        elif self.shape.stype == 'sphere':
+        elif self.shape.stype == "sphere":
             print(self.shape.base.t)
             self.mpl = base.plot_sphere(self.shape.radius, pose=self.shape.base, ax=ax)
 
-        elif self.shape.stype == 'cylinder':
+        elif self.shape.stype == "cylinder":
             # radius, length
             pass
 
     def make(self):
         pass
+
 
 class EllipsePlot:
     def __init__(self, robot, q, etype, opt="trans", centre=[0, 0, 0], scale=1):
@@ -190,7 +191,7 @@ class EllipsePlot:
         #         A = np.zeros((2,2))
 
         if isinstance(self.centre, str) and self.centre == "ee":
-            centre = self.robot.fkine(self.q).t
+            centre = self.robot.fkine(self.q)[:3, -1]
         else:
             centre = self.centre
 
