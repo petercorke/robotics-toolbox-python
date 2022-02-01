@@ -124,7 +124,7 @@ class BaseERobot(Robot):
         self._linkdict = {}
         self._n = 0
         self._ee_links = []
-        self._base_link = None
+        # self._base_link = None
 
         # Ordered links, we reorder the input elinks to be in depth first
         # search order
@@ -149,8 +149,8 @@ class BaseERobot(Robot):
         # resolve parents given by name, within the context of
         # this set of links
         for link in links:
-            if isinstance(link.parent, str):
-                link._parent = self._linkdict[link.parent]
+            if link.parent is None and link.parent_name is not None:
+                link._parent = self._linkdict[link.parent_name]
                 # Update the fast kinematics object
                 if isinstance(self, ERobot):
                     link._init_fknm()
@@ -166,12 +166,21 @@ class BaseERobot(Robot):
         for link in links:
             # is this a base link?
             if link._parent is None:
-                if self._base_link is not None:
-                    raise ValueError("Multiple base links")
+                try:
+                    if self._base_link is not None:
+                        raise ValueError("Multiple base links")
+                except AttributeError:
+                    pass
+
                 self._base_link = link
             else:
                 # no, update children of this link's parent
                 link._parent._children.append(link)
+
+        if self.base_link is None:  # Pragma: nocover
+            raise ValueError(
+                "Invalid link configuration provided, must have a base link"
+            )
 
         # Set up the gripper, make a list containing the root of all
         # grippers
@@ -182,23 +191,21 @@ class BaseERobot(Robot):
             gripper_links = []
 
         # An empty list to hold all grippers
-        self.grippers = []
+        self._grippers = []
 
         # Make a gripper object for each gripper
         for link in gripper_links:
             g_links = self.dfs_links(link)
-            # for g in g_links:
-            #     print(g)
 
             # Remove gripper links from the robot
             for g_link in g_links:
                 links.remove(g_link)
 
             # Save the gripper object
-            self.grippers.append(Gripper(g_links))
+            self._grippers.append(Gripper(g_links))
 
         # Subtract the n of the grippers from the n of the robot
-        for gripper in self.grippers:
+        for gripper in self._grippers:
             self._n -= gripper.n
 
         # Set the ee links
@@ -390,6 +397,17 @@ class BaseERobot(Robot):
     # --------------------------------------------------------------------- #
 
     @property
+    def grippers(self) -> list[Gripper]:
+        """
+        Grippers attached to the robot
+
+        :return: A list of grippers
+
+        """
+        return self._grippers
+
+    # --------------------------------------------------------------------- #
+    @property
     def nbranches(self):
         """
         Number of branches
@@ -428,15 +446,14 @@ class BaseERobot(Robot):
     # --------------------------------------------------------------------- #
 
     @property
-    def base_link(self):
+    def base_link(self) -> ELink:
         return self._base_link
 
     @base_link.setter
-    def base_link(self, link):
+    def base_link(self, link: ELink):
         if isinstance(link, ELink):
             self._base_link = link
         else:
-            # self._base_link = self.links[link]
             raise TypeError("Must be an ELink")
         # self._reset_fk_path()
 
@@ -516,24 +533,6 @@ class BaseERobot(Robot):
 
     # --------------------------------------------------------------------- #
 
-    # @property
-    # def ets(self):
-    #     return self._ets
-
-    # --------------------------------------------------------------------- #
-
-    # @property
-    # def M(self):
-    #     return self._M
-
-    # --------------------------------------------------------------------- #
-
-    # @property
-    # def q_idx(self):
-    #     return self._q_idx
-
-    # --------------------------------------------------------------------- #
-
     def _find_ets(self, start, end, explored, path) -> Union[ETS, None]:
         """
         Privade method which will recursively find the ETS of a path
@@ -577,9 +576,17 @@ class BaseERobot(Robot):
                 if p is not None:
                     return p
 
+    def _gripper_ets(self, gripper: Gripper) -> ETS:
+        """
+        Privade method which will find the ETS of a gripper
+        """
+        return gripper.links[0].ets * ET.SE3(gripper.tool)
+
     @lru_cache(maxsize=32)
     def ets(
-        self, start: Union[ELink, str, None] = None, end: Union[ELink, str, None] = None
+        self,
+        start: Union[ELink, Gripper, str, None] = None,
+        end: Union[ELink, Gripper, str, None] = None,
     ) -> ETS:
         """
         ERobot to ETS
@@ -607,11 +614,44 @@ class BaseERobot(Robot):
             >>> panda.ets()
         """
 
-        link = self._getlink(start, self.base_link)
+        # ets to stand and end incase of grippers
+        ets_init = None
+        ets_end = None
 
-        if end is None and len(self.ee_links) > 1:
-            raise ValueError("ambiguous, specify which end-effector is required")
-        end = self._getlink(end, self.ee_links[0])
+        if isinstance(start, Gripper):
+            ets_init = self._gripper_ets(start).inv()
+            link = start.links[0].parent
+            if link is None:  # pragma: nocover
+                raise ValueError("Invalid robot link configuration")
+        else:
+            link = self._getlink(start, self.base_link)
+
+        if end is None:
+            if len(self.grippers) > 1:
+                end_link = self.grippers[0].links[0]
+                ets_end = self._gripper_ets(self.grippers[0])
+                print("multiple grippers present, ambiguous, using self.grippers[0]")
+            elif len(self.grippers) == 1:
+                end_link = self.grippers[0].links[0]
+                ets_end = self._gripper_ets(self.grippers[0])
+            elif len(self.grippers) > 1:
+                end_link = self._getlink(end, self.ee_links[0])
+                print(
+                    "multiple end-effectors present, ambiguous, using self.ee_links[0]"
+                )
+            else:
+                end_link = self._getlink(end, self.ee_links[0])
+        else:
+            if isinstance(end, Gripper):
+                ets_end = self._gripper_ets(end)
+                end_link = end.links[0].parent  # type: ignore
+                if end_link is None:  # pragma: nocover
+                    raise ValueError("Invalid robot link configuration")
+            else:
+                end_link = self._getlink(end, self.ee_links[0])
+
+        print(link.name)
+        print(end_link.name)
 
         explored = set()
 
@@ -619,12 +659,18 @@ class BaseERobot(Robot):
 
         if ets is None:
             raise ValueError("Could not find the requested ETS in this robot")
-        else:
-            return ets
+
+        if ets_init is not None:
+            ets = ets_init * ets
+
+        if ets_end is not None:
+            ets = ets * ets_end
+
+        return ets
 
     # --------------------------------------------------------------------- #
 
-    def segments(self):
+    def segments(self) -> list[list[Union[ELink, None]]]:
         """
         Segments of branched robot
 
@@ -694,6 +740,7 @@ class BaseERobot(Robot):
               Sequence, J. Haviland and P. Corke
         """
         q = getvector(q)
+
         Tbase = self.base  # add base, also sets the type
         linkframes = Tbase.__class__.Alloc(self.nlinks + 1)
         linkframes[0] = Tbase
@@ -702,7 +749,11 @@ class BaseERobot(Robot):
             # if joint??
             T = Tparent
             while True:
-                T *= link.T(q[link.jindex])
+                if isinstance(self, ERobot):
+                    T *= SE3(link.T(q[link.jindex]))
+                else:
+                    T *= SE2(link.T(q[link.jindex]))
+
                 Tall[link.number] = T
 
                 if link.nchildren == 1:
@@ -910,7 +961,11 @@ graph [rankdir=LR];
 
         return visited
 
-    def _get_limit_links(self, end=None, start=None):
+    def _get_limit_links(
+        self,
+        end: Union[Gripper, ELink, str, None] = None,
+        start: Union[Gripper, ELink, str, None] = None,
+    ) -> tuple[ELink, Union[ELink, Gripper], Union[None, SE3]]:
         """
         Get and validate an end-effector, and a base link
         :param end: end-effector or gripper to compute forward kinematics to
@@ -933,19 +988,24 @@ graph [rankdir=LR];
         tool = None
         if end is None:
 
-            if len(self.grippers) > 0:
-                end = self.grippers[0].links[0]
+            if len(self.grippers) > 1:
+                end_ret = self.grippers[0].links[0]
                 tool = self.grippers[0].tool
                 if len(self.grippers) > 1:
                     # Warn user: more than one gripper
                     print("More than one gripper present, using robot.grippers[0]")
+            elif len(self.grippers) == 1:
+                end_ret = self.grippers[0].links[0]
+                tool = self.grippers[0].tool
 
             # no grippers, use ee link if just one
-            elif len(self.ee_links) > 0:
-                end = self.ee_links[0]
+            elif len(self.ee_links) > 1:
+                end_ret = self.ee_links[0]
                 if len(self.ee_links) > 1:
                     # Warn user: more than one EE
                     print("More than one end-effector present, using robot.ee_links[0]")
+            else:
+                end_ret = self.ee_links[0]
 
             # Cache result
             self._cache_end = end
@@ -956,34 +1016,40 @@ graph [rankdir=LR];
             for gripper in self.grippers:
                 if end == gripper or end == gripper.name:
                     tool = gripper.tool
-                    end = gripper.links[0]
+                    end_ret = gripper.links[0]
 
             # otherwise check for end in the links
-            end = self._getlink(end)
+            end_ret = self._getlink(end)
 
         if start is None:
-            start = self.base_link
+            start_ret = self.base_link
+
             # Cache result
             self._cache_start = start
         else:
             # start effector is specified
-            start = self._getlink(start)
+            start_ret = self._getlink(start)
 
-        return end, start, tool
+        return end_ret, start_ret, tool
 
     def _getlink(
-        self, link: Union[ELink, str, None], default: Union[ELink, str, None] = None
+        self,
+        link: Union[ELink, Gripper, str, None],
+        default: Union[ELink, Gripper, str, None] = None,
     ) -> ELink:
         """
         Validate reference to ELink
+
         :param link: link
-        :type link: ELink or str
+
         :raises ValueError: link does not belong to this ERobot
         :raises TypeError: bad argument
+
         :return: link reference
-        :rtype: ELink
+
         ``robot._getlink(link)`` is a validated reference to an ELink within
         the ERobot ``robot``.  If ``link`` is:
+
         -  an ``ELink`` reference it is validated as belonging to
           ``robot``.
         - a string, then it looked up in the robot's link name dictionary, and
@@ -1007,6 +1073,13 @@ graph [rankdir=LR];
                         return link
 
                 raise ValueError("link not in robot links")
+        elif isinstance(link, Gripper):
+            for gripper in self.grippers:
+                if link is gripper:
+                    return gripper.links[0]
+
+            raise ValueError("Gripper not in robot")
+
         else:
             raise TypeError("unknown argument")
 
@@ -1074,7 +1147,7 @@ class ERobot(BaseERobot):
                 # chop it up into segments, a link frame after every joint
                 parent = None
                 for j, ets_j in enumerate(arg.split()):
-                    elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
+                    elink = ELink(ETS(ets_j), parent=parent, name=f"link{j:d}")
                     if (
                         elink.qlim is None
                         and elink.v is not None
@@ -2041,11 +2114,7 @@ class ERobot(BaseERobot):
         :rtype: ndarray(6), ndarray(6)
         """
 
-        if start is None:
-            start = self.base_link
-
-        if end is None:
-            end = self.ee_link
+        start, end, _ = self._get_limit_links()
 
         links, n, _ = self.get_path(start=start, end=end)
 
@@ -2126,8 +2195,11 @@ class ERobot(BaseERobot):
         else:
             Q = np.empty((n,))  # joint torque/force
 
+        # TODO Should the dynamic parameters of static links preceding joint be
+        # somehow merged with the joint?
+
         # A temp variable to handle static joints
-        Ts = np.eye(4)
+        Ts = SE3()
 
         # A counter through joints
         j = 0
@@ -2148,7 +2220,7 @@ class ERobot(BaseERobot):
                 j += 1
 
                 # Reset the Ts tracker
-                Ts = np.eye(4)
+                Ts = SE3()
             else:
                 Ts *= SE3(link.Ts, check=False)
 
@@ -2162,13 +2234,13 @@ class ERobot(BaseERobot):
             vJ = SpatialVelocity(s[j] * qd[j])
 
             # transform from parent(j) to j
-            Xup[j] = self[j].A(q[j]).inv()
+            Xup[j] = SE3(self.links[j].T(q[j])).inv()
 
-            if self[j].parent is None:
+            if self.links[j].parent is None:
                 v[j] = vJ
                 a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qdd[j])
             else:
-                jp = self[j].parent.jindex
+                jp = self.links[j].parent.jindex  # type: ignore
                 v[j] = Xup[j] * v[jp] + vJ
                 a[j] = Xup[j] * a[jp] + SpatialAcceleration(s[j] * qdd[j]) + v[j] @ vJ
 
@@ -2180,8 +2252,8 @@ class ERobot(BaseERobot):
             # next line could be np.dot(), but fails for symbolic arguments
             Q[j] = np.sum(f[j].A * s[j])
 
-            if self[j].parent is not None:
-                jp = self[j].parent.jindex
+            if self.links[j].parent is not None:
+                jp = self.links[j].parent.jindex  # type: ignore
                 f[jp] = f[jp] + Xup[j] * f[j]
 
         return Q
