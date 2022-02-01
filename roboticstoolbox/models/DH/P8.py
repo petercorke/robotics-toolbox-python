@@ -55,7 +55,7 @@ class P8(DHRobot):
         # create the base
         links = [
             PrismaticDH(alpha=-pi / 2, qlim=[-1, 1]),
-            PrismaticDH(theta=-pi / 2, alpha=pi / 2, qlim=[-1, 1])
+            PrismaticDH(theta=-pi / 2, alpha=pi / 2, qlim=[-1, 1]),
         ]
 
         # stick the Puma on top
@@ -63,20 +63,19 @@ class P8(DHRobot):
         links.extend(puma.links)
 
         super().__init__(
-            links,
-            name="P8",
-            keywords=('mobile', 'redundant'),
-            base=SE3.Ry(pi/2)
+            links, name="P8", keywords=("mobile", "redundant"), base=SE3.Ry(pi / 2)
         )
 
-        self.addconfiguration("qz", np.zeros((8,)))
+        self.qr = np.zeros(8)
+        self.qz = np.zeros(8)
 
-if __name__ == '__main__':    # pragma nocover
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
+
+
+if __name__ == "__main__":  # pragma nocover
 
     robot = P8()
     print(robot)
 
-
     # robot.plot([.5, -0.6, 0, 0, 0, 0, 0, 0], block=True)
-
-

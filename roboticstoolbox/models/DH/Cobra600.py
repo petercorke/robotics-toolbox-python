@@ -35,21 +35,29 @@ class Cobra600(DHRobot):
     """
 
     def __init__(self):
-        deg = pi/180
+        deg = pi / 180
 
-        L = [RevoluteDH(d=0.387, a=0.325, qlim=[-50*deg, 50*deg]),
-             RevoluteDH(a=0.275, alpha=pi, qlim=[-88*deg, 88*deg]),
-             PrismaticDH(qlim=[0, 0.210]),
-             RevoluteDH()]
+        L = [
+            RevoluteDH(d=0.387, a=0.325, qlim=[-50 * deg, 50 * deg]),
+            RevoluteDH(a=0.275, alpha=pi, qlim=[-88 * deg, 88 * deg]),
+            PrismaticDH(qlim=[0, 0.210]),
+            RevoluteDH(),
+        ]
 
-        super().__init__(L, name='Cobra600', manufacturer='Omron')
+        super().__init__(L, name="Cobra600", manufacturer="Omron")
 
         # zero angles, L shaped pose
         self.addconfiguration("qz", np.array([0, 0, 0, 0]))
 
+        self.qr = np.zeros(4)
+        self.qz = np.zeros(4)
 
-if __name__ == '__main__':   # pragma nocover
-    deg = pi/180
-    a = RevoluteDH(d=0.387, a=0.325, qlim=[-50*deg, 50*deg])
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
+
+
+if __name__ == "__main__":  # pragma nocover
+    deg = pi / 180
+    a = RevoluteDH(d=0.387, a=0.325, qlim=[-50 * deg, 50 * deg])
     cobra = Cobra600()
     print(cobra)

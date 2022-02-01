@@ -31,7 +31,7 @@ class UR3(DHRobot):
     :References:
 
         - `Parameters for calculations of kinematics and dynamics <https://www.universal-robots.com/articles/ur/parameters-for-calculations-of-kinematics-and-dynamics>`_
-        
+
     :sealso: :func:`UR5`, :func:`UR10`
 
 
@@ -42,10 +42,12 @@ class UR3(DHRobot):
 
         if symbolic:
             import spatialmath.base.symbolic as sym
+
             zero = sym.zero()
             pi = sym.pi()
         else:
             from math import pi
+
             zero = 0.0
 
         deg = pi / 180
@@ -55,46 +57,43 @@ class UR3(DHRobot):
         a = [0, -0.24365, -0.21325, 0, 0, 0]
         d = [0.1519, 0, 0, 0.11235, 0.08535, 0.0819]
 
-        alpha = [pi/2, zero, zero, pi/2, -pi/2, zero]
+        alpha = [pi / 2, zero, zero, pi / 2, -pi / 2, zero]
 
         # mass data, no inertia available
         mass = [2, 3.42, 1.26, 0.8, 0.8, 0.35]
         center_of_mass = [
-                [0,   -0.02, 0],
-                [0.13, 0,    0.1157],
-                [0.05, 0,    0.0238],
-                [0,    0,    0.01],
-                [0,    0,    0.01],
-                [0,    0,   -0.02]
-            ]
+            [0, -0.02, 0],
+            [0.13, 0, 0.1157],
+            [0.05, 0, 0.0238],
+            [0, 0, 0.01],
+            [0, 0, 0.01],
+            [0, 0, -0.02],
+        ]
         links = []
 
         for j in range(6):
             link = RevoluteDH(
-                d=d[j],
-                a=a[j],
-                alpha=alpha[j],
-                m=mass[j],
-                r=center_of_mass[j],
-                G=1
+                d=d[j], a=a[j], alpha=alpha[j], m=mass[j], r=center_of_mass[j], G=1
             )
             links.append(link)
-    
+
         super().__init__(
             links,
             name="UR3",
             manufacturer="Universal Robotics",
-            keywords=('dynamics', 'symbolic'),
-            symbolic=symbolic
+            keywords=("dynamics", "symbolic"),
+            symbolic=symbolic,
         )
-    
-        # zero angles
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
-        # horizontal along the x-axis
-        self.addconfiguration("qr", np.r_[180, 0, 0, 0, 90, 0]*deg)
 
-if __name__ == '__main__':    # pragma nocover
+        self.qr = np.array([180, 0, 0, 0, 90, 0]) * deg
+        self.qz = np.zeros(6)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
+
+
+if __name__ == "__main__":  # pragma nocover
 
     ur3 = UR3(symbolic=False)
     print(ur3)
-    print(ur3.dyntable())
+    # print(ur3.dyntable())
