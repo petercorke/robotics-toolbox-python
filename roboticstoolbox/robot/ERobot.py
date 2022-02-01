@@ -1832,250 +1832,55 @@ class ERobot(BaseERobot):
 
         return d[-1]
 
-    # def jacob0(
-    #     self,
-    #     q,
-    #     end=None,
-    #     start=None,
-    #     tool=None,
-    #     T=None,
-    #     half=None,
-    #     analytical=None,
-    #     fast=False,
-    # ):
-    #     r"""
-    #     Manipulator geometric Jacobian in the base frame
-    #     :param q: Joint coordinate vector
-    #     :type q: ndarray(n)
-    #     :param end: the particular link or gripper whose velocity the Jacobian
-    #         describes, defaults to the end-effector if only one is present
-    #     :type end: str or ELink or Gripper
-    #     :param start: the link considered as the base frame, defaults to the robots's base frame
-    #     :type start: str or ELink
-    #     :param tool: a static tool transformation matrix to apply to the
-    #         end of end, defaults to None
-    #     :type tool: SE3, optional
-    #     :param T: The transformation matrix of the reference point which the
-    #         Jacobian represents with respect to the base frame. Use this to
-    #         avoid caluclating forward kinematics to save time, defaults
-    #         to None
-    #     :type T: SE3, optional
-    #     :param half: return half Jacobian: 'trans' or 'rot'
-    #     :type half: str
-    #     :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
-    #     :type analytical: str
-    #     :return J: Manipulator Jacobian in the base frame
-    #     :rtype: ndarray(6,n)
-    #     - ``robot.jacobo(q)`` is the manipulator Jacobian matrix which maps
-    #       joint  velocity to end-effector spatial velocity expressed in the
-    #       end-effector frame.
-    #     End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
-    #     is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
-    #     ``analytical`` can be one of:
-    #         =============  ==================================
-    #         Value          Rotational representation
-    #         =============  ==================================
-    #         ``'rpy-xyz'``  RPY angular rates in XYZ order
-    #         ``'rpy-zyx'``  RPY angular rates in XYZ order
-    #         ``'eul'``      Euler angular rates in ZYZ order
-    #         ``'exp'``      exponential coordinate rates
-    #         =============  ==================================
-    #     Example:
-    #     .. runblock:: pycon
-    #         >>> import roboticstoolbox as rtb
-    #         >>> puma = rtb.models.ETS.Puma560()
-    #         >>> puma.jacobe([0, 0, 0, 0, 0, 0])
-    #     .. warning:: This is the geometric Jacobian as described in texts by
-    #         Corke, Spong etal., Siciliano etal.  The end-effector velocity is
-    #         described in terms of translational and angular velocity, not a
-    #         velocity twist as per the text by Lynch & Park.
-    #     .. warning:: ``start`` and ``end`` must be on the same branch,
-    #         with ``start`` closest to the base.
-    #     """  # noqa
+    def jacob0_analytic(
+        self,
+        q: ArrayLike,
+        end: Union[str, ELink, Gripper] = None,
+        start: Union[str, ELink, Gripper] = None,
+        tool: Union[NDArray[np.float64], SE3, None] = None,
+        analytic: str = "rpy-xyz",
+    ):
+        r"""
+        Manipulator analytical Jacobian in the ``start`` frame
 
-    #     # Use c extension
-    #     if fast:
-    #         path, n, etool = self.get_path(end, start, _fknm=True)
-    #         if tool is None:
-    #             tool = self._eye_fknm
-    #         J = np.empty((6, n))
-    #         fknm.jacob0(len(path), n, path, q, etool, tool, J)
-    #         return J
+        :param q: Joint coordinate vector
+        :type q: Arraylike
+        :param end: the particular link or gripper whose velocity the Jacobian
+            describes, defaults to the base link
+        :param start: the link considered as the end-effector, defaults to the robots's end-effector
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
 
-    #     # Otherwise use Python
-    #     if tool is None:
-    #         tool = SE3()
+        :return J: Manipulator Jacobian in the ``start`` frame
 
-    #     path, n, _ = self.get_path(end, start)
+        - ``robot.jacob0_analytic(q)`` is the manipulator Jacobian matrix which maps
+          joint  velocity to end-effector spatial velocity expressed in the
+          ``start`` frame.
 
-    #     q = getvector(q, self.n)
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-    #     if T is None:
-    #         T = self.fkine(q, end=end, start=start, include_base=False) * tool
+        ``analytic`` can be one of:
+            =============  ==================================
+            Value          Rotational representation
+            =============  ==================================
+            ``'rpy-xyz'``  RPY angular rates in XYZ order
+            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'eul'``      Euler angular rates in ZYZ order
+            ``'exp'``      exponential coordinate rates
+            =============  ==================================
 
-    #     T = T.A
-    #     U = np.eye(4)
-    #     j = 0
-    #     J = np.zeros((6, n))
-    #     zero = np.array([0, 0, 0])
+        Example:
+        .. runblock:: pycon
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.ETS.Puma560()
+            >>> puma.jacob0_analytic([0, 0, 0, 0, 0, 0])
 
-    #     for link in path:
-
-    #         if link.isjoint:
-    #             U = U @ link.A(q[link.jindex], fast=True)
-
-    #             if link == end:
-    #                 U = U @ tool.A
-
-    #             Tu = np.linalg.inv(U) @ T
-    #             n = U[:3, 0]
-    #             o = U[:3, 1]
-    #             a = U[:3, 2]
-    #             x = Tu[0, 3]
-    #             y = Tu[1, 3]
-    #             z = Tu[2, 3]
-
-    #             if link.v.axis == "Rz":
-    #                 J[:3, j] = (o * x) - (n * y)
-    #                 J[3:, j] = a
-
-    #             elif link.v.axis == "Ry":
-    #                 J[:3, j] = (n * z) - (a * x)
-    #                 J[3:, j] = o
-
-    #             elif link.v.axis == "Rx":
-    #                 J[:3, j] = (a * y) - (o * z)
-    #                 J[3:, j] = n
-
-    #             elif link.v.axis == "tx":
-    #                 J[:3, j] = n
-    #                 J[3:, j] = zero
-
-    #             elif link.v.axis == "ty":
-    #                 J[:3, j] = o
-    #                 J[3:, j] = zero
-
-    #             elif link.v.axis == "tz":
-    #                 J[:3, j] = a
-    #                 J[3:, j] = zero
-
-    #             j += 1
-    #         else:
-    #             A = link.A(fast=True)
-    #             if A is not None:
-    #                 U = U @ A
-
-    #     # compute rotational transform if analytical Jacobian required
-    #     if analytical is not None and half != "trans":
-
-    #         if analytical == "rpy/xyz":
-    #             rpy = tr2rpy(T, order="xyz")
-    #             A = rpy2jac(rpy, order="xyz")
-    #         elif analytical == "rpy/zyx":
-    #             rpy = tr2rpy(T, order="zyx")
-    #             A = rpy2jac(rpy, order="zyx")
-    #         elif analytical == "eul":
-    #             eul = tr2eul(T)
-    #             A = eul2jac(eul)
-    #         elif analytical == "exp":
-    #             # TODO: move to SMTB.base, Horner form with skew(v)
-    #             (theta, v) = trlog(t2r(T))
-    #             A = (
-    #                 np.eye(3, 3)
-    #                 - (1 - math.cos(theta)) / theta * skew(v)
-    #                 + (theta - math.sin(theta)) / theta * skew(v) ** 2
-    #             )
-    #         else:
-    #             raise ValueError("bad analyical value specified")
-
-    #         J = block_diag(np.eye(3, 3), np.linalg.inv(A)) @ J
-
-    #     # TODO optimize computation above if half matrix is returned
-
-    #     # return top or bottom half if asked
-    #     if half is not None:
-    #         if half == "trans":
-    #             J = J[:3, :]
-    #         elif half == "rot":
-    #             J = J[3:, :]
-    #         else:
-    #             raise ValueError("bad half specified")
-
-    #     return J
-
-    # def jacobev(self, q, end=None, start=None, tool=None, T=None):
-    #     """
-    #     Jv = jacobev(q) is the spatial velocity Jacobian, at joint
-    #     configuration q, which relates the velocity in the base frame to the
-    #     velocity in the end-effector frame.
-    #     :param q: Joint coordinate vector
-    #     :type q: ndarray(n)
-    #     :param end: the final link or Gripper which the Jacobian represents
-    #     :type end: str or ELink or Gripper
-    #     :param start: the first link which the Jacobian represents
-    #     :type start: str or ELink
-    #     :param tool: a static tool transformation matrix to apply to the
-    #         end of end, defaults to None
-    #     :type tool: SE3, optional
-    #     :param T: The transformation matrix of the reference point which the
-    #         Jacobian represents with respect to the base frame. Use this to
-    #         avoid caluclating forward kinematics to save time, defaults
-    #         to None
-    #     :type T: SE3, optional
-    #     :returns J: The velocity Jacobian in ee frame
-    #     :rtype J: float ndarray(6,6)
-    #     """
-
-    #     end, start, _ = self._get_limit_links(end, start)
-
-    #     if T is None:
-    #         T = self.base.inv() * self.fkine(q, end=end, start=start)
-    #         if tool is not None:
-    #             T *= tool
-    #     R = (T.R).T
-
-    #     Jv = np.zeros((6, 6))
-    #     Jv[:3, :3] = R
-    #     Jv[3:, 3:] = R
-
-    #     return Jv
-
-    # def jacob0v(self, q, end=None, start=None, tool=None, T=None):
-    #     """
-    #     Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
-    #     configuration q, which relates the velocity in the end-effector frame
-    #     to velocity in the base frame
-    #     :param q: Joint coordinate vector
-    #     :type q: ndarray(n)
-    #     :param end: the final link or Gripper which the Jacobian represents
-    #     :type end: str or ELink or Gripper
-    #     :param start: the first link which the Jacobian represents
-    #     :type start: str or ELink
-    #     :param tool: a static tool transformation matrix to apply to the
-    #         end of end, defaults to None
-    #     :type tool: SE3, optional
-    #     :param T: The transformation matrix of the reference point which the
-    #         Jacobian represents with respect to the base frame. Use this to
-    #         avoid caluclating forward kinematics to save time, defaults
-    #         to None
-    #     :type T: SE3, optional
-    #     :returns J: The velocity Jacobian in 0 frame
-    #     :rtype J: float ndarray(6,6)
-    #     """
-
-    #     end, start, _ = self._get_limit_links(end, start)
-
-    #     if T is None:
-    #         T = self.base.inv() * self.fkine(q, end=end, start=start)
-    #         if tool is not None:
-    #             T *= tool
-    #     R = T.R
-
-    #     Jv = np.zeros((6, 6))
-    #     Jv[:3, :3] = R
-    #     Jv[3:, 3:] = R
-
-    #     return Jv
+        .. warning:: ``start`` and ``end`` must be on the same branch,
+            with ``start`` closest to the base.
+        """  # noqa
+        return self.ets(start, end).jacob0_analytic(q, tool=tool, analytic=analytic)
 
     def link_collision_damper(
         self,
@@ -2219,6 +2024,7 @@ class ERobot(BaseERobot):
                 # Reset the Ts tracker
                 Ts = SE3()
             else:
+                # TODO Keep track of inertia and transform???
                 Ts *= SE3(link.Ts, check=False)
 
         if gravity is None:
