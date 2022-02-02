@@ -877,24 +877,21 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         for i in range(n):
             Jd += H[:, :, i] * qd[i]
 
-        # compute rotational transform if analytical Jacobian required
         if analytical is not None:
+            # determine analytic rotation
             T = self.fkine(q).A
-            if analytical == "rpy/xyz":
-                gamma = smb.tr2rpy(T, order="xyz")
-            elif analytical == "rpy/zyx":
-                gamma = smb.tr2rpy(T, order="zyx")
-            elif analytical == "eul":
-                gamma = smb.tr2eul(T)
-            elif analytical == "exp":
-                # TODO: move to SMTB.base, Horner form with skew(v)
-                gamma = smb.trlog(smb.t2r(T), twist=True)
-            else:
-                raise ValueError("bad analyical value specified")
+            gamma = r2x(T, representation=analytical)
 
-            xd = self.jacob0(qd, analytical=analytical) @ qd
-            A = smb.angvelxform_dot(gamma, xd[3:],  full=True, representation=analytical)
-            Jd = A @ Jd
+            # get transformation angular velocity to analytic velocity
+            Ai = smb.angvelxform(gamma, representation=analytical,
+                                 inverse=True, full=True)
+
+            # get analytic rate from joint rates
+            omega = J0[3:, :] @ qd
+            gamma_dot = Ai[3:, 3:] @ omega
+            Ai_dot = smb.angvelxform_inv_dot(gamma, gamma_dot, full=True)            
+            
+            Jd = Ai_dot @ J0 + Ai @ Jd
 
         return Jd
 
