@@ -8,12 +8,10 @@ from os.path import splitext
 import tempfile
 import subprocess
 import webbrowser
-import numpy as np
+from numpy import array, ndarray, isnan, zeros, eye, expand_dims, empty, concatenate
 from spatialmath import SE3, SE2
-from spatialmath.base.argcheck import getvector, verifymatrix, islistof
-
+from spatialmath.base.argcheck import getvector, islistof
 from roboticstoolbox.robot.ELink import ELink, ELink2, BaseELink
-
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.DHRobot import DHRobot
@@ -23,7 +21,6 @@ from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.tools.data import rtb_path_to_datafile
 from roboticstoolbox.tools.params import rtb_get_param
-
 from pathlib import PurePosixPath
 from ansitable import ANSITable, Column
 from spatialmath import (
@@ -32,11 +29,11 @@ from spatialmath import (
     SpatialInertia,
     SpatialForce,
 )
-
 import fknm
 from functools import lru_cache
 from typing import Union, overload
-from numpy.typing import ArrayLike, NDArray
+
+ArrayLike = Union[list, ndarray, tuple, set]
 
 
 class BaseERobot(Robot):
@@ -118,7 +115,7 @@ class BaseERobot(Robot):
     ):
         self._path_cache_fknm = {}
         self._path_cache = {}
-        self._eye_fknm = np.eye(4)
+        self._eye_fknm = eye(4)
 
         # self._ets = []
         self._linkdict = {}
@@ -259,13 +256,13 @@ class BaseERobot(Robot):
 
         # Current joint angles of the robot
         # TODO should go to Robot class?
-        self.q = np.zeros(self.n)
-        self.qd = np.zeros(self.n)
-        self.qdd = np.zeros(self.n)
+        self.q = zeros(self.n)
+        self.qd = zeros(self.n)
+        self.qdd = zeros(self.n)
         self.control_type = "v"
 
         # Set up qlim
-        qlim = np.zeros((2, self.n))
+        qlim = zeros((2, self.n))
         j = 0
 
         for i in range(len(orlinks)):
@@ -275,12 +272,12 @@ class BaseERobot(Robot):
         self._qlim = qlim
 
         for i in range(self.n):
-            if np.any(qlim[:, i] != 0) and not np.any(np.isnan(qlim[:, i])):
+            if any(qlim[:, i] != 0) and not any(isnan(qlim[:, i])):
                 self._valid_qlim = True
 
         super().__init__(orlinks, **kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Pretty prints the ETS Model of the robot.
         :return: Pretty print of the robot model
@@ -303,15 +300,16 @@ class BaseERobot(Robot):
             Column("ETS", headalign="^", colalign="<"),
             border=border,
         )
-        for link in self:
+
+        for link in self.links:
             color = "" if link.isjoint else "<<blue>>"
             ee = "@" if link in self.ee_links else ""
-            ets = link.ets()
+            ets = link.ets
             if link.parent is None:
                 parent_name = "BASE"
             else:
                 parent_name = link.parent.name
-            s = ets.__str__(f"q{link._jindex}")
+            s = ets.__str__(f"q{link.jindex}")
             if len(s) > 0:
                 op = " \u2295 " if unicode else " * "  # \oplus
                 s = op + s
@@ -321,7 +319,7 @@ class BaseERobot(Robot):
             else:
                 jname = ""
             table.row(
-                link.number,
+                link.jindex,
                 color + ee + link.name,
                 jname,
                 parent_name,
@@ -352,40 +350,77 @@ class BaseERobot(Robot):
 
         return s
 
-    def hierarchy(self):
+    @overload
+    def __getitem__(self: "ERobot", i: Union[int, str]) -> ELink:
+        ...
+
+    @overload
+    def __getitem__(self: "ERobot", i: slice) -> list[ELink]:
+        ...
+
+    @overload
+    def __getitem__(self: "ERobot2", i: Union[int, str]) -> ELink2:
+        ...
+
+    @overload
+    def __getitem__(self: "ERobot2", i: slice) -> list[ELink2]:
+        ...
+
+    def __getitem__(self, i):
         """
-        Pretty print the robot link hierachy
-        :return: Pretty print of the robot model
-        :rtype: str
-        Example:
+        Get link
+
+        :param i: link number or name
+        :type i: int, slice or str
+        :return: i'th link or named link
+        :rtype: ELink
+
+        This also supports iterating over each link in the robot object,
+        from the base to the tool.
+
         .. runblock:: pycon
+
             >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.URDF.Panda()
-            >>> robot.hierarchy()
+            >>> robot = rtb.models.Panda()
+            >>> print(robot[1]) # print the 2nd link
+            >>> print([link.a for link in robot])  # print all the a_j values
+
+        .. note:: ``ERobot`` supports link lookup by name,
+            eg. ``robot['link1']``
         """
+        if isinstance(i, str):
+            try:
+                return self.link_dict[i]
+            except KeyError:
+                raise KeyError(f"link {i} not in link dictionary")
+            except AttributeError:
+                raise AttributeError(f"robot has no link dictionary")
+        else:
+            return self._links[i]
 
-        # link = self.base_link
+    # --------------------------------------------------------------------- #
 
-        def recurse(link, indent=0):
-            print(" " * indent * 2, link.name)
-            for child in link.child:
-                recurse(child, indent + 1)
+    @overload
+    def links(self: "ERobot") -> list[ELink]:
+        ...
 
-        recurse(self.base_link)
+    @overload
+    def links(self: "ERobot2") -> list[ELink2]:
+        ...
 
-    # @property
-    # def qlim(self):
-    #     return self._qlim
+    @property
+    def links(self) -> list[ELink]:
+        """
+        Robot links
 
-    # @property
-    # def valid_qlim(self):
-
-    #     return self._valid_qlim
+        :return: A list of link objects
+        """
+        return self._links
 
     # --------------------------------------------------------------------- #
 
     @property
-    def n(self):
+    def n(self) -> int:
         """
         Number of joints
         :return: number of variable joint in the robot's kinematic tree
@@ -408,7 +443,7 @@ class BaseERobot(Robot):
 
     # --------------------------------------------------------------------- #
     @property
-    def nbranches(self):
+    def nbranches(self) -> int:
         """
         Number of branches
 
@@ -432,33 +467,54 @@ class BaseERobot(Robot):
 
     # --------------------------------------------------------------------- #
 
+    @overload
+    def elinks(self: "ERobot") -> list[ELink]:
+        ...
+
+    @overload
+    def elinks(self: "ERobot2") -> list[ELink2]:
+        ...
+
     @property
-    def elinks(self):
-        # return self._linkdict
+    def elinks(self) -> list[ELink]:
         return self._links
 
     # --------------------------------------------------------------------- #
 
+    @overload
+    def link_dict(self: "ERobot") -> dict[str, ELink]:
+        ...
+
+    @overload
+    def link_dict(self: "ERobot2") -> dict[str, ELink2]:
+        ...
+
     @property
-    def link_dict(self):
+    def link_dict(self) -> dict[str, ELink]:
         return self._linkdict
 
     # --------------------------------------------------------------------- #
+
+    @overload
+    def base_link(self: "ERobot") -> ELink:
+        ...
+
+    @overload
+    def base_link(self: "ERobot2") -> ELink2:
+        ...
 
     @property
     def base_link(self) -> ELink:
         return self._base_link
 
     @base_link.setter
-    def base_link(self, link: ELink):
+    def base_link(self, link):
         if isinstance(link, ELink):
             self._base_link = link
         else:
             raise TypeError("Must be an ELink")
-        # self._reset_fk_path()
 
     # --------------------------------------------------------------------- #
-    # TODO  get configuration string
 
     @overload
     def ee_links(self: "ERobot2") -> list[ELink2]:
@@ -469,28 +525,22 @@ class BaseERobot(Robot):
         ...
 
     @property
-    def ee_links(self):
+    def ee_links(self) -> list[ELink]:
         return self._ee_links
 
-    # def add_ee(self, link):
-    #     if isinstance(link, ELink):
-    #         self._ee_link.append(link)
-    #     else:
-    #         raise ValueError('must be an ELink')
-    #     self._reset_fk_path()
-
     @ee_links.setter
-    def ee_links(self, link):
+    def ee_links(self, link: Union[list[ELink], ELink]):
         if isinstance(link, ELink):
             self._ee_links = [link]
         elif isinstance(link, list) and all([isinstance(x, ELink) for x in link]):
             self._ee_links = link
         else:
             raise TypeError("expecting an ELink or list of ELinks")
-        # self._reset_fk_path()
+
+    # --------------------------------------------------------------------- #
 
     @property
-    def reach(self):
+    def reach(self) -> float:
         r"""
         Reach of the robot
         :return: Maximum reach of the robot
@@ -518,9 +568,9 @@ class BaseERobot(Robot):
                                 # or in the Link depending on how the robot
                                 # was constructed
                                 if link.qlim is not None:
-                                    d += np.max(link.qlim)
+                                    d += max(link.qlim)
                                 elif et.qlim is not None:
-                                    d += np.max(et.qlim)
+                                    d += max(et.qlim)
                             else:
                                 d += abs(et.eta)
                     link = link.parent
@@ -530,6 +580,27 @@ class BaseERobot(Robot):
 
             self._reach = max(d_all)
         return self._reach
+
+    # --------------------------------------------------------------------- #
+
+    def hierarchy(self):
+        """
+        Pretty print the robot link hierachy
+        :return: Pretty print of the robot model
+        :rtype: str
+        Example:
+        .. runblock:: pycon
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.URDF.Panda()
+            >>> robot.hierarchy()
+        """
+
+        def recurse(link, indent=0):
+            print(" " * indent * 2, link.name)
+            for child in link.child:
+                recurse(child, indent + 1)
+
+        recurse(self.base_link)
 
     # --------------------------------------------------------------------- #
 
@@ -695,7 +766,7 @@ class BaseERobot(Robot):
               segments
         """
 
-        def recurse(link):
+        def recurse(link: ELink):
 
             segs = [link.parent]
             while True:
@@ -703,17 +774,17 @@ class BaseERobot(Robot):
                 if link.nchildren == 0:
                     return [segs]
                 elif link.nchildren == 1:
-                    link = link.children[0]
+                    link = link.children[0]  # type: ignore
                     continue
                 elif link.nchildren > 1:
                     segs = [segs]
 
-                    for child in link.children:
+                    for child in link.children:  # type: ignore
                         segs.extend(recurse(child))
 
                     return segs
 
-        return recurse(self.links[0])
+        return recurse(self.links[0])  # type: ignore
 
     # --------------------------------------------------------------------- #
 
@@ -816,8 +887,8 @@ class BaseERobot(Robot):
 
         # open the PDF file in browser (hopefully portable), then cleanup
         webbrowser.open(f"file://{pdffile.name}")
-        # time.sleep(1)
-        # os.remove(pdffile.name)
+
+    # --------------------------------------------------------------------- #
 
     def dotfile(self, filename, etsbox=False, jtype=False, static=True):
         """
@@ -931,6 +1002,8 @@ graph [rankdir=LR];
 
         if isinstance(filename, str):
             file.close()  # noqa
+
+    # --------------------------------------------------------------------- #
 
     def dfs_links(self, start, func=None):
         """
@@ -1212,15 +1285,6 @@ class ERobot(BaseERobot):
     def urdf_filepath(self):
         return self._urdf_filepath
 
-    @property
-    def links(self) -> list[ELink]:
-        """
-        Robot links
-
-        :return: A list of link objects
-        """
-        return self._links
-
     # --------------------------------------------------------------------- #
 
     def _reset_cache(self):
@@ -1229,7 +1293,7 @@ class ERobot(BaseERobot):
         self._cache_end = None
         self._cache_start = None
         self._cache_end_tool = None
-        self._eye_fknm = np.eye(4)
+        self._eye_fknm = eye(4)
 
         self._cache_links_fknm = []
 
@@ -1461,9 +1525,9 @@ class ERobot(BaseERobot):
         q: ArrayLike,
         end: Union[str, ELink, Gripper] = None,
         start: Union[str, ELink, Gripper] = None,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
         include_base: bool = True,
-    ) -> NDArray[np.float64]:
+    ) -> ndarray:
         """
         Forward kinematics
 
@@ -1505,8 +1569,8 @@ class ERobot(BaseERobot):
         q: ArrayLike,
         end: Union[str, ELink, Gripper] = None,
         start: Union[str, ELink, Gripper] = None,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
-    ) -> NDArray[np.float64]:
+        tool: Union[ndarray, SE3, None] = None,
+    ) -> ndarray:
         r"""
         Manipulator geometric Jacobian in the base frame
 
@@ -1557,8 +1621,8 @@ class ERobot(BaseERobot):
         q: ArrayLike,
         end: Union[str, ELink, Gripper] = None,
         start: Union[str, ELink, Gripper] = None,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
-    ) -> NDArray[np.float64]:
+        tool: Union[ndarray, SE3, None] = None,
+    ) -> ndarray:
         r"""
         Manipulator geometric Jacobian in the end-effector frame
 
@@ -1599,9 +1663,9 @@ class ERobot(BaseERobot):
         q: Union[ArrayLike, None] = None,
         end: Union[str, ELink, Gripper] = None,
         start: Union[str, ELink, Gripper] = None,
-        J0: Union[NDArray[np.float64], None] = None,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
-    ) -> NDArray[np.float64]:
+        J0: Union[ndarray, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
+    ) -> ndarray:
         r"""
         Manipulator Hessian
 
@@ -1652,9 +1716,9 @@ class ERobot(BaseERobot):
         q: Union[ArrayLike, None] = None,
         end: Union[str, ELink, Gripper] = None,
         start: Union[str, ELink, Gripper] = None,
-        Je: Union[NDArray[np.float64], None] = None,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
-    ) -> NDArray[np.float64]:
+        Je: Union[ndarray, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
+    ) -> ndarray:
         r"""
         Manipulator Hessian
 
@@ -1706,7 +1770,7 @@ class ERobot(BaseERobot):
         n: int = 3,
         end: Union[str, ELink, Gripper] = None,
         start: Union[str, ELink, Gripper] = None,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
     ):
         r"""
         Manipulator Forward Kinematics nth Partial Derivative
@@ -1737,7 +1801,7 @@ class ERobot(BaseERobot):
             x = a[1] * b[2] - a[2] * b[1]
             y = a[2] * b[0] - a[0] * b[2]
             z = a[0] * b[1] - a[1] * b[0]
-            return np.array([x, y, z])
+            return array([x, y, z])
 
         _, nl, _ = self.get_path(end, start)
 
@@ -1746,7 +1810,7 @@ class ERobot(BaseERobot):
 
         d = [J, H]
         size = [6, nl, nl]
-        count = np.array([0, 0])
+        count = array([0, 0])
         c = 2
 
         def add_indices(indices, c):
@@ -1795,17 +1859,17 @@ class ERobot(BaseERobot):
 
         while len(d) != n:
             size.append(nl)
-            count = np.r_[count, 0]
+            count = concatenate((count, 0))
             indices = add_indices(indices, c)
             pdi = add_pdi(pdi)
             c += 1
 
-            pd = np.zeros(size)
+            pd = zeros(size)
 
             for i in range(nl ** c):
 
-                rot = np.zeros(3)
-                trn = np.zeros(3)
+                rot = zeros(3)
+                trn = zeros(3)
 
                 for j in range(len(indices)):
                     pdr0 = d[pdi[j][0]]
@@ -1837,7 +1901,7 @@ class ERobot(BaseERobot):
         q: ArrayLike,
         end: Union[str, ELink, Gripper] = None,
         start: Union[str, ELink, Gripper] = None,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
         analytic: str = "rpy-xyz",
     ):
         r"""
@@ -1921,7 +1985,7 @@ class ERobot(BaseERobot):
         links, n, _ = self.get_path(start=start, end=end)
 
         # if q is None:
-        #     q = np.copy(self.q)
+        #     q = copy(self.q)
         # else:
         #     q = getvector(q, n)
 
@@ -1936,14 +2000,14 @@ class ERobot(BaseERobot):
                 lpTcp = -wTlp + wTcp
 
                 norm = lpTcp / d
-                norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
+                norm_h = expand_dims(concatenate((norm, 0, 0, 0)), axis=0)
 
                 Je = self.jacobe(
                     q, start=self.base_link, end=link, tool=link_col.base.A
                 )
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
-                l_Ain = np.zeros((1, n))
+                l_Ain = zeros((1, n))
                 l_Ain[0, :n_dim] = norm_h @ Je
                 l_bin = (xi * (d - ds) / (di - ds)) + dp
             else:
@@ -1968,12 +2032,12 @@ class ERobot(BaseERobot):
                     if Ain is None:
                         Ain = l_Ain
                     else:
-                        Ain = np.r_[Ain, l_Ain]
+                        Ain = concatenate((Ain, l_Ain))
 
                     if bin is None:
-                        bin = np.array(l_bin)
+                        bin = array(l_bin)
                     else:
-                        bin = np.r_[bin, l_bin]
+                        bin = concatenate((bin, l_bin))
 
         return Ain, bin
 
@@ -1993,9 +2057,9 @@ class ERobot(BaseERobot):
         s = []  # joint motion subspace
 
         if symbolic:
-            Q = np.empty((n,), dtype="O")  # joint torque/force
+            Q = empty((n,), dtype="O")  # joint torque/force
         else:
-            Q = np.empty((n,))  # joint torque/force
+            Q = empty((n,))  # joint torque/force
 
         # TODO Should the dynamic parameters of static links preceding joint be
         # somehow merged with the joint?
@@ -2011,7 +2075,7 @@ class ERobot(BaseERobot):
             if link.isjoint:
                 I[j] = SpatialInertia(m=link.m, r=link.r)
                 if symbolic and link.Ts is None:
-                    Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
+                    Xtree[j] = SE3(eye(4, dtype="O"), check=False)
                 else:
                     Xtree[j] = Ts * SE3(link.Ts, check=False)
 
@@ -2052,8 +2116,8 @@ class ERobot(BaseERobot):
         # backward recursion
         for j in reversed(range(0, n)):
 
-            # next line could be np.dot(), but fails for symbolic arguments
-            Q[j] = np.sum(f[j].A * s[j])
+            # next line could be dot(), but fails for symbolic arguments
+            Q[j] = sum(f[j].A * s[j])
 
             if self.links[j].parent is not None:
                 jp = self.links[j].parent.jindex  # type: ignore
@@ -2205,7 +2269,7 @@ class ERobot2(BaseERobot):
 #     """
 
 #     if q is None:
-#         q = np.zeros((self.n,))
+#         q = zeros((self.n,))
 #     else:
 #         q = getvector(q, self.n)
 
@@ -2224,7 +2288,7 @@ class ERobot2(BaseERobot):
 #     env._add_teach_panel(self, q)
 
 #     if limits is None:
-#         limits = np.r_[-1, 1, -1, 1] * self.reach * 1.5
+#         limits = r_[-1, 1, -1, 1] * self.reach * 1.5
 #         env.ax.set_xlim([limits[0], limits[1]])
 #         env.ax.set_ylim([limits[2], limits[3]])
 
