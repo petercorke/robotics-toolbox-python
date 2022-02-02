@@ -977,13 +977,13 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         manipulability = self.manipulability(q, J=J, start=start, end=end, axes=axes)
 
         J = J[axes, :]
-        H = H[axes, :, :]
+        H = H[:, axes, :]
 
         b = np.linalg.inv(J @ np.transpose(J))
         Jm = np.zeros((n, 1))
 
         for i in range(n):
-            c = J @ np.transpose(H[:, :, i])
+            c = J @ np.transpose(H[i, :, :])
             Jm[i, 0] = manipulability * np.transpose(c.flatten("F")) @ b.flatten("F")
 
         return Jm
