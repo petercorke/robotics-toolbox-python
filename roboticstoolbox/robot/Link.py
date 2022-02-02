@@ -438,7 +438,7 @@ class Link(ABC):
     # -------------------------------------------------------------------------- #
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
         Get/set link name
 
