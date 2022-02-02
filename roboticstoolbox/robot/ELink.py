@@ -1,19 +1,16 @@
 #!/usr/bin/env python
+
 """
 @author: Jesse Haviland
 """
 
-from spatialmath import SE3, SE2
 from spatialgeometry import Shape
-
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.ET import ET, ET2
 from roboticstoolbox.robot.Link import Link
-import numpy as np
+from numpy import ndarray, eye
 import fknm
-
-from typing import Optional, Union, overload
-from numpy.typing import ArrayLike, NDArray
+from typing import Union, overload
 
 
 class BaseELink(Link):
@@ -110,9 +107,9 @@ class BaseELink(Link):
         # to break everywhere, so initialise Ts np be identity
 
         if isinstance(self, ELink2):
-            T = np.eye(3)
+            T = eye(3)
         else:
-            T = np.eye(4)
+            T = eye(4)
 
         for et in self._ets:
             # constant transforms only
@@ -159,7 +156,7 @@ class BaseELink(Link):
     #     self._update_fknm()
 
     @property
-    def Ts(self) -> NDArray[np.float64]:
+    def Ts(self) -> ndarray:
         """
         Constant part of link ETS
         :return: constant part of link transform
@@ -419,7 +416,7 @@ class ELink(BaseELink):
         # Private variable, can be written to but never replaced!
         # The c will adjust the inside of this array with a reference
         # to this specific array. If replaced --> segfault
-        self._fk = np.eye(4)
+        self._fk = eye(4)
         self._init_fknm()
 
     # def copy(self, parent=None):
@@ -637,7 +634,7 @@ class ELink(BaseELink):
 
     #     return SE3(self._fk, check=False)
 
-    def T(self, q: float = 0.0) -> NDArray[np.float64]:
+    def T(self, q: float = 0.0) -> ndarray:
         """
         Link transform matrix
         :param q: Joint coordinate (radians or metres). Not required for links
@@ -688,7 +685,7 @@ class ELink2(BaseELink):
         """
         return self._ets
 
-    def T(self, q: float = 0.0) -> NDArray[np.float64]:
+    def T(self, q: float = 0.0) -> ndarray:
         """
         Link transform matrix
 
