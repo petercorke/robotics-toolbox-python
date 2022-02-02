@@ -18,7 +18,6 @@ from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
 from typing import Optional, Union, overload
 from spatialgeometry import Shape
-from numpy.typing import ArrayLike, NDArray
 
 try:
     from matplotlib import colors
@@ -29,6 +28,8 @@ except ImportError:  # pragma nocover
     pass
 
 _default_backend = None
+
+ArrayLike = Union[list, np.ndarray, tuple, set]
 
 # TODO maybe this needs to be abstract
 # ikine functions need: fkine, jacobe, qlim methods from subclass
@@ -133,6 +134,18 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     def __repr__(self):
         return str(self)
 
+    def __iter__(self):
+        self._iter = 0
+        return self
+
+    def __next__(self):
+        if self._iter < len(self.links) - 1:
+            link = self[self._iter]
+            self._iter += 1
+            return link
+        else:
+            raise StopIteration
+
     def __getitem__(self, i):
         """
         Get link (Robot superclass)
@@ -155,15 +168,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         .. note:: ``ERobot`` supports link lookup by name,
             eg. ``robot['link1']``
         """
-        if isinstance(i, str):
-            try:
-                return self.link_dict[i]
-            except KeyError:
-                raise KeyError(f"link {i} not in link dictionary")
-            except AttributeError:
-                raise AttributeError(f"robot has no link dictionary")
-        else:
-            return self._links[i]
+        return self._links[i]
 
     # URDF Parser Attempt
     # @staticmethod
@@ -253,7 +258,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         return self._nlinks
 
     @property
-    def configs(self) -> dict[str, NDArray[np.float64]]:
+    def configs(self) -> dict[str, np.ndarray]:
         return self._configs
 
     @abstractproperty
@@ -409,7 +414,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         v = np.array(v)
         self._configs[name] = v
 
-    def logconfiguration(self, name: str, q: NDArray[np.float64]):
+    def logconfiguration(self, name: str, q: np.ndarray):
         """
         Log a named joint configuration (Robot superclass)
 
@@ -1913,11 +1918,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
     def closest_point(
         self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip=False
-    ) -> tuple[
-        Union[int, None],
-        Union[NDArray[np.float64], None],
-        Union[NDArray[np.float64], None],
-    ]:
+    ) -> tuple[Union[int, None], Union[np.ndarray, None], Union[np.ndarray, None],]:
         """
         closest_point(shape, inf_dist) returns the minimum euclidean
         distance between this robot and shape, provided it is less than
