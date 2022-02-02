@@ -1,4 +1,11 @@
-import numpy as np
+#!/usr/bin/env python3
+
+"""
+@author: Jesse Haviland
+"""
+
+from numpy import array, ndarray, deg2rad, eye, pi
+from numpy.linalg import inv as npinv
 import roboticstoolbox as rtb
 from spatialmath.base import (
     trotx,
@@ -15,7 +22,8 @@ from fknm import ET_T, ET_init, ET_update
 from spatialmath.base import getvector
 from spatialmath import SE3, SE2
 from typing import Optional, Callable, Union
-from numpy.typing import ArrayLike, NDArray
+
+ArrayLike = Union[list, ndarray, tuple, set]
 
 try:  # pragma: no cover
     import sympy
@@ -32,8 +40,8 @@ class BaseET:
         self,
         axis: str,
         eta: Union[float, Sym, None] = None,
-        axis_func: Optional[Callable[[Union[float, Sym]], NDArray[np.float64]]] = None,
-        T: Optional[NDArray[np.float64]] = None,
+        axis_func: Optional[Callable[[Union[float, Sym]], ndarray]] = None,
+        T: Optional[ndarray] = None,
         jindex: Optional[int] = None,
         unit: str = "rad",
         flip: bool = False,
@@ -46,7 +54,7 @@ class BaseET:
         else:
             if axis[0] == "R" and unit.lower().startswith("deg"):
                 if not issymbol(eta):
-                    self.eta = np.deg2rad(float(eta))
+                    self.eta = deg2rad(float(eta))
             else:
                 self.eta = eta
 
@@ -55,14 +63,14 @@ class BaseET:
         self._jindex = jindex
 
         if qlim is not None:
-            self._qlim = np.array(getvector(qlim, 2, out="array"))
+            self._qlim = array(getvector(qlim, 2, out="array"))
         else:
             self._qlim = None
 
         if self.eta is None:
             if T is None:
                 self._joint = True
-                self._T = np.eye(4)
+                self._T = eye(4)
                 if axis_func is None:
                     raise TypeError("For a variable joint, axis_func must be specified")
             else:
@@ -92,7 +100,7 @@ class BaseET:
             jindex = self.jindex
 
         if self.qlim is None:
-            qlim = np.array([0, 0])
+            qlim = array([0, 0])
         else:
             qlim = self.qlim
 
@@ -115,7 +123,7 @@ class BaseET:
             jindex = self.jindex
 
         if self.qlim is None:
-            qlim = np.array([0, 0])
+            qlim = array([0, 0])
         else:
             qlim = self.qlim
 
@@ -142,11 +150,11 @@ class BaseET:
             # Check if symbolic
             eta_str = f"{self.eta}"
         elif self.isrotation and self.eta is not None:
-            eta_str = f"{self.eta * (180.0/np.pi):.2f}°"
+            eta_str = f"{self.eta * (180.0/pi):.2f}°"
         elif not self.iselementary:
             if isinstance(self, ET):
                 T = self.T()
-                rpy = tr2rpy(T) * 180.0 / np.pi
+                rpy = tr2rpy(T) * 180.0 / pi
                 if T[:3, -1].any() and rpy.any():
                     eta_str = f"xyzrpy: {T[0, -1]:.2f}, {T[1, -1]:.2f}, {T[2, -1]:.2f}, {rpy[0]:.2f}°, {rpy[1]:.2f}°, {rpy[2]:.2f}°"
                 elif T[:3, -1].any():
@@ -158,7 +166,7 @@ class BaseET:
             elif isinstance(self, ET2):
                 T = self.T()
                 xyt = tr2xyt(T)
-                xyt[2] *= 180 / np.pi
+                xyt[2] *= 180 / pi
                 eta_str = f"xyθ: {xyt[0]:.2f}, {xyt[1]:.2f}, {xyt[2]:.2f}°"
 
         else:
@@ -265,7 +273,7 @@ class BaseET:
     @property
     def axis_func(
         self,
-    ) -> Union[Callable[[Union[float, Sym]], NDArray[np.float64]], None]:
+    ) -> Union[Callable[[Union[float, Sym]], ndarray], None]:
         return self._axis_func
 
     @property
@@ -368,13 +376,13 @@ class BaseET:
         return self.axis[0] == "t"
 
     @property
-    def qlim(self) -> Union[NDArray[np.float64], None]:
+    def qlim(self) -> Union[ndarray, None]:
         return self._qlim
 
     @qlim.setter
     def qlim(self, qlim_new: Union[ArrayLike, None]) -> None:
         if qlim_new is not None:
-            qlim_new = np.array(getvector(qlim_new, 2, out="array"))
+            qlim_new = array(getvector(qlim_new, 2, out="array"))
         self._qlim = qlim_new
         self.__update_c()
 
@@ -445,16 +453,16 @@ class BaseET:
         if inv.isjoint:
             inv._flip ^= True
         elif not inv.iselementary:
-            inv._T = np.linalg.inv(inv._T)
+            inv._T = npinv(inv._T)
         elif inv._eta is not None:
-            inv._T = np.linalg.inv(inv._T)
+            inv._T = npinv(inv._T)
             inv._eta = -inv._eta
 
         inv.__update_c()
 
         return inv
 
-    def T(self, q: Union[float, Sym] = 0.0) -> NDArray[np.float64]:
+    def T(self, q: Union[float, Sym] = 0.0) -> ndarray:
         """
         Evaluate an elementary transformation
 
@@ -501,22 +509,22 @@ class ET(BaseET):
         return self.__mul__(other)
 
     @property
-    def s(self) -> NDArray[np.float64]:  # pragma: nocover
+    def s(self) -> ndarray:  # pragma: nocover
         if self.axis[1] == "x":
             if self.axis[0] == "R":
-                return np.array([0, 0, 0, 1, 0, 0])
+                return array([0, 0, 0, 1, 0, 0])
             else:
-                return np.array([1, 0, 0, 0, 0, 0])
+                return array([1, 0, 0, 0, 0, 0])
         elif self.axis[1] == "y":
             if self.axis[0] == "R":
-                return np.array([0, 0, 0, 0, 1, 0])
+                return array([0, 0, 0, 0, 1, 0])
             else:
-                return np.array([0, 1, 0, 0, 0, 0])
+                return array([0, 1, 0, 0, 0, 0])
         else:
             if self.axis[0] == "R":
-                return np.array([0, 0, 0, 0, 0, 1])
+                return array([0, 0, 0, 0, 0, 1])
             else:
-                return np.array([0, 0, 1, 0, 0, 0])
+                return array([0, 0, 1, 0, 0, 0])
 
     @classmethod
     def Rx(
@@ -618,7 +626,7 @@ class ET(BaseET):
         # this method is 3x faster than using lambda x: transl(x, 0, 0)
         def axis_func(eta):
             # fmt: off
-            return np.array([
+            return array([
                 [1, 0, 0, eta],
                 [0, 1, 0, 0],
                 [0, 0, 1, 0],
@@ -651,7 +659,7 @@ class ET(BaseET):
 
         def axis_func(eta):
             # fmt: off
-            return np.array([
+            return array([
                 [1, 0, 0, 0],
                 [0, 1, 0, eta],
                 [0, 0, 1, 0],
@@ -684,7 +692,7 @@ class ET(BaseET):
 
         def axis_func(eta):
             # fmt: off
-            return np.array([
+            return array([
                 [1, 0, 0, 0],
                 [0, 1, 0, 0],
                 [0, 0, 1, eta],
@@ -695,7 +703,7 @@ class ET(BaseET):
         return cls(axis="tz", axis_func=axis_func, eta=eta, **kwargs)
 
     @classmethod
-    def SE3(cls, T: Union[NDArray[np.float64], SE3], **kwargs) -> "ET":
+    def SE3(cls, T: Union[ndarray, SE3], **kwargs) -> "ET":
         """
         A static SE3
 
@@ -729,15 +737,15 @@ class ET2(BaseET):
         return self.__mul__(other)
 
     @property
-    def s(self) -> NDArray[np.float64]:  # pragma: nocover
+    def s(self) -> ndarray:  # pragma: nocover
         if self.axis[0] == "R":
-            return np.array([0, 0, 0, 1])
+            return array([0, 0, 0, 1])
         if self.axis[1] == "x":
-            return np.array([1, 0, 0, 0])
+            return array([1, 0, 0, 0])
         elif self.axis[1] == "y":
-            return np.array([0, 1, 0, 0])
+            return array([0, 1, 0, 0])
         else:
-            return np.array([0, 0, 1, 0])
+            return array([0, 0, 1, 0])
 
     @classmethod
     def R(
@@ -814,7 +822,7 @@ class ET2(BaseET):
         return cls(axis="ty", eta=eta, axis_func=lambda y: transl2(0, y), **kwargs)
 
     @classmethod
-    def SE2(cls, T: Union[NDArray[np.float64], SE2], **kwargs) -> "ET2":
+    def SE2(cls, T: Union[ndarray, SE2], **kwargs) -> "ET2":
         """
         A static SE2
 
@@ -836,7 +844,7 @@ class ET2(BaseET):
 
         return cls(axis="SE2", T=trans, **kwargs)
 
-    def T(self, q: Union[float, Sym] = 0.0) -> NDArray[np.float64]:
+    def T(self, q: Union[float, Sym] = 0.0) -> ndarray:
         """
         Evaluate an elementary transformation
 
