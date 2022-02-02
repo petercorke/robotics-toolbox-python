@@ -1350,7 +1350,7 @@ class ERobot(BaseERobot):
             T = np.empty((4, 4))
             fknm.fkine(m, path, q, etool, tool, T)
 
-            if self._base is not None and start is None and include_base == True:
+            if self._base is not None and start is None and include_base is True:
                 return self.base.A @ T
             else:
                 return T
@@ -1407,7 +1407,7 @@ class ERobot(BaseERobot):
             if (
                 self._base is not None
                 and start == self.base_link
-                and include_base == True
+                and include_base is True
             ):
                 Tk = self.base.A @ Tk
 
@@ -1613,25 +1613,10 @@ class ERobot(BaseERobot):
                 if A is not None:
                     U = U @ A
 
-        # compute rotational transform if analytical Jacobian required
-        if analytical is not None and half != "trans":
-
-            if analytical == "rpy/xyz":
-                gamma = smb.tr2rpy(T, order="xyz")
-            elif analytical == "rpy/zyx":
-                gamma = smb.tr2rpy(T, order="zyx")
-            elif analytical == "eul":
-                gamma = smb.tr2eul(T)
-            elif analytical == "exp":
-                # TODO: move to SMTB.base, Horner form with skew(v)
-                gamma = smb.trlog(smb.t2r(T), twist=True)
-            else:
-                raise ValueError("bad analyical value specified")
-
-            A = smb.angvelxform(gamma, representation=analytical)
+        if analytical is not None:
+            A = smb.angvelxform(smb.t2r(T), representation=analytical,
+                                inverse=True, full=True)
             J = A @ J
-
-        # TODO optimize computation above if half matrix is returned
 
         # return top or bottom half if asked
         if half is not None:
