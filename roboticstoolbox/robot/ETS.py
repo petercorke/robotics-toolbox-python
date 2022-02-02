@@ -6,8 +6,7 @@
 """
 
 from collections import UserList
-from attr import attributes
-import numpy as np
+from numpy import pi, where, all, ndarray, zeros, array, eye
 from spatialmath import SE3, SE2
 from spatialmath.base import (
     getvector,
@@ -24,16 +23,16 @@ from spatialmath.base import (
 from roboticstoolbox import rtb_get_param
 
 from collections import UserList
-import numpy as np
 from spatialmath.base import issymbol, getmatrix
-import fknm
+from fknm import ETS_fkine, ETS_jacob0, ETS_jacobe, ETS_hessian0, ETS_hessiane
 from copy import deepcopy
 from roboticstoolbox import rtb_get_param
 from roboticstoolbox.robot.ET import ET, ET2
 from spatialmath.base import getvector
 from spatialmath import SE3
 from typing import Union, overload
-from numpy.typing import ArrayLike, NDArray
+
+ArrayLike = Union[list, ndarray, tuple, set]
 
 
 class BaseETS(UserList):
@@ -135,7 +134,7 @@ class BaseETS(UserList):
                 if issymbol(et.eta):
                     s = f"{et.axis}({et.eta})"
                 else:
-                    s = f"{et.axis}({et.eta * 180 / np.pi:.4g}°)"
+                    s = f"{et.axis}({et.eta * 180 / pi:.4g}°)"
 
             elif et.istranslation:
                 s = f"{et.axis}({et.eta:.4g})"
@@ -166,7 +165,7 @@ class BaseETS(UserList):
             >>> e.joints()
 
         """
-        return np.where([e.isjoint for e in self])[0]
+        return where([e.isjoint for e in self])[0]
 
     def jointset(self) -> set[int]:
         """
@@ -526,7 +525,7 @@ class ETS(BaseETS):
                 # a joint
                 if const is not None:
                     # flush the constant
-                    if not np.all(const == np.eye(4)):
+                    if not all(const == eye(4)):
                         ets *= ET.SE3(const)
                     const = None
                 ets *= et  # emit the joint ET
@@ -539,7 +538,7 @@ class ETS(BaseETS):
 
         if const is not None:
             # flush the constant, tool transform
-            if not np.all(const == np.eye(4)):
+            if not all(const == eye(4)):
                 ets *= ET.SE3(const)
         return ets
 
@@ -585,10 +584,10 @@ class ETS(BaseETS):
     def fkine(
         self,
         q: ArrayLike,
-        base: Union[NDArray[np.float64], SE3, None] = None,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
+        base: Union[ndarray, SE3, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
         include_base: bool = True,
-    ) -> NDArray[np.float64]:
+    ) -> ndarray:
         """
         Forward kinematics
 
@@ -616,7 +615,7 @@ class ETS(BaseETS):
         """
 
         try:
-            return fknm.ETS_fkine(self._m, self._fknm, q, base, tool, include_base)
+            return ETS_fkine(self._m, self._fknm, q, base, tool, include_base)
         except:
             pass
 
@@ -625,20 +624,20 @@ class ETS(BaseETS):
         end = self.data[-1]
 
         if base is None:
-            base = np.eye(4)
+            base = eye(4)
         elif isinstance(base, SE3):
-            base = np.array(base.A)
+            base = array(base.A)
 
         if tool is None:
-            tool = np.eye(4)
+            tool = eye(4)
         elif isinstance(tool, SE3):
-            tool = np.array(tool.A)
+            tool = array(tool.A)
 
         if l > 1:
-            T = np.zeros((l, 4, 4), dtype=object)
+            T = zeros((l, 4, 4), dtype=object)
         else:
-            T = np.zeros((4, 4), dtype=object)
-        Tk = np.eye(4)
+            T = zeros((4, 4), dtype=object)
+        Tk = eye(4)
 
         for k, qk in enumerate(q):  # type: ignore
             link = end  # start with last link
@@ -676,8 +675,8 @@ class ETS(BaseETS):
     def jacob0(
         self,
         q: ArrayLike,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
-    ) -> NDArray[np.float64]:
+        tool: Union[ndarray, SE3, None] = None,
+    ) -> ndarray:
         r"""
         Jacobian in base frame
 
@@ -698,7 +697,7 @@ class ETS(BaseETS):
         reduce computation time.
 
         An ETS represents the relative pose from the {0} frame to the end frame
-        {e}. This is the composition of many relative poses, some constant and
+        {e}. This is the composition of mAny relative poses, some constant and
         some functions of the joint variables, which we can write as
         :math:`\mathbf{E}(q)`.
 
@@ -726,24 +725,24 @@ class ETS(BaseETS):
 
         # Use c extension
         try:
-            return fknm.ETS_jacob0(self._m, self._n, self._fknm, q, tool)
+            return ETS_jacob0(self._m, self._n, self._fknm, q, tool)
         except TypeError:
             pass
 
         # Otherwise use Python
         if tool is None:
-            tool = np.eye(4)
+            tool = eye(4)
         elif isinstance(tool, SE3):
-            tool = np.array(tool.A)
+            tool = array(tool.A)
 
         q = getvector(q, None)
 
         T = self.fkine(q, include_base=False) @ tool
 
-        U = np.eye(4)
+        U = eye(4)
         j = 0
-        J = np.zeros((6, self.n), dtype="object")
-        zero = np.array([0, 0, 0])
+        J = zeros((6, self.n), dtype="object")
+        zero = array([0, 0, 0])
         end = self.data[-1]
 
         for link in self.data:
@@ -798,8 +797,8 @@ class ETS(BaseETS):
     def jacobe(
         self,
         q: ArrayLike,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
-    ) -> NDArray[np.float64]:
+        tool: Union[ndarray, SE3, None] = None,
+    ) -> ndarray:
         r"""
         Manipulator geometric Jacobian in the end-effector frame
 
@@ -824,7 +823,7 @@ class ETS(BaseETS):
 
         # Use c extension
         try:
-            return fknm.ETS_jacobe(self._m, self._n, self._fknm, q, tool)
+            return ETS_jacobe(self._m, self._n, self._fknm, q, tool)
         except TypeError:
             pass
 
@@ -834,9 +833,9 @@ class ETS(BaseETS):
     def hessian0(
         self,
         q: Union[ArrayLike, None] = None,
-        J0: Union[NDArray[np.float64], None] = None,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
-    ) -> NDArray[np.float64]:
+        J0: Union[ndarray, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
+    ) -> ndarray:
         r"""
         Manipulator Hessian
 
@@ -880,7 +879,7 @@ class ETS(BaseETS):
 
         # Use c extension
         try:
-            return fknm.ETS_hessian0(self._m, self._n, self._fknm, q, J0, tool)
+            return ETS_hessian0(self._m, self._n, self._fknm, q, J0, tool)
         except TypeError:
             pass
 
@@ -888,7 +887,7 @@ class ETS(BaseETS):
             x = a[1] * b[2] - a[2] * b[1]
             y = a[2] * b[0] - a[0] * b[2]
             z = a[0] * b[1] - a[1] * b[0]
-            return np.array([x, y, z])
+            return array([x, y, z])
 
         n = self.n
 
@@ -898,7 +897,7 @@ class ETS(BaseETS):
         else:
             verifymatrix(J0, (6, self.n))
 
-        H = np.zeros((n, 6, n))
+        H = zeros((n, 6, n))
 
         for j in range(n):
             for i in range(j, n):
@@ -914,9 +913,9 @@ class ETS(BaseETS):
     def hessiane(
         self,
         q: Union[ArrayLike, None] = None,
-        Je: Union[NDArray[np.float64], None] = None,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
-    ) -> NDArray[np.float64]:
+        Je: Union[ndarray, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
+    ) -> ndarray:
         r"""
         Manipulator Hessian
 
@@ -960,7 +959,7 @@ class ETS(BaseETS):
 
         # Use c extension
         try:
-            return fknm.ETS_hessiane(self._m, self._n, self._fknm, q, Je, tool)
+            return ETS_hessiane(self._m, self._n, self._fknm, q, Je, tool)
         except TypeError:
             pass
 
@@ -968,7 +967,7 @@ class ETS(BaseETS):
             x = a[1] * b[2] - a[2] * b[1]
             y = a[2] * b[0] - a[0] * b[2]
             z = a[0] * b[1] - a[1] * b[0]
-            return np.array([x, y, z])
+            return array([x, y, z])
 
         n = self.n
 
@@ -978,7 +977,7 @@ class ETS(BaseETS):
         else:
             verifymatrix(Je, (6, self.n))
 
-        H = np.zeros((n, 6, n))
+        H = zeros((n, 6, n))
 
         for j in range(n):
             for i in range(j, n):
@@ -994,7 +993,7 @@ class ETS(BaseETS):
     def jacob0_analytic(
         self,
         q: ArrayLike,
-        tool: Union[NDArray[np.float64], SE3, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
         analytic: str = "rpy-xyz",
     ):
         r"""
@@ -1156,7 +1155,7 @@ class ETS2(BaseETS):
                 # a joint
                 if const is not None:
                     # flush the constant
-                    if not np.all(const == np.eye(3)):
+                    if not all(const == eye(3)):
                         ets *= ET2.SE2(const)
                     const = None
                 ets *= et  # emit the joint ET
@@ -1169,7 +1168,7 @@ class ETS2(BaseETS):
 
         if const is not None:
             # flush the constant, tool transform
-            if not np.all(const == np.eye(3)):
+            if not all(const == eye(3)):
                 ets *= ET2.SE2(const)
         return ets
 
@@ -1215,10 +1214,10 @@ class ETS2(BaseETS):
     def fkine(
         self,
         q: ArrayLike,
-        base: Union[NDArray[np.float64], SE2, None] = None,
-        tool: Union[NDArray[np.float64], SE2, None] = None,
+        base: Union[ndarray, SE2, None] = None,
+        tool: Union[ndarray, SE2, None] = None,
         include_base: bool = True,
-    ) -> NDArray[np.float64]:
+    ) -> ndarray:
         """
         Forward kinematics
         :param q: Joint coordinates
@@ -1249,20 +1248,20 @@ class ETS2(BaseETS):
         end = self[-1]
 
         if base is None:
-            base = np.eye(3)
+            base = eye(3)
         elif isinstance(base, SE2):
-            base = np.array(base.A)
+            base = array(base.A)
 
         if tool is None:
-            tool = np.eye(3)
+            tool = eye(3)
         elif isinstance(tool, SE2):
-            tool = np.array(tool.A)
+            tool = array(tool.A)
 
         if l > 1:
-            T = np.zeros((l, 3, 3), dtype=object)
+            T = zeros((l, 3, 3), dtype=object)
         else:
-            T = np.zeros((3, 3), dtype=object)
-        Tk = np.eye(3)
+            T = zeros((3, 3), dtype=object)
+        Tk = eye(3)
 
         for k, qk in enumerate(q):  # type: ignore
             link = end  # start with last link
@@ -1307,10 +1306,10 @@ class ETS2(BaseETS):
         q = getvector(q)
 
         j = 0
-        J = np.zeros((3, self.n))
+        J = zeros((3, self.n))
         etjoints = self.joints()
 
-        if not all([self[i].jindex for i in etjoints]):
+        if not all(array([self[i].jindex for i in etjoints])):
             # not all joints have a jindex it is required, set them
             for j in range(self.n):
                 i = etjoints[j]
@@ -1328,13 +1327,13 @@ class ETS2(BaseETS):
 
             axis = self[i].axis
             if axis == "R":
-                dTdq = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 0]]) @ self[i].T(
+                dTdq = array([[0, -1, 0], [1, 0, 0], [0, 0, 0]]) @ self[i].T(
                     q[jindex]  # type: ignore
                 )
             elif axis == "tx":
-                dTdq = np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]])
+                dTdq = array([[0, 0, 1], [0, 0, 0], [0, 0, 0]])
             elif axis == "ty":
-                dTdq = np.array([[0, 0, 0], [0, 0, 1], [0, 0, 0]])
+                dTdq = array([[0, 0, 0], [0, 0, 1], [0, 0, 0]])
             else:  # pragma: nocover
                 raise TypeError("Invalid axes")
 
@@ -1348,7 +1347,9 @@ class ETS2(BaseETS):
 
             T = self.fkine(q)
             dRdt = dTdq[:2, :2] @ T[:2, :2].T
-            J[:, j] = np.r_[dTdq[:2, 2].T, dRdt[1, 0]]
+
+            J[:2, j] = dTdq[:2, 2]
+            J[2, j] = dRdt[1, 0]
 
         return J
 
