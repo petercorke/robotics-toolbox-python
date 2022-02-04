@@ -2066,6 +2066,7 @@ class ERobot(BaseERobot):
         j = 0
         Ain = None
         bin = None
+        din = None
 
         def indiv_calculation(link, link_col, q):
             d, wTlp, wTcp = link_col.closest_point(shape, di)
@@ -2074,22 +2075,30 @@ class ERobot(BaseERobot):
                 lpTcp = -wTlp + wTcp
 
                 norm = lpTcp / d
+                # norm = self.fkine(q, end=link, fast=True)[:3, :3] @ norm
                 norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
 
-                Je = self.jacobe(
-                    q, start=self.base_link, end=link, tool=link_col.base.A, fast=True
+                tool = SE3((np.linalg.inv(self.fkine(q, end=link, fast=True)) @ SE3(wTlp).A)[:3, 3])
+
+                Je = self.jacob0(
+                    q, end=link, tool=tool.A, fast=True
                 )
+                Je[:3, :] = self._base.A[:3, :3] @ Je[:3, :]
+
+
+                # print(Je)
+
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
-                l_Ain = np.zeros((1, n))
+                l_Ain = np.zeros((1, self.n))
                 l_Ain[0, :n_dim] = norm_h @ Je
-                l_bin = (xi * (d - ds) / (di - ds)) + dp
+                l_bin = (xi * (d - ds) / (di - ds)) + 0
             else:
                 l_Ain = None
                 l_bin = None
 
             return l_Ain, l_bin, d, wTcp
-
+        
         for link in links:
             if link.isjoint:
                 j += 1
@@ -2113,7 +2122,255 @@ class ERobot(BaseERobot):
                     else:
                         bin = np.r_[bin, l_bin]
 
+                    if din is None:
+                        din = d
+                    else:
+                        din = np.r_[din, d]
+
         return Ain, bin
+
+    def vision_collision_damper(
+        self,
+        shape,
+        q=None,
+        di=0.3,
+        ds=0.05,
+        xi=1.0,
+        end=None,
+        start=None,
+        collision_list=None,
+        camera=None
+    ):
+        """
+        Formulates an inequality contraint which, when optimised for will
+        make it impossible for the robot to run into a collision. Requires
+        See examples/neo.py for use case
+        :param ds: The minimum distance in which a joint is allowed to
+            approach the collision object shape
+        :type ds: float
+        :param di: The influence distance in which the velocity
+            damper becomes active
+        :type di: float
+        :param xi: The gain for the velocity damper
+        :type xi: float
+        :param from_link: The first link to consider, defaults to the base
+            link
+        :type from_link: ELink
+        :param to_link: The last link to consider, will consider all links
+            between from_link and to_link in the robot, defaults to the
+            end-effector link
+        :type to_link: ELink
+        :returns: Ain, Bin as the inequality contraints for an omptimisor
+        :rtype: ndarray(6), ndarray(6)
+        """
+
+        if start is None:
+            start = self.base_link
+
+        if end is None:
+            end = self.ee_link
+
+        links, n, _ = self.get_path(start=start, end=end)
+
+        # if q is None:
+        #     q = np.copy(self.q)
+        # else:
+        #     q = getvector(q, n)
+
+        j = 0
+        Ain = None
+        bin = None
+        din = None
+
+        def indiv_calculation(link, link_col, q):
+            d, wTlp, wTcp = link_col.closest_point(shape, di)
+
+            if d is not None:
+                lpTcp = -wTlp + wTcp
+
+                norm = lpTcp / d
+                norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
+
+                tool = SE3((np.linalg.inv(self.fkine(q, end=link, fast=True)) @ SE3(wTlp).A)[:3, 3])
+
+                Je = self.jacob0(
+                    q, end=link, tool=tool.A, fast=True
+                )
+                Je[:3, :] = self._base.A[:3, :3] @ Je[:3, :]
+
+                wTc = camera.fkine(camera.q, fast=True)
+                Jv = camera.jacob0(
+                    camera.q, tool=SE3(np.linalg.inv(wTc[:3, :3]) @ (wTcp - wTc[:3, -1])).A, fast=True
+                )
+                Jv[:3, :] = self._base.A[:3, :3] @ Jv[:3, :]
+
+                n_dim = Je.shape[1]
+                dp = norm_h @ Jv
+                l_Ain = np.zeros((1, self.n + 2 + 10))
+                l_Ain[0, :n_dim] = norm_h @ Je
+                l_Ain -= np.r_[dp[0, :3], np.zeros(7), dp[0, 3:], np.zeros(9), 1]
+                l_bin = (xi * (d - ds) / (di - ds))
+            else:
+                l_Ain = None
+                l_bin = None
+
+            return l_Ain, l_bin, d, wTcp
+        
+        for link in links:
+            if link.isjoint:
+                j += 1
+
+            if collision_list is None:
+                col_list = link.collision
+            else:
+                col_list = collision_list[j - 1]
+
+            for link_col in col_list:
+                l_Ain, l_bin, d, wTcp = indiv_calculation(link, link_col, q)
+
+                if l_Ain is not None and l_bin is not None:
+                    if Ain is None:
+                        Ain = l_Ain
+                    else:
+                        Ain = np.r_[Ain, l_Ain]
+
+                    if bin is None:
+                        bin = np.array(l_bin)
+                    else:
+                        bin = np.r_[bin, l_bin]
+
+                    if din is None:
+                        din = d
+                    else:
+                        din = np.r_[din, d]
+
+        return Ain, bin, din
+
+    def new_vision_collision_damper(
+        self,
+        shape,
+        q=None,
+        di=0.3,
+        ds=0.05,
+        xi=1.0,
+        end=None,
+        start=None,
+        collision_list=None,
+        camera=None,
+        obj=None
+    ):
+        """
+        Formulates an inequality contraint which, when optimised for will
+        make it impossible for the robot to run into a collision. Requires
+        See examples/neo.py for use case
+        :param ds: The minimum distance in which a joint is allowed to
+            approach the collision object shape
+        :type ds: float
+        :param di: The influence distance in which the velocity
+            damper becomes active
+        :type di: float
+        :param xi: The gain for the velocity damper
+        :type xi: float
+        :param from_link: The first link to consider, defaults to the base
+            link
+        :type from_link: ELink
+        :param to_link: The last link to consider, will consider all links
+            between from_link and to_link in the robot, defaults to the
+            end-effector link
+        :type to_link: ELink
+        :returns: Ain, Bin as the inequality contraints for an omptimisor
+        :rtype: ndarray(6), ndarray(6)
+        """
+
+        if start is None:
+            start = self.base_link
+
+        if end is None:
+            end = self.ee_link
+
+        links, n, _ = self.get_path(start=start, end=end)
+
+        # if q is None:
+        #     q = np.copy(self.q)
+        # else:
+        #     q = getvector(q, n)
+
+        j = 0
+        Ain = None
+        bin = None
+        din = None
+
+        def indiv_calculation(link, link_col, q):
+            d, wTlp, wTcp = link_col.closest_point(shape, di)
+
+            if d is not None:
+                lpTcp = -wTlp + wTcp
+
+                norm = lpTcp / d
+
+                norm_e = self.fkine(q, end=link, fast=True)[:3, :3] @ norm
+                norm_v = camera.fkine(camera.q, fast=True)[:3, :3] @ norm
+
+                norm_e = np.expand_dims(np.r_[norm_e, 0, 0, 0], axis=0)
+                norm_v = np.expand_dims(np.r_[norm_v, 0, 0, 0], axis=0)
+
+                norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
+
+                tool = SE3((np.linalg.inv(self.fkine(q, end=link, fast=True)) @ SE3(wTlp).A)[:3, 3])
+
+                Je = self.jacobe(
+                    q, end=link, tool=tool.A, fast=True
+                )
+
+                Jv = camera.jacobe(camera.q, fast=True)
+
+                total_length = shape._length
+                length = np.linalg.norm(wTcp - obj)
+                Jv *= length / total_length
+
+                n_dim = Je.shape[1]
+                dp = norm_v @ Jv
+                l_Ain = np.zeros((1, self.n + 2 + 10))
+                l_Ain[0, :n_dim] = norm_e @ Je
+                l_Ain -= np.r_[dp[0, :3], np.zeros(7), dp[0, 3:], np.zeros(9), 1]
+                l_bin = (xi * (d - ds) / (di - ds))
+
+            else:
+                l_Ain = None
+                l_bin = None
+
+            return l_Ain, l_bin, d, wTcp
+        
+        for link in links:
+            if link.isjoint:
+                j += 1
+
+            if collision_list is None:
+                col_list = link.collision
+            else:
+                col_list = collision_list[j - 1]
+
+            for link_col in col_list:
+                l_Ain, l_bin, d, wTcp = indiv_calculation(link, link_col, q)
+
+                if l_Ain is not None and l_bin is not None:
+                    if Ain is None:
+                        Ain = l_Ain
+                    else:
+                        Ain = np.r_[Ain, l_Ain]
+
+                    if bin is None:
+                        bin = np.array(l_bin)
+                    else:
+                        bin = np.r_[bin, l_bin]
+
+                    if din is None:
+                        din = d
+                    else:
+                        din = np.r_[din, d]
+
+        return Ain, bin, din
+
 
     # inverse dynamics (recursive Newton-Euler) using spatial vector notation
     def rne(robot, q, qd, qdd, symbolic=False, gravity=None):
