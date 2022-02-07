@@ -4,6 +4,7 @@ import numpy as np
 from functools import wraps
 from spatialmath.base import getvector, isscalar, isvector, ismatrix
 from ansitable import ANSITable, Column
+from spatialgeometry import Shape, SceneNode, SceneGroup
 
 
 def _listen_dyn(func):
@@ -42,7 +43,7 @@ def _listen_dyn(func):
     return wrapper_listen_dyn
 
 
-class Link(ABC):
+class Link(SceneNode, ABC):
     """
     Link superclass
 
@@ -105,10 +106,12 @@ class Link(ABC):
         Tc=None,
         G=None,
         mesh=None,
-        geometry=[],
-        collision=[],
+        geometry: list[Shape] = [],
+        collision: list[Shape] = [],
         **kwargs,
     ):
+        # Initialise the scene node
+        super().__init__()
 
         self._robot = None  # reference to owning robot
 
@@ -119,8 +122,12 @@ class Link(ABC):
         self.qlim = qlim
 
         # Link geometry
-        self.geometry = geometry
-        self.collision = collision
+        self.geometry = SceneGroup(children=geometry)
+        self._scene_children.append(self.geometry)
+
+        # Collision Geometry
+        self.collision = SceneGroup(children=collision)
+        self._scene_children.append(self.collision)
 
         # TODO this is a leftover from VPython development, should be
         # using geometry instead
