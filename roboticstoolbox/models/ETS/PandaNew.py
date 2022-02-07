@@ -74,7 +74,12 @@ if __name__ == "__main__":  # pragma nocover
     r = rtb.models.Panda()
     r2 = rtb.models.ETS.Panda()
 
-    print(r2)
+    link = r[2]
+    j = r.jacob0(r.qr)
+
+    e = r.ets()
+
+    # print(r2)
 
     # r2.addconfiguration("ready", [1, 2, 3, 4, 4], "deg")
     # qq = r2.configs["my_q"]
