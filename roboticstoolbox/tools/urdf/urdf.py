@@ -493,7 +493,7 @@ class Collision(URDFType):
         self.geometry = geometry
         self.name = name
         self.origin = origin
-        self.geometry.ob.base = origin
+        self.geometry.ob.T = origin
 
     @property
     def geometry(self):
@@ -557,7 +557,7 @@ class Visual(URDFType):
 
     def __init__(self, geometry, name=None, origin=None, material=None):
         self.geometry = geometry
-        geometry.ob.base = origin
+        geometry.ob.T = origin
         self.name = name
         self.origin = origin
         self.material = material
