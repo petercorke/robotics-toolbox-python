@@ -172,7 +172,7 @@ qlim  =      -2.8 to      2.8""",
 
         self.assertIsInstance(col, gm.Shape)
 
-        self.assertIsInstance(col.base, sm.SE3)
+        self.assertIsInstance(col.T, np.ndarray)
 
         col.radius = 2
         self.assertEqual(col.radius, 2)
@@ -204,8 +204,8 @@ qlim  =      -2.8 to      2.8""",
             l0.geometry = 1  # type: ignore
 
     def test_dist(self):
-        s0 = gm.Cuboid([1, 1, 1], base=sm.SE3(0, 0, 0))
-        s1 = gm.Cuboid([1, 1, 1], base=sm.SE3(3, 0, 0))
+        s0 = gm.Cuboid([1, 1, 1], T=sm.SE3(0, 0, 0))
+        s1 = gm.Cuboid([1, 1, 1], T=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
         link = p.links[3]
 
@@ -218,8 +218,8 @@ qlim  =      -2.8 to      2.8""",
         self.assertAlmostEqual(d2, None)
 
     def test_collided(self):
-        s0 = gm.Cuboid([1, 1, 1], base=sm.SE3(0, 0, 0))
-        s1 = gm.Cuboid([1, 1, 1], base=sm.SE3(3, 0, 0))
+        s0 = gm.Cuboid([1, 1, 1], T=sm.SE3(0, 0, 0))
+        s1 = gm.Cuboid([1, 1, 1], T=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
         link = p.links[3]
         c0 = link.collided(s0)
