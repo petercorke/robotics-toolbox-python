@@ -2022,6 +2022,19 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         return Ain, Bin
 
+    # --------------------------------------------------------------------- #
+    # Scene Graph section
+    # --------------------------------------------------------------------- #
+
+    def _update_link_tf(self, q: ArrayLike = None):
+        """
+        This private method updates the local transform of each link within
+        this robot according to q (or self.q if q is none)
+        """
+        pass
+
+    # --------------------------------------------------------------------- #
+
 
 if __name__ == "__main__":
 
