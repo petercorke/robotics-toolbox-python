@@ -2026,6 +2026,8 @@ class ERobot(BaseERobot):
         end=None,
         start=None,
         collision_list=None,
+        wTcamp=None,
+        wTtp=None
     ):
         """
         Formulates an inequality contraint which, when optimised for will
@@ -2075,7 +2077,6 @@ class ERobot(BaseERobot):
                 lpTcp = -wTlp + wTcp
 
                 norm = lpTcp / d
-                # norm = self.fkine(q, end=link, fast=True)[:3, :3] @ norm
                 norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
 
                 tool = SE3((np.linalg.inv(self.fkine(q, end=link, fast=True)) @ SE3(wTlp).A)[:3, 3])
@@ -2085,11 +2086,13 @@ class ERobot(BaseERobot):
                 )
                 Je[:3, :] = self._base.A[:3, :3] @ Je[:3, :]
 
-
-                # print(Je)
-
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
+                if wTcamp is not None and wTtp is not None:
+                    length = np.linalg.norm(wTcp - wTcamp)
+                    total_length = np.linalg.norm(wTtp - wTcamp)
+                    dp *= length/total_length
+
                 l_Ain = np.zeros((1, self.n))
                 l_Ain[0, :n_dim] = norm_h @ Je
                 l_bin = (xi * (d - ds) / (di - ds)) + 0
@@ -2098,7 +2101,7 @@ class ERobot(BaseERobot):
                 l_bin = None
 
             return l_Ain, l_bin, d, wTcp
-        
+
         for link in links:
             if link.isjoint:
                 j += 1
@@ -2127,7 +2130,7 @@ class ERobot(BaseERobot):
                     else:
                         din = np.r_[din, d]
 
-        return Ain, bin
+        return Ain, bin, din
 
     def vision_collision_damper(
         self,
@@ -2139,13 +2142,12 @@ class ERobot(BaseERobot):
         end=None,
         start=None,
         collision_list=None,
-        camera=None,
-        obj=None
+        camera=None
     ):
         """
         Formulates an inequality contraint which, when optimised for will
-        make it impossible for the robot to self-occlude
-        :param shape: The line of sight object. 
+        make it impossible for the robot to run into a collision. Requires
+        See examples/neo.py for use case
         :param ds: The minimum distance in which a joint is allowed to
             approach the collision object shape
         :type ds: float
@@ -2173,6 +2175,11 @@ class ERobot(BaseERobot):
 
         links, n, _ = self.get_path(start=start, end=end)
 
+        # if q is None:
+        #     q = np.copy(self.q)
+        # else:
+        #     q = getvector(q, n)
+
         j = 0
         Ain = None
         bin = None
@@ -2185,34 +2192,27 @@ class ERobot(BaseERobot):
                 lpTcp = -wTlp + wTcp
 
                 norm = lpTcp / d
-
-                norm_e = self.fkine(q, end=link, fast=True)[:3, :3] @ norm
-                norm_v = camera.fkine(camera.q, fast=True)[:3, :3] @ norm
-
-                norm_e = np.expand_dims(np.r_[norm_e, 0, 0, 0], axis=0)
-                norm_v = np.expand_dims(np.r_[norm_v, 0, 0, 0], axis=0)
-
                 norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
 
                 tool = SE3((np.linalg.inv(self.fkine(q, end=link, fast=True)) @ SE3(wTlp).A)[:3, 3])
 
-                Je = self.jacobe(
+                Je = self.jacob0(
                     q, end=link, tool=tool.A, fast=True
                 )
+                Je[:3, :] = self._base.A[:3, :3] @ Je[:3, :]
 
-                Jv = camera.jacobe(camera.q, fast=True)
-
-                total_length = shape._length
-                length = np.linalg.norm(wTcp - obj)
-                Jv *= length / total_length
+                wTc = camera.fkine(camera.q, fast=True)
+                Jv = camera.jacob0(
+                    camera.q, tool=SE3(np.linalg.inv(wTc[:3, :3]) @ (wTcp - wTc[:3, -1])).A, fast=True
+                )
+                Jv[:3, :] = self._base.A[:3, :3] @ Jv[:3, :]
 
                 n_dim = Je.shape[1]
-                dp = norm_v @ Jv
+                dp = norm_h @ Jv
                 l_Ain = np.zeros((1, self.n + 2 + 10))
-                l_Ain[0, :n_dim] = norm_e @ Je
+                l_Ain[0, :n_dim] = norm_h @ Je
                 l_Ain -= np.r_[dp[0, :3], np.zeros(7), dp[0, 3:], np.zeros(9), 1]
                 l_bin = (xi * (d - ds) / (di - ds))
-
             else:
                 l_Ain = None
                 l_bin = None
