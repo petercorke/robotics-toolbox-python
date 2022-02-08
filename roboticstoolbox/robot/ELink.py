@@ -11,6 +11,7 @@ from roboticstoolbox.robot.Link import Link
 from numpy import ndarray, eye
 import fknm
 from typing import Union, overload
+from spatialgeometry import SceneGroup
 
 
 class BaseELink(Link):
@@ -296,7 +297,7 @@ class BaseELink(Link):
         return len(self._children)
 
     @property
-    def geometry(self) -> list[Shape]:
+    def geometry(self) -> SceneGroup:
         """
         Get/set joint visual geometry
         - ``link.geometry`` is the list of the visual geometries which
@@ -309,7 +310,7 @@ class BaseELink(Link):
         return self._geometry
 
     @property
-    def collision(self) -> list[Shape]:
+    def collision(self) -> SceneGroup:
         """
         Get/set joint collision geometry
         - ``link.collision`` is the list of the collision geometries which
@@ -323,38 +324,40 @@ class BaseELink(Link):
         return self._collision
 
     @collision.setter
-    def collision(self, coll: Union[Shape, list[Shape]]):
-        new_coll = []
+    def collision(self, coll: SceneGroup):
+        # new_coll = []
 
-        if isinstance(coll, list):
-            for gi in coll:
-                if isinstance(gi, Shape):
-                    new_coll.append(gi)
-                else:
-                    raise TypeError("Collision must be of Shape class")
-        elif isinstance(coll, Shape):
-            new_coll.append(coll)
-        else:
-            raise TypeError("Geometry must be of Shape class or list of Shape")
+        # if isinstance(coll, list):
+        #     for gi in coll:
+        #         if isinstance(gi, Shape):
+        #             new_coll.append(gi)
+        #         else:
+        #             raise TypeError("Collision must be of Shape class")
+        # elif isinstance(coll, Shape):
+        #     new_coll.append(coll)
+        # else:
+        #     raise TypeError("Geometry must be of Shape class or list of Shape")
 
-        self._collision = new_coll
+        # self._collision = new_coll
+        self._collision = coll
 
     @geometry.setter
-    def geometry(self, geom: Union[Shape, list[Shape]]):
-        new_geom = []
+    def geometry(self, geom: SceneGroup):
+        # new_geom = SceneGroup()
 
-        if isinstance(geom, list):
-            for gi in geom:
-                if isinstance(gi, Shape):
-                    new_geom.append(gi)
-                else:
-                    raise TypeError("Geometry must be of Shape class")
-        elif isinstance(geom, Shape):
-            new_geom.append(geom)
-        else:
-            raise TypeError("Geometry must be of Shape class or list of Shape")
+        # if isinstance(geom, list):
+        #     for gi in geom:
+        #         if isinstance(gi, Shape):
+        #             new_geom.append(gi)
+        #         else:
+        #             raise TypeError("Geometry must be of Shape class")
+        # elif isinstance(geom, Shape):
+        #     new_geom.append(geom)
+        # else:
+        #     raise TypeError("Geometry must be of Shape class or list of Shape")
 
-        self._geometry = new_geom
+        # self._geometry = new_geom
+        self._geometry = geom
 
 
 class ELink(BaseELink):
