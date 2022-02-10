@@ -615,7 +615,7 @@ class ETS(BaseETS):
         """
 
         try:
-            return ETS_fkine(self._m, self._fknm, q, base, tool, include_base)
+            return ETS_fkine(self._fknm, q, base, tool, include_base)
         except:
             pass
 
@@ -725,7 +725,7 @@ class ETS(BaseETS):
 
         # Use c extension
         try:
-            return ETS_jacob0(self._m, self._n, self._fknm, q, tool)
+            return ETS_jacob0(self._n, self._fknm, q, tool)
         except TypeError:
             pass
 
@@ -823,7 +823,7 @@ class ETS(BaseETS):
 
         # Use c extension
         try:
-            return ETS_jacobe(self._m, self._n, self._fknm, q, tool)
+            return ETS_jacobe(self._n, self._fknm, q, tool)
         except TypeError:
             pass
 
@@ -879,7 +879,7 @@ class ETS(BaseETS):
 
         # Use c extension
         try:
-            return ETS_hessian0(self._m, self._n, self._fknm, q, J0, tool)
+            return ETS_hessian0(self._n, self._fknm, q, J0, tool)
         except TypeError:
             pass
 
@@ -959,7 +959,7 @@ class ETS(BaseETS):
 
         # Use c extension
         try:
-            return ETS_hessiane(self._m, self._n, self._fknm, q, Je, tool)
+            return ETS_hessiane(self._n, self._fknm, q, Je, tool)
         except TypeError:
             pass
 
