@@ -2034,28 +2034,24 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         this robot according to q (or self.q if q is none)
         """
 
-        @lru_cache(maxsize=32)
+        @lru_cache(maxsize=2)
         def get_link_ets():
             return [link.ets._fknm for link in self.links]
 
-        @lru_cache(maxsize=32)
+        @lru_cache(maxsize=2)
         def get_link_scene_node():
             return [link._T_reference for link in self.links]
 
-        Robot_link_T(
-            get_link_ets(),
-            get_link_scene_node(),
-            self._q,
-        )
+        Robot_link_T(get_link_ets(), get_link_scene_node(), self._q, q)
 
     # --------------------------------------------------------------------- #
 
 
 if __name__ == "__main__":
 
-    from roboticstoolbox import ETS2 as ET
+    from roboticstoolbox import ET2 as ET
 
-    e = ET.r() * ET.tx(1) * ET.r() * ET.tx(1)
+    e = ET.R() * ET.tx(1) * ET.R() * ET.tx(1)
     # print(e)
     # r = Robot2(e)
 
