@@ -122,11 +122,11 @@ class Link(SceneNode, ABC):
         self.qlim = qlim
 
         # Link geometry
-        self.geometry = SceneGroup(children=geometry)
+        self.geometry = SceneGroup(scene_children=geometry)
         self._scene_children.append(self.geometry)
 
         # Collision Geometry
-        self.collision = SceneGroup(children=collision)
+        self.collision = SceneGroup(scene_children=collision)
         self._scene_children.append(self.collision)
 
         # TODO this is a leftover from VPython development, should be
