@@ -150,55 +150,50 @@ static PyObject *Robot_link_T(PyObject *self, PyObject *args)
 {
     npy_float64 *q, *T = NULL;
     PyObject *py_q, *py_np_q;
+    PyArrayObject *py_self_q;
     PyObject *ets;
     PyObject *ets_list, *T_list;
     PyObject *iter_ets_list, *iter_T_list;
-
+    int q_used = 0;
     Py_ssize_t n_links;
     PyArray_Descr *desc_q;
 
     if (!PyArg_ParseTuple(
-            args, "OOO",
+            args, "OOO!O",
             &ets_list,
             &T_list,
+            &PyArray_Type, &py_self_q,
             &py_q))
         return NULL;
 
     // Make sure q is number array
     // Cast to numpy array
     // Get data out
-    if (!_check_array_type(py_q))
-        return NULL;
-    py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
-    q = (npy_float64 *)PyArray_DATA(py_np_q);
-
-    // Set list pointers
-    // iter_ets_list = PyObject_GetIter(ets_list);
-    // iter_T_list = PyObject_GetIter(T_list);
+    if (py_q == Py_None || !_check_array_type(py_q))
+    {
+        q = (npy_float64 *)PyArray_DATA(py_self_q);
+    }
+    else
+    {
+        py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        q = (npy_float64 *)PyArray_DATA(py_np_q);
+        q_used = 1;
+    }
 
     n_links = PyList_GET_SIZE(ets_list);
     for (int i = 0; i < n_links; i++)
     {
-        // if (!(ets = (PyObject *)PyIter_Next(iter_ets_list)) ||
-        //     !(T = (npy_float64 *)PyArray_DATA((PyArrayObject *)PyIter_Next(iter_T_list))))
-        //     return;
-
         PyObject *ets = PyList_GET_ITEM(ets_list, i);
         npy_float64 *T = (npy_float64 *)PyArray_DATA((PyArrayObject *)PyList_GET_ITEM(T_list, i));
-
-        if (!PyList_CheckExact(ets))
-        {
-            PyErr_SetString(PyExc_RuntimeError, "Non-list type found in list of lists.");
-            return NULL;
-        }
 
         _ETS_fkine(ets, q, NULL, NULL, T);
     }
 
     // Free the memory
-    Py_DECREF(py_np_q);
-    // Py_DECREF(iter_ets_list);
-    // Py_DECREF(iter_T_list);
+    if (q_used)
+    {
+        Py_DECREF(py_np_q);
+    }
 
     return Py_None;
 }
