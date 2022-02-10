@@ -18,6 +18,8 @@ from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
 from typing import Optional, Union, overload
 from spatialgeometry import Shape
+from fknm import Robot_link_T
+from functools import lru_cache
 
 try:
     from matplotlib import colors
@@ -2031,7 +2033,20 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         This private method updates the local transform of each link within
         this robot according to q (or self.q if q is none)
         """
-        pass
+
+        @lru_cache(maxsize=32)
+        def get_link_ets():
+            return [link.ets._fknm for link in self.links]
+
+        @lru_cache(maxsize=32)
+        def get_link_scene_node():
+            return [link._T_reference for link in self.links]
+
+        Robot_link_T(
+            get_link_ets(),
+            get_link_scene_node(),
+            self._q,
+        )
 
     # --------------------------------------------------------------------- #
 
