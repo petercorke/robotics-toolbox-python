@@ -30,7 +30,7 @@ from roboticstoolbox import rtb_get_param
 from roboticstoolbox.robot.ET import ET, ET2
 from spatialmath.base import getvector
 from spatialmath import SE3
-from typing import Union, overload
+from typing import Union, overload, List, Set
 
 ArrayLike = Union[list, ndarray, tuple, set]
 
@@ -150,7 +150,7 @@ class BaseETS(UserList):
         else:  # pragma: nocover
             return " * ".join(es)
 
-    def joints(self) -> list[int]:
+    def joints(self) -> List[int]:
         """
         Get index of joint transforms
 
@@ -167,7 +167,7 @@ class BaseETS(UserList):
         """
         return where([e.isjoint for e in self])[0]
 
-    def jointset(self) -> set[int]:
+    def jointset(self) -> Set[int]:
         """
         Get set of joint indices
 
@@ -248,11 +248,11 @@ class BaseETS(UserList):
         return self._m
 
     @overload
-    def data(self: "ETS") -> list[ET]:  # pragma: nocover
+    def data(self: "ETS") -> List[ET]:  # pragma: nocover
         ...
 
     @overload
-    def data(self: "ETS2") -> list[ET2]:  # pragma: nocover
+    def data(self: "ETS2") -> List[ET2]:  # pragma: nocover
         ...
 
     @property
@@ -261,12 +261,12 @@ class BaseETS(UserList):
 
     @data.setter
     @overload
-    def data(self: "ETS", new_data: list[ET]):  # pragma: nocover
+    def data(self: "ETS", new_data: List[ET]):  # pragma: nocover
         ...
 
     @data.setter
     @overload
-    def data(self: "ETS", new_data: list[ET2]):  # pragma: nocover
+    def data(self: "ETS", new_data: List[ET2]):  # pragma: nocover
         ...
 
     @data.setter
@@ -307,11 +307,11 @@ class BaseETS(UserList):
         return item
 
     @overload
-    def split(self: "ETS") -> list["ETS"]:  # pragma: nocover
+    def split(self: "ETS") -> List["ETS"]:  # pragma: nocover
         ...
 
     @overload
-    def split(self: "ETS2") -> list["ETS2"]:  # pragma: nocover
+    def split(self: "ETS2") -> List["ETS2"]:  # pragma: nocover
         ...
 
     def split(self):
@@ -384,7 +384,7 @@ class BaseETS(UserList):
         ...
 
     @overload
-    def __getitem__(self: "ETS", i: slice) -> list[ET]:  # pragma: nocover
+    def __getitem__(self: "ETS", i: slice) -> List[ET]:  # pragma: nocover
         ...
 
     @overload
@@ -392,7 +392,7 @@ class BaseETS(UserList):
         ...
 
     @overload
-    def __getitem__(self: "ETS2", i: slice) -> list[ET2]:  # pragma: nocover
+    def __getitem__(self: "ETS2", i: slice) -> List[ET2]:  # pragma: nocover
         ...
 
     def __getitem__(self, i):
@@ -454,7 +454,7 @@ class ETS(BaseETS):
     def __init__(
         self,
         arg: Union[
-            list[Union["ETS", ET]], list[ET], list["ETS"], ET, "ETS", None
+            List[Union["ETS", ET]], List[ET], List["ETS"], ET, "ETS", None
         ] = None,
     ):
         super().__init__()
@@ -624,14 +624,18 @@ class ETS(BaseETS):
         end = self.data[-1]
 
         if base is None:
-            base = eye(4)
+            bases = eye(4)
         elif isinstance(base, SE3):
-            base = array(base.A)
+            bases = array(base.A)
+        else:  # pragma: nocover
+            bases = eye(4)
 
         if tool is None:
-            tool = eye(4)
+            tools = eye(4)
         elif isinstance(tool, SE3):
-            tool = array(tool.A)
+            tools = array(tool.A)
+        else:  # pragma: nocover
+            tools = eye(4)
 
         if l > 1:
             T = zeros((l, 4, 4), dtype=object)
@@ -646,9 +650,9 @@ class ETS(BaseETS):
             A = link.T(qk[jindex])
 
             if A is None:
-                Tk = tool  # pragma: nocover
+                Tk = tools  # pragma: nocover
             else:
-                Tk = A @ tool
+                Tk = A @ tools
 
             # add remaining links, back toward the base
             for i in range(self.m - 2, -1, -1):
@@ -662,7 +666,7 @@ class ETS(BaseETS):
 
             # add base transform if it is set
             if include_base == True:
-                Tk = base @ Tk
+                Tk = bases @ Tk
 
             # append
             if l > 1:
@@ -731,13 +735,15 @@ class ETS(BaseETS):
 
         # Otherwise use Python
         if tool is None:
-            tool = eye(4)
+            tools = eye(4)
         elif isinstance(tool, SE3):
-            tool = array(tool.A)
+            tools = array(tool.A)
+        else:  # pragma: nocover
+            tools = eye(4)
 
         q = getvector(q, None)
 
-        T = self.fkine(q, include_base=False) @ tool
+        T = self.fkine(q, include_base=False) @ tools
 
         U = eye(4)
         j = 0
@@ -752,7 +758,7 @@ class ETS(BaseETS):
                 U = U @ link.T(q[jindex])  # type: ignore
 
                 if link == end:
-                    U = U @ tool
+                    U = U @ tools
 
                 Tu = SE3(U, check=False).inv().A @ T
                 n = U[:3, 0]
@@ -1093,7 +1099,7 @@ class ETS2(BaseETS):
     def __init__(
         self,
         arg: Union[
-            list[Union["ETS2", ET2]], list[ET2], list["ETS2"], ET2, "ETS2", None
+            List[Union["ETS2", ET2]], List[ET2], List["ETS2"], ET2, "ETS2", None
         ] = None,
     ):
         super().__init__()
@@ -1248,19 +1254,24 @@ class ETS2(BaseETS):
         end = self[-1]
 
         if base is None:
-            base = eye(3)
+            bases = eye(3)
         elif isinstance(base, SE2):
-            base = array(base.A)
+            bases = array(base.A)
+        else:  # pragma: nocover
+            bases = eye(3)
 
         if tool is None:
-            tool = eye(3)
+            tools = eye(3)
         elif isinstance(tool, SE2):
-            tool = array(tool.A)
+            tools = array(tool.A)
+        else:  # pragma: nocover
+            tools = eye(3)
 
         if l > 1:
             T = zeros((l, 3, 3), dtype=object)
         else:
             T = zeros((3, 3), dtype=object)
+
         Tk = eye(3)
 
         for k, qk in enumerate(q):  # type: ignore
@@ -1270,9 +1281,9 @@ class ETS2(BaseETS):
             A = link.T(qk[jindex])
 
             if A is None:
-                Tk = tool  # pragma: nocover
+                Tk = tools  # pragma: nocover
             else:
-                Tk = A @ tool
+                Tk = A @ tools
 
             # add remaining links, back toward the base
             for i in range(self.m - 2, -1, -1):
@@ -1286,7 +1297,7 @@ class ETS2(BaseETS):
 
             # add base transform if it is set
             if include_base == True:
-                Tk = base @ Tk
+                Tk = bases @ Tk
 
             # append
             if l > 1:
