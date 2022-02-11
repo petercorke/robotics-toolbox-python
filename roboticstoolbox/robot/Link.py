@@ -5,6 +5,7 @@ from functools import wraps
 from spatialmath.base import getvector, isscalar, isvector, ismatrix
 from ansitable import ANSITable, Column
 from spatialgeometry import Shape, SceneNode, SceneGroup
+from typing import List, Union
 
 
 def _listen_dyn(func):
@@ -106,8 +107,8 @@ class Link(SceneNode, ABC):
         Tc=None,
         G=None,
         mesh=None,
-        geometry: list[Shape] = [],
-        collision: list[Shape] = [],
+        geometry: List[Shape] = [],
+        collision: List[Shape] = [],
         **kwargs,
     ):
         # Initialise the scene node
@@ -122,12 +123,12 @@ class Link(SceneNode, ABC):
         self.qlim = qlim
 
         # Link geometry
-        self.geometry = SceneGroup(scene_children=geometry)
-        self._scene_children.append(self.geometry)
+        self._geometry = SceneGroup(scene_children=geometry)
+        self._scene_children.append(self._geometry)
 
         # Collision Geometry
-        self.collision = SceneGroup(scene_children=collision)
-        self._scene_children.append(self.collision)
+        self._collision = SceneGroup(scene_children=collision)
+        self._scene_children.append(self._collision)
 
         # TODO this is a leftover from VPython development, should be
         # using geometry instead
@@ -789,6 +790,55 @@ class Link(SceneNode, ABC):
     @_listen_dyn
     def G(self, G_new):
         self._G = G_new
+
+    # -------------------------------------------------------------------------- #
+
+    @property
+    def geometry(self) -> SceneGroup:
+        """
+        Get/set joint visual geometry
+        - ``link.geometry`` is the list of the visual geometries which
+            represent the shape of the link
+            :return: the visual geometries
+            :rtype: list of Shape
+        - ``link.geometry = ...`` checks and sets the geometry
+        - ``link.geometry.append(...)`` add geometry
+        """
+        return self._geometry
+
+    @property
+    def collision(self) -> SceneGroup:
+        """
+        Get/set joint collision geometry
+        - ``link.collision`` is the list of the collision geometries which
+            represent the collidable shape of the link.
+            :return: the collision geometries
+            :rtype: list of Shape
+        - ``link.collision = ...`` checks and sets the collision geometry
+        - ``link.collision.append(...)`` add collision geometry
+        The collision geometries are what is used to check for collisions.
+        """
+        return self._collision
+
+    @collision.setter
+    def collision(self, coll: Union[SceneGroup, List[Shape], Shape]):
+
+        if isinstance(coll, list):
+            self.collision.scene_children = coll
+        elif isinstance(coll, Shape):
+            self.collision.scene_children.append(coll)
+        elif isinstance(coll, SceneGroup):
+            self._collision = coll
+
+    @geometry.setter
+    def geometry(self, geom: Union[SceneGroup, List[Shape], Shape]):
+
+        if isinstance(geom, list):
+            self.geometry.scene_children = geom
+        elif isinstance(geom, Shape):
+            self.geometry.scene_children.append(geom)
+        elif isinstance(geom, SceneGroup):
+            self._geometry = geom
 
     # -------------------------------------------------------------------------- #
 
