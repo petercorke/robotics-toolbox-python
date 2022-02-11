@@ -4,13 +4,13 @@
 @author: Jesse Haviland
 """
 
-from spatialgeometry import Shape
+from spatialgeometry import SceneNode, Shape
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.ET import ET, ET2
 from roboticstoolbox.robot.Link import Link
 from numpy import ndarray, eye
 import fknm
-from typing import Union, overload
+from typing import Union, overload, List
 from spatialgeometry import SceneGroup
 
 
@@ -277,7 +277,7 @@ class BaseELink(Link):
             return self._parent_name
 
     @property
-    def children(self) -> Union[list["ELink"], None]:
+    def children(self) -> Union[List["ELink"], None]:
         """
         List of child links
         :return: child links
@@ -295,69 +295,6 @@ class BaseELink(Link):
         Will be zero for an end-effector link
         """
         return len(self._children)
-
-    @property
-    def geometry(self) -> SceneGroup:
-        """
-        Get/set joint visual geometry
-        - ``link.geometry`` is the list of the visual geometries which
-            represent the shape of the link
-            :return: the visual geometries
-            :rtype: list of Shape
-        - ``link.geometry = ...`` checks and sets the geometry
-        - ``link.geometry.append(...)`` add geometry
-        """
-        return self._geometry
-
-    @property
-    def collision(self) -> SceneGroup:
-        """
-        Get/set joint collision geometry
-        - ``link.collision`` is the list of the collision geometries which
-            represent the collidable shape of the link.
-            :return: the collision geometries
-            :rtype: list of Shape
-        - ``link.collision = ...`` checks and sets the collision geometry
-        - ``link.collision.append(...)`` add collision geometry
-        The collision geometries are what is used to check for collisions.
-        """
-        return self._collision
-
-    @collision.setter
-    def collision(self, coll: SceneGroup):
-        # new_coll = []
-
-        # if isinstance(coll, list):
-        #     for gi in coll:
-        #         if isinstance(gi, Shape):
-        #             new_coll.append(gi)
-        #         else:
-        #             raise TypeError("Collision must be of Shape class")
-        # elif isinstance(coll, Shape):
-        #     new_coll.append(coll)
-        # else:
-        #     raise TypeError("Geometry must be of Shape class or list of Shape")
-
-        # self._collision = new_coll
-        self._collision = coll
-
-    @geometry.setter
-    def geometry(self, geom: SceneGroup):
-        # new_geom = SceneGroup()
-
-        # if isinstance(geom, list):
-        #     for gi in geom:
-        #         if isinstance(gi, Shape):
-        #             new_geom.append(gi)
-        #         else:
-        #             raise TypeError("Geometry must be of Shape class")
-        # elif isinstance(geom, Shape):
-        #     new_geom.append(geom)
-        # else:
-        #     raise TypeError("Geometry must be of Shape class or list of Shape")
-
-        # self._geometry = new_geom
-        self._geometry = geom
 
 
 class ELink(BaseELink):
@@ -420,130 +357,6 @@ class ELink(BaseELink):
         # The c will adjust the inside of this array with a reference
         # to this specific array. If replaced --> segfault
         self._fk = eye(4)
-        self._init_fknm()
-
-    # def copy(self, parent=None):
-    #     new = super().copy(parent)
-    #     new._init_fknm()
-    #     return new
-
-    def _get_fknm(self):
-        isflip = False
-        axis = 0
-        jindex = 0
-
-        if self.isjoint:
-            isflip = self.ets[-1].isflip
-            jindex = self.jindex
-
-            if jindex is None:
-                jindex = 0
-
-            if self.ets[-1].axis == "Rx":
-                axis = 0
-            elif self.ets[-1].axis == "Ry":
-                axis = 1
-            elif self.ets[-1].axis == "Rz":
-                axis = 2
-            elif self.ets[-1].axis == "tx":
-                axis = 3
-            elif self.ets[-1].axis == "ty":
-                axis = 4
-            elif self.ets[-1].axis == "tz":
-                axis = 5
-
-        parent = None
-        # if self.parent is None:
-        #     parent = None
-        # else:
-        #     parent = self.parent._fknm
-
-        shape_base = []
-        shape_wT = []
-        shape_sT = []
-        shape_sq = []
-
-        for shap in self.geometry:
-            shape_base.append(shap._base)
-            shape_wT.append(shap._wT)
-            shape_sT.append(shap._sT)
-            shape_sq.append(shap._sq)
-
-        for shap in self.collision:
-            shape_base.append(shap._base)
-            shape_wT.append(shap._wT)
-            shape_sT.append(shap._sT)
-            shape_sq.append(shap._sq)
-
-        return isflip, axis, jindex, parent, shape_base, shape_wT, shape_sT, shape_sq
-
-    def _init_fknm(self):
-        if isinstance(self.parent, str):
-            # Initialise later
-            return
-
-        (
-            isflip,
-            axis,
-            jindex,
-            parent,
-            shape_base,
-            shape_wT,
-            shape_sT,
-            shape_sq,
-        ) = self._get_fknm()
-
-        self._fknm = fknm.link_init(
-            self.isjoint,
-            isflip,
-            axis,
-            jindex,
-            len(shape_base),
-            self._Ts,
-            self._fk,
-            shape_base,
-            shape_wT,
-            shape_sT,
-            shape_sq,
-            parent,
-        )
-
-    def _update_fknm(self):
-
-        # Check if not initialized yet
-        try:
-            if self._fknm is None:
-                self._init_fknm()
-                return
-        except AttributeError:
-            return
-
-        (
-            isflip,
-            axis,
-            jindex,
-            parent,
-            shape_base,
-            shape_wT,
-            shape_sT,
-            shape_sq,
-        ) = self._get_fknm()
-
-        fknm.link_update(
-            self._fknm,
-            self.isjoint,
-            isflip,
-            axis,
-            jindex,
-            len(shape_base),
-            self._Ts,
-            self._fk,
-            shape_base,
-            shape_wT,
-            shape_sT,
-            shape_sq,
-            parent,
-        )
 
     @property
     def ets(self: "ELink") -> "ETS":
