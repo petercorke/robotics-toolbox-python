@@ -981,7 +981,7 @@ class DHRobot(Robot):
         L = self.links
         J = np.zeros((6, self.n), dtype=q.dtype)
 
-        U = self.tool.A
+        U = self.tool
 
         for j in range(n - 1, -1, -1):
             if self.mdh == 0:
