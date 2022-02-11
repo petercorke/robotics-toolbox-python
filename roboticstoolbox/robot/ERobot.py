@@ -31,7 +31,7 @@ from spatialmath import (
 )
 import fknm
 from functools import lru_cache
-from typing import Union, overload
+from typing import Union, overload, Dict, List, Tuple
 
 ArrayLike = Union[list, ndarray, tuple, set]
 
@@ -148,9 +148,6 @@ class BaseERobot(Robot):
         for link in links:
             if link.parent is None and link.parent_name is not None:
                 link._parent = self._linkdict[link.parent_name]
-                # Update the fast kinematics object
-                if isinstance(self, ERobot):
-                    link._init_fknm()
 
         if all([link.parent is None for link in links]):
             # no parent links were given, assume they are sequential
@@ -254,13 +251,6 @@ class BaseERobot(Robot):
 
         self._nbranches = sum([link.nchildren == 0 for link in links])
 
-        # Current joint angles of the robot
-        # TODO should go to Robot class?
-        self.q = zeros(self.n)
-        self.qd = zeros(self.n)
-        self.qdd = zeros(self.n)
-        self.control_type = "v"
-
         # Set up qlim
         qlim = zeros((2, self.n))
         j = 0
@@ -275,7 +265,16 @@ class BaseERobot(Robot):
             if any(qlim[:, i] != 0) and not any(isnan(qlim[:, i])):
                 self._valid_qlim = True
 
+        # Initialise Robot object
         super().__init__(orlinks, **kwargs)
+
+        # Scene node, set links between the links
+        for link in self.links:
+            if link.parent is not None:
+                link.scene_parent = link.parent
+
+        # SceneNode, set a reference to the first link
+        self.scene_children = [self.links[0]]
 
     def __str__(self) -> str:
         """
@@ -355,7 +354,7 @@ class BaseERobot(Robot):
         ...
 
     @overload
-    def __getitem__(self: "ERobot", i: slice) -> list[ELink]:
+    def __getitem__(self: "ERobot", i: slice) -> List[ELink]:
         ...
 
     @overload
@@ -363,7 +362,7 @@ class BaseERobot(Robot):
         ...
 
     @overload
-    def __getitem__(self: "ERobot2", i: slice) -> list[ELink2]:
+    def __getitem__(self: "ERobot2", i: slice) -> List[ELink2]:
         ...
 
     def __getitem__(self, i):
@@ -401,15 +400,15 @@ class BaseERobot(Robot):
     # --------------------------------------------------------------------- #
 
     @overload
-    def links(self: "ERobot") -> list[ELink]:
+    def links(self: "ERobot") -> List[ELink]:
         ...
 
     @overload
-    def links(self: "ERobot2") -> list[ELink2]:
+    def links(self: "ERobot2") -> List[ELink2]:
         ...
 
     @property
-    def links(self) -> list[ELink]:
+    def links(self) -> List[ELink]:
         """
         Robot links
 
@@ -432,7 +431,7 @@ class BaseERobot(Robot):
     # --------------------------------------------------------------------- #
 
     @property
-    def grippers(self) -> list[Gripper]:
+    def grippers(self) -> List[Gripper]:
         """
         Grippers attached to the robot
 
@@ -468,29 +467,29 @@ class BaseERobot(Robot):
     # --------------------------------------------------------------------- #
 
     @overload
-    def elinks(self: "ERobot") -> list[ELink]:
+    def elinks(self: "ERobot") -> List[ELink]:
         ...
 
     @overload
-    def elinks(self: "ERobot2") -> list[ELink2]:
+    def elinks(self: "ERobot2") -> List[ELink2]:
         ...
 
     @property
-    def elinks(self) -> list[ELink]:
+    def elinks(self) -> List[ELink]:
         return self._links
 
     # --------------------------------------------------------------------- #
 
     @overload
-    def link_dict(self: "ERobot") -> dict[str, ELink]:
+    def link_dict(self: "ERobot") -> Dict[str, ELink]:
         ...
 
     @overload
-    def link_dict(self: "ERobot2") -> dict[str, ELink2]:
+    def link_dict(self: "ERobot2") -> Dict[str, ELink2]:
         ...
 
     @property
-    def link_dict(self) -> dict[str, ELink]:
+    def link_dict(self) -> Dict[str, ELink]:
         return self._linkdict
 
     # --------------------------------------------------------------------- #
@@ -517,19 +516,19 @@ class BaseERobot(Robot):
     # --------------------------------------------------------------------- #
 
     @overload
-    def ee_links(self: "ERobot2") -> list[ELink2]:
+    def ee_links(self: "ERobot2") -> List[ELink2]:
         ...
 
     @overload
-    def ee_links(self: "ERobot") -> list[ELink]:
+    def ee_links(self: "ERobot") -> List[ELink]:
         ...
 
     @property
-    def ee_links(self) -> list[ELink]:
+    def ee_links(self) -> List[ELink]:
         return self._ee_links
 
     @ee_links.setter
-    def ee_links(self, link: Union[list[ELink], ELink]):
+    def ee_links(self, link: Union[List[ELink], ELink]):
         if isinstance(link, ELink):
             self._ee_links = [link]
         elif isinstance(link, list) and all([isinstance(x, ELink) for x in link]):
@@ -738,7 +737,7 @@ class BaseERobot(Robot):
 
     # --------------------------------------------------------------------- #
 
-    def segments(self) -> list[list[Union[ELink, None]]]:
+    def segments(self) -> List[List[Union[ELink, None]]]:
         """
         Segments of branched robot
 
@@ -809,7 +808,11 @@ class BaseERobot(Robot):
         """
         q = getvector(q)
 
-        Tbase = self.base  # add base, also sets the type
+        if isinstance(self, ERobot):
+            Tbase = SE3(self.base)  # add base, also sets the type
+        else:
+            Tbase = SE2(self.base)  # add base, also sets the type
+
         linkframes = Tbase.__class__.Alloc(self.nlinks + 1)
         linkframes[0] = Tbase
 
@@ -1035,7 +1038,7 @@ graph [rankdir=LR];
         self,
         end: Union[Gripper, ELink, str, None] = None,
         start: Union[Gripper, ELink, str, None] = None,
-    ) -> tuple[ELink, Union[ELink, Gripper], Union[None, SE3]]:
+    ) -> Tuple[ELink, Union[ELink, Gripper], Union[None, SE3]]:
         """
         Get and validate an end-effector, and a base link
         :param end: end-effector or gripper to compute forward kinematics to
@@ -1295,20 +1298,9 @@ class ERobot(BaseERobot):
         self._cache_end_tool = None
         self._eye_fknm = eye(4)
 
-        self._cache_links_fknm = []
-
         self._cache_grippers = []
 
-        for link in self.elinks:
-            self._cache_links_fknm.append(link._fknm)
-
-        for gripper in self.grippers:
-            cache = []
-            for link in gripper.links:
-                cache.append(link._fknm)
-            self._cache_grippers.append(cache)
-
-        self._cache_m = len(self._cache_links_fknm)
+        self._cache_m = len(self._path_cache)
 
     def _to_dict(self, robot_alpha=1.0, collision_alpha=0.0):
 
@@ -1367,6 +1359,7 @@ class ERobot(BaseERobot):
 
         return ob
 
+    # TODO REMOVE THIS
     def _set_link_fk(self, q):
         """
         robot._set_link_fk(q) evaluates fkine for each link within a
@@ -1388,12 +1381,12 @@ class ERobot(BaseERobot):
 
         """
 
-        if self._base is None:
+        if self._T is None:
             base = self._eye_fknm
         else:
-            base = self._base.A
+            base = self._T
 
-        fknm.fkine_all(self._cache_m, self._cache_links_fknm, q, base)
+        # fknm.fkine_all(self._cache_m, self._cache_links_fknm, q, base)
 
         for i in range(len(self._cache_grippers)):
             fknm.fkine_all(
@@ -1561,7 +1554,7 @@ class ERobot(BaseERobot):
               Sequence, J. Haviland and P. Corke
         """
         return self.ets(start, end).fkine(
-            q, base=self._base, tool=tool, include_base=include_base
+            q, base=self._T, tool=tool, include_base=include_base
         )
 
     def jacob0(
