@@ -209,10 +209,10 @@ class TestERobot(unittest.TestCase):
         panda.qdd = panda.qd
         panda.qd = panda.qdd
 
-    def test_control_type(self):
+    def test_control_mode(self):
         panda = rtb.models.ETS.Panda()
-        panda.control_type = "v"
-        self.assertEqual(panda.control_type, "v")
+        panda.control_mode = "v"
+        self.assertEqual(panda.control_mode, "v")
 
     def test_base(self):
         panda = rtb.models.ETS.Panda()
@@ -220,10 +220,10 @@ class TestERobot(unittest.TestCase):
         pose = sm.SE3()
 
         panda.base = pose.A
-        nt.assert_array_almost_equal(np.eye(4), panda.base.A)
+        nt.assert_array_almost_equal(np.eye(4), panda.base)
 
         panda.base = pose
-        nt.assert_array_almost_equal(np.eye(4), panda.base.A)
+        nt.assert_array_almost_equal(np.eye(4), panda.base)
 
     def test_fkine(self):
         panda = rtb.models.ETS.Panda()
@@ -878,13 +878,13 @@ class TestERobot(unittest.TestCase):
 
         nt.assert_array_almost_equal(r.jacob0(q), ans)
 
-    def test_control_type2(self):
+    def test_control_mode2(self):
         panda = rtb.models.ETS.Panda()
 
-        panda.control_type = "p"
+        panda.control_mode = "p"
 
         with self.assertRaises(ValueError):
-            panda.control_type = "z"
+            panda.control_mode = "z"
 
     def test_dist(self):
         s0 = gm.Cuboid([1, 1, 1], T=sm.SE3(0, 0, 0))
