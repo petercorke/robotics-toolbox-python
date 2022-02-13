@@ -41,31 +41,33 @@ class Bicycle(TransferBlock):
 
         :param L: Wheelbase, defaults to 1
         :type L: float, optional
-        :param speed_max: Velocity limit, defaults to 1
+        :param speed_max: Velocity limit, defaults to math.inf
         :type speed_max: float, optional
         :param accel_max: maximum acceleration, defaults to math.inf
         :type accel_max: float, optional
-        :param steer_max: maximum steering angle, defaults to math.pi*0.45
+        :param steer_max: maximum steered wheel angle, defaults to math.pi*0.45
         :type steer_max: float, optional
-        :param x0: Inital state, defaults to None
-        :type x0: array_like, optional
-        :param ``**blockargs``: common Block options
+        :param x0: Initial state, defaults to [0,0,0]
+        :type x0: array_like(3), optional
+        :param blockargs: |BlockOptions|
+        :type blockargs: dict
         :return: a BICYCLE block
         :rtype: Bicycle instance
 
         
-        Bicycle kinematic model with state :math:`[x, y, \theta]`.  
+        Bicycle kinematic model with state/configuration :math:`[x, y, \theta]`.  
         
         **Block ports**
             
-            :input v: Vehicle speed (metres/sec).  The velocity limit ``vlim`` is
-                applied to the magnitude of this input.
-            :input γ: Steering wheel angle (radians).  The steering limit ``slim``
-                is applied to the magnitude of this input.
+            :input v: Vehicle speed (metres/sec).  The velocity limit ``speed_max``
+                and acceleration limit ``accel_max`` is
+                applied to this input.
+            :input γ: Steered wheel angle (radians).  The steering limit ``steer_max``
+                is applied to this input.
             
             :output q: configuration (x, y, θ)
 
-        :seealso: :class:`mobile.Bicycle` :class:`DiffSteer`
+        :seealso: :class:`roboticstoolbox.mobile.Bicycle` :class:`Unicycle` :class:`DiffSteer` 
         """
         # TODO: add option to model the effect of steering arms, responds to
         #  gamma dot
@@ -93,56 +95,58 @@ class Bicycle(TransferBlock):
     
 # ------------------------------------------------------------------------ #
 class Unicycle(TransferBlock):
-    """
+    r"""
     :blockname:`UNICYCLE`
     
     .. table::
        :align: left
     
-    +------------+---------+---------+
-    | inputs     | outputs |  states |
-    +------------+---------+---------+
-    | 2          | 1       | 3       |
-    +------------+---------+---------+
-    | float      | float   |         | 
-    +------------+---------+---------+
+    +------------+------------+---------+
+    | inputs     | outputs    |  states |
+    +------------+------------+---------+
+    | 2          | 1          | 3       |
+    +------------+------------+---------+
+    | float      | ndarray(3) |         | 
+    +------------+------------+---------+
     """
     nin = 2
     nout = 1
     inlabels = ('v', 'ω')
     outlabels = ('q',)
 
-    def __init__(self, w=1, speed_max=np.inf, accel_max=np.inf, steer_max=None, 
+    def __init__(self, w=1, speed_max=np.inf, accel_max=np.inf, steer_max=np.inf, 
         a=0, x0=None, **blockargs):
         r"""
         Create a vehicle model with Unicycle kinematics.
 
         :param w: vehicle width, defaults to 1
         :type w: float, optional
-        :param speed_max: Velocity limit, defaults to 1
+        :param speed_max: Velocity limit, defaults to math.inf
         :type speed_max: float, optional
         :param accel_max: maximum acceleration, defaults to math.inf
         :type accel_max: float, optional
-        :param steer_max: maximum steering rate, defaults to 1
+        :param steer_max: maximum turn rate :math:`\omega`, defaults to math.inf
         :type steer_max: float, optional
-        :param x0: Inital state, defaults to None
-        :type x0: array_like, optional
-        :param ``**blockargs``: common Block options
+        :param x0: Inital state, defaults to [0,0,0]
+        :type x0: array_like(3), optional
+        :param blockargs: |BlockOptions|
+        :type blockargs: dict
         :return: a UNICYCLE block
         :rtype: Unicycle instance
 
-        Unicycle kinematic model with state :math:`[x, y, \theta]`.
+        Unicycle kinematic model with state/configuration :math:`[x, y, \theta]`.
 
         **Block ports**
             
-            :input v: Vehicle speed (metres/sec).  The velocity limit ``vlim`` is
-                applied to the magnitude of this input.
-            :input ω: Angular velocity (radians/sec).  The steering limit ``slim``
-                is applied to the magnitude of this input.
+            :input v: Vehicle speed (metres/sec).  The velocity limit ``speed_max`` and
+                acceleration limit ``accel_max`` is
+                applied to this input.
+            :input ω: Angular velocity (radians/sec).  The steering limit ``steer_max``
+                is applied to this input.
             
             :output q: configuration (x, y, θ)
 
-        :seealso: :class:`Bicycle` :class:`DiffSteer`
+        :seealso: :class:`roboticstoolbox.mobile.Unicycle` :class:`Bicycle` :class:`DiffSteer`
         """        
         super().__init__(nstates=3, **blockargs)
         
@@ -183,13 +187,13 @@ class DiffSteer(TransferBlock):
     .. table::
        :align: left
     
-    +------------+---------+---------+
-    | inputs     | outputs |  states |
-    +------------+---------+---------+
-    | 2          | 3       | 3       |
-    +------------+---------+---------+
-    | float      | float   |         | 
-    +------------+---------+---------+
+    +------------+------------+---------+
+    | inputs     | outputs    |  states |
+    +------------+------------+---------+
+    | 2          | 1          | 3       |
+    +------------+------------+---------+
+    | float      | ndarray(3) |         | 
+    +------------+------------+---------+
     """
 
     nin = 2
@@ -200,7 +204,7 @@ class DiffSteer(TransferBlock):
 
     def __init__(self, w=1, R=1, speed_max=np.inf, accel_max=np.inf, steer_max=None, 
         a=0, x0=None, **blockargs):
-        """
+        r"""
         Create a differential steer vehicle model
 
         :param w: vehicle width, defaults to 1
@@ -215,12 +219,13 @@ class DiffSteer(TransferBlock):
         :type steer_max: float, optional
         :param x0: Inital state, defaults to None
         :type x0: array_like, optional
-        :param ``**blockargs``: common Block options
+        :param blockargs: |BlockOptions|
+        :type blockargs: dict
         :return: a DIFFSTEER block
-        :rtype: DifSteer instance
+        :rtype: DiffSteer instance
         
         Unicycle kinematic model with state :math:`[x, y, \theta]`, with
-        with inputs given as wheel angular velocity.
+        inputs given as wheel angular velocity.
 
         **Block ports**
 
@@ -229,10 +234,14 @@ class DiffSteer(TransferBlock):
               
             :output q: configuration (x, y, θ)
 
+        The resulting forward velocity and turning rate from ωL and ωR have
+        the velocity limit ``speed_max`` and acceleration limit ``accel_max``
+        applied, as well as the turning rate limit ``steer_max``.
+
         .. note:: Wheel velocity is defined such that if both are positive the vehicle
               moves forward.
 
-        :seealso: :class:`Bicycle` :class:`Unicycle`
+        :seealso: :class:`roboticstoolbox.mobile.Unicycle` :class:`Bicycle` :class:`Unicycle`
         """
         super().__init__(nstates=3, **blockargs)
         self.type = 'diffsteer'
@@ -293,9 +302,12 @@ class VehiclePlot(GraphicsBlock):
         :type labels: array_like(2) or list
         :param square: Set aspect ratio to 1, defaults to True
         :type square: bool, optional
-        :param init: initialize graphics, defaults to None
+        :param init: function to initialize graphics, defaults to None
         :type init: callable, optional
-        :param ``**blockargs``: common Block options
+        :param scale: scale of plot, defaults to "auto"
+        :type scale: list or str, optional
+        :param blockargs: |BlockOptions|
+        :type blockargs: dict
         :return: A VEHICLEPLOT block
         :rtype: VehiclePlot instance
 
@@ -347,15 +359,11 @@ class VehiclePlot(GraphicsBlock):
         
     def start(self, state=None):
         # create the plot
-        super().reset()
-        try:
-            print('graphics start')
-            self.fig = self.create_figure(state)
-            print('fig created')
-            self.ax = self.fig.gca()
-            print('axes')
-        except:
-            print('aaargh')
+        # super().reset()
+        # create the figures
+        self.fig = self.create_figure(state)
+        self.ax = self.fig.add_subplot(111)
+        
         if self.square:
             self.ax.set_aspect('equal')
         print('done')

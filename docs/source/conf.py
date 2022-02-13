@@ -47,6 +47,7 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     'sphinx_autorun',
     'blockname',
+    'sphinx.ext.intersphinx',
     ]
 
 autosummary_generate = True
@@ -158,3 +159,8 @@ mathjax_config = {
         }
    }
 }
+intersphinx_mapping = { 'numpy': ('http://docs.scipy.org/doc/numpy/', None),
+                       'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
+                       'matplotlib': ('http://matplotlib.sourceforge.net/', None)}
+
+# 'python': ('http://docs.python.org/2', None),

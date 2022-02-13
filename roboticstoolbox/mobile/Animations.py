@@ -16,75 +16,42 @@ import matplotlib.transforms as mtransforms
 from spatialmath import SE2, base
 from roboticstoolbox import rtb_load_data
 
-"""
-Class to support animation of a vehicle on Matplotlib plot
-
-There are three concrete subclasses:
-
-- ``VehicleMarker`` animates a Matplotlib marker
-- ``VehiclePolygon`` animates a polygon, including predefined shapes
-- ``VehicleIcon`` animates an image
-
-
-
-These can be used in two different ways, firstly::
-
-    a.add()
-    a.update(q)
-
-adds an instance of the animation shape to the plot and subsequent calls
-to ``update`` will animate it.
-
-Secondly::
-
-    a.plot(q)
-
-adds an instance of the animation shape to the plot with the specified
-configuration.  It cannot be moved, but the method does return a reference
-to the Matplotlib object added to the plot.
-
-Any of these can be passed to a Vehicle subclass object to make an animation
-during simulation::
-
-        a = VehiclePolygon('car', color='r')
-        veh = Bicycle()
-        veh.run(animation=a)
-
-    """
-
-
 class VehicleAnimationBase(ABC):
     """
-    Class to support animation of a vehicle on Matplotlib plot
+    Abstract base class to support animation of a vehicle on Matplotlib plot
 
     There are three concrete subclasses:
 
     - ``VehicleMarker`` animates a Matplotlib marker
-    - ``VehiclePolygon`` animates a polygon, including predefined shapes
+    - ``VehiclePolygon`` animates a polygon shape (outline or filled), including predefined shapes
     - ``VehicleIcon`` animates an image
 
-    These can be used in two different ways, firstly::
+    An instance ``a`` of these classes can be used in three different ways, firstly::
 
+        a = VehiclePolygon("car", color="red")
         a.add()
-        a.update(q)
 
     adds an instance of the animation shape to the plot and subsequent calls
-    to ``update`` will animate it.
+    to::
 
-    Secondly::
+        a.update(q)
 
+    will animate it.
+
+    Secondly, an instance can be passed to a Vehicle subclass object to make an animation
+    during simulation::
+
+            a = VehiclePolygon("car", color="red")
+            veh = Bicycle(animation=a)
+
+    Thirdly::
+
+        a = VehiclePolygon("car", color="red")
         a.plot(q)
 
     adds an instance of the animation shape to the plot with the specified
     configuration.  It cannot be moved, but the method does return a reference
     to the Matplotlib object added to the plot.
-
-    Any of these can be passed to a Vehicle subclass object to make an animation
-    during simulation::
-
-            a = VehiclePolygon('car', color='r')
-            veh = Bicycle()
-            veh.run(animation=a)
 
     """
 
@@ -98,9 +65,15 @@ class VehicleAnimationBase(ABC):
 
         :param ax: Axis to add to, defaults to current axis
         :type ax: Axes, optional
+        :param kwargs: additional arguments passed to Matplotlib :meth:`~matplotlib.axes.Axes.plot`, which
+            override arguments given to the constructor.
 
         A reference to the animation object is kept, and it will be deleted
         from the plot when the ``VehicleAnimation`` object is garbage collected.
+
+        The animation is not displayed until :meth:`update` is called.
+
+        :seealso: :meth:`update`
         """
         if ax is None:
             self._ax = plt.gca()
@@ -111,28 +84,28 @@ class VehicleAnimationBase(ABC):
 
     def update(self, q):
         """
-        Update the vehicle animation
+        Update the vehicle animation (superclass)
 
-        :param q: vehicle configuration
-        :type q: ndarray(2) or ndarray(3)
+        :param q: vehicle position or configuration
+        :type q: array_like(2) or array_like(3)
 
-        The graphical depiction of the vehicle position or pose is updated.
+        The graphical depiction of the vehicle position or configuration is updated.
 
-        For ``AnimationMarker`` only position can be depicted so the third element
-        of ``q``, if given, is ignored.
+        :seealso: :meth:`add`
         """
         self._update(q)
 
     def plot(self, q, **kwargs):
         """
-        Add vehicle to the current plot
+        Add vehicle to the current plot (superclass)
 
-        :param q: vehicle configuration
-        :type q: ndarray(2) or ndarray(3)
+        :param q: vehicle position or configuration
+        :type q: array_like(2) or array_like(3)
+        :param kwargs: additional arguments passed to Matplotlib :meth:`~matplotlib.axes.Axes.plot`, which
+            override arguments given to the constructor.
         :return: reference to Matplotlib object
 
-        A reference to the animation object is kept, and it will be deleted
-        from the plot when the ``VehicleAnimation`` object is garbage collected.
+        The animation object is rendered into the current axes.
         """
         self.add(**kwargs)
         self.update(q)
@@ -143,25 +116,24 @@ class VehicleAnimationBase(ABC):
         if self._object is not None:
             self._object.remove()
 
-
 # ========================================================================= #
-
-
 class VehicleMarker(VehicleAnimationBase):
     def __init__(self, **kwargs):
         """
         Create graphical animation of vehicle as a Matplotlib marker
 
-        :param kwargs: additional arguments passed to matplotlib ``plot``.
+        :param kwargs: additional arguments passed to Matplotlib :meth:`~matplotlib.axes.Axes.plot`.
         :return: animation object
         :rtype: VehicleAnimation
 
         Creates an object that can be passed to a ``Vehicle`` subclass to depict
-        the moving robot as a simple matplotlib marker during simulation.
+        the moving robot as a simple Matplotlib marker during simulation.
 
-        For example, a blue filled square, is::
+        The default marker is a red filled circle with a white outline.
 
-            a = VehicleMarker(marker='s', markerfacecolor='b')
+        For example, to animate a simulation with a blue square marker::
+
+            a = VehicleMarker(marker="s", markerfacecolor="b")
             veh = Bicycle(driver=RandomPath(10), animation=a)
             veh.run()
 
@@ -186,48 +158,47 @@ class VehicleMarker(VehicleAnimationBase):
     def _add(self, x=None, **kwargs):
         if x is None:
             x = (0, 0)
-        self._object = plt.plot(x[0], x[1], **self._args)[0]
+        self._object = plt.plot(x[0], x[1], **{**self._args, **kwargs})[0]
 
 
 # ========================================================================= #
-
 
 class VehiclePolygon(VehicleAnimationBase):
     def __init__(self, shape="car", scale=1, **kwargs):
         """
         Create graphical animation of vehicle as a polygon
 
-        :param shape: polygon shape as vertices or a predefined shape, defaults to 'car'
+        :param shape: polygon shape as vertices or a predefined shape, defaults to "car"
         :type shape: ndarray(2,n) or str
         :param scale: Length of the vehicle on the plot, defaults to 1
         :type scale: float
-        :param kwargs: additional arguments passed to matplotlib patch such as
+        :param kwargs: additional arguments passed to Matplotlib :class:`~matplotlib.patches.Polygon` such as
             ``color`` (face+edge), ``alpha``, ``facecolor``, ``edgecolor``,
             ``linewidth`` etc.
         :raises ValueError: unknown shape name
         :raises TypeError: bad shape argument
         :return: animation object
-        :rtype: VehicleAnimation
+        :rtype: VehiclePolygon
 
         Creates an object that can be passed to a ``Vehicle`` subclass to
         depict the moving robot as a polygon during simulation.
 
-        For example, a red filled car-shaped polygon is::
+        For example, to animate a simulation with a red filled car-shaped polygon::
 
-            a = VehiclePolygon('car', color='r')
-            veh = Bicycle()
-            veh.run(animation=a)
+            a = VehiclePolygon("car", color="r")
+            veh = Bicycle(driver=RandomPath(10), animation=a)
+            veh.run()
 
         ``shape`` can be:
 
             * ``"car"``  a rectangle with chamfered front corners
-            * ``"triangle"`` a triangle
-            * an Nx2 NumPy array of vertices, does not have to be closed.
+            * ``"triangle"`` an isocles triangle pointing in the forward direction
+            * an 2xN NumPy array of vertices, does not have to be closed.
 
-        The polygon is scaled to an image with a length of ``scale`` in the units of
-        the plot.
+        The polygon is scaled to an image with a length of ``scale`` in the
+        vehicle x-direction, in the units of the plot.
 
-        :seealso: :func:`~Vehicle`
+        :seealso: :func:`~Vehicle` :class:`matplotlib.patches.Polygon`
         """
         super().__init__()
         if isinstance(shape, str):
@@ -287,12 +258,12 @@ class VehiclePolygon(VehicleAnimationBase):
 class VehicleIcon(VehicleAnimationBase):
     def __init__(self, filename, origin=None, scale=1, rotation=0):
         """
-        Create graphical animation of vehicle as an icon
+        Create graphical animation of vehicle as an image icon
 
         :param filename: Standard icon name or a path to an image
         :type filename: str
         :param origin: Origin of the vehicle coordinate frame, defaults to centre
-        :type origin: 2-tuple
+        :type origin: array_like(2)
         :param scale: Length of the vehicle on the plot, defaults to 1
         :type scale: float
         :param rotation: Vehicle icon heading in degrees, defaults to 0
@@ -302,50 +273,53 @@ class VehicleIcon(VehicleAnimationBase):
         :rtype: VehicleAnimation
 
         Creates an object that can be passed to a ``Vehicle`` subclass to
-        depict the moving robot as a polygon during simulation.
+        depict the moving robot as an image icon during simulation.  The image
+        is translated and rotated to represent the vehicle configuration. 
 
-        For example, the image of a red car is::
-
-            a = VehicleIcon('redcar', scale=2)
-            veh = Bicycle()
-            veh.run(animation=a)
-
-        ``filename`` can be:
-
-            * ``"greycar"`` a grey and white car (top view)
-            * ``"redcar"`` a red car (top view)
-            * ``"piano"`` a piano (top view)
-            * path to an image file, including extension
-
-        .. image:: ../../rtb-data/rtbdata/data/greycar.png
-          :width: 200px
-          :align: center
-
-        .. image:: ../../rtb-data/rtbdata/data/redcar.png
-          :width: 300px
-          :align: center
-
-        .. image:: ../../rtb-data/rtbdata/data/piano.png
-          :width: 300px
-          :align: center
-
-
-        The car is scaled to an image with a length of ``scale`` in the units of
-        the plot.
+        The car is scaled to an image with a horizontal length (width) of
+        ``scale`` in the units of the plot. By default the image is assumed to
+        contain a car parallel to the x-axis and facing right.  If the vehicle
+        is facing upward set ``rotation`` to 90.
 
         The vehicle rotates about its ``origin`` which is expressed in terms of
         normalized coordinates in the range 0 to 1.  By default it is in the
         middle of the icon image, (0.2, 0.5) moves it toward the back of the
         vehicle, (0.8, 0.5) moves it toward the front of the vehicle.
 
-        .. note::
+        ``filename`` can be an included image:
 
-            - The standard icons are kept in ``roboticstoolbox/data``
-            - By default the image is assumed to contain a car parallel to
-              the x-axis and facing right.  If the vehicle is facing upward
-              set ``rotation`` to 90.
+            * ``"greycar"`` a grey and white car (top view)
+            * ``"redcar"`` a red car (top view)
+            * ``"piano"`` a piano (top view)
 
-        :seealso: :func:`~Vehicle`
+        or the path to an image file, including extension.
+
+        The included images are:
+
+        .. image:: ../../rtb-data/rtbdata/data/greycar.png
+           :width: 200px
+           :align: center
+           :alt: "greycar"
+
+        .. image:: ../../rtb-data/rtbdata/data/redcar.png
+           :width: 300px
+           :align: center
+           :alt: "redcar"
+
+        .. image:: ../../rtb-data/rtbdata/data/piano.png
+           :width: 200px
+           :align: center
+           :alt: "piano"
+
+        For example, to animate a simulation with the red car icon::
+
+            a = VehicleIcon("redcar", scale=2)
+            veh = Bicycle(driver=RandomPath(10), animation=a)
+            veh.run(animation=a)
+
+        .. note:: The standard icons are provided in the package ``rtb-data``
+
+        :seealso: :class:`Vehicle`
         """
         super().__init__()
         if "." not in filename:
