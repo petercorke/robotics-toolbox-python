@@ -8,6 +8,7 @@ from roboticstoolbox.robot.DHLink import (
     RevoluteMDH,
     PrismaticMDH,
 )
+from roboticstoolbox.robot.PoERobot import PoELink, PoERobot
 from roboticstoolbox.robot.ERobot import ERobot, ERobot2
 from roboticstoolbox.robot.FastRobot import FastRobot
 from roboticstoolbox.robot.ELink import ELink, ELink2
@@ -35,4 +36,6 @@ __all__ = [
     "ETS2",
     "Gripper",
     "KinematicCache",
+    "PoELink",
+    "PoERobot",
 ]
