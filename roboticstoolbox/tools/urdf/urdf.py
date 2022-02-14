@@ -1663,7 +1663,7 @@ class URDF(URDFType):
 
         # build the list of links in URDF file order
         for link in self._links:
-            elink = rtb.ELink(
+            elink = rtb.Link(
                 name=link.name,
                 m=link.inertial.mass,
                 r=link.inertial.origin[:3, 3]
