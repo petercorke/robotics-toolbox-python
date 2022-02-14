@@ -1876,7 +1876,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
     # --------------------------------------------------------------------- #
 
     def closest_point(
-        self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip=False
+        self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip: bool = False
     ) -> Tuple[Union[int, None], Union[np.ndarray, None], Union[np.ndarray, None],]:
         """
         closest_point(shape, inf_dist) returns the minimum euclidean
@@ -1898,14 +1898,15 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
         if not skip:
             self._update_link_tf(q)
-            self._propogate_scene()
+            self._propogate_scene_tree()
+            shape._propogate_scene_tree()
 
         d = 10000
         p1 = None
         p2 = None
 
         for link in self.links:
-            td, tp1, tp2 = link.closest_point(shape, inf_dist)
+            td, tp1, tp2 = link.closest_point(shape, inf_dist, skip=True)
 
             if td is not None and td < d:
                 d = td
@@ -1931,16 +1932,17 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
         if not skip:
             self._update_link_tf(q)
-            self._propogate_scene()
+            self._propogate_scene_tree()
+            shape._propogate_scene_tree()
 
         for link in self.links:
-            if link.collided(shape):
+            if link.collided(shape, skip=True):
                 return True
 
         if isinstance(self, rtb.ERobot):
             for gripper in self.grippers:
                 for link in gripper.links:
-                    if link.collided(shape):
+                    if link.collided(shape, skip=True):
                         return True
 
         return False
