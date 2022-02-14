@@ -10,7 +10,7 @@ import copy
 import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
 from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.DHLink import DHLink  # HACK
+from roboticstoolbox.robot.DHLink import DHLink, StandardDH
 from roboticstoolbox import rtb_set_param
 from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix
 
@@ -22,7 +22,7 @@ import spatialmath.base.symbolic as sym
 # from scipy.optimize import minimize, Bounds
 from ansitable import ANSITable, Column
 from scipy.linalg import block_diag
-from roboticstoolbox.robot.DHLink import _check_rne
+from roboticstoolbox.robot.DHLink import _check_rne, DHLink
 from roboticstoolbox import rtb_get_param
 from frne import init, frne, delete
 
@@ -71,6 +71,11 @@ class DHRobot(Robot):
 
         all_links = []
         self._n = 0
+
+        # If we are given a list of standard DH Links, we must convert
+        # them to modified DH links
+        if [isinstance(link, StandardDH) for link in links]:
+            links = DHLink.StandardDH(links)
 
         for link in links:
             if isinstance(link, DHLink):
@@ -1584,7 +1589,7 @@ class DHRobot(Robot):
                 #  no Coulomb friction if model is symbolic
                 tau[k, j] = (
                     t
-                    + link.G ** 2 * link.Jm * qdd_k[j]
+                    + link.G**2 * link.Jm * qdd_k[j]
                     - link.friction(qd_k[j], coulomb=not self.symbolic)
                 )
                 if debug:
