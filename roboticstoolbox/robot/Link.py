@@ -179,6 +179,12 @@ class Link(ABC):
 
         return new
 
+    def __str__(self):
+        s = f"{self.__class__.__name__}"
+        if self._name is not None:
+            s += f", name={self._name}"
+        return s
+
     def _copy(self):
         raise DeprecationWarning("Use copy method of Link class")
 
