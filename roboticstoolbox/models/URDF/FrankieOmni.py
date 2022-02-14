@@ -2,7 +2,7 @@
 
 import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
-from roboticstoolbox.robot.ELink import ELink
+from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ET import ET
 from spatialmath import SE3
@@ -44,7 +44,7 @@ class FrankieOmni(ERobot):
         )
 
         base_link = links_base[9]
-        base_arm = ELink(ETS(ET.tz(0.28)), name="base_arm", parent=base_link)
+        base_arm = Link(ETS(ET.tz(0.28)), name="base_arm", parent=base_link)
 
         links_panda[0]._parent = base_arm
         links_panda[0]._update_fknm()

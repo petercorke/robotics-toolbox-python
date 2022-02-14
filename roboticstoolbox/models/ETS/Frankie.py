@@ -4,7 +4,7 @@ import numpy as np
 from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ERobot import ERobot
-from roboticstoolbox.robot.ELink import ELink
+from roboticstoolbox.robot.Link import Link
 
 
 class Frankie(ERobot):
@@ -41,33 +41,33 @@ class Frankie(ERobot):
         mm = 1e-3
         tool_offset = (103) * mm
 
-        b0 = ELink(ETS(ET.Rz()), name="base0", parent=None)
+        b0 = Link(ETS(ET.Rz()), name="base0", parent=None)
 
-        b1 = ELink(ETS(ET.tx()), name="base1", parent=b0)
+        b1 = Link(ETS(ET.tx()), name="base1", parent=b0)
 
-        l0 = ELink(ET.tz(0.333) * ET.Rz(), name="link0", parent=b1)
+        l0 = Link(ET.tz(0.333) * ET.Rz(), name="link0", parent=b1)
 
-        l1 = ELink(ET.Rx(-90 * deg) * ET.Rz(), name="link1", parent=l0)
+        l1 = Link(ET.Rx(-90 * deg) * ET.Rz(), name="link1", parent=l0)
 
-        l2 = ELink(ET.Rx(90 * deg) * ET.tz(0.316) * ET.Rz(), name="link2", parent=l1)
+        l2 = Link(ET.Rx(90 * deg) * ET.tz(0.316) * ET.Rz(), name="link2", parent=l1)
 
-        l3 = ELink(ET.tx(0.0825) * ET.Rx(90 * deg) * ET.Rz(), name="link3", parent=l2)
+        l3 = Link(ET.tx(0.0825) * ET.Rx(90 * deg) * ET.Rz(), name="link3", parent=l2)
 
-        l4 = ELink(
+        l4 = Link(
             ET.tx(-0.0825) * ET.Rx(-90 * deg) * ET.tz(0.384) * ET.Rz(),
             name="link4",
             parent=l3,
         )
 
-        l5 = ELink(ET.Rx(90 * deg) * ET.Rz(), name="link5", parent=l4)
+        l5 = Link(ET.Rx(90 * deg) * ET.Rz(), name="link5", parent=l4)
 
-        l6 = ELink(
+        l6 = Link(
             ET.tx(0.088) * ET.Rx(90 * deg) * ET.tz(0.107) * ET.Rz(),
             name="link6",
             parent=l5,
         )
 
-        ee = ELink(ET.tz(tool_offset) * ET.Rz(-np.pi / 4), name="ee", parent=l6)
+        ee = Link(ET.tz(tool_offset) * ET.Rz(-np.pi / 4), name="ee", parent=l6)
 
         elinks = [b0, b1, l0, l1, l2, l3, l4, l5, l6, ee]
 

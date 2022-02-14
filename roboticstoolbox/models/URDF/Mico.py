@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ELink import ELink
+from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.robot.ERobot import ERobot
 
 
@@ -40,7 +40,7 @@ class Mico(ERobot):
         gripper_links = [link for link in links if link.parent == gripper_base]
 
         # New intermediate link
-        gripper = ELink(name="gripper", parent=gripper_base)
+        gripper = Link(name="gripper", parent=gripper_base)
         links.append(gripper)
 
         # Set the finger link parent to be the new gripper base link
