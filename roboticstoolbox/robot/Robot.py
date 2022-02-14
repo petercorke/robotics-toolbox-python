@@ -21,6 +21,7 @@ from spatialgeometry import Shape
 from fknm import Robot_link_T
 from functools import lru_cache
 from spatialgeometry import SceneNode
+from roboticstoolbox.robot.Link import BaseLink, Link
 
 try:
     from matplotlib import colors
@@ -87,7 +88,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         self._hascollision = False
 
         for link in links:
-            if not isinstance(link, rtb.Link):
+            if not isinstance(link, BaseLink):
                 raise TypeError("links should all be Link subclass")
 
             # add link back to roboto
@@ -100,7 +101,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
             if link.collision:
                 self._hascollision = True
 
-            if isinstance(link, rtb.ELink):
+            if isinstance(link, Link):
                 if len(link.geometry) > 0:
                     self._hasgeometry = True
         self._links = links
@@ -1041,7 +1042,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
     # --------------------------------------------------------------------- #
 
     @property
-    def base(self) -> np.ndarray:
+    def base(self) -> SE3:
         """
         Get/set robot base transform (Robot superclass)
 
@@ -1058,7 +1059,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
         # This now returns the Scene Node transform
         # self._T is a copy of SceneNode.__T
-        return self._T
+        return SE3(self._T, check=False)
 
     @base.setter
     def base(self, T: Union[np.ndarray, SE3]):
@@ -1077,7 +1078,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
     # --------------------------------------------------------------------- #
 
     @property
-    def tool(self) -> np.ndarray:
+    def tool(self) -> SE3:
         """
         Get/set robot tool transform (Robot superclass)
 
@@ -1088,7 +1089,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         - ``robot.tool = ...`` checks and sets the robot tool transform
 
         """
-        return self._tool
+        return SE3(self._tool, check=False)
 
     @tool.setter
     def tool(self, T):
