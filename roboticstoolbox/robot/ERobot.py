@@ -11,7 +11,7 @@ import webbrowser
 from numpy import array, ndarray, isnan, zeros, eye, expand_dims, empty, concatenate
 from spatialmath import SE3, SE2
 from spatialmath.base.argcheck import getvector, islistof
-from roboticstoolbox.robot.ELink import ELink, ELink2, BaseELink
+from roboticstoolbox.robot.Link import Link, Link2, BaseLink
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.DHRobot import DHRobot
@@ -65,18 +65,18 @@ class BaseERobot(Robot):
         >>> print(robot)
     The ETS is partitioned such that a new link frame is created **after** every
     joint variable.
-    From list of ELinks
+    From list of Links
     -------------------
     Example:
     .. runblock:: pycon
         >>> from roboticstoolbox import ETS, ERobot
-        >>> link1 = ELink(ETS.rz(), name='link1')
-        >>> link2 = ELink(ETS.ry(), name='link2', parent=link1)
-        >>> link3 = ELink(ETS.tz(1) * ETS.ry(), name='link3', parent=link2)
-        >>> link4 = ELink(ETS.tz(1), name='ee', parent=link3)
+        >>> link1 = Link(ETS.rz(), name='link1')
+        >>> link2 = Link(ETS.ry(), name='link2', parent=link1)
+        >>> link3 = Link(ETS.tz(1) * ETS.ry(), name='link3', parent=link2)
+        >>> link4 = Link(ETS.tz(1), name='ee', parent=link3)
         >>> robot = ERobot([link1, link2, link3, link4])
         >>> print(robot)
-    A number of ``ELink`` objects are created, each has a transform with
+    A number of ``Link`` objects are created, each has a transform with
     respect to the previous frame, and all except the first link have a parent.
     The implicit parent of the first link is the base.
     The parent also can be specified as a string, and its name is mapped to the
@@ -87,10 +87,10 @@ class BaseERobot(Robot):
     .. runblock:: pycon
         >>> from roboticstoolbox import ETS, ERobot
         >>> robot = ERobot([
-        >>>     ELink(ETS.rz(), name='link1'),
-        >>>     ELink(ETS.ry(), name='link2'),
-        >>>     ELink(ETS.tz(1) * ETS.ry(), name='link3'),
-        >>>     ELink(ETS.tz(1), name='ee')
+        >>>     Link(ETS.rz(), name='link1'),
+        >>>     Link(ETS.ry(), name='link2'),
+        >>>     Link(ETS.tz(1) * ETS.ry(), name='link3'),
+        >>>     Link(ETS.tz(1), name='ee')
         >>>             ])
         >>> print(robot)
     Branched robots
@@ -98,11 +98,11 @@ class BaseERobot(Robot):
     Example:
     .. runblock:: pycon
         >>> robot = ERobot([
-        >>>    ELink(ETS.rz(), name='link1'),
-        >>>    ELink(ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(), name='link2', parent='link1'),
-        >>>    ELink(ETS.tx(1), name='ee_1', parent='link2'),
-        >>>    ELink(ETS.tx(1) * ETS.ty(0.5) * ETS.rz(), name='link3', parent='link1'),
-        >>>    ELink(ETS.tx(1), name='ee_2', parent='link3')
+        >>>    Link(ETS.rz(), name='link1'),
+        >>>    Link(ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(), name='link2', parent='link1'),
+        >>>    Link(ETS.tx(1), name='ee_1', parent='link2'),
+        >>>    Link(ETS.tx(1) * ETS.ty(0.5) * ETS.rz(), name='link3', parent='link1'),
+        >>>    Link(ETS.tx(1), name='ee_2', parent='link3')
         >>>             ])
         >>> print(robot)
     :references:
@@ -127,7 +127,7 @@ class BaseERobot(Robot):
         # search order
         orlinks = []
 
-        # check all the incoming ELink objects
+        # check all the incoming Link objects
         n = 0
         for k, link in enumerate(links):
             # if link has no name, give it one
@@ -179,7 +179,7 @@ class BaseERobot(Robot):
         # Set up the gripper, make a list containing the root of all
         # grippers
         if gripper_links is not None:
-            if isinstance(gripper_links, ELink):
+            if isinstance(gripper_links, Link):
                 gripper_links = [gripper_links]
         else:
             gripper_links = []
@@ -246,7 +246,7 @@ class BaseERobot(Robot):
                     raise ValueError(f"joints {jset} were not assigned")
             orlinks = links
         else:
-            # must be a mixture of ELinks with/without jindex
+            # must be a mixture of Links with/without jindex
             raise ValueError("all links must have a jindex, or none have a jindex")
 
         self._nbranches = sum([link.nchildren == 0 for link in links])
@@ -350,19 +350,19 @@ class BaseERobot(Robot):
         return s
 
     @overload
-    def __getitem__(self: "ERobot", i: Union[int, str]) -> ELink:
+    def __getitem__(self: "ERobot", i: Union[int, str]) -> Link:
         ...
 
     @overload
-    def __getitem__(self: "ERobot", i: slice) -> List[ELink]:
+    def __getitem__(self: "ERobot", i: slice) -> List[Link]:
         ...
 
     @overload
-    def __getitem__(self: "ERobot2", i: Union[int, str]) -> ELink2:
+    def __getitem__(self: "ERobot2", i: Union[int, str]) -> Link2:
         ...
 
     @overload
-    def __getitem__(self: "ERobot2", i: slice) -> List[ELink2]:
+    def __getitem__(self: "ERobot2", i: slice) -> List[Link2]:
         ...
 
     def __getitem__(self, i):
@@ -372,7 +372,7 @@ class BaseERobot(Robot):
         :param i: link number or name
         :type i: int, slice or str
         :return: i'th link or named link
-        :rtype: ELink
+        :rtype: Link
 
         This also supports iterating over each link in the robot object,
         from the base to the tool.
@@ -400,15 +400,15 @@ class BaseERobot(Robot):
     # --------------------------------------------------------------------- #
 
     @overload
-    def links(self: "ERobot") -> List[ELink]:
+    def links(self: "ERobot") -> List[Link]:
         ...
 
     @overload
-    def links(self: "ERobot2") -> List[ELink2]:
+    def links(self: "ERobot2") -> List[Link2]:
         ...
 
     @property
-    def links(self) -> List[ELink]:
+    def links(self) -> List[Link]:
         """
         Robot links
 
@@ -467,74 +467,74 @@ class BaseERobot(Robot):
     # --------------------------------------------------------------------- #
 
     @overload
-    def elinks(self: "ERobot") -> List[ELink]:
+    def elinks(self: "ERobot") -> List[Link]:
         ...
 
     @overload
-    def elinks(self: "ERobot2") -> List[ELink2]:
+    def elinks(self: "ERobot2") -> List[Link2]:
         ...
 
     @property
-    def elinks(self) -> List[ELink]:
+    def elinks(self) -> List[Link]:
         return self._links
 
     # --------------------------------------------------------------------- #
 
     @overload
-    def link_dict(self: "ERobot") -> Dict[str, ELink]:
+    def link_dict(self: "ERobot") -> Dict[str, Link]:
         ...
 
     @overload
-    def link_dict(self: "ERobot2") -> Dict[str, ELink2]:
+    def link_dict(self: "ERobot2") -> Dict[str, Link2]:
         ...
 
     @property
-    def link_dict(self) -> Dict[str, ELink]:
+    def link_dict(self) -> Dict[str, Link]:
         return self._linkdict
 
     # --------------------------------------------------------------------- #
 
     @overload
-    def base_link(self: "ERobot") -> ELink:
+    def base_link(self: "ERobot") -> Link:
         ...
 
     @overload
-    def base_link(self: "ERobot2") -> ELink2:
+    def base_link(self: "ERobot2") -> Link2:
         ...
 
     @property
-    def base_link(self) -> ELink:
+    def base_link(self) -> Link:
         return self._base_link
 
     @base_link.setter
     def base_link(self, link):
-        if isinstance(link, ELink):
+        if isinstance(link, Link):
             self._base_link = link
         else:
-            raise TypeError("Must be an ELink")
+            raise TypeError("Must be a Link")
 
     # --------------------------------------------------------------------- #
 
     @overload
-    def ee_links(self: "ERobot2") -> List[ELink2]:
+    def ee_links(self: "ERobot2") -> List[Link2]:
         ...
 
     @overload
-    def ee_links(self: "ERobot") -> List[ELink]:
+    def ee_links(self: "ERobot") -> List[Link]:
         ...
 
     @property
-    def ee_links(self) -> List[ELink]:
+    def ee_links(self) -> List[Link]:
         return self._ee_links
 
     @ee_links.setter
-    def ee_links(self, link: Union[List[ELink], ELink]):
-        if isinstance(link, ELink):
+    def ee_links(self, link: Union[List[Link], Link]):
+        if isinstance(link, Link):
             self._ee_links = [link]
-        elif isinstance(link, list) and all([isinstance(x, ELink) for x in link]):
+        elif isinstance(link, list) and all([isinstance(x, Link) for x in link]):
             self._ee_links = link
         else:
-            raise TypeError("expecting an ELink or list of ELinks")
+            raise TypeError("expecting a Link or list of Links")
 
     # --------------------------------------------------------------------- #
 
@@ -655,16 +655,16 @@ class BaseERobot(Robot):
     @lru_cache(maxsize=32)
     def ets(
         self,
-        start: Union[ELink, Gripper, str, None] = None,
-        end: Union[ELink, Gripper, str, None] = None,
+        start: Union[Link, Gripper, str, None] = None,
+        end: Union[Link, Gripper, str, None] = None,
     ) -> ETS:
         """
         ERobot to ETS
 
         :param start: start of path, defaults to ``base_link``
-        :type start: ELink or str, optional
+        :type start: Link or str, optional
         :param end: end of path, defaults to end-effector
-        :type end: ELink or str, optional
+        :type end: Link or str, optional
         :raises ValueError: a link does not belong to this ERobot
         :raises TypeError: a bad link argument
         :return: elementary transform sequence
@@ -674,7 +674,7 @@ class BaseERobot(Robot):
         - ``robot.ets()`` is an ETS representing the kinematics from base to
           end-effector.
         - ``robot.ets(end=link)`` is an ETS representing the kinematics from
-          base to the link ``link`` specified as an ELink reference or a name.
+          base to the link ``link`` specified as a Link reference or a name.
         - ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
           from link ``l1`` to link ``l2``.
 
@@ -737,7 +737,7 @@ class BaseERobot(Robot):
 
     # --------------------------------------------------------------------- #
 
-    def segments(self) -> List[List[Union[ELink, None]]]:
+    def segments(self) -> List[List[Union[Link, None]]]:
         """
         Segments of branched robot
 
@@ -765,7 +765,7 @@ class BaseERobot(Robot):
               segments
         """
 
-        def recurse(link: ELink):
+        def recurse(link: Link):
 
             segs = [link.parent]
             while True:
@@ -1013,11 +1013,11 @@ graph [rankdir=LR];
         Visit all links from start in depth-first order and will apply
         func to each visited link
         :param start: the link to start at
-        :type start: ELink
+        :type start: Link
         :param func: An optional function to apply to each link as it is found
         :type func: function
         :returns: A list of links
-        :rtype: list of ELink
+        :rtype: list of Link
         """
         visited = []
 
@@ -1036,21 +1036,21 @@ graph [rankdir=LR];
 
     def _get_limit_links(
         self,
-        end: Union[Gripper, ELink, str, None] = None,
-        start: Union[Gripper, ELink, str, None] = None,
-    ) -> Tuple[ELink, Union[ELink, Gripper], Union[None, SE3]]:
+        end: Union[Gripper, Link, str, None] = None,
+        start: Union[Gripper, Link, str, None] = None,
+    ) -> Tuple[Link, Union[Link, Gripper], Union[None, SE3]]:
         """
         Get and validate an end-effector, and a base link
         :param end: end-effector or gripper to compute forward kinematics to
-        :type end: str or ELink or Gripper, optional
+        :type end: str or Link or Gripper, optional
         :param start: name or reference to a base link, defaults to None
-        :type start: str or ELink, optional
+        :type start: str or Link, optional
         :raises ValueError: link not known or ambiguous
         :raises ValueError: [description]
         :raises TypeError: unknown type provided
         :return: end-effector link, base link, and tool transform of gripper
             if applicable
-        :rtype: ELink, Elink, SE3 or None
+        :rtype: Link, Elink, SE3 or None
         Helper method to find or validate an end-effector and base link.
         """
 
@@ -1107,11 +1107,11 @@ graph [rankdir=LR];
 
     def _getlink(
         self,
-        link: Union[ELink, Gripper, str, None],
-        default: Union[ELink, Gripper, str, None] = None,
-    ) -> ELink:
+        link: Union[Link, Gripper, str, None],
+        default: Union[Link, Gripper, str, None] = None,
+    ) -> Link:
         """
-        Validate reference to ELink
+        Validate reference to Link
 
         :param link: link
 
@@ -1120,13 +1120,13 @@ graph [rankdir=LR];
 
         :return: link reference
 
-        ``robot._getlink(link)`` is a validated reference to an ELink within
+        ``robot._getlink(link)`` is a validated reference to a Link within
         the ERobot ``robot``.  If ``link`` is:
 
-        -  an ``ELink`` reference it is validated as belonging to
+        -  an ``Link`` reference it is validated as belonging to
           ``robot``.
         - a string, then it looked up in the robot's link name dictionary, and
-          an ELink reference returned.
+          a Link reference returned.
         """
         if link is None:
             link = default
@@ -1137,7 +1137,7 @@ graph [rankdir=LR];
 
             raise ValueError(f"no link named {link}")
 
-        elif isinstance(link, BaseELink):
+        elif isinstance(link, BaseLink):
             if link in self.links:
                 return link
             else:
@@ -1220,7 +1220,7 @@ class ERobot(BaseERobot):
                 # chop it up into segments, a link frame after every joint
                 parent = None
                 for j, ets_j in enumerate(arg.split()):
-                    elink = ELink(ETS(ets_j), parent=parent, name=f"link{j:d}")
+                    elink = Link(ETS(ets_j), parent=parent, name=f"link{j:d}")
                     if (
                         elink.qlim is None
                         and elink.v is not None
@@ -1230,11 +1230,11 @@ class ERobot(BaseERobot):
                     parent = elink
                     links.append(elink)
 
-            elif islistof(arg, ELink):
+            elif islistof(arg, Link):
                 links = arg
 
             else:
-                raise TypeError("constructor argument must be ETS or list of ELink")
+                raise TypeError("constructor argument must be ETS or list of Link")
 
             super().__init__(links, **kwargs)
 
@@ -1401,7 +1401,7 @@ class ERobot(BaseERobot):
     @staticmethod
     def URDF_read(file_path, tld=None, xacro_tld=None):
         """
-        Read a URDF file as ELinks
+        Read a URDF file as Links
         :param file_path: File path relative to the xacro folder
         :type file_path: str, in Posix file path fprmat
         :param tld: A custom top-level directory which holds the xacro data,
@@ -1411,7 +1411,7 @@ class ERobot(BaseERobot):
             defaults to None
         :type xacro_tld: str, optional
         :return: Links and robot name
-        :rtype: tuple(ELink list, str)
+        :rtype: tuple(Link list, str)
         File should be specified relative to ``RTBDATA/URDF/xacro``
 
         .. note:: If ``tld`` is not supplied, filepath pointing to xacro data should
@@ -1458,9 +1458,9 @@ class ERobot(BaseERobot):
         method is a work in progress while an approach which generalises
         to all applications is designed.
         :param end: end-effector or gripper to compute forward kinematics to
-        :type end: str or ELink or Gripper, optional
+        :type end: str or Link or Gripper, optional
         :param start: name or reference to a base link, defaults to None
-        :type start: str or ELink, optional
+        :type start: str or Link, optional
         :raises ValueError: link not known or ambiguous
         :return: the path from start to end
         :rtype: list of Link
@@ -1516,11 +1516,11 @@ class ERobot(BaseERobot):
     def fkine(
         self,
         q: ArrayLike,
-        end: Union[str, ELink, Gripper] = None,
-        start: Union[str, ELink, Gripper] = None,
+        end: Union[str, Link, Gripper] = None,
+        start: Union[str, Link, Gripper] = None,
         tool: Union[ndarray, SE3, None] = None,
         include_base: bool = True,
-    ) -> ndarray:
+    ) -> SE3:
         """
         Forward kinematics
 
@@ -1553,15 +1553,18 @@ class ERobot(BaseERobot):
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
         """
-        return self.ets(start, end).fkine(
-            q, base=self._T, tool=tool, include_base=include_base
+        return SE3(
+            self.ets(start, end).fkine(
+                q, base=self._T, tool=tool, include_base=include_base
+            ),
+            check=False,
         )
 
     def jacob0(
         self,
         q: ArrayLike,
-        end: Union[str, ELink, Gripper] = None,
-        start: Union[str, ELink, Gripper] = None,
+        end: Union[str, Link, Gripper] = None,
+        start: Union[str, Link, Gripper] = None,
         tool: Union[ndarray, SE3, None] = None,
     ) -> ndarray:
         r"""
@@ -1612,8 +1615,8 @@ class ERobot(BaseERobot):
     def jacobe(
         self,
         q: ArrayLike,
-        end: Union[str, ELink, Gripper] = None,
-        start: Union[str, ELink, Gripper] = None,
+        end: Union[str, Link, Gripper] = None,
+        start: Union[str, Link, Gripper] = None,
         tool: Union[ndarray, SE3, None] = None,
     ) -> ndarray:
         r"""
@@ -1654,8 +1657,8 @@ class ERobot(BaseERobot):
     def hessian0(
         self,
         q: Union[ArrayLike, None] = None,
-        end: Union[str, ELink, Gripper] = None,
-        start: Union[str, ELink, Gripper] = None,
+        end: Union[str, Link, Gripper] = None,
+        start: Union[str, Link, Gripper] = None,
         J0: Union[ndarray, None] = None,
         tool: Union[ndarray, SE3, None] = None,
     ) -> ndarray:
@@ -1707,8 +1710,8 @@ class ERobot(BaseERobot):
     def hessiane(
         self,
         q: Union[ArrayLike, None] = None,
-        end: Union[str, ELink, Gripper] = None,
-        start: Union[str, ELink, Gripper] = None,
+        end: Union[str, Link, Gripper] = None,
+        start: Union[str, Link, Gripper] = None,
         Je: Union[ndarray, None] = None,
         tool: Union[ndarray, SE3, None] = None,
     ) -> ndarray:
@@ -1761,8 +1764,8 @@ class ERobot(BaseERobot):
         self,
         q: ArrayLike,
         n: int = 3,
-        end: Union[str, ELink, Gripper] = None,
-        start: Union[str, ELink, Gripper] = None,
+        end: Union[str, Link, Gripper] = None,
+        start: Union[str, Link, Gripper] = None,
         tool: Union[ndarray, SE3, None] = None,
     ):
         r"""
@@ -1859,7 +1862,7 @@ class ERobot(BaseERobot):
 
             pd = zeros(size)
 
-            for i in range(nl ** c):
+            for i in range(nl**c):
 
                 rot = zeros(3)
                 trn = zeros(3)
@@ -1892,8 +1895,8 @@ class ERobot(BaseERobot):
     def jacob0_analytic(
         self,
         q: ArrayLike,
-        end: Union[str, ELink, Gripper] = None,
-        start: Union[str, ELink, Gripper] = None,
+        end: Union[str, Link, Gripper] = None,
+        start: Union[str, Link, Gripper] = None,
         tool: Union[ndarray, SE3, None] = None,
         analytic: str = "rpy-xyz",
     ):
@@ -1964,11 +1967,11 @@ class ERobot(BaseERobot):
         :type xi: float
         :param from_link: The first link to consider, defaults to the base
             link
-        :type from_link: ELink
+        :type from_link: Link
         :param to_link: The last link to consider, will consider all links
             between from_link and to_link in the robot, defaults to the
             end-effector link
-        :type to_link: ELink
+        :type to_link: Link
         :returns: Ain, Bin as the inequality contraints for an omptimisor
         :rtype: ndarray(6), ndarray(6)
         """
@@ -2131,7 +2134,7 @@ class ERobot2(BaseERobot):
             # chop it up into segments, a link frame after every joint
             parent = None
             for j, ets_j in enumerate(arg.split()):
-                elink = ELink2(ets_j, parent=parent, name=f"link{j:d}")
+                elink = Link2(ets_j, parent=parent, name=f"link{j:d}")
                 parent = elink
                 if (
                     elink.qlim is None
@@ -2141,10 +2144,10 @@ class ERobot2(BaseERobot):
                     elink.qlim = elink.v.qlim
                 links.append(elink)
 
-        elif islistof(arg, ELink2):
+        elif islistof(arg, Link2):
             links = arg
         else:
-            raise TypeError("constructor argument must be ETS2 or list of ELink2")
+            raise TypeError("constructor argument must be ETS2 or list of Link2")
 
         super().__init__(links, **kwargs)
 
@@ -2302,9 +2305,9 @@ class ERobot2(BaseERobot):
 
 if __name__ == "__main__":  # pragma nocover
 
-    e1 = ELink(ETS(ET.Rz()), jindex=0)
-    e2 = ELink(ETS(ET.Rz()), jindex=1, parent=e1)
-    e3 = ELink(ETS(ET.Rz()), jindex=2, parent=e2)
-    e4 = ELink(ETS(ET.Rz()), jindex=5, parent=e3)
+    e1 = Link(ETS(ET.Rz()), jindex=0)
+    e2 = Link(ETS(ET.Rz()), jindex=1, parent=e1)
+    e3 = Link(ETS(ET.Rz()), jindex=2, parent=e2)
+    e4 = Link(ETS(ET.Rz()), jindex=5, parent=e3)
 
     ERobot([e1, e2, e3, e4])
