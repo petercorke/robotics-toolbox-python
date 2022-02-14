@@ -5,7 +5,10 @@ from functools import wraps
 from spatialmath.base import getvector, isscalar, isvector, ismatrix
 from ansitable import ANSITable, Column
 from spatialgeometry import Shape, SceneNode, SceneGroup
-from typing import List, Union
+from typing import List, Union, Type, Tuple
+import roboticstoolbox as rtb
+
+from sympy import false
 
 
 def _listen_dyn(func):
@@ -466,6 +469,24 @@ class Link(SceneNode, ABC):
     # -------------------------------------------------------------------------- #
 
     @property
+    def robot(self) -> Union["rtb.Robot", None]:
+        """
+        Get forward reference to the robot which owns this link
+
+        :return: The robot object
+        """
+        return self._robot
+
+    @robot.setter
+    def robot(self, robot_ref: "rtb.Robot"):
+        """
+        Set the forward reference to the robot which owns this link
+        """
+        self._robot = robot_ref
+
+    # -------------------------------------------------------------------------- #
+
+    @property
     def qlim(self):
         """
         Get/set joint limits
@@ -842,7 +863,9 @@ class Link(SceneNode, ABC):
 
     # -------------------------------------------------------------------------- #
 
-    def closest_point(self, shape, inf_dist=1.0):
+    def closest_point(
+        self, shape: Shape, inf_dist: float = 1.0, skip: bool = False
+    ) -> Tuple[Union[int, None], Union[np.ndarray, None], Union[np.ndarray, None],]:
         """
         closest_point(shape, inf_dist) returns the minimum euclidean
         distance between this link and shape, provided it is less than
@@ -851,10 +874,9 @@ class Link(SceneNode, ABC):
         shapes. If the distance is negative then the shapes are collided.
 
         :param shape: The shape to compare distance to
-        :type shape: Shape
         :param inf_dist: The minimum distance within which to consider
             the shape
-        :type inf_dist: float
+        :param skip: Skip setting all shape transforms
 
         :returns: d, p1, p2 where d is the distance between the shapes,
             p1 and p2 are the points in the world frame on the respective
@@ -862,8 +884,13 @@ class Link(SceneNode, ABC):
         :rtype: float, ndarray(1x3), ndarray(1x3)
         """
 
+        if not skip:
+            self.robot._update_link_tf(self.robot.q)  # type: ignore
+            self._propogate_scene_tree()
+            shape._propogate_scene_tree()
+
         d = 10000
-        p1 = (None,)
+        p1 = None
         p2 = None
 
         for col in self.collision:
@@ -879,16 +906,20 @@ class Link(SceneNode, ABC):
 
         return d, p1, p2
 
-    def collided(self, shape):
+    def collided(self, shape: Shape, skip: bool = False):
         """
         collided(shape) checks if this link and shape have collided
 
         :param shape: The shape to compare distance to
-        :type shape: Shape
+        :param skip: Skip setting all shape transforms
 
         :returns: True if shapes have collided
-        :rtype: bool
         """
+
+        if not skip:
+            self.robot._update_link_tf(self.robot.q)  # type: ignore
+            self._propogate_scene_tree()
+            shape._propogate_scene_tree()
 
         for col in self.collision:
             if col.collided(shape):
@@ -899,13 +930,4 @@ class Link(SceneNode, ABC):
 
 if __name__ == "__main__":  # pragma nocover
 
-    import roboticstoolbox as rtb
-    from spatialmath.base import sym
-
-    ET = rtb.ETS
-
-    d, a, theta = sym.symbol("d, a, theta")
-
-    e = ET.tx(d) * ET.ty(a) * ET.rz(theta)
-    print(e)
-    link = rtb.ELink()
+    pass
