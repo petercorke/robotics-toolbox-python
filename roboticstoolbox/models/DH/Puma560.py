@@ -190,14 +190,15 @@ class Puma560(DHRobot):
         self.qr = np.array([0, pi / 2, -pi / 2, 0, 0, 0])
         self.qz = np.zeros(6)
 
+        # nominal table top picking pose
+        self.qn = np.array([0, pi / 4, pi, 0, pi / 4, 0])
+
         self.logconfiguration("qr", self.qr)
         self.logconfiguration("qz", self.qz)
+        self.logconfiguration("qn", self.qn)
 
         # straight and horizontal
         self.addconfiguration("qs", np.array([0, 0, -pi / 2, 0, 0, 0]))
-
-        # nominal table top picking pose
-        self.addconfiguration("qn", np.array([0, pi / 4, pi, 0, pi / 4, 0]))
 
     def ikine_a(self, T, config="lun"):
         """
@@ -261,7 +262,7 @@ class Puma560(DHRobot):
             # theta[0] uses equations 40 and 41, p.39,
             # based on the configuration parameter n1
 
-            r = np.sqrt(Px ** 2 + Py ** 2)
+            r = np.sqrt(Px**2 + Py**2)
             if "r" in config:
                 theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
             elif "l" in config:
@@ -287,12 +288,12 @@ class Puma560(DHRobot):
 
             V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])
 
-            r = np.sqrt(V114 ** 2 + Pz ** 2)
+            r = np.sqrt(V114**2 + Pz**2)
 
             with np.errstate(invalid="raise"):
                 try:
                     Psi = np.arccos(
-                        (a2 ** 2 - d4 ** 2 - a3 ** 2 + V114 ** 2 + Pz ** 2)
+                        (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2)
                         / (2.0 * a2 * r)
                     )
                 except FloatingPointError:
