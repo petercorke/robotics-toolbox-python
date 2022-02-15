@@ -3,8 +3,8 @@
 @author: Jesse Haviland
 """
 
-import numpy as np
-from spatialmath import SE3
+# import numpy as np
+# from spatialmath import SE3
 import roboticstoolbox as rp
 from roboticstoolbox.robot.Link import Link, _listen_dyn
 from roboticstoolbox.robot.ETS import ETS
@@ -14,7 +14,7 @@ from functools import wraps
 from numpy import ndarray
 from spatialgeometry import Shape
 
-_eps = np.finfo(np.float64).eps
+# _eps = np.finfo(np.float64).eps
 
 
 ArrayLike = Union[list, ndarray, tuple, set]
@@ -52,31 +52,31 @@ def _check_rne(func):
 
 # --------------------------------------------------------------#
 
-try:  # pragma: no cover
-    # print('Using SymPy')
-    import sympy as sym
+# try:  # pragma: no cover
+#     # print('Using SymPy')
+#     import sympy as sym
 
-    def _issymbol(x):  # type: ignore
-        return isinstance(x, sym.Expr)
+#     def _issymbol(x):  # type: ignore
+#         return isinstance(x, sym.Expr)
 
-except ImportError:
+# except ImportError:
 
-    def _issymbol(x):  # pylint: disable=unused-argument
-        return False
-
-
-def _cos(theta) -> float:
-    if _issymbol(theta):
-        return sym.cos(theta)  # type: ignore
-    else:
-        return np.cos(theta)
+#     def _issymbol(x):  # pylint: disable=unused-argument
+#         return False
 
 
-def _sin(theta) -> float:
-    if _issymbol(theta):
-        return sym.sin(theta)  # type: ignore
-    else:
-        return np.sin(theta)
+# def _cos(theta) -> float:
+#     if _issymbol(theta):
+#         return sym.cos(theta)  # type: ignore
+#     else:
+#         return np.cos(theta)
+
+
+# def _sin(theta) -> float:
+#     if _issymbol(theta):
+#         return sym.sin(theta)  # type: ignore
+#     else:
+#         return np.sin(theta)
 
 
 # --------------------------------------------------------------#
@@ -157,7 +157,7 @@ class DHLink(Link):
     def _to_ets(self, sigma, theta, d, alpha, a, offset, flip: bool):
         ets = ETS()
 
-        isrevolute = True if sigma else False
+        isrevolute = False if sigma else True
 
         # MDH format: a alpha theta d
         if a != 0:
@@ -621,7 +621,6 @@ class StandardDH:
         theta=0.0,
         a=0.0,
         sigma=0,
-        mdh=False,
         offset=0,
         flip=False,
         qlim=None,
@@ -636,7 +635,7 @@ class StandardDH:
         geometry: List[Shape] = [],
         collision: List[Shape] = [],
     ):
-        self.ets = self._to_ets(sigma, theta, d, alpha, a, mdh, offset, flip)
+        self.ets = self._to_ets(sigma, theta, d, alpha, a, offset, flip)
 
         # DH Kinematic parameters
         self.sigma = sigma
@@ -644,7 +643,6 @@ class StandardDH:
         self.d = d
         self.alpha = alpha
         self.a = a
-        self.mdh = mdh
         self.offset = offset
         self.id = None
         self.qlim = qlim
@@ -659,7 +657,7 @@ class StandardDH:
         self.geometry = geometry
         self.collision = collision
 
-    def _to_ets(self, sigma, theta, d, alpha, a, mdh, offset, flip: bool):
+    def _to_ets(self, sigma, theta, d, alpha, a, offset, flip: bool):
         ets = ETS()
 
         isrevolute = True if sigma else False
@@ -743,7 +741,6 @@ class RevoluteDH(StandardDH):
 
         theta = 0.0
         sigma = 0
-        mdh = False
 
         super().__init__(
             d=d,
@@ -751,7 +748,6 @@ class RevoluteDH(StandardDH):
             theta=theta,
             a=a,
             sigma=sigma,
-            mdh=mdh,
             offset=offset,
             qlim=qlim,
             flip=flip,
@@ -816,7 +812,6 @@ class PrismaticDH(StandardDH):
 
         d = 0.0
         sigma = 1
-        mdh = False
 
         super().__init__(
             theta=theta,
@@ -824,7 +819,6 @@ class PrismaticDH(StandardDH):
             a=a,
             alpha=alpha,
             sigma=sigma,
-            mdh=mdh,
             offset=offset,
             qlim=qlim,
             flip=flip,
