@@ -115,6 +115,7 @@ class BaseLink(SceneNode, ABC):
         B: Union[float, None] = None,
         Tc: Union[ArrayLike, None] = None,
         G: Union[float, None] = None,
+        qlim: Union[ArrayLike, None] = None,
         geometry: List[Shape] = [],
         collision: List[Shape] = [],
         **kwargs,
@@ -195,6 +196,10 @@ class BaseLink(SceneNode, ABC):
 
         self._joint_name = joint_name
         self._children = []
+
+        # Set the qlim if provided
+        if qlim is not None and self.isjoint:
+            self._ets[-1].qlim = qlim
 
         # Initialise the static transform of the Link
         self._init_Ts()
@@ -1064,7 +1069,7 @@ class BaseLink(SceneNode, ABC):
     def _params(self):  # pragma nocover
         l = []  # noqa
         self._format(l, "name")
-        self._format(l, "flip", ignorevalue=False)
+        self._format(l, "isflip", ignorevalue=False)
         self._format(l, "qlim")
         self._format(l, "m")
         self._format(l, "r")
