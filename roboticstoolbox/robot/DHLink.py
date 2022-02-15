@@ -9,9 +9,10 @@ import roboticstoolbox as rp
 from roboticstoolbox.robot.Link import Link, _listen_dyn
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ET import ET
+from spatialmath import SE3
 from typing import List, Union
 from functools import wraps
-from numpy import ndarray
+from numpy import ndarray, cos, sin, array
 from spatialgeometry import Shape
 
 # _eps = np.finfo(np.float64).eps
@@ -52,31 +53,31 @@ def _check_rne(func):
 
 # --------------------------------------------------------------#
 
-# try:  # pragma: no cover
-#     # print('Using SymPy')
-#     import sympy as sym
+try:  # pragma: no cover
+    # print('Using SymPy')
+    import sympy as sym
 
-#     def _issymbol(x):  # type: ignore
-#         return isinstance(x, sym.Expr)
+    def _issymbol(x):  # type: ignore
+        return isinstance(x, sym.Expr)
 
-# except ImportError:
+except ImportError:
 
-#     def _issymbol(x):  # pylint: disable=unused-argument
-#         return False
-
-
-# def _cos(theta) -> float:
-#     if _issymbol(theta):
-#         return sym.cos(theta)  # type: ignore
-#     else:
-#         return np.cos(theta)
+    def _issymbol(x):  # pylint: disable=unused-argument
+        return False
 
 
-# def _sin(theta) -> float:
-#     if _issymbol(theta):
-#         return sym.sin(theta)  # type: ignore
-#     else:
-#         return np.sin(theta)
+def _cos(theta) -> float:
+    if _issymbol(theta):
+        return sym.cos(theta)  # type: ignore
+    else:
+        return cos(theta)
+
+
+def _sin(theta) -> float:
+    if _issymbol(theta):
+        return sym.sin(theta)  # type: ignore
+    else:
+        return sin(theta)
 
 
 # --------------------------------------------------------------#
@@ -136,13 +137,15 @@ class DHLink(Link):
         theta=0.0,
         a=0.0,
         sigma=0,
-        mdh=True,
+        mdh=False,
         offset=0,
         flip=False,
         **kwargs,
     ):
-        ets = self._to_ets(sigma, theta, d, alpha, a, offset, flip)
-        super().__init__(ets=ets, **kwargs)
+        super().__init__(**kwargs)
+
+        ets = self._to_ets(sigma, theta, d, alpha, a, offset, flip, mdh)
+        self._ets = ets
 
         # DH Kinematic parameters
         self.sigma = sigma
@@ -154,123 +157,145 @@ class DHLink(Link):
         self.offset = offset
         self.id = None
 
-    def _to_ets(self, sigma, theta, d, alpha, a, offset, flip: bool):
+    def _to_ets(self, sigma, theta, d, alpha, a, offset, flip: bool, mdh):
         ets = ETS()
 
         isrevolute = False if sigma else True
 
         # MDH format: a alpha theta d
-        if a != 0:
-            ets *= ET.tx(a)
-        if alpha != 0:
-            ets *= ET.Rx(alpha)
+        if mdh:
+            if a != 0:
+                ets *= ET.tx(a)
+            if alpha != 0:
+                ets *= ET.Rx(alpha)
 
-        if isrevolute:
-            if offset != 0:
-                ets *= ET.Rz(offset)
+            if isrevolute:
+                if offset != 0:
+                    ets *= ET.Rz(offset)
 
-            # Swapped d and theta: will make no difference to the transform
-            # But makes ets end with variable which is needed
-            if d != 0:
-                ets *= ET.tz(d)
+                # Swapped d and theta: will make no difference to the transform
+                # But makes ets end with variable which is needed
+                if d != 0:
+                    ets *= ET.tz(d)
 
-            ets *= ET.Rz(flip=flip)  # joint
+                ets *= ET.Rz(flip=flip)  # joint
+            else:
+                if theta != 0:
+                    ets *= ET.Rz(theta)
+
+                if offset != 0:
+                    ets *= ET.tz(offset)
+
+                ets *= ET.tz(flip=flip)  # joint
         else:
-            if theta != 0:
-                ets *= ET.Rz(theta)
+            # DH format: theta d a alpha
+            if isrevolute:
+                if offset != 0:
+                    ets *= ET.Rz(offset)
+                ets *= ET.Rz(flip=flip)
 
-            if offset != 0:
-                ets *= ET.tz(offset)
+                if d != 0:
+                    ets *= ET.tz(d)
+            else:
+                if theta != 0:
+                    ets *= ET.Rz(theta)
 
-            ets *= ET.tz(flip=flip)  # joint
+                if offset != 0:
+                    ets *= ET.tz(offset)
+                ets *= ET.tz(flip=flip)
+
+            if a != 0:
+                ets *= ET.tx(a)
+            if alpha != 0:
+                ets *= ET.Rx(alpha)
 
         return ets
 
-    @classmethod
-    def StandardDH(cls, links: List["StandardDH"]) -> List["DHLink"]:
-        """
-        Takes a list of standard DH links and converts to a list
-        of modified DH parameters
+    # @classmethod
+    # def StandardDH(cls, links: List["StandardDH"]) -> List["DHLink"]:
+    #     """
+    #     Takes a list of standard DH links and converts to a list
+    #     of modified DH parameters
 
-        """
+    #     """
 
-        new_links = []
-        ets = ETS()
+    #     new_links = []
+    #     ets = ETS()
 
-        # Make an ets of the whole Robot
-        for link in links:
-            ets += link.ets
+    #     # Make an ets of the whole Robot
+    #     for link in links:
+    #         ets += link.ets
 
-        # Split ETS with variables at the end
-        segs = ets.split()
+    #     # Split ETS with variables at the end
+    #     segs = ets.split()
 
-        # Construct MDH Links
-        for (seg, link) in zip(segs, links):
-            flip = True if seg[-1].isflip else False
-            isrevolute = True if seg[-1].axis[0] == "R" else False
+    #     # Construct MDH Links
+    #     for (seg, link) in zip(segs, links):
+    #         flip = True if seg[-1].isflip else False
+    #         isrevolute = True if seg[-1].axis[0] == "R" else False
 
-            a = 0.0
-            alpha = 0.0
-            theta = 0.0
-            d = 0.0
-            offset = 0.0
+    #         a = 0.0
+    #         alpha = 0.0
+    #         theta = 0.0
+    #         d = 0.0
+    #         offset = 0.0
 
-            # Find MDH Parameters
-            for et in seg:
-                if et.axis == "tx":
-                    a = et.eta
-                elif et.axis == "Rx":
-                    alpha = et.eta
-                elif et.axis == "Rz" and not et.isjoint:
-                    offset = et.eta
-                elif et.axis == "Rz" and not isrevolute:
-                    theta = et.eta
-                elif et.axis == "tz" and isrevolute:
-                    d = et.eta
+    #         # Find MDH Parameters
+    #         for et in seg:
+    #             if et.axis == "tx":
+    #                 a = et.eta
+    #             elif et.axis == "Rx":
+    #                 alpha = et.eta
+    #             elif et.axis == "Rz" and not et.isjoint:
+    #                 offset = et.eta
+    #             elif et.axis == "Rz" and not isrevolute:
+    #                 theta = et.eta
+    #             elif et.axis == "tz" and isrevolute:
+    #                 d = et.eta
 
-            # Make the link
-            if isrevolute:
-                new_link = RevoluteMDH(
-                    d=d,
-                    a=a,
-                    alpha=alpha,
-                    offset=offset,
-                    qlim=link.qlim,
-                    flip=flip,
-                    name=link.name,
-                    m=link.m,
-                    r=link.r,
-                    I=link.I,
-                    Jm=link.Jm,
-                    B=link.B,
-                    Tc=link.Tc,
-                    G=link.G,
-                    geometry=link.geometry,
-                    collision=link.collision,
-                )
-            else:
-                new_link = PrismaticMDH(
-                    theta=theta,
-                    a=a,
-                    alpha=alpha,
-                    offset=offset,
-                    qlim=link.qlim,
-                    flip=flip,
-                    name=link.name,
-                    m=link.m,
-                    r=link.r,
-                    I=link.I,
-                    Jm=link.Jm,
-                    B=link.B,
-                    Tc=link.Tc,
-                    G=link.G,
-                    geometry=link.geometry,
-                    collision=link.collision,
-                )
+    #         # Make the link
+    #         if isrevolute:
+    #             new_link = RevoluteMDH(
+    #                 d=d,
+    #                 a=a,
+    #                 alpha=alpha,
+    #                 offset=offset,
+    #                 qlim=link.qlim,
+    #                 flip=flip,
+    #                 name=link.name,
+    #                 m=link.m,
+    #                 r=link.r,
+    #                 I=link.I,
+    #                 Jm=link.Jm,
+    #                 B=link.B,
+    #                 Tc=link.Tc,
+    #                 G=link.G,
+    #                 geometry=link.geometry,
+    #                 collision=link.collision,
+    #             )
+    #         else:
+    #             new_link = PrismaticMDH(
+    #                 theta=theta,
+    #                 a=a,
+    #                 alpha=alpha,
+    #                 offset=offset,
+    #                 qlim=link.qlim,
+    #                 flip=flip,
+    #                 name=link.name,
+    #                 m=link.m,
+    #                 r=link.r,
+    #                 I=link.I,
+    #                 Jm=link.Jm,
+    #                 B=link.B,
+    #                 Tc=link.Tc,
+    #                 G=link.G,
+    #                 geometry=link.geometry,
+    #                 collision=link.collision,
+    #             )
 
-            new_links.append(new_link)
+    #         new_links.append(new_link)
 
-        return new_links
+    #     return new_links
 
     def __add__(self, L):
         if isinstance(L, DHLink):
@@ -494,202 +519,128 @@ class DHLink(Link):
 
     # -------------------------------------------------------------------------- #
 
-    # def A(self, q):
-    #     r"""
-    #     Link transform matrix
+    def A(self, q):
+        r"""
+        Link transform matrix
 
-    #     :param q: Joint coordinate
-    #     :type q: float
-    #     :return T: SE(3) link homogeneous transformation
-    #     :rtype T: SE3 instance
+        :param q: Joint coordinate
+        :type q: float
+        :return T: SE(3) link homogeneous transformation
+        :rtype T: SE3 instance
 
-    #     ``A(q)`` is an ``SE3`` instance representing the SE(3) homogeneous
-    #     transformation matrix corresponding to the link's joint variable ``q``
-    #     which is either the Denavit-Hartenberg parameter :math:`\theta_j`
-    #     (revolute) or :math:`d_j` (prismatic).
+        ``A(q)`` is an ``SE3`` instance representing the SE(3) homogeneous
+        transformation matrix corresponding to the link's joint variable ``q``
+        which is either the Denavit-Hartenberg parameter :math:`\theta_j`
+        (revolute) or :math:`d_j` (prismatic).
 
-    #     This is the relative pose of the current link frame with respect to the
-    #     previous link frame.
+        This is the relative pose of the current link frame with respect to the
+        previous link frame.
 
-    #     For details of the computation see the documentation for the
-    #     subclasses, click on the right side of the class boxes below.
+        For details of the computation see the documentation for the
+        subclasses, click on the right side of the class boxes below.
 
-    #     .. inheritance-diagram:: roboticstoolbox.RevoluteDH
-    #         roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH
-    #         roboticstoolbox.PrismaticMDH
-    #         :top-classes: roboticstoolbox.robot.DHLink.DHLink
-    #         :parts: 2
+        .. inheritance-diagram:: roboticstoolbox.RevoluteDH
+            roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH
+            roboticstoolbox.PrismaticMDH
+            :top-classes: roboticstoolbox.robot.DHLink.DHLink
+            :parts: 2
 
-    #     .. note::
+        .. note::
 
-    #         - For a revolute joint the ``theta`` parameter of the link is
-    #           ignored, and ``q`` used instead.
-    #         - For a prismatic joint the ``d`` parameter of the link is ignored,
-    #           and ``q`` used instead.
-    #         - The joint ``offset`` parameter is added to ``q`` before
-    #           computation of the transformation matrix.
-    #         - The computation is different for standard and modified
-    #           Denavit-Hartenberg parameters.
+            - For a revolute joint the ``theta`` parameter of the link is
+              ignored, and ``q`` used instead.
+            - For a prismatic joint the ``d`` parameter of the link is ignored,
+              and ``q`` used instead.
+            - The joint ``offset`` parameter is added to ``q`` before
+              computation of the transformation matrix.
+            - The computation is different for standard and modified
+              Denavit-Hartenberg parameters.
 
-    #     :seealso: :class:`RevoluteDH`, :class:`PrismaticDH`,
-    #         :class:`RevoluteMDH`, :class:`PrismaticMDH`
-    #     """
+        :seealso: :class:`RevoluteDH`, :class:`PrismaticDH`,
+            :class:`RevoluteMDH`, :class:`PrismaticMDH`
+        """
 
-    #     sa = _sin(self.alpha)
-    #     ca = _cos(self.alpha)
+        sa = _sin(self.alpha)
+        ca = _cos(self.alpha)
 
-    #     if self.ets[-1].isflip:
-    #         q = -q + self.offset
-    #     else:
-    #         q = q + self.offset
+        if self.ets[-1].isflip:
+            q = -q + self.offset
+        else:
+            q = q + self.offset
 
-    #     if self.sigma == 0:
-    #         # revolute
-    #         st = _sin(q)
-    #         ct = _cos(q)
-    #         d = self.d
-    #     else:
-    #         # prismatic
-    #         st = _sin(self.theta)
-    #         ct = _cos(self.theta)
-    #         d = q
+        if self.sigma == 0:
+            # revolute
+            st = _sin(q)
+            ct = _cos(q)
+            d = self.d
+        else:
+            # prismatic
+            st = _sin(self.theta)
+            ct = _cos(self.theta)
+            d = q
 
-    #     if self.mdh == 0:
-    #         # standard DH
-    #         T = np.array(
-    #             [
-    #                 [ct, -st * ca, st * sa, self.a * ct],
-    #                 [st, ct * ca, -ct * sa, self.a * st],
-    #                 [0, sa, ca, d],
-    #                 [0, 0, 0, 1],
-    #             ]
-    #         )
-    #     else:
-    #         # modified DH
-    #         T = np.array(
-    #             [
-    #                 [ct, -st, 0, self.a],
-    #                 [st * ca, ct * ca, -sa, -sa * d],
-    #                 [st * sa, ct * sa, ca, ca * d],
-    #                 [0, 0, 0, 1],
-    #             ]
-    #         )
+        if self.mdh == 0:
+            # standard DH
+            T = array(
+                [
+                    [ct, -st * ca, st * sa, self.a * ct],
+                    [st, ct * ca, -ct * sa, self.a * st],
+                    [0, sa, ca, d],
+                    [0, 0, 0, 1],
+                ]
+            )
+        else:
+            # modified DH
+            T = array(
+                [
+                    [ct, -st, 0, self.a],
+                    [st * ca, ct * ca, -sa, -sa * d],
+                    [st * sa, ct * sa, ca, ca * d],
+                    [0, 0, 0, 1],
+                ]
+            )
 
-    #     return SE3(T, check=False)
+        return SE3(T, check=False)
 
-    # @property
-    # def isrevolute(self):
-    #     """
-    #     Checks if the joint is of revolute type
+    @property
+    def isrevolute(self):
+        """
+        Checks if the joint is of revolute type
 
-    #     :return: Ture if is revolute
-    #     :rtype: bool
+        :return: Ture if is revolute
+        :rtype: bool
 
-    #     :seealso: :func:`sigma`
-    #     """
+        :seealso: :func:`sigma`
+        """
 
-    #     if not self.sigma:
-    #         return True
-    #     else:
-    #         return False
+        if not self.sigma:
+            return True
+        else:
+            return False
 
-    # @property
-    # def isprismatic(self):
-    #     """
-    #     Checks if the joint is of prismatic type
+    @property
+    def isprismatic(self):
+        """
+        Checks if the joint is of prismatic type
 
-    #     :return: Ture if is prismatic
-    #     :rtype: bool
+        :return: Ture if is prismatic
+        :rtype: bool
 
-    #     :seealso: :func:`sigma`
-    #     """
+        :seealso: :func:`sigma`
+        """
 
-    #     if self.sigma:
-    #         return True
-    #     else:
-    #         return False
+        if self.sigma:
+            return True
+        else:
+            return False
 
 
 # -------------------------------------------------------------------------- #
 
 
-class StandardDH:
-    def __init__(
-        self,
-        d=0.0,
-        alpha=0.0,
-        theta=0.0,
-        a=0.0,
-        sigma=0,
-        offset=0,
-        flip=False,
-        qlim=None,
-        name=None,
-        m: Union[float, None] = None,
-        r: Union[ArrayLike, None] = None,
-        I: Union[ArrayLike, None] = None,  # noqa
-        Jm: Union[float, None] = None,
-        B: Union[float, None] = None,
-        Tc: Union[ArrayLike, None] = None,
-        G: Union[float, None] = None,
-        geometry: List[Shape] = [],
-        collision: List[Shape] = [],
-    ):
-        self.ets = self._to_ets(sigma, theta, d, alpha, a, offset, flip)
-
-        # DH Kinematic parameters
-        self.sigma = sigma
-        self.theta = theta
-        self.d = d
-        self.alpha = alpha
-        self.a = a
-        self.offset = offset
-        self.id = None
-        self.qlim = qlim
-        self.name = name
-        self.m = m
-        self.r = r
-        self.I = I
-        self.Jm = Jm
-        self.B = B
-        self.Tc = Tc
-        self.G = G
-        self.geometry = geometry
-        self.collision = collision
-
-    def _to_ets(self, sigma, theta, d, alpha, a, offset, flip: bool):
-        ets = ETS()
-
-        isrevolute = True if sigma else False
-
-        # DH format: theta d a alpha
-        if isrevolute:
-            if offset != 0:
-                ets *= ET.Rz(offset)
-            ets *= ET.Rz(flip=flip)
-
-            if d != 0:
-                ets *= ET.tz(d)
-        else:
-            if theta != 0:
-                ets *= ET.Rz(theta)
-
-            if offset != 0:
-                ets *= ET.tz(offset)
-            ets *= ET.tz(flip=flip)
-
-        if a != 0:
-            ets *= ET.tx(a)
-        if alpha != 0:
-            ets *= ET.Rx(alpha)
-
-        return ets
-
-
-class RevoluteDH(StandardDH):
+class RevoluteDH(DHLink):
     r"""
     Class for revolute links using standard DH convention
-
     :param d: kinematic - link offset
     :type d: float
     :param alpha: kinematic - link twist
@@ -698,12 +649,10 @@ class RevoluteDH(StandardDH):
     :type a: float
     :param offset: kinematic - joint variable offset
     :type offset: float
-
     :param qlim: joint variable limits [min, max]
     :type qlim: float ndarray(1,2)
     :param flip: joint moves in opposite direction
     :type flip: bool
-
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
@@ -722,16 +671,11 @@ class RevoluteDH(StandardDH):
     A subclass of the :class:`DHLink` class for a revolute joint that holds all
     information related to a robot link such as kinematics parameters,
     rigid-body inertial parameters, motor and transmission parameters.
-
     The link transform is
-
     :math:`\underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`
-
     where :math:`q_i` is the joint variable.
-
     :references:
         - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
-
     :seealso: :func:`PrismaticDH`, :func:`DHLink`, :func:`RevoluteMDH`
     """  # noqa
 
@@ -741,6 +685,7 @@ class RevoluteDH(StandardDH):
 
         theta = 0.0
         sigma = 0
+        mdh = False
 
         super().__init__(
             d=d,
@@ -748,6 +693,7 @@ class RevoluteDH(StandardDH):
             theta=theta,
             a=a,
             sigma=sigma,
+            mdh=mdh,
             offset=offset,
             qlim=qlim,
             flip=flip,
@@ -755,10 +701,9 @@ class RevoluteDH(StandardDH):
         )
 
 
-class PrismaticDH(StandardDH):
+class PrismaticDH(DHLink):
     r"""
     Class for prismatic link using standard DH convention
-
     :param theta: kinematic: joint angle
     :type theta: float
     :param d: kinematic - link offset
@@ -769,12 +714,10 @@ class PrismaticDH(StandardDH):
     :type a: float
     :param offset: kinematic - joint variable offset
     :type offset: float
-
     :param qlim: joint variable limits [min, max]
     :type qlim: float ndarray(1,2)
     :param flip: joint moves in opposite direction
     :type flip: bool
-
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
@@ -789,20 +732,14 @@ class PrismaticDH(StandardDH):
     :type Tc: ndarray(2,)
     :param G: dynamic - gear ratio
     :type G: float
-
     A subclass of the DHLink class for a prismatic joint that holds all
     information related to a robot link such as kinematics parameters,
     rigid-body inertial parameters, motor and transmission parameters.
-
     The link transform is
-
     :math:`\mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`
-
     where :math:`q_i` is the joint variable.
-
     :references:
         - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
-
     :seealso: :func:`RevoluteDH`, :func:`DHLink`, :func:`PrismaticMDH`
     """  # noqa
 
@@ -812,6 +749,7 @@ class PrismaticDH(StandardDH):
 
         d = 0.0
         sigma = 1
+        mdh = False
 
         super().__init__(
             theta=theta,
@@ -819,6 +757,7 @@ class PrismaticDH(StandardDH):
             a=a,
             alpha=alpha,
             sigma=sigma,
+            mdh=mdh,
             offset=offset,
             qlim=qlim,
             flip=flip,
