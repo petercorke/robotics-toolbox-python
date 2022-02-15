@@ -10,7 +10,7 @@ import copy
 import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
 from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.DHLink import DHLink, StandardDH
+from roboticstoolbox.robot.DHLink import DHLink
 from roboticstoolbox import rtb_set_param
 from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix
 
@@ -75,8 +75,8 @@ class DHRobot(Robot):
 
         # If we are given a list of standard DH Links, we must convert
         # them to modified DH links
-        if any([isinstance(link, StandardDH) for link in links]):
-            links = DHLink.StandardDH(links)
+        # if any([isinstance(link, StandardDH) for link in links]):
+        #     links = DHLink.StandardDH(links)
 
         for link in links:
             if isinstance(link, DHLink):
