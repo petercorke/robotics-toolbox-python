@@ -856,13 +856,13 @@ class DHRobot(Robot):
                     Tr = L.A(q)
                     first = False
                 else:
-                    Tr *= L.A(q)
+                    Tr *= L.A(q)  # type: ignore
 
             if self._base is not None:
-                Tr = self._base * Tr
-            if self._tool is not None:
-                Tr = Tr * self._tool
-            T.append(Tr)
+                Tr = self._base * Tr  # type: ignore
+            if self.tool is not None:
+                Tr = Tr * self.tool  # type: ignore
+            T.append(Tr)  # type: ignore
 
         return T
 
