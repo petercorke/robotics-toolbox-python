@@ -519,7 +519,7 @@ class DHLink(Link):
 
     # -------------------------------------------------------------------------- #
 
-    def A(self, q):
+    def A(self, q: float) -> SE3:
         r"""
         Link transform matrix
 
