@@ -25,6 +25,7 @@ from scipy.linalg import block_diag
 from roboticstoolbox.robot.DHLink import _check_rne, DHLink
 from roboticstoolbox import rtb_get_param
 from frne import init, frne, delete
+from numpy import any
 
 iksol = namedtuple("IKsolution", "q, success, reason")
 
@@ -74,7 +75,7 @@ class DHRobot(Robot):
 
         # If we are given a list of standard DH Links, we must convert
         # them to modified DH links
-        if [isinstance(link, StandardDH) for link in links]:
+        if any([isinstance(link, StandardDH) for link in links]):
             links = DHLink.StandardDH(links)
 
         for link in links:
