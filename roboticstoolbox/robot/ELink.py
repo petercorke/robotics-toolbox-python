@@ -19,5 +19,5 @@ class ELink2(Link2):
     def __init__(self, **kwargs):
         import warnings
 
-        warnings.warn("ELink2 is deprecated, use Link instead", FutureWarning)
+        warnings.warn("ELink2 is deprecated, use Link2 instead", FutureWarning)
         super().__init__(**kwargs)
