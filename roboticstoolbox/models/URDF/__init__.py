@@ -20,6 +20,8 @@ from roboticstoolbox.models.URDF.LBR import LBR
 from roboticstoolbox.models.URDF.KinovaGen3 import KinovaGen3
 from roboticstoolbox.models.URDF.YuMi import YuMi
 from roboticstoolbox.models.URDF.Fetch import Fetch
+from roboticstoolbox.models.URDF.FetchCamera import FetchCamera
+
 __all__ = [
     "Panda",
     "Frankie",
@@ -42,5 +44,6 @@ __all__ = [
     "LBR",
     "KinovaGen3",
     "YuMi",
-    "Fetch"
+    "Fetch",
+    "FetchCamera",
 ]
