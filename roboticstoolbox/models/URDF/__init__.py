@@ -19,6 +19,7 @@ from roboticstoolbox.models.URDF.PR2 import PR2
 from roboticstoolbox.models.URDF.LBR import LBR
 from roboticstoolbox.models.URDF.KinovaGen3 import KinovaGen3
 from roboticstoolbox.models.URDF.YuMi import YuMi
+from roboticstoolbox.models.URDF.Valkyrie import Valkyrie
 
 __all__ = [
     "Panda",
@@ -42,4 +43,5 @@ __all__ = [
     "LBR",
     "KinovaGen3",
     "YuMi",
+    "Valkyrie",
 ]
