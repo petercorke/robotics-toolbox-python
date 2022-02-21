@@ -1,6 +1,13 @@
 Mobile robot kinematic models
 =============================
 
+These vehicle kinematic classes have methods to:
+
+* predict new configuration based on odometry
+* compute configuration derivative
+* simulate and animate motion
+* compute Jacobians
+
 Bicycle model
 ^^^^^^^^^^^^^
 
@@ -8,6 +15,7 @@ Bicycle model
    :members:
    :undoc-members:
    :inherited-members:
+   :show-inheritance:
    :special-members: __init__
 
 Unicycle model
@@ -24,7 +32,7 @@ Unicycle model
 Superclass
 ^^^^^^^^^^
 
-.. autoclass:: roboticstoolbox.mobile.Vehicle
+.. autoclass:: roboticstoolbox.mobile.VehicleBase
    :members:
    :undoc-members:
    :show-inheritance:

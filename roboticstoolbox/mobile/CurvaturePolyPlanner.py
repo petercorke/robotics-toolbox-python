@@ -52,10 +52,62 @@ def costfunc(x, start, goal):
 class CurvaturePolyPlanner(PlannerBase):
 
     def __init__(self, curvature=None):
+        """
+        Continuous curvature path planner
+
+        :param curvature: , defaults to None
+        :type curvature: _type_, optional
+
+        ==================   ========================
+        Feature              Capability
+        ==================   ========================
+        Plan                 :math:`\SE{2}`
+        Obstacle avoidance   No
+        Curvature            Continuous
+        Motion               Forwards only
+        ==================   ========================
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import DubinsPlanner
+            >>> from math import pi
+            >>> planner = CurvaturePolyPlanner()
+            >>> path, status = planner.query(start=(0, 0, pi/2), goal=(1, 0, pi/2))
+            >>> print(path[:5,:])
+            >>> print(status)
+        """
         super().__init__(ndims=3)
         self.curvature = curvature
 
+
     def query(self, start, goal):
+        r"""
+        Find a path betwee two configurations
+
+        :param start: start configuration :math:`(x, y, \theta)`
+        :type start: array_like(3), optional
+        :param goal: goal configuration :math:`(x, y, \theta)`
+        :type goal: array_like(3), optional
+        :return: path and status
+        :rtype: ndarray(N,3), namedtuple
+
+        The path comprises points equally spaced at a distance of ``stepsize``.
+
+        The returned status value has elements:
+
+        +-------------------+-----------------------------------------------+
+        | Element           |  Description                                  |
+        +-------------------+-----------------------------------------------+
+        | ``length``        | total path length                             |
+        +-------------------+-----------------------------------------------+
+        | ``maxcurvature``  | maximum curvature on path                     |
+        +-------------------+-----------------------------------------------+
+        | ``poly``          | curvature polynomial coefficients             |
+        +-------------------+-----------------------------------------------+
+
+        """
         goal = np.r_[goal]
         start = np.r_[start]
         self._start = start

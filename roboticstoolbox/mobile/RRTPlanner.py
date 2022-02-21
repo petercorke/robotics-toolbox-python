@@ -155,7 +155,7 @@ class RRTPlanner(PlannerBase):
 
         # iterate for a random freespace configuration
         while True:
-            q = self.random()
+            q = self.qrandom()
             if not self.map.iscollision(self.vehicle.polygon(q)):
                 return q
 

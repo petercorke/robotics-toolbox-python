@@ -318,7 +318,7 @@ class DubinsPlanner(PlannerBase):
     ==================   ========================
     Feature              Capability
     ==================   ========================
-    Plan                 Configuration space
+    Plan                 :math:`\SE{2}`
     Obstacle avoidance   No
     Curvature            Discontinuous
     Motion               Forwards only
@@ -326,14 +326,26 @@ class DubinsPlanner(PlannerBase):
 
     Creates a planner that finds the path between two configurations in the
     plane using forward motion only.  The path comprises upto 3 segments that are
-    straight lines or arcs with :math:`\pm` ``curvature``.
+    straight lines, or arcs with curvature of :math:`\pm` ``curvature``.
+
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import DubinsPlanner
+        >>> from math import pi
+        >>> dubins = DubinsPlanner(curvature=1.0)
+        >>> path, status = dubins.query(start=(0, 0, pi/2), goal=(1, 0, pi/2))
+        >>> print(path[:5,:])
+        >>> print(status)
 
     :reference: On Curves of Minimal Length with a Constraint on Average 
         Curvature, and with Prescribed Initial and Terminal Positions and 
         Tangents,  Dubins, L.E. (July 1957), American Journal of Mathematics.
         79(3): 497–516.
-    :author: Atsushi Sakai `PythonRobotics <https://github.com/AtsushiSakai/PythonRobotics>`_
-    :seealso: :class:`Planner`
+
+    :thanks: based on Dubins path planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
+    :seealso: :class:`PlannerBase`
     """
     def __init__(self, curvature=1, stepsize=0.1, **kwargs):
 
@@ -346,7 +358,7 @@ class DubinsPlanner(PlannerBase):
 
     def query(self, start, goal, **kwargs):
         r"""
-        Find a Dubins path
+        Find a path betwee two configurations
 
         :param start: start configuration :math:`(x, y, \theta)`
         :type start: array_like(3), optional
@@ -354,6 +366,8 @@ class DubinsPlanner(PlannerBase):
         :type goal: array_like(3), optional
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
+
+        The path comprises points equally spaced at a distance of ``stepsize``.
 
         The returned status value has elements:
 
@@ -364,11 +378,12 @@ class DubinsPlanner(PlannerBase):
         |             | a single letter code: either "L", "R" or "S" for    |
         |             | left turn, right turn or straight line respectively.|
         +-------------+-----------------------------------------------------+
+        | ``length``  | total path length                                   |
+        +-------------+-----------------------------------------------------+
         |``lengths``  | the length of each path segment. The sign of the    |
-        |             |length indicates the direction of travel.            |
+        |             | length indicates the direction of travel.           |
         +-------------+-----------------------------------------------------+
 
-        :seealso: :meth:`Planner.query`
         """
         super().query(start=start, goal=goal, next=False, **kwargs)
 

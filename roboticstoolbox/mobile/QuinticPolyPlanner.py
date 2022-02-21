@@ -36,7 +36,7 @@ from roboticstoolbox.mobile.PlannerBase import PlannerBase
 show_animation = True
 
 
-class QuinticPolynomial:
+class _QuinticPolynomial:
 
     def __init__(self, xs, vxs, axs, xe, vxe, axe, time):
         # calc coefficient of quintic polynomial
@@ -120,8 +120,8 @@ def quintic_polynomials_planner(sx, sy, syaw, sv, sa, gx, gy, gyaw, gv, ga, max_
     time, rx, ry, ryaw, rv, ra, rj = [], [], [], [], [], [], []
 
     for T in np.arange(MIN_T, MAX_T, MIN_T):
-        xqp = QuinticPolynomial(sx, vxs, axs, gx, vxg, axg, T)
-        yqp = QuinticPolynomial(sy, vys, ays, gy, vyg, ayg, T)
+        xqp = _QuinticPolynomial(sx, vxs, axs, gx, vxg, axg, T)
+        yqp = _QuinticPolynomial(sy, vys, ays, gy, vyg, ayg, T)
 
         time, rx, ry, ryaw, rv, ra, rj = [], [], [], [], [], [], []
 
@@ -186,7 +186,7 @@ class QuinticPolyPlanner(PlannerBase):
     ==================   ========================
     Feature              Capability
     ==================   ========================
-    Plan                 Configuration space
+    Plan                 :math:`\SE{2}`
     Obstacle avoidance   No
     Curvature            Continuous
     Motion               Forwards only
@@ -206,8 +206,23 @@ class QuinticPolyPlanner(PlannerBase):
         Sugimoto; Proceedings. IEEE/RSJ International Workshop on
         Intelligent Robots and Systems (IROS '89)  doi: 10.1109/IROS.1989.637936
 
-    .. note:: The path time is searched in the interval [``min_t``, `max_t`] in steps
+    .. note:: The path time is searched in the interval [``min_t``, ``max_t``] in steps
         of ``min_t``.
+
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import QuinticPolyPlanner
+        >>> import numpy as np
+        >>> start = (10, 10, np.deg2rad(10.0))
+        >>> goal = (30, -10, np.deg2rad(20.0))
+        >>> quintic = QuinticPolyPlanner(start_vel=1)
+        >>> path, status = quintic.query(start, goal)
+        >>> print(path[:5,:])
+
+    :thanks: based on quintic polynomial planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
+
 
     :seealso: :class:`Planner`
     """

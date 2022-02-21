@@ -1,9 +1,7 @@
 """
 Python Navigation Abstract Class
+@Author: Peter Corke
 @Author: Kristian Gibson
-TODO: Comments + Sphynx Docs Structured Text
-TODO: Bug-fix, testing
-
 """
 
 from abc import ABC
@@ -53,14 +51,23 @@ class PlannerBase(ABC):
     includes:
 
     - encapsulates an occupancy grid and optionally inflates it
+    - validates ``start`` and ``goal`` if given
     - encapsulates a private random number generator with specifiable seed
     - encapsulates state such as start, goal, and the plan
     - provides a message channel for diagnostic output
+
+    The start and goal can be specifed in various ways:
+
+    - at constructor time by the arguments ``start`` or ``goal``
+    - by assigning the attributes ``start`` or ``goal``
+    - at planning time by specifying ``goal`` to :meth:`plan`
+    - at query time by specifying ``start`` to :meth:`query`
 
     :seealso: :class:`OccGrid`
     """
 
     def __init__(self, occgrid=None, inflate=0, ndims=None,
+                start=None, goal=None,
                  verbose=False, msgcolor='yellow', 
                  progress=True, marker=None, seed=None, **unused):
 
@@ -73,23 +80,26 @@ class PlannerBase(ABC):
         self._seed = seed
         self._private_random = np.random.default_rng(seed=seed)
         self._inflate = inflate
-        self._start = None
-        self._goal = None
 
         self._progress = progress and _progress
 
         self.marker = marker
 
         if occgrid is not None:
-            if not isinstance(occgrid, BaseOccupancyGrid):
-                occgrid = BinaryOccupancyGrid(occgrid)
-            self._occgrid0 = occgrid  # original occgrid for reference
+            if isinstance(occgrid, np.ndarray) and occgrid.ndim == 2:
+                # it's a NumPy array
+                self._occgrid = BinaryOccupancyGrid(occgrid)
+            elif isinstance(occgrid, BinaryOccupancyGrid):
+                self._occgrid = occgrid  # original occgrid for reference
 
             if inflate > 0:
-                self._occgrid = occgrid.copy()
+                self._occgrid0 = occgrid.copy()
                 self._occgrid.inflate(inflate)
             else:
-                self._occgrid = occgrid
+                self._occgrid0 = self._occgrid
+
+        self._start = self.validate_endpoint(start)
+        self._goal = self.validate_endpoint(goal)
 
     def __str__(self):
         """
@@ -100,7 +110,7 @@ class PlannerBase(ABC):
         """
         s = f"{self.__class__.__name__}: "
         if self._occgrid0 is not None:
-            s += str(self.occgrid)
+            s += "\n  " + str(self.occgrid)
         if self._start is not None:
             s += f"\n  Start: {self.start}"
         if self._goal is not None:
@@ -110,39 +120,25 @@ class PlannerBase(ABC):
     def __repr__(self):
         return str(self)
 
-    @property
-    def occgrid(self):
-        """
-        Occupancy grid
-
-        :return: occupancy grid used for planning
-        :rtype: :class:`OccGrid` instance or None
-
-        Returns the grid that was optionally inflated at constructor time.
-
-        :seealso: :class:`OccGrid`
-        """
-        return self._occgrid
 
     @property
     def start(self):
         r"""
-        Start point or configuration used for planning
+        Set/get start point or configuration (superclass)
 
-        :return: start point :math:`(x, y)` or configuration :math:`(x, y, \theta)`
+        :getter: Return start point or configuration
         :rtype: ndarray(2) or ndarray(3)
+        :setter: Set start point or configuration
+        :param: array_like(2) or array_like(3)
+
+        The start is either a point :math:`(x, y)` or a configuration :math:`(x, y, \theta)`.
+
+        :seealso: :meth:`goal`
         """
         return self._start
 
     @start.setter
     def start(self, start):
-        r"""
-        Set start point or configuration for planning
-
-        :param start: Set start :math:`(x, y)` or configuration :math:`(x, y, \theta)`
-        :type start: array_like(2) or array_like(3)
-        :raises ValueError: if start point is occupied
-        """
         if start is not None:
             if self.isoccupied(start):
                 raise ValueError("Start location inside obstacle")
@@ -151,10 +147,16 @@ class PlannerBase(ABC):
     @property
     def goal(self):
         r"""
-        Goal point or configuration used for planning
+        Set/get goal point or configuration (superclass)
 
-        :return: goal point :math:`(x, y)` or configuration :math:`(x, y, \theta)`
+        :getter: Return goal pointor configuration
         :rtype: ndarray(2) or ndarray(3)
+        :setter: Set goal point or configuration
+        :param: array_like(2) or array_like(3)
+
+        The goal is either a point :math:`(x, y)` or a configuration :math:`(x, y, \theta)`.
+
+        :seealso: :meth:`goal`
         """
         return self._goal
 
@@ -172,27 +174,7 @@ class PlannerBase(ABC):
                 raise ValueError("Goal location inside obstacle")
             self._goal = base.getvector(goal)
 
-    def isoccupied(self, p):
-        """
-        Test if point is occupied
 
-        :param p: world coordinate (x, y)
-        :type p: array_like(2)
-        :return: occupancy status of corresponding grid cell
-        :rtype: bool
-
-        The world coordinate is transformed and the status of the occupancy
-        grid cell is returned.  If the point lies outside the bounds of
-        the occupancy grid return True (obstacle)
-
-        If there is no occupancy grid this function always returns False (free).
-
-        :seealso: :meth:`OccGrid.isoccupied`
-        """
-        if self.occgrid is None:
-            return False
-        else:
-            return self.occgrid.isoccupied(p)
 
     @property
     def verbose(self):
@@ -223,33 +205,54 @@ class PlannerBase(ABC):
     @property
     def random(self):
         """
-        Private random number generator
+        Get private random number generator
 
-        :return: random number generator
-        :rtype: NumPy Generator
+        :return: NumPy random number generator
+        :rtype: :class:`numpy.random.Generator`
 
-        For example::
+        Has methods including:
 
-            planner.random(size, dtype)
-            planner.integers(low, high, size, dtype)
-            planner.uniform(0, 5)
-       
-        :seealso: `Random Generator <https://numpy.org/doc/stable/reference/random/generator.html>`_
+            - :meth:`integers(low, high, size, endpoint) <numpy.random.Generator.integers>`
+            - :meth:`random(size) <numpy.random.Generator.random>`
+            - :meth:`uniform(low, high, size) <numpy.random.Generator.uniform>`
+            - :meth:`normal(mean, std, size) <numpy.random.Generator.normal>`
+            - :meth:`multivariate_normal(mean, covar, size) <numpy.random.Generator.multivariate_normal>`
+
+        The generator is initialized with the seed provided at constructor
+        time.
+
+        :seealso: :func:`numpy.random.default_rng`
         """
         return self._private_random
 
-    def randinit(self):
-        if self._seed is not None:
-            self._private_random = np.random.default_rng(seed=self._seed)
+    def random_init(self, seed=None):
+        """
+        Initialize private random number generator
 
-    # Define abstract classes to be implemented later
+        :param seed: random number seed, defaults to value given to constructor
+        :type seed: int
+
+        The private random number generator is initialized.  The seed is ``seed``
+        or the value given to the constructor.  If None, the generator will
+        be randomly seeded using a seed from the operating system.
+        """
+        if seed is None:
+            seed = self._seed
+    
+        self._private_random = np.random.default_rng(seed=seed)
+
+
+    # def randinit(self):
+    #     if self._seed is not None:
+    #         self._private_random = np.random.default_rng(seed=self._seed)
+
     def plan(self):
         r"""
-        Plan path (abstract superclass)
+        Plan path (superclass)
 
-        :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to None
+        :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value passed to constructor
         :type start: array_like(2) or array_like(3), optional
-        :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to None
+        :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value passed to constructor
         :type goal: array_like(2) or array_like(3), optional
 
         The implementation depends on the particular planner.  Some may have
@@ -257,7 +260,59 @@ class PlannerBase(ABC):
         """
         pass
 
+    @property
+    def occgrid(self):
+        """
+        Occupancy grid
+
+        :return: occupancy grid used for planning
+        :rtype: :class:`OccGrid` or subclass or None
+
+        Returns the occupancy grid that was optionally inflated at constructor time.
+
+        :seealso: :meth:`validate_endpoint` :meth:`isoccupied`
+        """
+        return self._occgrid
+
+
+    def isoccupied(self, p):
+        """
+        Test if point is occupied (superclass)
+
+        :param p: world coordinate (x, y)
+        :type p: array_like(2)
+        :return: occupancy status of corresponding grid cell
+        :rtype: bool
+
+        The world coordinate is transformed and the status of the occupancy
+        grid cell is returned.  If the point lies outside the bounds of
+        the occupancy grid return True (obstacle)
+
+        If there is no occupancy grid this function always returns False (free).
+
+        :seealso:  :meth:`occgrid` :meth:`validate_endpoint` :meth:`BinaryOccGrid.isoccupied`
+        """
+        if self.occgrid is None:
+            return False
+        else:
+            return self.occgrid.isoccupied(p)
+
     def validate_endpoint(self, p, dtype=None):
+        """
+        Validate start or goal point
+
+        :param p: the point
+        :type p: array_like(2)
+        :param dtype: data type for point coordinates, defaults to None
+        :type dtype: str, optional
+        :raises ValueError: point is inside obstacle
+        :return: point as a NumPy array of specified dtype
+        :rtype: ndarray(2)
+
+        The coordinate is tested to be a free cell in the occupancy grid.
+
+        :seealso: :meth:`isoccupied` :meth:`occgrid`
+        """
         if p is not None:
             p = base.getvector(p, self._ndims, dtype=dtype)
             if self.isoccupied(p):
@@ -265,23 +320,81 @@ class PlannerBase(ABC):
         return p
 
     def progress_start(self, n):
-        self._bar = FillingCirclesBar(self.__class__.__name__, max=n, 
-            suffix = '%(percent).1f%% - %(eta)ds')
+        """
+        Initialize a progress bar (superclass)
+
+        :param n: Number of iterations in the operation
+        :type n: int
+
+        Create a progress bar for an operation that has ``n`` steps, for
+        example::
+
+            planner.progress_start(100)
+            for i in range(100):
+                # ...
+                planner.progress_next()
+            planner.progress_end()
+        
+        .. warning: Requires that the ``progress`` package is installed.
+
+        :seealso: :meth:`progress_next` :meth:`progress_end`
+        """
+        if _progress:
+            self._bar = FillingCirclesBar(self.__class__.__name__, max=n, 
+                suffix = '%(percent).1f%% - %(eta)ds')
 
     def progress_next(self):
-        self._bar.next()
+        """
+        Increment a progress bar (superclass)
+
+        Create a progress bar for an operation that has ``n`` steps, for
+        example::
+
+            planner.progress_start(100)
+            for i in range(100):
+                # ...
+                planner.progress_next()
+            planner.progress_end()
+        
+        .. warning: Requires that the ``progress`` package is installed.
+
+        :seealso: :meth:`progress_start` :meth:`progress_end`
+        """
+        if _progress:
+            self._bar.next()
 
     def progress_end(self):
-        self._bar.finish()
+        """
+        Finalize a progress bar  (superclass)
+
+        Remove/cleanip a progress bar, for
+        example::
+
+            planner.progress_start(100)
+            for i in range(100):
+                # ...
+                planner.progress_next()
+            planner.progress_end()
+        
+        .. warning: Requires that the ``progress`` package is installed.
+
+        :seealso: :meth:`progress_start` :meth:`progress_next`
+        """
+        if _progress:
+            self._bar.finish()
 
     def query(self, start=None, goal=None, dtype=None, next=True, animate=False, movie=None):
-        """
-        Find a path from start to goal using plan (superclass)
+        r"""
+        Find a path from start to goal using planner (superclass)
 
-        :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to None
-        :type start: array_like(2) or array_like(3), optional
-        :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to None
-        :type goal: array_like(2) or array_like(3), optional
+        :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value specified to constructor
+        :type start: array_like(), optional
+        :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value specified to constructor
+        :type goal: array_like(), optional
+        :param dtype: data type for point coordinates, defaults to None
+        :type dtype: str, optional
+        :param next: invoke :meth:`next` method of class, defaults to True
+        :type next: bool, optional
         :param animate: show the vehicle path, defaults to False
         :type animate: bool, optional
         :return: path from start to goal, one point :math:`(x, y)` or configuration :math:`(x, y, \theta)` per row
@@ -289,11 +402,17 @@ class PlannerBase(ABC):
 
         Find a path from ``start`` to ``goal`` using a previously computed plan.
         
-        The method performs the following steps:
-        - Initialize navigation, invoke method N.navigate_init()
-        - Visualize the environment, invoke method N.plot()
-        - Iterate on the ``next()`` method of the subclass until the ``goal`` is
-          achieved.
+        This is a generic method that works for any planner
+        (:math:`\mathbb{R}^2` or :math:`\SE{2}`) that can incrementally
+        determine the next point on the path.  The method performs the following
+        steps:
+
+        - Validate start and goal
+        - If ``animate``, visualize the environment using :meth:`plot`
+        - Iterate on the class's :meth:`next` method until the ``goal`` is
+          achieved, and if ``animate`` plot points.
+
+        :seealso: :meth:`next` :meth:`plan`
         """
         # make sure start and goal are set and valid
         self.start = self.validate_endpoint(start, dtype=dtype)
@@ -302,33 +421,30 @@ class PlannerBase(ABC):
         # if movie is not None:
         #     animate = True
 
-        if next:
+        if animate:
+            self.plot()
+
+        # movie = MovieWriter(movie)
+
+        robot = self._start
+        path = [robot]
+
+        while next:
             if animate:
-                self.plot()
+                plt.plot(robot[0], robot[1], 'y.', 12)
+                plt.pause(0.05)
 
-            # movie = MovieWriter(movie)
+            # get next point on the path
+            robot = self.next(robot)
 
-            robot = self._start
-            path = [robot]
+            # are we are done?
+            if robot is None:
+                path.append(self._goal)
+                return np.array(path).astype(int)
 
-            while True:
-                if animate:
-                    plt.plot(robot[0], robot[1], 'y.', 12)
-                    plt.pause(0.05)
-
-                # get next point on the path
-                robot = self.next(robot)
-
-                # are we are done?
-                if robot is None:
-                    path.append(self._goal)
-                    return np.array(path).astype(int)
-
-                path.append(robot)
+            path.append(robot)
 
     def plot(self, path=None,
-            style='striped', stripe=(('black', 4), ('yellow', 3)),
-            stripe_r=(('black', 4), ('red', 3)),
             line=None, line_r=None,
             configspace=False, unwrap=True,
             direction=None, background=True,
@@ -336,24 +452,19 @@ class PlannerBase(ABC):
             start_marker=None, goal_marker=None,
             start_vehicle=None, goal_vehicle=None,
             start=None, goal=None,
-            ax=None, block=False, **kwargs):
+            ax=None, block=False, bgargs={}, **unused):
         r"""
-        Plot vehicle path
+        Plot vehicle path (superclass)
 
         :param path: path, defaults to None
-        :type path: ndarray(N, 2) or ndarray(N, 3)
-        :param style: line style: 'striped' [default] or 'line'
-        :type style: str
-        :param stripe: striped line style for forward motion
-        :type stripe: tuple of (color, linewidth)
-        :param stripe_r: striped line style for reverse motion
-        :type stripe: tuple of (color, linewidth)
-        :param line: plain line style for forward motion
-        :type line: dict of arguments for ``plot``
-        :param line_r: plain line style for forward motion
-        :type line_r: dict of arguments for ``plot``
+        :type path: (N, 2) or ndarray(N, 3)
         :param direction: travel direction associated with each point on path, is either >0 or <0, defaults to None
-        :type direction: ndarray(N,), optional
+        :type direction: array_like(N), optional
+        :param line: line style for forward motion, default is striped yellow on black
+        :type line: sequence of dict of arguments for ``plot``
+        :param line_r: line style for reverse motion, default is striped red on black
+        :type line_r: sequence of dict of arguments for ``plot``
+
         :param configspace: plot the path in 3D configuration space, input must be 3xN.  
             Start and goal style will be given by ``qstart_marker`` and ``qgoal_marker``, defaults to False
         :type configspace: bool, optional
@@ -370,50 +481,39 @@ class PlannerBase(ABC):
         :type start_vehicle: dict
         :param goal_vehicle: style for vehicle animation object at goal configuration
         :type goal_vehicle: dict
-        :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value used for ``plan/query``
+        :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value previously set
         :type start: array_like(2) or array_like(3), optional
-        :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value used for ``plan/query``
+        :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value previously set
         :type goal: array_like(2) or array_like(3), optional
+        :param bgargs: arguments passed to :meth:`plot_bg`, defaults to None
+        :type bgargs: dict, optional
         :param ax: axes to plot into
         :type ax: matplotlib axes
         :param block: block after displaying the plot
         :type block: bool, optional
 
-        The path has one column per point and either 2 or 3 rows:
-        
-        - 2 rows describes motion in the :math:`x-y` plane and a 2D plot  is created
-        - 3 rows describes motion in the :math:`x-y-\theta` configuration space. By
-          default only the :math:`x-y` plane is plotted unless ``configspace``
-          is True in which case motion in :math:`x-y-\theta` configuration space
-          is shown.
+        Plots the start and goal location/pose if they are specified by
+        ``start`` or ``goal`` or were set by the object constructor or 
+        ``plan`` or ``query`` method.  
 
-        If the planner supports bi-directional motion then the ``direction``
-        option gives the direction for each point on the path.
+        If the ``start`` and ``goal`` have length 2, planning in
+        :math:`\mathbb{R}^2`, then markers are drawn using styles specified by
+        ``start_marker`` and ``end_marker`` which are dicts using Matplotlib
+        keywords, for example::
 
-        The default line style is a ``'striped'`` line which comprises a wide first
-        line with a slightly narrow dashed line plotted on top.  For example::
+            planner.plot(path, start=dict(marker='s', color='b'))
 
-                (('black', 4), ('yellow', 3))
+        If the ``start`` and ``goal`` have length 3, planning in :math:`\SE{2}`,
+        and ``configspace`` is False, then direction-indicating markers are used
+        to display start and goal configuration. These are also given as dicts
+        but have two items: ``'shape'`` which is the shape of the polygonal
+        marker and is either ``'triangle'`` or ``'car'``.  The second item
+        ``'args'`` is passed to :func:`base.plot_poly` and Matplotlib and could
+        have values such as ``filled=True`` or ``color``.
 
-        is a blackline of width 4 with a dashed yellow line of width 3 plotted
-        on top, giving a line of alternating black and yellow dashes.
-
-        The parameters ``stripe`` and ``stripe_r`` specify the colors and widths for
-        forward and reverse motion respectively.
-
-        The ``'line'`` style is a regular Matplotlib and the parameters 
-        ``line`` and ``line_r`` specify the line and marker styles for
-        forward and reverse motion respectively.
-
-        For 2D plots with an :math:`x-y` path or 3D plots, the start and goal markers are specified
-        by the dicts ``start_marker`` and ``goal_marker`` respectively.
-
-        For 2D plots with an :math:`x-y-\theta` path the vehicle pose
-        is indicated by a vehicle animation object passed to the constructor.
-
-        Markers are specified as dicts using Matplotlib keywords, for example::
-
-            planner.plot(path, path_marker=dict(marker='s', color='b'))
+        If ``configspace`` is False then a 3D plot is created and the start and
+        goal are indicated by Matplotlib markers specified by the dicts
+        ``start_marker`` and ``end_marker``
 
         Default values are provided for all markers:
 
@@ -423,12 +523,6 @@ class PlannerBase(ABC):
               an unfilled outline
             - the goal vehicle style is a ``VehiclePolygon(shape='car')`` as
               a transparent filled shape
-    
-        If ``configspace`` is True then direction-indicating markers are used to
-        display start and goal configuration. These are also given as dicts but
-        have two items: ``'shape'`` which is the shape of the polygonal marker
-        and is either ``'triangle'`` or ``'car'``.  The second item ``'args'`` is
-        passed to :func:`base.plot_poly` and Matplotlib.
 
         If ``background`` is True then the background of the plot is either or
         both of:
@@ -436,7 +530,32 @@ class PlannerBase(ABC):
         - the occupancy grid
         - the distance field of the planner
 
-        Additional arguments are passed through to :meth:`plot_bg`
+        Additional arguments ``bgargs`` can be passed through to :meth:`plot_bg`
+
+        If ``path`` is specified it has one column per point and either 2 or 3 rows:
+        
+        - 2 rows describes motion in the :math:`xy`-plane and a 2D plot  is created
+        - 3 rows describes motion in the :math:`xy\theta`-configuration space. By
+          default only the :math:`xy`-plane is plotted unless ``configspace``
+          is True in which case motion in :math:`xy\theta`-configuration space
+          is shown as a 3D plot.
+
+        If the planner supports bi-directional motion then the ``direction``
+        option gives the direction for each point on the path.
+
+        Forward motion segments are drawn using style information from ``line``
+        while reverse motion segments are drawn using style information from
+        ``line_r``. These are each a sequence of dicts of Matplotlib plot
+        options which can draw an arbitrary number of lines on top of each
+        other.  The default::
+
+            line = (
+                    {color:'black', linewidth:4}, 
+                    {color:'yellow', linewidth:3, dashes:(5,5)}
+                )
+
+        will draw a blackline of width 4 with a dashed yellow line of width 3
+        plotted on top, giving a line of alternating black and yellow dashes.
 
         :seealso: :meth:`plot_bg` :func:`base.plot_poly`
         """
@@ -445,18 +564,32 @@ class PlannerBase(ABC):
         # passed to Matplotlib plot()
         if start_marker is None:
             start_marker = {'marker': 'o',
-                            'markeredgecolor': 'w',
+                            'markeredgecolor': 'k',
                             'markerfacecolor': 'y', 
                             'markersize': 10,
                             'zorder': 10,
+                            'linestyle': 'none',
                            }
         if goal_marker is None:
             goal_marker = { 'marker': '*',
-                            'markeredgecolor': 'w',
+                            'markeredgecolor': 'k',
                             'markerfacecolor': 'y',
                             'markersize': 16,
                             'zorder': 10,
+                            'linestyle': 'none',
                           }
+
+        # create defaut line styles
+        if line is None:
+            line = (
+                {'color':'black', 'linewidth':4}, 
+                {'color':'yellow', 'linewidth':3, 'dashes':(5,5)}
+            )
+        if line_r is None:
+            line_r = (
+                {'color':'black', 'linewidth':4}, 
+                {'color':'red', 'linewidth':3, 'dashes':(5,5)}
+                )
 
         # passed to VehiclePolygon
         if start_vehicle is None:
@@ -480,13 +613,14 @@ class PlannerBase(ABC):
 
         # plot occupancy grid background
         if background:
-            self.plot_bg(ax=ax, **kwargs)
+            self.plot_bg(ax=ax, **bgargs)
         
         # mark the path
         if path is not None:
             if ndims == 2:
                 # 2D case
                 if direction is not None:
+                    # bidirectional motion
                     direction = np.array(direction)
                     if direction.shape[0] != path.shape[0]:
                         raise ValueError('direction vector must have same length as path')
@@ -499,18 +633,8 @@ class PlannerBase(ABC):
                         else:
                             k = change[0, 0]
                         
-                        if style == 'striped':
-                            if dir > 0:
-                                xstripe = stripe
-                            else:
-                                xstripe = stripe_r
-                            ax.plot(path[:k, 0], path[:k, 1], color=xstripe[0][0], linewidth=xstripe[0][1])
-                            ax.plot(path[:k, 0], path[:k, 1], color=xstripe[1][0], linewidth=xstripe[1][1], dashes=(5,5))
-                        elif style == 'line':
-                            if dir > 0:
-                                ax.plot(path[:, 0], path[:, 1], **line)
-                            else:
-                                ax.plot(path[:, 0], path[:, 1], **line_r)
+                        for style in line if dir > 0 else line_r:
+                            ax.plot(path[:k, 0], path[:k, 1], zorder=9, **style)
 
                         if len(change) == 0:
                             break
@@ -519,14 +643,15 @@ class PlannerBase(ABC):
                         path = path[k-1:, :]
 
                 else:
-                    if style == 'striped':
-                        ax.plot(path[:, 0], path[:, 1], color=stripe[0][0], linewidth=stripe[0][1], zorder=9)
-                        ax.plot(path[:, 0], path[:, 1], color=stripe[1][0], linewidth=stripe[1][1], dashes=(5,5), zorder=9)
-                    elif style == 'line':
-                        ax.plot(path[:, 0], path[:, 1], **kwargs)
+                    # forward motion only
+                    for style in line:
+                        ax.plot(path[:, 0], path[:, 1], zorder=9, **style)
+
             elif ndims == 3:
                 # 3D case
                 if direction is not None:
+                    # bidirectional motion
+
                     direction = np.array(direction)
                     if direction.shape[0] != path.shape[0]:
                         raise ValueError('direction vector must have same length as path')
@@ -542,19 +667,8 @@ class PlannerBase(ABC):
                         else:
                             k = change[0, 0]
                         
-
-                        if style == 'striped':
-                            if dir > 0:
-                                xstripe = stripe
-                            else:
-                                xstripe = stripe_r
-                            ax.plot(path[:k, 0], path[:k, 1], theta[:k], color=xstripe[0][0], linewidth=xstripe[0][1])
-                            ax.plot(path[:k, 0], path[:k, 1], theta[:k], color=xstripe[1][0], linewidth=xstripe[1][1], dashes=(5,5))
-                        elif style == 'line':
-                            if dir > 0:
-                                ax.plot(path[:, 0], path[:, 1], **line)
-                            else:
-                                ax.plot(path[:, 0], path[:, 1], **line_r)
+                        for style in line if dir > 0 else line_r:
+                            ax.plot(path[:k, 0], path[:k, 1], theta[:k], **style)
 
                         if len(change) == 0:
                             break
@@ -564,14 +678,12 @@ class PlannerBase(ABC):
                         theta = theta[k-1:]
         
                 else:
+                    # forward motion only
                     theta = path[:, 2]
                     if unwrap:
                         theta = np.unwrap(theta)
-                    if style == 'striped':
-                        ax.plot(path[:, 0], path[:, 1], theta, color=stripe[0][0], linewidth=stripe[0][1])
-                        ax.plot(path[:, 0], path[:, 1], theta, color=stripe[1][0], linewidth=stripe[1][1], dashes=(5,5))
-                    elif style == 'line':
-                        ax.plot(path[:, 0], path[:, 1], **line)
+                    for style in line:
+                        ax.plot(path[:, 0], path[:, 1], theta, **style)
 
         # mark start and goal if requested
         if start is not None:
@@ -586,9 +698,9 @@ class PlannerBase(ABC):
         if ndims == 2 and self._ndims == 2:
             # proper 2d plot
             if start is not None:
-                ax.plot(start[0], start[1], **start_marker)
+                ax.plot(start[0], start[1], label='start', **start_marker)
             if goal is not None:
-                ax.plot(goal[0], goal[1], **goal_marker)
+                ax.plot(goal[0], goal[1], label='goal', **goal_marker)
         
         elif ndims == 2 and self._ndims == 3:
             # 2d projection of 3d plot, show start/goal configuration
@@ -606,14 +718,14 @@ class PlannerBase(ABC):
             # 3d plot
 
             if start is not None:
-                ax.plot(start[0], start[1], start[2], **start_marker)
+                ax.plot(start[0], start[1], start[2], label='start', **start_marker)
             if goal is not None:
                 
                 if path is not None and unwrap:
                     theta = theta[-1]
                 else:
                     theta = goal[2]
-                plt.plot(goal[0], goal[1], theta, **goal_marker)
+                plt.plot(goal[0], goal[1], theta, label='goal', **goal_marker)
 
         ax.set_xlabel('x')
         ax.set_ylabel('y')
@@ -648,9 +760,9 @@ class PlannerBase(ABC):
             ]).T
 
     def plot_bg(self, distance=None, cmap='gray',
-                ax=None, inflated=True,  **unused):
+                ax=None, inflated=True,  colorbar=True, **unused):
         """
-        Plot background
+        Plot background (superclass)
 
         :param distance: override distance field, defaults to None
         :type distance: ndarray(N,M), optional
@@ -724,8 +836,13 @@ class PlannerBase(ABC):
 
             # add colorbar
             scalar_mappable_c_map = cm.ScalarMappable(cmap=c_map, norm=norm)
-            plt.colorbar(scalar_mappable_c_map, label='Distance', shrink=0.7, aspect=20*0.7)
-
+            if colorbar is True:
+                plt.colorbar(scalar_mappable_c_map, shrink=0.75, aspect=20*0.75, label='Distance')
+                
+            elif isinstance(colorbar, dict):
+                if 'label' not in colorbar:
+                    colorbar['label'] = 'Distance'
+                plt.colorbar(scalar_mappable_c_map, **colorbar)
             # overlay obstacles
             c_map = mpl.colors.ListedColormap(colors)
             self.occgrid.plot(image, cmap=c_map, zorder=1)

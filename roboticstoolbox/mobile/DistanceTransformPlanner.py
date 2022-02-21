@@ -23,29 +23,51 @@ class DistanceTransformPlanner(PlannerBase):
     Distance transform path planner
 
     :param occgrid: occupancy grid
-    :type curvature: OccGrid or ndarray(w,h)
+    :type occgrid: :class:`BinaryOccGrid` or ndarray(h,w)
     :param metric: distane metric, one of: "euclidean" [default], "manhattan"
     :type metric: str optional
-    :param Planner: distance transform path planner
-    :type Planner: DistanceTransformPlanner instance
+    :param kwargs: common planner options, see :class:`PlannerBase`
 
     ==================   ========================
     Feature              Capability
     ==================   ========================
-    Plan                 Cartesian space
+    Plan                 :math:`\mathbb{R}^2`, discrete
     Obstacle avoidance   Yes
     Curvature            Discontinuous
-    Motion               Forwards only
+    Motion               Omnidirectional
     ==================   ========================
 
-    Also known as wavefront, grassfire or brushfire planning algorithm.
+    Creates a planner that finds the path between two points in the 2D grid
+    using omnidirectional motion and avoiding occupied cells.  The path
+    comprises a set of 4- or -way connected points in adjacent cells.  Also
+    known as the wavefront, grassfire or brushfire planning algorithm.
 
-    Creates a planner that finds the path between two points in the
-    plane using forward motion.  The path comprises a set of points in
-    adjacent cells.
+    The map is described by a 2D occupancy ``occgrid`` whose elements are zero
+    if traversable of nonzero if untraversable, ie. an obstacle.
+    
+    The cells are assumed to be unit squares. Crossing the cell horizontally or
+    vertically is a travel distance of 1, and for the Euclidean distance
+    measure, the crossing the cell diagonally is a distance of :math:`\sqrt{2}`.
 
-    :author: Peter Corke_
-    :seealso: :class:`Planner`
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import DistanceTransformPlanner
+        >>> import numpy as np
+        >>> simplegrid = np.zeros((6, 6));
+        >>> simplegrid[2:5, 3:5] = 1
+        >>> dx = DistanceTransformPlanner(simplegrid, goal=(1, 1), distance="manhattan");
+        >>> dx.plan()
+        >>> path = dx.query(start=(5, 4))
+        >>> print(path.T)
+
+    .. warning:: The distance planner is iterative and implemented in Python, will
+        be slow for very large occupancy grids.
+
+    :author: Peter Corke
+
+    :seealso: :meth:`plan` :meth:`query` :class:`PlannerBase`
     """
 
     def __init__(self, occgrid=None, metric="euclidean", **kwargs):
@@ -56,10 +78,26 @@ class DistanceTransformPlanner(PlannerBase):
 
     @property
     def metric(self):
+        """
+        Get the distance metric
+
+        :return: Get the metric, either "euclidean" or "manhattan"
+        :rtype: str
+        """
         return self._metric
 
     @property
     def distancemap(self):
+        """
+        Get the distance map
+
+        :return: distance map
+        :rtype: ndarray(h,w)
+
+        The 2D array, the same size as the passed occupancy grid, has elements
+        equal to nan if they contain an obstacle, otherwise the minimum
+        obstacle-free distance to the goal using the particular distance metric.
+        """
         return self._distancemap
 
     def __str__(self):
@@ -72,10 +110,19 @@ class DistanceTransformPlanner(PlannerBase):
 
         return s
 
-    def goal_change(self, goal):
-        self._distancemap = np.array([])
-
     def plan(self, goal=None, animate=False, verbose=False):
+        r"""
+        Plan path using distance transform
+
+        :param goal: goal position :math:`(x, y)`, defaults to previously set value
+        :type goal: array_like(2), optional
+
+        Compute the distance transform for all non-obstacle cells, which is the
+        minimum obstacle-free distance to the goal using the particular distance
+        metric.
+
+        :seealso: :meth:`query`
+        """
         # show = None
         # if animate:
         #     show = 0.05
@@ -92,13 +139,24 @@ class DistanceTransformPlanner(PlannerBase):
             self.occgrid.grid,
             goal=self._goal,
             metric=self._metric,
-            animate=animate,
-            verbose=verbose,
+            animate=animate
         )
 
-    # Use plot from parent class
-
     def next(self, position):
+        """
+        Find next point on the path
+
+        :param position: current robot position
+        :type position: array_like(2)
+        :raises RuntimeError: no plan has been computed
+        :return: next robot position
+        :rtype: ndarray(2)
+        
+        Return the robot position that is one step closer to the goal. Called
+        by :meth:`query` to find a path from start to goal.
+
+        :seealso: :meth:`plan` :meth:`query`
+        """
         if self.distancemap is None:
             Error("No distance map computed, you need to plan.")
 
@@ -143,7 +201,23 @@ class DistanceTransformPlanner(PlannerBase):
         else:
             return next
 
-    def plot_3d(self, p=None, ls=None):
+    def plot_3d(self, path=None, ls=None):
+        """
+        Plot path on 3D cost surface
+
+        :param path: robot path, defaults to None
+        :type path: ndarray(N,2), optional
+        :param ls: dictionary of Matplotlib linestyle options, defaults to None
+        :type ls: dict, optional
+        :return: Matplotlib 3D axes
+        :rtype: Axes
+
+        Creates a 3D plot showing distance from the goal as a cost surface.
+        Overlays the path if given.
+
+        .. warning:: The visualization is poor because of Matplotlib's poor hidden
+            line/surface handling.
+        """
         fig = plt.figure()
         ax = fig.gca(projection="3d")
 
@@ -153,10 +227,10 @@ class DistanceTransformPlanner(PlannerBase):
             X, Y, distance, linewidth=1, antialiased=False  # cmap='gray',
         )
 
-        if p is not None:
+        if path is not None:
             # k = sub2ind(np.shape(self._distancemap), p[:, 1], p[:, 0])
-            height = distance[p[:, 1], p[:, 0]]
-            ax.plot(p[:, 0], p[:, 1], height)
+            height = distance[path[:, 1], path[:, 0]]
+            ax.plot(path[:, 0], path[:, 1], height, **ls)
 
         plt.xlabel("x")
         plt.ylabel("y")
@@ -168,7 +242,7 @@ class DistanceTransformPlanner(PlannerBase):
 import numpy as np
 
 
-def distancexform(occgrid, goal, metric="cityblock", animate=False, verbose=False):
+def distancexform(occgrid, goal, metric="cityblock", animate=False, summary=False):
     """
     Distance transform for path planning
 
@@ -268,7 +342,7 @@ def distancexform(occgrid, goal, metric="cityblock", animate=False, verbose=Fals
 
         ninf = ninfnow
 
-    if verbose:
+    if summary:
         print(f"{count:d} iterations, {ninf:d} unreachable cells")
     return distance
 
