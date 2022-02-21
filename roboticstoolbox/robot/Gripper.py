@@ -8,10 +8,17 @@ import spatialmath as sm
 from spatialmath.base.argcheck import getvector
 from roboticstoolbox.robot.Link import Link
 from typing import List
+from functools import lru_cache
+from typing import Union
+from fknm import Robot_link_T
 
+ArrayLike = Union[list, np.ndarray, tuple, set]
 
 class Gripper:
     def __init__(self, elinks, name="", tool=None):
+
+        for l in elinks:
+            print(l._T)
 
         self._n = 0
 
@@ -147,3 +154,23 @@ class Gripper:
     @name.setter
     def name(self, new_name):
         self._name = new_name
+
+    # --------------------------------------------------------------------- #
+    # Scene Graph section
+    # --------------------------------------------------------------------- #
+
+    def _update_link_tf(self, q: ArrayLike = None):
+        """
+        This private method updates the local transform of each link within
+        this robot according to q (or self.q if q is none)
+        """
+
+        @lru_cache(maxsize=2)
+        def get_link_ets():
+            return [link.ets._fknm for link in self.links]
+
+        @lru_cache(maxsize=2)
+        def get_link_scene_node():
+            return [link._T_reference for link in self.links]
+
+        Robot_link_T(get_link_ets(), get_link_scene_node(), self._q, q)
