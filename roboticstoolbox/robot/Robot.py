@@ -56,7 +56,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         keywords=(),
         symbolic=False,
     ):
-
+        
         self.name = name
         self.manufacturer = manufacturer
         self.comment = comment
@@ -2021,6 +2021,8 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
             return [link._T_reference for link in self.links]
 
         Robot_link_T(get_link_ets(), get_link_scene_node(), self._q, q)
+
+        [gripper._update_link_tf() for gripper in self.grippers]
 
     # --------------------------------------------------------------------- #
 
