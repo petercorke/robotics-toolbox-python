@@ -78,28 +78,28 @@ class YuMi(ERobot):
         self.grippers[0].tool = sm.SE3.Tz(0.13)
         self.grippers[1].tool = sm.SE3.Tz(0.13)
 
-        self.addconfiguration("qz", np.zeros((14,)))
-        self.addconfiguration(
-            "qr",
-            np.array(
-                [
-                    0,
-                    -0.3,
-                    0,
-                    -2.2,
-                    0,
-                    2.0,
-                    np.pi / 4,
-                    0,
-                    -0.3,
-                    0,
-                    -2.2,
-                    0,
-                    2.0,
-                    np.pi / 4,
-                ]
-            ),
+        self.qz = np.zeros(14)
+        self.qr = np.array(
+            [
+                0,
+                -0.3,
+                0,
+                -2.2,
+                0,
+                2.0,
+                np.pi / 4,
+                0,
+                -0.3,
+                0,
+                -2.2,
+                0,
+                2.0,
+                np.pi / 4,
+            ]
         )
+
+        self.logconfiguration("qz", self.qz)
+        self.logconfiguration("qr", self.qr)
         self.addconfiguration("q1", [0, -0.4, 0, 0, 0, 0, 0, 0, -0.4, 0, 0, 0, 0, 0])
 
 
