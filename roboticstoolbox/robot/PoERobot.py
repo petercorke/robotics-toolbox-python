@@ -17,13 +17,41 @@ class PoELink(Link):
     def __str__(self):
         return super().__str__() + ", S = " + str(self.S)
 
-    @classmethod
-    def Revolute(cls, axis, point, **kwargs):
+class PoERevolute(PoELink):
 
-        link = cls(**kwargs)
-        link.S = Twist3.UnitRevolute(axis, point)
-        return link
+    def __init__(self, axis, point, **kwargs):
+        """
+        Construct revolute product of exponential link
 
+        :param axis: axis of rotation
+        :type axis: array_like(3)
+        :param point: point on axis of rotation
+        :type point: array_like(3)
+
+        Construct a link and revolute joint for a PoE Robot.
+
+        :seealso: :class:`Link` :class:`Robot`
+        """
+
+        super().__init__(**kwargs)
+        self.S = Twist3.UnitRevolute(axis, point)
+
+class PoEPrismatic(PoELink):
+
+
+    def __init__(self, axis, **kwargs):
+        """
+        Construct prismatic product of exponential link
+
+        :param axis: direction of motion
+        :type axis: array_like(3)
+
+        Construct a link and prismatic joint for a PoE Robot.
+
+        :seealso: :class:`Link` :class:`Robot`
+        """
+        super().__init__(**kwargs)
+        self.S = Twist3.UnitPrismatic(axis)
 
 class PoERobot(Robot):
 
@@ -39,7 +67,7 @@ class PoERobot(Robot):
         This is a subclass of the abstract base Robot class that provides
         only forward kinematics and world-frame Jacobian.
 
-        :seealso: :class:`Link`
+        :seealso: :class:`PoEPrismatic` :class:`PoERevolute`
         """
 
         self._n = len(links)
@@ -133,9 +161,9 @@ if __name__ == "__main__":  # pragma nocover
     T0 = SE3.Trans(2, 0, 0)
 
     # rotate about z-axis, through (0,0,0)
-    link1 = PoELink.Revolute([0, 0, 1], [0, 0, 0], name='foo')
+    link1 = PoERevolute([0, 0, 1], [0, 0, 0], name='foo')
     # rotate about z-axis, through (1,0,0)
-    link2 = PoELink.Revolute([0, 0, 1], [1, 0, 0])
+    link2 = PoERevolute([0, 0, 1], [1, 0, 0])
     # end-effector pose when q=[0,0]
     TE0 = SE3.Trans(2, 0, 0)
 
