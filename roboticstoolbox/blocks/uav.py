@@ -453,6 +453,7 @@ class MultiRotorMixer(FunctionBlock):
         ``h``         Height of rotors above CoG
         ``d``         Length of flyer arms
         ``r``         Rotor radius
+        ===========   ==========================================
 
         .. note::
             - Based on MATLAB code developed by Pauline Pounds 2004.
@@ -597,6 +598,7 @@ class MultiRotorPlot(GraphicsBlock):
         ``h``         Height of rotors above CoG
         ``d``         Length of flyer arms
         ``r``         Rotor radius
+        ===========   ==========================================
 
         .. note::
             - Based on MATLAB code developed by Pauline Pounds 2004.
