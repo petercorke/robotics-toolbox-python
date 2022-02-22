@@ -9,7 +9,7 @@ import warnings
 import copy
 import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ETS import ETS, ET
 from roboticstoolbox.robot.DHLink import DHLink
 from roboticstoolbox import rtb_set_param
 from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix
@@ -133,6 +133,16 @@ class DHRobot(Robot):
         :rtype: str
         """
 
+        if np.all(self.base.A == np.eye(4)):
+            base = None
+        else:
+            base = self.base
+
+        if np.all(self.tool.A == np.eye(4)):
+            tool = None
+        else:
+            tool = self.tool
+
         unicode = rtb_get_param("unicode")
         border = "thin" if unicode else "ascii"
         s = f"DHRobot: {self.name}"
@@ -248,15 +258,15 @@ class DHRobot(Robot):
                 border=border,
                 header=False,
             )
-            if self._base is not None:
+            if base is not None:
                 table.row(
                     "base",
-                    self._base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
+                    base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
                 )
             if self._tool is not None:
                 table.row(
                     "tool",
-                    self._tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
+                    tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
                 )
             s += "\n" + str(table)
 
@@ -799,18 +809,28 @@ class DHRobot(Robot):
         """
 
         # optionally start with the base transform
-        if self._base is None:
+        if np.all(self.base.A == np.eye(4)):
+            base = None
+        else:
+            base = self.base.A
+
+        if np.all(self.tool.A == np.eye(4)):
+            tool = None
+        else:
+            tool = self.tool.A
+
+        if base is None:
             ets = ETS()
         else:
-            ets = ETS.SE3(self._base)
+            ets = ET.SE3(base)
 
         # add the links
         for link in self:
             ets *= link.ets()
 
         # optionally add the base transform
-        if self._tool is not None:
-            ets *= ETS.SE3(self._tool)
+        if tool is not None:
+            ets *= ET.SE3(tool)
 
         return ets
 
@@ -847,6 +867,16 @@ class DHRobot(Robot):
               kinematics are computed.
         """
 
+        if np.all(self.base.A == np.eye(4)):
+            base = None
+        else:
+            base = self.base
+
+        if np.all(self.tool.A == np.eye(4)):
+            tool = None
+        else:
+            tool = self.tool
+
         T = SE3.Empty()
         for qr in getmatrix(q, (None, self.n)):
 
@@ -858,10 +888,10 @@ class DHRobot(Robot):
                 else:
                     Tr *= L.A(q)  # type: ignore
 
-            if self._base is not None:
-                Tr = self._base * Tr  # type: ignore
-            if self.tool is not None:
-                Tr = Tr * self.tool  # type: ignore
+            if base is not None:
+                Tr = base * Tr  # type: ignore
+            if tool is not None:
+                Tr = Tr * tool  # type: ignore
             T.append(Tr)  # type: ignore
 
         return T
@@ -985,14 +1015,14 @@ class DHRobot(Robot):
 
         n = self.n
         L = self.links
-        J = np.zeros((6, self.n), dtype=q.dtype)
+        J = np.zeros((6, self.n), dtype=q.dtype)  # type: ignore
 
-        U = self.tool
+        U = self.tool.A
 
         for j in range(n - 1, -1, -1):
             if self.mdh == 0:
                 # standard DH convention
-                U = L[j].A(q[j]).A @ U
+                U = L[j].A(q[j]).A @ U  # type: ignore
 
             if not L[j].sigma:
                 # revolute axis
@@ -1013,7 +1043,7 @@ class DHRobot(Robot):
 
             if self.mdh != 0:
                 # modified DH convention
-                U = L[j].A(q[j]).A @ U
+                U = L[j].A(q[j]).A @ U  # type: ignore
 
         # return top or bottom half if asked
         if half is not None:
@@ -1347,6 +1377,11 @@ class DHRobot(Robot):
         :seealso: :func:`rne`
         """
 
+        if np.all(self.base.A == np.eye(4)):
+            base = None
+        else:
+            base = self.base.A
+
         def removesmall(x):
             return x
 
@@ -1421,10 +1456,10 @@ class DHRobot(Robot):
             w = np.zeros((3,), dtype=dtype)
             # base has zero angular acceleration
             wd = np.zeros((3,), dtype=dtype)
-            vd = -gravity
+            vd = -gravity  # type: ignore
 
-            if self._base is not None:
-                Rb = t2r(self.base.A).T
+            if base is not None:
+                Rb = t2r(base).T
                 w = Rb @ w
                 wd = Rb @ wd
                 vd = Rb @ gravity
@@ -1450,9 +1485,9 @@ class DHRobot(Robot):
                 if self.mdh:
                     pstar = np.r_[link.a, -d * sym.sin(alpha), d * sym.cos(alpha)]
                     if j == 0:
-                        if self._base:
-                            Tj = self._base.A @ Tj
-                            pstar = self._base.A @ pstar
+                        if base:
+                            Tj = base @ Tj
+                            pstar = base @ pstar
                 else:
                     pstar = np.r_[link.a, d * sym.sin(alpha), d * sym.cos(alpha)]
 
@@ -1631,10 +1666,20 @@ class DHRobot(Robot):
     def ikine_6s(self, T, config, ikfunc):
         # Undo base and tool transformations, but if they are not
         # set, skip the operation.  Nicer for symbolics
-        if self._base is not None:
-            T = self.base.inv() * T
-        if self._tool is not None:
-            T = self.tool.inv() * T
+        if np.all(self.base.A == np.eye(4)):
+            base = None
+        else:
+            base = self.base
+
+        if np.all(self.tool.A == np.eye(4)):
+            tool = None
+        else:
+            tool = self.tool
+
+        if base is not None:
+            T = base.inv() * T
+        if tool is not None:
+            T = tool.inv() * T
 
         # q = np.zeros((6,))
         solutions = []
