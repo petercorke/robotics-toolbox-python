@@ -222,7 +222,7 @@ class BaseLink(SceneNode, ABC):
             if et.isjoint:
                 break
             else:
-                T = T @ et.T()
+                T = T @ et.A()
 
         self._Ts = T
 
@@ -1266,7 +1266,7 @@ class Link(BaseLink):
         """
         return self._ets  # type: ignore
 
-    def T(self, q: float = 0.0) -> SE3:
+    def A(self, q: float = 0.0) -> SE3:
         """
         Link transform matrix
         :param q: Joint coordinate (radians or metres). Not required for links
@@ -1279,7 +1279,7 @@ class Link(BaseLink):
           the next, which depends on the joint coordinate ``q``.
         """
         if self.isjoint:
-            return SE3(self._Ts @ self._ets[-1].T(q), check=False)
+            return SE3(self._Ts @ self._ets[-1].A(q), check=False)
         else:
             return SE3(self._Ts, check=False)
 
@@ -1315,7 +1315,7 @@ class Link2(BaseLink):
         """
         return self._ets  # type: ignore
 
-    def T(self, q: float = 0.0) -> SE2:
+    def A(self, q: float = 0.0) -> SE2:
         """
         Link transform matrix
 
@@ -1327,13 +1327,10 @@ class Link2(BaseLink):
         ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body
           transformation from the previous to the current link frame to
           the next, which depends on the joint coordinate ``q``.
-
-        If ``fast`` is True return a NumPy array, either SE(2) or SE(3).
-        A value of None means that it is the identity matrix.
         """
 
         if self.isjoint:
-            return SE2(self._Ts @ self._ets[-1].T(q), check=False)
+            return SE2(self._Ts @ self._ets[-1].A(q), check=False)
         else:
             return SE2(self._Ts, check=False)
 
