@@ -22,7 +22,7 @@ from fknm import Robot_link_T
 from functools import lru_cache
 from spatialgeometry import SceneNode
 from roboticstoolbox.robot.Link import BaseLink, Link
-from numpy import all, eye
+from numpy import all, eye, isin
 
 try:
     from matplotlib import colors
@@ -56,7 +56,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         keywords=(),
         symbolic=False,
     ):
-        
+
         self.name = name
         self.manufacturer = manufacturer
         self.comment = comment
@@ -133,7 +133,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         return self
 
     def __next__(self):
-        if self._iter < len(self.links) - 1:
+        if self._iter < len(self.links):
             link = self[self._iter]
             self._iter += 1
             return link
@@ -1061,21 +1061,6 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         # This now returns the Scene Node transform
         # self._T is a copy of SceneNode.__T
         return SE3(self._T, check=False)
-
-    @property
-    def _base(self) -> Union[SE3, None]:
-        """
-        Get robot base transform (Robot superclass)
-
-        This differs from robot.base in that if the base is an identity transform
-        then None is returned
-
-        """
-
-        if all(self._T == eye(4)):
-            return None
-        else:
-            return SE3(self._T, check=False)
 
     @base.setter
     def base(self, T: Union[np.ndarray, SE3]):
