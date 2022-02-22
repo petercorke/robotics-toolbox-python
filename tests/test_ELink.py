@@ -49,7 +49,7 @@ class TestLink(unittest.TestCase):
 
         ans = sm.SE3.Rx(1.543) * sm.SE3.Ry(1.543) * sm.SE3.Tz(1)
 
-        nt.assert_array_almost_equal(l0.T(), ans.A)
+        nt.assert_array_almost_equal(l0.A(), ans.A)
 
     def test_A2(self):
         rx = rtb.ET.Rx(np.pi)
@@ -60,8 +60,8 @@ class TestLink(unittest.TestCase):
 
         ans = sm.SE3.Rx(np.pi) * sm.SE3.Ry(np.pi) * sm.SE3.Tz(1.2)
 
-        nt.assert_array_almost_equal(l0.T(1.2), ans.A)
-        l0.T()
+        nt.assert_array_almost_equal(l0.A(1.2), ans.A)
+        l0.A()
 
     def test_qlim(self):
         l0 = rtb.Link(rtb.ET.Rx())

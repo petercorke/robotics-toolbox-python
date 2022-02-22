@@ -20,64 +20,64 @@ class TestET(unittest.TestCase):
     def test_TRx(self):
         fl = 1.543
 
-        nt.assert_array_almost_equal(rtb.ET.Rx(fl).T(), sm.trotx(fl))
-        nt.assert_array_almost_equal(rtb.ET.Rx(-fl).T(), sm.trotx(-fl))
-        nt.assert_array_almost_equal(rtb.ET.Rx(0).T(), sm.trotx(0))
+        nt.assert_array_almost_equal(rtb.ET.Rx(fl).A(), sm.trotx(fl))
+        nt.assert_array_almost_equal(rtb.ET.Rx(-fl).A(), sm.trotx(-fl))
+        nt.assert_array_almost_equal(rtb.ET.Rx(0).A(), sm.trotx(0))
 
         nt.assert_array_almost_equal(
-            rtb.ET.Rx(90.0, unit="degr").T(), sm.trotx(np.pi / 2, unit="rad")
+            rtb.ET.Rx(90.0, unit="degr").A(), sm.trotx(np.pi / 2, unit="rad")
         )
 
         nt.assert_array_almost_equal(
-            rtb.ET.Rx(90.0, unit="deg").T(), sm.trotx(np.pi / 2, unit="rad")
+            rtb.ET.Rx(90.0, unit="deg").A(), sm.trotx(np.pi / 2, unit="rad")
         )
 
         nt.assert_array_almost_equal(
-            rtb.ET.Rx(90.0, unit="Deg").T(), sm.trotx(np.pi / 2, unit="rad")
+            rtb.ET.Rx(90.0, unit="Deg").A(), sm.trotx(np.pi / 2, unit="rad")
         )
 
     def test_TRy(self):
         fl = 1.543
 
-        nt.assert_array_almost_equal(rtb.ET.Ry(fl).T(), sm.troty(fl))
-        nt.assert_array_almost_equal(rtb.ET.Ry(-fl).T(), sm.troty(-fl))
-        nt.assert_array_almost_equal(rtb.ET.Ry(0).T(), sm.troty(0))
+        nt.assert_array_almost_equal(rtb.ET.Ry(fl).A(), sm.troty(fl))
+        nt.assert_array_almost_equal(rtb.ET.Ry(-fl).A(), sm.troty(-fl))
+        nt.assert_array_almost_equal(rtb.ET.Ry(0).A(), sm.troty(0))
 
     def test_TRz(self):
         fl = 1.543
 
-        nt.assert_array_almost_equal(rtb.ET.Rz(fl).T(), sm.trotz(fl))
-        nt.assert_array_almost_equal(rtb.ET.Rz(-fl).T(), sm.trotz(-fl))
-        nt.assert_array_almost_equal(rtb.ET.Rz(0).T(), sm.trotz(0))
+        nt.assert_array_almost_equal(rtb.ET.Rz(fl).A(), sm.trotz(fl))
+        nt.assert_array_almost_equal(rtb.ET.Rz(-fl).A(), sm.trotz(-fl))
+        nt.assert_array_almost_equal(rtb.ET.Rz(0).A(), sm.trotz(0))
 
-        nt.assert_array_almost_equal(rtb.ET.Rz().T(fl), sm.trotz(fl))
+        nt.assert_array_almost_equal(rtb.ET.Rz().A(fl), sm.trotz(fl))
 
     def test_Ttx(self):
         fl = 1.543
 
-        nt.assert_array_almost_equal(rtb.ET.tx(fl).T(), sm.transl(fl, 0, 0))
-        nt.assert_array_almost_equal(rtb.ET.tx(-fl).T(), sm.transl(-fl, 0, 0))
-        nt.assert_array_almost_equal(rtb.ET.tx(0.0).T(), sm.transl(0, 0, 0))
+        nt.assert_array_almost_equal(rtb.ET.tx(fl).A(), sm.transl(fl, 0, 0))
+        nt.assert_array_almost_equal(rtb.ET.tx(-fl).A(), sm.transl(-fl, 0, 0))
+        nt.assert_array_almost_equal(rtb.ET.tx(0.0).A(), sm.transl(0, 0, 0))
 
     def test_Tty(self):
         fl = 1.543
 
-        nt.assert_array_almost_equal(rtb.ET.ty(fl).T(), sm.transl(0, fl, 0))
-        nt.assert_array_almost_equal(rtb.ET.ty(-fl).T(), sm.transl(0, -fl, 0))
-        nt.assert_array_almost_equal(rtb.ET.ty(0).T(), sm.transl(0, 0, 0))
+        nt.assert_array_almost_equal(rtb.ET.ty(fl).A(), sm.transl(0, fl, 0))
+        nt.assert_array_almost_equal(rtb.ET.ty(-fl).A(), sm.transl(0, -fl, 0))
+        nt.assert_array_almost_equal(rtb.ET.ty(0).A(), sm.transl(0, 0, 0))
 
     def test_Ttz(self):
         fl = 1.543
 
-        nt.assert_array_almost_equal(rtb.ET.tz(fl).T(), sm.transl(0, 0, fl))
-        nt.assert_array_almost_equal(rtb.ET.tz(-fl).T(), sm.transl(0, 0, -fl))
-        nt.assert_array_almost_equal(rtb.ET.tz(0).T(), sm.transl(0, 0, 0))
+        nt.assert_array_almost_equal(rtb.ET.tz(fl).A(), sm.transl(0, 0, fl))
+        nt.assert_array_almost_equal(rtb.ET.tz(-fl).A(), sm.transl(0, 0, -fl))
+        nt.assert_array_almost_equal(rtb.ET.tz(0).A(), sm.transl(0, 0, 0))
 
     def test_SE3(self):
         T = SE3.Rx(0.3) * SE3.Rz(0.3) * SE3.Ry(0.3)
 
-        nt.assert_array_almost_equal(rtb.ET.SE3(T).T(), T.A)
-        nt.assert_array_almost_equal(rtb.ET.SE3(T.A).T(), T.A)
+        nt.assert_array_almost_equal(rtb.ET.SE3(T).A(), T.A)
+        nt.assert_array_almost_equal(rtb.ET.SE3(T.A).A(), T.A)
 
     def test_str(self):
         x = sympy.Symbol("x")
@@ -149,12 +149,12 @@ class TestET(unittest.TestCase):
         ty = rtb.ET.ty(fl)
         tz = rtb.ET.tz(fl)
 
-        nt.assert_array_almost_equal(rx.T(), sm.trotx(fl))
-        nt.assert_array_almost_equal(ry.T(), sm.troty(fl))
-        nt.assert_array_almost_equal(rz.T(), sm.trotz(fl))
-        nt.assert_array_almost_equal(tx.T(), sm.transl(fl, 0, 0))
-        nt.assert_array_almost_equal(ty.T(), sm.transl(0, fl, 0))
-        nt.assert_array_almost_equal(tz.T(), sm.transl(0, 0, fl))
+        nt.assert_array_almost_equal(rx.A(), sm.trotx(fl))
+        nt.assert_array_almost_equal(ry.A(), sm.troty(fl))
+        nt.assert_array_almost_equal(rz.A(), sm.trotz(fl))
+        nt.assert_array_almost_equal(tx.A(), sm.transl(fl, 0, 0))
+        nt.assert_array_almost_equal(ty.A(), sm.transl(0, fl, 0))
+        nt.assert_array_almost_equal(tz.A(), sm.transl(0, 0, fl))
 
     def test_T_real_2(self):
         fl = 1.543
@@ -165,12 +165,12 @@ class TestET(unittest.TestCase):
         ty = rtb.ET.ty()
         tz = rtb.ET.tz()
 
-        nt.assert_array_almost_equal(rx.T(fl), sm.trotx(fl))
-        nt.assert_array_almost_equal(ry.T(fl), sm.troty(fl))
-        nt.assert_array_almost_equal(rz.T(fl), sm.trotz(fl))
-        nt.assert_array_almost_equal(tx.T(fl), sm.transl(fl, 0, 0))
-        nt.assert_array_almost_equal(ty.T(fl), sm.transl(0, fl, 0))
-        nt.assert_array_almost_equal(tz.T(fl), sm.transl(0, 0, fl))
+        nt.assert_array_almost_equal(rx.A(fl), sm.trotx(fl))
+        nt.assert_array_almost_equal(ry.A(fl), sm.troty(fl))
+        nt.assert_array_almost_equal(rz.A(fl), sm.trotz(fl))
+        nt.assert_array_almost_equal(tx.A(fl), sm.transl(fl, 0, 0))
+        nt.assert_array_almost_equal(ty.A(fl), sm.transl(0, fl, 0))
+        nt.assert_array_almost_equal(tz.A(fl), sm.transl(0, 0, fl))
 
     def test_qlim(self):
         q1 = -1.0
@@ -202,14 +202,14 @@ class TestET(unittest.TestCase):
     def test_ets(self):
         ets = rtb.ET.Rx(1) * rtb.ET.tx(2)
 
-        nt.assert_array_almost_equal(ets[0].T(), sm.trotx(1))
-        nt.assert_array_almost_equal(ets[1].T(), sm.transl(2, 0, 0))
+        nt.assert_array_almost_equal(ets[0].A(), sm.trotx(1))
+        nt.assert_array_almost_equal(ets[1].A(), sm.transl(2, 0, 0))
 
     def test_ets_add(self):
         ets = rtb.ET.Rx(1) + rtb.ET.tx(2)
 
-        nt.assert_array_almost_equal(ets[0].T(), sm.trotx(1))
-        nt.assert_array_almost_equal(ets[1].T(), sm.transl(2, 0, 0))
+        nt.assert_array_almost_equal(ets[0].A(), sm.trotx(1))
+        nt.assert_array_almost_equal(ets[1].A(), sm.transl(2, 0, 0))
 
     def test_is_rot(self):
         e1 = rtb.ET.Rx()
@@ -234,20 +234,20 @@ class TestET(unittest.TestCase):
         fl = 1.543
         r1 = rtb.ET.Rx()
         r2 = rtb.ET.Rx(flip=True)
-        r2.T(x)
+        r2.A(x)
 
-        nt.assert_array_almost_equal(r1.T(fl), sm.trotx(fl))
-        nt.assert_array_almost_equal(r2.T(fl), sm.trotx(-fl))
-        nt.assert_array_almost_equal(r1.T(x), sm.trotx(x))
+        nt.assert_array_almost_equal(r1.A(fl), sm.trotx(fl))
+        nt.assert_array_almost_equal(r2.A(fl), sm.trotx(-fl))
+        nt.assert_array_almost_equal(r1.A(x), sm.trotx(x))
 
     def test_copy(self):
         r1 = rtb.ET.Rx(flip=True)
         r2 = copy(r1)
         r3 = deepcopy(r1)
 
-        nt.assert_array_almost_equal(r1.T(1.0), sm.trotx(-1.0))
-        nt.assert_array_almost_equal(r2.T(1.0), sm.trotx(-1.0))
-        nt.assert_array_almost_equal(r3.T(1.0), sm.trotx(-1.0))
+        nt.assert_array_almost_equal(r1.A(1.0), sm.trotx(-1.0))
+        nt.assert_array_almost_equal(r2.A(1.0), sm.trotx(-1.0))
+        nt.assert_array_almost_equal(r3.A(1.0), sm.trotx(-1.0))
 
         self.assertEqual(r1.fknm, r2.fknm)
         self.assertNotEqual(r1.fknm, r3.fknm)
@@ -308,10 +308,10 @@ class TestET(unittest.TestCase):
         r3i = r3.inv()
         r4i = r4.inv()
 
-        nt.assert_almost_equal(r1i.T(), np.linalg.inv(SE3.Rx(2.5)))
-        nt.assert_almost_equal(r2i.T(), np.linalg.inv(SE3.Tx(1.0)))
-        nt.assert_almost_equal(r3i.T(), np.linalg.inv(se3))
-        nt.assert_almost_equal(r4i.T(5.0), np.linalg.inv(SE3.Rx(5.0)))
+        nt.assert_almost_equal(r1i.A(), np.linalg.inv(SE3.Rx(2.5)))
+        nt.assert_almost_equal(r2i.A(), np.linalg.inv(SE3.Tx(1.0)))
+        nt.assert_almost_equal(r3i.A(), np.linalg.inv(se3))
+        nt.assert_almost_equal(r4i.A(5.0), np.linalg.inv(SE3.Rx(5.0)))
 
     def test_with_qlim(self):
         r1 = rtb.ET.Rx(2.5, qlim=(1, -1))
@@ -349,11 +349,11 @@ class TestET(unittest.TestCase):
         se = rtb.ET2.SE2(sm.trot2(fl) @ sm.transl2(fl, 0))
         tyf = rtb.ET2.ty(flip=True)
 
-        nt.assert_array_almost_equal(rx.T(fl), sm.trot2(fl))
-        nt.assert_array_almost_equal(tx.T(fl), sm.transl2(fl, 0))
-        nt.assert_array_almost_equal(ty.T(fl), sm.transl2(0, fl))
-        nt.assert_array_almost_equal(se.T(), sm.trot2(fl) @ sm.transl2(fl, 0))
-        nt.assert_array_almost_equal(tyf.T(fl), sm.transl2(0, -fl))
+        nt.assert_array_almost_equal(rx.A(fl), sm.trot2(fl))
+        nt.assert_array_almost_equal(tx.A(fl), sm.transl2(fl, 0))
+        nt.assert_array_almost_equal(ty.A(fl), sm.transl2(0, fl))
+        nt.assert_array_almost_equal(se.A(), sm.trot2(fl) @ sm.transl2(fl, 0))
+        nt.assert_array_almost_equal(tyf.A(fl), sm.transl2(0, -fl))
 
 
 if __name__ == "__main__":
