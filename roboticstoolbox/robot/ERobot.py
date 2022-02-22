@@ -822,9 +822,9 @@ class BaseERobot(Robot):
             T = Tparent
             while True:
                 if isinstance(self, ERobot):
-                    T *= SE3(link.T(q[link.jindex]))
+                    T *= SE3(link.A(q[link.jindex]))
                 else:
-                    T *= SE2(link.T(q[link.jindex]))
+                    T *= SE2(link.A(q[link.jindex]))
 
                 Tall[link.number] = T
 
@@ -2102,7 +2102,7 @@ class ERobot(BaseERobot):
             vJ = SpatialVelocity(s[j] * qd[j])
 
             # transform from parent(j) to j
-            Xup[j] = SE3(self.links[j].T(q[j])).inv()
+            Xup[j] = SE3(self.links[j].A(q[j])).inv()
 
             if self.links[j].parent is None:
                 v[j] = vJ
