@@ -12,7 +12,6 @@ import math
 
 
 class TestDHRobot(unittest.TestCase):
-
     def test_DHRobot(self):
         l0 = rp.DHLink()
         rp.DHRobot([l0])
@@ -40,7 +39,6 @@ class TestDHRobot(unittest.TestCase):
         ans = [False, True, False, True]
 
         self.assertEqual(r0.revolutejoints, ans)
-
 
     def test_isprismatic(self):
         l0 = rp.PrismaticDH()
@@ -177,12 +175,14 @@ class TestDHRobot(unittest.TestCase):
 
         q = np.array([1, 2, 3, 4])
 
-        T1 = np.array([
-            [-0.14550003, -0.98935825, 0, 0],
-            [0.98935825, -0.14550003, 0, 0],
-            [0, 0, 1, 4],
-            [0, 0, 0, 1]
-        ])
+        T1 = np.array(
+            [
+                [-0.14550003, -0.98935825, 0, 0],
+                [0.98935825, -0.14550003, 0, 0],
+                [0, 0, 1, 4],
+                [0, 0, 0, 1],
+            ]
+        )
 
         r0 = rp.DHRobot([l0, l1, l2, l3])
 
@@ -225,12 +225,14 @@ class TestDHRobot(unittest.TestCase):
 
         q = np.array([1, 2, 3, 4])
 
-        T1 = np.array([
-            [-0.14550003, -0.98935825, 0, 0],
-            [0.98935825, -0.14550003, 0, 0],
-            [0, 0, 1, 4],
-            [0, 0, 0, 1]
-        ])
+        T1 = np.array(
+            [
+                [-0.14550003, -0.98935825, 0, 0],
+                [0.98935825, -0.14550003, 0, 0],
+                [0, 0, 1, 4],
+                [0, 0, 0, 1],
+            ]
+        )
 
         nt.assert_array_almost_equal(r3.fkine(q).A, T1)
         nt.assert_array_almost_equal(r4.fkine(q).A, T1)
@@ -253,12 +255,14 @@ class TestDHRobot(unittest.TestCase):
 
         q = np.array([1, 2, 3, 4])
 
-        T1 = np.array([
-            [-0.14550003, -0.98935825, 0, 0],
-            [0.98935825, -0.14550003, 0, 0],
-            [0, 0, 1, 4],
-            [0, 0, 0, 1]
-        ])
+        T1 = np.array(
+            [
+                [-0.14550003, -0.98935825, 0, 0],
+                [0.98935825, -0.14550003, 0, 0],
+                [0, 0, 1, 4],
+                [0, 0, 0, 1],
+            ]
+        )
 
         nt.assert_array_almost_equal(r3.fkine(q).A, T1)
 
@@ -275,12 +279,14 @@ class TestDHRobot(unittest.TestCase):
 
         q = np.array([1, 2, 3, 4])
 
-        T1 = np.array([
-            [-0.14550003, -0.98935825, 0, 0],
-            [0.98935825, -0.14550003, 0, 0],
-            [0, 0, 1, 4],
-            [0, 0, 0, 1]
-        ])
+        T1 = np.array(
+            [
+                [-0.14550003, -0.98935825, 0, 0],
+                [0.98935825, -0.14550003, 0, 0],
+                [0, 0, 1, 4],
+                [0, 0, 0, 1],
+            ]
+        )
 
         nt.assert_array_almost_equal(r3.fkine(q).A, T1)
         nt.assert_array_almost_equal(r4.fkine(q).A, T1)
@@ -312,8 +318,8 @@ class TestDHRobot(unittest.TestCase):
     def test_name(self):
         panda = rp.models.DH.Panda()
 
-        panda.name = 'new'
-        self.assertEqual(panda.name, 'new')
+        panda.name = "new"
+        self.assertEqual(panda.name, "new")
 
     def test_base(self):
         panda = rp.models.DH.Panda()
@@ -329,19 +335,23 @@ class TestDHRobot(unittest.TestCase):
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
 
-        T1 = np.array([
-            [0.5403, -0.8415, 0, 0],
-            [0.8415, 0.5403, 0, 0],
-            [0, 0, 1, 0.333],
-            [0, 0, 0, 1]
-        ])
+        T1 = np.array(
+            [
+                [0.5403, -0.8415, 0, 0],
+                [0.8415, 0.5403, 0, 0],
+                [0, 0, 1, 0.333],
+                [0, 0, 0, 1],
+            ]
+        )
 
-        T2 = np.array([
-            [-0.3279, -0.9015, -0.2826, 0.2918],
-            [0.9232, -0.3693, 0.1068, 0.06026],
-            [-0.2006, -0.2258, 0.9533, 0.3314],
-            [0, 0, 0, 1]
-        ])
+        T2 = np.array(
+            [
+                [-0.3279, -0.9015, -0.2826, 0.2918],
+                [0.9232, -0.3693, 0.1068, 0.06026],
+                [-0.2006, -0.2258, 0.9533, 0.3314],
+                [0, 0, 0, 1],
+            ]
+        )
 
         nt.assert_array_almost_equal(panda.A(0, q).A, T1, decimal=4)
         nt.assert_array_almost_equal(panda.A([1, 4], q).A, T2, decimal=4)
@@ -393,12 +403,11 @@ class TestDHRobot(unittest.TestCase):
         puma = rp.models.DH.Puma560()
         jd = puma.jointdynamics(puma.qn)
         # numbers come from MATLAB
+        nt.assert_array_almost_equal(jd[0], [0.001133478453251, 0.001480000000000])
         nt.assert_array_almost_equal(
-            jd[0], [0.001133478453251, 0.001480000000000])
-        nt.assert_array_almost_equal(
-            jd[1], [0.579706964030143e-3, 0.817000000000000e-3])
-        nt.assert_array_almost_equal(
-            jd[2], [0.000525146448377, 0.001380000000000])
+            jd[1], [0.579706964030143e-3, 0.817000000000000e-3]
+        )
+        nt.assert_array_almost_equal(jd[2], [0.000525146448377, 0.001380000000000])
 
     def test_twists(self):
         # TODO
@@ -429,12 +438,14 @@ class TestDHRobot(unittest.TestCase):
         panda = rp.models.DH.Panda()
         q = [1, 2, 3, 4, 5, 6, 7]
 
-        T = np.array([
-            [-0.8583, 0.1178, 0.4994, 0.1372],
-            [0.1980, 0.9739, 0.1106, 0.3246],
-            [-0.4734, 0.1938, -0.8593, 0.4436],
-            [0, 0, 0, 1]
-        ])
+        T = np.array(
+            [
+                [-0.8583, 0.1178, 0.4994, 0.1372],
+                [0.1980, 0.9739, 0.1106, 0.3246],
+                [-0.4734, 0.1938, -0.8593, 0.4436],
+                [0, 0, 0, 1],
+            ]
+        )
 
         nt.assert_array_almost_equal(panda.fkine(q).A, T, decimal=4)
 
@@ -448,14 +459,16 @@ class TestDHRobot(unittest.TestCase):
         q = [1, 2, 3, 4]
         r0.q = q
 
-        Je = np.array([
-            [0, -0.5588, 0, 0],
-            [0, 1.9203, 0, 0],
-            [1.0000, 0, 1.0000, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 1.0000, 0, 1.0000]
-        ])
+        Je = np.array(
+            [
+                [0, -0.5588, 0, 0],
+                [0, 1.9203, 0, 0],
+                [1.0000, 0, 1.0000, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 1.0000, 0, 1.0000],
+            ]
+        )
 
         nt.assert_array_almost_equal(r0.jacobe(q), Je, decimal=4)
 
@@ -469,14 +482,16 @@ class TestDHRobot(unittest.TestCase):
         q = [1, 2, 3, 4]
         r0.q = q
 
-        J0 = np.array([
-            [0, 0.5588, 0, 0],
-            [0, 1.9203, 0, 0],
-            [1.0000, 0, 1.0000, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 1.0000, 0, 1.0000]
-        ])
+        J0 = np.array(
+            [
+                [0, 0.5588, 0, 0],
+                [0, 1.9203, 0, 0],
+                [1.0000, 0, 1.0000, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 1.0000, 0, 1.0000],
+            ]
+        )
 
         nt.assert_array_almost_equal(r0.jacob0(q), J0, decimal=4)
 
@@ -485,14 +500,16 @@ class TestDHRobot(unittest.TestCase):
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
 
-        Je = np.array([
-            [0.3058, 0.1315, -0.2364, -0.0323, 0.0018, 0.2095, 0],
-            [0.0954, 0.0303, -0.0721, 0.1494, -0.0258, 0.0144, 0],
-            [-0.1469, 0.3385, 0.0506, 0.0847, -0.0000, -0.0880, 0],
-            [-0.4734, 0.8292, -0.0732, 0.8991, -0.2788, -0.0685, 0],
-            [0.1938, 0.4271, 0.7224, 0.3461, -0.0191, 0.9976, 0],
-            [-0.8593, -0.3605, 0.6876, -0.2679, -0.9602, 0.0000, 1.0000]
-        ])
+        Je = np.array(
+            [
+                [0.3058, 0.1315, -0.2364, -0.0323, 0.0018, 0.2095, 0],
+                [0.0954, 0.0303, -0.0721, 0.1494, -0.0258, 0.0144, 0],
+                [-0.1469, 0.3385, 0.0506, 0.0847, -0.0000, -0.0880, 0],
+                [-0.4734, 0.8292, -0.0732, 0.8991, -0.2788, -0.0685, 0],
+                [0.1938, 0.4271, 0.7224, 0.3461, -0.0191, 0.9976, 0],
+                [-0.8593, -0.3605, 0.6876, -0.2679, -0.9602, 0.0000, 1.0000],
+            ]
+        )
 
         nt.assert_array_almost_equal(panda.jacobe(q), Je, decimal=4)
 
@@ -573,11 +590,9 @@ class TestDHRobot(unittest.TestCase):
         wT = np.c_[w, w, w, w].T
         qT = np.c_[q, q, q, q].T
 
-        tau = np.array(
-            [6.0241, -4.4972, -7.2160, -4.2400, 7.0215, -4.6884, -6.0000])
+        tau = np.array([6.0241, -4.4972, -7.2160, -4.2400, 7.0215, -4.6884, -6.0000])
 
-        tau0 = np.array(
-            [-5.9498, 1.4604, -3.4544, 1.5026, -3.7777, -6.6578, 2.6047])
+        tau0 = np.array([-5.9498, 1.4604, -3.4544, 1.5026, -3.7777, -6.6578, 2.6047])
 
         tauT = np.c_[tau, tau, tau, tau].T
         tau0T = np.c_[tau0, tau0, tau0, tau0].T
@@ -596,8 +611,7 @@ class TestDHRobot(unittest.TestCase):
 
         nt.assert_array_almost_equal(panda.pay(w, q=q), tau, decimal=4)
         nt.assert_array_almost_equal(panda.pay(wT, q=qT), tauT, decimal=4)
-        nt.assert_array_almost_equal(
-            panda.pay(wT, q=qT, frame=0), tau0T, decimal=4)
+        nt.assert_array_almost_equal(panda.pay(wT, q=qT, frame=0), tau0T, decimal=4)
 
         nt.assert_array_almost_equal(panda.pay(w, J=Je), tau, decimal=4)
         nt.assert_array_almost_equal(panda.pay(w, J=J0), tau0, decimal=4)
@@ -625,53 +639,65 @@ class TestDHRobot(unittest.TestCase):
         q = [1, 2, 3, 4, 5, 6, 7]
         panda.q = q
 
-
         t0 = np.eye(4)
-        t1 = np.array([
-            [0.5403, -0.8415, 0, 0],
-            [0.8415, 0.5403, 0, 0],
-            [0, 0, 1, 0.333],
-            [0, 0, 0, 1]
-        ])
-        t2 = np.array([
-            [-0.2248, -0.4913, -0.8415, 0],
-            [-0.3502, -0.7651, 0.5403, 0],
-            [-0.9093, 0.4161, 0, 0.333],
-            [0, 0, 0, 1]
-        ])
-        t3 = np.array([
-            [0.1038, 0.8648, 0.4913, 0.1552],
-            [0.4229, -0.4855, 0.7651, 0.2418],
-            [0.9002, 0.1283, -0.4161, 0.2015],
-            [0, 0, 0, 1]
-        ])
-        t4 = np.array([
-            [-0.4397, -0.2425, -0.8648, 0.1638],
-            [-0.8555, -0.1801, 0.4855, 0.2767],
-            [-0.2735, 0.9533, -0.1283, 0.2758],
-            [0, 0, 0, 1]
-        ])
-        t5 = np.array([
-            [-0.9540, -0.1763, -0.2425, 0.107],
-            [0.2229, -0.9581, -0.1801, 0.2781],
-            [-0.2006, -0.2258, 0.9533, 0.6644],
-            [0, 0, 0, 1]
-        ])
-        t6 = np.array([
-            [-0.8482, -0.4994, 0.1763, 0.107],
-            [0.2643, -0.1106, 0.9581, 0.2781],
-            [-0.4590, 0.8593, 0.2258, 0.6644],
-            [0, 0, 0, 1]
-        ])
-        t7 = np.array([
-            [-0.5236, 0.6902, 0.4994, 0.08575],
-            [0.8287, 0.5487, 0.1106, 0.3132],
-            [-0.1977, 0.4718, -0.8593, 0.5321],
-            [0, 0, 0, 1]
-        ])
+        t1 = np.array(
+            [
+                [0.5403, -0.8415, 0, 0],
+                [0.8415, 0.5403, 0, 0],
+                [0, 0, 1, 0.333],
+                [0, 0, 0, 1],
+            ]
+        )
+        t2 = np.array(
+            [
+                [-0.2248, -0.4913, -0.8415, 0],
+                [-0.3502, -0.7651, 0.5403, 0],
+                [-0.9093, 0.4161, 0, 0.333],
+                [0, 0, 0, 1],
+            ]
+        )
+        t3 = np.array(
+            [
+                [0.1038, 0.8648, 0.4913, 0.1552],
+                [0.4229, -0.4855, 0.7651, 0.2418],
+                [0.9002, 0.1283, -0.4161, 0.2015],
+                [0, 0, 0, 1],
+            ]
+        )
+        t4 = np.array(
+            [
+                [-0.4397, -0.2425, -0.8648, 0.1638],
+                [-0.8555, -0.1801, 0.4855, 0.2767],
+                [-0.2735, 0.9533, -0.1283, 0.2758],
+                [0, 0, 0, 1],
+            ]
+        )
+        t5 = np.array(
+            [
+                [-0.9540, -0.1763, -0.2425, 0.107],
+                [0.2229, -0.9581, -0.1801, 0.2781],
+                [-0.2006, -0.2258, 0.9533, 0.6644],
+                [0, 0, 0, 1],
+            ]
+        )
+        t6 = np.array(
+            [
+                [-0.8482, -0.4994, 0.1763, 0.107],
+                [0.2643, -0.1106, 0.9581, 0.2781],
+                [-0.4590, 0.8593, 0.2258, 0.6644],
+                [0, 0, 0, 1],
+            ]
+        )
+        t7 = np.array(
+            [
+                [-0.5236, 0.6902, 0.4994, 0.08575],
+                [0.8287, 0.5487, 0.1106, 0.3132],
+                [-0.1977, 0.4718, -0.8593, 0.5321],
+                [0, 0, 0, 1],
+            ]
+        )
 
         Tall = panda.fkine_all(q)
-
 
         nt.assert_array_almost_equal(Tall[0].A, t0, decimal=4)
         nt.assert_array_almost_equal(Tall[1].A, t1, decimal=4)
@@ -681,7 +707,6 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_almost_equal(Tall[5].A, t5, decimal=4)
         nt.assert_array_almost_equal(Tall[6].A, t6, decimal=4)
         nt.assert_array_almost_equal(Tall[7].A, t7, decimal=4)
-       
 
     # def test_gravjac(self):
     #     l0 = rp.RevoluteDH(d=2, B=3, G=2, Tc=[2, -1], alpha=0.4, a=0.2,
@@ -895,46 +920,46 @@ class TestDHRobot(unittest.TestCase):
         T = puma.fkine(puma.qn)
 
         # test configuration validation
-        config = puma.config_validate('l', ('lr', 'ud', 'nf'))
+        config = puma.config_validate("l", ("lr", "ud", "nf"))
         self.assertEqual(len(config), 3)
-        self.assertTrue('l' in config)
-        self.assertTrue('u' in config)
-        self.assertTrue('n' in config)
+        self.assertTrue("l" in config)
+        self.assertTrue("u" in config)
+        self.assertTrue("n" in config)
         with self.assertRaises(ValueError):
-            config = puma.config_validate('lux', ('lr', 'ud', 'nf'))
+            config = puma.config_validate("lux", ("lr", "ud", "nf"))
 
         # analytic solution
         sol = puma.ikine_a(T)
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=6)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
 
         sol = puma.ikine_a(T, "l")
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=6)
-        self.assertTrue(sol.q[0] > np.pi/2)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
+        self.assertTrue(sol.q[0] > np.pi / 2)
 
         sol = puma.ikine_a(T, "r")
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=6)
-        self.assertTrue(sol.q[0] < np.pi/2)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
+        self.assertTrue(sol.q[0] < np.pi / 2)
 
         sol = puma.ikine_a(T, "u")
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=6)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
         self.assertTrue(sol.q[1] > 0)
 
         sol = puma.ikine_a(T, "d")
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=6)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
         self.assertTrue(sol.q[1] < 0)
 
         sol = puma.ikine_a(T, "n")
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=6)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
 
         sol = puma.ikine_a(T, "f")
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=6)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
 
     def test_ikine_LM(self):
         puma = rp.models.DH.Puma560()
@@ -943,7 +968,7 @@ class TestDHRobot(unittest.TestCase):
 
         sol = puma.ikine_LM(T)
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=6)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
 
     def test_ikine_LMS(self):
         puma = rp.models.DH.Puma560()
@@ -952,7 +977,7 @@ class TestDHRobot(unittest.TestCase):
 
         sol = puma.ikine_LM(T)
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=6)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
 
     def test_ikine_unc(self):
         puma = rp.models.DH.Puma560()
@@ -961,12 +986,12 @@ class TestDHRobot(unittest.TestCase):
 
         sol = puma.ikine_min(T)
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=5)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=5)
 
         q0 = np.r_[0.1, 0.1, 0.1, 0.2, 0.3, 0.4]
         sol = puma.ikine_min(T, q0=q0)
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=5)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=5)
 
     def test_ikine_con(self):
         puma = rp.models.DH.Puma560()
@@ -975,12 +1000,12 @@ class TestDHRobot(unittest.TestCase):
 
         sol = puma.ikine_min(T, qlim=True)
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=5)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=5)
 
         q0 = np.r_[0.1, 0.1, 0.1, 0.2, 0.3, 0.4]
         sol = puma.ikine_min(T, q0=q0, qlim=True)
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol.q)), 0, places=5)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=5)
 
     # def test_ikine_min(self):
     #     puma = rp.models.DH.Puma560()
@@ -993,19 +1018,19 @@ class TestDHRobot(unittest.TestCase):
     #     sol2 = puma.ikine_min(
     #           T, qlimits=False, stiffness=0.1, ilimit=1)
 
-        # print(np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)))
+    # print(np.sum(np.abs(T.A - puma.fkine(q0[:, 0]).A)))
 
-        # self.assertTrue(sol0[0].success)
-        # self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol0[0].q)), 0, places=4)
-        # TODO: second solution fails, even though starting value is the
-        # solution.  see https://stackoverflow.com/questions/34663539/scipy-optimize-fmin-l-bfgs-b-returns-abnormal-termination-in-lnsrch
-        # documentation is pretty bad.
-        # self.assertTrue(sol0[1].success)
-        # self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol0[1].q)), 0, places=4)
-        # self.assertTrue(sol1.success)
-        # self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol1.q)), 0, places=4)
-        # self.assertTrue(sol2.success)
-        # self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol2.q)), 0, places=4)
+    # self.assertTrue(sol0[0].success)
+    # self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol0[0].q)), 0, places=4)
+    # TODO: second solution fails, even though starting value is the
+    # solution.  see https://stackoverflow.com/questions/34663539/scipy-optimize-fmin-l-bfgs-b-returns-abnormal-termination-in-lnsrch
+    # documentation is pretty bad.
+    # self.assertTrue(sol0[1].success)
+    # self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol0[1].q)), 0, places=4)
+    # self.assertTrue(sol1.success)
+    # self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol1.q)), 0, places=4)
+    # self.assertTrue(sol2.success)
+    # self.assertAlmostEqual(np.linalg.norm(T-puma.fkine(sol2.q)), 0, places=4)
 
     def test_rne(self):
         puma = rp.models.DH.Puma560()
@@ -1074,8 +1099,7 @@ class TestDHRobot(unittest.TestCase):
         res = [-7.4102, -9.8432, -10.9694, -4.4314, -0.9881, 21.0228]
 
         qdd0 = puma.accel(q, qd, torque)
-        qdd1 = puma.accel(
-            np.c_[q, q].T, np.c_[qd, qd].T, np.c_[torque, torque].T)
+        qdd1 = puma.accel(np.c_[q, q].T, np.c_[qd, qd].T, np.c_[torque, torque].T)
 
         nt.assert_array_almost_equal(qdd0, res, decimal=4)
         nt.assert_array_almost_equal(qdd1[0, :], res, decimal=4)
@@ -1092,7 +1116,8 @@ class TestDHRobot(unittest.TestCase):
             [0.1006, 0.3509, 0.9378, 0.0000, 0.0015, 0.0000],
             [-0.0025, 0.0000, 0.0000, 0.1925, 0.0000, 0.0000],
             [0.0000, 0.0024, 0.0015, 0.0000, 0.1713, 0.0000],
-            [-0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.1941]]
+            [-0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.1941],
+        ]
 
         I0 = puma.inertia(q)
         # I1 = puma.inertia(np.c_[q, q].T)
@@ -1111,7 +1136,8 @@ class TestDHRobot(unittest.TestCase):
             [-9.6233, 1.2459, 13.3348, -0.0000, 0.2767, -0.0000],
             [-0.0000, -0.3254, -0.0000, 0.1941, 0.0000, 0.1941],
             [0.2795, -0.0703, 0.2767, 0.0000, 0.1713, 0.0000],
-            [0.0000, -0.9652, -0.0000, 0.1941, 0.0000, 0.5791]]
+            [0.0000, -0.9652, -0.0000, 0.1941, 0.0000, 0.5791],
+        ]
 
         M0 = puma.inertia_x(q, analytical=None)
         M1 = puma.inertia_x(np.c_[q, q].T, analytical=None)
@@ -1132,7 +1158,8 @@ class TestDHRobot(unittest.TestCase):
             [-0.3608, -0.7734, -0.0018, -0.0009, -0.0064, -0.0000],
             [0.0011, 0.0005, -0.0001, 0.0002, 0.0002, -0.0001],
             [-0.0002, 0.0028, 0.0046, -0.0002, -0.0000, -0.0000],
-            [0.0001, 0.0000, 0.0000, 0.0000, 0.0000, 0]]
+            [0.0001, 0.0000, 0.0000, 0.0000, 0.0000, 0],
+        ]
 
         C0 = puma.coriolis(q, qd)
         C1 = puma.coriolis(np.c_[q, q].T, np.c_[qd, qd].T)
@@ -1171,25 +1198,25 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_array_almost_equal(taui1[0, :], tauir, decimal=4)
         nt.assert_array_almost_equal(taui1[1, :], tauir, decimal=4)
 
-#     def test_str(self):
-#         puma = rp.models.DH.Puma560()
-#         l0 = rp.PrismaticMDH()
-#         r0 = rp.DHRobot([l0, l0, l0])
-#         str(r0)
+    #     def test_str(self):
+    #         puma = rp.models.DH.Puma560()
+    #         l0 = rp.PrismaticMDH()
+    #         r0 = rp.DHRobot([l0, l0, l0])
+    #         str(r0)
 
-#         res = """
-# Puma 560 (Unimation): 6 axis, RRRRRR, std DH
-# Parameters:
-# Revolute   theta=q1 + 0.00,  d= 0.67,  a= 0.00,  alpha= 1.57
-# Revolute   theta=q2 + 0.00,  d= 0.00,  a= 0.43,  alpha= 0.00
-# Revolute   theta=q3 + 0.00,  d= 0.15,  a= 0.02,  alpha=-1.57
-# Revolute   theta=q4 + 0.00,  d= 0.43,  a= 0.00,  alpha= 1.57
-# Revolute   theta=q5 + 0.00,  d= 0.00,  a= 0.00,  alpha=-1.57
-# Revolute   theta=q6 + 0.00,  d= 0.00,  a= 0.00,  alpha= 0.00
+    #         res = """
+    # Puma 560 (Unimation): 6 axis, RRRRRR, std DH
+    # Parameters:
+    # Revolute   theta=q1 + 0.00,  d= 0.67,  a= 0.00,  alpha= 1.57
+    # Revolute   theta=q2 + 0.00,  d= 0.00,  a= 0.43,  alpha= 0.00
+    # Revolute   theta=q3 + 0.00,  d= 0.15,  a= 0.02,  alpha=-1.57
+    # Revolute   theta=q4 + 0.00,  d= 0.43,  a= 0.00,  alpha= 1.57
+    # Revolute   theta=q5 + 0.00,  d= 0.00,  a= 0.00,  alpha=-1.57
+    # Revolute   theta=q6 + 0.00,  d= 0.00,  a= 0.00,  alpha= 0.00
 
-# tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg"""
+    # tool:  t = (0, 0, 0),  RPY/xyz = (0, 0, 0) deg"""
 
-#         self.assertEqual(str(puma), res)
+    #         self.assertEqual(str(puma), res)
 
     # def test_paycap(self):
     #     self.skipTest("error introduced with DHLink change")
@@ -1231,7 +1258,7 @@ class TestDHRobot(unittest.TestCase):
         for i in range(puma.n):
             Jd += H[:, :, i] * qd[i]
 
-        res = [-0.0000, -1.0654, -0.3702,  2.4674, 0, 0]
+        res = [-0.0000, -1.0654, -0.3702, 2.4674, 0, 0]
 
         nt.assert_array_almost_equal(j0, Jd, decimal=4)
 
@@ -1241,8 +1268,8 @@ class TestDHRobot(unittest.TestCase):
 
         m1 = puma.manipulability(q)
         m2 = puma.manipulability(np.c_[q, q].T)
-        m3 = puma.manipulability(q, axes='trans')
-        m4 = puma.manipulability(q, axes='rot')
+        m3 = puma.manipulability(q, axes="trans")
+        m4 = puma.manipulability(q, axes="rot")
 
         a0 = 0.0786
         a2 = 0.111181
@@ -1255,17 +1282,17 @@ class TestDHRobot(unittest.TestCase):
         nt.assert_almost_equal(m4, a3, decimal=4)
 
         with self.assertRaises(ValueError):
-            puma.manipulability(axes='abcdef')
+            puma.manipulability(axes="abcdef")
 
     def test_asada(self):
         puma = rp.models.DH.Puma560()
         q = puma.qn
 
-        m1 = puma.manipulability(q, method='asada')
-        m2 = puma.manipulability(np.c_[q, q].T, method='asada')
-        m3 = puma.manipulability(q, axes='trans', method='asada')
-        m4 = puma.manipulability(q, axes='rot', method='asada')
-        m5 = puma.manipulability(puma.qz, method='asada')
+        m1 = puma.manipulability(q, method="asada")
+        m2 = puma.manipulability(np.c_[q, q].T, method="asada")
+        m3 = puma.manipulability(q, axes="trans", method="asada")
+        m4 = puma.manipulability(q, axes="rot", method="asada")
+        m5 = puma.manipulability(puma.qz, method="asada")
 
         a0 = 0.0044
         a2 = 0.2094
@@ -1317,7 +1344,7 @@ class TestDHRobot(unittest.TestCase):
         puma.q = puma.qn
 
         with self.assertRaises(ValueError):
-            puma.manipulability(method='notamethod')
+            puma.manipulability(method="notamethod")
 
     def test_perturb(self):
         puma = rp.models.DH.Puma560()
@@ -1332,23 +1359,25 @@ class TestDHRobot(unittest.TestCase):
         for i in range(puma.n):
             resI0[i] = np.divide(
                 np.sum(np.abs(puma.links[i].I - p2.links[i].I)),
-                np.sum(np.abs(puma.links[i].I)))
+                np.sum(np.abs(puma.links[i].I)),
+            )
 
             if puma.links[i].m - p2.links[i].m != 0.0:
-                resm0[i] = np.abs(np.divide(
-                    (puma.links[i].m - p2.links[i].m),
-                    puma.links[i].m))
+                resm0[i] = np.abs(
+                    np.divide((puma.links[i].m - p2.links[i].m), puma.links[i].m)
+                )
             else:
                 resm0[i] = 0
 
             resI1[i] = np.divide(
                 np.sum(np.abs(puma.links[i].I - p3.links[i].I)),
-                np.sum(np.abs(puma.links[i].I)))
+                np.sum(np.abs(puma.links[i].I)),
+            )
 
             if puma.links[i].m - p3.links[i].m != 0.0:
-                resm1[i] = np.abs(np.divide(
-                    (puma.links[i].m - p3.links[i].m),
-                    puma.links[i].m))
+                resm1[i] = np.abs(
+                    np.divide((puma.links[i].m - p3.links[i].m), puma.links[i].m)
+                )
             else:
                 resm1[i] = 0
 
@@ -1385,7 +1414,7 @@ class TestDHRobot(unittest.TestCase):
 
     def test_plot(self):
         panda = rp.models.DH.Panda()
-        e = panda.plot(panda.qr, block=False, backend='pyplot')
+        e = panda.plot(panda.qr, block=False, backend="pyplot")
         e.close()
 
     def test_teach_basic(self):
@@ -1398,26 +1427,24 @@ class TestDHRobot(unittest.TestCase):
     def test_plot_traj(self):
         panda = rp.models.DH.Panda()
         q = np.random.rand(3, 7)
-        e = panda.plot(q=q, block=False, dt=0.05, backend='pyplot')
+        e = panda.plot(q=q, block=False, dt=0.05, backend="pyplot")
         e.close()
 
     def test_control_type(self):
         panda = rp.models.DH.Panda()
 
-        panda.control_type = 'p'
+        panda.control_type = "p"
 
         with self.assertRaises(ValueError):
-            panda.control_type = 'z'
+            panda.control_type = "z"
 
     def test_plot_vellipse(self):
         panda = rp.models.DH.Panda()
 
-
         e = panda.plot_vellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
         e.close()
 
-        e = panda.plot_vellipse(
-            block=False, q=panda.qr, centre='ee', opt='rot')
+        e = panda.plot_vellipse(block=False, q=panda.qr, centre="ee", opt="rot")
         e.step()
         e.close()
 
@@ -1425,7 +1452,7 @@ class TestDHRobot(unittest.TestCase):
             panda.plot_vellipse(q=panda.qr, vellipse=10)
 
         with self.assertRaises(ValueError):
-            panda.plot_vellipse(q=panda.qr, centre='ff')
+            panda.plot_vellipse(q=panda.qr, centre="ff")
 
     def test_plot_fellipse(self):
         panda = rp.models.DH.Panda()
@@ -1433,8 +1460,7 @@ class TestDHRobot(unittest.TestCase):
         e = panda.plot_fellipse(q=panda.qr, block=False, limits=[1, 2, 1, 2, 1, 2])
         e.close()
 
-        e = panda.plot_fellipse(
-            block=False, q=panda.qr, centre='ee', opt='rot')
+        e = panda.plot_fellipse(block=False, q=panda.qr, centre="ee", opt="rot")
         e.step()
         e.close()
 
@@ -1442,18 +1468,16 @@ class TestDHRobot(unittest.TestCase):
             panda.plot_fellipse(q=panda.qr, fellipse=10)
 
         with self.assertRaises(ValueError):
-            panda.plot_fellipse(q=panda.qr, centre='ff')
+            panda.plot_fellipse(q=panda.qr, centre="ff")
 
     def test_plot_with_vellipse(self):
         panda = rp.models.DH.Panda()
-        e = panda.plot(
-            panda.qr, block=False, vellipse=True, backend='pyplot')
+        e = panda.plot(panda.qr, block=False, vellipse=True, backend="pyplot")
         e.close()
 
     def test_plot_with_fellipse(self):
         panda = rp.models.DH.Panda()
-        e = panda.plot(
-            panda.qr, block=False, fellipse=True, backend='pyplot')
+        e = panda.plot(panda.qr, block=False, fellipse=True, backend="pyplot")
         e.close()
 
     def test_str(self):
@@ -1485,8 +1509,7 @@ class TestDHRobot(unittest.TestCase):
     def test_alpha(self):
         r0 = rp.models.DH.Puma560()
 
-        nt.assert_array_almost_equal(
-            r0.alpha, np.r_[1, 0, -1, 1, -1, 0] * math.pi / 2)
+        nt.assert_array_almost_equal(r0.alpha, np.r_[1, 0, -1, 1, -1, 0] * math.pi / 2)
 
     def test_ets(self):
         panda = rp.models.DH.Panda()
@@ -1499,5 +1522,5 @@ class TestDHRobot(unittest.TestCase):
         rp.SerialLink([rp.RevoluteDH()])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
