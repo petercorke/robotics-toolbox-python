@@ -14,11 +14,9 @@ from fknm import Robot_link_T
 
 ArrayLike = Union[list, np.ndarray, tuple, set]
 
+
 class Gripper:
     def __init__(self, elinks, name="", tool=None):
-
-        for l in elinks:
-            print(l._T)
 
         self._n = 0
 
