@@ -166,7 +166,7 @@ class DHRobot(Robot):
 
         def qstr(j, link):
             j += 1
-            if link.flip:
+            if link.isflip:
                 s = f"-q{j:d}"
             else:
                 s = f" q{j:d}"
@@ -189,7 +189,7 @@ class DHRobot(Robot):
                 else:
                     return str(theta * deg) + "\u00b0"
 
-        has_qlim = any([link._qlim is not None for link in self])
+        has_qlim = any([link.qlim is not None for link in self])
         if has_qlim:
             qlim_columns = [
                 Column("q⁻", headalign="^"),
@@ -265,7 +265,7 @@ class DHRobot(Robot):
                     "base",
                     base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
                 )
-            if self._tool is not None:
+            if tool is not None:
                 table.row(
                     "tool",
                     tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
@@ -828,7 +828,7 @@ class DHRobot(Robot):
 
         # add the links
         for link in self:
-            ets *= link.ets()
+            ets *= link.ets
 
         # optionally add the base transform
         if tool is not None:
