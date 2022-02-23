@@ -1,4 +1,4 @@
-import copy
+from copy import copy as ccopy, deepcopy
 from abc import ABC
 from multiprocessing.sharedctypes import Value
 import numpy as np
@@ -321,22 +321,63 @@ class BaseLink(SceneNode, ABC):
         ``link.copy()`` is a new Link subclass instance with a copy of all
         the parameters.
         """
-        new = copy.copy(self)
-        for k, v in self.__dict__.items():
-            # print(k)
-            if k.startswith("_") and isinstance(v, np.ndarray):
-                setattr(new, k, np.copy(v))
+        # new = ccopy(self)
+        # for k, v in self.__dict__.items():
+        #     # print(k)
+        #     if k.startswith("_") and isinstance(v, np.ndarray):
+        #         setattr(new, k, np.copy(v))
 
-        new._geometry = [shape.copy() for shape in self._geometry]
-        new._collision = [shape.copy() for shape in self._collision]
+        # new._geometry = [shape.copy() for shape in self._geometry]
+        # new._collision = [shape.copy() for shape in self._collision]
 
-        # invalidate references to parent, child
-        new._parent = parent
-        new._children = []
-        return new
+        # # invalidate references to parent, child
+        # new._parent = parent
+        # new._children = []
+        # return new
+        return deepcopy(self)
 
     def _copy(self):
         raise DeprecationWarning("Use copy method of Link class")
+
+    def __deepcopy__(self, memo):
+        ets = deepcopy(self.ets)
+        name = deepcopy(self.name)
+        parent = self.parent
+        joint_name = deepcopy(self._joint_name)
+        m = deepcopy(self.m)
+        r = deepcopy(self.r)
+        I = deepcopy(self.I)
+        Jm = deepcopy(self.Jm)
+        B = deepcopy(self.B)
+        Tc = deepcopy(self.Tc)
+        G = deepcopy(self.G)
+        qlim = deepcopy(self.qlim)
+        geometry = [shape.copy() for shape in self._geometry]
+        collision = [shape.copy() for shape in self._collision]
+
+        cls = self.__class__
+        result = cls(
+            ets=ets,
+            name=name,
+            parent=parent,
+            joint_name=joint_name,
+            m=m,
+            r=r,
+            I=I,
+            Jm=Jm,
+            B=B,
+            Tc=Tc,
+            G=G,
+            qlim=qlim,
+            geometry=geometry,
+            collision=collision,
+        )
+
+        if self._children:
+            result._children = self._children.copy()
+
+        memo[id(self)] = result
+        return result
 
     # -------------------------------------------------------------------------- #
 
@@ -1268,11 +1309,6 @@ class Link(BaseLink):
         if len(self._ets) > 0 and self._ets[-1].isjoint:
             if jindex is not None:
                 self._ets[-1].jindex = jindex
-
-        # Private variable, can be written to but never replaced!
-        # The c will adjust the inside of this array with a reference
-        # to this specific array. If replaced --> segfault
-        self._fk = eye(4)
 
     # @property
     # def ets(self: "Link") -> "ETS":
