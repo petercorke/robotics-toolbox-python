@@ -2,6 +2,9 @@
 
 import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Link import Link
+from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ET import ET
 from spatialmath import SE3
 
 
@@ -32,15 +35,26 @@ class FrankieOmni(ERobot):
 
     def __init__(self):
 
-        links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "franka_description/robots/frankieOmni_arm_hand.urdf.xacro"
+        links_base, _, urdf_string, urdf_filepath = self.URDF_read(
+            "ridgeback_description/urdf/ridgeback.urdf.xacro"
         )
 
+        links_panda, _, _, _ = self.URDF_read(
+            "franka_description/robots/panda_arm_hand.urdf.xacro"
+        )
+
+        base_link = links_base[9]
+        base_arm = Link(ETS(ET.tz(0.28)), name="base_arm", parent=base_link)
+
+        links_panda[0]._parent = base_arm
+        links_all = links_base + links_panda
+        links_all.append(base_arm)
+
         super().__init__(
-            links,
-            name=name,
-            manufacturer="Franka Emika",
-            gripper_links=links[12],
+            links_all,
+            name="FrankieOmni",
+            manufacturer="Custom",
+            gripper_links=links_all[28],
             urdf_string=urdf_string,
             urdf_filepath=urdf_filepath,
         )
@@ -64,26 +78,17 @@ class FrankieOmni(ERobot):
             ]
         )
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+        self.qr = np.array([0, 0, 0, 0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        self.qz = np.zeros(10)
 
-        self.addconfiguration(
-            "qr", np.array([0, 0, 0, 0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
-        )
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover
+    pass
 
-    robot = FrankieOmni()
-    print(robot)
+    # r = Panda()
 
-    for link in robot.links:
-        print(link.name)
-        print(link.isjoint)
-        print(len(link.collision))
-
-    print()
-
-    for link in robot.grippers[0].links:
-        print(link.name)
-        print(link.isjoint)
-        print(len(link.collision))
+    # for link in r.grippers[0].links:
+    #     print(link)

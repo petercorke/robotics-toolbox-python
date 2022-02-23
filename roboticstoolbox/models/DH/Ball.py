@@ -58,16 +58,19 @@ class Ball(DHRobot):
             links.append(RevoluteDH(a=0.1, alpha=pi / 2))
 
         # and build a serial link manipulator
-        super(Ball, self).__init__(links, name='ball')
+        super(Ball, self).__init__(links, name="ball")
 
-        # zero angles, ball pose
-        self.addconfiguration("qz", np.zeros(N,))
-        self.addconfiguration("q1", [_fract(i) for i in range(N)])
+        self.qr = np.array([_fract(i) for i in range(N)])
+        self.qz = np.zeros(N)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
+
 
 def _fract(i):
     # i is "i-1" as per the paper
     theta1 = 1
-    theta2 = -2/3
+    theta2 = -2 / 3
 
     if i == 0:
         return theta1
@@ -78,7 +81,8 @@ def _fract(i):
     elif i % 3 == 0:
         return _fract(i / 3)
 
-if __name__ == '__main__':   # pragma nocover
+
+if __name__ == "__main__":  # pragma nocover
 
     ball = Ball()
     print(ball)

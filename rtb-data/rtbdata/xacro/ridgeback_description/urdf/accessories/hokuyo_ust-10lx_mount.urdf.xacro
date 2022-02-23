@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+
+  <xacro:macro name="hokuyo_ust-10lx_mount" params="prefix topic location">
+
+    <joint name="${prefix}_laser_joint" type="fixed">
+      <origin xyz="${location * 0.3932} 0 0.2330" rpy="0 0 ${PI/2 - (location * PI/2)}" />
+      <parent link="chassis_link" />
+      <child link="${prefix}_laser" />
+    </joint>
+
+    <link name="${prefix}_laser">
+      <inertial>
+        <mass value="0.130" />
+        <origin xyz="0 0 0" />
+        <inertia ixx="${0.0833333 * 0.130 * (0.05*0.05 + 0.07*0.07)}" ixy="0.0" ixz="0.0"
+          iyy="${0.0833333 * 0.130 * (0.05*0.05 + 0.07*0.07)}" iyz="0.0"
+          izz="${0.0833333 * 0.130 * (0.05*0.05 + 0.05*0.05)}" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <!-- Origin of this mesh is the focal point of the LIDAR. -->
+          <mesh filename="package://ridgeback_description/meshes/ust-10lx.stl" />
+        </geometry>
+        <material name="dark_grey" />
+      </visual>
+      <collision>
+        <origin xyz="0 0 -0.0122" rpy="0 0 0" />
+        <geometry>
+          <box size="0.05 0.05 0.07" />
+        </geometry>
+      </collision>
+    </link>
+
+    <gazebo reference="${prefix}_laser">
+      <turnGravityOff>false</turnGravityOff>
+      <sensor type="ray" name="${prefix}_laser">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>false</visualize>
+        <update_rate>50</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>720</samples>
+              <resolution>1</resolution>
+              <min_angle>-2.35619</min_angle>
+              <max_angle>2.35619</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.20</min>
+            <max>10.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.001</stddev>
+          </noise>
+        </ray>
+        <plugin name="gazebo_ros_laser" filename="libgazebo_ros_laser.so">
+          <topicName>${topic}</topicName>
+          <frameName>${prefix}_laser</frameName>
+          <hokuyoMinIntensity>101</hokuyoMinIntensity>
+        </plugin>
+      </sensor>
+      <material>Gazebo/DarkGrey</material>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>

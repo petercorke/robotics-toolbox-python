@@ -17,18 +17,18 @@ import sphinx_rtd_theme
 import re
 
 # defined relative to configuration directory which is where this file conf.py lives
-sys.path.append(os.path.abspath('exts'))
+sys.path.append(os.path.abspath("exts"))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Robotics Toolbox for Python'
-copyright = '2020, Jesse Haviland and Peter Corke'
-author = 'Jesse Haviland and Peter Corke'
+project = "Robotics Toolbox for Python"
+copyright = "2020, Jesse Haviland and Peter Corke"
+author = "Jesse Haviland and Peter Corke"
 
 # print(__file__)
 
 # parse version number out of setup.py
-with open('../../setup.py', encoding='utf-8') as f:
+with open("../../setup.py", encoding="utf-8") as f:
     setup_py = f.read()
     m = re.search("version='([0-9\.]*)',", setup_py, re.MULTILINE)
 
@@ -37,34 +37,36 @@ with open('../../setup.py', encoding='utf-8') as f:
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [ 
-    'sphinx.ext.autodoc',
-    'sphinx.ext.todo',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.coverage',
-    'sphinx.ext.doctest',
-    'sphinx.ext.inheritance_diagram',
-    'sphinx_autorun',
-    'blockname',
-    'sphinx.ext.intersphinx',
-    ]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.todo",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.coverage",
+    "sphinx.ext.doctest",
+    "sphinx.ext.inheritance_diagram",
+    "sphinx_autorun",
+    "blockname",
+    "sphinx.ext.intersphinx",
+]
 
 autosummary_generate = True
-autodoc_member_order = 'bysource'
+autodoc_member_order = "bysource"
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
-exclude_patterns = ['test_*']
+exclude_patterns = ["test_*"]
 
 # options for spinx_autorun, used for inline examples
 #  choose UTF-8 encoding to allow for Unicode characters, eg. ansitable
 #  Python session setup, turn off color printing for SE3, set NumPy precision
 autorun_languages = {}
-autorun_languages['pycon_output_encoding'] = 'UTF-8'
-autorun_languages['pycon_input_encoding'] = 'UTF-8'
-autorun_languages['pycon_runfirst'] = """
+autorun_languages["pycon_output_encoding"] = "UTF-8"
+autorun_languages["pycon_input_encoding"] = "UTF-8"
+autorun_languages[
+    "pycon_runfirst"
+] = """
 from spatialmath import SE3
 SE3._color = False
 import numpy as np
@@ -75,20 +77,20 @@ ANSITable._color = False
 
 # -- Options for HTML output -------------------------------------------------
 
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 
 html_theme_options = {
     #'github_user': 'petercorke',
     #'github_repo': 'spatialmath-python',
     #'logo_name': False,
-    'logo_only': False,
-    'display_version': True,
-    'prev_next_buttons_location': 'both',
-    'analytics_id': 'G-11Q6WJM565',
-    'style_external_links': True,
-    }
-html_logo = '../figs/RobToolBox_RoundLogoB.png'
-html_last_updated_fmt = '%d-%b-%Y'
+    "logo_only": False,
+    "display_version": True,
+    "prev_next_buttons_location": "both",
+    "analytics_id": "G-11Q6WJM565",
+    "style_external_links": True,
+}
+html_logo = "../figs/RobToolBox_RoundLogoB.png"
+html_last_updated_fmt = "%d-%b-%Y"
 show_authors = True
 
 # mathjax_config = {
@@ -99,33 +101,33 @@ show_authors = True
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 html_css_files = [
-    'css/custom.css',
+    "css/custom.css",
 ]
-# autodoc_mock_imports = ["numpy", "scipy"] 
+# autodoc_mock_imports = ["numpy", "scipy"]
 
 
 # -- Options for LaTeX/PDF output --------------------------------------------
-latex_engine = 'xelatex'
+latex_engine = "xelatex"
 # maybe need to set graphics path in here somewhere
 # \graphicspath{{figures/}{../figures/}{C:/Users/me/Documents/project/figures/}}
 # https://stackoverflow.com/questions/63452024/how-to-include-image-files-in-sphinx-latex-pdf-files
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
-    'papersize': 'a4paper',
+    "papersize": "a4paper",
     #'releasename':" ",
     # Sonny, Lenny, Glenn, Conny, Rejne, Bjarne and Bjornstrup
     # 'fncychap': '\\usepackage[Lenny]{fncychap}',
-    'fncychap': '\\usepackage{fncychap}',
-    'maketitle': "blah blah blah"
+    "fncychap": "\\usepackage{fncychap}",
+    "maketitle": "blah blah blah",
 }
 
 # Use RVC book notation for maths
 # see https://stackoverflow.com/questions/9728292/creating-latex-math-macros-within-sphinx
 mathjax_config = {
-    'TeX': {
-        'Macros': {
+    "TeX": {
+        "Macros": {
             # RVC Math notation
             #  - not possible to do the if/then/else approach
             #  - subset only
@@ -155,12 +157,13 @@ mathjax_config = {
             # quaternions
             "q": r"\mathring{q}",
             "fq": [r"\presup{#1}\mathring{q}", 1],
-
         }
-   }
+    }
 }
-intersphinx_mapping = { 'numpy': ('http://docs.scipy.org/doc/numpy/', None),
-                       'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-                       'matplotlib': ('http://matplotlib.sourceforge.net/', None)}
+intersphinx_mapping = {
+    "numpy": ("http://docs.scipy.org/doc/numpy/", None),
+    "scipy": ("http://docs.scipy.org/doc/scipy/reference/", None),
+    "matplotlib": ("http://matplotlib.sourceforge.net/", None),
+}
 
 # 'python': ('http://docs.python.org/2', None),

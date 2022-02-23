@@ -7,7 +7,7 @@ Created on Fri May 1 14:04:04 2020
 import numpy.testing as nt
 import numpy as np
 import roboticstoolbox as rtb
-from roboticstoolbox import ERobot, ELink, ELink2, ETS, ETS2, ERobot2
+from roboticstoolbox import ERobot, ET, ETS, ERobot2, Link
 from spatialmath import SE2, SE3
 import unittest
 import spatialmath as sm
@@ -17,7 +17,7 @@ from math import pi, sin, cos
 
 class TestERobot(unittest.TestCase):
     def test_init(self):
-        ets = tb.ETS.rz()
+        ets = ETS(rtb.ET.Rz())
         robot = ERobot(
             ets, name="myname", manufacturer="I made it", comment="other stuff"
         )
@@ -27,17 +27,17 @@ class TestERobot(unittest.TestCase):
 
     def test_init_ets(self):
         ets = (
-            rtb.ETS.tx(-0.0825)
-            * rtb.ETS.rz()
-            * rtb.ETS.tx(-0.0825)
-            * rtb.ETS.tz()
-            * rtb.ETS.tx(0.1)
+            rtb.ET.tx(-0.0825)
+            * rtb.ET.Rz()
+            * rtb.ET.tx(-0.0825)
+            * rtb.ET.tz()
+            * rtb.ET.tx(0.1)
         )
 
         robot = ERobot(ets)
         self.assertEqual(robot.n, 2)
-        self.assertIsInstance(robot[0], ELink)
-        self.assertIsInstance(robot[1], ELink)
+        self.assertIsInstance(robot[0], Link)
+        self.assertIsInstance(robot[1], Link)
         self.assertTrue(robot[0].isrevolute)
         self.assertTrue(robot[1].isprismatic)
 
@@ -50,14 +50,14 @@ class TestERobot(unittest.TestCase):
         self.assertEqual(robot[2].children, [])
 
     def test_init_elink(self):
-        link1 = ELink(ETS.rx(), name="link1")
-        link2 = ELink(ETS.tx(1) * ETS.ty(-0.5) * ETS.tz(), name="link2", parent=link1)
-        link3 = ELink(ETS.tx(1), name="ee_1", parent=link2)
+        link1 = Link(ETS(ET.Rx()), name="link1")
+        link2 = Link(ET.tx(1) * ET.ty(-0.5) * ET.tz(), name="link2", parent=link1)
+        link3 = Link(ETS(ET.tx(1)), name="ee_1", parent=link2)
         robot = ERobot([link1, link2, link3])
         self.assertEqual(robot.n, 2)
-        self.assertIsInstance(robot[0], ELink)
-        self.assertIsInstance(robot[1], ELink)
-        self.assertIsInstance(robot[2], ELink)
+        self.assertIsInstance(robot[0], Link)
+        self.assertIsInstance(robot[1], Link)
+        self.assertIsInstance(robot[2], Link)
         self.assertTrue(robot[0].isrevolute)
         self.assertTrue(robot[1].isprismatic)
 
@@ -72,14 +72,14 @@ class TestERobot(unittest.TestCase):
         self.assertEqual(robot[1].children, [robot[2]])
         self.assertEqual(robot[2].children, [])
 
-        link1 = ELink(ETS.rx(), name="link1")
-        link2 = ELink(ETS.tx(1) * ETS.ty(-0.5) * ETS.tz(), name="link2", parent="link1")
-        link3 = ELink(ETS.tx(1), name="ee_1", parent="link2")
+        link1 = Link(ETS(ET.Rx()), name="link1")
+        link2 = Link(ET.tx(1) * ET.ty(-0.5) * ET.tz(), name="link2", parent="link1")
+        link3 = Link(ETS(ET.tx(1)), name="ee_1", parent="link2")
         robot = ERobot([link1, link2, link3])
         self.assertEqual(robot.n, 2)
-        self.assertIsInstance(robot[0], ELink)
-        self.assertIsInstance(robot[1], ELink)
-        self.assertIsInstance(robot[2], ELink)
+        self.assertIsInstance(robot[0], Link)
+        self.assertIsInstance(robot[1], Link)
+        self.assertIsInstance(robot[2], Link)
         self.assertTrue(robot[0].isrevolute)
         self.assertTrue(robot[1].isprismatic)
 
@@ -93,15 +93,15 @@ class TestERobot(unittest.TestCase):
 
     def test_init_elink_autoparent(self):
         links = [
-            ELink(ETS.rx(), name="link1"),
-            ELink(ETS.tx(1) * ETS.ty(-0.5) * ETS.tz(), name="link2"),
-            ELink(ETS.tx(1), name="ee_1"),
+            Link(ETS(ET.Rx()), name="link1"),
+            Link(ET.tx(1) * ET.ty(-0.5) * ET.tz(), name="link2"),
+            Link(ETS(ET.tx(1)), name="ee_1"),
         ]
         robot = ERobot(links)
         self.assertEqual(robot.n, 2)
-        self.assertIsInstance(robot[0], ELink)
-        self.assertIsInstance(robot[1], ELink)
-        self.assertIsInstance(robot[2], ELink)
+        self.assertIsInstance(robot[0], Link)
+        self.assertIsInstance(robot[1], Link)
+        self.assertIsInstance(robot[2], Link)
         self.assertTrue(robot[0].isrevolute)
         self.assertTrue(robot[1].isprismatic)
         self.assertIs(robot[0].parent, None)
@@ -115,18 +115,18 @@ class TestERobot(unittest.TestCase):
     def test_init_elink_branched(self):
         robot = ERobot(
             [
-                ELink(ETS.rz(), name="link1"),
-                ELink(
-                    ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(), name="link2", parent="link1"
+                Link(ETS(ET.Rz()), name="link1"),
+                Link(
+                    ETS(ET.tx(1)) * ET.ty(-0.5) * ET.Rz(), name="link2", parent="link1"
                 ),
-                ELink(ETS.tx(1), name="ee_1", parent="link2"),
-                ELink(ETS.tx(1) * ETS.ty(0.5) * ETS.rz(), name="link3", parent="link1"),
-                ELink(ETS.tx(1), name="ee_2", parent="link3"),
+                Link(ETS(ET.tx(1)), name="ee_1", parent="link2"),
+                Link(ET.tx(1) * ET.ty(0.5) * ET.Rz(), name="link3", parent="link1"),
+                Link(ETS(ET.tx(1)), name="ee_2", parent="link3"),
             ]
         )
         self.assertEqual(robot.n, 3)
         for i in range(5):
-            self.assertIsInstance(robot[i], ELink)
+            self.assertIsInstance(robot[i], Link)
         self.assertTrue(robot[0].isrevolute)
         self.assertTrue(robot[1].isrevolute)
         self.assertTrue(robot[3].isrevolute)
@@ -144,36 +144,36 @@ class TestERobot(unittest.TestCase):
         self.assertEqual(robot[2].children, [])
 
     def test_init_bases(self):
-        e1 = ELink()
-        e2 = ELink()
-        e3 = ELink(parent=e1)
-        e4 = ELink(parent=e2)
+        e1 = Link()
+        e2 = Link()
+        e3 = Link(parent=e1)
+        e4 = Link(parent=e2)
 
         with self.assertRaises(ValueError):
             ERobot([e1, e2, e3, e4])
 
     def test_jindex(self):
-        e1 = ELink(rtb.ETS.rz(), jindex=0)
-        e2 = ELink(rtb.ETS.rz(), jindex=1, parent=e1)
-        e3 = ELink(rtb.ETS.rz(), jindex=2, parent=e2)
-        e4 = ELink(rtb.ETS.rz(), jindex=0, parent=e3)
+        e1 = Link(ETS(ET.Rz()), jindex=0)
+        e2 = Link(ETS(ET.Rz()), jindex=1, parent=e1)
+        e3 = Link(ETS(ET.Rz()), jindex=2, parent=e2)
+        e4 = Link(ETS(ET.Rz()), jindex=0, parent=e3)
 
         # with self.assertRaises(ValueError):
         ERobot([e1, e2, e3, e4], gripper_links=e4)
 
     def test_jindex_fail(self):
-        e1 = ELink(rtb.ETS.rz(), jindex=0)
-        e2 = ELink(rtb.ETS.rz(), jindex=1, parent=e1)
-        e3 = ELink(rtb.ETS.rz(), jindex=2, parent=e2)
-        e4 = ELink(rtb.ETS.rz(), jindex=5, parent=e3)
+        e1 = Link(rtb.ETS(rtb.ET.Rz()), jindex=0)
+        e2 = Link(rtb.ETS(rtb.ET.Rz()), jindex=1, parent=e1)
+        e3 = Link(rtb.ETS(rtb.ET.Rz()), jindex=2, parent=e2)
+        e4 = Link(rtb.ETS(rtb.ET.Rz()), jindex=5, parent=e3)
 
         with self.assertRaises(ValueError):
             ERobot([e1, e2, e3, e4])
 
-        e1 = ELink(rtb.ETS.rz(), jindex=0)
-        e2 = ELink(rtb.ETS.rz(), jindex=1, parent=e1)
-        e3 = ELink(rtb.ETS.rz(), jindex=2, parent=e2)
-        e4 = ELink(rtb.ETS.rz(), parent=e3)
+        e1 = Link(rtb.ETS(rtb.ET.Rz()), jindex=0)
+        e2 = Link(rtb.ETS(rtb.ET.Rz()), jindex=1, parent=e1)
+        e3 = Link(rtb.ETS(rtb.ET.Rz()), jindex=2, parent=e2)
+        e4 = Link(rtb.ETS(rtb.ET.Rz()), parent=e3)
 
         with self.assertRaises(ValueError):
             ERobot([e1, e2, e3, e4])
@@ -209,10 +209,10 @@ class TestERobot(unittest.TestCase):
         panda.qdd = panda.qd
         panda.qd = panda.qdd
 
-    def test_control_type(self):
+    def test_control_mode(self):
         panda = rtb.models.ETS.Panda()
-        panda.control_type = "v"
-        self.assertEqual(panda.control_type, "v")
+        panda.control_mode = "v"
+        self.assertEqual(panda.control_mode, "v")
 
     def test_base(self):
         panda = rtb.models.ETS.Panda()
@@ -220,33 +220,10 @@ class TestERobot(unittest.TestCase):
         pose = sm.SE3()
 
         panda.base = pose.A
-        nt.assert_array_almost_equal(np.eye(4), panda.base.A)
+        nt.assert_array_almost_equal(np.eye(4), panda.base)
 
         panda.base = pose
-        nt.assert_array_almost_equal(np.eye(4), panda.base.A)
-
-    # def test_str(self):
-    #     panda = rtb.models.ETS.Panda()
-
-    #     ans = '\nPanda (Franka Emika): 7 axis, RzRzRzRzRzRzRz, ETS\n'\
-    #         'Elementary Transform Sequence:\n'\
-    #         '[tz(0.333), Rz(q0), Rx(-90), Rz(q1), Rx(90), tz(0.316), '\
-    #         'Rz(q2), tx(0.0825), Rx(90), Rz(q3), tx(-0.0825), Rx(-90), '\
-    #         'tz(0.384), Rz(q4), Rx(90), Rz(q5), tx(0.088), Rx(90), '\
-    #         'tz(0.107), Rz(q6)]\n'\
-    #         'tool:  t = (0, 0, 0.103),  RPY/xyz = (0, 0, -45) deg'
-
-    #     self.assertEqual(str(panda), ans)
-
-    # def test_str_ets(self):
-    #     panda = rtb.models.ETS.Panda()
-
-    #     ans = '[tz(0.333), Rz(q0), Rx(-90), Rz(q1), Rx(90), tz(0.316), '\
-    #         'Rz(q2), tx(0.0825), Rx(90), Rz(q3), tx(-0.0825), Rx(-90), '\
-    #         'tz(0.384), Rz(q4), Rx(90), Rz(q5), tx(0.088), Rx(90), '\
-    #         'tz(0.107), Rz(q6)]'
-
-    #     self.assertEqual(str(panda.ets), ans)
+        nt.assert_array_almost_equal(np.eye(4), panda.base)
 
     def test_fkine(self):
         panda = rtb.models.ETS.Panda()
@@ -263,73 +240,8 @@ class TestERobot(unittest.TestCase):
             ]
         )
 
-        panda.q = q1
-        # nt.assert_array_almost_equal(panda.fkine().A, ans)
-        nt.assert_array_almost_equal(panda.fkine(q2).A, ans)
-        nt.assert_array_almost_equal(panda.fkine(q3).A, ans)
-        nt.assert_array_almost_equal(panda.fkine(q3).A, ans)
-        self.assertRaises(TypeError, panda.fkine, "Wfgsrth")
-
-    def test_fkine_traj(self):
-        panda = rtb.models.ETS.Panda()
-        q = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-        qq = np.r_[q, q, q, q]
-
-        ans = np.array(
-            [
-                [-0.50827907, -0.57904589, 0.63746234, 0.44682295],
-                [0.83014553, -0.52639462, 0.18375824, 0.16168396],
-                [0.22915229, 0.62258699, 0.74824773, 0.96798113],
-                [0.0, 0.0, 0.0, 1.0],
-            ]
-        )
-
-        TT = panda.fkine(qq)
-        nt.assert_array_almost_equal(TT[0].A, ans)
-        nt.assert_array_almost_equal(TT[1].A, ans)
-        nt.assert_array_almost_equal(TT[2].A, ans)
-        nt.assert_array_almost_equal(TT[3].A, ans)
-
-    def test_fkine_all(self):
-        a1 = 1
-        a2 = 1
-        e = ETS2.r() * ETS2.tx(a1) * ETS2.r() * ETS2.tx(a2)
-        robot = ERobot2(e)
-
-        T = robot.fkine_all([0, 0])
-        self.assertIsInstance(T, SE2)
-        self.assertEqual(len(T), 4)
-
-        nt.assert_array_almost_equal(T[0].A, SE2().A)
-        nt.assert_array_almost_equal(T[1].A, SE2().A)
-        nt.assert_array_almost_equal(T[2].A, SE2(1, 0).A)
-        nt.assert_array_almost_equal(T[3].A, SE2(2, 0).A)
-
-        robot = ERobot2(
-            [
-                ELink2(ETS2.r(), name="link1"),
-                ELink2(
-                    ETS2.tx(1.2) * ETS2.ty(-0.5) * ETS2.r(),
-                    name="link2",
-                    parent="link1",
-                ),
-                ELink2(ETS2.tx(1), name="ee_1", parent="link2"),
-                ELink2(
-                    ETS2.tx(0.6) * ETS2.ty(0.5) * ETS2.r(), name="link3", parent="link1"
-                ),
-                ELink2(ETS2.tx(1), name="ee_2", parent="link3"),
-            ]
-        )
-        T = robot.fkine_all([0, 0, 0])
-        self.assertIsInstance(T, SE2)
-        self.assertEqual(len(T), 6)
-
-        nt.assert_array_almost_equal(T[0].A, SE2().A)
-        nt.assert_array_almost_equal(T[1].A, SE2().A)
-        nt.assert_array_almost_equal(T[2].A, SE2(1.2, -0.5).A)
-        nt.assert_array_almost_equal(T[3].A, SE2(2.2, -0.5).A)
-        nt.assert_array_almost_equal(T[4].A, SE2(0.6, 0.5).A)
-        nt.assert_array_almost_equal(T[5].A, SE2(1.6, 0.5).A)
+        # panda.q = q1
+        nt.assert_array_almost_equal(panda.fkine(q1), ans)
 
     def test_jacob0(self):
         panda = rtb.models.ETS.Panda()
@@ -806,18 +718,17 @@ class TestERobot(unittest.TestCase):
             ]
         )
 
-        panda.q = q1
-        # nt.assert_array_almost_equal(panda.hessian0(), ans)
-        nt.assert_array_almost_equal(panda.hessian0(q2), ans)
-        nt.assert_array_almost_equal(panda.hessian0(q3), ans)
-        nt.assert_array_almost_equal(panda.hessian0(q4), ans)
-        nt.assert_array_almost_equal(panda.hessian0(J0=panda.jacob0(q1)), ans)
-        nt.assert_array_almost_equal(panda.hessian0(q1, J0=panda.jacob0(q1)), ans)
-        # self.assertRaises(ValueError, panda.hessian0)
-        self.assertRaises(ValueError, panda.hessian0, [1, 3])
-        self.assertRaises(TypeError, panda.hessian0, "Wfgsrth")
-        self.assertRaises(ValueError, panda.hessian0, [1, 3], np.array([1, 5]))
-        self.assertRaises(TypeError, panda.hessian0, [1, 3], "qwe")
+        ans_new = np.empty((7, 6, 7))
+
+        for i in range(7):
+            ans_new[i, :, :] = ans[:, :, i]
+
+        nt.assert_array_almost_equal(panda.hessian0(q1), ans_new)
+        nt.assert_array_almost_equal(panda.hessian0(q2), ans_new)
+        nt.assert_array_almost_equal(panda.hessian0(q3), ans_new)
+        nt.assert_array_almost_equal(panda.hessian0(q4), ans_new)
+        nt.assert_array_almost_equal(panda.hessian0(J0=panda.jacob0(q1)), ans_new)
+        nt.assert_array_almost_equal(panda.hessian0(q1, J0=panda.jacob0(q1)), ans_new)
 
     def test_manipulability(self):
         panda = rtb.models.ETS.Panda()
@@ -866,36 +777,20 @@ class TestERobot(unittest.TestCase):
             ValueError, panda.jacobm, [1, 3], panda.jacob0(q1), np.array([1, 2, 3])
         )
 
-    # def test_jacobev(self):
+    # def test_jacobe(self):
     #     pdh = rtb.models.DH.Panda()
     #     panda = rtb.models.ETS.Panda()
     #     q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
     #     panda.q = q1
 
-    #     nt.assert_array_almost_equal(panda.jacobev(), pdh.jacobev(q1))
+    #     # nt.assert_array_almost_equal(panda.jacobe(), pdh.jacobe(q1))
+    #     nt.assert_array_almost_equal(panda.jacobe(q1), pdh.jacobe(q1))
 
-    # def test_jacob0v(self):
-    #     pdh = rtb.models.DH.Panda()
-    #     panda = rtb.models.ETS.Panda()
-    #     q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-    #     panda.q = q1
-
-    #     nt.assert_array_almost_equal(panda.jacob0v(), pdh.jacob0v(q1))
-
-    def test_jacobe(self):
-        pdh = rtb.models.DH.Panda()
-        panda = rtb.models.ETS.Panda()
-        q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-        panda.q = q1
-
-        # nt.assert_array_almost_equal(panda.jacobe(), pdh.jacobe(q1))
-        nt.assert_array_almost_equal(panda.jacobe(q1), pdh.jacobe(q1))
-
-    def test_init(self):
-        l0 = ELink()
-        l1 = ELink(parent=l0)
-        r = ERobot([l0, l1], base=sm.SE3.Rx(1.3), base_link=l1)
-        r.base_link = l1
+    def test_init2(self):
+        l0 = Link()
+        l1 = Link(parent=l0)
+        r = ERobot([l0, l1], base=sm.SE3.Rx(1.3))
+        # r.base_link = l1
 
         with self.assertRaises(TypeError):
             ERobot(l0, base=sm.SE3.Rx(1.3))
@@ -932,7 +827,7 @@ class TestERobot(unittest.TestCase):
         panda.ee_links = panda.links[5]
 
         with self.assertRaises(TypeError):
-            panda.ee_links = [1]
+            panda.ee_links = [1]  # type: ignore
 
     def test_qlim(self):
         panda = rtb.models.ETS.Panda()
@@ -946,12 +841,12 @@ class TestERobot(unittest.TestCase):
         self.assertIsInstance(panda.manufacturer, str)
 
     def test_complex(self):
-        l0 = ELink(rtb.ETS.tx(0.1), rtb.ETS.rx())
-        l1 = ELink(rtb.ETS.tx(0.1), rtb.ETS.ry(), parent=l0)
-        l2 = ELink(rtb.ETS.tx(0.1), rtb.ETS.rz(), parent=l1)
-        l3 = ELink(rtb.ETS.tx(0.1), rtb.ETS.tx(), parent=l2)
-        l4 = ELink(rtb.ETS.tx(0.1), rtb.ETS.ty(), parent=l3)
-        l5 = ELink(rtb.ETS.tx(0.1), rtb.ETS.tz(), parent=l4)
+        l0 = Link(rtb.ET.tx(0.1) * rtb.ET.Rx())
+        l1 = Link(rtb.ET.tx(0.1) * rtb.ET.Ry(), parent=l0)
+        l2 = Link(rtb.ET.tx(0.1) * rtb.ET.Rz(), parent=l1)
+        l3 = Link(rtb.ET.tx(0.1) * rtb.ET.tx(), parent=l2)
+        l4 = Link(rtb.ET.tx(0.1) * rtb.ET.ty(), parent=l3)
+        l5 = Link(rtb.ET.tx(0.1) * rtb.ET.tz(), parent=l4)
 
         r = ERobot([l0, l1, l2, l3, l4, l5])
         q = [1, 2, 3, 1, 2, 3]
@@ -983,134 +878,30 @@ class TestERobot(unittest.TestCase):
 
         nt.assert_array_almost_equal(r.jacob0(q), ans)
 
-    # def test_plot(self):
-    #     panda = rtb.models.ETS.Panda()
-    #     panda.q = panda.qr
-    #     e = panda.plot(block=False)
-    #     e.close()
-
-    # def test_plot_complex(self):
-    #     l0 = rtb.ETS.rz()
-    #     l1 = rtb.ETS.tx()
-    #     l2 = rtb.ETS.ry()
-    #     l3 = rtb.ETS.tz(1)
-    #     l4 = rtb.ETS.rx()
-
-    #     E = ERobot([l0, l1, l2, l3, l4])
-    #     e = E.plot(block=False)
-    #     e.step(0)
-    #     e.close()
-
-    # def test_teach(self):
-    #     l0 = rtb.ETS.rz()
-    #     l1 = rtb.ETS.tx()
-    #     l2 = rtb.ETS.ry()
-    #     l3 = rtb.ETS.tz(1)
-    #     l4 = rtb.ETS.rx()
-
-    #     E = ERobot([l0, l1, l2, l3, l4])
-    #     e = E.teach(block=False, q=[1, 2, 3, 4])
-    #     e.close()
-
-    # def test_plot_traj(self):
-    #     panda = rtb.models.ETS.Panda()
-    #     q = np.random.rand(7, 3)
-    #     e = panda.plot(block=False, q=q, dt=0)
-    #     e.close()
-
-    def test_control_type2(self):
+    def test_control_mode2(self):
         panda = rtb.models.ETS.Panda()
 
-        panda.control_type = "p"
+        panda.control_mode = "p"
 
         with self.assertRaises(ValueError):
-            panda.control_type = "z"
-
-    # def test_plot_vellipse(self):
-    #     panda = rtb.models.ETS.Panda()
-    #     panda.q = panda.qr
-
-    #     e = panda.plot_vellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
-    #     e.close()
-
-    #     e = panda.plot_vellipse(
-    #         block=False, q=panda.qr, centre='ee', opt='rot')
-    #     e.step(0)
-    #     e.close()
-
-    #     with self.assertRaises(TypeError):
-    #         panda.plot_vellipse(vellipse=10)
-
-    #     with self.assertRaises(ValueError):
-    #         panda.plot_vellipse(centre='ff')
-
-    # def test_plot_fellipse(self):
-    #     panda = rtb.models.ETS.Panda()
-    #     panda.q = panda.qr
-
-    #     e = panda.plot_fellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
-    #     e.close()
-
-    #     e = panda.plot_fellipse(
-    #         block=False, q=panda.qr, centre='ee', opt='rot')
-    #     e.step(0)
-    #     e.close()
-
-    #     with self.assertRaises(TypeError):
-    #         panda.plot_fellipse(fellipse=10)
-
-    #     with self.assertRaises(ValueError):
-    #         panda.plot_fellipse(centre='ff')
-
-    # def test_plot_with_vellipse(self):
-    #     panda = rtb.models.ETS.Panda()
-    #     panda.q = panda.qr
-    #     e = panda.plot(block=False, vellipse=True)
-    #     e.close()
-
-    # def test_plot_with_fellipse(self):
-    #     panda = rtb.models.ETS.Panda()
-    #     panda.q = panda.qr
-    #     e = panda.plot(block=False, fellipse=True)
-    #     e.close()
-
-    # def test_plot2(self):
-    #     panda = rtb.models.ETS.Panda()
-    #     panda.q = panda.qr
-    #     e = panda.plot2(block=False, name=True)
-    #     e.close()
-
-    # def test_plot2_traj(self):
-    #     panda = rtb.models.ETS.Panda()
-    #     q = np.random.rand(7, 3)
-    #     e = panda.plot2(block=False, q=q, dt=0)
-    #     e.close()
-
-    # def test_teach2(self):
-    #     panda = rtb.models.ETS.Panda()
-    #     panda.q = panda.qr
-    #     e = panda.teach(block=False)
-    #     e.close()
-
-    #     e2 = panda.teach2(block=False, q=panda.qr)
-    #     e2.close()
+            panda.control_mode = "z"
 
     def test_dist(self):
-        s0 = gm.Cuboid([1, 1, 1], base=sm.SE3(0, 0, 0))
-        s1 = gm.Cuboid([1, 1, 1], base=sm.SE3(3, 0, 0))
+        s0 = gm.Cuboid([1, 1, 1], T=sm.SE3(0, 0, 0))
+        s1 = gm.Cuboid([1, 1, 1], T=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
 
         d0, _, _ = p.closest_point(p.q, s0)
         d1, _, _ = p.closest_point(p.q, s1, 5)
         d2, _, _ = p.closest_point(p.q, s1)
 
-        self.assertAlmostEqual(d0, -0.5599999999995913)
-        self.assertAlmostEqual(d1, 2.362147178773918)
-        self.assertAlmostEqual(d2, None)
+        self.assertAlmostEqual(d0, -0.5599999999995913)  # type: ignore
+        self.assertAlmostEqual(d1, 2.362147178773918)  # type: ignore
+        self.assertAlmostEqual(d2, None)  # type: ignore
 
     def test_collided(self):
-        s0 = gm.Cuboid([1, 1, 1], base=sm.SE3(0, 0, 0))
-        s1 = gm.Cuboid([1, 1, 1], base=sm.SE3(3, 0, 0))
+        s0 = gm.Cuboid([1, 1, 1], T=sm.SE3(0, 0, 0))
+        s1 = gm.Cuboid([1, 1, 1], T=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
 
         c0 = p.collided(p.q, s0)
@@ -1122,9 +913,8 @@ class TestERobot(unittest.TestCase):
     def test_invdyn(self):
         # create a 2 link robot
         # Example from Spong etal. 2nd edition, p. 260
-        E = rtb.ETS
-        l1 = ELink(ets=E.ry(), m=1, r=[0.5, 0, 0], name="l1")
-        l2 = ELink(ets=E.tx(1) * E.ry(), m=1, r=[0.5, 0, 0], parent=l1, name="l2")
+        l1 = Link(ets=ETS(ET.Ry()), m=1, r=[0.5, 0, 0], name="l1")
+        l2 = Link(ets=ETS(ET.tx(1)) * ET.Ry(), m=1, r=[0.5, 0, 0], parent=l1, name="l2")
         robot = ERobot([l1, l2], name="simple 2 link")
         z = np.zeros(robot.n)
 
@@ -1207,22 +997,6 @@ class TestERobot2(unittest.TestCase):
         )
         e.step()
         e.close()
-
-    # def test_plot_with_vellipse2_fail(self):
-    #     panda = rtb.models.DH.Panda()
-    #     panda.q = panda.qr
-
-    #     from roboticstoolbox.backends.PyPlot import PyPlot2
-    #     e = PyPlot2()
-    #     e.launch()
-    #     e.add(panda.fellipse(
-    #             q=panda.qr, centre=[0, 1]))
-
-    #     with self.assertRaises(ValueError):
-    #         e.add(panda.fellipse(
-    #             q=panda.qr, centre='ee', opt='rot'))
-
-    #     e.close()
 
 
 if __name__ == "__main__":  # pragma nocover

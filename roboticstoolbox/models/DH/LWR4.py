@@ -48,70 +48,39 @@ class LWR4(DHRobot):
         # Denavit-Hartenberg parameters
 
         L = [
-                RevoluteDH(
-                    a=0.0,
-                    d=0,
-                    alpha=np.pi/2,
-                    qlim=np.array([-2.8973, 2.8973])
-                ),
-
-                RevoluteDH(
-                    a=0.0,
-                    d=0.0,
-                    alpha=-np.pi/2,
-                    qlim=np.array([-1.7628, 1.7628])
-                ),
-
-                RevoluteDH(
-                    a=0.0,
-                    d=0.40,
-                    alpha=-np.pi/2,
-                    qlim=np.array([-2.8973, 2.8973])
-                ),
-
-                RevoluteDH(
-                    a=0.0,
-                    d=0.0,
-                    alpha=np.pi/2,
-                    qlim=np.array([-3.0718, -0.0698])
-                ),
-
-                RevoluteDH(
-                    a=0.0,
-                    d=0.39,
-                    alpha=np.pi/2,
-                    qlim=np.array([-2.8973, 2.8973])
-                ),
-
-                RevoluteDH(
-                    a=0.0,
-                    d=0.0,
-                    alpha=-np.pi/2,
-                    qlim=np.array([-0.0175, 3.7525])
-                ),
-
-                RevoluteDH(
-                    a=0.0,
-                    d=flange,
-                    alpha=0.0,
-                    qlim=np.array([-2.8973, 2.8973])
-                )
+            RevoluteDH(a=0.0, d=0, alpha=np.pi / 2, qlim=np.array([-2.8973, 2.8973])),
+            RevoluteDH(
+                a=0.0, d=0.0, alpha=-np.pi / 2, qlim=np.array([-1.7628, 1.7628])
+            ),
+            RevoluteDH(
+                a=0.0, d=0.40, alpha=-np.pi / 2, qlim=np.array([-2.8973, 2.8973])
+            ),
+            RevoluteDH(
+                a=0.0, d=0.0, alpha=np.pi / 2, qlim=np.array([-3.0718, -0.0698])
+            ),
+            RevoluteDH(
+                a=0.0, d=0.39, alpha=np.pi / 2, qlim=np.array([-2.8973, 2.8973])
+            ),
+            RevoluteDH(
+                a=0.0, d=0.0, alpha=-np.pi / 2, qlim=np.array([-0.0175, 3.7525])
+            ),
+            RevoluteDH(a=0.0, d=flange, alpha=0.0, qlim=np.array([-2.8973, 2.8973])),
         ]
 
-        tool = transl(0, 0, tool_offset) @  trotz(-np.pi/4)
+        tool = transl(0, 0, tool_offset) @ trotz(-np.pi / 4)
 
-        super().__init__(
-            L,
-            name='LWR-IV',
-            manufacturer='Kuka',
-            tool=tool)
+        super().__init__(L, name="LWR-IV", manufacturer="Kuka", tool=tool)
 
         # tool = xyzrpy_to_trans(0, 0, d7, 0, 0, -np.pi/4)
 
-        self.addconfiguration("qz", [0, 0, 0, 0, 0, 0, 0])
+        self.qr = np.array(7)
+        self.qz = np.zeros(7)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     robot = LWR4()
     print(robot)

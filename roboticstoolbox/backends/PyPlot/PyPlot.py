@@ -11,6 +11,7 @@ from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot, ShapePlot
 from spatialmath.base.argcheck import getvector
 from spatialgeometry import Shape
+
 # from roboticstoolbox.tools import Ticker
 
 _mpl = False
@@ -21,17 +22,18 @@ try:
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
     from matplotlib.widgets import Slider
-    matplotlib.rcParams['pdf.fonttype'] = 42
-    matplotlib.rcParams['ps.fonttype'] = 42
-    plt.style.use('ggplot')
-    matplotlib.rcParams['font.size'] = 7
-    matplotlib.rcParams['lines.linewidth'] = 0.5
-    matplotlib.rcParams['xtick.major.size'] = 1.5
-    matplotlib.rcParams['ytick.major.size'] = 1.5
-    matplotlib.rcParams['axes.labelpad'] = 1
-    plt.rc('grid', linestyle="-", color='#dbdbdb')
+
+    matplotlib.rcParams["pdf.fonttype"] = 42
+    matplotlib.rcParams["ps.fonttype"] = 42
+    plt.style.use("ggplot")
+    matplotlib.rcParams["font.size"] = 7
+    matplotlib.rcParams["lines.linewidth"] = 0.5
+    matplotlib.rcParams["xtick.major.size"] = 1.5
+    matplotlib.rcParams["ytick.major.size"] = 1.5
+    matplotlib.rcParams["axes.labelpad"] = 1
+    plt.rc("grid", linestyle="-", color="#dbdbdb")
     _mpl = True
-except ImportError:    # pragma nocover
+except ImportError:  # pragma nocover
     pass
 
 
@@ -68,13 +70,14 @@ class PyPlot(Connector):
         self.ellipses = []
         self.shapes = []
 
-        if not _mpl:    # pragma nocover
+        if not _mpl:  # pragma nocover
             raise ImportError(
-                '\n\nYou do not have matplotlib installed, do:\n'
-                'pip install matplotlib\n\n')
+                "\n\nYou do not have matplotlib installed, do:\n"
+                "pip install matplotlib\n\n"
+            )
 
     def __repr__(self):
-        s =  f"PyPlot3D backend, t = {self.sim_time}, scene:"
+        s = f"PyPlot3D backend, t = {self.sim_time}, scene:"
         for robot in self.robots:
             s += f"\n  {robot.robot.name}"
         return s
@@ -93,11 +96,11 @@ class PyPlot(Connector):
         if limits is not None:
             self.limits = getvector(limits, 6)
 
-        projection = 'ortho'
-        labels = ['X', 'Y', 'Z']
+        projection = "ortho"
+        labels = ["X", "Y", "Z"]
 
         if name is None:
-            name = 'Robotics Toolbox for Python'
+            name = "Robotics Toolbox for Python"
 
         if fig is None:
             self.fig = plt.figure(name)
@@ -108,10 +111,11 @@ class PyPlot(Connector):
         self.fig.subplots_adjust(left=-0.09, bottom=0, top=1, right=0.99)
 
         # Create a 3D axes
-        self.ax = self.fig.add_subplot(
-            111, projection='3d', proj_type=projection)
-        self.ax.set_facecolor('white')
-        self.ax.figure.canvas.manager.set_window_title(f"Robotics Toolbox for Python (Figure {self.ax.figure.number})")
+        self.ax = self.fig.add_subplot(111, projection="3d", proj_type=projection)
+        self.ax.set_facecolor("white")
+        self.ax.figure.canvas.manager.set_window_title(
+            f"Robotics Toolbox for Python (Figure {self.ax.figure.number})"
+        )
 
         self.ax.set_xbound(-0.5, 0.5)
         self.ax.set_ybound(-0.5, 0.5)
@@ -132,7 +136,7 @@ class PyPlot(Connector):
         # self.ax.format_coord = lambda x, y: ''
 
         # add time display in top-right corner
-        self.timer = plt.figtext(0.85, 0.95, '')
+        self.timer = plt.figtext(0.85, 0.95, "")
 
         if _isnotebook():
             plt.ion()
@@ -176,17 +180,17 @@ class PyPlot(Connector):
         for rpl in self.robots:
             robot = rpl.robot
 
-            if rpl.readonly or robot.control_type == 'p':
-                pass            # pragma: no cover
-            elif robot.control_type == 'v':
+            if rpl.readonly or robot.control_mode == "p":
+                pass  # pragma: no cover
+            elif robot.control_mode == "v":
                 for i in range(robot.n):
                     robot.q[i] += robot.qd[i] * (dt)
-            elif robot.control_type == 'a':     # pragma: no cover
+            elif robot.control_mode == "a":  # pragma: no cover
                 pass
-            else:            # pragma: no cover
+            else:  # pragma: no cover
                 raise ValueError(
-                    'Invalid robot.control_type. '
-                    'Must be one of \'p\', \'v\', or \'a\'')
+                    "Invalid robot.control_type. " "Must be one of 'p', 'v', or 'a'"
+                )
 
         # plt.ioff()
 
@@ -261,8 +265,17 @@ class PyPlot(Connector):
     #
 
     def add(
-            self, ob, readonly=False, display=True,
-            jointaxes=True, jointlabels=False, eeframe=True, shadow=True, name=True, options=None):
+        self,
+        ob,
+        readonly=False,
+        display=True,
+        jointaxes=True,
+        jointlabels=False,
+        eeframe=True,
+        shadow=True,
+        name=True,
+        options=None,
+    ):
         """
         Add a robot to the graphical scene
 
@@ -301,8 +314,18 @@ class PyPlot(Connector):
         if isinstance(ob, rp.DHRobot) or isinstance(ob, rp.ERobot):
             self.robots.append(
                 RobotPlot(
-                    ob, self, readonly, display,
-                    jointaxes, jointlabels, eeframe, shadow, name, options))
+                    ob,
+                    self,
+                    readonly,
+                    display,
+                    jointaxes,
+                    jointlabels,
+                    eeframe,
+                    shadow,
+                    name,
+                    options,
+                )
+            )
             self.robots[len(self.robots) - 1].draw()
             id = len(self.robots)
 
@@ -346,12 +369,12 @@ class PyPlot(Connector):
 
         super().remove()
 
-    def hold(self):           # pragma: no cover
-        '''
+    def hold(self):  # pragma: no cover
+        """
         hold() keeps the plot open i.e. stops the plot from closing once
         the main script has finished.
 
-        '''
+        """
 
         # signal.setitimer(signal.ITIMER_REAL, 0)
         plt.ioff()
@@ -368,13 +391,15 @@ class PyPlot(Connector):
         if _pil is None:
             try:
                 import PIL
+
                 _pil = PIL.Image.frombytes
-            except ImportError:    # pragma nocover
+            except ImportError:  # pragma nocover
                 pass
-            
+
             if _pil is None:
                 raise RuntimeError(
-                    'to save movies PIL must be installed:\npip3 install PIL')
+                    "to save movies PIL must be installed:\npip3 install PIL"
+                )
 
         # make the background white, looks better than grey stipple
         self.ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
@@ -384,15 +409,11 @@ class PyPlot(Connector):
 
         # render the frame and save as a PIL image in the list
         canvas = self.fig.canvas
-        return _pil(
-            'RGB', canvas.get_width_height(),
-            canvas.tostring_rgb())
+        return _pil("RGB", canvas.get_width_height(), canvas.tostring_rgb())
 
     #
     #  Private methods
     #
-
-
 
     # def _plot_handler(self, sig, frame):
     #     try:
@@ -412,7 +433,7 @@ class PyPlot(Connector):
         if self.limits is not None:
             return
 
-        self.ax.autoscale(enable=True, axis='both', tight=False)
+        self.ax.autoscale(enable=True, axis="both", tight=False)
 
         x_limits = self.ax.get_xlim3d()
         y_limits = self.ax.get_ylim3d()
@@ -427,7 +448,7 @@ class PyPlot(Connector):
 
         # The plot bounding box is a sphere in the sense of the infinity
         # norm, hence I call half the max range the plot radius.
-        plot_radius = 0.5*max([x_range, y_range, z_range])
+        plot_radius = 0.5 * max([x_range, y_range, z_range])
 
         self.ax.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
         self.ax.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
@@ -436,7 +457,7 @@ class PyPlot(Connector):
     def _add_teach_panel(self, robot, q):
 
         if _isnotebook():
-            raise RuntimeError('cannot use teach panel under Jupyter')
+            raise RuntimeError("cannot use teach panel under Jupyter")
 
         fig = self.fig
 
@@ -444,7 +465,7 @@ class PyPlot(Connector):
         def text_trans(text, q):  # pragma: no cover
             T = robot.fkine(q)
             t = np.round(T.t, 3)
-            r = np.round(T.rpy('deg'), 3)
+            r = np.round(T.rpy("deg"), 3)
             text[0].set_text("x: {0}".format(t[0]))
             text[1].set_text("y: {0}".format(t[1]))
             text[2].set_text("z: {0}".format(t[2]))
@@ -467,7 +488,7 @@ class PyPlot(Connector):
         x1 = 0.04
         x2 = 0.22
         yh = 0.04
-        ym = 0.5 - (robot.n * yh) / 2 + 0.17/2
+        ym = 0.5 - (robot.n * yh) / 2 + 0.17 / 2
 
         self.axjoint = []
         self.sjoint = []
@@ -484,48 +505,71 @@ class PyPlot(Connector):
         r = np.round(T.rpy(), 3)
 
         fig.text(
-            0.02,  1 - ym + 0.25, "End-effector Pose",
-            fontsize=9, weight="bold", color="#4f4f4f")
-        text.append(fig.text(
-            0.03, 1 - ym + 0.20, "x: {0}".format(t[0]),
-            fontsize=9, color="#2b2b2b"))
-        text.append(fig.text(
-            0.03, 1 - ym + 0.16, "y: {0}".format(t[1]),
-            fontsize=9, color="#2b2b2b"))
-        text.append(fig.text(
-            0.03, 1 - ym + 0.12, "z: {0}".format(t[2]),
-            fontsize=9, color="#2b2b2b"))
-        text.append(fig.text(
-            0.15, 1 - ym + 0.20, "r: {0}".format(r[0]),
-            fontsize=9, color="#2b2b2b"))
-        text.append(fig.text(
-            0.15, 1 - ym + 0.16, "p: {0}".format(r[1]),
-            fontsize=9, color="#2b2b2b"))
-        text.append(fig.text(
-            0.15, 1 - ym + 0.12, "y: {0}".format(r[2]),
-            fontsize=9, color="#2b2b2b"))
+            0.02,
+            1 - ym + 0.25,
+            "End-effector Pose",
+            fontsize=9,
+            weight="bold",
+            color="#4f4f4f",
+        )
+        text.append(
+            fig.text(
+                0.03, 1 - ym + 0.20, "x: {0}".format(t[0]), fontsize=9, color="#2b2b2b"
+            )
+        )
+        text.append(
+            fig.text(
+                0.03, 1 - ym + 0.16, "y: {0}".format(t[1]), fontsize=9, color="#2b2b2b"
+            )
+        )
+        text.append(
+            fig.text(
+                0.03, 1 - ym + 0.12, "z: {0}".format(t[2]), fontsize=9, color="#2b2b2b"
+            )
+        )
+        text.append(
+            fig.text(
+                0.15, 1 - ym + 0.20, "r: {0}".format(r[0]), fontsize=9, color="#2b2b2b"
+            )
+        )
+        text.append(
+            fig.text(
+                0.15, 1 - ym + 0.16, "p: {0}".format(r[1]), fontsize=9, color="#2b2b2b"
+            )
+        )
+        text.append(
+            fig.text(
+                0.15, 1 - ym + 0.12, "y: {0}".format(r[2]), fontsize=9, color="#2b2b2b"
+            )
+        )
         fig.text(
-            0.02,  1 - ym + 0.06, "Joint angles",
-            fontsize=9, weight="bold", color="#4f4f4f")
+            0.02,
+            1 - ym + 0.06,
+            "Joint angles",
+            fontsize=9,
+            weight="bold",
+            color="#4f4f4f",
+        )
 
         for j in range(robot.n):
             ymin = (1 - ym) - j * yh
-            ax = fig.add_axes([x1, ymin, x2, 0.03], facecolor='#dbdbdb')
+            ax = fig.add_axes([x1, ymin, x2, 0.03], facecolor="#dbdbdb")
             self.axjoint.append(ax)
 
             if robot.isrevolute(j):
                 slider = Slider(
-                    ax, 'q' + str(j),
-                    qlim[0, j], qlim[1, j], np.degrees(q[j]), "% .1f°")
+                    ax, "q" + str(j), qlim[0, j], qlim[1, j], np.degrees(q[j]), "% .1f°"
+                )
             else:
                 slider = Slider(
-                    ax, 'q' + str(j),
-                    qlim[0, j], qlim[1, j], robot.q[j], "% .1f")
+                    ax, "q" + str(j), qlim[0, j], qlim[1, j], robot.q[j], "% .1f"
+                )
 
             slider.on_changed(lambda x: update(x, text, robot))
             self.sjoint.append(slider)
         robot.q = q
         self.step()
+
 
 def _isnotebook():
     """
@@ -540,11 +584,11 @@ def _isnotebook():
     """
     try:
         shell = get_ipython().__class__.__name__
-        if shell == 'ZMQInteractiveShell':
-            return True   # Jupyter notebook or qtconsole
-        elif shell == 'TerminalInteractiveShell':
+        if shell == "ZMQInteractiveShell":
+            return True  # Jupyter notebook or qtconsole
+        elif shell == "TerminalInteractiveShell":
             return False  # Terminal running IPython
         else:
             return False  # Other type (?)
     except NameError:
-        return False      # Probably standard Python interpreter
+        return False  # Probably standard Python interpreter

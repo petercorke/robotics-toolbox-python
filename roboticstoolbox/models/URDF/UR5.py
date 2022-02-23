@@ -42,8 +42,11 @@ class UR5(ERobot):
             urdf_filepath=urdf_filepath,
         )
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
-        self.addconfiguration("qr", np.array([np.pi, 0, 0, 0, np.pi / 2, 0]))
+        self.qr = np.array([np.pi, 0, 0, 0, np.pi / 2, 0])
+        self.qz = np.zeros(6)
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
         # sol=robot.ikine_LM(SE3(0.5, -0.2, 0.2)@SE3.OA([1,0,0],[0,0,-1]))
         self.addconfiguration(

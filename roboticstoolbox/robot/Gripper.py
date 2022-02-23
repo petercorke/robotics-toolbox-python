@@ -6,6 +6,13 @@
 import numpy as np
 import spatialmath as sm
 from spatialmath.base.argcheck import getvector
+from roboticstoolbox.robot.Link import Link
+from typing import List
+from functools import lru_cache
+from typing import Union
+from fknm import Robot_link_T
+
+ArrayLike = Union[list, np.ndarray, tuple, set]
 
 
 class Gripper:
@@ -55,7 +62,7 @@ class Gripper:
             if len(jset) > 0:  # pragma nocover # is impossible
                 raise ValueError("gripper joints {jset} were not assigned")
         else:
-            # must be a mixture of ELinks with/without jindex
+            # must be a mixture of Links with/without jindex
             raise ValueError(
                 "all gripper links must have a jindex, or none have a jindex"
             )
@@ -66,12 +73,12 @@ class Gripper:
         func to each visited link
 
         :param start: the link to start at
-        :type start: ELink
+        :type start: Link
         :param func: An optional function to apply to each link as it is found
         :type func: function
 
         :returns: A list of links
-        :rtype: list of ELink
+        :rtype: list of Link
         """
         visited = []
 
@@ -115,7 +122,7 @@ class Gripper:
     # --------------------------------------------------------------------- #
 
     @property
-    def links(self):
+    def links(self) -> List[Link]:
         """
         Gripper links
 
@@ -145,3 +152,23 @@ class Gripper:
     @name.setter
     def name(self, new_name):
         self._name = new_name
+
+    # --------------------------------------------------------------------- #
+    # Scene Graph section
+    # --------------------------------------------------------------------- #
+
+    def _update_link_tf(self, q: ArrayLike = None):
+        """
+        This private method updates the local transform of each link within
+        this robot according to q (or self.q if q is none)
+        """
+
+        @lru_cache(maxsize=2)
+        def get_link_ets():
+            return [link.ets._fknm for link in self.links]
+
+        @lru_cache(maxsize=2)
+        def get_link_scene_node():
+            return [link._T_reference for link in self.links]
+
+        Robot_link_T(get_link_ets(), get_link_scene_node(), self._q, q)

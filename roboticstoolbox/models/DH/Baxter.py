@@ -4,6 +4,7 @@ from roboticstoolbox import DHRobot, RevoluteDH
 from spatialmath import SE3
 from spatialmath import base
 
+
 class Baxter(DHRobot):
     """
     Class that models a Baxter manipulator
@@ -44,16 +45,16 @@ class Baxter(DHRobot):
     .. codeauthor:: Peter Corke
     """  # noqa
 
-    def __init__(self, arm='left'):
+    def __init__(self, arm="left"):
 
         links = [
-                RevoluteDH(d=0.27,        a=0.069, alpha=-pi/2),
-                RevoluteDH(d=0,           a=0,     alpha=pi/2, offset=pi/2),
-                RevoluteDH(d=0.102+0.262, a=0.069, alpha=-pi/2),
-                RevoluteDH(d=0,           a=0,     alpha=pi/2),
-                RevoluteDH(d=0.103+0.271, a=0.010, alpha=-pi/2),
-                RevoluteDH(d=0,           a=0,     alpha=pi/2),
-                RevoluteDH(d=0.28,        a=0,     alpha=0)
+            RevoluteDH(d=0.27, a=0.069, alpha=-pi / 2),
+            RevoluteDH(d=0, a=0, alpha=pi / 2, offset=pi / 2),
+            RevoluteDH(d=0.102 + 0.262, a=0.069, alpha=-pi / 2),
+            RevoluteDH(d=0, a=0, alpha=pi / 2),
+            RevoluteDH(d=0.103 + 0.271, a=0.010, alpha=-pi / 2),
+            RevoluteDH(d=0, a=0, alpha=pi / 2),
+            RevoluteDH(d=0.28, a=0, alpha=0),
         ]
 
         super().__init__(
@@ -62,27 +63,27 @@ class Baxter(DHRobot):
             manufacturer="Rethink Robotics",
         )
 
-        # zero angles, L shaped pose
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0]))
+        self.qr = np.array([0, -pi / 2, -pi / 2, 0, 0, 0, 0])
+        self.qz = np.zeros(7)
 
-        # ready pose, arm up
-        self.addconfiguration("qr", np.array([0, -pi/2, -pi/2, 0, 0, 0, 0]))
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
         # straight and horizontal
-        self.addconfiguration("qs", np.array([0, 0, -pi/2, 0, 0, 0, 0]))
+        self.addconfiguration("qs", np.array([0, 0, -pi / 2, 0, 0, 0, 0]))
 
         # nominal table top picking pose
-        self.addconfiguration("qn", np.array([0, pi/4, pi/2, 0, pi/4, 0, 0]))
+        self.addconfiguration("qn", np.array([0, pi / 4, pi / 2, 0, pi / 4, 0, 0]))
 
-        if arm == 'left':
-            self.base = SE3(0.064614, 0.25858, 0.119) * SE3.Rz(pi/4)
+        if arm == "left":
+            self.base = SE3(0.064614, 0.25858, 0.119) * SE3.Rz(pi / 4)
         else:
-            self.base = SE3(0.063534, -0.25966, 0.119) * SE3.Rz(-pi/4)
+            self.base = SE3(0.063534, -0.25966, 0.119) * SE3.Rz(-pi / 4)
 
 
-if __name__ == '__main__':    # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
-    baxter = Baxter('left')
+    baxter = Baxter("left")
     print(baxter.name, baxter.base)
     # baxter.plot(baxter.qz, block=False)
 

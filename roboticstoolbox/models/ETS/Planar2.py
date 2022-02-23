@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
+from roboticstoolbox.robot.ET import ET2
 from roboticstoolbox.robot.ETS import ETS2
 from roboticstoolbox.robot.ERobot import ERobot2
-from roboticstoolbox.robot.ELink import ELink2
+from roboticstoolbox.robot.Link import Link2
 
 
 class Planar2(ERobot2):
@@ -22,30 +23,28 @@ class Planar2(ERobot2):
           Sequence, J. Haviland and P. Corke
 
     """
+
     def __init__(self):
 
         a1 = 1
         a2 = 1
 
-        # ets = ETS2.r() * ETS2.tx(a1) * ETS2.r() * ETS2.tx(a2)
+        l0 = Link2(ETS2(ET2.R()), name="link0")
+        l1 = Link2(ETS2(ET2.tx(a1)) * ET2.R(), name="link1", parent=l0)
+        l2 = Link2(ETS2(ET2.tx(a2)), name="ee", parent=l1)
 
-        l0 = ELink2(ETS2.r(), name='link0')
-        l1 = ELink2(ETS2.tx(a1) * ETS2.r(), name='link1', parent=l0)
-        l2 = ELink2(ETS2.tx(a2), name='ee', parent=l1)
+        super().__init__([l0, l1, l2], name="Planar2", comment="Planar 2D manipulator")
 
-        super().__init__(
-            [l0, l1, l2],
-            name='Planar2',
-            comment='Planar 2D manipulator')
+        self.qr = np.array([0, 0])
+        self.qz = np.zeros(2)
 
-        self.addconfiguration(
-            "qz", [0, 0])
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     robot = Planar2()
     print(robot)
 
-    print(robot.fkine(robot.qz))
-
+    # print(robot.fkine(robot.qz))

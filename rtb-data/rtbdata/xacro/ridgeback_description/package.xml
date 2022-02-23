@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package>
+  <name>ridgeback_description</name>
+  <version>0.3.0</version>
+  <description>URDF robot description for Ridgeback</description>
+
+  <maintainer email="tbaltovski@clearpathrobotics.com">Tony Baltovski</maintainer>
+
+  <license>BSD</license>
+
+  <author email="mpurvis@clearpathrobotics.com">Mike Purvis</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roslaunch</build_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>lms1xx</run_depend>
+  <run_depend>urdf</run_depend>
+  <run_depend>xacro</run_depend>
+
+  <export>
+  </export>
+</package>

@@ -58,7 +58,7 @@ class Puma560(DHRobot):
 
     .. warning:: Compared to the MATLAB version of the Toolbox this model
         includes the pedestal, making the z-coordinates 26 inches larger.
-        
+
     :references:
         - "A search for consensus among model parameters reported for the PUMA
           560 robot", P. Corke and B. Armstrong-Helouvry,
@@ -76,22 +76,24 @@ class Puma560(DHRobot):
 
         if symbolic:
             import spatialmath.base.symbolic as sym
+
             zero = sym.zero()
             pi = sym.pi()
         else:
             from math import pi
+
             zero = 0.0
 
         deg = pi / 180
         inch = 0.0254
 
-        base = 26.45 * inch    # from mounting surface to shoulder axis
+        base = 26.45 * inch  # from mounting surface to shoulder axis
 
         L = [
             RevoluteDH(
-                d=base,       # link length (Dennavit-Hartenberg notation)
-                a=0,          # link offset (Dennavit-Hartenberg notation)
-                alpha=pi/2,   # link twist (Dennavit-Hartenberg notation)
+                d=base,  # link length (Dennavit-Hartenberg notation)
+                a=0,  # link offset (Dennavit-Hartenberg notation)
+                alpha=pi / 2,  # link twist (Dennavit-Hartenberg notation)
                 I=[0, 0.35, 0, 0, 0, 0],
                 # inertia tensor of link with respect to
                 # center of mass I = [L_xx, L_yy, L_zz,
@@ -99,31 +101,33 @@ class Puma560(DHRobot):
                 r=[0, 0, 0],
                 # distance of ith origin to center of mass [x,y,z]
                 # in link reference frame
-                m=0,          # mass of link
-                Jm=200e-6,    # actuator inertia
-                G=-62.6111,   # gear ratio
-                B=1.48e-3,    # actuator viscous friction coefficient (measured
-                              # at the motor)
+                m=0,  # mass of link
+                Jm=200e-6,  # actuator inertia
+                G=-62.6111,  # gear ratio
+                B=1.48e-3,  # actuator viscous friction coefficient (measured
+                # at the motor)
                 Tc=[0.395, -0.435],
                 # actuator Coulomb friction coefficient for
                 # direction [-,+] (measured at the motor)
-                qlim=[-160*deg, 160*deg]    # minimum and maximum joint angle
+                qlim=[-160 * deg, 160 * deg],  # minimum and maximum joint angle
             ),
-
             RevoluteDH(
-                d=0, a=0.4318, alpha=zero,
+                d=0,
+                a=0.4318,
+                alpha=zero,
                 I=[0.13, 0.524, 0.539, 0, 0, 0],
                 r=[-0.3638, 0.006, 0.2275],
                 m=17.4,
                 Jm=200e-6,
                 G=107.815,
-                B=.817e-3,
+                B=0.817e-3,
                 Tc=[0.126, -0.071],
-                qlim=[-110*deg, 110*deg],  # qlim=[-45*deg, 225*deg]
+                qlim=[-110 * deg, 110 * deg],  # qlim=[-45*deg, 225*deg]
             ),
-
             RevoluteDH(
-                d=0.15005, a=0.0203, alpha=-pi/2,
+                d=0.15005,
+                a=0.0203,
+                alpha=-pi / 2,
                 I=[0.066, 0.086, 0.0125, 0, 0, 0],
                 r=[-0.0203, -0.0141, 0.070],
                 m=4.8,
@@ -131,11 +135,12 @@ class Puma560(DHRobot):
                 G=-53.7063,
                 B=1.38e-3,
                 Tc=[0.132, -0.105],
-                qlim=[-135*deg, 135*deg]  # qlim=[-225*deg, 45*deg]
+                qlim=[-135 * deg, 135 * deg],  # qlim=[-225*deg, 45*deg]
             ),
-
             RevoluteDH(
-                d=0.4318, a=0, alpha=pi/2,
+                d=0.4318,
+                a=0,
+                alpha=pi / 2,
                 I=[1.8e-3, 1.3e-3, 1.8e-3, 0, 0, 0],
                 r=[0, 0.019, 0],
                 m=0.82,
@@ -143,11 +148,12 @@ class Puma560(DHRobot):
                 G=76.0364,
                 B=71.2e-6,
                 Tc=[11.2e-3, -16.9e-3],
-                qlim=[-266*deg, 266*deg]  # qlim=[-110*deg, 170*deg]
+                qlim=[-266 * deg, 266 * deg],  # qlim=[-110*deg, 170*deg]
             ),
-
             RevoluteDH(
-                d=0, a=0, alpha=-pi/2,
+                d=0,
+                a=0,
+                alpha=-pi / 2,
                 I=[0.3e-3, 0.4e-3, 0.3e-3, 0, 0, 0],
                 r=[0, 0, 0],
                 m=0.34,
@@ -155,11 +161,12 @@ class Puma560(DHRobot):
                 G=71.923,
                 B=82.6e-6,
                 Tc=[9.26e-3, -14.5e-3],
-                qlim=[-100*deg, 100*deg]
+                qlim=[-100 * deg, 100 * deg],
             ),
-
             RevoluteDH(
-                d=0, a=0, alpha=zero,
+                d=0,
+                a=0,
+                alpha=zero,
                 I=[0.15e-3, 0.15e-3, 0.04e-3, 0, 0, 0],
                 r=[0, 0, 0.032],
                 m=0.09,
@@ -167,30 +174,31 @@ class Puma560(DHRobot):
                 G=76.686,
                 B=36.7e-6,
                 Tc=[3.96e-3, -10.5e-3],
-                qlim=[-266*deg, 266*deg]
-            )
+                qlim=[-266 * deg, 266 * deg],
+            ),
         ]
 
         super().__init__(
             L,
             name="Puma 560",
             manufacturer="Unimation",
-            keywords=('dynamics', 'symbolic', 'mesh'),
+            keywords=("dynamics", "symbolic", "mesh"),
             symbolic=symbolic,
-            meshdir="meshes/UNIMATE/puma560"
+            meshdir="meshes/UNIMATE/puma560",
         )
 
-        # zero angles, L shaped pose
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
-
-        # ready pose, arm up
-        self.addconfiguration("qr", np.array([0, pi/2, -pi/2, 0, 0, 0]))
-
-        # straight and horizontal
-        self.addconfiguration("qs", np.array([0, 0, -pi/2, 0, 0, 0]))
+        self.qr = np.array([0, pi / 2, -pi / 2, 0, 0, 0])
+        self.qz = np.zeros(6)
 
         # nominal table top picking pose
-        self.addconfiguration("qn", np.array([0, pi/4, pi, 0, pi/4, 0]))
+        self.qn = np.array([0, pi / 4, pi, 0, pi / 4, 0])
+
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
+        self.logconfiguration("qn", self.qn)
+
+        # straight and horizontal
+        self.addconfiguration("qs", np.array([0, 0, -pi / 2, 0, 0, 0]))
 
     def ikine_a(self, T, config="lun"):
         """
@@ -227,11 +235,12 @@ class Puma560(DHRobot):
 
         :author: based on MATLAB code by Robert Biro with Gary Von McMurray,
             GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95
- 
-        """
-        def ik3(robot, T, config='lun'):
 
-            config = self.config_validate(config, ('lr', 'ud', 'nf'))
+        """
+
+        def ik3(robot, T, config="lun"):
+
+            config = self.config_validate(config, ("lr", "ud", "nf"))
 
             # solve for the first three joints
 
@@ -243,7 +252,7 @@ class Puma560(DHRobot):
 
             # The following parameters are extracted from the Homogeneous
             # Transformation as defined in equation 1, p. 34
-            
+
             Px, Py, Pz = T.t
             Pz -= d1  # offset the pedestal height
             theta = np.zeros((3,))
@@ -254,13 +263,12 @@ class Puma560(DHRobot):
             # based on the configuration parameter n1
 
             r = np.sqrt(Px**2 + Py**2)
-            if 'r' in config:
+            if "r" in config:
                 theta[0] = np.arctan2(Py, Px) + np.arcsin(d3 / r)
-            elif 'l' in config:
+            elif "l" in config:
                 theta[0] = np.arctan2(Py, Px) + np.pi - np.arcsin(d3 / r)
             else:
-                raise ValueError('bad configuration string')
-
+                raise ValueError("bad configuration string")
 
             # Solve for theta[1]
             # V114 is defined in equation 43, p.39.
@@ -268,28 +276,28 @@ class Puma560(DHRobot):
             # Psi is defined in equation 49, p.40.
             # theta[1] uses equations 50 and 51, p.40, based on the
             # configuration parameter n2
-            if 'u' in config:
+            if "u" in config:
                 n2 = 1
-            elif 'd' in config:
+            elif "d" in config:
                 n2 = -1
             else:
-                raise ValueError('bad configuration string')
+                raise ValueError("bad configuration string")
 
-            if 'l' in config:
+            if "l" in config:
                 n2 = -n2
 
             V114 = Px * np.cos(theta[0]) + Py * np.sin(theta[0])
 
             r = np.sqrt(V114**2 + Pz**2)
 
-            with np.errstate(invalid='raise'):
+            with np.errstate(invalid="raise"):
                 try:
                     Psi = np.arccos(
                         (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2)
-                        / (2.0 * a2 * r))
+                        / (2.0 * a2 * r)
+                    )
                 except FloatingPointError:
                     return "Out of reach"
-
 
             theta[1] = np.arctan2(Pz, V114) + n2 * Psi
 
@@ -306,7 +314,7 @@ class Puma560(DHRobot):
         return self.ikine_6s(T, config, ik3)
 
 
-if __name__ == '__main__':    # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     puma = Puma560(symbolic=False)
     print(puma)

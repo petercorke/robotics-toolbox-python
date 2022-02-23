@@ -1,6 +1,6 @@
 # import sys
 from abc import ABC, abstractproperty
-import copy
+from copy import deepcopy
 import numpy as np
 import roboticstoolbox as rtb
 from spatialmath import SE3, SE2
@@ -17,6 +17,13 @@ from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.IK import IKMixin
+from typing import Optional, Union, overload, Dict, Tuple
+from spatialgeometry import Shape
+from fknm import Robot_link_T
+from functools import lru_cache
+from spatialgeometry import SceneNode
+from roboticstoolbox.robot.Link import BaseLink, Link
+from numpy import all, eye, isin
 
 try:
     from matplotlib import colors
@@ -28,11 +35,13 @@ except ImportError:  # pragma nocover
 
 _default_backend = None
 
+ArrayLike = Union[list, np.ndarray, tuple, set]
+
 # TODO maybe this needs to be abstract
 # ikine functions need: fkine, jacobe, qlim methods from subclass
 
 
-class Robot(ABC, DynamicsMixin, IKMixin):
+class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
     _color = True
 
@@ -42,8 +51,8 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         name="noname",
         manufacturer="",
         comment="",
-        base=None,
-        tool=None,
+        base=SE3(),
+        tool=SE3(),
         gravity=None,
         keywords=(),
         symbolic=False,
@@ -53,9 +62,13 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         self.manufacturer = manufacturer
         self.comment = comment
         self.symbolic = symbolic
-        self.tool = tool
         self._reach = None
-        self._base = base
+
+        # Initialise the scene node
+        SceneNode.__init__(self)
+
+        self._T = base.A
+        self.tool = tool
 
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError("keywords must be a list or tuple")
@@ -77,7 +90,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         self._hascollision = False
 
         for link in links:
-            if not isinstance(link, rtb.Link):
+            if not isinstance(link, BaseLink):
                 raise TypeError("links should all be Link subclass")
 
             # add link back to roboto
@@ -90,9 +103,10 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             if link.collision:
                 self._hascollision = True
 
-            if isinstance(link, rtb.ELink):
+            if isinstance(link, Link):
                 if len(link.geometry) > 0:
                     self._hasgeometry = True
+
         self._links = links
         self._nlinks = len(links)
 
@@ -101,31 +115,64 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         self.qd = np.zeros(self.n)
         self.qdd = np.zeros(self.n)
 
-        self.control_type = "v"
+        self.control_mode = "v"
 
         self._configdict = {}
 
         self._dynchanged = False
 
-        # URDF Parser Attempt
-        # # Search mesh dir for meshes
-        # if urdfdir is not None:
-        #     # Parse the URDF to obtain file paths and scales
-        #     data = self._get_stl_file_paths_and_scales(urdfdir)
-        #     # Obtain the base mesh
-        #     self.basemesh = [data[0][0], data[1][0], data[2][0]]
-        #     # Save the respective meshes to each link
-        #     for idx in range(1, self.n+1):
-        #         self._links[idx-1].mesh = [data[0][idx], data[1][idx],
-        #         data[2][idx]]
-        # else:
-        #     self.basemesh = None
+        # Set up named configuration property
+        self._configs = {}
 
     def copy(self):
-        return copy.deepcopy(self)
+        return deepcopy(self)
+
+    def __deepcopy__(self, memo):
+
+        links = []
+
+        for link in self.links:
+            links.append(deepcopy(link))
+
+        name = deepcopy(self.name)
+        manufacturer = deepcopy(self.manufacturer)
+        comment = deepcopy(self.comment)
+        base = deepcopy(self.base)
+        tool = deepcopy(self.tool)
+        gravity = deepcopy(self.gravity)
+        keywords = deepcopy(self.keywords)
+        symbolic = deepcopy(self.symbolic)
+
+        cls = self.__class__
+        result = cls(
+            links=links,
+            name=name,
+            manufacturer=manufacturer,
+            comment=comment,
+            base=base,
+            tool=tool,
+            gravity=gravity,
+            keywords=keywords,
+            symbolic=symbolic,
+        )
+
+        memo[id(self)] = result
+        return result
 
     def __repr__(self):
         return str(self)
+
+    def __iter__(self):
+        self._iter = 0
+        return self
+
+    def __next__(self):
+        if self._iter < len(self.links):
+            link = self[self._iter]
+            self._iter += 1
+            return link
+        else:
+            raise StopIteration
 
     def __getitem__(self, i):
         """
@@ -149,15 +196,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         .. note:: ``ERobot`` supports link lookup by name,
             eg. ``robot['link1']``
         """
-        if isinstance(i, str):
-            try:
-                return self.link_dict[i]
-            except KeyError:
-                raise KeyError(f"link {i} not in link dictionary")
-            except AttributeError:
-                raise AttributeError(f"robot has no link dictionary")
-        else:
-            return self._links[i]
+        return self._links[i]
 
     # URDF Parser Attempt
     # @staticmethod
@@ -245,6 +284,10 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         :seealso: :func:`n`, :func:`nbranches`
         """
         return self._nlinks
+
+    @property
+    def configs(self) -> Dict[str, np.ndarray]:
+        return self._configs
 
     @abstractproperty
     def nbranches(self):
@@ -376,14 +419,13 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         """
         _default_backend = be
 
-    def addconfiguration(self, name, q, unit="rad"):
+    def addconfiguration(self, name: str, q: ArrayLike, unit: str = "rad"):
         """
         Add a named joint configuration (Robot superclass)
 
         :param name: Name of the joint configuration
-        :type name: str
         :param q: Joint configuration
-        :type q: ndarray(n) or list
+        :type q: Arraylike
 
         Example:
 
@@ -397,8 +439,21 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         """
         v = getvector(q, self.n)
         v = getunit(v, unit)
-        self._configdict[name] = v
-        setattr(self, name, v)
+        v = np.array(v)
+        self._configs[name] = v
+
+    def logconfiguration(self, name: str, q: np.ndarray):
+        """
+        Log a named joint configuration (Robot superclass)
+
+        Used in robot model init method to store the qr configuration
+
+        :param name: Name of the joint configuration
+        :type name: str
+        :param q: Joint configuration
+        :type q: ndarray(n) or list
+        """
+        self._configs[name] = q
 
     def configurations_str(self, border="thin"):
         deg = 180 / np.pi
@@ -416,7 +471,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             return str(theta * deg) + "\u00b0"
 
         # show named configurations
-        if len(self._configdict) > 0:
+        if len(self._configs) > 0:
             table = ANSITable(
                 Column("name", colalign=">"),
                 *[
@@ -426,7 +481,7 @@ class Robot(ABC, DynamicsMixin, IKMixin):
                 border=border,
             )
 
-            for name, q in self._configdict.items():
+            for name, q in self._configs.items():
                 qlist = []
                 for j, c in enumerate(self.structure):
                     if c == "P":
@@ -966,13 +1021,13 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         manipulability = self.manipulability(q, J=J, start=start, end=end, axes=axes)
 
         J = J[axes, :]
-        H = H[axes, :, :]
+        H = H[:, axes, :]
 
         b = np.linalg.inv(J @ np.transpose(J))
         Jm = np.zeros((n, 1))
 
         for i in range(n):
-            c = J @ np.transpose(H[:, :, i])
+            c = J @ np.transpose(H[i, :, :])
             Jm[i, 0] = manipulability * np.transpose(c.flatten("F")) @ b.flatten("F")
 
         return Jm
@@ -1038,47 +1093,35 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     # --------------------------------------------------------------------- #
 
     @property
-    def base(self):
+    def base(self) -> SE3:
         """
         Get/set robot base transform (Robot superclass)
 
         - ``robot.base`` is the robot base transform
 
         :return: robot tool transform
-        :rtype: SE3 instance
 
         - ``robot.base = ...`` checks and sets the robot base transform
 
-        .. note:: The private attribute ``_base`` will be None in the case of
-            no base transform, but this property will return ``SE3()`` which
-            is an identity matrix.
         """
-        if self._base is None:
-            if isinstance(self, rtb.ERobot2):
-                self._base = SE2()
-            else:
-                self._base = SE3()
 
         # return a copy, otherwise somebody with
         # reference to the base can change it
-        return self._base.copy()
+
+        # This now returns the Scene Node transform
+        # self._T is a copy of SceneNode.__T
+        return SE3(self._T, check=False)
 
     @base.setter
-    def base(self, T):
-        if T is None:
-            self._base = T
-        elif isinstance(self, rtb.ERobot2):
-            # 2D robot
-            if isinstance(T, SE2):
-                self._base = T
-            elif SE2.isvalid(T):
-                self._tool = SE2(T, check=True)
-        elif isinstance(self, rtb.Robot):
-            # all other 3D robots
+    def base(self, T: Union[np.ndarray, SE3]):
+
+        if isinstance(self, rtb.Robot):
+            # All 3D robots
+            # Set the SceneNode T
             if isinstance(T, SE3):
-                self._base = T
-            elif SE3.isvalid(T):
-                self._tool = SE3(T, check=True)
+                self._T = T.A
+            else:
+                self._T = T
 
         else:
             raise ValueError("base must be set to None (no tool), SE2, or SE3")
@@ -1086,36 +1129,25 @@ class Robot(ABC, DynamicsMixin, IKMixin):
     # --------------------------------------------------------------------- #
 
     @property
-    def tool(self):
+    def tool(self) -> SE3:
         """
         Get/set robot tool transform (Robot superclass)
 
-        - ``robot.tool`` is the robot name
+        - ``robot.tool`` is the robot tool transform
 
         :return: robot tool transform
-        :rtype: SE3 instance
 
         - ``robot.tool = ...`` checks and sets the robot tool transform
 
-        .. note:: The private attribute ``_tool`` will be None in the case of
-            no tool transform, but this property will return ``SE3()`` which
-            is an identity matrix.
         """
-        if self._tool is None:
-            return SE3()
-        else:
-            return self._tool
+        return SE3(self._tool, check=False)
 
     @tool.setter
-    def tool(self, T):
-        # This is allowed to be none, it's helpful for symbolics rather than
-        # having an identity matrix
-        if T is None or isinstance(T, SE3):
-            self._tool = T
-        elif SE3.isvalid(T):
-            self._tool = SE3(T, check=False)
+    def tool(self, T: Union[SE3, np.ndarray]):
+        if isinstance(T, SE3):
+            self._tool = T.A
         else:
-            raise ValueError("tool must be set to None (no tool) or an SE3")
+            self._tool = T
 
     @property
     def qlim(self):
@@ -1162,8 +1194,6 @@ class Robot(ABC, DynamicsMixin, IKMixin):
             j += 1
         return limits
 
-    # TODO, the remaining functions, I have only a hazy understanding
-    # of how they work
     # --------------------------------------------------------------------- #
 
     @property
@@ -1232,9 +1262,8 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
     # --------------------------------------------------------------------- #
 
-    # TODO could we change this to control_mode ?
     @property
-    def control_type(self):
+    def control_mode(self):
         """
         Get/set robot control mode (Robot superclass)
 
@@ -1247,12 +1276,12 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         .. note::  ???
         """
-        return self._control_type
+        return self._control_mode
 
-    @control_type.setter
-    def control_type(self, cn):
+    @control_mode.setter
+    def control_mode(self, cn):
         if cn == "p" or cn == "v" or cn == "a":
-            self._control_type = cn
+            self._control_mode = cn
         else:
             raise ValueError("Control type must be one of 'p', 'v', or 'a'")
 
@@ -1898,36 +1927,38 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
     # --------------------------------------------------------------------- #
 
-    def closest_point(self, q, shape, inf_dist=1.0, skip=False):
+    def closest_point(
+        self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip: bool = False
+    ) -> Tuple[Union[int, None], Union[np.ndarray, None], Union[np.ndarray, None],]:
         """
         closest_point(shape, inf_dist) returns the minimum euclidean
         distance between this robot and shape, provided it is less than
         inf_dist. It will also return the points on self and shape in the
         world frame which connect the line of length distance between the
         shapes. If the distance is negative then the shapes are collided.
+
         :param shape: The shape to compare distance to
-        :type shape: Shape
         :param inf_dist: The minimum distance within which to consider
             the shape
-        :type inf_dist: float
         :param skip: Skip setting all shape transforms based on q, use this
             option if using this method in conjuction with Swift to save time
-        :type skip: boolean
+
         :returns: d, p1, p2 where d is the distance between the shapes,
             p1 and p2 are the points in the world frame on the respective
             shapes. The points returned are [x, y, z].
-        :rtype: float, ndarray(1x3), ndarray(1x3)
         """
 
         if not skip:
-            self._set_link_fk(q)
+            self._update_link_tf(q)
+            self._propogate_scene_tree()
+            shape._propogate_scene_tree()
 
         d = 10000
         p1 = None
         p2 = None
 
         for link in self.links:
-            td, tp1, tp2 = link.closest_point(shape, inf_dist)
+            td, tp1, tp2 = link.closest_point(shape, inf_dist, skip=True)
 
             if td is not None and td < d:
                 d = td
@@ -1952,16 +1983,18 @@ class Robot(ABC, DynamicsMixin, IKMixin):
         """
 
         if not skip:
-            self._set_link_fk(q)
+            self._update_link_tf(q)
+            self._propogate_scene_tree()
+            shape._propogate_scene_tree()
 
         for link in self.links:
-            if link.collided(shape):
+            if link.collided(shape, skip=True):
                 return True
 
         if isinstance(self, rtb.ERobot):
             for gripper in self.grippers:
                 for link in gripper.links:
-                    if link.collided(shape):
+                    if link.collided(shape, skip=True):
                         return True
 
         return False
@@ -2004,12 +2037,36 @@ class Robot(ABC, DynamicsMixin, IKMixin):
 
         return Ain, Bin
 
+    # --------------------------------------------------------------------- #
+    # Scene Graph section
+    # --------------------------------------------------------------------- #
+
+    def _update_link_tf(self, q: ArrayLike = None):
+        """
+        This private method updates the local transform of each link within
+        this robot according to q (or self.q if q is none)
+        """
+
+        @lru_cache(maxsize=2)
+        def get_link_ets():
+            return [link.ets._fknm for link in self.links]
+
+        @lru_cache(maxsize=2)
+        def get_link_scene_node():
+            return [link._T_reference for link in self.links]
+
+        Robot_link_T(get_link_ets(), get_link_scene_node(), self._q, q)
+
+        [gripper._update_link_tf() for gripper in self.grippers]
+
+    # --------------------------------------------------------------------- #
+
 
 if __name__ == "__main__":
 
-    from roboticstoolbox import ETS2 as ET
+    from roboticstoolbox import ET2 as ET
 
-    e = ET.r() * ET.tx(1) * ET.r() * ET.tx(1)
+    e = ET.R() * ET.tx(1) * ET.R() * ET.tx(1)
     # print(e)
     # r = Robot2(e)
 

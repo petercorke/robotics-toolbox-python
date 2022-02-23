@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.ERobot import ERobot, ERobot2
 from spatialmath import SE3
 
 
@@ -51,14 +51,18 @@ class Panda(ERobot):
             [2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0]
         )
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0]))
+        self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        self.qz = np.zeros(7)
 
-        self.addconfiguration("qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]))
+        self.logconfiguration("qr", self.qr)
+        self.logconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover
 
     r = Panda()
+
+    r.qz
 
     for link in r.grippers[0].links:
         print(link)

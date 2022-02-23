@@ -16,7 +16,22 @@
 #define TRUE 1
 #define FALSE 0
 
+typedef struct ET ET;
 typedef struct Link Link;
+
+struct ET
+{
+    /**********************************************************
+     *************** kinematic parameters *********************
+     **********************************************************/
+    int isjoint;
+    int isflip;
+    int jindex;
+    int axis;
+    npy_float64 *T;    /* link static transform */
+    npy_float64 *qlim; /* joint limits */
+    void (*op)(npy_float64 *data, double eta);
+};
 
 struct Link
 {
