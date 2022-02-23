@@ -415,6 +415,18 @@ class BaseETS(UserList):
         """
         return self.data[i]  # can be [2] or slice, eg. [3:5]
 
+    def __deepcopy__(self, memo):
+
+        new_data = []
+
+        for data in self:
+            new_data.append(deepcopy(data))
+
+        cls = self.__class__
+        result = cls(new_data)
+        memo[id(self)] = result
+        return result
+
 
 class ETS(BaseETS):
     """
