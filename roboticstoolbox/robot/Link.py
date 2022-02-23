@@ -829,7 +829,6 @@ class BaseLink(SceneNode, ABC):
         :return: True if is prismatic
         :rtype: bool
         """
-        print(self.v)
         return self.v.istranslation if self.v else False
 
     @property
