@@ -115,14 +115,9 @@ class BaseERobot(Robot):
         self._path_cache = {}
         self._eye_fknm = eye(4)
 
-        # self._ets = []
-        self._all_links = []
         self._linkdict = {}
         self._n = 0
         self._ee_links = []
-
-        for link in links:
-            self._all_links.append(link)
 
         # Ordered links, we reorder the input elinks to be in depth first
         # search order
