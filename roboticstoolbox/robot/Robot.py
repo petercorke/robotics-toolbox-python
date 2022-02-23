@@ -105,6 +105,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
             if isinstance(link, Link):
                 if len(link.geometry) > 0:
                     self._hasgeometry = True
+
         self._links = links
         self._nlinks = len(links)
 
