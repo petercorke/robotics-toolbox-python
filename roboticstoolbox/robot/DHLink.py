@@ -140,12 +140,23 @@ class DHLink(Link):
         mdh=False,
         offset=0,
         flip=False,
+        qlim: Union[ArrayLike, None] = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
 
         ets = self._to_ets(sigma, theta, d, alpha, a, offset, flip, mdh)
         self._ets = ets
+
+        # Set the variable et
+        for et in ets:
+            if et.isjoint:
+                self._v = et
+                break
+
+        # Set the qlim if provided now we have an ETS
+        if qlim is not None and self.v:
+            self.v.qlim = qlim
 
         # DH Kinematic parameters
         self.sigma = sigma
@@ -210,6 +221,38 @@ class DHLink(Link):
                 ets *= ET.Rx(alpha)
 
         return ets
+
+    # @property
+    # def v(self) -> ET:
+    #     """
+    #     Variable part of link ETS
+    #     :return: joint variable transform
+    #     The ETS for each Link comprises a constant part (possible the
+    #     identity) followed by an optional joint variable transform.
+    #     This property returns the latter.
+    #     .. runblock:: pycon
+    #         >>> from roboticstoolbox import models
+    #         >>> robot = models.DH.Panda()
+    #         >>> robot[1].v
+    #     """
+    #     return self._v
+
+    @property
+    def isjoint(self) -> bool:
+        """
+        Test if link has joint
+        :return: test if link has a joint
+        :rtype: bool
+        The ETS for each ELink comprises a constant part (possible the
+        identity) followed by an optional joint variable transform.
+        This property returns the whether the
+        .. runblock:: pycon
+            >>> from roboticstoolbox import models
+            >>> robot = models.URDF.Panda()
+            >>> robot[1].isjoint  # link with joint
+            >>> robot[8].isjoint  # static link
+        """
+        return True
 
     # @classmethod
     # def StandardDH(cls, links: List["StandardDH"]) -> List["DHLink"]:
