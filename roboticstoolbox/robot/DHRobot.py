@@ -305,6 +305,47 @@ class DHRobot(Robot):
             gravity=self.gravity,
         )
 
+    def __deepcopy__(self, memo):
+
+        links = []
+
+        for link in self.links:
+            links.append(copy.deepcopy(link))
+
+        name = copy.deepcopy(self.name)
+        manufacturer = copy.deepcopy(self.manufacturer)
+        comment = copy.deepcopy(self.comment)
+        base = copy.deepcopy(self.base)
+        tool = copy.deepcopy(self.tool)
+        gravity = copy.deepcopy(self.gravity)
+        keywords = copy.deepcopy(self.keywords)
+        symbolic = copy.deepcopy(self.symbolic)
+
+        try:
+            if self.meshdir:
+                meshdir = copy.deepcopy(self.meshdir)
+            else:
+                meshdir = None
+        except AttributeError:
+            meshdir = None
+
+        # cls = self.__class__
+        result = DHRobot(
+            links,
+            meshdir=meshdir,
+            name=name,
+            manufacturer=manufacturer,
+            comment=comment,
+            base=base,
+            tool=tool,
+            gravity=gravity,
+            keywords=keywords,
+            symbolic=symbolic,
+        )
+
+        memo[id(self)] = result
+        return result
+
     # def copy(self):
     #     """
     #     Copy a robot
