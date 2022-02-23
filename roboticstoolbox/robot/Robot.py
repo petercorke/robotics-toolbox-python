@@ -1,6 +1,6 @@
 # import sys
 from abc import ABC, abstractproperty
-import copy
+from copy import deepcopy
 import numpy as np
 import roboticstoolbox as rtb
 from spatialmath import SE3, SE2
@@ -124,7 +124,39 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         self._configs = {}
 
     def copy(self):
-        return copy.deepcopy(self)
+        return deepcopy(self)
+
+    def __deepcopy__(self, memo):
+
+        links = []
+
+        for link in self.links:
+            links.append(deepcopy(link))
+
+        name = deepcopy(self.name)
+        manufacturer = deepcopy(self.manufacturer)
+        comment = deepcopy(self.comment)
+        base = deepcopy(self.base)
+        tool = deepcopy(self.tool)
+        gravity = deepcopy(self.gravity)
+        keywords = deepcopy(self.keywords)
+        symbolic = deepcopy(self.symbolic)
+
+        cls = self.__class__
+        result = cls(
+            links=links,
+            name=name,
+            manufacturer=manufacturer,
+            comment=comment,
+            base=base,
+            tool=tool,
+            gravity=gravity,
+            keywords=keywords,
+            symbolic=symbolic,
+        )
+
+        memo[id(self)] = result
+        return result
 
     def __repr__(self):
         return str(self)
