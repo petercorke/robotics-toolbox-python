@@ -1759,7 +1759,8 @@ class URDF(URDFType):
 
             # joint limit
             try:
-                childlink.qlim = [joint.limit.lower, joint.limit.upper]
+                if childlink.isjoint:
+                    childlink.qlim = [joint.limit.lower, joint.limit.upper]
             except AttributeError:
                 # no joint limits provided
                 pass
