@@ -376,6 +376,8 @@ class BaseLink(SceneNode, ABC):
         if self._children:
             result._children = self._children.copy()
 
+        result._robot = self.robot
+
         memo[id(self)] = result
         return result
 

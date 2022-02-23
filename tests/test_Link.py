@@ -176,6 +176,7 @@ qlim  =      -2.8 to      2.8""",
         l1 = l0.copy()
         l0.m = 4
         l0.r[1] = 5
+
         self.assertEqual(l1.m, 0)
         self.assertEqual(l1.r[1], 0)
         self.assertIs(l0._robot, r)

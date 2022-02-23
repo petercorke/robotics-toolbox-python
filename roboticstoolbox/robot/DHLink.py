@@ -426,8 +426,9 @@ class DHLink(Link):
             del kwargs["mdh"]
 
         result = cls(**kwargs)
-
+        result._robot = self.robot
         result.sigma = self.sigma
+
         memo[id(self)] = result
         return result
 
