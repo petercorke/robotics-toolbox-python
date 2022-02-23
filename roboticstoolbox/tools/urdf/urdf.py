@@ -1755,8 +1755,7 @@ class URDF(URDFType):
             if isinstance(ets, rtb.ET):
                 ets = rtb.ETS(ets)
 
-            childlink._ets = ets
-            childlink._init_Ts()
+            childlink.ets = ets
 
             # joint limit
             try:
