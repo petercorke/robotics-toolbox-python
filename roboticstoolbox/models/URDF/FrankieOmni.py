@@ -39,7 +39,7 @@ class FrankieOmni(ERobot):
             "ridgeback_description/urdf/ridgeback.urdf.xacro"
         )
 
-        links_panda, _, urdf_string_panda, _ = self.URDF_read(
+        links_panda, _, _, _ = self.URDF_read(
             "franka_description/robots/panda_arm_hand.urdf.xacro"
         )
 
@@ -47,7 +47,6 @@ class FrankieOmni(ERobot):
         base_arm = Link(ETS(ET.tz(0.28)), name="base_arm", parent=base_link)
 
         links_panda[0]._parent = base_arm
-        links_panda[0]._update_fknm()
         links_all = links_base + links_panda
         links_all.append(base_arm)
 
