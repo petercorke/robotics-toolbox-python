@@ -9,11 +9,10 @@ import numpy.testing as nt
 
 
 class TestModels(unittest.TestCase):
-
     def test_list(self):
         rp.models.list()
-        rp.models.list('UR', 6)
-        rp.models.list(mtype='DH')
+        rp.models.list("UR", 6)
+        rp.models.list(mtype="DH")
 
     def test_puma(self):
         puma = rp.models.DH.Puma560()
@@ -147,6 +146,7 @@ class TestModels(unittest.TestCase):
     def test_pr2(self):
         rp.models.PR2()
 
-if __name__ == '__main__':  # pragma nocover
+
+if __name__ == "__main__":  # pragma nocover
     unittest.main()
     # pytest.main(['tests/test_SerialLink.py'])
