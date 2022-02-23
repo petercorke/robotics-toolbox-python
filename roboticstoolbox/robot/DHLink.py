@@ -14,6 +14,7 @@ from typing import List, Union
 from functools import wraps
 from numpy import ndarray, cos, sin, array
 from spatialgeometry import Shape
+from copy import deepcopy
 
 # _eps = np.finfo(np.float64).eps
 
@@ -388,6 +389,47 @@ class DHLink(Link):
         self._format(args, "alpha", "⍺")
         args.extend(super()._params())
         return name + "(" + ", ".join(args) + ")"
+
+    def __deepcopy__(self, memo):
+        kwargs = {
+            "name": deepcopy(self.name),
+            "joint_name": deepcopy(self._joint_name),
+            "m": deepcopy(self.m),
+            "r": deepcopy(self.r),
+            "I": deepcopy(self.I),
+            "Jm": deepcopy(self.Jm),
+            "B": deepcopy(self.B),
+            "Tc": deepcopy(self.Tc),
+            "G": deepcopy(self.G),
+            "qlim": deepcopy(self.qlim),
+            "geometry": [shape.copy() for shape in self._geometry],
+            "collision": [shape.copy() for shape in self._collision],
+            "d": deepcopy(self.d),
+            "alpha": deepcopy(self.alpha),
+            "theta": deepcopy(self.theta),
+            "a": deepcopy(self.a),
+            "sigma": deepcopy(self.sigma),
+            "mdh": deepcopy(self.mdh),
+            "offset": deepcopy(self.offset),
+            "flip": deepcopy(self.isflip),
+        }
+
+        cls = self.__class__
+
+        if "Revolute" in str(cls):
+            del kwargs["theta"]
+            del kwargs["sigma"]
+            del kwargs["mdh"]
+        elif "Prismatic" in str(cls):
+            del kwargs["d"]
+            del kwargs["sigma"]
+            del kwargs["mdh"]
+
+        result = cls(**kwargs)
+
+        result.sigma = self.sigma
+        memo[id(self)] = result
+        return result
 
     # -------------------------------------------------------------------------- #
 
