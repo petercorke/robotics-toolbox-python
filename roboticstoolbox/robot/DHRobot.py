@@ -198,7 +198,9 @@ class DHRobot(Robot):
             qlim = self.qlim
 
         else:
+            qlim = np.array([])  # satisfy type checker
             qlim_columns = []
+
         if self.mdh:
             # MDH format
             table = ANSITable(
