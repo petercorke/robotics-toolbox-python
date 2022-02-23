@@ -167,6 +167,7 @@ class DHLink(Link):
         self.mdh = mdh
         self.offset = offset
         self.id = None
+        self.mesh = None
 
     def _to_ets(self, sigma, theta, d, alpha, a, offset, flip: bool, mdh):
         ets = ETS()
@@ -221,21 +222,6 @@ class DHLink(Link):
                 ets *= ET.Rx(alpha)
 
         return ets
-
-    # @property
-    # def v(self) -> ET:
-    #     """
-    #     Variable part of link ETS
-    #     :return: joint variable transform
-    #     The ETS for each Link comprises a constant part (possible the
-    #     identity) followed by an optional joint variable transform.
-    #     This property returns the latter.
-    #     .. runblock:: pycon
-    #         >>> from roboticstoolbox import models
-    #         >>> robot = models.DH.Panda()
-    #         >>> robot[1].v
-    #     """
-    #     return self._v
 
     @property
     def isjoint(self) -> bool:
