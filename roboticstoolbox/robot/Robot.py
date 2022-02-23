@@ -50,8 +50,8 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         name="noname",
         manufacturer="",
         comment="",
-        base=np.eye(4),
-        tool=np.eye(4),
+        base=SE3(),
+        tool=SE3(),
         gravity=None,
         keywords=(),
         symbolic=False,
@@ -66,7 +66,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         # Initialise the scene node
         SceneNode.__init__(self)
 
-        self._T = base
+        self._T = base.A
         self.tool = tool
 
         if keywords is not None and not isinstance(keywords, (tuple, list)):
@@ -1062,20 +1062,20 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         # self._T is a copy of SceneNode.__T
         return SE3(self._T, check=False)
 
-    @property
-    def _base(self) -> Union[SE3, None]:
-        """
-        Get robot base transform (Robot superclass)
+    # @property
+    # def _base(self) -> Union[SE3, None]:
+    #     """
+    #     Get robot base transform (Robot superclass)
 
-        This differs from robot.base in that if the base is an identity transform
-        then None is returned
+    #     This differs from robot.base in that if the base is an identity transform
+    #     then None is returned
 
-        """
+    #     """
 
-        if all(self._T == eye(4)):
-            return None
-        else:
-            return SE3(self._T, check=False)
+    #     if all(self._T == eye(4)):
+    #         return None
+    #     else:
+    #         return SE3(self._T, check=False)
 
     @base.setter
     def base(self, T: Union[np.ndarray, SE3]):
