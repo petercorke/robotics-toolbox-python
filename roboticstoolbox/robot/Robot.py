@@ -1094,7 +1094,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         return SE3(self._tool, check=False)
 
     @tool.setter
-    def tool(self, T):
+    def tool(self, T: Union[SE3, np.ndarray]):
         if isinstance(T, SE3):
             self._tool = T.A
         else:
