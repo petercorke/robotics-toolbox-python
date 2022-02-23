@@ -335,8 +335,6 @@ class BaseLink(SceneNode, ABC):
         new._children = []
         return new
 
-        return new
-
     def _copy(self):
         raise DeprecationWarning("Use copy method of Link class")
 
