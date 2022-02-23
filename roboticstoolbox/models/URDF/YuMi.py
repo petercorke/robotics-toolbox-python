@@ -96,7 +96,6 @@ class YuMi(ERobot):
                 np.pi / 4,
             ]
         )
-
         self.qz = np.zeros(14)
         self.q1 = np.array([0, -0.4, 0, 0, 0, 0, 0, 0, -0.4, 0, 0, 0, 0, 0])
 

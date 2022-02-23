@@ -153,7 +153,7 @@ class BaseET:
             eta_str = f"{self.eta * (180.0/pi):.2f}°"
         elif not self.iselementary:
             if isinstance(self, ET):
-                T = self.T()
+                T = self.A()
                 rpy = tr2rpy(T) * 180.0 / pi
                 if T[:3, -1].any() and rpy.any():
                     eta_str = f"xyzrpy: {T[0, -1]:.2f}, {T[1, -1]:.2f}, {T[2, -1]:.2f}, {rpy[0]:.2f}°, {rpy[1]:.2f}°, {rpy[2]:.2f}°"
@@ -164,7 +164,7 @@ class BaseET:
                 else:
                     eta_str = ""  # pragma: nocover
             elif isinstance(self, ET2):
-                T = self.T()
+                T = self.A()
                 xyt = tr2xyt(T)
                 xyt[2] *= 180 / pi
                 eta_str = f"xyθ: {xyt[0]:.2f}, {xyt[1]:.2f}, {xyt[2]:.2f}°"
@@ -462,7 +462,7 @@ class BaseET:
 
         return inv
 
-    def T(self, q: Union[float, Sym] = 0.0) -> ndarray:
+    def A(self, q: Union[float, Sym] = 0.0) -> ndarray:
         """
         Evaluate an elementary transformation
 
@@ -476,9 +476,9 @@ class BaseET:
 
             >>> from roboticstoolbox import ET
             >>> e = ET.tx(1)
-            >>> e.T()
+            >>> e.A()
             >>> e = ET.tx()
-            >>> e.T(0.7)
+            >>> e.A(0.7)
 
         """
         try:
@@ -844,7 +844,7 @@ class ET2(BaseET):
 
         return cls(axis="SE2", T=trans, **kwargs)
 
-    def T(self, q: Union[float, Sym] = 0.0) -> ndarray:
+    def A(self, q: Union[float, Sym] = 0.0) -> ndarray:
         """
         Evaluate an elementary transformation
 
@@ -858,9 +858,9 @@ class ET2(BaseET):
 
             >>> from roboticstoolbox import ET2
             >>> e = ET2.tx(1)
-            >>> e.T()
+            >>> e.A()
             >>> e = ET2.tx()
-            >>> e.T(0.7)
+            >>> e.A(0.7)
 
         """
         if self.isjoint:

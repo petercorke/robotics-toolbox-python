@@ -70,9 +70,9 @@ class TestDHLink(unittest.TestCase):
             np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, np.pi], [0, 0, 0, 1]])
         )
 
-        nt.assert_array_almost_equal(l0.T(np.pi).A, T0.A)
-        nt.assert_array_almost_equal(l1.T(np.pi).A, T1.A)
-        nt.assert_array_almost_equal(l2.T(np.pi).A, T0.A)
+        nt.assert_array_almost_equal(l0.A(np.pi).A, T0.A)
+        nt.assert_array_almost_equal(l1.A(np.pi).A, T1.A)
+        nt.assert_array_almost_equal(l2.A(np.pi).A, T0.A)
 
     def test_friction(self):
         l0 = rp.RevoluteMDH(d=2, Tc=[2, -1], B=3, G=2)
@@ -176,6 +176,7 @@ qlim  =      -2.8 to      2.8""",
         l1 = l0.copy()
         l0.m = 4
         l0.r[1] = 5
+
         self.assertEqual(l1.m, 0)
         self.assertEqual(l1.r[1], 0)
         self.assertIs(l0._robot, r)

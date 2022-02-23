@@ -415,6 +415,18 @@ class BaseETS(UserList):
         """
         return self.data[i]  # can be [2] or slice, eg. [3:5]
 
+    def __deepcopy__(self, memo):
+
+        new_data = []
+
+        for data in self:
+            new_data.append(deepcopy(data))
+
+        cls = self.__class__
+        result = cls(new_data)
+        memo[id(self)] = result
+        return result
+
 
 class ETS(BaseETS):
     """
@@ -532,9 +544,9 @@ class ETS(BaseETS):
             else:
                 # not a joint
                 if const is None:
-                    const = et.T()
+                    const = et.A()
                 else:
-                    const = const @ et.T()
+                    const = const @ et.A()
 
         if const is not None:
             # flush the constant, tool transform
@@ -647,7 +659,7 @@ class ETS(BaseETS):
             link = end  # start with last link
 
             jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-            A = link.T(qk[jindex])
+            A = link.A(qk[jindex])
 
             if A is None:
                 Tk = tools  # pragma: nocover
@@ -659,7 +671,7 @@ class ETS(BaseETS):
                 link = self.data[i]
 
                 jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-                A = link.T(qk[jindex])
+                A = link.A(qk[jindex])
 
                 if A is not None:
                     Tk = A @ Tk
@@ -755,7 +767,7 @@ class ETS(BaseETS):
             jindex = 0 if link.jindex is None and link.isjoint else link.jindex
 
             if link.isjoint:
-                U = U @ link.T(q[jindex])  # type: ignore
+                U = U @ link.A(q[jindex])  # type: ignore
 
                 if link == end:
                     U = U @ tools
@@ -794,7 +806,7 @@ class ETS(BaseETS):
 
                 j += 1
             else:
-                A = link.T()
+                A = link.A()
                 if A is not None:
                     U = U @ A
 
@@ -1168,9 +1180,9 @@ class ETS2(BaseETS):
             else:
                 # not a joint
                 if const is None:
-                    const = et.T()
+                    const = et.A()
                 else:
-                    const = const @ et.T()
+                    const = const @ et.A()
 
         if const is not None:
             # flush the constant, tool transform
@@ -1278,7 +1290,7 @@ class ETS2(BaseETS):
             link = end  # start with last link
 
             jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-            A = link.T(qk[jindex])
+            A = link.A(qk[jindex])
 
             if A is None:
                 Tk = tools  # pragma: nocover
@@ -1290,7 +1302,7 @@ class ETS2(BaseETS):
                 link = self.data[i]
 
                 jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-                A = link.T(qk[jindex])
+                A = link.A(qk[jindex])
 
                 if A is not None:
                     Tk = A @ Tk
@@ -1338,7 +1350,7 @@ class ETS2(BaseETS):
 
             axis = self[i].axis
             if axis == "R":
-                dTdq = array([[0, -1, 0], [1, 0, 0], [0, 0, 0]]) @ self[i].T(
+                dTdq = array([[0, -1, 0], [1, 0, 0], [0, 0, 0]]) @ self[i].A(
                     q[jindex]  # type: ignore
                 )
             elif axis == "tx":

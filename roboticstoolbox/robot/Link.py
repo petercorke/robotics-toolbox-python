@@ -1,4 +1,4 @@
-import copy
+from copy import copy as ccopy, deepcopy
 from abc import ABC
 from multiprocessing.sharedctypes import Value
 import numpy as np
@@ -172,13 +172,7 @@ class BaseLink(SceneNode, ABC):
         elif not isinstance(ets, (ETS, ETS2)):
             raise TypeError("The ets argument must be of type ETS or ET")
 
-        if ets.n > 1:
-            raise ValueError("An elementary link can only have one joint variable")
-
-        if ets.n == 1 and not ets[-1].isjoint:
-            raise ValueError("Variable link must be at the end of the ETS")
-
-        self._ets = ets
+        self.ets = ets
 
         # Check parent argument
         if parent is not None:
@@ -198,11 +192,8 @@ class BaseLink(SceneNode, ABC):
         self._children = []
 
         # Set the qlim if provided
-        if qlim is not None and self.isjoint:
-            self._ets[-1].qlim = qlim
-
-        # Initialise the static transform of the Link
-        self._init_Ts()
+        if qlim is not None and self.v:
+            self.v.qlim = qlim
 
     # -------------------------------------------------------------------------- #
 
@@ -222,7 +213,7 @@ class BaseLink(SceneNode, ABC):
             if et.isjoint:
                 break
             else:
-                T = T @ et.T()
+                T = T @ et.A()
 
         self._Ts = T
 
@@ -244,6 +235,46 @@ class BaseLink(SceneNode, ABC):
             >>> link.Ts
         """
         return self._Ts
+
+    @overload
+    def ets(self: "Link") -> ETS:
+        ...
+
+    @overload
+    def ets(self: "Link2") -> ETS2:
+        ...
+
+    @property
+    def ets(self):
+        return self._ets
+
+    @ets.setter
+    @overload
+    def ets(self: "Link", new_ets: ETS):
+        ...
+
+    @ets.setter
+    @overload
+    def ets(self: "Link2", new_ets: ETS2):
+        ...
+
+    @ets.setter
+    def ets(self, new_ets):
+        if new_ets.n > 1:
+            raise ValueError("An elementary link can only have one joint variable")
+
+        if new_ets.n == 1 and not new_ets[-1].isjoint:
+            raise ValueError("Variable link must be at the end of the ETS")
+
+        self._ets = new_ets
+        self._init_Ts()
+
+        if self._ets.n:
+            self._v = self._ets[-1]
+            self._isjoint = True
+        else:
+            self._v = None
+            self._isjoint = False
 
     def __repr__(self):
         name = self.__class__.__name__
@@ -290,24 +321,65 @@ class BaseLink(SceneNode, ABC):
         ``link.copy()`` is a new Link subclass instance with a copy of all
         the parameters.
         """
-        new = copy.copy(self)
-        for k, v in self.__dict__.items():
-            # print(k)
-            if k.startswith("_") and isinstance(v, np.ndarray):
-                setattr(new, k, np.copy(v))
+        # new = ccopy(self)
+        # for k, v in self.__dict__.items():
+        #     # print(k)
+        #     if k.startswith("_") and isinstance(v, np.ndarray):
+        #         setattr(new, k, np.copy(v))
 
-        new._geometry = [shape.copy() for shape in self._geometry]
-        new._collision = [shape.copy() for shape in self._collision]
+        # new._geometry = [shape.copy() for shape in self._geometry]
+        # new._collision = [shape.copy() for shape in self._collision]
 
-        # invalidate references to parent, child
-        new._parent = parent
-        new._children = []
-        return new
-
-        return new
+        # # invalidate references to parent, child
+        # new._parent = parent
+        # new._children = []
+        # return new
+        return deepcopy(self)
 
     def _copy(self):
         raise DeprecationWarning("Use copy method of Link class")
+
+    def __deepcopy__(self, memo):
+        ets = deepcopy(self.ets)
+        name = deepcopy(self.name)
+        parent = self.parent
+        joint_name = deepcopy(self._joint_name)
+        m = deepcopy(self.m)
+        r = deepcopy(self.r)
+        I = deepcopy(self.I)
+        Jm = deepcopy(self.Jm)
+        B = deepcopy(self.B)
+        Tc = deepcopy(self.Tc)
+        G = deepcopy(self.G)
+        qlim = deepcopy(self.qlim)
+        geometry = [shape.copy() for shape in self._geometry]
+        collision = [shape.copy() for shape in self._collision]
+
+        cls = self.__class__
+        result = cls(
+            ets=ets,
+            name=name,
+            parent=parent,
+            joint_name=joint_name,
+            m=m,
+            r=r,
+            I=I,
+            Jm=Jm,
+            B=B,
+            Tc=Tc,
+            G=G,
+            qlim=qlim,
+            geometry=geometry,
+            collision=collision,
+        )
+
+        if self._children:
+            result._children = self._children.copy()
+
+        result._robot = self.robot
+
+        memo[id(self)] = result
+        return result
 
     # -------------------------------------------------------------------------- #
 
@@ -325,7 +397,7 @@ class BaseLink(SceneNode, ABC):
         Variable part of link ETS
         :return: joint variable transform
         :rtype: ET instance
-        The ETS for each ELink comprises a constant part (possible the
+        The ETS for each Link comprises a constant part (possible the
         identity) followed by an optional joint variable transform.
         This property returns the latter.
         .. runblock:: pycon
@@ -333,10 +405,7 @@ class BaseLink(SceneNode, ABC):
             >>> link = ELink( ET.tz(0.333) * ET.Rx(90, 'deg') * ETS.Rz() )
             >>> print(link.v)
         """
-        if self.isjoint:
-            return self._ets[-1]
-        else:
-            return None
+        return self._v
 
     # -------------------------------------------------------------------------- #
 
@@ -396,15 +465,15 @@ class BaseLink(SceneNode, ABC):
 
         :seealso: :func:`~islimit`
         """
-        if self.isjoint:
-            return self.ets[-1].qlim
+        if self.v:
+            return self.v.qlim
         else:
             return None
 
     @qlim.setter
     def qlim(self, qlim_new: ArrayLike):
-        if self.isjoint:
-            self.ets[-1].qlim = qlim_new
+        if self.v:
+            self.v.qlim = qlim_new
         else:
             raise ValueError("Can not set qlim on a static joint")
 
@@ -459,7 +528,7 @@ class BaseLink(SceneNode, ABC):
             - prismatic motion is a negative translation along the z-axis
 
         """
-        return self.isjoint and self.ets[-1].isflip
+        return self.v.isflip if self.v else False
 
     # -------------------------------------------------------------------------- #
 
@@ -768,7 +837,8 @@ class BaseLink(SceneNode, ABC):
             >>> robot[1].isjoint  # link with joint
             >>> robot[8].isjoint  # static link
         """
-        return len(self._ets) > 0 and self._ets[-1].isjoint
+        # return self.v.isjoint if self.v else False
+        return self._isjoint
 
     @property
     def jindex(self) -> Union[None, int]:
@@ -786,11 +856,12 @@ class BaseLink(SceneNode, ABC):
         .. note:: ``jindex`` values must be a sequence of integers starting
             at zero.
         """
-        return None if not self.isjoint else self._ets[-1]._jindex
+        return None if not self.v else self.v._jindex
 
     @jindex.setter
     def jindex(self, j: int):
-        self._ets[-1].jindex = j
+        if self.v:
+            self.v.jindex = j
 
     @property
     def isprismatic(self) -> bool:
@@ -799,7 +870,7 @@ class BaseLink(SceneNode, ABC):
         :return: True if is prismatic
         :rtype: bool
         """
-        return self.isjoint and self._ets[-1].istranslation
+        return self.v.istranslation if self.v else False
 
     @property
     def isrevolute(self) -> bool:
@@ -808,11 +879,7 @@ class BaseLink(SceneNode, ABC):
         :return: True if is revolute
         :rtype: bool
         """
-        return self.isjoint and self._ets[-1].isrotation
-
-    @property
-    def ets(self):
-        return self._ets
+        return self.v.isrotation if self.v else False
 
     @overload
     def parent(self: "Link") -> Union["Link", None]:
@@ -1245,28 +1312,40 @@ class Link(BaseLink):
             if jindex is not None:
                 self._ets[-1].jindex = jindex
 
-        # Private variable, can be written to but never replaced!
-        # The c will adjust the inside of this array with a reference
-        # to this specific array. If replaced --> segfault
-        self._fk = eye(4)
+    # @property
+    # def ets(self: "Link") -> "ETS":
+    #     """
+    #     Link transform in ETS form
 
-    @property
-    def ets(self: "Link") -> "ETS":
-        """
-        Link transform in ETS form
+    #     :return: elementary transform sequence for link transform
+    #     :rtype: ETS or ETS2 instance
 
-        :return: elementary transform sequence for link transform
-        :rtype: ETS or ETS2 instance
+    #     The sequence:
+    #         - has at least one element
+    #         - may include zero or more constant transforms
+    #         - no more than one variable transform, which if present will
+    #           be last in the sequence
+    #     """
+    #     return self._ets  # type: ignore
 
-        The sequence:
-            - has at least one element
-            - may include zero or more constant transforms
-            - no more than one variable transform, which if present will
-              be last in the sequence
-        """
-        return self._ets  # type: ignore
+    # @ets.setter
+    # def ets(self, new_ets: ETS):
+    #     if new_ets.n > 1:
+    #         raise ValueError("An elementary link can only have one joint variable")
 
-    def T(self, q: float = 0.0) -> SE3:
+    #     if new_ets.n == 1 and not new_ets[-1].isjoint:
+    #         raise ValueError("Variable link must be at the end of the ETS")
+
+    #     self._ets = new_ets
+
+    #     if self._ets.n:
+    #         self._v = self._ets[-1]
+    #         self._isjoint = True
+    #     else:
+    #         self._v = None
+    #         self._isjoint = False
+
+    def A(self, q: float = 0.0) -> SE3:
         """
         Link transform matrix
         :param q: Joint coordinate (radians or metres). Not required for links
@@ -1279,7 +1358,7 @@ class Link(BaseLink):
           the next, which depends on the joint coordinate ``q``.
         """
         if self.isjoint:
-            return SE3(self._Ts @ self._ets[-1].T(q), check=False)
+            return SE3(self._Ts @ self._ets[-1].A(q), check=False)
         else:
             return SE3(self._Ts, check=False)
 
@@ -1299,23 +1378,40 @@ class Link2(BaseLink):
             if jindex is not None:
                 self._ets[-1].jindex = jindex
 
-    @property
-    def ets(self) -> "ETS2":
-        """
-        Link transform in ETS form
+    # @property
+    # def ets(self) -> "ETS2":
+    #     """
+    #     Link transform in ETS form
 
-        :return: elementary transform sequence for link transform
-        :rtype: ETS or ETS2 instance
+    #     :return: elementary transform sequence for link transform
+    #     :rtype: ETS or ETS2 instance
 
-        The sequence:
-            - has at least one element
-            - may include zero or more constant transforms
-            - no more than one variable transform, which if present will
-              be last in the sequence
-        """
-        return self._ets  # type: ignore
+    #     The sequence:
+    #         - has at least one element
+    #         - may include zero or more constant transforms
+    #         - no more than one variable transform, which if present will
+    #           be last in the sequence
+    #     """
+    #     return self._ets
 
-    def T(self, q: float = 0.0) -> SE2:
+    # @ets.setter
+    # def ets(self, new_ets: ETS2):
+    #     if new_ets.n > 1:
+    #         raise ValueError("An elementary link can only have one joint variable")
+
+    #     if new_ets.n == 1 and not new_ets[-1].isjoint:
+    #         raise ValueError("Variable link must be at the end of the ETS")
+
+    #     self._ets = new_ets
+
+    #     if self._ets.n:
+    #         self._v = self._ets[-1]
+    #         self._isjoint = True
+    #     else:
+    #         self._v = None
+    #         self._isjoint = False
+
+    def A(self, q: float = 0.0) -> SE2:
         """
         Link transform matrix
 
@@ -1327,13 +1423,10 @@ class Link2(BaseLink):
         ``LINK.A(q)`` is an SE(3) matrix that describes the rigid-body
           transformation from the previous to the current link frame to
           the next, which depends on the joint coordinate ``q``.
-
-        If ``fast`` is True return a NumPy array, either SE(2) or SE(3).
-        A value of None means that it is the identity matrix.
         """
 
         if self.isjoint:
-            return SE2(self._Ts @ self._ets[-1].T(q), check=False)
+            return SE2(self._Ts @ self._ets[-1].A(q), check=False)
         else:
             return SE2(self._Ts, check=False)
 

@@ -34,9 +34,7 @@ class TestCustomXacro(unittest.TestCase):
                 )
 
                 self.grippers[0].tool = SE3(0, 0, 0.1034)
-                self.addconfiguration(
-                    "qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
-                )
+                self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
         temp_dir = tf.mkdtemp()
 

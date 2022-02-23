@@ -383,11 +383,11 @@ class TestETS(unittest.TestCase):
 
         et = r.pop(1)
         nt.assert_almost_equal(r.fkine(q), ans2)
-        nt.assert_almost_equal(et.T(q[1]), SE3.Ry(q[1]))
+        nt.assert_almost_equal(et.A(q[1]), SE3.Ry(q[1]))
 
         et = r.pop()
         nt.assert_almost_equal(r.fkine(q), ans3)
-        nt.assert_almost_equal(et.T(), SE3.Tz(1.543))
+        nt.assert_almost_equal(et.A(), SE3.Tz(1.543))
 
     def test_inv(self):
         q = [1.0, 2.0, 3.0]

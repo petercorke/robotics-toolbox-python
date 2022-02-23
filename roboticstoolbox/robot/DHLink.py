@@ -14,6 +14,7 @@ from typing import List, Union
 from functools import wraps
 from numpy import ndarray, cos, sin, array
 from spatialgeometry import Shape
+from copy import deepcopy
 
 # _eps = np.finfo(np.float64).eps
 
@@ -140,12 +141,23 @@ class DHLink(Link):
         mdh=False,
         offset=0,
         flip=False,
+        qlim: Union[ArrayLike, None] = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
 
         ets = self._to_ets(sigma, theta, d, alpha, a, offset, flip, mdh)
         self._ets = ets
+
+        # Set the variable et
+        for et in ets:
+            if et.isjoint:
+                self._v = et
+                break
+
+        # Set the qlim if provided now we have an ETS
+        if qlim is not None and self.v:
+            self.v.qlim = qlim
 
         # DH Kinematic parameters
         self.sigma = sigma
@@ -156,6 +168,7 @@ class DHLink(Link):
         self.mdh = mdh
         self.offset = offset
         self.id = None
+        self.mesh = None
 
     def _to_ets(self, sigma, theta, d, alpha, a, offset, flip: bool, mdh):
         ets = ETS()
@@ -210,6 +223,23 @@ class DHLink(Link):
                 ets *= ET.Rx(alpha)
 
         return ets
+
+    @property
+    def isjoint(self) -> bool:
+        """
+        Test if link has joint
+        :return: test if link has a joint
+        :rtype: bool
+        The ETS for each ELink comprises a constant part (possible the
+        identity) followed by an optional joint variable transform.
+        This property returns the whether the
+        .. runblock:: pycon
+            >>> from roboticstoolbox import models
+            >>> robot = models.URDF.Panda()
+            >>> robot[1].isjoint  # link with joint
+            >>> robot[8].isjoint  # static link
+        """
+        return True
 
     # @classmethod
     # def StandardDH(cls, links: List["StandardDH"]) -> List["DHLink"]:
@@ -359,6 +389,48 @@ class DHLink(Link):
         self._format(args, "alpha", "⍺")
         args.extend(super()._params())
         return name + "(" + ", ".join(args) + ")"
+
+    def __deepcopy__(self, memo):
+        kwargs = {
+            "name": deepcopy(self.name),
+            "joint_name": deepcopy(self._joint_name),
+            "m": deepcopy(self.m),
+            "r": deepcopy(self.r),
+            "I": deepcopy(self.I),
+            "Jm": deepcopy(self.Jm),
+            "B": deepcopy(self.B),
+            "Tc": deepcopy(self.Tc),
+            "G": deepcopy(self.G),
+            "qlim": deepcopy(self.qlim),
+            "geometry": [shape.copy() for shape in self._geometry],
+            "collision": [shape.copy() for shape in self._collision],
+            "d": deepcopy(self.d),
+            "alpha": deepcopy(self.alpha),
+            "theta": deepcopy(self.theta),
+            "a": deepcopy(self.a),
+            "sigma": deepcopy(self.sigma),
+            "mdh": deepcopy(self.mdh),
+            "offset": deepcopy(self.offset),
+            "flip": deepcopy(self.isflip),
+        }
+
+        cls = self.__class__
+
+        if "Revolute" in str(cls):
+            del kwargs["theta"]
+            del kwargs["sigma"]
+            del kwargs["mdh"]
+        elif "Prismatic" in str(cls):
+            del kwargs["d"]
+            del kwargs["sigma"]
+            del kwargs["mdh"]
+
+        result = cls(**kwargs)
+        result._robot = self.robot
+        result.sigma = self.sigma
+
+        memo[id(self)] = result
+        return result
 
     # -------------------------------------------------------------------------- #
 

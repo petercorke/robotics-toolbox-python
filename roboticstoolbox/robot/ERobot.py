@@ -110,18 +110,14 @@ class BaseERobot(Robot):
           J. Haviland and P. Corke
     """  # noqa E501
 
-    def __init__(
-        self, links, base_link=None, gripper_links=None, checkjindex=True, **kwargs
-    ):
+    def __init__(self, links, gripper_links=None, checkjindex=True, **kwargs):
         self._path_cache_fknm = {}
         self._path_cache = {}
         self._eye_fknm = eye(4)
 
-        # self._ets = []
         self._linkdict = {}
         self._n = 0
         self._ee_links = []
-        # self._base_link = None
 
         # Ordered links, we reorder the input elinks to be in depth first
         # search order
@@ -176,6 +172,11 @@ class BaseERobot(Robot):
                 "Invalid link configuration provided, must have a base link"
             )
 
+        # Scene node, set links between the links
+        for link in links:
+            if link.parent is not None:
+                link.scene_parent = link.parent
+
         # Set up the gripper, make a list containing the root of all
         # grippers
         if gripper_links is not None:
@@ -213,7 +214,7 @@ class BaseERobot(Robot):
         else:
             for link in gripper_links:
                 # use the passed in value
-                self.ee_links.append(link.parent)
+                self.ee_links.append(link.parent)  # type: ignore
 
         # assign the joint indices
         if all([link.jindex is None for link in links]):
@@ -267,11 +268,6 @@ class BaseERobot(Robot):
 
         # Initialise Robot object
         super().__init__(orlinks, **kwargs)
-
-        # Scene node, set links between the links
-        for link in self.links:
-            if link.parent is not None:
-                link.scene_parent = link.parent
 
         # SceneNode, set a reference to the first link
         self.scene_children = [self.links[0]]
@@ -821,9 +817,9 @@ class BaseERobot(Robot):
             T = Tparent
             while True:
                 if isinstance(self, ERobot):
-                    T *= SE3(link.T(q[link.jindex]))
+                    T *= SE3(link.A(q[link.jindex]))
                 else:
-                    T *= SE2(link.T(q[link.jindex]))
+                    T *= SE2(link.A(q[link.jindex]))
 
                 Tall[link.number] = T
 
@@ -1290,6 +1286,7 @@ class ERobot(BaseERobot):
 
     # --------------------------------------------------------------------- #
 
+    # TODO REMOVE THIS
     def _reset_cache(self):
         self._path_cache = {}
         self._path_cache_fknm = {}
@@ -1304,7 +1301,7 @@ class ERobot(BaseERobot):
 
     def _to_dict(self, robot_alpha=1.0, collision_alpha=0.0):
 
-        self._set_link_fk(self.q)
+        # self._set_link_fk(self.q)
 
         ob = []
 
@@ -1331,6 +1328,9 @@ class ERobot(BaseERobot):
                     for gi in link.collision:
                         gi.set_alpha(collision_alpha)
                         ob.append(gi.to_dict())
+
+        # for o in ob:
+        #     print(o)
 
         return ob
 
@@ -2097,7 +2097,7 @@ class ERobot(BaseERobot):
             vJ = SpatialVelocity(s[j] * qd[j])
 
             # transform from parent(j) to j
-            Xup[j] = SE3(self.links[j].T(q[j])).inv()
+            Xup[j] = SE3(self.links[j].A(q[j])).inv()
 
             if self.links[j].parent is None:
                 v[j] = vJ

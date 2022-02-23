@@ -789,8 +789,8 @@ class TestERobot(unittest.TestCase):
     def test_init2(self):
         l0 = Link()
         l1 = Link(parent=l0)
-        r = ERobot([l0, l1], base=sm.SE3.Rx(1.3), base_link=l1)
-        r.base_link = l1
+        r = ERobot([l0, l1], base=sm.SE3.Rx(1.3))
+        # r.base_link = l1
 
         with self.assertRaises(TypeError):
             ERobot(l0, base=sm.SE3.Rx(1.3))

@@ -1,6 +1,6 @@
 # import sys
 from abc import ABC, abstractproperty
-import copy
+from copy import deepcopy
 import numpy as np
 import roboticstoolbox as rtb
 from spatialmath import SE3, SE2
@@ -22,7 +22,7 @@ from fknm import Robot_link_T
 from functools import lru_cache
 from spatialgeometry import SceneNode
 from roboticstoolbox.robot.Link import BaseLink, Link
-from numpy import all, eye
+from numpy import all, eye, isin
 
 try:
     from matplotlib import colors
@@ -105,6 +105,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
             if isinstance(link, Link):
                 if len(link.geometry) > 0:
                     self._hasgeometry = True
+
         self._links = links
         self._nlinks = len(links)
 
@@ -123,7 +124,39 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         self._configs = {}
 
     def copy(self):
-        return copy.deepcopy(self)
+        return deepcopy(self)
+
+    def __deepcopy__(self, memo):
+
+        links = []
+
+        for link in self.links:
+            links.append(deepcopy(link))
+
+        name = deepcopy(self.name)
+        manufacturer = deepcopy(self.manufacturer)
+        comment = deepcopy(self.comment)
+        base = deepcopy(self.base)
+        tool = deepcopy(self.tool)
+        gravity = deepcopy(self.gravity)
+        keywords = deepcopy(self.keywords)
+        symbolic = deepcopy(self.symbolic)
+
+        cls = self.__class__
+        result = cls(
+            links=links,
+            name=name,
+            manufacturer=manufacturer,
+            comment=comment,
+            base=base,
+            tool=tool,
+            gravity=gravity,
+            keywords=keywords,
+            symbolic=symbolic,
+        )
+
+        memo[id(self)] = result
+        return result
 
     def __repr__(self):
         return str(self)
@@ -133,7 +166,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         return self
 
     def __next__(self):
-        if self._iter < len(self.links) - 1:
+        if self._iter < len(self.links):
             link = self[self._iter]
             self._iter += 1
             return link
@@ -1062,21 +1095,6 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         # self._T is a copy of SceneNode.__T
         return SE3(self._T, check=False)
 
-    # @property
-    # def _base(self) -> Union[SE3, None]:
-    #     """
-    #     Get robot base transform (Robot superclass)
-
-    #     This differs from robot.base in that if the base is an identity transform
-    #     then None is returned
-
-    #     """
-
-    #     if all(self._T == eye(4)):
-    #         return None
-    #     else:
-    #         return SE3(self._T, check=False)
-
     @base.setter
     def base(self, T: Union[np.ndarray, SE3]):
 
@@ -1108,7 +1126,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         return SE3(self._tool, check=False)
 
     @tool.setter
-    def tool(self, T):
+    def tool(self, T: Union[SE3, np.ndarray]):
         if isinstance(T, SE3):
             self._tool = T.A
         else:
@@ -2021,6 +2039,8 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
             return [link._T_reference for link in self.links]
 
         Robot_link_T(get_link_ets(), get_link_scene_node(), self._q, q)
+
+        [gripper._update_link_tf() for gripper in self.grippers]
 
     # --------------------------------------------------------------------- #
 
