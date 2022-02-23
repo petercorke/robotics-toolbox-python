@@ -1433,10 +1433,10 @@ class TestDHRobot(unittest.TestCase):
     def test_control_type(self):
         panda = rp.models.DH.Panda()
 
-        panda.control_type = "p"
+        panda.control_mode = "p"
 
         with self.assertRaises(ValueError):
-            panda.control_type = "z"
+            panda.control_mode = "z"
 
     def test_plot_vellipse(self):
         panda = rp.models.DH.Panda()
