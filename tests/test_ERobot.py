@@ -220,10 +220,10 @@ class TestERobot(unittest.TestCase):
         pose = sm.SE3()
 
         panda.base = pose.A
-        nt.assert_array_almost_equal(np.eye(4), panda.base)
+        nt.assert_array_almost_equal(np.eye(4), panda.base.A)
 
         panda.base = pose
-        nt.assert_array_almost_equal(np.eye(4), panda.base)
+        nt.assert_array_almost_equal(np.eye(4), panda.base.A)
 
     def test_fkine(self):
         panda = rtb.models.ETS.Panda()
@@ -241,7 +241,7 @@ class TestERobot(unittest.TestCase):
         )
 
         # panda.q = q1
-        nt.assert_array_almost_equal(panda.fkine(q1), ans)
+        nt.assert_array_almost_equal(panda.fkine(q1).A, ans)
 
     def test_jacob0(self):
         panda = rtb.models.ETS.Panda()

@@ -221,7 +221,7 @@ class TestETS2(unittest.TestCase):
 
         q2 = [y]
         ans6 = SE2(y) * tool
-        nt.assert_almost_equal(r2.fkine(q2, tool=tool), ans6)  # type: ignore
+        nt.assert_almost_equal(r2.fkine(q2, tool=tool), ans6.A)  # type: ignore
         # nt.assert_almost_equal(r2.fkine(q2, tool=tool.A), ans6)  # type: ignore
 
     def test_pop(self):
@@ -237,15 +237,15 @@ class TestETS2(unittest.TestCase):
 
         r = a + b + c + d
 
-        nt.assert_almost_equal(r.fkine(q), ans1)
+        nt.assert_almost_equal(r.fkine(q), ans1.A)
 
         et = r.pop(1)
-        nt.assert_almost_equal(r.fkine(q), ans2)
-        nt.assert_almost_equal(et.A(q[1]), SE2(q[1]))
+        nt.assert_almost_equal(r.fkine(q), ans2.A)
+        nt.assert_almost_equal(et.A(q[1]), SE2(q[1]).A)
 
         et = r.pop()
-        nt.assert_almost_equal(r.fkine(q), ans3)
-        nt.assert_almost_equal(et.A(), SE2.Tx(1.543))
+        nt.assert_almost_equal(r.fkine(q), ans3.A)
+        nt.assert_almost_equal(et.A(), SE2.Tx(1.543).A)
 
     def test_inv(self):
         q = [1.0, 2.0, 3.0]
@@ -259,7 +259,7 @@ class TestETS2(unittest.TestCase):
         r = a + b + c + d
         r_inv = r.inv()
 
-        nt.assert_almost_equal(r_inv.fkine(q), ans1.inv())
+        nt.assert_almost_equal(r_inv.fkine(q), ans1.inv().A)
 
     def test_jointset(self):
         q = [1.0, 2.0, 3.0]

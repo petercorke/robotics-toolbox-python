@@ -308,10 +308,10 @@ class TestET(unittest.TestCase):
         r3i = r3.inv()
         r4i = r4.inv()
 
-        nt.assert_almost_equal(r1i.A(), np.linalg.inv(SE3.Rx(2.5)))
-        nt.assert_almost_equal(r2i.A(), np.linalg.inv(SE3.Tx(1.0)))
-        nt.assert_almost_equal(r3i.A(), np.linalg.inv(se3))
-        nt.assert_almost_equal(r4i.A(5.0), np.linalg.inv(SE3.Rx(5.0)))
+        nt.assert_almost_equal(r1i.A(), np.linalg.inv(SE3.Rx(2.5).A))
+        nt.assert_almost_equal(r2i.A(), np.linalg.inv(SE3.Tx(1.0).A))
+        nt.assert_almost_equal(r3i.A(), np.linalg.inv(se3.A))
+        nt.assert_almost_equal(r4i.A(5.0), np.linalg.inv(SE3.Rx(5.0).A))
 
     def test_with_qlim(self):
         r1 = rtb.ET.Rx(2.5, qlim=(1, -1))
