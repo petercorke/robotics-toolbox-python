@@ -1862,7 +1862,7 @@ class ERobot(BaseERobot):
 
             pd = zeros(size)
 
-            for i in range(nl ** c):
+            for i in range(nl**c):
 
                 rot = zeros(3)
                 trn = zeros(3)
@@ -1892,55 +1892,55 @@ class ERobot(BaseERobot):
 
         return d[-1]
 
-    def jacob0_analytic(
-        self,
-        q: ArrayLike,
-        end: Union[str, Link, Gripper] = None,
-        start: Union[str, Link, Gripper] = None,
-        tool: Union[ndarray, SE3, None] = None,
-        analytic: str = "rpy-xyz",
-    ):
-        r"""
-        Manipulator analytical Jacobian in the ``start`` frame
+    # def jacob0_analytic(
+    #     self,
+    #     q: ArrayLike,
+    #     end: Union[str, Link, Gripper] = None,
+    #     start: Union[str, Link, Gripper] = None,
+    #     tool: Union[ndarray, SE3, None] = None,
+    #     analytic: str = "rpy-xyz",
+    # ):
+    #     r"""
+    #     Manipulator analytical Jacobian in the ``start`` frame
 
-        :param q: Joint coordinate vector
-        :type q: Arraylike
-        :param end: the particular link or gripper whose velocity the Jacobian
-            describes, defaults to the base link
-        :param start: the link considered as the end-effector, defaults to the robots's end-effector
-        :param tool: a static tool transformation matrix to apply to the
-            end of end, defaults to None
-        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
+    #     :param q: Joint coordinate vector
+    #     :type q: Arraylike
+    #     :param end: the particular link or gripper whose velocity the Jacobian
+    #         describes, defaults to the base link
+    #     :param start: the link considered as the end-effector, defaults to the robots's end-effector
+    #     :param tool: a static tool transformation matrix to apply to the
+    #         end of end, defaults to None
+    #     :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
 
-        :return J: Manipulator Jacobian in the ``start`` frame
+    #     :return J: Manipulator Jacobian in the ``start`` frame
 
-        - ``robot.jacob0_analytic(q)`` is the manipulator Jacobian matrix which maps
-          joint  velocity to end-effector spatial velocity expressed in the
-          ``start`` frame.
+    #     - ``robot.jacob0_analytic(q)`` is the manipulator Jacobian matrix which maps
+    #       joint  velocity to end-effector spatial velocity expressed in the
+    #       ``start`` frame.
 
-        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
-        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+    #     End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+    #     is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        ``analytic`` can be one of:
-            =============  ==================================
-            Value          Rotational representation
-            =============  ==================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
-            ``'eul'``      Euler angular rates in ZYZ order
-            ``'exp'``      exponential coordinate rates
-            =============  ==================================
+    #     ``analytic`` can be one of:
+    #         =============  ==================================
+    #         Value          Rotational representation
+    #         =============  ==================================
+    #         ``'rpy-xyz'``  RPY angular rates in XYZ order
+    #         ``'rpy-zyx'``  RPY angular rates in XYZ order
+    #         ``'eul'``      Euler angular rates in ZYZ order
+    #         ``'exp'``      exponential coordinate rates
+    #         =============  ==================================
 
-        Example:
-        .. runblock:: pycon
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.ETS.Puma560()
-            >>> puma.jacob0_analytic([0, 0, 0, 0, 0, 0])
+    #     Example:
+    #     .. runblock:: pycon
+    #         >>> import roboticstoolbox as rtb
+    #         >>> puma = rtb.models.ETS.Puma560()
+    #         >>> puma.jacob0_analytic([0, 0, 0, 0, 0, 0])
 
-        .. warning:: ``start`` and ``end`` must be on the same branch,
-            with ``start`` closest to the base.
-        """  # noqa
-        return self.ets(start, end).jacob0_analytic(q, tool=tool, analytic=analytic)
+    #     .. warning:: ``start`` and ``end`` must be on the same branch,
+    #         with ``start`` closest to the base.
+    #     """  # noqa
+    #     return self.ets(start, end).jacob0_analytic(q, tool=tool, analytic=analytic)
 
     def link_collision_damper(
         self,
