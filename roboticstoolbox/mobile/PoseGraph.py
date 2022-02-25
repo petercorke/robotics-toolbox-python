@@ -286,14 +286,20 @@ class PoseGraph:
         return self.vindex[i].time
     
     def plot(self, **kwargs):
-        if not 'vertex' in kwargs:
-            kwargs['vertex'] = dict(markersize=8, markerfacecolor='blue', markeredgecolor='None')
-        if not 'edge' in kwargs:
-            kwargs['edge'] = dict(linewidth=1, color='black')
-        self.graph.plot(colorcomponents=False, **kwargs)
+        if not 'vopt' in kwargs:
+            kwargs['vopt'] = dict(markersize=8, markerfacecolor='blue', markeredgecolor='None')
+        if not 'eopt' in kwargs:
+            kwargs['eopt'] = dict(linewidth=1)
+        self.graph.plot(colorcomponents=False, force2d=True, **kwargs)
         plt.xlabel('x')
         plt.ylabel('y')
         plt.grid(True)
+
+    def scanmatch(self, s1, s2):
+        p1 = self.scanxy(s1)
+        p2 = self.scanxy(s2)
+        T = base.ICP2d(p1, p2)
+        return SE2(T)
     
     def scanmap(self, occgrid, maxrange=None):
         # note about maxrange timing
@@ -409,11 +415,23 @@ class PoseGraph:
     def optimize(self, iterations = 10, animate = False, retain = False, **kwargs):
         
         eprev  =  math.inf
+
+        if animate and retain:
+            colors = plt.cm.Greys(np.linspace(0.3, 1, iterations))
+            if 'eopt' in kwargs:
+                eo = kwargs['eopt']
+                kwargs = {k: v for (k, v) in kwargs.items() if k != 'eopt'}
+            else:
+                eo = {}
+
         for i in range(iterations):
             if animate:
                 if not retain:
                     plt.clf()
-                self.graph.plot(**kwargs)
+                    eopt = eo
+                else:
+                    eopt = {**eo, **dict(color=tuple(colors[i, :]), label=i)}
+                self.graph.plot(eopt=eopt, force2d=True, colorcomponents=False, **kwargs)
                 plt.pause(0.5)
             
             energy = self.linearize_and_solve()

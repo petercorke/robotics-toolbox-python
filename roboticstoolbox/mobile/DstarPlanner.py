@@ -27,7 +27,9 @@ show_animation = True
 # https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning
 # D* grid planning
 # Author: Nirnay Roy
-#
+# Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
+
 # for performance reasons there are some important differences compared to
 # the version from Python Robotics:
 #
@@ -275,6 +277,8 @@ class _Dstar:
 
 # ====================== RTB wrapper ============================= #
 
+# Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
 class DstarPlanner(PlannerBase):
     r"""
     D* path planner
@@ -287,7 +291,7 @@ class DstarPlanner(PlannerBase):
     Feature              Capability
     ==================   ========================
     Plan                 :math:`\mathbb{R}^2`, discrete
-    Obstacle avoidance   Yes
+    Obstacle avoidance   Yes, occupancy grid
     Curvature            Discontinuous
     Motion               Omnidirectional
     ==================   ========================
@@ -368,7 +372,6 @@ class DstarPlanner(PlannerBase):
         
         if summary:
             print(self._Dstar.ninsert, self._Dstar.nin)
-
 
     @property
     def nexpand(self):

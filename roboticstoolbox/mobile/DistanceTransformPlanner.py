@@ -1,10 +1,6 @@
 """
-Python ReedShepp Planner
-@Author: Kristian Gibson
-TODO: Comments + Sphynx Docs Structured Text
-TODO: Bug-fix, testing
-
-Not ready for use yet.
+@Author: Peter Corke, original MATLAB code and Python version
+@Author: Kristian Gibson, initial MATLAB port
 """
 from numpy import disp
 from scipy import integrate
@@ -32,7 +28,7 @@ class DistanceTransformPlanner(PlannerBase):
     Feature              Capability
     ==================   ========================
     Plan                 :math:`\mathbb{R}^2`, discrete
-    Obstacle avoidance   Yes
+    Obstacle avoidance   Yes, occupancy grid
     Curvature            Discontinuous
     Motion               Omnidirectional
     ==================   ========================

@@ -1,7 +1,7 @@
 """
 Python PRM
-@Author: Kristian Gibson
-
+@Author: Peter Corke, original MATLAB code and Python version
+@Author: Kristian Gibson, initial MATLAB port
 """
 from multiprocessing.sharedctypes import Value
 from numpy import disp
@@ -37,7 +37,7 @@ class PRMPlanner(PlannerBase):
     Feature              Capability
     ==================   ========================
     Plan                 Cartesian space
-    Obstacle avoidance   Yes
+    Obstacle avoidance   Yes, occupancy grid
     Curvature            Discontinuous
     Motion               Omnidirectional
     ==================   ========================

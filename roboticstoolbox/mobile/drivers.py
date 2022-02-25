@@ -1,7 +1,7 @@
 """
 Python Vehicle
-@Author: Kristian Gibson
-@Author: Peter Corke
+@Author: Peter Corke, original MATLAB code and Python version
+@Author: Kristian Gibson, initial MATLAB port
 """
 from abc import ABC, abstractmethod
 import warnings
@@ -79,7 +79,7 @@ class RandomPath(VehicleDriverBase):
         """
         Driving agent for random path
 
-        :param workspace: dimension of workspace
+        :param workspace: dimension of workspace, see :func:`spatialmath.base.exand_dims`
         :type workspace: scalar, array_like(2), array_like(4)
         :param speed: forward speed, defaults to 1
         :type speed: float, optional
