@@ -1044,11 +1044,16 @@ class ETS(BaseETS):
         elif analytic == "exp":
             # TODO: move to SMTB.base, Horner form with skew(v)
             gamma = trlog(t2r(T), twist=True)
+        elif analytic == None:
+            return J
         else:
             raise ValueError("bad analyical value specified")
 
         A = angvelxform(gamma, representation=analytic)
         J = A @ J
+
+        # A = angvelxform(t2r(T), inverse=True, representation=analytic)
+        # J = A @ J
 
         return J
 
