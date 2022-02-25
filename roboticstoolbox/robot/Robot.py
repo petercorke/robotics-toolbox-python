@@ -930,7 +930,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         # Jd = H qd using mode 3 product
         Jd = np.zeros((6, n))
         for i in range(n):
-            Jd += H[:, :, i] * qd[i]
+            Jd += H[i, :, :] * qd[i]
 
         if analytical is not None:
             # determine analytic rotation
