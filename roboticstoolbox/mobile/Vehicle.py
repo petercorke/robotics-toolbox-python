@@ -1,7 +1,7 @@
 """
 Python Vehicle
-@Author: Kristian Gibson
-@Author: Peter Corke
+@Author: Peter Corke, original MATLAB code and Python version
+@Author: Kristian Gibson, initial MATLAB port
 """
 from abc import ABC, abstractmethod
 import warnings

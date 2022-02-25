@@ -1,24 +1,12 @@
-"""
+# ======================================================================== #
 
-Dubins path planner sample code
+# The following code is modified from Python Robotics
+# https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning
+# Dubins planning
+# Author: Atsushi Sakai 
+# Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
 
-author Atsushi Sakai(@Atsushi_twi)
-
-The MIT License (MIT)
-
-Copyright (c) 2016 - 2021 Atsushi Sakai
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-"""
 import math
 from collections import namedtuple
 from roboticstoolbox.mobile import PlannerBase
@@ -303,7 +291,10 @@ def path_planning(start, goal, curvature, step_size=0.1):
     path = np.c_[x_list, y_list, yaw_list]
     return path, length, mode, lengths
 
-# ============================================================================
+# ====================== RTB wrapper ============================= #
+
+# Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
 class DubinsPlanner(PlannerBase):
     r"""
     Dubins path planner
@@ -345,7 +336,7 @@ class DubinsPlanner(PlannerBase):
         79(3): 497–516.
 
     :thanks: based on Dubins path planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
-    :seealso: :class:`PlannerBase`
+    :seealso: :class:`ReedsSheppPlanner` :class:`PlannerBase`
     """
     def __init__(self, curvature=1, stepsize=0.1, **kwargs):
 
@@ -358,7 +349,7 @@ class DubinsPlanner(PlannerBase):
 
     def query(self, start, goal, **kwargs):
         r"""
-        Find a path betwee two configurations
+        Find a path between two configurations
 
         :param start: start configuration :math:`(x, y, \theta)`
         :type start: array_like(3), optional

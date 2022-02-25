@@ -212,11 +212,11 @@ class PlannerBase(ABC):
 
         Has methods including:
 
-            - :meth:`integers(low, high, size, endpoint) <numpy.random.Generator.integers>`
-            - :meth:`random(size) <numpy.random.Generator.random>`
-            - :meth:`uniform(low, high, size) <numpy.random.Generator.uniform>`
-            - :meth:`normal(mean, std, size) <numpy.random.Generator.normal>`
-            - :meth:`multivariate_normal(mean, covar, size) <numpy.random.Generator.multivariate_normal>`
+        - :meth:`integers(low, high, size, endpoint) <numpy.random.Generator.integers>`
+        - :meth:`random(size) <numpy.random.Generator.random>`
+        - :meth:`uniform(low, high, size) <numpy.random.Generator.uniform>`
+        - :meth:`normal(mean, std, size) <numpy.random.Generator.normal>`
+        - :meth:`multivariate_normal(mean, covar, size) <numpy.random.Generator.multivariate_normal>`
 
         The generator is initialized with the seed provided at constructor
         time.

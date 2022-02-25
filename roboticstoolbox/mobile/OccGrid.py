@@ -444,6 +444,7 @@ class OccupancyGrid(BaseOccupancyGrid):
         >>> og = OccupancyGrid(workspace=[-5,5], cellsize=0.1, value=0.5)
         >>> print(og)
 
+    :seealso: :class:`BinaryOccupancyGrid`
     """
 
 

@@ -86,7 +86,7 @@ class LatticePlanner(PlannerBase):
     Feature              Capability
     ==================   ========================
     Plan                 :math:`\SE{2}`
-    Obstacle avoidance   Yes
+    Obstacle avoidance   Yes, occupancy grid
     Curvature            Discontinuous
     Motion               Forwards only
     ==================   ========================

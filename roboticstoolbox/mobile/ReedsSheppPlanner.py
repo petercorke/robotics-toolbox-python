@@ -1,24 +1,3 @@
-"""
-
-Reeds Shepp path planner sample code
-
-author Atsushi Sakai(@Atsushi_twi)
-
-The MIT License (MIT)
-
-Copyright (c) 2016 - 2021 Atsushi Sakai
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-"""
 import math
 from collections import namedtuple
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
@@ -27,6 +6,14 @@ import numpy as np
 from spatialmath import *
 from spatialmath import base
 
+# ======================================================================== #
+
+# The following code is modified from Python Robotics
+# https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning
+# D* grid planning
+# Author: Atsushi Sakai 
+# Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
 
 class _Path:
 
@@ -373,8 +360,10 @@ def reeds_shepp_path_planning(start, goal, maxc, step_size):
 
     return bpath
 
-# ============================================================================
+# ====================== RTB wrapper ============================= #
 
+# Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
 class ReedsSheppPlanner(PlannerBase):
     r"""
     Reeds-Shepp path planner
@@ -416,7 +405,7 @@ class ReedsSheppPlanner(PlannerBase):
         pp. 367–393. 
 
     :thanks: based on Reeds-Shepp path planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
-    :seealso: :class:`PlannerBase`
+    :seealso: :class:`DubinsPlanner` :class:`PlannerBase`
     """
     def __init__(self, curvature=1, stepsize=0.1, **kwargs):
         super().__init__(ndims=3, **kwargs)
@@ -428,7 +417,7 @@ class ReedsSheppPlanner(PlannerBase):
 
     def query(self, start, goal, **kwargs):
         r"""
-        Find a path betwee two configurations
+        Find a path between two configurations
 
         :param start: start configuration :math:`(x, y, \theta)`
         :type start: array_like(3), optional
