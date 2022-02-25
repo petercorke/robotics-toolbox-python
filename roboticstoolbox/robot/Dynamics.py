@@ -65,7 +65,7 @@ class DynamicsMixin:
             >>> robot.links[2].dyntable()
             >>> robot.dyntable()
         """
-        unicode = rtb_get_param('unicode')
+        unicode = rtb_get_param("unicode")
         table = ANSITable(
             Column("j", colalign=">", headalign="^"),
             Column("m", colalign="<", headalign="^"),
@@ -851,8 +851,7 @@ class DynamicsMixin:
         else:
             return taug
 
-    def inertia_x(self, q=None, pinv=False, representation="rpy/xyz", 
-            Ji=None):
+    def inertia_x(self, q=None, pinv=False, representation="rpy/xyz", Ji=None):
         r"""
         Operational space inertia matrix
 
@@ -916,7 +915,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0(q[0, :], analytical=representation)
+                Ja = self.jacob0_analytic(q[0, :], analytic=representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -929,7 +928,7 @@ class DynamicsMixin:
             Mt = np.zeros((q.shape[0], 6, 6))
 
             for k, qk in enumerate(q):
-                Ja = self.jacob0(qk, analytical=representation)
+                Ja = self.jacob0_analytic(qk, analytic=representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -939,8 +938,18 @@ class DynamicsMixin:
 
             return Mt
 
-    def coriolis_x(self, q, qd, pinv=False, representation="rpy/xyz",
-        J=None, Ji=None, Jd=None, C=None, Mx=None):
+    def coriolis_x(
+        self,
+        q,
+        qd,
+        pinv=False,
+        representation="rpy/xyz",
+        J=None,
+        Ji=None,
+        Jd=None,
+        C=None,
+        Mx=None,
+    ):
         r"""
         Operational space Coriolis and centripetal term
 
@@ -1050,8 +1059,9 @@ class DynamicsMixin:
 
             return Ct
 
-    def gravload_x(self, q=None, gravity=None, pinv=False, representation="rpy/xyz",
-                    Ji=None):
+    def gravload_x(
+        self, q=None, gravity=None, pinv=False, representation="rpy/xyz", Ji=None
+    ):
         """
         Operational space gravity load
 
@@ -1151,7 +1161,9 @@ class DynamicsMixin:
 
             return taug
 
-    def accel_x(self, q, xd, wrench, gravity=None, pinv=False, representation="rpy/xyz"):
+    def accel_x(
+        self, q, xd, wrench, gravity=None, pinv=False, representation="rpy/xyz"
+    ):
         r"""
         Operational space acceleration due to applied wrench
 
