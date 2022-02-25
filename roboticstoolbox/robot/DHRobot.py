@@ -15,7 +15,16 @@ from roboticstoolbox import rtb_set_param
 from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix
 
 # from spatialmath import base
-from spatialmath.base import tr2jac, tr2eul, tr2rpy, t2r, eul2jac, rpy2jac, trlog, angvelxform
+from spatialmath.base import (
+    tr2jac,
+    tr2eul,
+    tr2rpy,
+    t2r,
+    eul2jac,
+    rpy2jac,
+    trlog,
+    angvelxform,
+)
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
 
@@ -835,7 +844,7 @@ class DHRobot(Robot):
 
         return tw, T[-1]
 
-    def ets(self):
+    def ets(self, *args, **kwargs):
         """
         Robot kinematics as an elemenary transform sequence
 
