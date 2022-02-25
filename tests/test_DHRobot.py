@@ -1259,8 +1259,6 @@ class TestDHRobot(unittest.TestCase):
         for i in range(puma.n):
             Jd += H[:, :, i] * qd[i]
 
-        res = [-0.0000, -1.0654, -0.3702, 2.4674, 0, 0]
-
         nt.assert_array_almost_equal(j0, Jd, decimal=4)
 
     def test_yoshi(self):
