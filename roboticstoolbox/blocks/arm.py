@@ -8,7 +8,7 @@ from spatialmath import base, SE3
 from bdsim.components import TransferBlock, FunctionBlock, SourceBlock
 from bdsim.graphics import GraphicsBlock
 
-from roboticstoolbox import tpoly_func, lspb_func
+from roboticstoolbox import tpoly_func, trapezoidal_func
 
 """
 Robot blocks:
@@ -1098,7 +1098,7 @@ class Traj(FunctionBlock):
     nout = 3
     outlabels = ('q',)
 
-    def __init__(self, y0=0, yf=1, T=None, time=False, traj="lspb", **blockargs):
+    def __init__(self, y0=0, yf=1, T=None, time=False, traj="trapezoidal", **blockargs):
         """
 
         :param y0: initial value, defaults to 0
@@ -1109,7 +1109,7 @@ class Traj(FunctionBlock):
         :type T: array_like or int, optional
         :param time: x is simulation time, defaults to False
         :type time: bool, optional
-        :param traj: trajectory type, one of: 'lspb' [default], 'tpoly'
+        :param traj: trajectory type, one of: 'trapezoidal' [default], 'tpoly'
         :type traj: str, optional
         :param blockargs: |BlockOptions|
         :type blockargs: dict
@@ -1149,8 +1149,8 @@ class Traj(FunctionBlock):
             assert self.x[0] <= 0, "interpolation not defined for t=0"
             assert self.x[-1] >= self.bd.T, "interpolation not defined for t=T"
 
-        if self.traj == "lspb":
-            trajfunc = lspb_func
+        if self.traj == "trapezoidal":
+            trajfunc = trapezoidal_func
         elif self.traj == "tpoly":
             trajfunc = tpoly_func
 
@@ -1394,10 +1394,10 @@ class LSPB(SourceBlock):
 
         if self.T is None:
             self.T = self.bd.state.T
-        self.lspbfunc = lspb_func(self.q0, self.qf, self.T)
+        self.trapezoidalfunc = trapezoidal_func(self.q0, self.qf, self.T)
 
     def output(self, t=None):
-        return self.lspbfunc(t)
+        return self.trapezoidalfunc(t)
 
 # ------------------------------------------------------------------------ #
 
@@ -1426,7 +1426,7 @@ class CTraj(SourceBlock):
         T1,
         T2,
         T,
-        lspb=True,
+        trapezoidal=True,
         **blockargs
     ):
         """
@@ -1438,8 +1438,8 @@ class CTraj(SourceBlock):
         :type T2: SE3
         :param T: motion time
         :type T: float
-        :param lspb: Use LSPB motion profile along the path
-        :type lspb: bool
+        :param trapezoidal: Use LSPB motion profile along the path
+        :type trapezoidal: bool
         :param blockargs: |BlockOptions|
         :type blockargs: dict
         :return: CTRAJ block
@@ -1452,7 +1452,7 @@ class CTraj(SourceBlock):
         
         If ``T`` is not given it defaults to the simulation time.
 
-        If ``lspb`` is True then an LSPB motion profile is used along the path
+        If ``trapezoidal`` is True then a trapezoidal motion profile is used along the path
         to provide initial acceleration and final deceleration.  Otherwise,
         motion is at constant velocity.
 
@@ -1471,12 +1471,12 @@ class CTraj(SourceBlock):
     def start(self, state):
         if self.T is None:
             self.T = self.bd.state.T
-        if self.lspb:
-            self.lspbfunc = lspb_func(self.q0, self.qf, self.T)
+        if self.trapezoidal:
+            self.trapezoidalfunc = trapezoidal_func(self.q0, self.qf, self.T)
 
     def output(self, t=None):
-        if lspb:
-            s = self.lspbfunc(t)
+        if trapezoidal:
+            s = self.trapezoidalfunc(t)
         else:
             s = np.min(t / self.T, 1.0)
 

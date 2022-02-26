@@ -8,8 +8,8 @@ from roboticstoolbox.tools.trajectory import (
     jtraj,
     mtraj,
     ctraj,
-    lspb,
-    lspb_func,
+    trapezoidal,
+    trapezoidal_func,
     mstraj,
 )
 from roboticstoolbox.tools.numerical import jacobian_numerical, hessian_numerical
@@ -31,8 +31,8 @@ __all__ = [
     "tpoly_func",
     "jtraj",
     "ctraj",
-    "lspb",
-    "lspb_func",
+    "trapezoidal",
+    "trapezoidal_func",
     "xplot",
     "mtraj",
     "mstraj",
