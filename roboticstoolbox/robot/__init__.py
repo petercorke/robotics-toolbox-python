@@ -8,7 +8,12 @@ from roboticstoolbox.robot.DHLink import (
     RevoluteMDH,
     PrismaticMDH,
 )
-from roboticstoolbox.robot.PoERobot import PoELink, PoERobot
+from roboticstoolbox.robot.PoERobot import (
+    PoELink,
+    PoERobot,
+    PoERevolute, 
+    PoEPrismatic
+)
 from roboticstoolbox.robot.ERobot import ERobot, ERobot2
 from roboticstoolbox.robot.FastRobot import FastRobot
 
@@ -40,8 +45,10 @@ __all__ = [
     "ETS2",
     "Gripper",
     "KinematicCache",
-    "PoELink",
     "PoERobot",
+    "PoELink",
+    "PoEPrismatic",
+    "PoERevolute",
     "ET",
     "ET2",
 ]
