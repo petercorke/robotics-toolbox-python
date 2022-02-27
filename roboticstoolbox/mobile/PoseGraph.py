@@ -326,7 +326,7 @@ class PoseGraph:
 
                 # all cells along the ray
                 try:
-                    k = occgrid.line(p1, p2)
+                    k = occgrid._line(p1, p2)
                 except ValueError:
                     # silently ignore rays to points outside the grid map
                     continue

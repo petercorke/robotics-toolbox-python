@@ -286,7 +286,7 @@ class RangeBearingSensor(SensorBase):
         else:
             self._theta_range = [-angle, angle]
 
-        self._plot = plot
+        self._animate = plot
         self._landmarklog = []
 
         self._random = np.random.default_rng(seed)
@@ -316,7 +316,7 @@ class RangeBearingSensor(SensorBase):
         super().init()
         self._landmarklog = []
 
-        if self._plot:
+        if self._animate:
             self.map.plot()
 
     @property
@@ -537,9 +537,7 @@ class RangeBearingSensor(SensorBase):
         if isinstance(x, np.ndarray) and x.ndim == 2:
             # x is Nx3 set of vehicle states, do vectorized form
             # used by particle filter
-            x = x[:, 0]
-            y = x[:, 1]
-            t = x[:, 2]
+            x, y, t = x.T
         else:
             x, y, t = x
 
@@ -594,7 +592,7 @@ class RangeBearingSensor(SensorBase):
 
         if base.isinteger(landmark):
             # landmark index provided
-            xf = self.map.landmark(landmark)
+            xf = self.map[landmark]
         else:
             # assume it is a coordinate
             xf = base.getvector(landmark, 2)

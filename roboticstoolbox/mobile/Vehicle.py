@@ -390,7 +390,7 @@ class VehicleBase(ABC):
         driver._veh = self
 
 
-    def run(self, T=10, x0=None, control=None):
+    def run(self, T=10, x0=None, control=None, animate=False):
         r"""
         Simulate motion of vehicle (superclass)
 
@@ -428,7 +428,7 @@ class VehicleBase(ABC):
         self.init(control=control, x0=x0)
         
         for i in range(round(T / self.dt)):
-            self.step()
+            self.step(animate=animate)
 
             # check for user requested stop
             if self._stopsim:

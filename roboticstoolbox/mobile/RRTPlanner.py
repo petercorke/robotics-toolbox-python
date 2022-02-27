@@ -127,7 +127,7 @@ class RRTPlanner(PlannerBase):
         # self.goal_yaw_th = np.deg2rad(1.0)
         # self.goal_xy_th = 0.5
 
-    def plan(self, goal, animation=True, search_until_npoints=True):
+    def plan(self, goal, animate=True, search_until_npoints=True):
         r"""
         Plan paths to goal using RRT
 
@@ -147,7 +147,7 @@ class RRTPlanner(PlannerBase):
         # TODO use validate
         self.goal = np.r_[goal]
         # self.goal = np.r_[goal]
-        self.randinit()
+        self.random_init()
 
         v = self.g.add_vertex(coord=goal)
         v.path = None
@@ -156,7 +156,7 @@ class RRTPlanner(PlannerBase):
         count = 0
         while count < self.npoints:
 
-            random_point = self._qrandom_free()
+            random_point = self.qrandom_free()
 
             if self.showsamples:
                 plt.plot(random_point[0], random_point[1], "ok", markersize=2)
@@ -254,7 +254,7 @@ class RRTPlanner(PlannerBase):
     #     dy = y - self.end.y
     #     return math.hypot(dx, dy)
 
-    def _qrandom(self):
+    def qrandom(self):
         r"""
         Random configuration
 
@@ -264,14 +264,14 @@ class RRTPlanner(PlannerBase):
         Returns a random configuration where position :math:`(x, y)`
         lies within the bounds of the ``map`` associated with this planner.
 
-        :seealso: :meth:`_qrandom_free`
+        :seealso: :meth:`qrandom_free`
         """
         return self.random.uniform(
             low=(self.map.workspace[0], self.map.workspace[2], -np.pi),
             high=(self.map.workspace[1], self.map.workspace[3], np.pi),
         )
 
-    def _qrandom_free(self):
+    def qrandom_free(self):
         r"""
         Random obstacle free configuration
 
@@ -280,13 +280,13 @@ class RRTPlanner(PlannerBase):
 
         Returns a random obstacle free configuration where position :math:`(x,
         y)` lies within the bounds of the ``map`` associated with this planner.
-        Iterates on :meth:`_qrandom`
+        Iterates on :meth:`qrandom`
 
-        :seealso: :meth:`_qrandom` :meth:`iscollision`
+        :seealso: :meth:`qrandom` :meth:`iscollision`
         """
         # iterate for a random freespace configuration
         while True:
-            q = self._qrandom()
+            q = self.qrandom()
             if not self.iscollision(q):
                 return q
 

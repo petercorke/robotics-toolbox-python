@@ -61,8 +61,8 @@ class PRMPlanner(PlannerBase):
     :author: Peter Corke
     :seealso: :class:`PlannerBase`
     """
-    def __init__(self, occ_grid=None, npoints=100, dist_thresh=None, **kwargs):
-        super().__init__(occ_grid, ndims=2, **kwargs)
+    def __init__(self, occgrid=None, npoints=100, dist_thresh=None, **kwargs):
+        super().__init__(occgrid, ndims=2, **kwargs)
 
         if dist_thresh is None:
             self._dist_thresh = 0.3 * self.occgrid.maxdim
@@ -128,7 +128,7 @@ class PRMPlanner(PlannerBase):
 
     def _create_roadmap(self, npoints, dist_thresh, animate=None):
         # a = Animate(animate, fps=5)
-        self.progress_start(self.npoints)
+        self.progress_start(npoints)
 
         x = None
         y = None

@@ -1,7 +1,7 @@
 """
 Python Bug Planner
-@Author: Kristian Gibson
-@Author: Peter Corke
+@Author: Peter Corke, original MATLAB code and Python version
+@Author: Kristian Gibson, initial MATLAB port
 """
 from numpy import disp
 from scipy import integrate

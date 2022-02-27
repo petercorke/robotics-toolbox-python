@@ -329,7 +329,7 @@ class DstarPlanner(PlannerBase):
             self.costmap = costmap
         elif isinstance(costmap, OccupancyGrid):
             self.costmap = costmap.grid
-        elif isinstance(costmap, BinaryOccupancyGrid):
+        elif self.occgrid is not None:
             self.costmap = np.where(self.occgrid.grid > 0, np.inf, 1)
         else:
             raise ValueError('unknown type of map')
@@ -356,6 +356,8 @@ class DstarPlanner(PlannerBase):
 
         if self._goal is None:
             raise ValueError("No goal specified here or in constructor")
+
+        self._goal = self._goal.astype(int)
 
         goal_State = self._Map._Map[self._goal[1]][self._goal[0]]
         self.goal_State = goal_State

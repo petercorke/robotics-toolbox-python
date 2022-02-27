@@ -25,7 +25,7 @@ class LandmarkMap:
     of point landmarks. 
     
     The landmarks can be specified explicitly or be uniform randomly positioned
-    inside a region defined by:
+    inside a region defined by the workspace.  The workspace can be numeric:
 
     ==============  =======  =======
     ``workspace``   x-range  y-range
@@ -34,6 +34,8 @@ class LandmarkMap:
     [A, B]           A:B      A:B
     [A, B, C, D]     A:B      C:D
     ==============  =======  =======
+
+    or any object that has a ``workspace`` attribute.
 
     Example:
 
@@ -57,7 +59,11 @@ class LandmarkMap:
 
     def __init__(self, map, workspace=10, verbose=True, seed=0):
     
-        self._workspace = base.expand_dims(workspace)
+
+        try:
+            self._workspace = workspace.workspace
+        except:
+            self._workspace = base.expand_dims(workspace)
 
         if base.ismatrix(map, (2, None)):
             self._map = map

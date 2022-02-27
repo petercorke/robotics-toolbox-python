@@ -287,8 +287,8 @@ class EKF:
 
         if workspace is not None:
             self._dim = base.expand_dims(dim)
-        elif sensor is not None:
-            self._dim = sensor.map.workspace
+        elif self.sensor is not None:
+            self._dim = self.sensor.map.workspace
         else:
             self._dim = self._robot.workspace
 
@@ -358,31 +358,31 @@ class EKF:
     def __repr__(self):
         return str(self)
 
-    # @property
-    # def x_est(self):
-    #     """
-    #     Get EKF state
+    @property
+    def x_est(self):
+        """
+        Get EKF state
 
-    #     :return: state vector
-    #     :rtype: ndarray(n)
+        :return: state vector
+        :rtype: ndarray(n)
 
-    #     Returns the value of the estimated state vector at the end of
-    #     simulation. The dimensions depend on the problem being solved.
-    #     """
-    #     return self._x_est
+        Returns the value of the estimated state vector at the end of
+        simulation. The dimensions depend on the problem being solved.
+        """
+        return self._x_est
     
-    # @property
-    # def P_est(self):
-    #     """
-    #     Get EKF covariance
+    @property
+    def P_est(self):
+        """
+        Get EKF covariance
 
-    #     :return: covariance matrix
-    #     :rtype: ndarray(n,n)
+        :return: covariance matrix
+        :rtype: ndarray(n,n)
 
-    #     Returns the value of the estimated covariance matrix at the end of
-    #     simulation. The dimensions depend on the problem being solved.
-    #     """
-    #     return self._P_est
+        Returns the value of the estimated covariance matrix at the end of
+        simulation. The dimensions depend on the problem being solved.
+        """
+        return self._P_est
 
     @property
     def P0(self):
@@ -524,7 +524,7 @@ class EKF:
 
         The first observed landmark has order 0 and so on.
 
-        :seealso: :meth:`landmarks` :meth:`landmark_i`
+        :seealso: :meth:`landmarks` :meth:`landmark_index` :meth:`landmark_mindex`
         """
         try:
             l = self._landmarks[id]
@@ -532,9 +532,9 @@ class EKF:
         except KeyError:
             raise ValueError(f"unknown landmark {id}") from None
 
-    def landmark_i(self, id):
+    def landmark_index(self, id):
         """
-        Landmark state index
+        Landmark index in complete state vector
 
         :param id: landmark index
         :type id: int
@@ -542,7 +542,7 @@ class EKF:
         :rtype: int
 
         The return value ``j`` is the index of the x-coordinate of the landmark
-        in the state vector, and ``j+1`` is the index of the y-coordinate.
+        in the EKF state vector, and ``j+1`` is the index of the y-coordinate.
 
         :seealso: :meth:`landmark`
         """
@@ -554,7 +554,26 @@ class EKF:
         except KeyError:
             raise ValueError(f"unknown landmark {id}") from None
 
-    def _landmark_x(self, id):
+    def landmark_mindex(self, id):
+        """
+        Landmark index in map state vector
+
+        :param id: landmark index
+        :type id: int
+        :return: index in the state vector
+        :rtype: int
+
+        The return value ``j`` is the index of the x-coordinate of the landmark
+        in the map vector, and ``j+1`` is the index of the y-coordinate.
+
+        :seealso: :meth:`landmark`
+        """
+        try:
+            return self._landmarks[id][0] * 2
+        except KeyError:
+            raise ValueError(f"unknown landmark {id}") from None
+
+    def landmark_x(self, id):
         """
         Landmark position
 
@@ -565,7 +584,7 @@ class EKF:
 
         Returns the landmark position from the current state vector.
         """
-        jx = self._landmark_index(id)
+        jx = self.landmark_index(id)
         return self._x_est[jx: jx+2]
 
     def _init(self):
@@ -762,7 +781,7 @@ class EKF:
                     # landmark is previously seen
                     
                     # get previous estimate of its state
-                    jx = self._landmark_index(lm_id)
+                    jx = self.landmark_mindex(lm_id)
                     xf = xm_pred[jx: jx+2]
 
                     # compute Jacobian for this particular landmark
@@ -788,7 +807,7 @@ class EKF:
 
                     self._landmark_increment(lm_id)  # update the count
                     if self._verbose:
-                        print(f"landmark {lm_id} seen {self._landmark_count(lm_id)} times, state_idx={self._landmark_index(lm_id)}")
+                        print(f"landmark {lm_id} seen {self._landmark_count(lm_id)} times, state_idx={self.landmark_index(lm_id)}")
                     doUpdatePhase = True
 
                 else:
@@ -802,7 +821,7 @@ class EKF:
 
                     self._landmark_add(lm_id)
                     if self._verbose:
-                        print(f"landmark {lm_id} seen for first time, state_idx={self._landmark_index(lm_id)}")
+                        print(f"landmark {lm_id} seen for first time, state_idx={self.landmark_index(lm_id)}")
                     doUpdatePhase = False
 
             else:
@@ -1007,7 +1026,7 @@ class EKF:
             h = self._history[k]
             base.plot_ellipse(h.P[:2, :2], centre=h.xest[:2], confidence=confidence, inverted=True, **kwargs)
 
-    def plot_error(self, bgcolor='r', confidence=0.95, **kwargs):
+    def plot_error(self, bgcolor='r', confidence=0.95, ax=None, **kwargs):
         r"""
         Plot error with uncertainty bounds
 
@@ -1049,7 +1068,10 @@ class EKF:
         bounds = np.array(bounds)
         t = self.get_t()
 
-        fig, axes = plt.subplots(3)
+        if ax is None:
+            fig, axes = plt.subplots(3)
+        else:
+            axes = ax[:3]
         labels = ["x", "y", r"$\theta$"]
 
         for k, ax in enumerate(axes):
@@ -1223,7 +1245,7 @@ class EKF:
         plt.imshow(z, cmap='Reds')
         if colorbar is True:
             plt.colorbar(label='log covariance')
-        elif isinstance(color, dict):
+        elif isinstance(colorbar, dict):
             plt.colorbar(**colorbar)
 
     def get_transform(self, map):
@@ -1245,8 +1267,8 @@ class EKF:
         q = []
 
         for lm_id in self._landmarks.keys():
-            p.append(map.landmark(lm_id))
-            q.append(self._landmark_x(lm_id))
+            p.append(map[lm_id])
+            q.append(self.landmark_x(lm_id))
 
         p = np.array(p)
         q = np.array(q)

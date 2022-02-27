@@ -1,7 +1,6 @@
 """
-Python Vehicle
-@Author: Kristian Gibson
-@Author: Peter Corke
+@Author: Peter Corke, original MATLAB code and Python version
+@Author: Kristian Gibson, initial MATLAB port
 """
 from abc import ABC, abstractmethod
 import warnings
@@ -418,13 +417,13 @@ if __name__ == "__main__":
 
     V = np.diag(np.r_[0.02, 0.5 * pi / 180] ** 2)
 
-    v = VehiclePolygon()
+    v = VehiclePolygon(facecolor='None', edgecolor='k')
     # v = VehicleIcon('greycar2', scale=2, rotation=90)
 
     veh = Bicycle(covar=V, animation=v, control=RandomPath(10), verbose=False)
     print(veh)
 
-    odo = veh.step(1, 0.3)
+    odo = veh.step([1, 0.3])
     print(odo)
 
     print(veh.x)
@@ -440,11 +439,12 @@ if __name__ == "__main__":
         return (1, d_heading)
 
     veh.control = RandomPath(10)
-    p = veh.run(1000, plot=True)
+    p = veh.run(20, animate=True)
     # plt.show()
     print(p)
 
-    veh.plot_xyt_t()
+    veh.plot_xyt()
+    plt.show(block=True)
     # veh.plot(p)
 
     # t, x = veh.path(5, u=control)

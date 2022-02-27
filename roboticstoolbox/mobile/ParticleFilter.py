@@ -26,7 +26,7 @@ odometry and observations of known landmarks.
 class ParticleFilter:
     
     def __init__(self, robot, sensor, R, L, nparticles=500, seed=0, x0=None,
-    verbose=False, history=True, workspace=None):
+    verbose=False, animate=False, history=True, workspace=None):
         """
         Particle filter
 
@@ -98,14 +98,15 @@ class ParticleFilter:
 
         :seealso: :meth:`run`
         """
-        self.robot = robot
-        self.sensor = sensor
+        self._robot = robot
+        self._sensor = sensor
         self.R = R
         self.L = L
         self.nparticles = nparticles
+        self._animate = animate
 
         # self.dim = sensor.map.dim
-        self.history = []
+        self._history = []
         self.x = ()
         self.weight = ()
         self.w0 = 0.05
@@ -118,8 +119,8 @@ class ParticleFilter:
         self._keep_history = history     #  keep history
         self._htuple = namedtuple("PFlog", "t odo xest std weights")
 
-        if dim is not None:
-            self._dim = base.expand_dims(dim)
+        if workspace is not None:
+            self._dim = base.expand_dims(workspace)
         else:
             self._dim = sensor.map.workspace
 
@@ -310,7 +311,7 @@ class ParticleFilter:
         # anim = Animate(opt.movie)
 
         # display the initial particles
-        if self.robot._animation is not None:
+        if self._animate:
             self.h, = plt.plot(self.x[:, 0], self.x[:, 1], 'go', zorder=0, markersize=3, markeredgecolor='none', alpha=0.3, label='particle')
         # set(self.h, 'Tag', 'particles')
         
@@ -349,7 +350,7 @@ class ParticleFilter:
         # display the updated particles
         # set(self.h, 'Xdata', self.x(:,1), 'Ydata', self.x(:,2), 'Zdata', self.x(:,3))
 
-        if self.robot._animation is not None:
+        if self._animate:
             self.h.set_xdata(self.x[:, 0])
             self.h.set_ydata(self.x[:, 1])
         

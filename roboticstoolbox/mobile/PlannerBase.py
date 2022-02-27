@@ -93,7 +93,7 @@ class PlannerBase(ABC):
                 self._occgrid = occgrid  # original occgrid for reference
 
             if inflate > 0:
-                self._occgrid0 = occgrid.copy()
+                self._occgrid0 = self._occgrid.copy()
                 self._occgrid.inflate(inflate)
             else:
                 self._occgrid0 = self._occgrid

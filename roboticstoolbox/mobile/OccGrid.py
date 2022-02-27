@@ -309,7 +309,7 @@ class BaseOccupancyGrid(BaseMap):
         gp1 = self.w2g(p1)
         gp2 = self.w2g(p2)
 
-        return _line(gp1, gp2)
+        return self._line(gp1, gp2)
 
     def _line(self, p1, p2):
 
