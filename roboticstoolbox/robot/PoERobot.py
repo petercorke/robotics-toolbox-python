@@ -108,7 +108,7 @@ class PoERobot(Robot):
             else:
                 T *= link.S.exp(qk)
 
-        return T * T0
+        return T * self.T0
 
         # T = reduce(lambda x, y: x * y,
         #           [link.A(qk) for link, qk in zip(self, q)])
@@ -155,6 +155,8 @@ class PoERobot(Robot):
         # convert velocity twist from world frame to EE frame
         return T.inv().Ad() @ J
 
+    def ets(self):
+        return NotImplemented
 
 if __name__ == "__main__":  # pragma nocover
 
