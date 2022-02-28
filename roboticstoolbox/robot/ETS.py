@@ -19,6 +19,7 @@ from spatialmath.base import (
     trlog,
     t2r,
     angvelxform,
+    simplify,
 )
 from roboticstoolbox import rtb_get_param
 
@@ -703,6 +704,10 @@ class ETS(BaseETS):
 
         ret = SE3.Empty()
         fk = self.eval(q, base, tool, include_base)
+
+        if fk.dtype == 'O':
+            # symbolic
+            fk = simplify(fk)
 
         if fk.ndim == 3:
             for T in fk:
@@ -1470,6 +1475,10 @@ class ETS2(BaseETS):
                 ret.append(SE2(Tk, check=False))
             else:
                 ret = SE2(Tk, check=False)
+
+        if ret.A.dtype == 'O':
+            # if symbolic, simplify it
+            ret = ret.simplify()
 
         return ret
 
