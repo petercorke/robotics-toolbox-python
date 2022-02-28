@@ -2137,7 +2137,7 @@ class ERobot2(BaseERobot):
             # chop it up into segments, a link frame after every joint
             parent = None
             for j, ets_j in enumerate(arg.split()):
-                elink = Link2(ets_j, parent=parent, name=f"link{j:d}")
+                elink = Link2(ETS2(ets_j), parent=parent, name=f"link{j:d}")
                 parent = elink
                 if (
                     elink.qlim is None

@@ -440,29 +440,24 @@ class TestETS2(unittest.TestCase):
         nt.assert_almost_equal(r.jacobe(q), np.array([[0, 0, 1]]).T)
         nt.assert_almost_equal(r2.jacobe(q), np.eye(3))
 
-    # def test_jacob0_sym(self):
-    #     x = sympy.Symbol("x")
-    #     q1 = np.array([x, x])
-    #     q2 = np.array([0, x])
-    #     r = rtb.ETS2(rtb.ET2.R(jindex=0))
-    #     tx = rtb.ETS2(rtb.ET2.tx(jindex=0))
-    #     ty = rtb.ETS2(rtb.ET2.ty(jindex=0))
-    #     tx = rtb.ETS2(rtb.ET2.tx(jindex=1))
-    #     a = rtb.ETS2(rtb.ET2.SE2(np.eye(4)))
+    def test_plot(self):
+        q2 = np.array([0, 1, 2])
+        rz = rtb.ETS2(rtb.ET2.R(jindex=0))
+        tx = rtb.ETS2(rtb.ET2.tx(jindex=1, qlim=[-1, 1]))
+        ty = rtb.ETS2(rtb.ET2.ty(jindex=2, qlim=[-1, 1]))
+        a = rtb.ETS2(rtb.ET2.SE2(np.eye(3)))
+        r = tx + ty + rz + a
+        r.plot(q=q2, block=False)
 
-    #     r = tx + ty + tx + rx + ry + rz + a
-
-    #     print(r.jacob0(q2))
-
-    #     nt.assert_almost_equal(tx.jacob0(q1), np.array([[1, 0, 0, 0, 0, 0]]).T)
-    #     nt.assert_almost_equal(ty.jacob0(q1), np.array([[0, 1, 0, 0, 0, 0]]).T)
-    #     nt.assert_almost_equal(tx.jacob0(q1), np.array([[0, 0, 1, 0, 0, 0]]).T)
-    #     nt.assert_almost_equal(rx.jacob0(q1), np.array([[0, 0, 0, 1, 0, 0]]).T)
-    #     nt.assert_almost_equal(ry.jacob0(q1), np.array([[0, 0, 0, 0, 1, 0]]).T)
-    #     nt.assert_almost_equal(rz.jacob0(q1), np.array([[0, 0, 0, 0, 0, 1]]).T)
-    #     nt.assert_almost_equal(r.jacob0(q2), np.eye(6))
-    #     nt.assert_almost_equal(r.jacob0(q2, tool=SE2()), np.eye(6))
-    #     nt.assert_almost_equal(r.jacob0(q2, tool=SE2().A), np.eye(6))
+    def test_teach(self):
+        x = sympy.Symbol("x")
+        q2 = np.array([0, 1, 2])
+        rz = rtb.ETS2(rtb.ET2.R(jindex=0))
+        tx = rtb.ETS2(rtb.ET2.tx(jindex=1, qlim=[-1, 1]))
+        ty = rtb.ETS2(rtb.ET2.ty(jindex=2, qlim=[-1, 1]))
+        a = rtb.ETS2(rtb.ET2.SE2(np.eye(3)))
+        r = tx + ty + rz + a
+        r.teach(q=q2, block=False)
 
 
 if __name__ == "__main__":

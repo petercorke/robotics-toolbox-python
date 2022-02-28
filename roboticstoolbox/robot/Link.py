@@ -170,6 +170,7 @@ class BaseLink(SceneNode, ABC):
         elif isinstance(ets, ET2):
             ets = ETS2(ets)
         elif not isinstance(ets, (ETS, ETS2)):
+            print(ets)
             raise TypeError("The ets argument must be of type ETS or ET")
 
         self.ets = ets
