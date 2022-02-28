@@ -32,6 +32,7 @@ from spatialmath import (
 import fknm
 from functools import lru_cache
 from typing import Union, overload, Dict, List, Tuple
+from copy import deepcopy
 
 ArrayLike = Union[list, ndarray, tuple, set]
 
@@ -191,9 +192,12 @@ class BaseERobot(Robot):
         # Make a gripper object for each gripper
         for link in gripper_links:
             g_links = self.dfs_links(link)
+            print(g_links)
+            print()
 
             # Remove gripper links from the robot
             for g_link in g_links:
+                # print(g_link)
                 links.remove(g_link)
 
             # Save the gripper object
@@ -1165,31 +1169,51 @@ class ERobot(BaseERobot):
         if isinstance(arg, ERobot):
             # We're passed an ERobot, clone it
             # We need to preserve the parent link as we copy
-            links = []
 
-            gripper_parents = []
-
-            # Make a list of old gripper links
-            for gripper in arg.grippers:
-                gripper_parents.append(gripper.links[0].name)
-
+            # Copy each link within the robot
+            links = [deepcopy(link) for link in arg.links]
             gripper_links = []
-            # print(arg.grippers[0].links[0])
 
-            def dfs(node, node_copy):
-                for child in node.children:
-                    child_copy = child.copy(node_copy)
-                    links.append(child_copy)
+            for gripper in arg.grippers:
+                glinks = []
+                for link in gripper.links:
+                    glinks.append(deepcopy(link))
 
-                    # If this link was a gripper link, add to the list
-                    if child_copy.name in gripper_parents:
-                        gripper_links.append(child_copy)
+                gripper_links.append(glinks[0])
+                links = links + glinks
 
-                    dfs(child, child_copy)
+            # print(links[9] is gripper_links[0])
+            # print(gripper_links)
 
-            link0 = arg.links[0]
-            links.append(arg.links[0].copy())
-            dfs(link0, links[0])
+            # Sever parent connection, but save the string
+            # The constructor will piece this together for us
+            for link in links:
+                if link.parent is not None:
+                    link._parent_name = link.parent.name
+                    link._parent = None
+
+            # gripper_parents = []
+
+            # # Make a list of old gripper links
+            # for gripper in arg.grippers:
+            #     gripper_parents.append(gripper.links[0].name)
+
+            # gripper_links = []
+
+            # def dfs(node, node_copy):
+            #     for child in node.children:
+            #         child_copy = child.copy(node_copy)
+            #         links.append(child_copy)
+
+            #         # If this link was a gripper link, add to the list
+            #         if child_copy.name in gripper_parents:
+            #             gripper_links.append(child_copy)
+
+            #         dfs(child, child_copy)
+
+            # link0 = arg.links[0]
+            # links.append(arg.links[0].copy())
+            # dfs(link0, links[0])
 
             # print(gripper_links[0].jindex)
 
