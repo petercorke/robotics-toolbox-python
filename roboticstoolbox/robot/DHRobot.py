@@ -142,12 +142,12 @@ class DHRobot(Robot):
         :rtype: str
         """
 
-        if np.all(self.base.A == np.eye(4)):
+        if np.array_equal(self.base.A, np.eye(4)):
             base = None
         else:
             base = self.base
 
-        if np.all(self.tool.A == np.eye(4)):
+        if np.array_equal(self.tool.A, np.eye(4)):
             tool = None
         else:
             tool = self.tool
@@ -861,12 +861,12 @@ class DHRobot(Robot):
         """
 
         # optionally start with the base transform
-        if np.all(self.base.A == np.eye(4)):
+        if np.array_equal(self.base.A, np.eye(4)):
             base = None
         else:
             base = self.base.A
 
-        if np.all(self.tool.A == np.eye(4)):
+        if np.array_equal(self.tool.A, np.eye(4)):
             tool = None
         else:
             tool = self.tool.A
@@ -919,12 +919,12 @@ class DHRobot(Robot):
               kinematics are computed.
         """
 
-        if np.all(self.base.A == np.eye(4)):
+        if np.array_equal(self.base.A, np.eye(4)):
             base = None
         else:
             base = self.base
 
-        if np.all(self.tool.A == np.eye(4)):
+        if np.array_equal(self.tool.A, np.eye(4)):
             tool = None
         else:
             tool = self.tool
@@ -1422,7 +1422,7 @@ class DHRobot(Robot):
         :seealso: :func:`rne`
         """
 
-        if np.all(self.base.A == np.eye(4)):
+        if np.array_equal(self.base.A, np.eye(4)):
             base = None
         else:
             base = self.base.A
@@ -1711,12 +1711,12 @@ class DHRobot(Robot):
     def ikine_6s(self, T, config, ikfunc):
         # Undo base and tool transformations, but if they are not
         # set, skip the operation.  Nicer for symbolics
-        if np.all(self.base.A == np.eye(4)):
+        if np.array_equal(self.base.A, np.eye(4)):
             base = None
         else:
             base = self.base
 
-        if np.all(self.tool.A == np.eye(4)):
+        if np.array_equal(self.tool.A, np.eye(4)):
             tool = None
         else:
             tool = self.tool
