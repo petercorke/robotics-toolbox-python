@@ -189,7 +189,9 @@ class BaseET:
         kwargs = [s_eta, s_T, s_jindex, s_flip, s_qlim]
         s_kwargs = ", ".join(filter(None, kwargs))
 
-        return f"ET.{self.axis}({s_kwargs})"
+        start = "ET" if isinstance(self, ET) else "ET2"
+
+        return f"{start}.{self.axis}({s_kwargs})"
 
     def __deepcopy__(self, memo):
         cls = self.__class__
