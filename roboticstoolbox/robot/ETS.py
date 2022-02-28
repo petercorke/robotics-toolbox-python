@@ -427,6 +427,26 @@ class BaseETS(UserList):
         memo[id(self)] = result
         return result
 
+    def plot(self, *args, **kwargs):
+        from roboticstoolbox.robot.ERobot import ERobot, ERobot2
+
+        if isinstance(self, ETS):
+            robot = ERobot(self)
+        else:
+            robot = ERobot2(self)
+
+        robot.plot(*args, **kwargs)
+
+    def teach(self, *args, **kwargs):
+        from roboticstoolbox.robot.ERobot import ERobot, ERobot2
+
+        if isinstance(self, ETS):
+            robot = ERobot(self)
+        else:
+            robot = ERobot2(self)
+
+        robot.teach(*args, **kwargs)
+
 
 class ETS(BaseETS):
     """
