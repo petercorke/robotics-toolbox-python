@@ -134,6 +134,7 @@ class TestLink(unittest.TestCase):
         l0.qlim = [-2.79, 2.79]
 
         s0 = l0.dyn()
+        print(s0)
 
         self.assertEqual(
             s0,
@@ -142,11 +143,11 @@ r     =         0        0        0
         |        0        0        0 | 
 I     = |        0     0.35        0 | 
         |        0        0        0 | 
-G     =       -63 
 Jm    =         0 
 B     =         0 
 Tc    =       0.4(+)    -0.43(-) 
-""",
+G     =       -63 
+qlim  =      -2.8 to      2.8""",
         )
 
     def test_properties(self):
@@ -206,8 +207,8 @@ Tc    =       0.4(+)    -0.43(-)
     #         l0.geometry = 1  # type: ignore
 
     def test_dist(self):
-        s0 = gm.Cuboid([1, 1, 1], T=sm.SE3(0, 0, 0))
-        s1 = gm.Cuboid([1, 1, 1], T=sm.SE3(3, 0, 0))
+        s0 = gm.Cuboid([1, 1, 1], pose=sm.SE3(0, 0, 0))
+        s1 = gm.Cuboid([1, 1, 1], pose=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
         link = p.links[3]
 
@@ -220,8 +221,8 @@ Tc    =       0.4(+)    -0.43(-)
         self.assertAlmostEqual(d2, None)  # type: ignore
 
     def test_collided(self):
-        s0 = gm.Cuboid([1, 1, 1], T=sm.SE3(0, 0, 0))
-        s1 = gm.Cuboid([1, 1, 1], T=sm.SE3(3, 0, 0))
+        s0 = gm.Cuboid([1, 1, 1], pose=sm.SE3(0, 0, 0))
+        s1 = gm.Cuboid([1, 1, 1], pose=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
         link = p.links[3]
         c0 = link.collided(s0)

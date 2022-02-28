@@ -887,8 +887,8 @@ class TestERobot(unittest.TestCase):
             panda.control_mode = "z"
 
     def test_dist(self):
-        s0 = gm.Cuboid([1, 1, 1], T=sm.SE3(0, 0, 0))
-        s1 = gm.Cuboid([1, 1, 1], T=sm.SE3(3, 0, 0))
+        s0 = gm.Cuboid([1, 1, 1], pose=sm.SE3(0, 0, 0))
+        s1 = gm.Cuboid([1, 1, 1], pose=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
 
         d0, _, _ = p.closest_point(p.q, s0)
@@ -900,8 +900,8 @@ class TestERobot(unittest.TestCase):
         self.assertAlmostEqual(d2, None)  # type: ignore
 
     def test_collided(self):
-        s0 = gm.Cuboid([1, 1, 1], T=sm.SE3(0, 0, 0))
-        s1 = gm.Cuboid([1, 1, 1], T=sm.SE3(3, 0, 0))
+        s0 = gm.Cuboid([1, 1, 1], pose=sm.SE3(0, 0, 0))
+        s1 = gm.Cuboid([1, 1, 1], pose=sm.SE3(3, 0, 0))
         p = rtb.models.Panda()
 
         c0 = p.collided(p.q, s0)

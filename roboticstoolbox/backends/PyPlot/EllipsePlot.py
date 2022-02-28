@@ -191,7 +191,7 @@ class EllipsePlot:
         #         A = np.zeros((2,2))
 
         if isinstance(self.centre, str) and self.centre == "ee":
-            centre = self.robot.fkine(self.q)[:3, -1]
+            centre = self.robot.fkine(self.q).A[:3, -1]
         else:
             centre = self.centre
 
