@@ -35,7 +35,13 @@ class Gripper:
         self._links = elinks
 
         # assign the joint indices
-        if all([link.jindex is None for link in elinks if link.isjoint]):
+        if all(
+            [
+                link.jindex is None or link.ets._auto_jindex
+                for link in elinks
+                if link.isjoint
+            ]
+        ):
 
             jindex = [0]  # "mutable integer" hack
 

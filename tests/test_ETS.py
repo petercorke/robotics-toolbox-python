@@ -78,7 +78,9 @@ class TestETS(unittest.TestCase):
         c = rtb.ET.Rz()
         d = rtb.ET.tx(1.0)
         e = rtb.ET.SE3(SE3.Rx(1.0))
+        print(a.jindex)
         ets = rx * ry * rz * d
+        print(a.jindex)
         ets2 = rx * a * b * c
         ets3 = d * e
 

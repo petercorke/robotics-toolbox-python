@@ -217,7 +217,7 @@ class BaseERobot(Robot):
                 self.ee_links.append(link.parent)  # type: ignore
 
         # assign the joint indices
-        if all([link.jindex is None for link in links]):
+        if all([link.jindex is None or link.ets._auto_jindex for link in links]):
             # no joints have an index
             jindex = [0]  # "mutable integer" hack
 

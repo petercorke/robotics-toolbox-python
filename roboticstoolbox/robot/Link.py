@@ -863,6 +863,7 @@ class BaseLink(SceneNode, ABC):
     def jindex(self, j: int):
         if self.v:
             self.v.jindex = j
+            self.ets._auto_jindex = False
 
     @property
     def isprismatic(self) -> bool:
@@ -1312,6 +1313,7 @@ class Link(BaseLink):
         if len(self._ets) > 0 and self._ets[-1].isjoint:
             if jindex is not None:
                 self._ets[-1].jindex = jindex
+                self._ets._auto_jindex = False
 
     # @property
     # def ets(self: "Link") -> "ETS":

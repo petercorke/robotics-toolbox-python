@@ -511,6 +511,44 @@ class ETS(BaseETS):
 
         super()._update_internals()
 
+        self._auto_jindex = False
+
+        # Check if jindices are set
+        joints = [self[j] for j in self.joints()]
+
+        # Number of joints with a jindex
+        jindices = 0
+
+        # Number of joints with a sequential jindex (j[2] -> jindex = 2)
+        seq_jindex = 0
+
+        # Count them up
+        for j, joint in enumerate(joints):
+            if joint.jindex is not None:
+                jindices += 1
+                if joint.jindex == j:
+                    seq_jindex += 1
+
+        if (
+            jindices == self.n - 1
+            and seq_jindex == self.n - 1
+            and joints[-1].jindex is None
+        ):
+            # ets has sequential jindicies, except for the last.
+            joints[-1].jindex = self.n - 1
+            self._auto_jindex = True
+
+        elif jindices > 0 and not jindices == self.n:
+            raise ValueError(
+                "You can not have some jindices set for the ET's in arg. It must be all or none"
+            )
+        elif jindices == 0 and self.n > 0:
+            # Set them ourself
+            for j, joint in enumerate(joints):
+                joint.jindex = j
+
+            self._auto_jindex = True
+
     def __mul__(self, other: Union["ET", "ETS"]) -> "ETS":
         if isinstance(other, ET):
             return ETS([*self.data, other])
@@ -1197,6 +1235,41 @@ class ETS2(BaseETS):
 
         self._update_internals()
         self._ndims = 2
+        self._auto_jindex = False
+
+        # Check if jindices are set
+        joints = [self[j] for j in self.joints()]
+
+        # Number of joints with a jindex
+        jindices = 0
+
+        # Number of joints with a sequential jindex (j[2] -> jindex = 2)
+        seq_jindex = 0
+
+        # Count them up
+        for j, joint in enumerate(joints):
+            if joint.jindex is not None:
+                jindices += 1
+                if joint.jindex == j:
+                    seq_jindex += 1
+
+        if (
+            jindices == self.n - 1
+            and seq_jindex == self.n - 1
+            and joints[-1].jindex is None
+        ):
+            # ets has sequential jindicies, except for the last.
+            joints[-1].jindex = self.n - 1
+            self._auto_jindex = True
+        elif jindices > 0 and not jindices == self.n:
+            raise ValueError(
+                "You can not have some jindices set for the ET's in arg. It must be all or none"
+            )
+        elif jindices == 0 and self.n > 0:
+            # Set them ourself
+            for j, joint in enumerate(joints):
+                joint.jindex = j
+            self._auto_jindex = True
 
     def __mul__(self, other: Union[ET2, "ETS2"]) -> "ETS2":
         if isinstance(other, ET2):
