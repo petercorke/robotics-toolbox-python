@@ -680,19 +680,25 @@ class ETS(BaseETS):
         l, _ = q.shape  # type: ignore
         end = self.data[-1]
 
+        if isinstance(tool, SE3):
+            tool = array(tool.A)
+
+        if isinstance(base, SE3):
+            base = array(base.A)
+
         if base is None:
             bases = None
-        elif isinstance(base, SE3):
-            bases = array(base.A)
-        else:  # pragma: nocover
+        elif all(base == eye(3)):  # pragma: nocover
             bases = None
+        else:  # pragma: nocover
+            bases = base
 
         if tool is None:
             tools = None
-        elif isinstance(tool, SE3):
-            tools = array(tool.A)
-        else:  # pragma: nocover
+        elif all(tool == eye(3)):  # pragma: nocover
             tools = None
+        else:  # pragma: nocover
+            tools = tool
 
         if l > 1:
             T = zeros((l, 4, 4), dtype=object)
@@ -1301,37 +1307,38 @@ class ETS2(BaseETS):
         end = self[-1]
 
         if base is None:
-            bases = eye(3)
+            bases = None
         elif isinstance(base, SE2):
             bases = array(base.A)
+        elif all(base == eye(3)):  # pragma: nocover
+            bases = None
         else:  # pragma: nocover
-            bases = eye(3)
+            bases = base
 
         if tool is None:
-            tools = eye(3)
+            tools = None
         elif isinstance(tool, SE2):
             tools = array(tool.A)
+        elif all(tool == eye(3)):  # pragma: nocover
+            tools = None
         else:  # pragma: nocover
-            tools = eye(3)
+            tools = tool
 
         if l > 1:
             T = zeros((l, 3, 3), dtype=object)
         else:
             T = zeros((3, 3), dtype=object)
 
-        Tk = eye(3)
         ret = SE2.Empty()
 
         for k, qk in enumerate(q):  # type: ignore
             link = end  # start with last link
 
             jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-            A = link.A(qk[jindex])
+            Tk = link.A(qk[jindex])
 
-            if A is None:
-                Tk = tools  # pragma: nocover
-            else:
-                Tk = A @ tools
+            if tools is not None:
+                Tk = Tk @ tools
 
             # add remaining links, back toward the base
             for i in range(self.m - 2, -1, -1):
@@ -1344,7 +1351,7 @@ class ETS2(BaseETS):
                     Tk = A @ Tk
 
             # add base transform if it is set
-            if include_base == True:
+            if include_base == True and bases is not None:
                 Tk = bases @ Tk
 
             # append
