@@ -16,13 +16,13 @@ _eps = np.finfo(np.float64).eps
 
 class TestTrajectory(unittest.TestCase):
 
-    def test_tpoly(self):
+    def test_quintic(self):
 
         s1 = 1
         s2 = 2
         # no boundary conditions
 
-        tg = tr.tpoly(s1, s2, 11)
+        tg = tr.quintic(s1, s2, 11)
         s = tg.s
         sd = tg.sd
         sdd = tg.sdd
@@ -44,7 +44,7 @@ class TestTrajectory(unittest.TestCase):
         # time vector version
         t = np.linspace(0, 1, 11)
 
-        tg = tr.tpoly(s1, s2, t)
+        tg = tr.quintic(s1, s2, t)
         s = tg.s
         sd = tg.sd
         sdd = tg.sdd
@@ -66,7 +66,7 @@ class TestTrajectory(unittest.TestCase):
         self.assertAlmostEqual(sum(sdd), 0)
 
         # boundary conditions
-        tg = tr.tpoly(s1, s2, 11, -1, 1)
+        tg = tr.quintic(s1, s2, 11, -1, 1)
         s = tg.s
         sd = tg.sd
         sdd = tg.sdd
@@ -81,13 +81,13 @@ class TestTrajectory(unittest.TestCase):
         self.assertAlmostEqual(sdd[-1], 0)
 
         with self.assertRaises(TypeError):
-            tr.tpoly(s1, s2, 'not time')
+            tr.quintic(s1, s2, 'not time')
 
-    def test_tpoly_plot(self):
-        t = tr.tpoly(0, 1, 50)
+    def test_quintic_plot(self):
+        t = tr.quintic(0, 1, 50)
         t.plot()
 
-        t = tr.tpoly(0, 1, np.linspace(0,1,50))
+        t = tr.quintic(0, 1, np.linspace(0,1,50))
         t.plot()
     
 
@@ -208,11 +208,11 @@ class TestTrajectory(unittest.TestCase):
         tr.cmstraj()
 
     def test_mtraj(self):
-        # unit testing jtraj with tpoly
+        # unit testing jtraj with quintic
         q1 = np.r_[1, 2, 3, 4, 5, 6]
         q2 = -q1
 
-        tg = tr.mtraj(tr.tpoly, q1, q2, 11)
+        tg = tr.mtraj(tr.quintic, q1, q2, 11)
         q = tg.s
         qd = tg.sd
         qdd = tg.sdd
@@ -234,7 +234,7 @@ class TestTrajectory(unittest.TestCase):
         # with a time vector
         t = np.linspace(0, 2, 11)
 
-        tg = tr.mtraj(tr.tpoly, q1, q2, 11)
+        tg = tr.mtraj(tr.quintic, q1, q2, 11)
         q = tg.s
         qd = tg.sd
         qdd = tg.sdd
@@ -448,18 +448,18 @@ if __name__ == '__main__':    # pragma nocover
 
     unittest.main()
 
-    # function mtraj_tpoly_test(tc)
+    # function mtraj_quintic_test(tc)
     #     q1 = [1 2 3 4 5 6]
     #     q2 = -q1
 
-    #     q = mtraj(@tpoly, q1,q2,11)
+    #     q = mtraj(@quintic, q1,q2,11)
     #     self.assertAlmostEqual(size(q,1), 11)
     #     self.assertAlmostEqual(size(q,2), 6)
     #     self.assertAlmostEqual(q(1,:), q1)
     #     self.assertAlmostEqual(q(end,:), q2)
     #     self.assertAlmostEqual(q(6,:), zeros(1,6))
 
-    #     [q,qd] = mtraj(@tpoly, q1,q2,11)
+    #     [q,qd] = mtraj(@quintic, q1,q2,11)
     #     self.assertAlmostEqual(size(q,1), 11)
     #     self.assertAlmostEqual(size(q,2), 6)
     #     self.assertAlmostEqual(q(1,:), q1)
@@ -471,7 +471,7 @@ if __name__ == '__main__':    # pragma nocover
     #     self.assertAlmostEqual(qd(1,:), zeros(1,6))
     #     self.assertAlmostEqual(qd(end,:), zeros(1,6))
 
-    #     [q,qd,qdd] = mtraj(@tpoly, q1,q2,11)
+    #     [q,qd,qdd] = mtraj(@quintic, q1,q2,11)
     #     self.assertAlmostEqual(size(q,1), 11)
     #     self.assertAlmostEqual(size(q,2), 6)
     #     self.assertAlmostEqual(q(1,:), q1)
@@ -493,14 +493,14 @@ if __name__ == '__main__':    # pragma nocover
     #     ## with a time vector
     #     t = linspace(0, 1, 11)
 
-    #     q = mtraj(@tpoly, q1,q2,t)
+    #     q = mtraj(@quintic, q1,q2,t)
     #     self.assertAlmostEqual(size(q,1), 11)
     #     self.assertAlmostEqual(size(q,2), 6)
     #     self.assertAlmostEqual(q(1,:), q1)
     #     self.assertAlmostEqual(q(end,:), q2)
     #     self.assertAlmostEqual(q(6,:), zeros(1,6))
 
-    #     [q,qd] = mtraj(@tpoly, q1,q2,t)
+    #     [q,qd] = mtraj(@quintic, q1,q2,t)
     #     self.assertAlmostEqual(size(q,1), 11)
     #     self.assertAlmostEqual(size(q,2), 6)
     #     self.assertAlmostEqual(q(1,:), q1)
@@ -512,7 +512,7 @@ if __name__ == '__main__':    # pragma nocover
     #     self.assertAlmostEqual(qd(1,:), zeros(1,6))
     #     self.assertAlmostEqual(qd(end,:), zeros(1,6))
 
-    #     [q,qd,qdd] = mtraj(@tpoly, q1,q2,t)
+    #     [q,qd,qdd] = mtraj(@quintic, q1,q2,t)
     #     self.assertAlmostEqual(size(q,1), 11)
     #     self.assertAlmostEqual(size(q,2), 6)
     #     self.assertAlmostEqual(q(1,:), q1)
