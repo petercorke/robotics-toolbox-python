@@ -358,7 +358,7 @@ class TestETS2(unittest.TestCase):
         r = l0 * l1 * l2 * l3 * l4 * l5 * l6 * ee
         r2 = r.compile()
 
-        nt.assert_almost_equal(r.fkine(q), r2.fkine(q))
+        nt.assert_almost_equal(r.fkine(q).A, r2.fkine(q).A)
         self.assertTrue(len(r) > len(r2))
 
     def test_insert(self):
@@ -409,10 +409,10 @@ class TestETS2(unittest.TestCase):
         r5.insert(rtb.ET2.R(90 * deg), 14)
         r5.insert(rtb.ET2.R(jindex=5), 15)
 
-        nt.assert_almost_equal(r.fkine(q), r2.fkine(q))
-        nt.assert_almost_equal(r.fkine(q), r3.fkine(q))
-        nt.assert_almost_equal(r.fkine(q), r4.fkine(q))
-        nt.assert_almost_equal(r.fkine(q), r5.fkine(q))
+        nt.assert_almost_equal(r.fkine(q).A, r2.fkine(q).A)
+        nt.assert_almost_equal(r.fkine(q).A, r3.fkine(q).A)
+        nt.assert_almost_equal(r.fkine(q).A, r4.fkine(q).A)
+        nt.assert_almost_equal(r.fkine(q).A, r5.fkine(q).A)
 
     def test_jacob0(self):
         q = [0, 0, 0]

@@ -207,12 +207,14 @@ class TestETS(unittest.TestCase):
         fk_traj = r.fkine(qt)
 
         print(fk_traj[0])
+        print(fk_traj[1])
+        print(fk_traj[2])
         print(ans2)
 
-        nt.assert_almost_equal(r.fkine(q), ans1.A)
-        nt.assert_almost_equal(fk_traj[0], ans2.A)
-        nt.assert_almost_equal(fk_traj[1], ans3.A)
-        nt.assert_almost_equal(fk_traj[2], ans4.A)
+        nt.assert_almost_equal(r.fkine(q).A, ans1.A)
+        nt.assert_almost_equal(fk_traj[0].A, ans2.A)
+        nt.assert_almost_equal(fk_traj[1].A, ans3.A)
+        nt.assert_almost_equal(fk_traj[2].A, ans4.A)
 
         base = SE3.Rx(1.0)
         tool = SE3.Tz(0.5)
@@ -220,12 +222,12 @@ class TestETS(unittest.TestCase):
 
         r2 = rtb.ETS([rtb.ET.Rx(jindex=0)])
 
-        nt.assert_almost_equal(r.fkine(q, base=base), ans5.A)
+        nt.assert_almost_equal(r.fkine(q, base=base).A, ans5.A)
         # nt.assert_almost_equal(r.fkine(q, base=base), ans5.A)  # type: ignore
 
         q2 = [y]
         ans6 = SE3.Rx(y) * tool
-        nt.assert_almost_equal(r2.fkine(q2, tool=tool), ans6.A)  # type: ignore
+        nt.assert_almost_equal(r2.fkine(q2, tool=tool).A, ans6.A)  # type: ignore
         # nt.assert_almost_equal(r2.fkine(q2, tool=tool), ans6)  # type: ignore
 
     def test_jacob0_panda(self):
@@ -362,7 +364,7 @@ class TestETS(unittest.TestCase):
         q3 = np.expand_dims(q1, 0)
         q4 = np.expand_dims(q1, 1)
 
-        ans = tr2jac(r.fkine(q1).T) @ r.jacob0(q1)
+        ans = tr2jac(r.eval(q1).T) @ r.jacob0(q1)
 
         nt.assert_array_almost_equal(r.jacobe(q1), ans)
 
@@ -500,7 +502,7 @@ class TestETS(unittest.TestCase):
         r = l0 * l1 * l2 * l3 * l4 * l5 * l6 * ee
         r2 = r.compile()
 
-        nt.assert_almost_equal(r.fkine(q), r2.fkine(q))
+        nt.assert_almost_equal(r.eval(q), r2.eval(q))
         self.assertTrue(len(r) > len(r2))
 
     def test_insert(self):
@@ -551,10 +553,10 @@ class TestETS(unittest.TestCase):
         r5.insert(rtb.ET.Rx(90 * deg), 14)
         r5.insert(rtb.ET.Rz(jindex=5), 15)
 
-        nt.assert_almost_equal(r.fkine(q), r2.fkine(q))
-        nt.assert_almost_equal(r.fkine(q), r3.fkine(q))
-        nt.assert_almost_equal(r.fkine(q), r4.fkine(q))
-        nt.assert_almost_equal(r.fkine(q), r5.fkine(q))
+        nt.assert_almost_equal(r.eval(q), r2.eval(q))
+        nt.assert_almost_equal(r.eval(q), r3.eval(q))
+        nt.assert_almost_equal(r.eval(q), r4.eval(q))
+        nt.assert_almost_equal(r.fkine(q).A, r5.fkine(q).A)
 
     def test_jacob0(self):
         q = [0]
@@ -1587,7 +1589,7 @@ class TestETS(unittest.TestCase):
 
         H0 = r.hessian0(q1)
         He = np.empty((r.n, 6, r.n))
-        T = r.fkine(q1, include_base=False)
+        T = r.eval(q1, include_base=False)
 
         for i in range(r.n):
             He[i, :, :] = tr2jac(T.T) @ H0[i, :, :]
@@ -1645,7 +1647,7 @@ class TestETS(unittest.TestCase):
 
         H0 = r.hessian0(q1, tool=ee)
         He = np.empty((r.n, 6, r.n))
-        T = r.fkine(q1, tool=ee, include_base=False)
+        T = r.eval(q1, tool=ee, include_base=False)
 
         for i in range(r.n):
             He[i, :, :] = tr2jac(T.T) @ H0[i, :, :]

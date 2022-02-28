@@ -599,6 +599,51 @@ class ETS(BaseETS):
         base: Union[ndarray, SE3, None] = None,
         tool: Union[ndarray, SE3, None] = None,
         include_base: bool = True,
+    ) -> SE3:
+        """
+        Forward kinematics
+
+        :param q: Joint coordinates
+        :type q: ArrayLike
+        :param base: base transform, optional
+        :param tool: tool transform, optional
+
+        :return: The transformation matrix representing the pose of the
+            end-effector
+
+        - ``T = ets.fkine(q)`` evaluates forward kinematics for the robot at
+          joint configuration ``q``.
+        **Trajectory operation**:
+        If ``q`` has multiple rows (mxn), it is considered a trajectory and the
+        result is an ``SE3`` instance with ``m`` values.
+        .. note::
+            - The robot's base tool transform, if set, is incorporated
+              into the result.
+            - A tool transform, if provided, is incorporated into the result.
+            - Works from the end-effector link to the base
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        """
+
+        ret = SE3.Empty()
+        fk = self.eval(q, base, tool, include_base)
+
+        if fk.ndim == 3:
+            for T in fk:
+                print(T)
+                ret.append(SE3(T, check=False))
+        else:
+            ret = SE3(fk, check=False)
+
+        return ret
+
+    def eval(
+        self,
+        q: ArrayLike,
+        base: Union[ndarray, SE3, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
+        include_base: bool = True,
     ) -> ndarray:
         """
         Forward kinematics
@@ -741,7 +786,7 @@ class ETS(BaseETS):
 
         q = getvector(q, None)
 
-        T = self.fkine(q, include_base=False) @ tools
+        T = self.eval(q, include_base=False) @ tools
 
         U = eye(4)
         j = 0
@@ -831,7 +876,7 @@ class ETS(BaseETS):
         except TypeError:
             pass
 
-        T = self.fkine(q, tool=tool, include_base=False)
+        T = self.eval(q, tool=tool, include_base=False)
         return tr2jac(T.T) @ self.jacob0(q, tool=tool)
 
     def hessian0(
@@ -1225,7 +1270,7 @@ class ETS2(BaseETS):
         base: Union[ndarray, SE2, None] = None,
         tool: Union[ndarray, SE2, None] = None,
         include_base: bool = True,
-    ) -> ndarray:
+    ) -> SE2:
         """
         Forward kinematics
         :param q: Joint coordinates
@@ -1275,6 +1320,7 @@ class ETS2(BaseETS):
             T = zeros((3, 3), dtype=object)
 
         Tk = eye(3)
+        ret = SE2.Empty()
 
         for k, qk in enumerate(q):  # type: ignore
             link = end  # start with last link
@@ -1303,11 +1349,12 @@ class ETS2(BaseETS):
 
             # append
             if l > 1:
-                T[k, :, :] = Tk
+                # T[k, :, :] = Tk
+                ret.append(SE2(Tk, check=False))
             else:
-                T = Tk
+                ret = SE2(Tk, check=False)
 
-        return T
+        return ret
 
     def jacob0(
         self,
@@ -1352,13 +1399,13 @@ class ETS2(BaseETS):
 
             E0 = ETS2(self[:i])
             if len(E0) > 0:
-                dTdq = E0.fkine(q) @ dTdq
+                dTdq = E0.fkine(q).A @ dTdq
 
             Ef = ETS2(self[i + 1 :])
             if len(Ef) > 0:
-                dTdq = dTdq @ Ef.fkine(q)
+                dTdq = dTdq @ Ef.fkine(q).A
 
-            T = self.fkine(q)
+            T = self.fkine(q).A
             dRdt = dTdq[:2, :2] @ T[:2, :2].T
 
             J[:2, j] = dTdq[:2, 2]
@@ -1386,5 +1433,5 @@ class ETS2(BaseETS):
         :seealso: :func:`jacob`, :func:`hessian0`
         """  # noqa
 
-        T = self.fkine(q, include_base=False)
+        T = self.fkine(q, include_base=False).A
         return tr2jac2(T.T) @ self.jacob0(q)
