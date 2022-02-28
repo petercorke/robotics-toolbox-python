@@ -718,7 +718,10 @@ class BaseERobot(Robot):
 
         explored = set()
 
-        ets = self._find_ets(link, end, explored, path=None)
+        if link is end_link:
+            ets = link.ets
+        else:
+            ets = self._find_ets(link, end_link, explored, path=None)
 
         if ets is None:
             raise ValueError("Could not find the requested ETS in this robot")
