@@ -6,7 +6,7 @@
 """
 
 from collections import UserList
-from numpy import pi, where, all, ndarray, zeros, array, eye
+from numpy import pi, where, all, ndarray, zeros, array, eye, array_equal
 from spatialmath import SE3, SE2
 from spatialmath.base import (
     getvector,
@@ -557,7 +557,7 @@ class ETS(BaseETS):
                 # a joint
                 if const is not None:
                     # flush the constant
-                    if not all(const == eye(4)):
+                    if not array_equal(const, eye(4)):
                         ets *= ET.SE3(const)
                     const = None
                 ets *= et  # emit the joint ET
@@ -570,7 +570,7 @@ class ETS(BaseETS):
 
         if const is not None:
             # flush the constant, tool transform
-            if not all(const == eye(4)):
+            if not array_equal(const, eye(4)):
                 ets *= ET.SE3(const)
         return ets
 
@@ -708,14 +708,14 @@ class ETS(BaseETS):
 
         if base is None:
             bases = None
-        elif all(base == eye(3)):  # pragma: nocover
+        elif array_equal(base, eye(3)):  # pragma: nocover
             bases = None
         else:  # pragma: nocover
             bases = base
 
         if tool is None:
             tools = None
-        elif all(tool == eye(3)):  # pragma: nocover
+        elif array_equal(tool, eye(3)):  # pragma: nocover
             tools = None
         else:  # pragma: nocover
             tools = tool
@@ -1234,7 +1234,7 @@ class ETS2(BaseETS):
                 # a joint
                 if const is not None:
                     # flush the constant
-                    if not all(const == eye(3)):
+                    if not array_equal(const, eye(3)):
                         ets *= ET2.SE2(const)
                     const = None
                 ets *= et  # emit the joint ET
@@ -1247,7 +1247,7 @@ class ETS2(BaseETS):
 
         if const is not None:
             # flush the constant, tool transform
-            if not all(const == eye(3)):
+            if not array_equal(const, eye(3)):
                 ets *= ET2.SE2(const)
         return ets
 
@@ -1330,7 +1330,7 @@ class ETS2(BaseETS):
             bases = None
         elif isinstance(base, SE2):
             bases = array(base.A)
-        elif all(base == eye(3)):  # pragma: nocover
+        elif array_equal(base, eye(3)):  # pragma: nocover
             bases = None
         else:  # pragma: nocover
             bases = base
@@ -1339,7 +1339,7 @@ class ETS2(BaseETS):
             tools = None
         elif isinstance(tool, SE2):
             tools = array(tool.A)
-        elif all(tool == eye(3)):  # pragma: nocover
+        elif array_equal(tool, eye(3)):  # pragma: nocover
             tools = None
         else:  # pragma: nocover
             tools = tool
