@@ -1739,6 +1739,31 @@ class TestETS(unittest.TestCase):
         nt.assert_almost_equal(r.hessian0(J0=J0), ans)
         nt.assert_almost_equal(r.hessiane(Je=Je), ans)
 
+    def test_plot(self):
+        q2 = np.array([0, 1, 2, 3, 4, 5])
+        rx = rtb.ETS(rtb.ET.Rx(jindex=0))
+        ry = rtb.ETS(rtb.ET.Ry(jindex=1))
+        rz = rtb.ETS(rtb.ET.Rz(jindex=2))
+        tx = rtb.ETS(rtb.ET.tx(jindex=3, qlim=[-1, 1]))
+        ty = rtb.ETS(rtb.ET.ty(jindex=4, qlim=[-1, 1]))
+        tz = rtb.ETS(rtb.ET.tz(jindex=5, qlim=[-1, 1]))
+        a = rtb.ETS(rtb.ET.SE3(np.eye(4)))
+        r = tx + ty + tz + rx + ry + rz + a
+        r.plot(q=q2, block=False)
+
+    def test_teach(self):
+        x = sympy.Symbol("x")
+        q2 = np.array([0, 1, 2, 3, 4, 5])
+        rx = rtb.ETS(rtb.ET.Rx(jindex=0))
+        ry = rtb.ETS(rtb.ET.Ry(jindex=1))
+        rz = rtb.ETS(rtb.ET.Rz(jindex=2))
+        tx = rtb.ETS(rtb.ET.tx(jindex=3, qlim=[-1, 1]))
+        ty = rtb.ETS(rtb.ET.ty(jindex=4, qlim=[-1, 1]))
+        tz = rtb.ETS(rtb.ET.tz(jindex=5, qlim=[-1, 1]))
+        a = rtb.ETS(rtb.ET.SE3(np.eye(4)))
+        r = tx + ty + tz + rx + ry + rz + a
+        r.teach(q=q2, block=False)
+
 
 if __name__ == "__main__":
 
