@@ -681,35 +681,35 @@ class ETS(BaseETS):
         end = self.data[-1]
 
         if base is None:
-            bases = eye(4)
+            bases = None
         elif isinstance(base, SE3):
             bases = array(base.A)
         else:  # pragma: nocover
-            bases = eye(4)
+            bases = None
 
         if tool is None:
-            tools = eye(4)
+            tools = None
         elif isinstance(tool, SE3):
             tools = array(tool.A)
         else:  # pragma: nocover
-            tools = eye(4)
+            tools = None
 
         if l > 1:
             T = zeros((l, 4, 4), dtype=object)
         else:
             T = zeros((4, 4), dtype=object)
-        Tk = eye(4)
+
+        # Tk = None
 
         for k, qk in enumerate(q):  # type: ignore
             link = end  # start with last link
 
             jindex = 0 if link.jindex is None and link.isjoint else link.jindex
-            A = link.A(qk[jindex])
 
-            if A is None:
-                Tk = tools  # pragma: nocover
-            else:
-                Tk = A @ tools
+            Tk = link.A(qk[jindex])
+
+            if tools is not None:
+                Tk = Tk @ tools
 
             # add remaining links, back toward the base
             for i in range(self.m - 2, -1, -1):
@@ -722,7 +722,7 @@ class ETS(BaseETS):
                     Tk = A @ Tk
 
             # add base transform if it is set
-            if include_base == True:
+            if include_base == True and bases is not None:
                 Tk = bases @ Tk
 
             # append
