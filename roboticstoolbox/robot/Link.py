@@ -312,7 +312,7 @@ class BaseLink(SceneNode, ABC):
 
     # -------------------------------------------------------------------------- #
 
-    def copy(self, parent: "BaseLink" = None):
+    def copy(self, parent: Union["BaseLink", None] = None):
         """
         Copy of link object
 
@@ -1367,7 +1367,7 @@ class Link(BaseLink):
 
 
 class Link2(BaseLink):
-    def __init__(self, ets: ETS2 = ETS2(), jindex: int = None, **kwargs):
+    def __init__(self, ets: ETS2 = ETS2(), jindex: Union[int, None] = None, **kwargs):
 
         # process common options
         super().__init__(ets=ets, **kwargs)
