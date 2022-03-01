@@ -47,13 +47,13 @@ class Cobra600(DHRobot):
         super().__init__(L, name="Cobra600", manufacturer="Omron")
 
         # zero angles, L shaped pose
-        self.addconfiguration("qz", np.array([0, 0, 0, 0]))
+        self.addconfiguration_attr("qz", np.array([0, 0, 0, 0]))
 
         self.qr = np.zeros(4)
         self.qz = np.zeros(4)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

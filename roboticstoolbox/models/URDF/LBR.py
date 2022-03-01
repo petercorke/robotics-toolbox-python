@@ -50,8 +50,8 @@ class LBR(ERobot):
         self.qr = np.array([0, -0.3, 0, -1.9, 0, 1.5, np.pi / 4])
         self.qz = np.zeros(7)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

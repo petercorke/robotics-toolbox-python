@@ -45,11 +45,11 @@ class UR5(ERobot):
         self.qr = np.array([np.pi, 0, 0, 0, np.pi / 2, 0])
         self.qz = np.zeros(6)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
         # sol=robot.ikine_LM(SE3(0.5, -0.2, 0.2)@SE3.OA([1,0,0],[0,0,-1]))
-        self.addconfiguration(
+        self.addconfiguration_attr(
             "qn",
             np.array(
                 [

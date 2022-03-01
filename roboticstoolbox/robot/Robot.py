@@ -423,7 +423,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         """
         _default_backend = be
 
-    def addconfiguration(self, name: str, q: ArrayLike, unit: str = "rad"):
+    def addconfiguration_attr(self, name: str, q: ArrayLike, unit: str = "rad"):
         """
         Add a named joint configuration (Robot superclass)
 
@@ -438,7 +438,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
             >>> import roboticstoolbox as rtb
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.qz
-            >>> robot.addconfiguration("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+            >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
             >>> robot.mypos
         """
         v = getvector(q, self.n)
@@ -446,7 +446,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         v = np.array(v)
         self._configs[name] = v
 
-    def logconfiguration(self, name: str, q: np.ndarray):
+    def addconfiguration(self, name: str, q: np.ndarray):
         """
         Log a named joint configuration (Robot superclass)
 

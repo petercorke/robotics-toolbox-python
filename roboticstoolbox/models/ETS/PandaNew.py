@@ -65,8 +65,8 @@ class Panda(ERobot):
         self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
         self.qz = np.zeros(7)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover
@@ -81,7 +81,7 @@ if __name__ == "__main__":  # pragma nocover
 
     # print(r2)
 
-    # r2.addconfiguration("ready", [1, 2, 3, 4, 4], "deg")
+    # r2.addconfiguration_attr("ready", [1, 2, 3, 4, 4], "deg")
     # qq = r2.configs["my_q"]
 
     # # r.ets()

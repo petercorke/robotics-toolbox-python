@@ -91,13 +91,13 @@ class TwoLink(DHRobot):
         self.qr = np.array([pi / 6, -pi / 6])
         self.qz = np.zeros(2)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
-        self.addconfiguration("qz", [0, 0])
-        self.addconfiguration("q1", [0, pi / 2])
-        self.addconfiguration("q2", [pi / 2, -pi / 2])
-        self.addconfiguration("qn", [pi / 6, -pi / 6])
+        self.addconfiguration_attr("qz", [0, 0])
+        self.addconfiguration_attr("q1", [0, pi / 2])
+        self.addconfiguration_attr("q2", [pi / 2, -pi / 2])
+        self.addconfiguration_attr("qn", [pi / 6, -pi / 6])
 
         self.base = SE3.Rx(pi / 2)
         self.gravity = [0, 0, g]

@@ -71,8 +71,8 @@ class Coil(DHRobot):
         self.qr = np.array(np.ones(N) * 10 * pi / N)
         self.qz = np.zeros(N)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

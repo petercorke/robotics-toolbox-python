@@ -84,16 +84,16 @@ class KR5(DHRobot):
         self.qr = np.array([pi / 4, pi / 3, pi / 4, pi / 6, pi / 4, pi / 6])
         self.qz = np.zeros(6)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
-        self.addconfiguration(
+        self.addconfiguration_attr(
             "qk1", np.array([pi / 4, pi / 3, pi / 4, pi / 6, pi / 4, pi / 6])
         )
-        self.addconfiguration(
+        self.addconfiguration_attr(
             "qk2", np.array([pi / 4, pi / 3, pi / 6, pi / 3, pi / 4, pi / 6])
         )
-        self.addconfiguration(
+        self.addconfiguration_attr(
             "qk3", np.array([pi / 6, pi / 3, pi / 6, pi / 3, pi / 6, pi / 3])
         )
 

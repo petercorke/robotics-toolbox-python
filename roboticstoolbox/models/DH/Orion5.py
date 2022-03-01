@@ -76,14 +76,14 @@ class Orion5(DHRobot):
         self.qr = np.array([0, 0, 180, 90]) * deg
         self.qz = np.zeros(4)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
         # stretched out vertically
-        self.addconfiguration("qv", np.r_[0, 90, 180, 180] * deg)
+        self.addconfiguration_attr("qv", np.r_[0, 90, 180, 180] * deg)
 
         # arm horizontal, hand down
-        self.addconfiguration("qh", np.r_[0, 0, 180, 90] * deg)
+        self.addconfiguration_attr("qh", np.r_[0, 0, 180, 90] * deg)
 
 
 if __name__ == "__main__":  # pragma nocover

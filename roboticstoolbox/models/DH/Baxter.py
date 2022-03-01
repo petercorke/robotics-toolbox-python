@@ -66,14 +66,14 @@ class Baxter(DHRobot):
         self.qr = np.array([0, -pi / 2, -pi / 2, 0, 0, 0, 0])
         self.qz = np.zeros(7)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
         # straight and horizontal
-        self.addconfiguration("qs", np.array([0, 0, -pi / 2, 0, 0, 0, 0]))
+        self.addconfiguration_attr("qs", np.array([0, 0, -pi / 2, 0, 0, 0, 0]))
 
         # nominal table top picking pose
-        self.addconfiguration("qn", np.array([0, pi / 4, pi / 2, 0, pi / 4, 0, 0]))
+        self.addconfiguration_attr("qn", np.array([0, pi / 4, pi / 2, 0, pi / 4, 0, 0]))
 
         if arm == "left":
             self.base = SE3(0.064614, 0.25858, 0.119) * SE3.Rz(pi / 4)
