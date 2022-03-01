@@ -127,7 +127,10 @@ class BaseLink(SceneNode, ABC):
         self._robot = None
 
         # Set name of link and joint()
-        self._name = name
+        if name is None:
+            self._name = ""
+        else:
+            self._name = name
 
         # Link geometry
         self._geometry = SceneGroup(scene_children=geometry)
