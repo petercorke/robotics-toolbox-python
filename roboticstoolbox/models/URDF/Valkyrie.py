@@ -35,7 +35,7 @@ class Valkyrie(ERobot):
             raise ValueError("variant must be in the range A-D")
 
         links, name, urdf_string, urdf_filepath = self.URDF_read(
-            f"valkyrie_description/robots/valkyrie_{variant}.urdf"
+            f"val_description/model/robots/valkyrie_{variant}.urdf"
         )
 
         super().__init__(
