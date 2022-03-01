@@ -11,9 +11,16 @@ import roboticstoolbox as rtb
 from spatialmath.base import tr2x, numjac
 from scipy.linalg import block_diag
 import unittest
+import pytest
 
 
 class Tests:
+    @pytest.fixture(autouse=True)
+    def setUp(self):
+        self.robot = rtb.models.ETS.Puma560()
+        self.q = np.array([0.1, 0.2, 0.3, 0.1, 0.2, 0.3])
+        self.qd = np.array([0.1, -0.2, 0.3, -0.1, 0.2, -0.3])
+
     def test_jacob0(self):
         q = self.q
         nt.assert_array_almost_equal(
@@ -32,25 +39,25 @@ class Tests:
         rep = "eul"
         q = self.q
         Ja = numjac(lambda q: tr2x(self.robot.fkine(q).A, representation=rep), q)
-        nt.assert_array_almost_equal(self.robot.jacob0(q, analytical=rep), Ja)
+        nt.assert_array_almost_equal(self.robot.jacob0_analytic(q, analytic=rep), Ja)
 
     def test_jacob_analytical_rpy_xyz(self):
         rep = "rpy/xyz"
         q = self.q
         Ja = numjac(lambda q: tr2x(self.robot.fkine(q).A, representation=rep), q)
-        nt.assert_array_almost_equal(self.robot.jacob0(q, analytical=rep), Ja)
+        nt.assert_array_almost_equal(self.robot.jacob0_analytic(q, analytic=rep), Ja)
 
     def test_jacob_analytical_rpy_zyx(self):
         rep = "rpy/zyx"
         q = self.q
         Ja = numjac(lambda q: tr2x(self.robot.fkine(q).A, representation=rep), q)
-        nt.assert_array_almost_equal(self.robot.jacob0(q, analytical=rep), Ja)
+        nt.assert_array_almost_equal(self.robot.jacob0_analytic(q, analytic=rep), Ja)
 
     def test_jacob_analytical_exp(self):
         rep = "exp"
         q = self.q
         Ja = numjac(lambda q: tr2x(self.robot.fkine(q).A, representation=rep), q)
-        nt.assert_array_almost_equal(self.robot.jacob0(q, analytical=rep), Ja)
+        nt.assert_array_almost_equal(self.robot.jacob0_analytic(q, analytic=rep), Ja)
 
     def test_jacob_dot(self):
         j0 = self.robot.jacob_dot(self.q, self.qd)
@@ -113,11 +120,11 @@ class Tests:
 #         self.qd = np.r_[0.1, -0.2, 0.3, -0.1, 0.2, -0.3]
 
 
-class TestJacobians_ERobot(unittest.TestCase, Tests):
-    def setUp(self):
-        self.robot = rtb.models.ETS.Puma560()
-        self.q = np.array([0.1, 0.2, 0.3, 0.1, 0.2, 0.3])
-        self.qd = np.array([0.1, -0.2, 0.3, -0.1, 0.2, -0.3])
+# class TestJacobians_ERobot(unittest.TestCase, Tests):
+#     def setUp(self):
+#         self.robot = rtb.models.ETS.Puma560()
+#         self.q = np.array([0.1, 0.2, 0.3, 0.1, 0.2, 0.3])
+#         self.qd = np.array([0.1, -0.2, 0.3, -0.1, 0.2, -0.3])
 
 
 if __name__ == "__main__":
