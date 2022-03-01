@@ -44,7 +44,7 @@ class BaseETS(UserList):
         self._m = len(self.data)
         self._n = len([True for et in self.data if et.isjoint])
 
-    def __str__(self, q: str = None):
+    def __str__(self, q: Union[str, None] = None):
         """
         Pretty prints the ETS
 
@@ -690,7 +690,7 @@ class ETS(BaseETS):
         if fk.ndim == 3:
             for T in fk:
                 print(T)
-                ret.append(SE3(T, check=False))
+                ret.append(SE3(T, check=False))  # type: ignore
         else:
             ret = SE3(fk, check=False)
 
@@ -1450,7 +1450,7 @@ class ETS2(BaseETS):
             # append
             if l > 1:
                 # T[k, :, :] = Tk
-                ret.append(SE2(Tk, check=False))
+                ret.append(SE2(Tk, check=False))  # type: ignore
             else:
                 ret = SE2(Tk, check=False)
 
