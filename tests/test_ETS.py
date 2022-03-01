@@ -78,9 +78,7 @@ class TestETS(unittest.TestCase):
         c = rtb.ET.Rz()
         d = rtb.ET.tx(1.0)
         e = rtb.ET.SE3(SE3.Rx(1.0))
-        print(a.jindex)
         ets = rx * ry * rz * d
-        print(a.jindex)
         ets2 = rx * a * b * c
         ets3 = d * e
 
@@ -208,15 +206,15 @@ class TestETS(unittest.TestCase):
 
         fk_traj = r.fkine(qt)
 
-        print(fk_traj[0])
-        print(fk_traj[1])
-        print(fk_traj[2])
-        print(ans2)
+        # print(fk_traj[0])
+        # print(fk_traj[1])
+        # print(fk_traj[2])
+        # print(ans4)
 
         nt.assert_almost_equal(r.fkine(q).A, ans1.A)
         nt.assert_almost_equal(fk_traj[0].A, ans2.A)
         nt.assert_almost_equal(fk_traj[1].A, ans3.A)
-        nt.assert_almost_equal(fk_traj[2].A, ans4.A)
+        nt.assert_almost_equal(fk_traj[2].A, sympy.simplify(ans4.A))
 
         base = SE3.Rx(1.0)
         tool = SE3.Tz(0.5)
@@ -224,12 +222,12 @@ class TestETS(unittest.TestCase):
 
         r2 = rtb.ETS([rtb.ET.Rx(jindex=0)])
 
-        nt.assert_almost_equal(r.fkine(q, base=base).A, ans5.A)
+        nt.assert_almost_equal(r.fkine(q, base=base).A, sympy.simplify(ans5.A))
         # nt.assert_almost_equal(r.fkine(q, base=base), ans5.A)  # type: ignore
 
         q2 = [y]
         ans6 = SE3.Rx(y) * tool
-        nt.assert_almost_equal(r2.fkine(q2, tool=tool).A, ans6.A)  # type: ignore
+        nt.assert_almost_equal(r2.fkine(q2, tool=tool).A, sympy.simplify(ans6.A))  # type: ignore
         # nt.assert_almost_equal(r2.fkine(q2, tool=tool), ans6)  # type: ignore
 
     def test_jacob0_panda(self):

@@ -18,7 +18,7 @@ from spatialmath.base import (
     tr2eul,
     trlog,
     t2r,
-    angvelxform,
+    rotvelxform,
     simplify,
 )
 from roboticstoolbox import rtb_get_param
@@ -705,13 +705,12 @@ class ETS(BaseETS):
         ret = SE3.Empty()
         fk = self.eval(q, base, tool, include_base)
 
-        if fk.dtype == 'O':
+        if fk.dtype == "O":
             # symbolic
-            fk = simplify(fk)
+            fk = array(simplify(fk))
 
         if fk.ndim == 3:
             for T in fk:
-                print(T)
                 ret.append(SE3(T, check=False))  # type: ignore
         else:
             ret = SE3(fk, check=False)
@@ -1166,25 +1165,8 @@ class ETS(BaseETS):
         T = self.fkine(q, tool=tool)
         J = self.jacob0(q, tool=tool)
 
-        if analytic == "rpy/xyz":
-            gamma = tr2rpy(T, order="xyz")
-        elif analytic == "rpy/zyx":
-            gamma = tr2rpy(T, order="zyx")
-        elif analytic == "eul":
-            gamma = tr2eul(T)
-        elif analytic == "exp":
-            # TODO: move to SMTB.base, Horner form with skew(v)
-            gamma = trlog(t2r(T), twist=True)
-        elif analytic == None:
-            return J
-        else:
-            raise ValueError("bad analyical value specified")
-
-        A = angvelxform(gamma, representation=analytic)
+        A = rotvelxform(t2r(T), inverse=True, representation=analytic)
         J = A @ J
-
-        # A = angvelxform(t2r(T), inverse=True, representation=analytic)
-        # J = A @ J
 
         return J
 
@@ -1417,6 +1399,53 @@ class ETS2(BaseETS):
               Sequence, J. Haviland and P. Corke
         """
 
+        ret = SE2.Empty()
+        fk = self.eval(q, base, tool, include_base)
+
+        if fk.dtype == "O":
+            # symbolic
+            fk = array(simplify(fk))
+
+        if fk.ndim == 3:
+            for T in fk:
+                ret.append(SE2(T, check=False))  # type: ignore
+        else:
+            ret = SE2(fk, check=False)
+
+        return ret
+
+    def eval(
+        self,
+        q: ArrayLike,
+        base: Union[ndarray, SE2, None] = None,
+        tool: Union[ndarray, SE2, None] = None,
+        include_base: bool = True,
+    ) -> ndarray:
+        """
+        Forward kinematics
+        :param q: Joint coordinates
+        :type q: ArrayLike
+        :param base: base transform, optional
+        :param tool: tool transform, optional
+
+        :return: The transformation matrix representing the pose of the
+            end-effector
+
+        - ``T = ets.fkine(q)`` evaluates forward kinematics for the robot at
+          joint configuration ``q``.
+        **Trajectory operation**:
+        If ``q`` has multiple rows (mxn), it is considered a trajectory and the
+        result is an ``SE2`` instance with ``m`` values.
+        .. note::
+            - The robot's base tool transform, if set, is incorporated
+              into the result.
+            - A tool transform, if provided, is incorporated into the result.
+            - Works from the end-effector link to the base
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        """
+
         q = getmatrix(q, (None, None))
         l, _ = q.shape  # type: ignore
         end = self[-1]
@@ -1444,8 +1473,6 @@ class ETS2(BaseETS):
         else:
             T = zeros((3, 3), dtype=object)
 
-        ret = SE2.Empty()
-
         for k, qk in enumerate(q):  # type: ignore
             link = end  # start with last link
 
@@ -1471,16 +1498,13 @@ class ETS2(BaseETS):
 
             # append
             if l > 1:
-                # T[k, :, :] = Tk
-                ret.append(SE2(Tk, check=False))  # type: ignore
+                T[k, :, :] = Tk
+                # ret.append(SE2(Tk, check=False))  # type: ignore
             else:
-                ret = SE2(Tk, check=False)
+                T = Tk
+                # ret = SE2(Tk, check=False)
 
-        if ret.A.dtype == 'O':
-            # if symbolic, simplify it
-            ret = ret.simplify()
-
-        return ret
+        return T
 
     def jacob0(
         self,
