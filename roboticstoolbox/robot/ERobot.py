@@ -128,7 +128,7 @@ class BaseERobot(Robot):
         n = 0
         for k, link in enumerate(links):
             # if link has no name, give it one
-            if link.name is None:
+            if link.name is None or link.name == "":
                 link.name = f"link-{k}"
             link.number = k + 1
 
