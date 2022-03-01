@@ -12,6 +12,7 @@ import roboticstoolbox as rtb
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.ET import ET, ET2
 from numpy import eye, ndarray, array, diag
+from warnings import warn
 
 ArrayLike = Union[list, ndarray, tuple, set]
 
@@ -984,7 +985,7 @@ class BaseLink(SceneNode, ABC):
 
         return d, p1, p2
 
-    def collided(self, shape: Shape, skip: bool = False):
+    def iscollided(self, shape: Shape, skip: bool = False) -> bool:
         """
         collided(shape) checks if this link and shape have collided
 
@@ -1000,10 +1001,22 @@ class BaseLink(SceneNode, ABC):
             shape._propogate_scene_tree()
 
         for col in self.collision:
-            if col.collided(shape):
+            if col.iscollided(shape):
                 return True
 
         return False
+
+    def collided(self, shape: Shape, skip: bool = False):
+        """
+        collided(shape) checks if this link and shape have collided
+
+        :param shape: The shape to compare distance to
+        :param skip: Skip setting all shape transforms
+
+        :returns: True if shapes have collided
+        """
+        warn("base kwarg is deprecated, use pose instead", FutureWarning)
+        return self.iscollided(shape=shape, skip=skip)
 
     def dyn(self, indent=0):
         """

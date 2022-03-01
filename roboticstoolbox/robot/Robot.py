@@ -27,6 +27,7 @@ from roboticstoolbox.robot.Link import BaseLink, Link
 from numpy import all, eye, isin
 from roboticstoolbox.robot.Gripper import Gripper
 from numpy import ndarray
+from warnings import warn
 
 try:
     from matplotlib import colors
@@ -2028,7 +2029,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
         return d, p1, p2
 
-    def collided(self, q, shape, skip=False):
+    def iscollided(self, q, shape, skip=False):
         """
         collided(shape) checks if this robot and shape have collided
         :param shape: The shape to compare distance to
@@ -2046,16 +2047,30 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
             shape._propogate_scene_tree()
 
         for link in self.links:
-            if link.collided(shape, skip=True):
+            if link.iscollided(shape, skip=True):
                 return True
 
         if isinstance(self, rtb.ERobot):
             for gripper in self.grippers:
                 for link in gripper.links:
-                    if link.collided(shape, skip=True):
+                    if link.iscollided(shape, skip=True):
                         return True
 
         return False
+
+    def collided(self, q, shape, skip=False):
+        """
+        collided(shape) checks if this robot and shape have collided
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+        :param skip: Skip setting all shape transforms based on q, use this
+            option if using this method in conjuction with Swift to save time
+        :type skip: boolean
+        :returns: True if shapes have collided
+        :rtype: bool
+        """
+        warn("base kwarg is deprecated, use pose instead", FutureWarning)
+        return self.iscollided(q, shape, skip=skip)
 
     def joint_velocity_damper(self, ps=0.05, pi=0.1, n=None, gain=1.0):
         """
