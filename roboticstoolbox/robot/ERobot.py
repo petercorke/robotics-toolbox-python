@@ -31,7 +31,7 @@ from spatialmath import (
 )
 import fknm
 from functools import lru_cache
-from typing import Union, overload, Dict, List, Tuple
+from typing import Union, overload, Dict, List, Tuple, Optional
 from copy import deepcopy
 
 ArrayLike = Union[list, ndarray, tuple, set]
@@ -192,8 +192,6 @@ class BaseERobot(Robot):
         # Make a gripper object for each gripper
         for link in gripper_links:
             g_links = self.dfs_links(link)
-            print(g_links)
-            print()
 
             # Remove gripper links from the robot
             for g_link in g_links:
@@ -1188,6 +1186,7 @@ class ERobot(BaseERobot):
             # Sever parent connection, but save the string
             # The constructor will piece this together for us
             for link in links:
+                link._children = []
                 if link.parent is not None:
                     link._parent_name = link.parent.name
                     link._parent = None
@@ -1543,8 +1542,8 @@ class ERobot(BaseERobot):
     def fkine(
         self,
         q: ArrayLike,
-        end: Union[str, Link, Gripper] = None,
-        start: Union[str, Link, Gripper] = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
         tool: Union[ndarray, SE3, None] = None,
         include_base: bool = True,
     ) -> SE3:
@@ -1590,8 +1589,8 @@ class ERobot(BaseERobot):
     def jacob0(
         self,
         q: ArrayLike,
-        end: Union[str, Link, Gripper] = None,
-        start: Union[str, Link, Gripper] = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
         tool: Union[ndarray, SE3, None] = None,
     ) -> ndarray:
         r"""
@@ -1642,8 +1641,8 @@ class ERobot(BaseERobot):
     def jacobe(
         self,
         q: ArrayLike,
-        end: Union[str, Link, Gripper] = None,
-        start: Union[str, Link, Gripper] = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
         tool: Union[ndarray, SE3, None] = None,
     ) -> ndarray:
         r"""
@@ -1684,8 +1683,8 @@ class ERobot(BaseERobot):
     def hessian0(
         self,
         q: Union[ArrayLike, None] = None,
-        end: Union[str, Link, Gripper] = None,
-        start: Union[str, Link, Gripper] = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
         J0: Union[ndarray, None] = None,
         tool: Union[ndarray, SE3, None] = None,
     ) -> ndarray:
@@ -1737,8 +1736,8 @@ class ERobot(BaseERobot):
     def hessiane(
         self,
         q: Union[ArrayLike, None] = None,
-        end: Union[str, Link, Gripper] = None,
-        start: Union[str, Link, Gripper] = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
         Je: Union[ndarray, None] = None,
         tool: Union[ndarray, SE3, None] = None,
     ) -> ndarray:
@@ -1791,8 +1790,8 @@ class ERobot(BaseERobot):
         self,
         q: ArrayLike,
         n: int = 3,
-        end: Union[str, Link, Gripper] = None,
-        start: Union[str, Link, Gripper] = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
         tool: Union[ndarray, SE3, None] = None,
     ):
         r"""
