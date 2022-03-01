@@ -193,6 +193,23 @@ class BaseET:
 
         return f"{start}.{self.axis}({s_kwargs})"
 
+    def _repr_pretty_(self, p, cycle):
+        """
+        Pretty string for IPython
+
+        :param p: pretty printer handle (ignored)
+        :param cycle: pretty printer flag (ignored)
+
+        Print stringified version when variable is displayed in IPython, ie. on
+        a line by itself.
+
+        Example::
+
+            [In [1]: e
+            Out [1]: tx(1)
+        """
+        print(self.__str__())
+
     def __deepcopy__(self, memo):
         cls = self.__class__
         result = cls.__new__(cls)

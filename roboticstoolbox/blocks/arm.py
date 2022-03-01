@@ -8,7 +8,7 @@ from spatialmath import base, SE3
 from bdsim.components import TransferBlock, FunctionBlock, SourceBlock
 from bdsim.graphics import GraphicsBlock
 
-from roboticstoolbox import tpoly_func, trapezoidal_func
+from roboticstoolbox import quintic_func, trapezoidal_func
 
 """
 Robot blocks:
@@ -1109,7 +1109,7 @@ class Traj(FunctionBlock):
         :type T: array_like or int, optional
         :param time: x is simulation time, defaults to False
         :type time: bool, optional
-        :param traj: trajectory type, one of: 'trapezoidal' [default], 'tpoly'
+        :param traj: trajectory type, one of: 'trapezoidal' [default], 'quintic'
         :type traj: str, optional
         :param blockargs: |BlockOptions|
         :type blockargs: dict
@@ -1151,8 +1151,8 @@ class Traj(FunctionBlock):
 
         if self.traj == "trapezoidal":
             trajfunc = trapezoidal_func
-        elif self.traj == "tpoly":
-            trajfunc = tpoly_func
+        elif self.traj == "quintic":
+            trajfunc = quintic_func
 
         self.trajfuncs = []
         for i in range(len(self.y0)):

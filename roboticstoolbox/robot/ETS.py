@@ -19,6 +19,7 @@ from spatialmath.base import (
     trlog,
     t2r,
     angvelxform,
+    simplify,
 )
 from roboticstoolbox import rtb_get_param
 
@@ -149,6 +150,23 @@ class BaseETS(UserList):
             return " \u2295 ".join(es)
         else:  # pragma: nocover
             return " * ".join(es)
+
+    def _repr_pretty_(self, p, cycle):
+        """
+        Pretty string for IPython
+
+        :param p: pretty printer handle (ignored)
+        :param cycle: pretty printer flag (ignored)
+
+        Print stringified version when variable is displayed in IPython, ie. on
+        a line by itself.
+
+        Example::
+
+            [In [1]: e
+            Out [1]: R(q0) ⊕ tx(1) ⊕ R(q1) ⊕ tx(1)
+        """
+        print(self.__str__())
 
     def joints(self) -> List[int]:
         """
@@ -686,6 +704,10 @@ class ETS(BaseETS):
 
         ret = SE3.Empty()
         fk = self.eval(q, base, tool, include_base)
+
+        if fk.dtype == 'O':
+            # symbolic
+            fk = simplify(fk)
 
         if fk.ndim == 3:
             for T in fk:
@@ -1453,6 +1475,10 @@ class ETS2(BaseETS):
                 ret.append(SE2(Tk, check=False))  # type: ignore
             else:
                 ret = SE2(Tk, check=False)
+
+        if ret.A.dtype == 'O':
+            # if symbolic, simplify it
+            ret = ret.simplify()
 
         return ret
 
