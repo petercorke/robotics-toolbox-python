@@ -8,45 +8,46 @@ Created on Sun Oct 3 17:17:04 2021
 import numpy.testing as nt
 import numpy as np
 import roboticstoolbox as rtb
-from spatialmath.base import *
+from spatialmath.base import tr2x, numjac
 from scipy.linalg import block_diag
 import unittest
 
-class Tests:
 
+class Tests:
     def test_jacob0(self):
         q = self.q
-        nt.assert_array_almost_equal(self.robot.jacob0(q), 
-            numjac(lambda q: self.robot.fkine(q).A, q, SE=3))
+        nt.assert_array_almost_equal(
+            self.robot.jacob0(q), numjac(lambda q: self.robot.fkine(q).A, q, SE=3)
+        )
 
     def test_jacobe(self):
         q = self.q
         J0 = numjac(lambda q: self.robot.fkine(q).A, q, SE=3)
-        # velocity transform to EE frame 
+        # velocity transform to EE frame
         TE = self.robot.fkine(q)
         Je = block_diag(TE.R.T, TE.R.T) @ J0
         nt.assert_array_almost_equal(self.robot.jacobe(q), Je)
 
     def test_jacob_analytical_eul(self):
-        rep = 'eul'
+        rep = "eul"
         q = self.q
         Ja = numjac(lambda q: tr2x(self.robot.fkine(q).A, representation=rep), q)
         nt.assert_array_almost_equal(self.robot.jacob0(q, analytical=rep), Ja)
 
     def test_jacob_analytical_rpy_xyz(self):
-        rep = 'rpy/xyz'
+        rep = "rpy/xyz"
         q = self.q
         Ja = numjac(lambda q: tr2x(self.robot.fkine(q).A, representation=rep), q)
         nt.assert_array_almost_equal(self.robot.jacob0(q, analytical=rep), Ja)
 
     def test_jacob_analytical_rpy_zyx(self):
-        rep = 'rpy/zyx'
+        rep = "rpy/zyx"
         q = self.q
         Ja = numjac(lambda q: tr2x(self.robot.fkine(q).A, representation=rep), q)
         nt.assert_array_almost_equal(self.robot.jacob0(q, analytical=rep), Ja)
 
     def test_jacob_analytical_exp(self):
-        rep = 'exp'
+        rep = "exp"
         q = self.q
         Ja = numjac(lambda q: tr2x(self.robot.fkine(q).A, representation=rep), q)
         nt.assert_array_almost_equal(self.robot.jacob0(q, analytical=rep), Ja)
@@ -61,7 +62,7 @@ class Tests:
         nt.assert_array_almost_equal(j0, Jd, decimal=4)
 
     def test_jacob_dot_analytical_eul(self):
-        rep = 'eul'
+        rep = "eul"
         j0 = self.robot.jacob_dot(self.q, self.qd, analytical=rep)
 
         H = numhess(lambda q: self.robot.jacob0(q, analytical=rep), self.q)
@@ -103,6 +104,7 @@ class Tests:
     #         Jd += H[:, :, i] * self.qd[i]
     #     nt.assert_array_almost_equal(j0, Jd, decimal=4)
 
+
 # class TestJacobians_DH(unittest.TestCase, Tests):
 
 #     def setUp(self):
@@ -111,16 +113,13 @@ class Tests:
 #         self.qd = np.r_[0.1, -0.2, 0.3, -0.1, 0.2, -0.3]
 
 
-
 class TestJacobians_ERobot(unittest.TestCase, Tests):
-
     def setUp(self):
         self.robot = rtb.models.ETS.Puma560()
-        self.q = np.r_[0.1, 0.2, 0.3, 0.1, 0.2, 0.3]
-        self.qd = np.r_[0.1, -0.2, 0.3, -0.1, 0.2, -0.3]
+        self.q = np.array([0.1, 0.2, 0.3, 0.1, 0.2, 0.3])
+        self.qd = np.array([0.1, -0.2, 0.3, -0.1, 0.2, -0.3])
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     unittest.main()
