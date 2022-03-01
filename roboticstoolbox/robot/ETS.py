@@ -1162,7 +1162,7 @@ class ETS(BaseETS):
 
         """  # noqa
 
-        T = self.fkine(q, tool=tool)
+        T = self.eval(q, tool=tool)
         J = self.jacob0(q, tool=tool)
 
         A = rotvelxform(t2r(T), inverse=True, representation=analytic)
