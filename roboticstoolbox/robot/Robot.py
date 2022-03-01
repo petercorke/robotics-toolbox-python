@@ -929,7 +929,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         n = len(q)
         if J0 is None:
             J0 = self.jacob0(q)
-        H = self.hessian0(q, J0)
+        H = self.hessian0(q, J0=J0)
 
         # Jd = H qd using mode 3 product
         Jd = np.zeros((6, n))
@@ -939,17 +939,17 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         if analytical is not None:
             # determine analytic rotation
             T = self.fkine(q).A
-            gamma = r2x(T, representation=analytical)
+            gamma = smb.r2x(T, representation=analytical)
 
             # get transformation angular velocity to analytic velocity
-            Ai = smb.angvelxform(
+            Ai = smb.rotvelxform(
                 gamma, representation=analytical, inverse=True, full=True
             )
 
             # get analytic rate from joint rates
             omega = J0[3:, :] @ qd
             gamma_dot = Ai[3:, 3:] @ omega
-            Ai_dot = smb.angvelxform_inv_dot(gamma, gamma_dot, full=True)
+            Ai_dot = smb.rotvelxform_inv_dot(gamma, gamma_dot, full=True)
 
             Jd = Ai_dot @ J0 + Ai @ Jd
 
@@ -1044,8 +1044,8 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
     def jacob0_analytic(
         self,
         q: ArrayLike,
-        end: Union[str, Link, Gripper] = None,
-        start: Union[str, Link, Gripper] = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
         tool: Union[ndarray, SE3, None] = None,
         analytic: str = "rpy-xyz",
     ):
