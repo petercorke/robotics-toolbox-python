@@ -88,8 +88,8 @@ class UR3(DHRobot):
         self.qr = np.array([180, 0, 0, 0, 90, 0]) * deg
         self.qz = np.zeros(6)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

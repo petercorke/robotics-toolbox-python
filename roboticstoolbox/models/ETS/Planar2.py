@@ -38,8 +38,8 @@ class Planar2(ERobot2):
         self.qr = np.array([0, 0])
         self.qz = np.zeros(2)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

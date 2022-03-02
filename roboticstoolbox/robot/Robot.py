@@ -27,6 +27,7 @@ from roboticstoolbox.robot.Link import BaseLink, Link
 from numpy import all, eye, isin
 from roboticstoolbox.robot.Gripper import Gripper
 from numpy import ndarray
+from warnings import warn
 
 try:
     from matplotlib import colors
@@ -422,7 +423,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         """
         _default_backend = be
 
-    def addconfiguration(self, name: str, q: ArrayLike, unit: str = "rad"):
+    def addconfiguration_attr(self, name: str, q: ArrayLike, unit: str = "rad"):
         """
         Add a named joint configuration (Robot superclass)
 
@@ -437,7 +438,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
             >>> import roboticstoolbox as rtb
             >>> robot = rtb.models.DH.Puma560()
             >>> robot.qz
-            >>> robot.addconfiguration("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+            >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
             >>> robot.mypos
         """
         v = getvector(q, self.n)
@@ -445,7 +446,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         v = np.array(v)
         self._configs[name] = v
 
-    def logconfiguration(self, name: str, q: np.ndarray):
+    def addconfiguration(self, name: str, q: np.ndarray):
         """
         Log a named joint configuration (Robot superclass)
 
@@ -928,7 +929,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         n = len(q)
         if J0 is None:
             J0 = self.jacob0(q)
-        H = self.hessian0(q, J0)
+        H = self.hessian0(q, J0=J0)
 
         # Jd = H qd using mode 3 product
         Jd = np.zeros((6, n))
@@ -938,17 +939,17 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         if analytical is not None:
             # determine analytic rotation
             T = self.fkine(q).A
-            gamma = r2x(T, representation=analytical)
+            gamma = smb.r2x(T, representation=analytical)
 
             # get transformation angular velocity to analytic velocity
-            Ai = smb.angvelxform(
+            Ai = smb.rotvelxform(
                 gamma, representation=analytical, inverse=True, full=True
             )
 
             # get analytic rate from joint rates
             omega = J0[3:, :] @ qd
             gamma_dot = Ai[3:, 3:] @ omega
-            Ai_dot = smb.angvelxform_inv_dot(gamma, gamma_dot, full=True)
+            Ai_dot = smb.rotvelxform_inv_dot(gamma, gamma_dot, full=True)
 
             Jd = Ai_dot @ J0 + Ai @ Jd
 
@@ -1043,8 +1044,8 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
     def jacob0_analytic(
         self,
         q: ArrayLike,
-        end: Union[str, Link, Gripper] = None,
-        start: Union[str, Link, Gripper] = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
         tool: Union[ndarray, SE3, None] = None,
         analytic: str = "rpy-xyz",
     ):
@@ -2028,7 +2029,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
         return d, p1, p2
 
-    def collided(self, q, shape, skip=False):
+    def iscollided(self, q, shape, skip=False):
         """
         collided(shape) checks if this robot and shape have collided
         :param shape: The shape to compare distance to
@@ -2046,16 +2047,30 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
             shape._propogate_scene_tree()
 
         for link in self.links:
-            if link.collided(shape, skip=True):
+            if link.iscollided(shape, skip=True):
                 return True
 
         if isinstance(self, rtb.ERobot):
             for gripper in self.grippers:
                 for link in gripper.links:
-                    if link.collided(shape, skip=True):
+                    if link.iscollided(shape, skip=True):
                         return True
 
         return False
+
+    def collided(self, q, shape, skip=False):
+        """
+        collided(shape) checks if this robot and shape have collided
+        :param shape: The shape to compare distance to
+        :type shape: Shape
+        :param skip: Skip setting all shape transforms based on q, use this
+            option if using this method in conjuction with Swift to save time
+        :type skip: boolean
+        :returns: True if shapes have collided
+        :rtype: bool
+        """
+        warn("base kwarg is deprecated, use pose instead", FutureWarning)
+        return self.iscollided(q, shape, skip=skip)
 
     def joint_velocity_damper(self, ps=0.05, pi=0.1, n=None, gain=1.0):
         """

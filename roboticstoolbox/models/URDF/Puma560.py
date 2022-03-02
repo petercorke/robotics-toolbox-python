@@ -57,37 +57,37 @@ class Puma560(ERobot):
         self.qr = np.array([0, pi / 2, -pi / 2, 0, 0, 0])
         self.qz = np.zeros(6)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
         # zero angles, upper arm horizontal, lower up straight up
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
+        self.addconfiguration_attr("qz", np.array([0, 0, 0, 0, 0, 0]))
 
         # reference pose, arm to the right, elbow up
-        self.addconfiguration(
+        self.addconfiguration_attr(
             "ru", np.array([-0.0000, 0.7854, 3.1416, -0.0000, 0.7854, 0.0000])
         )
 
         # reference pose, arm to the right, elbow up
-        self.addconfiguration(
+        self.addconfiguration_attr(
             "rd", np.array([-0.0000, -0.8335, 0.0940, -3.1416, 0.8312, 3.1416])
         )
 
         # reference pose, arm to the left, elbow up
-        self.addconfiguration(
+        self.addconfiguration_attr(
             "lu", np.array([2.6486, -3.9270, 0.0940, 2.5326, 0.9743, 0.3734])
         )
 
         # reference pose, arm to the left, elbow down
-        self.addconfiguration(
+        self.addconfiguration_attr(
             "ld", np.array([2.6486, -2.3081, 3.1416, 0.6743, 0.8604, 2.6611])
         )
 
         # straight and horizontal
-        self.addconfiguration("qs", np.array([0, 0, -pi / 2, 0, 0, 0]))
+        self.addconfiguration_attr("qs", np.array([0, 0, -pi / 2, 0, 0, 0]))
 
         # nominal table top picking pose
-        self.addconfiguration("qn", np.array([0, pi / 4, pi, 0, pi / 4, 0]))
+        self.addconfiguration_attr("qn", np.array([0, pi / 4, pi, 0, pi / 4, 0]))
 
 
 if __name__ == "__main__":  # pragma nocover

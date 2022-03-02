@@ -50,8 +50,8 @@ class KinovaGen3(ERobot):
         self.qr = np.array([np.pi, -0.3, 0, -1.6, 0, -1.0, np.pi / 2])
         self.qz = np.zeros(7)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

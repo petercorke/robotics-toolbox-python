@@ -58,11 +58,11 @@ class Planar2(DHRobot):
         self.qr = np.array([0, pi / 2])
         self.qz = np.zeros(2)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
-        self.addconfiguration("q1", np.array([0, pi / 2]))
-        self.addconfiguration("q2", np.array([pi / 2, -pi / 2]))
+        self.addconfiguration_attr("q1", np.array([0, pi / 2]))
+        self.addconfiguration_attr("q2", np.array([pi / 2, -pi / 2]))
 
 
 if __name__ == "__main__":  # pragma nocover

@@ -32,10 +32,10 @@ class Valkyrie(ERobot):
     def __init__(self, variant="A"):
 
         if not variant in "ABCD":
-            raise ValueError('variant must be in the range A-D')
+            raise ValueError("variant must be in the range A-D")
 
         links, name, urdf_string, urdf_filepath = self.URDF_read(
-            f"valkyrie_description/robots/valkyrie_{variant}.urdf"
+            f"val_description/model/robots/valkyrie_{variant}.urdf"
         )
 
         super().__init__(
@@ -46,8 +46,8 @@ class Valkyrie(ERobot):
             urdf_filepath=urdf_filepath,
         )
 
-        # self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0]))
-        # self.addconfiguration("qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]))
+        # self.addconfiguration_attr("qz", np.array([0, 0, 0, 0, 0, 0, 0]))
+        # self.addconfiguration_attr("qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]))
 
 
 if __name__ == "__main__":  # pragma nocover

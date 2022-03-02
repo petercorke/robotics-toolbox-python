@@ -99,9 +99,9 @@ class YuMi(ERobot):
         self.qz = np.zeros(14)
         self.q1 = np.array([0, -0.4, 0, 0, 0, 0, 0, 0, -0.4, 0, 0, 0, 0, 0])
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
-        self.logconfiguration("q1", self.q1)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
+        self.addconfiguration("q1", self.q1)
 
 
 if __name__ == "__main__":  # pragma nocover

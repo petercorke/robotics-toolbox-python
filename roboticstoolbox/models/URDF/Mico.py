@@ -59,8 +59,8 @@ class Mico(ERobot):
         self.qr = np.array([0, 45, 60, 0]) * np.pi / 180
         self.qz = np.zeros(4)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

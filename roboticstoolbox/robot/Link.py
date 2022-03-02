@@ -12,6 +12,7 @@ import roboticstoolbox as rtb
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.ET import ET, ET2
 from numpy import eye, ndarray, array, diag
+from warnings import warn
 
 ArrayLike = Union[list, ndarray, tuple, set]
 
@@ -127,7 +128,10 @@ class BaseLink(SceneNode, ABC):
         self._robot = None
 
         # Set name of link and joint()
-        self._name = name
+        if name is None:
+            self._name = ""
+        else:
+            self._name = name
 
         # Link geometry
         self._geometry = SceneGroup(scene_children=geometry)
@@ -312,7 +316,7 @@ class BaseLink(SceneNode, ABC):
 
     # -------------------------------------------------------------------------- #
 
-    def copy(self, parent: "BaseLink" = None):
+    def copy(self, parent: Union["BaseLink", None] = None):
         """
         Copy of link object
 
@@ -981,7 +985,7 @@ class BaseLink(SceneNode, ABC):
 
         return d, p1, p2
 
-    def collided(self, shape: Shape, skip: bool = False):
+    def iscollided(self, shape: Shape, skip: bool = False) -> bool:
         """
         collided(shape) checks if this link and shape have collided
 
@@ -997,10 +1001,22 @@ class BaseLink(SceneNode, ABC):
             shape._propogate_scene_tree()
 
         for col in self.collision:
-            if col.collided(shape):
+            if col.iscollided(shape):
                 return True
 
         return False
+
+    def collided(self, shape: Shape, skip: bool = False):
+        """
+        collided(shape) checks if this link and shape have collided
+
+        :param shape: The shape to compare distance to
+        :param skip: Skip setting all shape transforms
+
+        :returns: True if shapes have collided
+        """
+        warn("base kwarg is deprecated, use pose instead", FutureWarning)
+        return self.iscollided(shape=shape, skip=skip)
 
     def dyn(self, indent=0):
         """
@@ -1367,7 +1383,7 @@ class Link(BaseLink):
 
 
 class Link2(BaseLink):
-    def __init__(self, ets: ETS2 = ETS2(), jindex: int = None, **kwargs):
+    def __init__(self, ets: ETS2 = ETS2(), jindex: Union[int, None] = None, **kwargs):
 
         # process common options
         super().__init__(ets=ets, **kwargs)

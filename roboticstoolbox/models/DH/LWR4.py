@@ -76,8 +76,8 @@ class LWR4(DHRobot):
         self.qr = np.array(7)
         self.qz = np.zeros(7)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

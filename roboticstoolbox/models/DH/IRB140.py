@@ -140,10 +140,10 @@ class IRB140(DHRobot):
         self.qr = np.array([0, -90 * deg, 90 * deg, 0, 90 * deg, -90 * deg])
         self.qz = np.zeros(6)
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
-        self.addconfiguration(
+        self.addconfiguration_attr(
             "qd", np.array([0, -90 * deg, 180 * deg, 0, 0, -90 * deg])
         )
 

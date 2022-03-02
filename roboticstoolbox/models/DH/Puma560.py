@@ -193,12 +193,12 @@ class Puma560(DHRobot):
         # nominal table top picking pose
         self.qn = np.array([0, pi / 4, pi, 0, pi / 4, 0])
 
-        self.logconfiguration("qr", self.qr)
-        self.logconfiguration("qz", self.qz)
-        self.logconfiguration("qn", self.qn)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
+        self.addconfiguration("qn", self.qn)
 
         # straight and horizontal
-        self.addconfiguration("qs", np.array([0, 0, -pi / 2, 0, 0, 0]))
+        self.addconfiguration_attr("qs", np.array([0, 0, -pi / 2, 0, 0, 0]))
 
     def ikine_a(self, T, config="lun"):
         """
