@@ -1260,10 +1260,6 @@ class ERobot(BaseERobot):
 
             super().__init__(links, **kwargs)
 
-        # Cached paths through links
-        # TODO Add listners on setters to reset cache
-        self._reset_cache()
-
     @classmethod
     def URDF(cls, file_path, gripper=None):
         """
@@ -1311,19 +1307,6 @@ class ERobot(BaseERobot):
         return self._urdf_filepath
 
     # --------------------------------------------------------------------- #
-
-    # TODO REMOVE THIS
-    def _reset_cache(self):
-        self._path_cache = {}
-        self._path_cache_fknm = {}
-        self._cache_end = None
-        self._cache_start = None
-        self._cache_end_tool = None
-        self._eye_fknm = eye(4)
-
-        self._cache_grippers = []
-
-        self._cache_m = len(self._path_cache)
 
     def _to_dict(self, robot_alpha=1.0, collision_alpha=0.0):
 
@@ -1384,43 +1367,6 @@ class ERobot(BaseERobot):
                         ob.append(gi.fk_dict())
 
         return ob
-
-    # TODO REMOVE THIS
-    def _set_link_fk(self, q):
-        """
-        robot._set_link_fk(q) evaluates fkine for each link within a
-        robot and stores that pose in a private variable within the link.
-
-        This method is not for general use.
-
-        :param q: The joint angles/configuration of the robot
-        :type q: float ndarray(n)
-
-        .. note::
-
-            - The robot's base transform, if present, are incorporated
-              into the result.
-
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-
-        """
-
-        if self._T is None:
-            base = self._eye_fknm
-        else:
-            base = self._T
-
-        # fknm.fkine_all(self._cache_m, self._cache_links_fknm, q, base)
-
-        for i in range(len(self._cache_grippers)):
-            fknm.fkine_all(
-                len(self._cache_grippers[i]),
-                self._cache_grippers[i],
-                self.grippers[i].q,
-                base,
-            )
 
     # --------------------------------------------------------------------- #
 
@@ -1917,56 +1863,6 @@ class ERobot(BaseERobot):
             d.append(pd)
 
         return d[-1]
-
-    # def jacob0_analytic(
-    #     self,
-    #     q: ArrayLike,
-    #     end: Union[str, Link, Gripper] = None,
-    #     start: Union[str, Link, Gripper] = None,
-    #     tool: Union[ndarray, SE3, None] = None,
-    #     analytic: str = "rpy-xyz",
-    # ):
-    #     r"""
-    #     Manipulator analytical Jacobian in the ``start`` frame
-
-    #     :param q: Joint coordinate vector
-    #     :type q: Arraylike
-    #     :param end: the particular link or gripper whose velocity the Jacobian
-    #         describes, defaults to the base link
-    #     :param start: the link considered as the end-effector, defaults to the robots's end-effector
-    #     :param tool: a static tool transformation matrix to apply to the
-    #         end of end, defaults to None
-    #     :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
-
-    #     :return J: Manipulator Jacobian in the ``start`` frame
-
-    #     - ``robot.jacob0_analytic(q)`` is the manipulator Jacobian matrix which maps
-    #       joint  velocity to end-effector spatial velocity expressed in the
-    #       ``start`` frame.
-
-    #     End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
-    #     is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
-
-    #     ``analytic`` can be one of:
-    #         =============  ==================================
-    #         Value          Rotational representation
-    #         =============  ==================================
-    #         ``'rpy-xyz'``  RPY angular rates in XYZ order
-    #         ``'rpy-zyx'``  RPY angular rates in XYZ order
-    #         ``'eul'``      Euler angular rates in ZYZ order
-    #         ``'exp'``      exponential coordinate rates
-    #         =============  ==================================
-
-    #     Example:
-    #     .. runblock:: pycon
-    #         >>> import roboticstoolbox as rtb
-    #         >>> puma = rtb.models.ETS.Puma560()
-    #         >>> puma.jacob0_analytic([0, 0, 0, 0, 0, 0])
-
-    #     .. warning:: ``start`` and ``end`` must be on the same branch,
-    #         with ``start`` closest to the base.
-    #     """  # noqa
-    #     return self.ets(start, end).jacob0_analytic(q, tool=tool, analytic=analytic)
 
     def link_collision_damper(
         self,
