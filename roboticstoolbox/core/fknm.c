@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 // forward defines
+static PyObject *IK(PyObject *self, PyObject *args);
 static PyObject *Robot_link_T(PyObject *self, PyObject *args);
 static PyObject *ETS_hessian0(PyObject *self, PyObject *args);
 static PyObject *ETS_hessiane(PyObject *self, PyObject *args);
@@ -55,8 +56,15 @@ void _eye(npy_float64 *data);
 void _inv(npy_float64 *m, npy_float64 *invOut);
 void _r2q(npy_float64 *r, npy_float64 *q);
 void _cross(npy_float64 *a, npy_float64 *b, npy_float64 *ret, int n);
+double _norm(npy_float64 *a, int n);
+double _trace(npy_float64 *a, int n);
+void _angle_axis(npy_float64 *Te, npy_float64 *Tep, npy_float64 *e);
 
 static PyMethodDef fknmMethods[] = {
+    {"IK",
+     (PyCFunction)IK,
+     METH_VARARGS,
+     "Link"},
     {"Robot_link_T",
      (PyCFunction)Robot_link_T,
      METH_VARARGS,
@@ -144,6 +152,51 @@ PyMODINIT_FUNC PyInit_fknm(void)
 {
     import_array();
     return PyModule_Create(&fknmmodule);
+}
+
+static PyObject *IK(PyObject *self, PyObject *args)
+{
+    npy_float64 *J, *q, *Tep, *ret;
+    PyObject *py_q, *py_Tep, *py_np_q, *py_np_Tep;
+    PyObject *ets;
+    int n, tool_used = 0;
+    PyObject *py_ret;
+    npy_intp dim1[1] = {6};
+
+    if (!PyArg_ParseTuple(
+            args, "iOOO",
+            &n,
+            &ets,
+            &py_q,
+            &py_Tep))
+        return NULL;
+
+    // Make sure q is number array
+    // Cast to numpy array
+    // Get data out
+    if (!_check_array_type(py_q))
+        return NULL;
+    py_np_q = (npy_float64 *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+    q = (npy_float64 *)PyArray_DATA(py_np_q);
+
+    if (!_check_array_type(py_Tep))
+        return NULL;
+    py_np_Tep = (npy_float64 *)PyArray_FROMANY(py_Tep, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+    Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
+
+    py_ret = PyArray_EMPTY(1, &dim1, NPY_DOUBLE, 0);
+    ret = (npy_float64 *)PyArray_DATA(py_ret);
+
+    npy_float64 *Te = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    _ETS_fkine(ets, q, (npy_float64 *)NULL, NULL, Te);
+
+    _angle_axis(Te, Tep, ret);
+
+    // Free the memory
+    Py_DECREF(py_np_q);
+    Py_DECREF(py_np_Tep);
+
+    return py_ret;
 }
 
 static PyObject *Robot_link_T(PyObject *self, PyObject *args)
@@ -2070,4 +2123,97 @@ void _cross(npy_float64 *a, npy_float64 *b, npy_float64 *ret, int n)
     // ret[0] = b[0 * n];
     // ret[1 * n] = b[1 * n];
     // ret[2 * n] = b[2 * n];
+}
+
+double _norm(npy_float64 *a, int n)
+{
+    int i;
+    double sum = 0;
+
+    for (i = 0; i < n; i++)
+    {
+        sum += pow(a[i], 2);
+    }
+
+    return sqrt(sum);
+}
+
+double _trace(npy_float64 *a, int n)
+{
+    // Assumes square nxn matrix
+    int i;
+    double sum = 0;
+
+    for (i = 0; i < n; i++)
+    {
+        sum += a[i * n + i];
+    }
+
+    return sum;
+}
+
+void _angle_axis(npy_float64 *Te, npy_float64 *Tep, npy_float64 *e)
+{
+    int i, j, k;
+    double num, li_norm, R_tr, ang;
+    npy_float64 *R = (npy_float64 *)PyMem_RawCalloc(9, sizeof(npy_float64));
+    double li[3];
+
+    // e[:3] = Tep[:3, 3] - Te[:3, 3]
+    e[0] = Tep[0 * 4 + 3] - Te[0 * 4 + 3];
+    e[1] = Tep[1 * 4 + 3] - Te[1 * 4 + 3];
+    e[2] = Tep[2 * 4 + 3] - Te[2 * 4 + 3];
+
+    // R = Tep.R @ T.R.T
+    // R = Tep[:3, :3] @ T[:3, :3].T
+    for (i = 0; i < 3; i++)
+    {
+        for (j = 0; j < 3; j++)
+        {
+            num = 0;
+            for (k = 0; k < 3; k++)
+            {
+                num += Tep[i * 4 + k] * Te[j * 4 + k];
+            }
+            R[i * 3 + j] = num;
+        }
+    }
+
+    // li = np.array([R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]]);
+    li[0] = R[2 * 3 + 1] - R[1 * 3 + 2];
+    li[1] = R[0 * 3 + 2] - R[2 * 3 + 0];
+    li[2] = R[1 * 3 + 0] - R[0 * 3 + 1];
+
+    // if base.iszerovec(li)
+    li_norm = _norm(li, 3);
+    R_tr = _trace(R, 3);
+    if (li_norm < 1e-6)
+    {
+        // diagonal matrix case
+        // if np.trace(R) > 0
+        if (R_tr > 0)
+        {
+            // (1,1,1) case
+            // a = np.zeros((3, ));
+            e[3] = 0;
+            e[4] = 0;
+            e[5] = 0;
+        }
+        else
+        {
+            // a = np.pi / 2 * (np.diag(R) + 1);
+            e[3] = M_PI_2 * (R[0] + 1);
+            e[4] = M_PI_2 * (R[4] + 1);
+            e[5] = M_PI_2 * (R[8] + 1);
+        }
+    }
+    else
+    {
+        // non-diagonal matrix case
+        // a = math.atan2(li_norm, np.trace(R) - 1) * li / li_norm
+        ang = atan2(li_norm, R_tr - 1);
+        e[3] = ang * li[0] / li_norm;
+        e[4] = ang * li[1] / li_norm;
+        e[5] = ang * li[2] / li_norm;
+    }
 }
