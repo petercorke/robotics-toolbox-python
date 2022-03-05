@@ -18,7 +18,6 @@ req = [
     "matplotlib",
     "ansitable",
     "swift-sim>=0.10.0",
-    "qpsolvers",
     "rtb-data",
     "progress",
 ]

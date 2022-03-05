@@ -1164,9 +1164,9 @@ class ETS(BaseETS):
 
         T = self.eval(q, tool=tool)
         J = self.jacob0(q, tool=tool)
-
-        A = rotvelxform(t2r(T), inverse=True, representation=analytic)
-        J = A @ J
+        if analytic is not None:
+            A = rotvelxform(t2r(T), full=True, inverse=True, representation=analytic)
+            J = A @ J
 
         return J
 
