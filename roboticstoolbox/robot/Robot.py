@@ -425,7 +425,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
     def addconfiguration_attr(self, name: str, q: ArrayLike, unit: str = "rad"):
         """
-        Add a named joint configuration (Robot superclass)
+        Add a named joint configuration as an attribute (Robot superclass)
 
         :param name: Name of the joint configuration
         :param q: Joint configuration
@@ -437,25 +437,47 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
             >>> import roboticstoolbox as rtb
             >>> robot = rtb.models.DH.Puma560()
-            >>> robot.qz
             >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
             >>> robot.mypos
+            >>> robot.configs["mypos"]
+
+        .. note::
+            - Used in robot model init method to store the ``qr`` configuration
+            - Dynamically adding attributes to objects can cause issues with
+              Python type checking.
+            - Configuration is also added to the robot instance's dictionary of
+              named configurations.
+
+        :seealso: :meth:`addconfiguration`
         """
         v = getvector(q, self.n)
         v = getunit(v, unit)
         v = np.array(v)
         self._configs[name] = v
+        setattr(self, name, v)
 
     def addconfiguration(self, name: str, q: np.ndarray):
         """
-        Log a named joint configuration (Robot superclass)
-
-        Used in robot model init method to store the qr configuration
+        Add a named joint configuration (Robot superclass)
 
         :param name: Name of the joint configuration
         :type name: str
         :param q: Joint configuration
         :type q: ndarray(n) or list
+
+        Add a named configuration to the robot instance's dictionary of named
+        configurations.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+            >>> robot.configs["mypos"]
+
+        :seealso: :meth:`addconfiguration`
         """
         self._configs[name] = q
 
