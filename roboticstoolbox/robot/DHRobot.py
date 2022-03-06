@@ -786,11 +786,10 @@ class DHRobot(Robot):
         """
         Joint axes as  twists
 
-        :param q: The joint configuration of the robot
-        :type q: array_like (n)
-        :return: a vector of Twist objects
-        :rtype: float ndarray(n,)
-        :return: Represents the pose of the tool
+        :param q: The joint configuration of the robot, defaults to zero
+        :return: a vector of joint axis twists
+        :rtype: Twist3 instance
+        :return: Pose of the tool
         :rtype: SE3 instance
 
         - ``tw, T0 = twists(q)`` calculates a vector of Twist objects (n) that
@@ -807,16 +806,16 @@ class DHRobot(Robot):
 
             >>> import roboticstoolbox as rtb
             >>> robot = rtb.models.DH.Puma560()
-            >>> tw, T0 = robot.twists(robot.qz)
+            >>> tw, T0 = robot.twists()
             >>> tw
             >>> T0
 
         """
 
         if q is None:
-            q = np.zeros((self.n))
+            q = np.zeros((self.n,))
 
-        T = self.fkine_all(q)
+        T = self.fkine_all(q)[1:]  # don't use first transform which is base
         tw = Twist3.Alloc(self.n)
         if self.mdh:
             # MDH case
