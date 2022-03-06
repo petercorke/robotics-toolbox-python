@@ -23,7 +23,7 @@ from spatialmath.base import (
     eul2jac,
     rpy2jac,
     trlog,
-    angvelxform,
+    rotvelxform,
 )
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
@@ -1107,7 +1107,7 @@ class DHRobot(Robot):
 
         return J
 
-    def jacob0(self, q=None, T=None, half=None, analytical=None, start=None, end=None):
+    def jacob0(self, q=None, T=None, half=None, start=None, end=None):
         r"""
         Manipulator Jacobian in world frame
 
@@ -1117,27 +1117,14 @@ class DHRobot(Robot):
         :type T: SE3 instance
         :param half: return half Jacobian: 'trans' or 'rot'
         :type half: str
-        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
-        :type analytical: str
         :return J: The manipulator Jacobian in the world frame
         :rtype: ndarray(6,n)
 
-        - ``robot.jacob0(q)`` is the manipulator Jacobian matrix which maps
+        - ``robot.jacob0(q)`` is the manipulator geometric Jacobian matrix which maps
           joint velocity to end-effector spatial velocity.
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{0}\!\nu = \mathbf{J}_0(q) \dot{q}`.
-
-        ``analytical`` can be one of:
-
-            =============  ==================================
-            Value          Rotational representation
-            =============  ==================================
-            ``'rpy/xyz'``  RPY angular rates in XYZ order
-            ``'rpy/zyx'``  RPY angular rates in XYZ order
-            ``'eul'``      Euler angular rates in ZYZ order
-            ``'exp'``      exponential coordinate rates
-            =============  ==================================
 
         Example:
 
@@ -1147,7 +1134,7 @@ class DHRobot(Robot):
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacob0([0, 0, 0, 0, 0, 0])
 
-        .. warning:: The **geometric Jacobian** is as described in texts by
+        .. warning:: This is the **geometric Jacobian** is as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a
             velocity twist as per the text by Lynch & Park.
@@ -1166,24 +1153,6 @@ class DHRobot(Robot):
         # compute Jacobian in EE frame and transform to world frame
         J0 = tr2jac(T) @ self.jacobe(q)
 
-        # compute rotational transform if analytical Jacobian required
-        if analytical is not None:
-
-            if analytical == "rpy/xyz":
-                gamma = tr2rpy(T, order="xyz")
-            elif analytical == "rpy/zyx":
-                gamma = tr2rpy(T, order="zyx")
-            elif analytical == "eul":
-                gamma = tr2eul(T)
-            elif analytical == "exp":
-                # TODO: move to SMTB.base, Horner form with skew(v)
-                gamma = trlog(t2r(T), twist=True)
-            else:
-                raise ValueError("bad analytical value specified")
-
-            A = angvelxform(gamma, representation=analytical, full=True)
-            J0 = A @ J0
-
         # TODO optimize computation above if half matrix is returned
 
         # return top or bottom half if asked
@@ -1195,6 +1164,80 @@ class DHRobot(Robot):
             else:
                 raise ValueError("bad half specified")
         return J0
+
+    def jacob0_analytic(self, q, analytical, T=None):
+        r"""
+        Manipulator Jacobian in world frame
+
+        :param q: Joint coordinate vector
+        :type q: ndarray(n)
+        :param analytical: return analytical Jacobian instead of geometric Jacobian
+        :type analytical: str
+        :param T: Forward kinematics if known, SE(3 matrix)
+        :type T: SE3 instance
+        :return J: The manipulator analytical Jacobian in the world frame
+        :rtype: ndarray(6,n)
+
+        Return the manipulator's analytical Jacobian matrix which maps
+        joint velocity to end-effector spatial velocity.
+
+        End-effector spatial velocity :math:`\nu_a = (v_x, v_y, v_z, \dot{\Gamma}_1, \dot{\Gamma}_2, \dot{\Gamma}_3)^T`
+        is related to joint velocity by :math:`{}^{0}\!\nu_a = \mathbf{J}_{a,0}(q) \dot{q}`.
+        Where :math:`\dvec{\Gamma} = (\dot{\Gamma}_1, \dot{\Gamma}_2, \dot{\Gamma}_3)` is
+        orientation rate expressed as one of:
+
+            ==============   ==================================
+            ``analytical``   Rotational representation
+            ==============   ==================================
+            ``'rpy/xyz'``    RPY angular rates in XYZ order
+            ``'rpy/zyx'``    RPY angular rates in XYZ order
+            ``'eul'``        Euler angular rates in ZYZ order
+            ``'exp'``        exponential coordinate rates
+            ==============   ==================================
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.jacob0_analytic([0, 0, 0, 0, 0, 0], "rpy/xyz")
+
+        .. warning:: The **geometric Jacobian** is as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a
+            velocity twist as per the text by Lynch & Park.
+
+        .. note:: ``T`` can be passed in to save the cost of computing forward
+            kinematics which is needed to transform velocity from end-effector
+            frame to world frame.
+
+        """  # noqa
+        q = getvector(q, self.n)
+
+        # compute forward kinematics if not provided
+        if T is None:
+            T = self.fkine(q)
+
+        # compute Jacobian in world frame
+        J0 = self.jacob0(q, T)
+
+        # compute rotational transform if analytical Jacobian required
+
+        if analytical == "rpy/xyz":
+            gamma = tr2rpy(T.A, order="xyz")
+        elif analytical == "rpy/zyx":
+            gamma = tr2rpy(T.A, order="zyx")
+        elif analytical == "eul":
+            gamma = tr2eul(T.A)
+        elif analytical == "exp":
+            # TODO: move to SMTB.base, Horner form with skew(v)
+            gamma = trlog(t2r(T.A), twist=True)
+        else:
+            raise ValueError("bad analytical value specified")
+
+        A = rotvelxform(gamma, representation=analytical, inverse=True, full=True)
+        return A @ J0
 
     def hessian0(self, q=None, J0=None, start=None, end=None):
         r"""
