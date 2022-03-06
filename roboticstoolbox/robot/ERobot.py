@@ -290,15 +290,15 @@ class BaseERobot(Robot):
         border = "thin" if unicode else "ascii"
 
         table = ANSITable(
-            Column("id", headalign="^", colalign=">"),
+            Column("link", headalign="^", colalign=">"),
             Column("link", headalign="^", colalign="<"),
             Column("joint", headalign="^", colalign=">"),
             Column("parent", headalign="^", colalign="<"),
-            Column("ETS", headalign="^", colalign="<"),
+            Column("ETS: parent to link", headalign="^", colalign="<"),
             border=border,
         )
 
-        for link in self.links:
+        for k, link in enumerate(self.links):
             color = "" if link.isjoint else "<<blue>>"
             ee = "@" if link in self.ee_links else ""
             ets = link.ets
@@ -307,20 +307,21 @@ class BaseERobot(Robot):
             else:
                 parent_name = link.parent.name
             s = ets.__str__(f"q{link.jindex}")
-            if len(s) > 0:
-                op = " \u2295 " if unicode else " * "  # \oplus
-                s = op + s
+            # if len(s) > 0:
+            #     op = " \u2295 " if unicode else " * "  # \oplus
+            #     s = op + s
 
             if link.isjoint:
                 jname = link.jindex
             else:
                 jname = ""
             table.row(
-                link.jindex,
+                #link.jindex,
+                k,
                 color + ee + link.name,
                 jname,
                 parent_name,
-                f"{{{link.name}}} = {{{parent_name}}}{s}",
+                f"{s}",
             )
 
         if isinstance(self, ERobot2):
@@ -959,7 +960,7 @@ graph [rankdir=LR];
                 file.write(
                     "  {}_ets [shape=box, style=rounded, "
                     'label="{}"{}];\n'.format(
-                        link.name, link.ets().__str__(q=f"q{link.jindex}"), node_options
+                        link.name, link.ets.__str__(q=f"q{link.jindex}"), node_options
                     )
                 )
                 file.write("  {} -> {}_ets;\n".format(parent, link.name))
@@ -974,7 +975,7 @@ graph [rankdir=LR];
                     '  {} -> {} [label="{}", {}];\n'.format(
                         parent,
                         link.name,
-                        link.ets().__str__(q=f"q{link.jindex}"),
+                        link.ets.__str__(q=f"q{link.jindex}"),
                         edge_options,
                     )
                 )
@@ -1234,7 +1235,7 @@ class ERobot(BaseERobot):
             if isinstance(arg, DHRobot):
                 # we're passed a DHRobot object
                 # TODO handle dynamic parameters if given
-                arg = arg.ets()
+                arg = arg.ets
 
             if isinstance(arg, ETS):
                 # we're passed an ETS string

@@ -85,7 +85,7 @@ class BaseLink(SceneNode, ABC):
 
     .. inheritance-diagram:: roboticstoolbox.RevoluteDH
         roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH
-        roboticstoolbox.PrismaticMDH roboticstoolbox.ELink
+        roboticstoolbox.PrismaticMDH roboticstoolbox.Link
         :top-classes: roboticstoolbox.robot.Link
         :parts: 2
 
@@ -228,15 +228,15 @@ class BaseLink(SceneNode, ABC):
         Constant part of link ETS
         :return: constant part of link transform
         :rtype: SE3 instance
-        The ETS for each ELink comprises a constant part (possible the
+        The ETS for each Link comprises a constant part (possible the
         identity) followed by an optional joint variable transform.
         This property returns the constant part.  If no constant part
         is given, this returns an identity matrix.
         .. runblock:: pycon
-            >>> from roboticstoolbox import ELink, ET
-            >>> link = ELink( ET.tz(0.333) * ET.Rx(90, 'deg') * ET.Rz() )
+            >>> from roboticstoolbox import Link, ET
+            >>> link = Link( ET.tz(0.333) * ET.Rx(90, 'deg') * ET.Rz() )
             >>> link.Ts
-            >>> link = ELink( ET.Rz() )
+            >>> link = Link( ET.Rz() )
             >>> link.Ts
         """
         return self._Ts
@@ -282,18 +282,12 @@ class BaseLink(SceneNode, ABC):
             self._isjoint = False
 
     def __repr__(self):
-        name = self.__class__.__name__
-        if self.name is None:
-            s = f"ets={self.ets}"
-        else:
-            s = f"{self.name}, ets={self.ets}"
-        if self.parent is None:
-            parent = ""
-        else:
-            parent = f" [{self.parent.name}]"
-
-        args = [s] + self._params()
-        return name + "(" + ", ".join(args) + ")"
+        s = self.__class__.__name__ + "("
+        if len(self.ets) > 0:
+            s += repr(self.ets) + ", "
+        s += ", ".join(self._params())
+        s += ")"
+        return s
 
     def __str__(self):
         """
@@ -301,18 +295,47 @@ class BaseLink(SceneNode, ABC):
         :return: Pretty print of the robot link
         :rtype: str
         """
-        name = self.__class__.__name__
+        s = self.__class__.__name__ + "("
+        if self.name is not None:
+            s += f'"{self.name}"'
+        
+        ets = self.ets
+        if len(ets) > 0:
+            s += f", {ets}"
+        # if self.name is None:
+        #     return f"{name}[{self.ets}] "
+        # else:
+        #     if self.parent is None:
+        #         parent = ""
+        #     elif isinstance(self.parent, str):
+        #         parent = f" [{self.parent}]"
+        #     else:
+        #         parent = f" [{self.parent.name}]"
+        params = self._params(name=False)
+        if len(params) > 0:
+            s += ", "
+        s += ", ".join(params)
+        s += ")"
+        return s
 
-        if self.name is None:
-            return f"{name}[{self.ets}] "
-        else:
-            if self.parent is None:
-                parent = ""
-            elif isinstance(self.parent, str):
-                parent = f" [{self.parent}]"
-            else:
-                parent = f" [{self.parent.name}]"
-            return f"{name}[{self.name}({parent}): {self.ets}] "
+    def _repr_pretty_(self, p, cycle):
+        """
+        Pretty string for IPython (superclass method)
+
+        :param p: pretty printer handle (ignored)
+        :param cycle: pretty printer flag (ignored)
+
+        Print colorized output when variable is displayed in IPython, ie. on a line by
+        itself.
+
+        Example::
+
+            In [1]: x
+
+        """
+        # see https://ipython.org/ipython-doc/stable/api/generated/IPython.lib.pretty.html
+
+        p.text(str(self))
 
     # -------------------------------------------------------------------------- #
 
@@ -406,8 +429,8 @@ class BaseLink(SceneNode, ABC):
         identity) followed by an optional joint variable transform.
         This property returns the latter.
         .. runblock:: pycon
-            >>> from roboticstoolbox import ELink, ETS
-            >>> link = ELink( ET.tz(0.333) * ET.Rx(90, 'deg') * ETS.Rz() )
+            >>> from roboticstoolbox import Link, ETS
+            >>> link = Link( ET.tz(0.333) * ET.Rx(90, 'deg') * ETS.Rz() )
             >>> print(link.v)
         """
         return self._v
@@ -833,7 +856,7 @@ class BaseLink(SceneNode, ABC):
         Test if link has joint
         :return: test if link has a joint
         :rtype: bool
-        The ETS for each ELink comprises a constant part (possible the
+        The ETS for each Link comprises a constant part (possible the
         identity) followed by an optional joint variable transform.
         This property returns the whether the
         .. runblock:: pycon
@@ -900,7 +923,7 @@ class BaseLink(SceneNode, ABC):
         """
         Parent link
         :return: Link's parent
-        :rtype: ELink instance
+        :rtype: Link instance
         This is a reference to
         .. runblock:: pycon
             >>> from roboticstoolbox import models
@@ -927,7 +950,7 @@ class BaseLink(SceneNode, ABC):
         """
         List of child links
         :return: child links
-        :rtype: list of ``ELink`` instances
+        :rtype: list of ``Link`` instances
         The list will be empty for a end-effector link
         """
         return self._children
@@ -1128,41 +1151,52 @@ class BaseLink(SceneNode, ABC):
 
         return dyn
 
-    def _format(
-        self, l, name, symbol=None, ignorevalue=None, indices=None
-    ):  # noqa  # pragma nocover
-        # if value == ignorevalue then don't display it
 
-        v = getattr(self, name)
-        s = None
-        if v is None:
-            return
-        if isscalar(v) and v != ignorevalue:
-            if symbol is not None:
-                s = f"{symbol}={v:.3g}"
-            else:
-                s = f"{name}={v:.3g}"
-        elif isinstance(v, np.ndarray):
-            if np.linalg.norm(v, ord=np.inf) > 0:
-                if indices is not None:
-                    flat = v.flatten()
-                    v = np.r_[[flat[k] for k in indices]]
-                s = f"{name}=[" + ", ".join([f"{x:.3g}" for x in v]) + "]"
-        if s is not None:
-            l.append(s)
 
-    def _params(self):  # pragma nocover
+    def _params(self, name=True):  # pragma nocover
+        def format_param(
+            self, l, name, symbol=None, ignorevalue=None, indices=None
+        ):  # noqa  # pragma nocover
+            # if value == ignorevalue then don't display it
+
+            v = getattr(self, name)
+            s = None
+            if v is None:
+                return
+            if isinstance(v, str):
+                s = f'{name} = "{v}"'
+            elif isscalar(v) and v != ignorevalue:
+                if symbol is not None:
+                    s = f"{symbol}={v:.3g}"
+                else:
+                    s = f"{name}={v:.3g}"
+            elif isinstance(v, np.ndarray):
+                if np.linalg.norm(v, ord=np.inf) > 0:
+                    if indices is not None:
+                        flat = v.flatten()
+                        v = np.r_[[flat[k] for k in indices]]
+                    s = f"{name}=[" + ", ".join([f"{x:.3g}" for x in v]) + "]"
+            if s is not None:
+                l.append(s)
+
         l = []  # noqa
-        self._format(l, "name")
-        self._format(l, "isflip", ignorevalue=False)
-        self._format(l, "qlim")
-        self._format(l, "m")
-        self._format(l, "r")
-        self._format(l, "I", indices=[0, 4, 8, 1, 2, 5])
-        self._format(l, "Jm")
-        self._format(l, "B")
-        self._format(l, "Tc")
-        self._format(l, "G")
+        if name:
+            format_param(self, l, "name")
+        if self.parent_name is not None:
+            l.append('parent="' + self.parent_name + '"')
+        elif self.parent is not None:
+            l.append('parent="' + self.parent.name + '"')
+        format_param(self, l, "parent")
+        format_param(self, l, "isflip", ignorevalue=False)
+        format_param(self, l, "qlim")
+        if self._hasdynamics:
+            format_param(self, l, "m")
+            format_param(self, l, "r")
+            format_param(self, l, "I", indices=[0, 4, 8, 1, 2, 5])
+            format_param(self, l, "Jm")
+            format_param(self, l, "B")
+            format_param(self, l, "Tc")
+            format_param(self, l, "G")
 
         return l
 
@@ -1296,7 +1330,7 @@ class Link(BaseLink):
     :param G: dynamic - gear ratio
     :type G: float
 
-    The ELink object holds all information related to a robot link and can form
+    The Link object holds all information related to a robot link and can form
     a serial-connected chain or a rigid-body tree.
     It inherits from the Link class which provides common functionality such
     as joint and link such as kinematics parameters,
@@ -1330,6 +1364,7 @@ class Link(BaseLink):
             if jindex is not None:
                 self._ets[-1].jindex = jindex
                 self._ets._auto_jindex = False
+
 
     # @property
     # def ets(self: "Link") -> "ETS":
@@ -1452,4 +1487,14 @@ class Link2(BaseLink):
 
 if __name__ == "__main__":  # pragma nocover
 
-    pass
+    a = Link(name='bob')
+    print(a)
+    print(repr(a))
+
+    a = Link(name='bob', parent='foo')
+    print(a)
+    print(repr(a))
+
+    a = rtb.models.URDF.UR5()
+    print(a[3])
+    print(repr(a[3]))

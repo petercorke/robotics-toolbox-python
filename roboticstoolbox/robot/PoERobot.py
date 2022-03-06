@@ -14,8 +14,36 @@ class PoELink(Link):
     :seealso: :class:`Link`
     """
 
+    def __init__(self, twist, name=None):
+        super().__init__()
+        self.S = Twist3(twist)
+        self.name = name
+
+    def __repr__(self):
+        s = f"PoELink({np.array2string(self.S.S, separator=',')}"
+        if self.name is not None:
+            s += f', name="{self.name}"'
+        s += ")"
+        return s
+
     def __str__(self):
-        return super().__str__() + ", S = " + str(self.S)
+        s = f"{self.__class__.__name__}[twist={self.S}"
+        if self.name is not None:
+            s += f', name="{self.name}"'
+        s += "]"
+        return s
+
+    def _repr_pretty_(self, p, cycle):
+        """
+        Pretty string for IPython (superclass method)
+
+        :param p: pretty printer handle (ignored)
+        :param cycle: pretty printer flag (ignored)
+
+        """
+        # see https://ipython.org/ipython-doc/stable/api/generated/IPython.lib.pretty.html
+
+        p.text(f"{i}:\n{str(x)}")
 
 class PoERevolute(PoELink):
 
@@ -33,9 +61,7 @@ class PoERevolute(PoELink):
         :seealso: :class:`Link` :class:`Robot`
         """
 
-        super().__init__(**kwargs)
-        self.S = Twist3.UnitRevolute(axis, point)
-
+        super().__init__(Twist3.UnitRevolute(axis, point), **kwargs)
 class PoEPrismatic(PoELink):
 
 
@@ -50,9 +76,7 @@ class PoEPrismatic(PoELink):
 
         :seealso: :class:`Link` :class:`Robot`
         """
-        super().__init__(**kwargs)
-        self.S = Twist3.UnitPrismatic(axis)
-
+        super().__init__(Twist3.UnitPrismatic(axis), **kwargs)
 class PoERobot(Robot):
 
     def __init__(self, links, T0, **kwargs):
@@ -82,13 +106,35 @@ class PoERobot(Robot):
         :return: Pretty print of the robot model
         :rtype: str
         """
-        s = ""
+        s = "PoERobot:\n"
         for j, link in enumerate(self):
-            s += f"{j}: {link.S}\n"
+            s += f"  {j}: {link.S}\n"
 
-        s += f"T0: {self.T0.strline()}"
+        s += f"  T0: {self.T0.strline()}"
         return s
 
+    def __repr__(self):
+        s = "PoERobot([\n    "
+        for j, link in enumerate(self):
+            s += repr(link) + ","
+        s += "],\n"
+        s += f"    T0=SE3({np.array_repr(self.T0.A)}),\n"
+        s += f"    name={self.name},\n"
+        s += ")"
+        return s
+
+    def _repr_pretty_(self, p, cycle):
+        """
+        Pretty string for IPython (superclass method)
+
+        :param p: pretty printer handle (ignored)
+        :param cycle: pretty printer flag (ignored)
+
+        """
+        # see https://ipython.org/ipython-doc/stable/api/generated/IPython.lib.pretty.html
+
+        p.text(f"{i}:\n{str(x)}")
+        
     def nbranches(self):
         return 0
 
@@ -169,13 +215,16 @@ if __name__ == "__main__":  # pragma nocover
     # end-effector pose when q=[0,0]
     TE0 = SE3.Trans(2, 0, 0)
 
+    print(repr(link1))
     print(link1)
+
     robot = PoERobot([link1, link2], T0)
 
     q = [0, np.pi/2]
     # q = [0, 0]
 
-    robot.fkine(q).printline()
-    print(robot.jacob0(q))
-    print(robot.jacobe(q))
+    # robot.fkine(q).printline()
+    # print(robot.jacob0(q))
+    # print(robot.jacobe(q))
+    print(repr(robot))
     print(robot)
