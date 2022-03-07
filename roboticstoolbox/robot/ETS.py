@@ -1166,6 +1166,7 @@ class ETS(BaseETS):
         A = rotvelxform(t2r(T), full=True, inverse=True, representation=representation)
         return A @ J
 
+
 class ETS2(BaseETS):
     """
     This class implements an elementary transform sequence (ETS) for 2D
@@ -1580,6 +1581,7 @@ class ETS2(BaseETS):
 
         T = self.fkine(q, include_base=False).A
         return tr2jac2(T.T) @ self.jacob0(q)
+
 
 if __name__ == "__main__":
 

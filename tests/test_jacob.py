@@ -8,7 +8,7 @@ Created on Sun Oct 3 17:17:04 2021
 import numpy.testing as nt
 import numpy as np
 import roboticstoolbox as rtb
-from spatialmath.base import tr2x, numjac
+from spatialmath.base import tr2x, numjac, numhess
 from scipy.linalg import block_diag
 import unittest
 import pytest
@@ -20,6 +20,9 @@ class Tests:
         self.robot = rtb.models.ETS.Puma560()
         self.q = np.array([0.1, 0.2, 0.3, 0.1, 0.2, 0.3])
         self.qd = np.array([0.1, -0.2, 0.3, -0.1, 0.2, -0.3])
+        # self.robot = rtb.models.ETS.Panda()
+        # self.q = self.robot.qr
+        # self.qd = self.robot.qr
 
     def test_jacob0(self):
         q = self.q
@@ -65,20 +68,22 @@ class Tests:
         H = numhess(lambda q: self.robot.jacob0(q), self.q)
         Jd = np.zeros((6, self.robot.n))
         for i in range(self.robot.n):
-            Jd += H[:, :, i] * self.qd[i]
+            Jd += H[i, :, :] * self.qd[i]
+
         nt.assert_array_almost_equal(j0, Jd, decimal=4)
 
     def test_jacob_dot_analytical_eul(self):
         rep = "eul"
         j0 = self.robot.jacob_dot(self.q, self.qd, analytical=rep)
 
-        H = numhess(lambda q: self.robot.jacob0(q, analytical=rep), self.q)
+        H = numhess(lambda q: self.robot.jacob0_analytic(q, analytic=rep), self.q)
         Jd = np.zeros((6, self.robot.n))
         for i in range(self.robot.n):
-            Jd += H[:, :, i] * self.qd[i]
-        print(j0)
+            Jd += H[i, :, :] * self.qd[i]
+
+        print(np.round(j0, 2))
         print()
-        print(Jd)
+        print(np.round(Jd, 2))
         nt.assert_array_almost_equal(j0, Jd, decimal=4)
 
     # def test_jacob_dot_analytical_rpy_xyz(self):
