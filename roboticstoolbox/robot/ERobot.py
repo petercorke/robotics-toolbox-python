@@ -895,7 +895,7 @@ class BaseERobot(Robot):
 
     # --------------------------------------------------------------------- #
 
-    def dotfile(self, filename, etsbox=False, jtype=False, static=True):
+    def dotfile(self, filename, etsbox=False, ets="full", jtype=False, static=True):
         """
         Write a link transform graph as a GraphViz dot file
         :param file: Name of file to write to
@@ -971,11 +971,20 @@ graph [rankdir=LR];
                 # put the ets fragment as an edge label
                 if not link.isjoint and static:
                     edge_options += 'fontcolor="blue"'
+                if ets == "full":
+                    estr = link.ets.__str__(q=f"q{link.jindex}")
+                elif ets == "brief":
+                    if link.jindex is None:
+                        estr = ""
+                    else:
+                        estr = f"...q{link.jindex}"
+                else:
+                    return
                 file.write(
                     '  {} -> {} [label="{}", {}];\n'.format(
                         parent,
                         link.name,
-                        link.ets.__str__(q=f"q{link.jindex}"),
+                        estr,
                         edge_options,
                     )
                 )
