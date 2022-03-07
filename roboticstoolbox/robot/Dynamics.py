@@ -879,8 +879,8 @@ class DynamicsMixin:
             =============  ========================================
             Value          Rotational representation
             =============  ========================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order (default)
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'rpy/xyz'``  RPY angular rates in XYZ order (default)
+            ``'rpy/zyx'``  RPY angular rates in XYZ order
             ``'eul'``      Euler angular rates in ZYZ order
             ``'exp'``      exponential coordinate rates
             =============  ========================================
@@ -1026,7 +1026,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0(q[0, :], analytical=representation)
+                Ja = self.jacob0_analytic(q[0, :], analytic=representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -1045,7 +1045,7 @@ class DynamicsMixin:
             for k, (qk, qdk) in enumerate(zip(q, qd)):
 
                 if Ji is None:
-                    Ja = self.jacob0(q[0, :], analytical=representation)
+                    Ja = self.jacob0_analytic(q[0, :], analytic=representation)
                     if pinv:
                         Ji = np.linalg.pinv(Ja)
                     else:
