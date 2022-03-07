@@ -35,6 +35,7 @@ static PyObject *compose(PyObject *self, PyObject *args);
 static PyObject *r2q(PyObject *self, PyObject *args);
 
 int _check_array_type(PyObject *toCheck);
+void _ETS_IK(PyObject *ets, int n, npy_float64 *q, npy_float64 *Tep, npy_float64 *ret);
 void _ETS_hessian(int n, npy_float64 *J, npy_float64 *H);
 void _ETS_jacob0(PyObject *ets, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J);
 void _ETS_jacobe(PyObject *ets, int n, npy_float64 *q, npy_float64 *tool, npy_float64 *J);
@@ -52,13 +53,15 @@ void rz(npy_float64 *data, double eta);
 void tx(npy_float64 *data, double eta);
 void ty(npy_float64 *data, double eta);
 void tz(npy_float64 *data, double eta);
-void _eye(npy_float64 *data);
+void _eye4(npy_float64 *data);
 void _inv(npy_float64 *m, npy_float64 *invOut);
 void _r2q(npy_float64 *r, npy_float64 *q);
 void _cross(npy_float64 *a, npy_float64 *b, npy_float64 *ret, int n);
 double _norm(npy_float64 *a, int n);
 double _trace(npy_float64 *a, int n);
 void _angle_axis(npy_float64 *Te, npy_float64 *Tep, npy_float64 *e);
+void _mult(int n, int m, npy_float64 *A, int p, int q, npy_float64 *B, npy_float64 *C);
+void _mult_T(int n, int m, int AT, npy_float64 *A, int p, int q, int BT, npy_float64 *B, npy_float64 *C);
 
 static PyMethodDef fknmMethods[] = {
     {"IK",
@@ -161,7 +164,7 @@ static PyObject *IK(PyObject *self, PyObject *args)
     PyObject *ets;
     int n, tool_used = 0;
     PyObject *py_ret;
-    npy_intp dim1[1] = {6};
+    npy_intp dim1[2] = {2, 4};
 
     if (!PyArg_ParseTuple(
             args, "iOOO",
@@ -184,13 +187,14 @@ static PyObject *IK(PyObject *self, PyObject *args)
     py_np_Tep = (npy_float64 *)PyArray_FROMANY(py_Tep, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
     Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
 
-    py_ret = PyArray_EMPTY(1, &dim1, NPY_DOUBLE, 0);
+    py_ret = PyArray_EMPTY(2, &dim1, NPY_DOUBLE, 0);
     ret = (npy_float64 *)PyArray_DATA(py_ret);
 
-    npy_float64 *Te = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
-    _ETS_fkine(ets, q, (npy_float64 *)NULL, NULL, Te);
+    // _mult(2, 4, )
 
-    _angle_axis(Te, Tep, ret);
+    _ETS_IK(ets, n, q, Tep, ret);
+
+    // _angle_axis(Te, Tep, ret);
 
     // Free the memory
     Py_DECREF(py_np_q);
@@ -1273,6 +1277,60 @@ int _check_array_type(PyObject *toCheck)
     return 1;
 }
 
+void _ETS_IK(PyObject *ets, int n, npy_float64 *q, npy_float64 *Tep, npy_float64 *ret)
+{
+    double E;
+    npy_float64 *Te = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    npy_float64 *e = (npy_float64 *)PyMem_RawCalloc(6, sizeof(npy_float64));
+
+    npy_float64 *a = (npy_float64 *)PyMem_RawCalloc(6, sizeof(npy_float64));
+    a[0] = 1.0;
+    a[1] = 4.0;
+    a[2] = 2.0;
+    a[3] = 5.0;
+    a[4] = 3.0;
+    a[5] = 6.0;
+    npy_float64 *b = (npy_float64 *)PyMem_RawCalloc(12, sizeof(npy_float64));
+    b[0] = 11.0;
+    b[1] = 12.0;
+    b[2] = 13.0;
+    b[3] = 14.0;
+    b[4] = 15.0;
+    b[5] = 16.0;
+    b[6] = 17.0;
+    b[7] = 18.0;
+    b[8] = 19.0;
+    b[9] = 20.0;
+    b[10] = 21.0;
+    b[11] = 22.0;
+
+    // npy_float64 *U = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    // npy_float64 *invU = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    // npy_float64 *temp = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    // npy_float64 *ret = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
+    // Py_ssize_t m;
+    int arrived = 0, iter = 0;
+
+    // while (arrived == 0 && iter < 500)
+    // {
+    //     // Current pose Te
+    //     _ETS_fkine(ets, q, (npy_float64 *)NULL, NULL, Te);
+
+    //     // Angle axis error e
+    //     _angle_axis(Te, Tep, e);
+
+    //     // Squared error E
+    //     // E = 0.5 * e @ We @ e
+    //     E = 0.5 * (e[0] * e[0] + e[1] * e[1] + e[2] * e[2] + e[3] * e[3] + e[4] * e[4] + e[5] * e[5]);
+    // }
+
+    _ETS_fkine(ets, q, (npy_float64 *)NULL, NULL, Te);
+
+    _mult_T(3, 2, 1, a, 3, 4, 0, b, ret);
+
+    int j = 0;
+}
+
 void _ETS_hessian(int n, npy_float64 *J, npy_float64 *H)
 {
     int a, b;
@@ -1312,7 +1370,7 @@ void _ETS_jacob0(PyObject *ets, int n, npy_float64 *q, npy_float64 *tool, npy_fl
 
     int j = 0;
 
-    _eye(U);
+    _eye4(U);
 
     // Get the forward  kinematics into T
     _ETS_fkine(ets, q, (npy_float64 *)NULL, tool, T);
@@ -1424,7 +1482,7 @@ void _ETS_jacobe(PyObject *ets, int n, npy_float64 *q, npy_float64 *tool, npy_fl
 
     int j = n - 1;
 
-    _eye(U);
+    _eye4(U);
 
     // Get the forward  kinematics into T
     _ETS_fkine(ets, q, (npy_float64 *)NULL, tool, T);
@@ -1540,7 +1598,7 @@ void _ETS_fkine(PyObject *ets, npy_float64 *q, npy_float64 *base, npy_float64 *t
     }
     else
     {
-        _eye(current);
+        _eye4(current);
     }
 
     m = PyList_GET_SIZE(ets);
@@ -1596,7 +1654,7 @@ void _jacobe(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, 
     npy_float64 *ret = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
     int j = n - 1;
 
-    _eye(U);
+    _eye4(U);
     _fkine(links, m, q, etool, tool, T);
 
     PyList_Reverse(links);
@@ -1701,7 +1759,7 @@ void _jacob0(PyObject *links, int m, int n, npy_float64 *q, npy_float64 *etool, 
     npy_float64 *invU = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
     int j = 0;
 
-    _eye(U);
+    _eye4(U);
     _fkine(links, m, q, etool, tool, T);
 
     PyObject *iter_links = PyObject_GetIter(links);
@@ -2038,7 +2096,7 @@ void tz(npy_float64 *data, double eta)
     data[15] = 1;
 }
 
-void _eye(npy_float64 *data)
+void _eye4(npy_float64 *data)
 {
     data[0] = 1;
     data[1] = 0;
@@ -2215,5 +2273,75 @@ void _angle_axis(npy_float64 *Te, npy_float64 *Tep, npy_float64 *e)
         e[3] = ang * li[0] / li_norm;
         e[4] = ang * li[1] / li_norm;
         e[5] = ang * li[2] / li_norm;
+    }
+}
+
+void _mult_T(int n, int m, int AT, npy_float64 *A, int p, int q, int BT, npy_float64 *B, npy_float64 *C)
+{
+    int i, j, k, temp;
+    double num, a, b;
+
+    if (AT)
+    {
+        n = temp;
+        n = m;
+        m = temp;
+    }
+
+    // if (BT)
+    // {
+    //     p = temp;
+    //     p = q;
+    //     q = temp;
+    // }
+
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < q; j++)
+        {
+            num = 0;
+            for (k = 0; k < p; k++)
+            {
+                if (AT)
+                {
+                    a = A[k * m + i];
+                }
+                else
+                {
+                    a = A[i * m + k];
+                }
+
+                // if (BT)
+                // {
+                //     b = B[j * q + k];
+                // }
+                // else
+                // {
+                b = B[k * q + j];
+                // }
+
+                num += a * b;
+            }
+            C[i * q + j] = num;
+        }
+    }
+}
+
+void _mult(int n, int m, npy_float64 *A, int p, int q, npy_float64 *B, npy_float64 *C)
+{
+    int i, j, k;
+    double num;
+
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < q; j++)
+        {
+            num = 0;
+            for (k = 0; k < p; k++)
+            {
+                num += A[i * m + k] * B[k * q + j];
+            }
+            C[i * q + j] = num;
+        }
     }
 }
