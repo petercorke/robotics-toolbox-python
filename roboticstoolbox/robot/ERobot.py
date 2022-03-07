@@ -252,7 +252,7 @@ class BaseERobot(Robot):
             # must be a mixture of Links with/without jindex
             raise ValueError("all links must have a jindex, or none have a jindex")
 
-        self._nbranches = sum([link.nchildren == 0 for link in links])
+        # self._nbranches = sum([link.nchildren == 0 for link in links])
 
         # Set up qlim
         qlim = zeros((2, self.n))
@@ -272,7 +272,7 @@ class BaseERobot(Robot):
         super().__init__(orlinks, **kwargs)
 
         # SceneNode, set a reference to the first link
-        self.scene_children = [self.links[0]]
+        self.scene_children = [self.links[0]]  # type: ignore
 
     def __str__(self) -> str:
         """
@@ -460,7 +460,8 @@ class BaseERobot(Robot):
 
         :seealso: :func:`n`, :func:`nlinks`
         """
-        return self._nbranches
+        # return self._nbranches
+        return sum([link.nchildren == 0 for link in self.links]) + len(self.grippers)
 
     # --------------------------------------------------------------------- #
 
