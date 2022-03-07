@@ -1128,7 +1128,7 @@ class ETS(BaseETS):
         self,
         q: ArrayLike,
         tool: Union[ndarray, SE3, None] = None,
-        analytic: str = "rpy-xyz",
+        analytic: str = "rpy/xyz",
     ):
         r"""
         Manipulator analytical Jacobian in the base frame
@@ -1148,8 +1148,8 @@ class ETS(BaseETS):
             =============  ==================================
             Value          Rotational representation
             =============  ==================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'rpy/xyz'``  RPY angular rates in XYZ order
+            ``'rpy/zyx'``  RPY angular rates in XYZ order
             ``'eul'``      Euler angular rates in ZYZ order
             ``'exp'``      exponential coordinate rates
             =============  ==================================
