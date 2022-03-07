@@ -20,7 +20,7 @@ class TestLink(unittest.TestCase):
 
         l0 = rtb.Link(rx * ry * tz)
 
-        ans = "Link[(): Rx(88.41°) ⊕ Ry(88.41°) ⊕ tz(1)] "
+        ans = 'Link("", Rx(88.41°) ⊕ Ry(88.41°) ⊕ tz(1))'
 
         self.assertEqual(str(l0), ans)
 

@@ -85,7 +85,7 @@ class TestETS2(unittest.TestCase):
 
         self.assertEqual(str(ets), "R(88.41°) ⊕ R(88.41°) ⊕ R(88.41°) ⊕ tx(1)")
         self.assertEqual(str(ets2), "R(88.41°) ⊕ R(q0) ⊕ R(q1) ⊕ R(q2)")
-        self.assertEqual(str(ets3), "tx(1) ⊕ SE2(xyθ: 0.00, 0.00, 57.30°)")
+        self.assertEqual(str(ets3), "tx(1) ⊕ SE2(0, 0; 57.3°)")
         self.assertEqual(ets2.__str__(q="θ{0}"), "R(88.41°) ⊕ R(θ0) ⊕ R(θ1) ⊕ R(θ2)")
 
     def test_str_jindex(self):
