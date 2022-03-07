@@ -2,7 +2,7 @@
 
 import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
-
+from math import pi
 
 class UR5(ERobot):
     """
@@ -62,6 +62,7 @@ class UR5(ERobot):
                 ]
             ),
         )
+        self.addconfiguration_attr("q1", [0, -pi/2, pi/2, 0, pi/2, 0])
 
 
 if __name__ == "__main__":  # pragma nocover

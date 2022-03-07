@@ -425,7 +425,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
     def addconfiguration_attr(self, name: str, q: ArrayLike, unit: str = "rad"):
         """
-        Add a named joint configuration (Robot superclass)
+        Add a named joint configuration as an attribute (Robot superclass)
 
         :param name: Name of the joint configuration
         :param q: Joint configuration
@@ -437,25 +437,47 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
             >>> import roboticstoolbox as rtb
             >>> robot = rtb.models.DH.Puma560()
-            >>> robot.qz
             >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
             >>> robot.mypos
+            >>> robot.configs["mypos"]
+
+        .. note::
+            - Used in robot model init method to store the ``qr`` configuration
+            - Dynamically adding attributes to objects can cause issues with
+              Python type checking.
+            - Configuration is also added to the robot instance's dictionary of
+              named configurations.
+
+        :seealso: :meth:`addconfiguration`
         """
         v = getvector(q, self.n)
         v = getunit(v, unit)
         v = np.array(v)
         self._configs[name] = v
+        setattr(self, name, v)
 
     def addconfiguration(self, name: str, q: np.ndarray):
         """
-        Log a named joint configuration (Robot superclass)
-
-        Used in robot model init method to store the qr configuration
+        Add a named joint configuration (Robot superclass)
 
         :param name: Name of the joint configuration
         :type name: str
         :param q: Joint configuration
         :type q: ndarray(n) or list
+
+        Add a named configuration to the robot instance's dictionary of named
+        configurations.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+            >>> robot.configs["mypos"]
+
+        :seealso: :meth:`addconfiguration`
         """
         self._configs[name] = q
 
@@ -1044,22 +1066,22 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
     def jacob0_analytic(
         self,
         q: ArrayLike,
+        analytic: str = "rpy/xyz",
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
         tool: Union[ndarray, SE3, None] = None,
-        analytic: str = "rpy/xyz",
     ):
         r"""
         Manipulator analytical Jacobian in the ``start`` frame
 
         :param q: Joint coordinate vector
         :type q: Arraylike
+        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
         :param end: the particular link or gripper whose velocity the Jacobian
             describes, defaults to the base link
         :param start: the link considered as the end-effector, defaults to the robots's end-effector
         :param tool: a static tool transformation matrix to apply to the
             end of end, defaults to None
-        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
 
         :return J: Manipulator Jacobian in the ``start`` frame
 

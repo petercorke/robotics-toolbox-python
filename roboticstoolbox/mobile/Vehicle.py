@@ -104,7 +104,10 @@ class VehicleBase(ABC):
         self._x_hist = []
 
         if workspace:
-            self._workspace = base.expand_dims(workspace)
+            try:
+                self._workspace = workspace.workspace
+            except AttributeError:
+                self._workspace = base.expand_dims(workspace)
         else:
             self._workspace = None
 

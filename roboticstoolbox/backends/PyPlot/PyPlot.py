@@ -326,7 +326,7 @@ class PyPlot(Connector):
                     options,
                 )
             )
-            self.robots[len(self.robots) - 1].draw()
+            self.robots[-1].draw()
             id = len(self.robots)
 
         elif isinstance(ob, EllipsePlot):

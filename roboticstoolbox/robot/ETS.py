@@ -1127,8 +1127,8 @@ class ETS(BaseETS):
     def jacob0_analytic(
         self,
         q: ArrayLike,
-        tool: Union[ndarray, SE3, None] = None,
         analytic: str = "rpy/xyz",
+        tool: Union[ndarray, SE3, None] = None,
     ):
         r"""
         Manipulator analytical Jacobian in the base frame
@@ -1164,11 +1164,8 @@ class ETS(BaseETS):
 
         T = self.eval(q, tool=tool)
         J = self.jacob0(q, tool=tool)
-        if analytic is not None:
-            A = rotvelxform(t2r(T), full=True, inverse=True, representation=analytic)
-            J = A @ J
-
-        return J
+        A = rotvelxform(t2r(T), full=True, inverse=True, representation=analytic)
+        return A @ J
 
 
 class ETS2(BaseETS):
@@ -1585,3 +1582,14 @@ class ETS2(BaseETS):
 
         T = self.fkine(q, include_base=False).A
         return tr2jac2(T.T) @ self.jacob0(q)
+
+
+if __name__ == "__main__":
+
+    from roboticstoolbox import models
+
+    ur5 = models.URDF.UR5()
+
+    ur5.fkine(ur5.qz)
+    ur5.jacob0(ur5.qz)
+    ur5.jacob0_analytic(ur5.qz)
