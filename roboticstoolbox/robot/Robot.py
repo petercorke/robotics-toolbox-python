@@ -900,7 +900,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         else:
             return w
 
-    def jacob_dot(self, q=None, qd=None, J0=None, analytical=None):
+    def jacob_dot(self, q=None, qd=None, J0=None, analytic=None):
         r"""
         Derivative of Jacobian
 
@@ -936,14 +936,14 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         for i in range(n):
             Jd += H[i, :, :] * qd[i]
 
-        if analytical is not None:
+        if analytic is not None:
             # determine analytic rotation
             T = self.fkine(q).A
-            gamma = smb.r2x(T, representation=analytical)
+            gamma = smb.r2x(T, representation=analytic)
 
             # get transformation angular velocity to analytic velocity
             Ai = smb.rotvelxform(
-                gamma, representation=analytical, inverse=True, full=True
+                gamma, representation=analytic, inverse=True, full=True
             )
 
             # get analytic rate from joint rates
@@ -1047,7 +1047,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
         tool: Union[ndarray, SE3, None] = None,
-        analytic: str = "rpy-xyz",
+        analytic: str = "rpy/xyz",
     ):
         r"""
         Manipulator analytical Jacobian in the ``start`` frame
@@ -1074,8 +1074,8 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
             =============  ==================================
             Value          Rotational representation
             =============  ==================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'rpy/xyz'``  RPY angular rates in XYZ order
+            ``'rpy/zyx'``  RPY angular rates in XYZ order
             ``'eul'``      Euler angular rates in ZYZ order
             ``'exp'``      exponential coordinate rates
             =============  ==================================
@@ -1961,11 +1961,11 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         env.add(
             self,
             readonly=True,
-            jointaxes=jointaxes,
-            jointlabels=jointlabels,
-            eeframe=eeframe,
-            shadow=shadow,
-            name=name,
+            # jointaxes=jointaxes,
+            # jointlabels=jointlabels,
+            # eeframe=eeframe,
+            # shadow=shadow,
+            # name=name,
         )
 
         env._add_teach_panel(self, q)
