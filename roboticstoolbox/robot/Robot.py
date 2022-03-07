@@ -922,7 +922,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         else:
             return w
 
-    def jacob_dot(self, q=None, qd=None, J0=None, analytical=None):
+    def jacob_dot(self, q=None, qd=None, J0=None, representation=None):
         r"""
         Derivative of Jacobian
 
@@ -932,6 +932,8 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         :type qd: ndarray(n)
         :param J0: Jacobian in {0} frame
         :type J0: ndarray(6,n)
+        :param representation: angular representation
+        :type representation: str
         :return: The derivative of the manipulator Jacobian
         :rtype:  ndarray(6,n)
 
@@ -941,6 +943,18 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
         It is computed as the mode-3 product of the Hessian tensor and the
         velocity vector.
+
+        The derivative of an analytical Jacobian can be obtained by setting
+        ``representation`` as
+
+        ==================   ==================================
+        ``representation``          Rotational representation
+        ==================   ==================================
+        ``'rpy/xyz'``        RPY angular rates in XYZ order
+        ``'rpy/zyx'``        RPY angular rates in XYZ order
+        ``'eul'``            Euler angular rates in ZYZ order
+        ``'exp'``            exponential coordinate rates
+        ==================   ==================================
 
         :references:
             - Kinematic Derivatives using the Elementary Transform
@@ -958,14 +972,14 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         for i in range(n):
             Jd += H[i, :, :] * qd[i]
 
-        if analytical is not None:
+        if representation is not None:
             # determine analytic rotation
             T = self.fkine(q).A
-            gamma = smb.r2x(T, representation=analytical)
+            gamma = smb.r2x(T, representation=representation)
 
             # get transformation angular velocity to analytic velocity
             Ai = smb.rotvelxform(
-                gamma, representation=analytical, inverse=True, full=True
+                gamma, representation=representation, inverse=True, full=True
             )
 
             # get analytic rate from joint rates
@@ -1063,10 +1077,10 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
     def ets(self, *args, **kwargs) -> ETS:
         pass
 
-    def jacob0_analytic(
+    def jacob0_analytical(
         self,
         q: ArrayLike,
-        analytic: str = "rpy/xyz",
+        representation: str = "rpy/xyz",
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
         tool: Union[ndarray, SE3, None] = None,
@@ -1076,7 +1090,8 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
         :param q: Joint coordinate vector
         :type q: Arraylike
-        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
+        :param representation: angular representation
+        :type representation: str
         :param end: the particular link or gripper whose velocity the Jacobian
             describes, defaults to the base link
         :param start: the link considered as the end-effector, defaults to the robots's end-effector
@@ -1085,33 +1100,32 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
         :return J: Manipulator Jacobian in the ``start`` frame
 
-        - ``robot.jacob0_analytic(q)`` is the manipulator Jacobian matrix which maps
+        - ``robot.jacob0_analytical(q)`` is the manipulator Jacobian matrix which maps
           joint  velocity to end-effector spatial velocity expressed in the
           ``start`` frame.
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        ``analytic`` can be one of:
-            =============  ==================================
-            Value          Rotational representation
-            =============  ==================================
-            ``'rpy/xyz'``  RPY angular rates in XYZ order
-            ``'rpy/zyx'``  RPY angular rates in XYZ order
-            ``'eul'``      Euler angular rates in ZYZ order
-            ``'exp'``      exponential coordinate rates
-            =============  ==================================
+        ==================   ==================================
+        ``representation``          Rotational representation
+        ==================   ==================================
+        ``'rpy/xyz'``        RPY angular rates in XYZ order
+        ``'rpy/zyx'``        RPY angular rates in XYZ order
+        ``'eul'``            Euler angular rates in ZYZ order
+        ``'exp'``            exponential coordinate rates
+        ==================   ==================================
 
         Example:
         .. runblock:: pycon
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.ETS.Puma560()
-            >>> puma.jacob0_analytic([0, 0, 0, 0, 0, 0])
+            >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
 
         .. warning:: ``start`` and ``end`` must be on the same branch,
             with ``start`` closest to the base.
         """  # noqa
-        return self.ets(start, end).jacob0_analytic(q, tool=tool, analytic=analytic)
+        return self.ets(start, end).jacob0_analytical(q, tool=tool, representation=representation)
 
     # --------------------------------------------------------------------- #
 
@@ -1983,11 +1997,11 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         env.add(
             self,
             readonly=True,
-            jointaxes=jointaxes,
-            jointlabels=jointlabels,
-            eeframe=eeframe,
-            shadow=shadow,
-            name=name,
+            #jointaxes=jointaxes,
+            #jointlabels=jointlabels,
+            #eeframe=eeframe,
+            #shadow=shadow,
+            #name=name,
         )
 
         env._add_teach_panel(self, q)

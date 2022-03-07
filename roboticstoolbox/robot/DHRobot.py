@@ -1165,14 +1165,14 @@ class DHRobot(Robot):
                 raise ValueError("bad half specified")
         return J0
 
-    def jacob0_analytic(self, q, analytical, T=None):
+    def jacob0_analytical(self, q, representation=None, T=None):
         r"""
         Manipulator Jacobian in world frame
 
         :param q: Joint coordinate vector
         :type q: ndarray(n)
-        :param analytical: return analytical Jacobian instead of geometric Jacobian
-        :type analytical: str
+        :param representation: return analytical Jacobian instead of geometric Jacobian
+        :type representation: str
         :param T: Forward kinematics if known, SE(3 matrix)
         :type T: SE3 instance
         :return J: The manipulator analytical Jacobian in the world frame
@@ -1186,14 +1186,14 @@ class DHRobot(Robot):
         Where :math:`\dvec{\Gamma} = (\dot{\Gamma}_1, \dot{\Gamma}_2, \dot{\Gamma}_3)` is
         orientation rate expressed as one of:
 
-            ==============   ==================================
-            ``analytical``   Rotational representation
-            ==============   ==================================
-            ``'rpy/xyz'``    RPY angular rates in XYZ order
-            ``'rpy/zyx'``    RPY angular rates in XYZ order
-            ``'eul'``        Euler angular rates in ZYZ order
-            ``'exp'``        exponential coordinate rates
-            ==============   ==================================
+        ==================   ==================================
+        ``representation``          Rotational representation
+        ==================   ==================================
+        ``'rpy/xyz'``        RPY angular rates in XYZ order
+        ``'rpy/zyx'``        RPY angular rates in XYZ order
+        ``'eul'``            Euler angular rates in ZYZ order
+        ``'exp'``            exponential coordinate rates
+        ==================   ==================================
 
         Example:
 
@@ -1201,7 +1201,7 @@ class DHRobot(Robot):
 
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
-            >>> puma.jacob0_analytic([0, 0, 0, 0, 0, 0], "rpy/xyz")
+            >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0], "rpy/xyz")
 
         .. warning:: The **geometric Jacobian** is as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
@@ -1224,19 +1224,19 @@ class DHRobot(Robot):
 
         # compute rotational transform if analytical Jacobian required
 
-        if analytical == "rpy/xyz":
+        if representation == "rpy/xyz":
             gamma = tr2rpy(T.A, order="xyz")
-        elif analytical == "rpy/zyx":
+        elif representation == "rpy/zyx":
             gamma = tr2rpy(T.A, order="zyx")
-        elif analytical == "eul":
+        elif representation == "eul":
             gamma = tr2eul(T.A)
-        elif analytical == "exp":
+        elif representation == "exp":
             # TODO: move to SMTB.base, Horner form with skew(v)
             gamma = trlog(t2r(T.A), twist=True)
         else:
             raise ValueError("bad analytical value specified")
 
-        A = rotvelxform(gamma, representation=analytical, inverse=True, full=True)
+        A = rotvelxform(gamma, representation=representation, inverse=True, full=True)
         return A @ J0
 
     def hessian0(self, q=None, J0=None, start=None, end=None):

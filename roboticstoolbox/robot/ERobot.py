@@ -1559,15 +1559,6 @@ class ERobot(BaseERobot):
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
-        ``analytical`` can be one of:
-            =============  ==================================
-            Value          Rotational representation
-            =============  ==================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
-            ``'eul'``      Euler angular rates in ZYZ order
-            ``'exp'``      exponential coordinate rates
-            =============  ==================================
 
         Example:
         .. runblock:: pycon
