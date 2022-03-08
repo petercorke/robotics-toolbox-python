@@ -199,7 +199,7 @@ class BaseERobot(Robot):
                 links.remove(g_link)
 
             # Save the gripper object
-            self._grippers.append(Gripper(g_links))
+            self._grippers.append(Gripper(g_links, name=link.name))
 
         # Subtract the n of the grippers from the n of the robot
         for gripper in self._grippers:

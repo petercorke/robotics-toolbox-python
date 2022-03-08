@@ -73,6 +73,17 @@ class Gripper:
                 "all gripper links must have a jindex, or none have a jindex"
             )
 
+    def __str__(self):
+        s = "Gripper("
+        if self.name is not None:
+            s += f'"{self.name}"'
+        s += f", connected to {self.links[0].parent_name}, {self.n} joints, {len(self.links)} links"
+        s += ")"
+        return s
+
+    def __repr__(self):
+        return self.__str__()
+
     def dfs_links(self, start, func=None):
         """
         Visit all links from start in depth-first order and will apply
