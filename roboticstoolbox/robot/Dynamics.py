@@ -915,7 +915,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0_analytical(q[0, :], representation=representation)
+                Ja = self.jacob0_analytical(q[0, :], representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -928,7 +928,7 @@ class DynamicsMixin:
             Mt = np.zeros((q.shape[0], 6, 6))
 
             for k, qk in enumerate(q):
-                Ja = self.jacob0_analytical(qk, representation=representation)
+                Ja = self.jacob0_analytical(qk, representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -1026,7 +1026,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0_analytic(q[0, :], analytic=representation)
+                Ja = self.jacob0_analytical(q[0, :], representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -1045,7 +1045,7 @@ class DynamicsMixin:
             for k, (qk, qdk) in enumerate(zip(q, qd)):
 
                 if Ji is None:
-                    Ja = self.jacob0_analytic(q[0, :], analytic=representation)
+                    Ja = self.jacob0_analytical(q[0, :], representation)
                     if pinv:
                         Ji = np.linalg.pinv(Ja)
                     else:
