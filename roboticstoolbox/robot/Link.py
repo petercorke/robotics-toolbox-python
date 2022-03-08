@@ -1134,9 +1134,17 @@ class BaseLink(SceneNode, ABC):
 
         def format(l, fmt, val):  # noqa
             if isinstance(val, np.ndarray):
-                s = ", ".join([fmt.format(v) for v in val])
+                try:
+                    s = ", ".join([fmt.format(v) for v in val])
+                except TypeError:
+                    # handle symbolic case
+                    s = ", ".join([str(v) for v in val])                    
             else:
-                s = fmt.format(val)
+                try:
+                    s = fmt.format(val)
+                except TypeError:
+                    # handle symbolic case
+                    s = str(val)
             l.append(s)
 
         dyn = []
@@ -1169,13 +1177,21 @@ class BaseLink(SceneNode, ABC):
                 if symbol is not None:
                     s = f"{symbol}={v:.3g}"
                 else:
-                    s = f"{name}={v:.3g}"
+                    try:
+                        s = f"{name}={v:.3g}"
+                    except TypeError:
+                        s = f"{name}={v}"
             elif isinstance(v, np.ndarray):
-                if np.linalg.norm(v, ord=np.inf) > 0:
+                # if np.linalg.norm(v, ord=np.inf) > 0:
+                #     if indices is not None:
+                #         flat = v.flatten()
+                #         v = np.r_[[flat[k] for k in indices]]
+                #     s = f"{name}=[" + ", ".join([f"{x:.3g}" for x in v]) + "]"
                     if indices is not None:
-                        flat = v.flatten()
-                        v = np.r_[[flat[k] for k in indices]]
-                    s = f"{name}=[" + ", ".join([f"{x:.3g}" for x in v]) + "]"
+                        v = v.ravel()[indices]
+                    s = f"{name}=" + np.array2string(v, separator=', ', 
+                            suppress_small=True, 
+                            formatter={'float': lambda x: f"{x:.3g}"})
             if s is not None:
                 l.append(s)
 
@@ -1487,14 +1503,25 @@ class Link2(BaseLink):
 
 if __name__ == "__main__":  # pragma nocover
 
-    a = Link(name='bob')
-    print(a)
-    print(repr(a))
+    import sympy
+    from roboticstoolbox import *
 
-    a = Link(name='bob', parent='foo')
-    print(a)
-    print(repr(a))
+    a1, a2, r1, r2, m1, m2, g = sympy.symbols("a1 a2 r1 r2 m1 m2 g")
+    link1 = Link(ET.Ry(flip=True), m=m1, r=[r1, 0, 0], name="link0")
+    link2 = Link(ET.tx(a1) * ET.Ry(flip=True), m=m2, r=[r2, 0, 0], name="link1")
+    print(link1)
+    robot = ERobot([link1, link2])
+    print(robot)
+    robot.dynamics()
 
-    a = rtb.models.URDF.UR5()
-    print(a[3])
-    print(repr(a[3]))
+    # a = Link(name='bob')
+    # print(a)
+    # print(repr(a))
+
+    # a = Link(name='bob', parent='foo')
+    # print(a)
+    # print(repr(a))
+
+    # a = rtb.models.URDF.UR5()
+    # print(a[3])
+    # print(repr(a[3]))

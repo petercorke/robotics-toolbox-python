@@ -138,7 +138,10 @@ class BaseETS(UserList):
                     s = f"{et.axis}({et.eta * 180 / pi:.4g}°)"
 
             elif et.istranslation:
-                s = f"{et.axis}({et.eta:.4g})"
+                try:
+                    s = f"{et.axis}({et.eta:.4g})"
+                except TypeError:
+                    s = f"{et.axis}({et.eta})"
 
             elif not et.iselementary:
                 s = str(et)
