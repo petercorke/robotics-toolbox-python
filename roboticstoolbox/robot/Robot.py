@@ -60,6 +60,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         gravity=None,
         keywords=(),
         symbolic=False,
+        configs={},
     ):
 
         self.name = name
@@ -121,12 +122,10 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
         self.control_mode = "v"
 
-        self._configdict = {}
-
         self._dynchanged = False
 
         # Set up named configuration property
-        self._configs = {}
+        self._configs = configs
 
     def copy(self):
         return deepcopy(self)
@@ -146,6 +145,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         gravity = deepcopy(self.gravity)
         keywords = deepcopy(self.keywords)
         symbolic = deepcopy(self.symbolic)
+        configs = deepcopy(self.configs)
 
         cls = self.__class__
         result = cls(
@@ -158,7 +158,14 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
             gravity=gravity,
             keywords=keywords,
             symbolic=symbolic,
+            configs=configs,
         )
+
+        # if a configuration was an attribute of original robot, make it an
+        # attribute of the deep copy
+        for config in configs:
+            if hasattr(self, config):
+                setattr(result, config, configs[config])
 
         memo[id(self)] = result
         return result
@@ -2173,9 +2180,15 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
 if __name__ == "__main__":
 
-    from roboticstoolbox import ET2 as ET
+    import roboticstoolbox as rtb
 
-    e = ET.R() * ET.tx(1) * ET.R() * ET.tx(1)
+    puma = rtb.models.DH.Puma560()
+    a = puma.copy()
+    pass
+
+    # from roboticstoolbox import ET2 as ET
+
+    # e = ET.R() * ET.tx(1) * ET.R() * ET.tx(1)
     # print(e)
     # r = Robot2(e)
 

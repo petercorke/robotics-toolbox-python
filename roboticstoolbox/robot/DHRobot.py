@@ -329,6 +329,7 @@ class DHRobot(Robot):
         gravity = copy.deepcopy(self.gravity)
         keywords = copy.deepcopy(self.keywords)
         symbolic = copy.deepcopy(self.symbolic)
+        configs = copy.deepcopy(self.configs)
 
         try:
             if self.meshdir:
@@ -350,7 +351,19 @@ class DHRobot(Robot):
             gravity=gravity,
             keywords=keywords,
             symbolic=symbolic,
+            configs=configs,
         )
+
+        # if a configuration was an attribute of original robot, make it an
+        # attribute of the deep copy
+        for config in configs:
+            if hasattr(self, config):
+                setattr(result, config, configs[config])
+
+        try:
+            setattr(result, "ikine_a", getattr(self, "ikine_a"))
+        except AttributeError:
+            pass
 
         memo[id(self)] = result
         return result

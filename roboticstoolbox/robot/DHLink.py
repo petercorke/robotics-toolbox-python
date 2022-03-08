@@ -169,6 +169,7 @@ class DHLink(Link):
         self.offset = offset
         self.id = None
         self.mesh = None
+        self.number = None
 
     def _to_ets(self, sigma, theta, d, alpha, a, offset, flip: bool, mdh):
         ets = ETS()
@@ -428,6 +429,7 @@ class DHLink(Link):
         result = cls(**kwargs)
         result._robot = self.robot
         result.sigma = self.sigma
+        result.number = self.number
 
         memo[id(self)] = result
         return result
