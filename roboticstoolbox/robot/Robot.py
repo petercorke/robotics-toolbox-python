@@ -2105,7 +2105,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         :returns: True if shapes have collided
         :rtype: bool
         """
-        warn("base kwarg is deprecated, use pose instead", FutureWarning)
+        warn("method collided is deprecated, use iscollided instead", FutureWarning)
         return self.iscollided(q, shape, skip=skip)
 
     def joint_velocity_damper(self, ps=0.05, pi=0.1, n=None, gain=1.0):
