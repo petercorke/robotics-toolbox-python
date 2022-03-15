@@ -333,6 +333,8 @@ class BaseERobot(Robot):
         if self.manufacturer is not None and len(self.manufacturer) > 0:
             s += f" (by {self.manufacturer})"
         s += f", {self.n} joints ({self.structure})"
+        if len(self.grippers) > 0:
+            s += f", {len(self.grippers)} gripper{'s' if len(self.grippers) > 1 else ''}"
         if self.nbranches > 1:
             s += f", {self.nbranches} branches"
         if self._hasdynamics:
