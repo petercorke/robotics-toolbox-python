@@ -60,7 +60,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         gravity=None,
         keywords=(),
         symbolic=False,
-        configs={},
+        configs=None,
     ):
 
         self.name = name
@@ -125,6 +125,8 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         self._dynchanged = False
 
         # Set up named configuration property
+        if configs is None:
+            configs = dict()
         self._configs = configs
 
     def copy(self):
