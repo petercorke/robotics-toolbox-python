@@ -199,7 +199,7 @@ class BaseERobot(Robot):
                 links.remove(g_link)
 
             # Save the gripper object
-            self._grippers.append(Gripper(g_links))
+            self._grippers.append(Gripper(g_links, name=link.name))
 
         # Subtract the n of the grippers from the n of the robot
         for gripper in self._grippers:
@@ -333,6 +333,8 @@ class BaseERobot(Robot):
         if self.manufacturer is not None and len(self.manufacturer) > 0:
             s += f" (by {self.manufacturer})"
         s += f", {self.n} joints ({self.structure})"
+        if len(self.grippers) > 0:
+            s += f", {len(self.grippers)} gripper{'s' if len(self.grippers) > 1 else ''}"
         if self.nbranches > 1:
             s += f", {self.nbranches} branches"
         if self._hasdynamics:
@@ -896,7 +898,7 @@ class BaseERobot(Robot):
 
     # --------------------------------------------------------------------- #
 
-    def dotfile(self, filename, etsbox=False, jtype=False, static=True):
+    def dotfile(self, filename, etsbox=False, ets="full", jtype=False, static=True):
         """
         Write a link transform graph as a GraphViz dot file
         :param file: Name of file to write to
@@ -972,11 +974,20 @@ graph [rankdir=LR];
                 # put the ets fragment as an edge label
                 if not link.isjoint and static:
                     edge_options += 'fontcolor="blue"'
+                if ets == "full":
+                    estr = link.ets.__str__(q=f"q{link.jindex}")
+                elif ets == "brief":
+                    if link.jindex is None:
+                        estr = ""
+                    else:
+                        estr = f"...q{link.jindex}"
+                else:
+                    return
                 file.write(
                     '  {} -> {} [label="{}", {}];\n'.format(
                         parent,
                         link.name,
-                        link.ets.__str__(q=f"q{link.jindex}"),
+                        estr,
                         edge_options,
                     )
                 )
@@ -1560,15 +1571,6 @@ class ERobot(BaseERobot):
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
-        ``analytical`` can be one of:
-            =============  ==================================
-            Value          Rotational representation
-            =============  ==================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
-            ``'eul'``      Euler angular rates in ZYZ order
-            ``'exp'``      exponential coordinate rates
-            =============  ==================================
 
         Example:
         .. runblock:: pycon

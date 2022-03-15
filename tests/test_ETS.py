@@ -84,7 +84,7 @@ class TestETS(unittest.TestCase):
 
         self.assertEqual(str(ets), "Rx(88.41°) ⊕ Ry(88.41°) ⊕ Rz(88.41°) ⊕ tx(1)")
         self.assertEqual(str(ets2), "Rx(88.41°) ⊕ Rx(q0) ⊕ Ry(q1) ⊕ Rz(q2)")
-        self.assertEqual(str(ets3), "tx(1) ⊕ SE3(rpy: 57.30°, -0.00°, 0.00°)")
+        self.assertEqual(str(ets3), "tx(1) ⊕ SE3(57.3°, -0°, 0°)")
         self.assertEqual(
             ets2.__str__(q="θ{0}"), "Rx(88.41°) ⊕ Rx(θ0) ⊕ Ry(θ1) ⊕ Rz(θ2)"
         )

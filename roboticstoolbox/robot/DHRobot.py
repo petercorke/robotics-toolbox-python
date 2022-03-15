@@ -329,6 +329,7 @@ class DHRobot(Robot):
         gravity = copy.deepcopy(self.gravity)
         keywords = copy.deepcopy(self.keywords)
         symbolic = copy.deepcopy(self.symbolic)
+        configs = copy.deepcopy(self.configs)
 
         try:
             if self.meshdir:
@@ -350,7 +351,19 @@ class DHRobot(Robot):
             gravity=gravity,
             keywords=keywords,
             symbolic=symbolic,
+            configs=configs,
         )
+
+        # if a configuration was an attribute of original robot, make it an
+        # attribute of the deep copy
+        for config in configs:
+            if hasattr(self, config):
+                setattr(result, config, configs[config])
+
+        try:
+            setattr(result, "ikine_a", getattr(self, "ikine_a"))
+        except AttributeError:
+            pass
 
         memo[id(self)] = result
         return result
@@ -1165,14 +1178,14 @@ class DHRobot(Robot):
                 raise ValueError("bad half specified")
         return J0
 
-    def jacob0_analytic(self, q, analytical, T=None):
+    def jacob0_analytical(self, q, representation=None, T=None):
         r"""
         Manipulator Jacobian in world frame
 
         :param q: Joint coordinate vector
         :type q: ndarray(n)
-        :param analytical: return analytical Jacobian instead of geometric Jacobian
-        :type analytical: str
+        :param representation: return analytical Jacobian instead of geometric Jacobian
+        :type representation: str
         :param T: Forward kinematics if known, SE(3 matrix)
         :type T: SE3 instance
         :return J: The manipulator analytical Jacobian in the world frame
@@ -1186,14 +1199,14 @@ class DHRobot(Robot):
         Where :math:`\dvec{\Gamma} = (\dot{\Gamma}_1, \dot{\Gamma}_2, \dot{\Gamma}_3)` is
         orientation rate expressed as one of:
 
-            ==============   ==================================
-            ``analytical``   Rotational representation
-            ==============   ==================================
-            ``'rpy/xyz'``    RPY angular rates in XYZ order
-            ``'rpy/zyx'``    RPY angular rates in XYZ order
-            ``'eul'``        Euler angular rates in ZYZ order
-            ``'exp'``        exponential coordinate rates
-            ==============   ==================================
+        ==================   ==================================
+        ``representation``          Rotational representation
+        ==================   ==================================
+        ``'rpy/xyz'``        RPY angular rates in XYZ order
+        ``'rpy/zyx'``        RPY angular rates in XYZ order
+        ``'eul'``            Euler angular rates in ZYZ order
+        ``'exp'``            exponential coordinate rates
+        ==================   ==================================
 
         Example:
 
@@ -1201,7 +1214,7 @@ class DHRobot(Robot):
 
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.DH.Puma560()
-            >>> puma.jacob0_analytic([0, 0, 0, 0, 0, 0], "rpy/xyz")
+            >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0], "rpy/xyz")
 
         .. warning:: The **geometric Jacobian** is as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
@@ -1224,19 +1237,19 @@ class DHRobot(Robot):
 
         # compute rotational transform if analytical Jacobian required
 
-        if analytical == "rpy/xyz":
+        if representation == "rpy/xyz":
             gamma = tr2rpy(T.A, order="xyz")
-        elif analytical == "rpy/zyx":
+        elif representation == "rpy/zyx":
             gamma = tr2rpy(T.A, order="zyx")
-        elif analytical == "eul":
+        elif representation == "eul":
             gamma = tr2eul(T.A)
-        elif analytical == "exp":
+        elif representation == "exp":
             # TODO: move to SMTB.base, Horner form with skew(v)
             gamma = trlog(t2r(T.A), twist=True)
         else:
             raise ValueError("bad analytical value specified")
 
-        A = rotvelxform(gamma, representation=analytical, inverse=True, full=True)
+        A = rotvelxform(gamma, representation=representation, inverse=True, full=True)
         return A @ J0
 
     def hessian0(self, q=None, J0=None, start=None, end=None):
@@ -1336,7 +1349,7 @@ class DHRobot(Robot):
             self._rne_ob = None
 
     @_check_rne
-    def rne(self, q, qd=None, qdd=None, gravity=None, fext=None):
+    def rne(self, q, qd=None, qdd=None, gravity=None, fext=None, base_wrench=False):
         r"""
         Inverse dynamics
 
@@ -1370,6 +1383,12 @@ class DHRobot(Robot):
 
         :seealso: :func:`rne_python`
         """
+
+        if base_wrench:
+            return self.rne_python(q, qd, qdd, 
+                                gravity=gravity, fext=fext,
+                                base_wrench=base_wrench)
+        
         trajn = 1
 
         try:
@@ -1422,7 +1441,7 @@ class DHRobot(Robot):
         gravity=None,
         fext=None,
         debug=False,
-        basewrench=False,
+        base_wrench=False,
     ):
         """
         Compute inverse dynamics via recursive Newton-Euler formulation
@@ -1437,8 +1456,8 @@ class DHRobot(Robot):
         :type fext: array-like(6), optional
         :param debug: print debug information to console, defaults to False
         :type debug: bool, optional
-        :param basewrench: compute the base wrench, defaults to False
-        :type basewrench: bool, optional
+        :param base_wrench: compute the base wrench, defaults to False
+        :type base_wrench: bool, optional
         :raises ValueError: for misshaped inputs
         :return: Joint force/torques
         :rtype: NumPy array
@@ -1512,7 +1531,7 @@ class DHRobot(Robot):
         nk = q.shape[0]
 
         tau = np.zeros((nk, n), dtype=dtype)
-        if basewrench:
+        if base_wrench:
             wbase = np.zeros((nk, n), dtype=dtype)
 
         for k in range(nk):
@@ -1722,7 +1741,7 @@ class DHRobot(Robot):
                     print()
 
             # compute the base wrench and save it
-            if basewrench:
+            if base_wrench:
                 R = Rm[0]
                 nn = R @ nn
                 f = R @ f
@@ -1743,10 +1762,16 @@ class DHRobot(Robot):
         #     else:
         #         return tau
 
-        if tau.shape[0] == 1:
-            return tau.flatten()
+        if base_wrench:
+            if tau.shape[0] == 1:
+                return tau.flatten(), wbase.flatten()
+            else:
+                return tau, wbase
         else:
-            return tau
+            if tau.shape[0] == 1:
+                return tau.flatten()
+            else:
+                return tau
 
     # -------------------------------------------------------------------------- #
 

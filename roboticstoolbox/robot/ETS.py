@@ -150,7 +150,10 @@ class BaseETS(UserList):
                     s = f"{et.axis}({et.eta * 180 / pi:.4g}°)"
 
             elif et.istranslation:
-                s = f"{et.axis}({et.eta:.4g})"
+                try:
+                    s = f"{et.axis}({et.eta:.4g})"
+                except TypeError:
+                    s = f"{et.axis}({et.eta})"
 
             elif not et.iselementary:
                 s = str(et)
@@ -1194,10 +1197,10 @@ class ETS(BaseETS):
 
         return H
 
-    def jacob0_analytic(
+    def jacob0_analytical(
         self,
         q: ArrayLike,
-        analytic: str = "rpy/xyz",
+        representation: str = "rpy/xyz",
         tool: Union[ndarray, SE3, None] = None,
     ):
         r"""
@@ -1207,34 +1210,33 @@ class ETS(BaseETS):
         :type q: ArrayLike
         :param tool: a static tool transformation matrix to apply to the
             end of end, defaults to None
-        :param analytic: describes the rotational representation
+        :param representation: describes the rotational representation
 
         :return J: Manipulator Jacobian in the base frame
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        ``analytic`` can be one of:
-            =============  ==================================
-            Value          Rotational representation
-            =============  ==================================
-            ``'rpy/xyz'``  RPY angular rates in XYZ order
-            ``'rpy/zyx'``  RPY angular rates in XYZ order
-            ``'eul'``      Euler angular rates in ZYZ order
-            ``'exp'``      exponential coordinate rates
-            =============  ==================================
+        ==================   ==================================
+        ``representation``          Rotational representation
+        ==================   ==================================
+        ``'rpy/xyz'``        RPY angular rates in XYZ order
+        ``'rpy/zyx'``        RPY angular rates in XYZ order
+        ``'eul'``            Euler angular rates in ZYZ order
+        ``'exp'``            exponential coordinate rates
+        ==================   ==================================
 
         Example:
         .. runblock:: pycon
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.ETS.Puma560()
-            >>> puma.jacob0_analytic([0, 0, 0, 0, 0, 0])
+            >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
 
         """  # noqa
 
         T = self.eval(q, tool=tool)
         J = self.jacob0(q, tool=tool)
-        A = rotvelxform(t2r(T), full=True, inverse=True, representation=analytic)
+        A = rotvelxform(t2r(T), full=True, inverse=True, representation=representation)
         return A @ J
 
     def jacobm(self, q: ArrayLike) -> ndarray:

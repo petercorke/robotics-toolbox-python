@@ -104,10 +104,10 @@ class TestET(unittest.TestCase):
         b = rtb.ET.SE3(SE3.RPY(1.0, 2.0, 3.00))
         c = rtb.ET.SE3(SE3(1.0, 0, 0) * SE3.RPY(1.0, 2.0, 3.00))
 
-        self.assertEqual(str(a), "SE3(xyz: 1.00, 0.00, 0.00)")
-        self.assertEqual(str(b), "SE3(rpy: -122.70°, 65.41°, -8.11°)")
+        self.assertEqual(str(a), "SE3(1, 0, 0)")
+        self.assertEqual(str(b), "SE3(-122.7°, 65.41°, -8.113°)")
         self.assertEqual(
-            str(c), "SE3(xyzrpy: 1.00, 0.00, 0.00, -122.70°, 65.41°, -8.11°)"
+            str(c), "SE3(1, 0, 0; -122.7°, 65.41°, -8.113°)"
         )
 
     def test_repr(self):

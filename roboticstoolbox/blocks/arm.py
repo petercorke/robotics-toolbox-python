@@ -957,7 +957,7 @@ class FDyn_X(TransferBlock):
         T = self.robot.fkine(q)
         x = base.tr2x(T.A)
 
-        Ja = self.robot.jacob0(q, analytical=self.representation)
+        Ja = self.robot.jacob0_analytical(q, self.representation)
         xd = Ja @ qd
         # print(q)
         # print(qd)
@@ -984,7 +984,7 @@ class FDyn_X(TransferBlock):
         # compute joint forces
         w = self.inputs[0]
         assert len(w) == 6, "wrench vector wrong size"
-        Q = self.robot.jacob0(q, analytical=self.representation).T @ w
+        Q = self.robot.jacob0_analytical(q, self.representation).T @ w
 
         if self.gravcomp or self.velcomp:
             if self.velcomp:

@@ -1020,11 +1020,21 @@ class EKF:
         :seealso: :meth:`get_P` :meth:`run` :meth:`history`
         """
         nhist = len(self._history)
+
+        if "label" in kwargs:
+            label = kwargs["label"]
+            del kwargs["label"]
+        else:
+            label = f"{confidence*100:.3g}% confidence"
         
         for k in np.linspace(0, nhist-1, N):
             k = round(k)
             h = self._history[k]
-            base.plot_ellipse(h.P[:2, :2], centre=h.xest[:2], confidence=confidence, inverted=True, **kwargs)
+            if k == 0:
+                base.plot_ellipse(h.P[:2, :2], centre=h.xest[:2], confidence=confidence, label=label, inverted=True, **kwargs)
+            else:
+                base.plot_ellipse(h.P[:2, :2], centre=h.xest[:2], confidence=confidence, inverted=True, **kwargs)
+
 
     def plot_error(self, bgcolor='r', confidence=0.95, ax=None, **kwargs):
         r"""
@@ -1172,8 +1182,10 @@ class EKF:
         if ellipse is not None:
             for i in range(xm.shape[0]):
                 Pi = self.P_est[i: i+2, i: i+2]
+                # put ellipse in the legend only once
                 if i == 0:
-                    base.plot_ellipse(Pi, centre=xm[i, :], confidence=confidence, inverted=True, label='confidence', **ellipse)
+                    base.plot_ellipse(Pi, centre=xm[i, :], confidence=confidence,
+                        inverted=True, label=f"{confidence*100:.3g}% confidence", **ellipse)
                 else:
                     base.plot_ellipse(Pi, centre=xm[i, :], confidence=confidence, inverted=True, **ellipse)
         # plot_ellipse( P * chi2inv_rtb(opt.confidence, 2), xf, args{:});

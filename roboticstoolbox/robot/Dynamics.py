@@ -860,7 +860,7 @@ class DynamicsMixin:
         :param pinv: use pseudo inverse rather than inverse
         :type pinv: bool
         :param analytical: the type of analytical Jacobian to use, default is
-            'rpy-xyz'
+            'rpy/xyz'
         :type analytical: str
         :return: The inertia matrix
         :rtype: ndarray(6,6) or ndarray(m,6,6)
@@ -915,7 +915,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0_analytic(q[0, :], analytic=representation)
+                Ja = self.jacob0_analytical(q[0, :], representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -928,7 +928,7 @@ class DynamicsMixin:
             Mt = np.zeros((q.shape[0], 6, 6))
 
             for k, qk in enumerate(q):
-                Ja = self.jacob0_analytic(qk, analytic=representation)
+                Ja = self.jacob0_analytical(qk, representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -960,7 +960,7 @@ class DynamicsMixin:
         :param pinv: use pseudo inverse rather than inverse
         :type pinv: bool
         :param analytical: the type of analytical Jacobian to use, default is
-            'rpy-xyz'
+            'rpy/xyz'
         :type analytical: str
         :return: Operational space velocity matrix
         :rtype: ndarray(6,6) or ndarray(m,6,6)
@@ -986,8 +986,8 @@ class DynamicsMixin:
             =============  ========================================
             Value          Rotational representation
             =============  ========================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order (default)
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'rpy/xyz'``  RPY angular rates in XYZ order (default)
+            ``'rpy/zyx'``  RPY angular rates in XYZ order
             ``'eul'``      Euler angular rates in ZYZ order
             ``'exp'``      exponential coordinate rates
             =============  ========================================
@@ -1026,7 +1026,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0_analytic(q[0, :], analytic=representation)
+                Ja = self.jacob0_analytical(q[0, :], representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -1045,7 +1045,7 @@ class DynamicsMixin:
             for k, (qk, qdk) in enumerate(zip(q, qd)):
 
                 if Ji is None:
-                    Ja = self.jacob0_analytic(q[0, :], analytic=representation)
+                    Ja = self.jacob0_analytical(q[0, :], representation)
                     if pinv:
                         Ji = np.linalg.pinv(Ja)
                     else:
@@ -1073,7 +1073,7 @@ class DynamicsMixin:
         :param pinv: use pseudo inverse rather than inverse
         :type pinv: bool
         :param analytical: the type of analytical Jacobian to use, default is
-            'rpy-xyz'
+            'rpy/xyz'
         :type analytical: str
         :return: The operational space gravity wrench
         :rtype: ndarray(6) or ndarray(m,6)
@@ -1095,8 +1095,8 @@ class DynamicsMixin:
             =============  ========================================
             Value          Rotational representation
             =============  ========================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order (default)
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'rpy/xyz'``  RPY angular rates in XYZ order (default)
+            ``'rpy/zyx'``  RPY angular rates in XYZ order
             ``'eul'``      Euler angular rates in ZYZ order
             ``'exp'``      exponential coordinate rates
             =============  ========================================
@@ -1179,7 +1179,7 @@ class DynamicsMixin:
         :param pinv: use pseudo inverse rather than inverse
         :type pinv: bool
         :param analytical: the type of analytical Jacobian to use, default is
-            'rpy-xyz'
+            'rpy/xyz'
         :type analytical: str
         :return: Operational space accelerations of the end-effector
         :rtype: ndarray(6) or ndarray(m,6)

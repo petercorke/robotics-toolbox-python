@@ -156,18 +156,18 @@ class BaseET:
                 T = self.A()
                 rpy = tr2rpy(T) * 180.0 / pi
                 if T[:3, -1].any() and rpy.any():
-                    eta_str = f"xyzrpy: {T[0, -1]:.4g}, {T[1, -1]:.4g}, {T[2, -1]:.4g}, {rpy[0]:.4g}°, {rpy[1]:.4g}°, {rpy[2]:.4g}°"
+                    eta_str = f"{T[0, -1]:.4g}, {T[1, -1]:.4g}, {T[2, -1]:.4g}; {rpy[0]:.4g}°, {rpy[1]:.4g}°, {rpy[2]:.4g}°"
                 elif T[:3, -1].any():
-                    eta_str = f"xyz: {T[0, -1]:.4g}, {T[1, -1]:.4g}, {T[2, -1]:.4g}"
+                    eta_str = f"{T[0, -1]:.4g}, {T[1, -1]:.4g}, {T[2, -1]:.4g}"
                 elif rpy.any():
-                    eta_str = f"rpy: {rpy[0]:.4g}°, {rpy[1]:.4g}°, {rpy[2]:.4g}°"
+                    eta_str = f"{rpy[0]:.4g}°, {rpy[1]:.4g}°, {rpy[2]:.4g}°"
                 else:
                     eta_str = ""  # pragma: nocover
             elif isinstance(self, ET2):
                 T = self.A()
                 xyt = tr2xyt(T)
                 xyt[2] *= 180 / pi
-                eta_str = f"xyθ: {xyt[0]:.4g}, {xyt[1]:.4g}, {xyt[2]:.4g}°"
+                eta_str = f"{xyt[0]:.4g}, {xyt[1]:.4g}; {xyt[2]:.4g}°"
 
         else:
             eta_str = f"{self.eta:.4g}"
