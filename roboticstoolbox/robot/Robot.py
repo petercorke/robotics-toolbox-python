@@ -28,6 +28,7 @@ from numpy import all, eye, isin
 from roboticstoolbox.robot.Gripper import Gripper
 from numpy import ndarray
 from warnings import warn
+import scipy as sp
 
 try:
     from matplotlib import colors
@@ -931,7 +932,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         else:
             return w
 
-    def jacob_dot(self, q=None, qd=None, J0=None, representation=None):
+    def jacob0_dot(self, q=None, qd=None, J0=None, representation=None):
         r"""
         Derivative of Jacobian
 
@@ -947,7 +948,15 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         :rtype:  ndarray(6,n)
 
         ``robot.jacob_dot(q, qd)`` computes the rate of change of the
-        Jacobian elements.  If ``J0`` is already calculated for the joint
+        Jacobian elements
+        
+        .. math::
+        
+            \dmat{J} = \frac{d \mat{J}}{d \vec{q}} \frac{d \vec{q}}{dt}
+
+        where the first term is the rank-3 Hessian.
+
+         If ``J0`` is already calculated for the joint
         coordinates ``q`` it can be passed in to to save computation time.
 
         It is computed as the mode-3 product of the Hessian tensor and the
@@ -972,33 +981,39 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         :seealso: :func:`jacob0`, :func:`hessian0`
         """  # noqa
         n = len(q)
-        if J0 is None:
-            J0 = self.jacob0(q)
-        H = self.hessian0(q, J0=J0)
 
-        # Jd = H qd using mode 3 product
-        Jd = np.zeros((6, n))
-        for i in range(n):
-            Jd += H[i, :, :] * qd[i]
 
-        if representation is not None:
-            # determine analytic rotation
-            T = self.fkine(q).A
-            gamma = smb.r2x(T, representation=representation)
+        if representation is None:
 
-            # get transformation angular velocity to analytic velocity
-            Ai = smb.rotvelxform(
-                gamma, representation=representation, inverse=True, full=True
-            )
+            if J0 is None:
+                J0 = self.jacob0(q)
+            H = self.hessian0(q, J0=J0)
 
-            # get analytic rate from joint rates
-            omega = J0[3:, :] @ qd
-            gamma_dot = Ai[3:, 3:] @ omega
-            Ai_dot = smb.rotvelxform_inv_dot(gamma, gamma_dot, full=True)
+        else:
+            # # determine analytic rotation
+            # T = self.fkine(q).A
+            # gamma = smb.r2x(smb.t2r(T), representation=representation)
 
-            Jd = Ai_dot @ J0 + Ai @ Jd
+            # # get transformation angular velocity to analytic velocity
+            # Ai = smb.rotvelxform(
+            #     gamma, representation=representation, inverse=True, full=True
+            # )
 
-        return Jd
+            # # get analytic rate from joint rates
+            # omega = J0[3:, :] @ qd
+            # gamma_dot = Ai[3:, 3:] @ omega
+            # Ai_dot = smb.rotvelxform_inv_dot(gamma, gamma_dot, full=True)
+            # Ai_dot = sp.linalg.block_diag(np.zeros((3, 3)), Ai_dot)
+
+            # Jd = Ai_dot @ J0 + Ai @ Jd
+
+            # not actually sure this can be written in closed form
+
+            H = smb.numhess(lambda q: self.jacob0_analytical(q, representation=representation), q)
+            # Jd = Ai @ Jd
+
+        return np.tensordot(H, qd, (0,0))
+
 
     def jacobm(self, q=None, J=None, H=None, end=None, start=None, axes="all"):
         r"""
