@@ -1,6 +1,9 @@
 from setuptools import setup, find_packages, Extension
 import os
 
+# from findblas distutils import build_ext_with_blas
+# from findblas.distutils import build_ext_with_blas
+
 # fmt: off
 import pip
 pip.main(['install', 'numpy>=1.17.4'])
@@ -70,6 +73,10 @@ frne = Extension(
     include_dirs=["./roboticstoolbox/core/"],
 )
 
+# cblass = (
+# "/home/jesse/miniconda3/envs/rtb/lib/python3.9/site-packages/numpy/core/src/common"
+# )
+# print(cblass)
 fknm = Extension(
     "fknm",
     sources=["./roboticstoolbox/core/fknm.c"],
@@ -108,6 +115,7 @@ setup(
         "Tracker": "https://github.com/petercorke/roboticstoolbox-python/issues",
         "Coverage": "https://codecov.io/gh/petercorke/roboticstoolbox-python",
     },
+    # cmdclass={"build_ext": build_ext_with_blas},
     ext_modules=[frne, fknm],
     keywords="python robotics robotics-toolbox kinematics dynamics"
     " motion-planning trajectory-generation jacobian hessian"
