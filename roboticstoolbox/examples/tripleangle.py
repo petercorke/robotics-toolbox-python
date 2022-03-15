@@ -34,7 +34,7 @@ g2 = Mesh(
 g3 = Mesh(
     filename=str(path / "gimbal-ring3.stl"),
     color=[240, 103, 103],
-    scale=(1.1 ** 2 / 3,) * 3,
+    scale=(1.1**2 / 3,) * 3,
 )
 
 plane = Mesh(
@@ -86,10 +86,10 @@ def update_gimbals(theta, ring):
     def convert(R):
         return BASE * SE3.Rt(R, t=[0, 0, 0])
 
-    g3.base = convert(R1 * SO3.Ry(pi / 2))
-    g2.base = convert(R1 * R2 * SO3.Rz(pi / 2))
-    g1.base = convert(R1 * R2 * R3 * SO3.Rx(pi / 2))
-    plane.base = convert(R1 * R2 * R3 * SO3.Ry(pi / 2) * SO3.Rz(pi / 2))
+    g3.T = convert(R1 * SO3.Ry(pi / 2))
+    g2.T = convert(R1 * R2 * SO3.Rz(pi / 2))
+    g1.T = convert(R1 * R2 * R3 * SO3.Rx(pi / 2))
+    plane.T = convert(R1 * R2 * R3 * SO3.Ry(pi / 2) * SO3.Rz(pi / 2))
 
 
 # slider call backs, invoke the central handler
