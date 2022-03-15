@@ -12,6 +12,8 @@
 #include <math.h>
 #include "fknm.h"
 #include <stdio.h>
+// #include "findblas.h"
+// #include <npy_cblas.h>
 
 // forward defines
 static PyObject *IK(PyObject *self, PyObject *args);
@@ -1284,25 +1286,43 @@ void _ETS_IK(PyObject *ets, int n, npy_float64 *q, npy_float64 *Tep, npy_float64
     npy_float64 *e = (npy_float64 *)PyMem_RawCalloc(6, sizeof(npy_float64));
 
     npy_float64 *a = (npy_float64 *)PyMem_RawCalloc(6, sizeof(npy_float64));
+    // a[0] = 1.0;
+    // a[1] = 4.0;
+    // a[2] = 2.0;
+    // a[3] = 5.0;
+    // a[4] = 3.0;
+    // a[5] = 6.0;
     a[0] = 1.0;
-    a[1] = 4.0;
-    a[2] = 2.0;
-    a[3] = 5.0;
-    a[4] = 3.0;
+    a[1] = 2.0;
+    a[2] = 3.0;
+    a[3] = 4.0;
+    a[4] = 5.0;
     a[5] = 6.0;
     npy_float64 *b = (npy_float64 *)PyMem_RawCalloc(12, sizeof(npy_float64));
     b[0] = 11.0;
-    b[1] = 12.0;
-    b[2] = 13.0;
-    b[3] = 14.0;
-    b[4] = 15.0;
-    b[5] = 16.0;
-    b[6] = 17.0;
-    b[7] = 18.0;
-    b[8] = 19.0;
-    b[9] = 20.0;
-    b[10] = 21.0;
+    b[1] = 15.0;
+    b[2] = 19.0;
+    b[3] = 12.0;
+    b[4] = 16.0;
+    b[5] = 20.0;
+    b[6] = 13.0;
+    b[7] = 17.0;
+    b[8] = 21.0;
+    b[9] = 14.0;
+    b[10] = 18.0;
     b[11] = 22.0;
+    // b[0] = 11.0;
+    // b[1] = 12.0;
+    // b[2] = 13.0;
+    // b[3] = 14.0;
+    // b[4] = 15.0;
+    // b[5] = 16.0;
+    // b[6] = 17.0;
+    // b[7] = 18.0;
+    // b[8] = 19.0;
+    // b[9] = 20.0;
+    // b[10] = 21.0;
+    // b[11] = 22.0;
 
     // npy_float64 *U = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
     // npy_float64 *invU = (npy_float64 *)PyMem_RawCalloc(16, sizeof(npy_float64));
@@ -1311,22 +1331,33 @@ void _ETS_IK(PyObject *ets, int n, npy_float64 *q, npy_float64 *Tep, npy_float64
     // Py_ssize_t m;
     int arrived = 0, iter = 0;
 
-    // while (arrived == 0 && iter < 500)
+    while (arrived == 0 && iter < 500)
+    {
+        // Current pose Te
+        _ETS_fkine(ets, q, (npy_float64 *)NULL, NULL, Te);
+
+        // Angle axis error e
+        _angle_axis(Te, Tep, e);
+
+        // Squared error E
+        // E = 0.5 * e @ We @ e
+        E = 0.5 * (e[0] * e[0] + e[1] * e[1] + e[2] * e[2] + e[3] * e[3] + e[4] * e[4] + e[5] * e[5]);
+    }
+
+    // _ETS_fkine(ets, q, (npy_float64 *)NULL, NULL, Te);
+
+    // for (int i = 0; i < 2; i++)
     // {
-    //     // Current pose Te
-    //     _ETS_fkine(ets, q, (npy_float64 *)NULL, NULL, Te);
-
-    //     // Angle axis error e
-    //     _angle_axis(Te, Tep, e);
-
-    //     // Squared error E
-    //     // E = 0.5 * e @ We @ e
-    //     E = 0.5 * (e[0] * e[0] + e[1] * e[1] + e[2] * e[2] + e[3] * e[3] + e[4] * e[4] + e[5] * e[5]);
+    //     for (int j = 0; j < 4; j++)
+    //     {
+    //         ret[i * 4 + j] = 0.0;
+    //     }
     // }
 
-    _ETS_fkine(ets, q, (npy_float64 *)NULL, NULL, Te);
-
-    _mult_T(3, 2, 1, a, 3, 4, 0, b, ret);
+    // _mult_T(2, 3, 0, a, 3, 4, 0, b, ret);
+    // _mult_T(3, 2, 1, a, 3, 4, 0, b, ret);
+    // _mult_T(3, 2, 1, a, 4, 3, 1, b, ret);
+    // _mult_T(2, 3, 0, a, 4, 3, 1, b, ret);
 
     int j = 0;
 }
@@ -1608,7 +1639,8 @@ void _ETS_fkine(PyObject *ets, npy_float64 *q, npy_float64 *base, npy_float64 *t
             return;
 
         _ET_T(et, ret, q[et->jindex]);
-        mult(current, ret, temp);
+        // mult(current, ret, temp);
+        // cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, 4, 4, 4, 1.0, current, 4, ret, 4, 0.0, temp, 4);
         copy(temp, current);
     }
 
@@ -2283,17 +2315,17 @@ void _mult_T(int n, int m, int AT, npy_float64 *A, int p, int q, int BT, npy_flo
 
     if (AT)
     {
-        n = temp;
+        temp = n;
         n = m;
         m = temp;
     }
 
-    // if (BT)
-    // {
-    //     p = temp;
-    //     p = q;
-    //     q = temp;
-    // }
+    if (BT)
+    {
+        temp = p;
+        p = q;
+        q = temp;
+    }
 
     for (i = 0; i < n; i++)
     {
@@ -2304,21 +2336,21 @@ void _mult_T(int n, int m, int AT, npy_float64 *A, int p, int q, int BT, npy_flo
             {
                 if (AT)
                 {
-                    a = A[k * m + i];
+                    a = A[k * n + i];
                 }
                 else
                 {
                     a = A[i * m + k];
                 }
 
-                // if (BT)
-                // {
-                //     b = B[j * q + k];
-                // }
-                // else
-                // {
-                b = B[k * q + j];
-                // }
+                if (BT)
+                {
+                    b = B[j * p + k];
+                }
+                else
+                {
+                    b = B[k * q + j];
+                }
 
                 num += a * b;
             }
