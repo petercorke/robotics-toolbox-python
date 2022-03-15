@@ -6,7 +6,22 @@
 """
 
 from collections import UserList
-from numpy import pi, where, all, ndarray, zeros, array, eye, array_equal
+from functools import lru_cache, cached_property
+from numpy import (
+    pi,
+    where,
+    all,
+    ndarray,
+    zeros,
+    array,
+    eye,
+    array_equal,
+    sqrt,
+    min,
+    max,
+    where,
+)
+from numpy.linalg import inv, det, cond, pinv, matrix_rank, svd, eig
 from spatialmath import SE3, SE2
 from spatialmath.base import (
     getvector,
@@ -14,9 +29,6 @@ from spatialmath.base import (
     tr2jac,
     verifymatrix,
     tr2jac2,
-    tr2rpy,
-    tr2eul,
-    trlog,
     t2r,
     rotvelxform,
     simplify,
@@ -168,7 +180,7 @@ class BaseETS(UserList):
         """
         print(self.__str__())
 
-    def joints(self) -> List[int]:
+    def joints(self) -> List[int]:  # Returns a list of ET's   joint_idx
         """
         Get index of joint transforms
 
@@ -185,7 +197,7 @@ class BaseETS(UserList):
         """
         return where([e.isjoint for e in self])[0]
 
-    def jointset(self) -> Set[int]:
+    def jointset(self) -> Set[int]:  #
         """
         Get set of joint indices
 
@@ -200,6 +212,64 @@ class BaseETS(UserList):
             >>> e.jointset()
         """
         return set([self[j].jindex for j in self.joints()])  # type: ignore
+
+    @cached_property
+    def jindices(self) -> ndarray:
+        """
+        Get an array of joint indices
+
+        :return: array of unique joint indices
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
+            >>> e.jointset()
+        """
+        return array([self[j].jindex for j in self.joints()])  # type: ignore
+
+    @cached_property
+    def qlim(self):
+        r"""
+        Joint limits
+
+        :return: Array of joint limit values
+        :rtype: ndarray(2,n)
+        :exception ValueError: unset limits for a prismatic joint
+
+        Limits are extracted from the link objects.  If joints limits are
+        not set for:
+
+            - a revolute joint [-𝜋. 𝜋] is returned
+            - a prismatic joint an exception is raised
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.DH.Puma560()
+            >>> robot.qlim
+        """
+        limits = zeros((2, self.n))
+        for i, j in enumerate(self.joints()):
+            if self.data[j].isrotation:
+                if self.data[j].qlim is None:
+                    v = [-pi, pi]
+                else:
+                    v = self.data[j].qlim
+            elif self.data[j].istranslation:
+                if self.data[j].qlim is None:
+                    raise ValueError("undefined prismatic joint limit")
+                else:
+                    v = self.data[j].qlim
+            else:
+                raise ValueError("Undefined Joint Type")
+            limits[:, i] = v
+
+        return limits
 
     @property
     def structure(self) -> str:
@@ -1167,6 +1237,187 @@ class ETS(BaseETS):
         A = rotvelxform(t2r(T), full=True, inverse=True, representation=analytic)
         return A @ J
 
+    def jacobm(self, q: ArrayLike) -> ndarray:
+        r"""
+        Calculates the manipulability Jacobian. This measure relates the rate
+        of change of the manipulability to the joint velocities of the robot.
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+
+        :return: The manipulability Jacobian
+        :rtype: float ndarray(n)
+
+        Yoshikawa's manipulability measure
+
+        .. math::
+
+            m(\vec{q}) = \sqrt{\mat{J}(\vec{q}) \mat{J}(\vec{q})^T}
+
+        This method returns its Jacobian with respect to configuration
+
+        .. math::
+
+            \frac{\partial m(\vec{q})}{\partial \vec{q}}
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        """
+
+        J = self.jacob0(q)
+        H = self.hessian0(q)
+
+        manipulability = self.manipulability(q)
+
+        # J = J[axes, :]
+        # H = H[:, axes, :]
+
+        b = inv(J @ J.T)
+        Jm = zeros((self.n, 1))
+
+        for i in range(self.n):
+            c = J @ H[i, :, :].T
+            Jm[i, 0] = manipulability * (c.flatten("F")).T @ b.flatten("F")
+
+        return Jm
+
+    def manipulability(self, q, method="yoshikawa"):
+        """
+        Manipulability measure
+
+        :param q: Joint coordinates, one of J or q required
+        :type q: ndarray(n), or ndarray(m,n)
+        :param J: Jacobian in world frame if already computed, one of J or
+            q required
+        :type J: ndarray(6,n)
+        :param method: method to use, "yoshikawa" (default), "condition",
+            "minsingular"  or "asada"
+        :type method: str
+        :param axes: Task space axes to consider: "all" [default],
+            "trans", "rot" or "both"
+        :type axes: str
+        :param kwargs: extra arguments to pass to ``jacob0``
+        :return: manipulability
+        :rtype: float or ndarray(m)
+
+        - ``manipulability(q)`` is the scalar manipulability index
+          for the robot at the joint configuration ``q``.  It indicates
+          dexterity, that is, how well conditioned the robot is for motion
+          with respect to the 6 degrees of Cartesian motion.  The values is
+          zero if the robot is at a singularity.
+
+        Various measures are supported:
+
+        +-------------------+-------------------------------------------------+
+        | Measure           |       Description                               |
+        +-------------------+-------------------------------------------------+
+        | ``"yoshikawa"``   | Volume of the velocity ellipsoid, *distance*    |
+        |                   | from singularity [Yoshikawa85]_                 |
+        +-------------------+-------------------------------------------------+
+        | ``"invcondition"``| Inverse condition number of Jacobian, isotropy  |
+        |                   | of the velocity ellipsoid [Klein87]_            |
+        +-------------------+-------------------------------------------------+
+        | ``"minsingular"`` | Minimum singular value of the Jacobian,         |
+        |                   | *distance*  from singularity [Klein87]_         |
+        +-------------------+-------------------------------------------------+
+        | ``"asada"``       | Isotropy of the task-space acceleration         |
+        |                   | ellipsoid which is a function of the Cartesian  |
+        |                   | inertia matrix which depends on the inertial    |
+        |                   | parameters [Asada83]_                           |
+        +-------------------+-------------------------------------------------+
+
+        **Trajectory operation**:
+
+        If ``q`` is a matrix (m,n) then the result (m,) is a vector of
+        manipulability indices for each joint configuration specified by a row
+        of ``q``.
+
+        .. note::
+
+            - Invokes the ``jacob0`` method of the robot if ``J`` is not passed
+            - The "all" option includes rotational and translational
+              dexterity, but this involves adding different units. It can be
+              more useful to look at the translational and rotational
+              manipulability separately.
+            - Examples in the RVC book (1st edition) can be replicated by
+              using the "all" option
+            - Asada's measure requires inertial a robot model with inertial
+              parameters.
+
+        :references:
+
+        .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T.,
+                The International Journal of Robotics Research.
+                1985;4(2):3-9. doi:10.1177/027836498500400201
+        .. [Asada83] A geometrical representation of manipulator dynamics and
+                its application to arm design, H. Asada,
+                Journal of Dynamic Systems, Measurement, and Control,
+                vol. 105, p. 131, 1983.
+        .. [Klein87] Dexterity Measures for the Design and Control of
+                Kinematically Redundant Manipulators. Klein CA, Blaho BE.
+                The International Journal of Robotics Research.
+                1987;6(2):72-83. doi:10.1177/027836498700600206
+
+        - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
+
+        """
+
+        def yoshikawa(robot, J, q, axes, **kwargs):
+            J = J[axes, :]
+            if J.shape[0] == J.shape[1]:
+                # simplified case for square matrix
+                return abs(det(J))
+            else:
+                m2 = det(J @ J.T)
+                return sqrt(abs(m2))
+
+        def condition(robot, J, q, axes, **kwargs):
+            J = J[axes, :]
+            return 1 / cond(J)
+
+        def minsingular(robot, J, q, axes, **kwargs):
+            J = J[axes, :]
+            s = svd(J, compute_uv=False)
+            return s[-1]  # return last/smallest singular value of J
+
+        def asada(robot, J, q, axes, **kwargs):
+            # dof = np.sum(axes)
+            if matrix_rank(J) < 6:
+                return 0
+            Ji = pinv(J)
+            Mx = Ji.T @ robot.inertia(q) @ Ji
+            d = where(axes)[0]
+            Mx = Mx[d]
+            Mx = Mx[:, d.tolist()]
+            e, _ = eig(Mx)
+            return min(e) / max(e)
+
+        # choose the handler function
+        if method == "yoshikawa":
+            mfunc = yoshikawa
+        elif method == "invcondition":
+            mfunc = condition
+        elif method == "minsingular":
+            mfunc = minsingular
+        elif method == "asada":
+            mfunc = asada
+        else:
+            raise ValueError("Invalid method chosen")
+
+        # q = getmatrix(q, (None, self.n))
+        # w = zeros(q.shape[0])
+        axes = [True, True, True, True, True, True]
+
+        # for k, qk in enumerate(q):
+        J = self.jacob0(q)
+        w = mfunc(self, J, q, axes)
+
+        # if len(w) == 1:
+        #     return w[0]
+        # else:
+        return w
+
 
 class ETS2(BaseETS):
     """
@@ -1584,12 +1835,12 @@ class ETS2(BaseETS):
         return tr2jac2(T.T) @ self.jacob0(q)
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    from roboticstoolbox import models
+#     from roboticstoolbox import models
 
-    ur5 = models.URDF.UR5()
+#     ur5 = models.URDF.UR5()
 
-    ur5.fkine(ur5.qz)
-    ur5.jacob0(ur5.qz)
-    ur5.jacob0_analytic(ur5.qz)
+#     ur5.fkine(ur5.qz)
+#     ur5.jacob0(ur5.qz)
+#     ur5.jacob0_analytic(ur5.qz)
