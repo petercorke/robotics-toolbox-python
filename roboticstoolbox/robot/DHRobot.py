@@ -1349,7 +1349,7 @@ class DHRobot(Robot):
             self._rne_ob = None
 
     @_check_rne
-    def rne(self, q, qd=None, qdd=None, gravity=None, fext=None):
+    def rne(self, q, qd=None, qdd=None, gravity=None, fext=None, base_wrench=False):
         r"""
         Inverse dynamics
 
@@ -1383,6 +1383,12 @@ class DHRobot(Robot):
 
         :seealso: :func:`rne_python`
         """
+
+        if base_wrench:
+            return self.rne_python(q, qd, qdd, 
+                                gravity=gravity, fext=fext,
+                                base_wrench=base_wrench)
+        
         trajn = 1
 
         try:
@@ -1435,7 +1441,7 @@ class DHRobot(Robot):
         gravity=None,
         fext=None,
         debug=False,
-        basewrench=False,
+        base_wrench=False,
     ):
         """
         Compute inverse dynamics via recursive Newton-Euler formulation
@@ -1450,8 +1456,8 @@ class DHRobot(Robot):
         :type fext: array-like(6), optional
         :param debug: print debug information to console, defaults to False
         :type debug: bool, optional
-        :param basewrench: compute the base wrench, defaults to False
-        :type basewrench: bool, optional
+        :param base_wrench: compute the base wrench, defaults to False
+        :type base_wrench: bool, optional
         :raises ValueError: for misshaped inputs
         :return: Joint force/torques
         :rtype: NumPy array
@@ -1525,7 +1531,7 @@ class DHRobot(Robot):
         nk = q.shape[0]
 
         tau = np.zeros((nk, n), dtype=dtype)
-        if basewrench:
+        if base_wrench:
             wbase = np.zeros((nk, n), dtype=dtype)
 
         for k in range(nk):
@@ -1735,7 +1741,7 @@ class DHRobot(Robot):
                     print()
 
             # compute the base wrench and save it
-            if basewrench:
+            if base_wrench:
                 R = Rm[0]
                 nn = R @ nn
                 f = R @ f
@@ -1756,10 +1762,16 @@ class DHRobot(Robot):
         #     else:
         #         return tau
 
-        if tau.shape[0] == 1:
-            return tau.flatten()
+        if base_wrench:
+            if tau.shape[0] == 1:
+                return tau.flatten(), wbase.flatten()
+            else:
+                return tau, wbase
         else:
-            return tau
+            if tau.shape[0] == 1:
+                return tau.flatten()
+            else:
+                return tau
 
     # -------------------------------------------------------------------------- #
 
