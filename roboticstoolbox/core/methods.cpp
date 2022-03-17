@@ -125,11 +125,6 @@ extern "C"
     void _ETS_jacob0(PyObject *ets, int n, double *q, double *tool, double *J)
     {
         ET *et;
-        // double *T = (double *)PyMem_RawCalloc(16, sizeof(double));
-        // double *U = (double *)PyMem_RawCalloc(16, sizeof(double));
-        // double *invU = (double *)PyMem_RawCalloc(16, sizeof(double));
-        // double *temp = (double *)PyMem_RawCalloc(16, sizeof(double));
-        // double *ret = (double *)PyMem_RawCalloc(16, sizeof(double));
         Py_ssize_t m;
 
         MapMatrixJ eJ(J, 6, n);
@@ -142,8 +137,8 @@ extern "C"
 
         int j = 0;
 
-        eye4(U);
-        // _eye4(U);
+        // eye4(U);
+        U = Eigen::Matrix4d::Identity();
 
         // Get the forward  kinematics into T
         _ETS_fkine(ets, q, (double *)NULL, tool, eT);
@@ -161,22 +156,16 @@ extern "C"
                 _ET_T(et, &ret(0), q[et->jindex]);
                 temp = U * ret;
                 U = temp;
-                // _mult4(U, ret, temp);
-                // _copy(temp, U);
 
                 if (i == m - 1 && tool != NULL)
                 {
                     MapMatrix4dr e_tool(tool);
                     temp = U * e_tool;
                     U = temp;
-                    // _mult4(U, tool, temp);
-                    // _copy(temp, U);
                 }
 
                 _inv(&U(0), &invU(0));
                 temp = invU * eT;
-                // _inv(U, invU);
-                // _mult4(invU, T, temp);
 
                 if (et->axis == 0)
                 {
@@ -239,19 +228,10 @@ extern "C"
                 _ET_T(et, &ret(0), q[et->jindex]);
                 temp = U * ret;
                 U = temp;
-                // _ET_T(et, ret, q[et->jindex]);
-                // _mult4(U, ret, temp);
-                // _copy(temp, U);
             }
         }
 
         Py_DECREF(iter_et);
-
-        // free(T);
-        // free(U);
-        // free(temp);
-        // free(ret);
-        // free(invU);
     }
 
     void _ETS_jacobe(PyObject *ets, int n, double *q, double *tool, double *J)
