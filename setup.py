@@ -1,9 +1,6 @@
 from setuptools import setup, find_packages, Extension
 import os
 
-# from findblas distutils import build_ext_with_blas
-# from findblas.distutils import build_ext_with_blas
-
 # fmt: off
 import pip
 pip.main(['install', 'numpy>=1.17.4'])
@@ -73,15 +70,30 @@ frne = Extension(
     include_dirs=["./roboticstoolbox/core/"],
 )
 
-# cblass = (
-# "/home/jesse/miniconda3/envs/rtb/lib/python3.9/site-packages/numpy/core/src/common"
-# )
-# print(cblass)
+# eig = "./roboticstoolbox/core/Eigen"
 fknm = Extension(
     "fknm",
-    sources=["./roboticstoolbox/core/fknm.c"],
+    sources=[
+        "./roboticstoolbox/core/methods.cpp",
+        "./roboticstoolbox/core/linalg.cpp",
+        "./roboticstoolbox/core/fknm.c",
+    ],
     include_dirs=["./roboticstoolbox/core/", numpy.get_include()],
+    # define_macros=[("EIGEN_USE_BLAS")],
+    extra_compile_args=["-Werror"],
+    # extra_compile_args=["-fopenmp"],
+    # extra_link_args=["-lgomp"],
 )
+
+
+# class build_ext_subclass(build_ext_with_blas):
+#     def build_extensions(self):
+#         compiler = self.compiler.compiler_type
+#         for e in self.extensions:
+#             e.extra_compile_args += ["-Ofast", "-fopenmp", "-march=native", "-std=c99"]
+#             e.extra_link_args += ["-fopenmp"]
+#         build_ext_with_blas.build_extensions(self)
+
 
 setup(
     name="roboticstoolbox-python",
@@ -115,7 +127,7 @@ setup(
         "Tracker": "https://github.com/petercorke/roboticstoolbox-python/issues",
         "Coverage": "https://codecov.io/gh/petercorke/roboticstoolbox-python",
     },
-    # cmdclass={"build_ext": build_ext_with_blas},
+    # cmdclass={"build_ext": build_ext_subclass},
     ext_modules=[frne, fknm],
     keywords="python robotics robotics-toolbox kinematics dynamics"
     " motion-planning trajectory-generation jacobian hessian"
