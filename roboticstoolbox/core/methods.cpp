@@ -426,8 +426,7 @@ extern "C"
 
     void _ET_Alloc(ET *et)
     {
-        // new (&et->Tm) Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>>(et->T);
-        // Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>> et->Tm(et->T);
+        new (&et->Tm) Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>>(et->T);
     }
 
 } /* extern "C" */
