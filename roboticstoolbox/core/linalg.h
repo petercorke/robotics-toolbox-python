@@ -5,8 +5,10 @@
  */
 /* linalg.h */
 
+#ifndef _LINALG_H_
+#define _LINALG_H_
+
 #include <Eigen/Dense>
-// #define Matrix4dr Eigen::Matrix<double, 4, 4, Eigen::RowMajor>
 
 #ifdef __cplusplus
 extern "C"
@@ -21,6 +23,7 @@ extern "C"
     void _r2q(double *r, double *q);
     void _angle_axis(double *Te, double *Tep, double *e);
     void _eye4(double *data);
+    void eye4(Matrix4dr &data);
     void _copy(double *A, double *B);
     void _mult4(double *A, double *B, double *C);
     double _trace(double *a, int n);
@@ -32,3 +35,5 @@ extern "C"
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */
+
+#endif

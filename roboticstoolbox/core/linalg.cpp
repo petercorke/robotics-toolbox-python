@@ -169,6 +169,26 @@ extern "C"
         data[15] = 1;
     }
 
+    void eye4(Matrix4dr &data)
+    {
+        data(0, 0) = 1;
+        data(0, 1) = 0;
+        data(0, 2) = 0;
+        data(0, 3) = 0;
+        data(1, 0) = 0;
+        data(1, 1) = 1;
+        data(1, 2) = 0;
+        data(1, 3) = 0;
+        data(2, 0) = 0;
+        data(2, 1) = 0;
+        data(2, 2) = 1;
+        data(2, 3) = 0;
+        data(3, 0) = 0;
+        data(3, 1) = 0;
+        data(3, 2) = 0;
+        data(3, 3) = 1;
+    }
+
     void _copy(double *A, double *B)
     {
         // copy A into B
