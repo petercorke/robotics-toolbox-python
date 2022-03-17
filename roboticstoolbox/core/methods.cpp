@@ -130,14 +130,13 @@ extern "C"
         MapMatrixJ eJ(J, 6, n);
         double T[16];
         MapMatrix4dr eT(T);
-        Matrix4dr U;
-        Matrix4dr invU;
-        Matrix4dr temp;
-        Matrix4dr ret;
+        Matrix4dc U;
+        Matrix4dc invU;
+        Matrix4dc temp;
+        Matrix4dc ret;
 
         int j = 0;
 
-        // eye4(U);
         U = Eigen::Matrix4d::Identity();
 
         // Get the forward  kinematics into T

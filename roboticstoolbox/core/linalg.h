@@ -17,6 +17,7 @@ extern "C"
 
 // #include <Eigen/Dense>
 #define Matrix4dr Eigen::Matrix<double, 4, 4, Eigen::RowMajor>
+#define Matrix4dc Eigen::Matrix4d
 #define MapMatrix4dr Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>>
 #define MapMatrixJ Eigen::Map<Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::RowMajor>>
 
