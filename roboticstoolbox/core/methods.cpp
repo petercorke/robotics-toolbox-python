@@ -366,9 +366,14 @@ extern "C"
         double *temp, *current;
         ET *et;
         Py_ssize_t m;
+        // MapMatrix4dr e_ret(ret);
 
         temp = (double *)PyMem_RawCalloc(16, sizeof(double));
         current = (double *)PyMem_RawCalloc(16, sizeof(double));
+
+        // MapMatrix4dr e_temp(temp);
+        // MapMatrix4dr e_current(current);
+
         PyObject *iter_et = PyObject_GetIter(ets);
 
         if (base != NULL)
