@@ -1,0 +1,341 @@
+/**
+ * \file linalg.cpp
+ * \author Jesse Haviland
+ *
+ *
+ */
+/* linalg.cpp */
+
+// #define EIGEN_USE_BLAS
+
+#include "linalg.h"
+
+#include <Python.h>
+#include <math.h>
+#include <iostream>
+#include <Eigen/Dense>
+#include <Eigen/QR>
+
+extern "C"
+{
+    // --------------------------------------------------------------------- //
+    // SE3 specific
+    // --------------------------------------------------------------------- //
+
+    void _inv(double *m, double *inv)
+    {
+        inv[0] = m[0];
+        inv[1] = m[4];
+        inv[2] = m[8];
+
+        inv[4] = m[1];
+        inv[5] = m[5];
+        inv[6] = m[9];
+
+        inv[8] = m[2];
+        inv[9] = m[6];
+        inv[10] = m[10];
+
+        inv[3] = -(inv[0] * m[3] + inv[1] * m[7] + inv[2] * m[11]);
+        inv[7] = -(inv[4] * m[3] + inv[5] * m[7] + inv[6] * m[11]);
+        inv[11] = -(inv[8] * m[3] + inv[9] * m[7] + inv[10] * m[11]);
+
+        inv[12] = 0;
+        inv[13] = 0;
+        inv[14] = 0;
+        inv[15] = 1;
+    }
+
+    void _r2q(double *r, double *q)
+    {
+        double t12p, t13p, t23p;
+        double t12m, t13m, t23m;
+        double d1, d2, d3, d4;
+
+        t12p = pow((r[0 * 4 + 1] + r[1 * 4 + 0]), 2);
+        t13p = pow((r[0 * 4 + 2] + r[2 * 4 + 0]), 2);
+        t23p = pow((r[1 * 4 + 2] + r[2 * 4 + 1]), 2);
+
+        t12m = pow((r[0 * 4 + 1] - r[1 * 4 + 0]), 2);
+        t13m = pow((r[0 * 4 + 2] - r[2 * 4 + 0]), 2);
+        t23m = pow((r[1 * 4 + 2] - r[2 * 4 + 1]), 2);
+
+        d1 = pow((r[0 * 4 + 0] + r[1 * 4 + 1] + r[2 * 4 + 2] + 1), 2);
+        d2 = pow((r[0 * 4 + 0] - r[1 * 4 + 1] - r[2 * 4 + 2] + 1), 2);
+        d3 = pow((-r[0 * 4 + 0] + r[1 * 4 + 1] - r[2 * 4 + 2] + 1), 2);
+        d4 = pow((-r[0 * 4 + 0] - r[1 * 4 + 1] + r[2 * 4 + 2] + 1), 2);
+
+        q[3] = sqrt(d1 + t23m + t13m + t12m) / 4.0;
+        q[0] = sqrt(t23m + d2 + t12p + t13p) / 4.0;
+        q[1] = sqrt(t13m + t12p + d3 + t23p) / 4.0;
+        q[2] = sqrt(t12m + t13p + t23p + d4) / 4.0;
+
+        // transfer sign from rotation element differences
+        if (r[2 * 4 + 1] < r[1 * 4 + 2])
+            q[0] = -q[0];
+        if (r[0 * 4 + 2] < r[2 * 4 + 0])
+            q[1] = -q[1];
+        if (r[1 * 4 + 0] < r[0 * 4 + 1])
+            q[2] = -q[2];
+    }
+
+    void _angle_axis(double *Te, double *Tep, double *e)
+    {
+        int i, j, k;
+        double num, li_norm, R_tr, ang;
+        double *R = (double *)PyMem_RawCalloc(9, sizeof(double));
+        double li[3];
+
+        // e[:3] = Tep[:3, 3] - Te[:3, 3]
+        e[0] = Tep[0 * 4 + 3] - Te[0 * 4 + 3];
+        e[1] = Tep[1 * 4 + 3] - Te[1 * 4 + 3];
+        e[2] = Tep[2 * 4 + 3] - Te[2 * 4 + 3];
+
+        // R = Tep.R @ T.R.T
+        // R = Tep[:3, :3] @ T[:3, :3].T
+        for (i = 0; i < 3; i++)
+        {
+            for (j = 0; j < 3; j++)
+            {
+                num = 0;
+                for (k = 0; k < 3; k++)
+                {
+                    num += Tep[i * 4 + k] * Te[j * 4 + k];
+                }
+                R[i * 3 + j] = num;
+            }
+        }
+
+        // li = np.array([R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]]);
+        li[0] = R[2 * 3 + 1] - R[1 * 3 + 2];
+        li[1] = R[0 * 3 + 2] - R[2 * 3 + 0];
+        li[2] = R[1 * 3 + 0] - R[0 * 3 + 1];
+
+        // if base.iszerovec(li)
+        li_norm = _norm(li, 3);
+        R_tr = _trace(R, 3);
+        if (li_norm < 1e-6)
+        {
+            // diagonal matrix case
+            // if np.trace(R) > 0
+            if (R_tr > 0)
+            {
+                // (1,1,1) case
+                // a = np.zeros((3, ));
+                e[3] = 0;
+                e[4] = 0;
+                e[5] = 0;
+            }
+            else
+            {
+                // a = np.pi / 2 * (np.diag(R) + 1);
+                e[3] = M_PI_2 * (R[0] + 1);
+                e[4] = M_PI_2 * (R[4] + 1);
+                e[5] = M_PI_2 * (R[8] + 1);
+            }
+        }
+        else
+        {
+            // non-diagonal matrix case
+            // a = math.atan2(li_norm, np.trace(R) - 1) * li / li_norm
+            ang = atan2(li_norm, R_tr - 1);
+            e[3] = ang * li[0] / li_norm;
+            e[4] = ang * li[1] / li_norm;
+            e[5] = ang * li[2] / li_norm;
+        }
+    }
+
+    // --------------------------------------------------------------------- //
+    // 4x4 matrix linalg
+    // --------------------------------------------------------------------- //
+
+    void _eye4(double *data)
+    {
+        data[0] = 1;
+        data[1] = 0;
+        data[2] = 0;
+        data[3] = 0;
+        data[4] = 0;
+        data[5] = 1;
+        data[6] = 0;
+        data[7] = 0;
+        data[8] = 0;
+        data[9] = 0;
+        data[10] = 1;
+        data[11] = 0;
+        data[12] = 0;
+        data[13] = 0;
+        data[14] = 0;
+        data[15] = 1;
+    }
+
+    void _copy(double *A, double *B)
+    {
+        // copy A into B
+        B[0] = A[0];
+        B[1] = A[1];
+        B[2] = A[2];
+        B[3] = A[3];
+        B[4] = A[4];
+        B[5] = A[5];
+        B[6] = A[6];
+        B[7] = A[7];
+        B[8] = A[8];
+        B[9] = A[9];
+        B[10] = A[10];
+        B[11] = A[11];
+        B[12] = A[12];
+        B[13] = A[13];
+        B[14] = A[14];
+        B[15] = A[15];
+    }
+
+    void _mult4(double *A, double *B, double *C)
+    {
+        // mult4(A, B, C);
+
+        const int N = 4;
+        int i, j;
+
+        for (i = 0; i < N; i++)
+        {
+            for (j = 0; j < N; j++)
+            {
+                C[i * N + j] = A[i * N + 0] * B[0 + j] + A[i * N + 1] * B[4 + j] + A[i * N + 2] * B[8 + j] + A[i * N + 3] * B[12 + j];
+            }
+        }
+
+        // C[0] = A[0] * B[0] + A[1] * B[4 + 0] + A[2] * B[8 + 0] + A[3] * B[12 + 0];
+        // C[1] = A[0] * B[1] + A[1] * B[4 + 1] + A[2] * B[8 + 1] + A[3] * B[12 + 1];
+        // C[2] = A[0] * B[2] + A[1] * B[4 + 2] + A[2] * B[8 + 2] + A[3] * B[12 + 2];
+        // C[3] = A[0] * B[3] + A[1] * B[4 + 3] + A[2] * B[8 + 3] + A[3] * B[12 + 3];
+        // C[4] = A[4 + 0] * B[0] + A[4 + 1] * B[4 + 0] + A[4 + 2] * B[8 + 0] + A[4 + 3] * B[12 + 0];
+        // C[4 + 1] = A[4 + 0] * B[1] + A[4 + 1] * B[4 + 1] + A[4 + 2] * B[8 + 1] + A[4 + 3] * B[12 + 1];
+        // C[4 + 2] = A[4 + 0] * B[2] + A[4 + 1] * B[4 + 2] + A[4 + 2] * B[8 + 2] + A[4 + 3] * B[12 + 2];
+        // C[4 + 3] = A[4 + 0] * B[3] + A[4 + 1] * B[4 + 3] + A[4 + 2] * B[8 + 3] + A[4 + 3] * B[12 + 3];
+        // C[8 + 0] = A[8 + 0] * B[0] + A[8 + 1] * B[4 + 0] + A[8 + 2] * B[8 + 0] + A[8 + 3] * B[12 + 0];
+        // C[8 + 1] = A[8 + 0] * B[1] + A[8 + 1] * B[4 + 1] + A[8 + 2] * B[8 + 1] + A[8 + 3] * B[12 + 1];
+        // C[8 + 2] = A[8 + 0] * B[2] + A[8 + 1] * B[4 + 2] + A[8 + 2] * B[8 + 2] + A[8 + 3] * B[12 + 2];
+        // C[8 + 3] = A[8 + 0] * B[3] + A[8 + 1] * B[4 + 3] + A[8 + 2] * B[8 + 3] + A[8 + 3] * B[12 + 3];
+        // C[12 + 0] = A[12 + 0] * B[0] + A[12 + 1] * B[4 + 0] + A[12 + 2] * B[8 + 0] + A[12 + 3] * B[12 + 0];
+        // C[12 + 1] = A[12 + 0] * B[1] + A[12 + 1] * B[4 + 1] + A[12 + 2] * B[8 + 1] + A[12 + 3] * B[12 + 1];
+        // C[12 + 2] = A[12 + 0] * B[2] + A[12 + 1] * B[4 + 2] + A[12 + 2] * B[8 + 2] + A[12 + 3] * B[12 + 2];
+        // C[12 + 3] = A[12 + 0] * B[3] + A[12 + 1] * B[4 + 3] + A[12 + 2] * B[8 + 3] + A[12 + 3] * B[12 + 3];
+    }
+
+    // --------------------------------------------------------------------- //
+    // General matrix linalg
+    // --------------------------------------------------------------------- //
+
+    double _trace(double *a, int n)
+    {
+        // Assumes square nxn matrix
+        int i;
+        double sum = 0;
+
+        for (i = 0; i < n; i++)
+        {
+            sum += a[i * n + i];
+        }
+
+        return sum;
+    }
+
+    void _mult(int n, int m, double *A, int p, int q, double *B, double *C)
+    {
+        int i, j, k;
+        double num;
+
+        for (i = 0; i < n; i++)
+        {
+            for (j = 0; j < q; j++)
+            {
+                num = 0;
+                for (k = 0; k < p; k++)
+                {
+                    num += A[i * m + k] * B[k * q + j];
+                }
+                C[i * q + j] = num;
+            }
+        }
+    }
+
+    void _mult_T(int n, int m, int AT, double *A, int p, int q, int BT, double *B, double *C)
+    {
+        int i, j, k, temp;
+        double num, a, b;
+
+        if (AT)
+        {
+            temp = n;
+            n = m;
+            m = temp;
+        }
+
+        if (BT)
+        {
+            temp = p;
+            p = q;
+            q = temp;
+        }
+
+        for (i = 0; i < n; i++)
+        {
+            for (j = 0; j < q; j++)
+            {
+                num = 0;
+                for (k = 0; k < p; k++)
+                {
+                    if (AT)
+                    {
+                        a = A[k * n + i];
+                    }
+                    else
+                    {
+                        a = A[i * m + k];
+                    }
+
+                    if (BT)
+                    {
+                        b = B[j * p + k];
+                    }
+                    else
+                    {
+                        b = B[k * q + j];
+                    }
+
+                    num += a * b;
+                }
+                C[i * q + j] = num;
+            }
+        }
+    }
+
+    // --------------------------------------------------------------------- //
+    // Vector linalg
+    // --------------------------------------------------------------------- //
+
+    void _cross(double *a, double *b, double *ret, int n)
+    {
+        ret[0] = a[1 * n] * b[2 * n] - a[2 * n] * b[1 * n];
+        ret[1 * n] = a[2 * n] * b[0] - a[0] * b[2 * n];
+        ret[2 * n] = a[0] * b[1 * n] - a[1 * n] * b[0];
+        // ret[0] = b[0 * n];
+        // ret[1 * n] = b[1 * n];
+        // ret[2 * n] = b[2 * n];
+    }
+
+    double _norm(double *a, int n)
+    {
+        int i;
+        double sum = 0;
+
+        for (i = 0; i < n; i++)
+        {
+            sum += pow(a[i], 2);
+        }
+
+        return sqrt(sum);
+    }
+
+} /* extern "C" */
