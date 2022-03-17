@@ -625,6 +625,7 @@ static PyObject *ET_update(PyObject *self, PyObject *args)
         return NULL;
 
     et->T = (npy_float64 *)PyArray_DATA(py_T);
+    _ET_Alloc(et);
     et->qlim = (npy_float64 *)PyArray_DATA(py_qlim);
     et->axis = jointtype;
 
@@ -680,6 +681,7 @@ static PyObject *ET_init(PyObject *self, PyObject *args)
         return NULL;
 
     et->T = (npy_float64 *)PyArray_DATA(py_T);
+    _ET_Alloc(et);
     et->qlim = (npy_float64 *)PyArray_DATA(py_qlim);
 
     et->axis = jointtype;
