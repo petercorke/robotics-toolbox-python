@@ -76,7 +76,7 @@ fknm = Extension(
     sources=[
         "./roboticstoolbox/core/methods.cpp",
         "./roboticstoolbox/core/linalg.cpp",
-        "./roboticstoolbox/core/fknm.c",
+        "./roboticstoolbox/core/fknm.cpp",
     ],
     include_dirs=["./roboticstoolbox/core/", numpy.get_include()],
     # define_macros=[("EIGEN_USE_BLAS")],
