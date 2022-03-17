@@ -1,56 +1,34 @@
 /**
  * \file fknm.h
- * \author Peter Corke
  * \author Jesse Haviland
- * \brief Definitions for c file
  *
  */
 
 #ifndef _fknm_h_
 #define _fknm_h_
 
-#include <math.h>
+#include <Python.h>
 #include <numpy/arrayobject.h>
-// #include "vmath.h"
 
-#define TRUE 1
-#define FALSE 0
+// forward defines
+static PyObject *IK(PyObject *self, PyObject *args);
+static PyObject *Robot_link_T(PyObject *self, PyObject *args);
+static PyObject *ETS_hessian0(PyObject *self, PyObject *args);
+static PyObject *ETS_hessiane(PyObject *self, PyObject *args);
+static PyObject *ETS_jacob0(PyObject *self, PyObject *args);
+static PyObject *ETS_jacobe(PyObject *self, PyObject *args);
+static PyObject *ETS_fkine(PyObject *self, PyObject *args);
+static PyObject *ET_init(PyObject *self, PyObject *args);
+static PyObject *ET_update(PyObject *self, PyObject *args);
+static PyObject *ET_T(PyObject *self, PyObject *args);
+static PyObject *r2q(PyObject *self, PyObject *args);
+int _check_array_type(PyObject *toCheck);
 
-typedef struct ET ET;
-typedef struct Link Link;
-
-struct ET
-{
-    /**********************************************************
-     *************** kinematic parameters *********************
-     **********************************************************/
-    int isjoint;
-    int isflip;
-    int jindex;
-    int axis;
-    npy_float64 *T;    /* link static transform */
-    npy_float64 *qlim; /* joint limits */
-    void (*op)(npy_float64 *data, double eta);
-};
-
-struct Link
-{
-    /**********************************************************
-     *************** kinematic parameters *********************
-     **********************************************************/
-    int isjoint;
-    int isflip;
-    int jindex;
-    int axis;
-    int n_shapes;
-    npy_float64 *A;  /* link static transform */
-    npy_float64 *fk; /* link world transform */
-    void (*op)(npy_float64 *data, double eta);
-    Link *parent;
-    npy_float64 **shape_base; /* link visual and collision geometries */
-    npy_float64 **shape_wT;   /* link visual and collision geometries */
-    npy_float64 **shape_sT;   /* link visual and collision geometries */
-    npy_float64 **shape_sq;   /* link visual and collision geometries */
-};
+void rx(npy_float64 *data, double eta);
+void ry(npy_float64 *data, double eta);
+void rz(npy_float64 *data, double eta);
+void tx(npy_float64 *data, double eta);
+void ty(npy_float64 *data, double eta);
+void tz(npy_float64 *data, double eta);
 
 #endif
