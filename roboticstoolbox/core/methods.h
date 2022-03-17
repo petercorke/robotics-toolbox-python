@@ -5,11 +5,12 @@
  */
 /* methods.h */
 
-// #include "linalg.h"
-// #include <Eigen/Dense>
+#ifndef _METHODS_H_
+#define _METHODS_H_
 
 #include <Python.h>
 #include "structs.h"
+#include "linalg.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -20,9 +21,9 @@ extern "C"
     void _ETS_hessian(int n, double *J, double *H);
     void _ETS_jacob0(PyObject *ets, int n, double *q, double *tool, double *J);
     void _ETS_jacobe(PyObject *ets, int n, double *q, double *tool, double *J);
-    void _ETS_fkine(PyObject *ets, double *q, double *base, double *tool, double *ret);
+    void _ETS_fkine(PyObject *ets, double *q, double *base, double *tool, MapMatrix4dr &e_ret);
     void _ET_T(ET *et, double *ret, double eta);
-    void _ET_Alloc(ET *et);
+    // void _ET_Alloc(ET *et);
 
     // #include "structs.h"
 
@@ -75,3 +76,5 @@ extern "C"
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */
+
+#endif

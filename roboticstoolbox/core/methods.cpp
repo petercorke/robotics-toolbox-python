@@ -12,17 +12,6 @@
 
 extern "C"
 {
-    // Forward defines
-    // void _ETS_IK(PyObject *ets, int n, double *q, double *Tep, double *ret);
-    // void _ETS_hessian(int n, double *J, double *H);
-    // void _ETS_jacob0(PyObject *ets, int n, double *q, double *tool, double *J);
-    // void _ETS_jacobe(PyObject *ets, int n, double *q, double *tool, double *J);
-    // void _ETS_fkine(PyObject *ets, double *q, double *base, double *tool, double *ret);
-    // void _ET_T(ET *et, double *ret, double eta);
-    // void _ET_Alloc(ET *et);
-
-    // Methods
-
     void _ETS_IK(PyObject *ets, int n, double *q, double *Tep, double *ret)
     {
         // double E;
@@ -78,7 +67,7 @@ extern "C"
         while (arrived == 0 && iter < 500)
         {
             // Current pose Te
-            _ETS_fkine(ets, q, (double *)NULL, NULL, Te);
+            // _ETS_fkine(ets, q, (double *)NULL, NULL, Te);
 
             // Angle axis error e
             _angle_axis(Te, Tep, e);
@@ -148,7 +137,7 @@ extern "C"
         _eye4(U);
 
         // Get the forward  kinematics into T
-        _ETS_fkine(ets, q, (double *)NULL, tool, T);
+        // _ETS_fkine(ets, q, (double *)NULL, tool, T);
 
         PyObject *iter_et = PyObject_GetIter(ets);
 
@@ -264,7 +253,7 @@ extern "C"
         _eye4(U);
 
         // Get the forward  kinematics into T
-        _ETS_fkine(ets, q, (double *)NULL, tool, T);
+        // _ETS_fkine(ets, q, (double *)NULL, tool, T);
 
         PyList_Reverse(ets);
         PyObject *iter_et = PyObject_GetIter(ets);
@@ -361,28 +350,35 @@ extern "C"
         free(ret);
     }
 
-    void _ETS_fkine(PyObject *ets, double *q, double *base, double *tool, double *ret)
+    void _ETS_fkine(PyObject *ets, double *q, double *base, double *tool, MapMatrix4dr &e_ret)
     {
-        double *temp, *current;
+        // double *temp, *current;
         ET *et;
         Py_ssize_t m;
         // MapMatrix4dr e_ret(ret);
 
-        temp = (double *)PyMem_RawCalloc(16, sizeof(double));
-        current = (double *)PyMem_RawCalloc(16, sizeof(double));
+        // temp = (double *)PyMem_RawCalloc(16, sizeof(double));
+        // current = (double *)PyMem_RawCalloc(16, sizeof(double));
+        Matrix4dr temp;
+        Matrix4dr current;
 
         // MapMatrix4dr e_temp(temp);
         // MapMatrix4dr e_current(current);
 
         PyObject *iter_et = PyObject_GetIter(ets);
 
+        // std::cout << std::endl;
+        // std::cout << &current << std::endl;
+
         if (base != NULL)
         {
-            _copy(base, current);
+            MapMatrix4dr e_base(base);
+            current = e_base;
+            // _copy(base, current);
         }
         else
         {
-            _eye4(current);
+            eye4(current);
         }
 
         m = PyList_GET_SIZE(ets);
@@ -391,24 +387,29 @@ extern "C"
             if (!(et = (ET *)PyCapsule_GetPointer(PyIter_Next(iter_et), "ET")))
                 return;
 
-            _ET_T(et, ret, q[et->jindex]);
-            _mult4(current, ret, temp);
-            _copy(temp, current);
+            _ET_T(et, &e_ret(0, 0), q[et->jindex]);
+            temp = current * e_ret;
+            current = temp;
+            // _mult4(current, ret, temp);
+            // _copy(temp, current);
         }
 
         if (tool != NULL)
         {
-            _mult4(current, tool, ret);
+            MapMatrix4dr e_tool(tool);
+            e_ret = current * e_tool;
+            // _mult4(current, tool, ret);
         }
         else
         {
-            _copy(current, ret);
+            e_ret = current;
+            // _copy(current, ret);
         }
 
         Py_DECREF(iter_et);
 
-        free(temp);
-        free(current);
+        // free(temp);
+        // free(current);
     }
 
     void _ET_T(ET *et, double *ret, double eta)
@@ -429,9 +430,9 @@ extern "C"
         et->op(ret, eta);
     }
 
-    void _ET_Alloc(ET *et)
-    {
-        new (&et->Tm) Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>>(et->T);
-    }
+    // void _ET_Alloc(ET *et)
+    // {
+    //     new (&et->Tm) Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>>(et->T);
+    // }
 
 } /* extern "C" */
