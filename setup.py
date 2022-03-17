@@ -80,7 +80,7 @@ fknm = Extension(
     ],
     include_dirs=["./roboticstoolbox/core/", numpy.get_include()],
     # define_macros=[("EIGEN_USE_BLAS")],
-    extra_compile_args=["-Werror"],
+    # extra_compile_args=["-Werror"],
     # extra_compile_args=["-fopenmp"],
     # extra_link_args=["-lgomp"],
 )
