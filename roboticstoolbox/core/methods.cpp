@@ -125,19 +125,28 @@ extern "C"
     void _ETS_jacob0(PyObject *ets, int n, double *q, double *tool, double *J)
     {
         ET *et;
-        double *T = (double *)PyMem_RawCalloc(16, sizeof(double));
-        double *U = (double *)PyMem_RawCalloc(16, sizeof(double));
-        double *invU = (double *)PyMem_RawCalloc(16, sizeof(double));
-        double *temp = (double *)PyMem_RawCalloc(16, sizeof(double));
-        double *ret = (double *)PyMem_RawCalloc(16, sizeof(double));
+        // double *T = (double *)PyMem_RawCalloc(16, sizeof(double));
+        // double *U = (double *)PyMem_RawCalloc(16, sizeof(double));
+        // double *invU = (double *)PyMem_RawCalloc(16, sizeof(double));
+        // double *temp = (double *)PyMem_RawCalloc(16, sizeof(double));
+        // double *ret = (double *)PyMem_RawCalloc(16, sizeof(double));
         Py_ssize_t m;
+
+        MapMatrixJ eJ(J, 6, n);
+        double T[16];
+        MapMatrix4dr eT(T);
+        Matrix4dr U;
+        Matrix4dr invU;
+        Matrix4dr temp;
+        Matrix4dr ret;
 
         int j = 0;
 
-        _eye4(U);
+        eye4(U);
+        // _eye4(U);
 
         // Get the forward  kinematics into T
-        // _ETS_fkine(ets, q, (double *)NULL, tool, T);
+        _ETS_fkine(ets, q, (double *)NULL, tool, eT);
 
         PyObject *iter_et = PyObject_GetIter(ets);
 
@@ -149,94 +158,100 @@ extern "C"
 
             if (et->isjoint)
             {
-                _ET_T(et, ret, q[et->jindex]);
-                _mult4(U, ret, temp);
-                // cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, 4, 4, 4, 1.0, U, 4, ret, 4, 0, temp, 4);
-                _copy(temp, U);
+                _ET_T(et, &ret(0), q[et->jindex]);
+                temp = U * ret;
+                U = temp;
+                // _mult4(U, ret, temp);
+                // _copy(temp, U);
 
                 if (i == m - 1 && tool != NULL)
                 {
-                    _mult4(U, tool, temp);
-                    // cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, 4, 4, 4, 1.0, U, 4, tool, 4, 0, temp, 4);
-                    _copy(temp, U);
+                    MapMatrix4dr e_tool(tool);
+                    temp = U * e_tool;
+                    U = temp;
+                    // _mult4(U, tool, temp);
+                    // _copy(temp, U);
                 }
 
-                _inv(U, invU);
-                _mult4(invU, T, temp);
-                // cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, 4, 4, 4, 1.0, invU, 4, T, 4, 0, temp, 4);
+                _inv(&U(0), &invU(0));
+                temp = invU * eT;
+                // _inv(U, invU);
+                // _mult4(invU, T, temp);
 
                 if (et->axis == 0)
                 {
-                    J[0 * n + j] = U[0 * 4 + 2] * temp[1 * 4 + 3] - U[0 * 4 + 1] * temp[2 * 4 + 3];
-                    J[1 * n + j] = U[1 * 4 + 2] * temp[1 * 4 + 3] - U[1 * 4 + 1] * temp[2 * 4 + 3];
-                    J[2 * n + j] = U[2 * 4 + 2] * temp[1 * 4 + 3] - U[2 * 4 + 1] * temp[2 * 4 + 3];
-                    J[3 * n + j] = U[0 * 4 + 0];
-                    J[4 * n + j] = U[1 * 4 + 0];
-                    J[5 * n + j] = U[2 * 4 + 0];
+                    eJ(0, j) = U(0, 2) * temp(1, 3) - U(0, 1) * temp(2, 3);
+                    eJ(1, j) = U(1, 2) * temp(1, 3) - U(1, 1) * temp(2, 3);
+                    eJ(2, j) = U(2, 2) * temp(1, 3) - U(2, 1) * temp(2, 3);
+                    eJ(3, j) = U(0, 0);
+                    eJ(4, j) = U(1, 0);
+                    eJ(5, j) = U(2, 0);
                 }
                 else if (et->axis == 1)
                 {
-                    J[0 * n + j] = U[0 * 4 + 0] * temp[2 * 4 + 3] - U[0 * 4 + 2] * temp[0 * 4 + 3];
-                    J[1 * n + j] = U[1 * 4 + 0] * temp[2 * 4 + 3] - U[1 * 4 + 2] * temp[0 * 4 + 3];
-                    J[2 * n + j] = U[2 * 4 + 0] * temp[2 * 4 + 3] - U[2 * 4 + 2] * temp[0 * 4 + 3];
-                    J[3 * n + j] = U[0 * 4 + 1];
-                    J[4 * n + j] = U[1 * 4 + 1];
-                    J[5 * n + j] = U[2 * 4 + 1];
+                    eJ(0, j) = U(0, 0) * temp(2, 3) - U(0, 2) * temp(0, 3);
+                    eJ(1, j) = U(1, 0) * temp(2, 3) - U(1, 2) * temp(0, 3);
+                    eJ(2, j) = U(2, 0) * temp(2, 3) - U(2, 2) * temp(0, 3);
+                    eJ(3, j) = U(0, 1);
+                    eJ(4, j) = U(1, 1);
+                    eJ(5, j) = U(2, 1);
                 }
                 else if (et->axis == 2)
                 {
-                    J[0 * n + j] = U[0 * 4 + 1] * temp[0 * 4 + 3] - U[0 * 4 + 0] * temp[1 * 4 + 3];
-                    J[1 * n + j] = U[1 * 4 + 1] * temp[0 * 4 + 3] - U[1 * 4 + 0] * temp[1 * 4 + 3];
-                    J[2 * n + j] = U[2 * 4 + 1] * temp[0 * 4 + 3] - U[2 * 4 + 0] * temp[1 * 4 + 3];
-                    J[3 * n + j] = U[0 * 4 + 2];
-                    J[4 * n + j] = U[1 * 4 + 2];
-                    J[5 * n + j] = U[2 * 4 + 2];
+                    eJ(0, j) = U(0, 1) * temp(0, 3) - U(0, 0) * temp(1, 3);
+                    eJ(1, j) = U(1, 1) * temp(0, 3) - U(1, 0) * temp(1, 3);
+                    eJ(2, j) = U(2, 1) * temp(0, 3) - U(2, 0) * temp(1, 3);
+                    eJ(3, j) = U(0, 2);
+                    eJ(4, j) = U(1, 2);
+                    eJ(5, j) = U(2, 2);
                 }
                 else if (et->axis == 3)
                 {
-                    J[0 * n + j] = U[0 * 4 + 0];
-                    J[1 * n + j] = U[1 * 4 + 0];
-                    J[2 * n + j] = U[2 * 4 + 0];
-                    J[3 * n + j] = 0.0;
-                    J[4 * n + j] = 0.0;
-                    J[5 * n + j] = 0.0;
+                    eJ(0, j) = U(0, 0);
+                    eJ(1, j) = U(1, 0);
+                    eJ(2, j) = U(2, 0);
+                    eJ(3, j) = 0.0;
+                    eJ(4, j) = 0.0;
+                    eJ(5, j) = 0.0;
                 }
                 else if (et->axis == 4)
                 {
-                    J[0 * n + j] = U[0 * 4 + 1];
-                    J[1 * n + j] = U[1 * 4 + 1];
-                    J[2 * n + j] = U[2 * 4 + 1];
-                    J[3 * n + j] = 0.0;
-                    J[4 * n + j] = 0.0;
-                    J[5 * n + j] = 0.0;
+                    eJ(0, j) = U(0, 1);
+                    eJ(1, j) = U(1, 1);
+                    eJ(2, j) = U(2, 1);
+                    eJ(3, j) = 0.0;
+                    eJ(4, j) = 0.0;
+                    eJ(5, j) = 0.0;
                 }
                 else if (et->axis == 5)
                 {
-                    J[0 * n + j] = U[0 * 4 + 2];
-                    J[1 * n + j] = U[1 * 4 + 2];
-                    J[2 * n + j] = U[2 * 4 + 2];
-                    J[3 * n + j] = 0.0;
-                    J[4 * n + j] = 0.0;
-                    J[5 * n + j] = 0.0;
+                    eJ(0, j) = U(0, 2);
+                    eJ(1, j) = U(1, 2);
+                    eJ(2, j) = U(2, 2);
+                    eJ(3, j) = 0.0;
+                    eJ(4, j) = 0.0;
+                    eJ(5, j) = 0.0;
                 }
                 j++;
             }
             else
             {
-                _ET_T(et, ret, q[et->jindex]);
-                _mult4(U, ret, temp);
-                // cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, 4, 4, 4, 1.0, U, 4, ret, 4, 0, temp, 4);
-                _copy(temp, U);
+                _ET_T(et, &ret(0), q[et->jindex]);
+                temp = U * ret;
+                U = temp;
+                // _ET_T(et, ret, q[et->jindex]);
+                // _mult4(U, ret, temp);
+                // _copy(temp, U);
             }
         }
 
         Py_DECREF(iter_et);
 
-        free(T);
-        free(U);
-        free(temp);
-        free(ret);
-        free(invU);
+        // free(T);
+        // free(U);
+        // free(temp);
+        // free(ret);
+        // free(invU);
     }
 
     void _ETS_jacobe(PyObject *ets, int n, double *q, double *tool, double *J)

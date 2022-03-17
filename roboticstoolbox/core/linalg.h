@@ -18,6 +18,7 @@ extern "C"
 // #include <Eigen/Dense>
 #define Matrix4dr Eigen::Matrix<double, 4, 4, Eigen::RowMajor>
 #define MapMatrix4dr Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>>
+#define MapMatrixJ Eigen::Map<Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::RowMajor>>
 
     void _inv(double *m, double *invOut);
     void _r2q(double *r, double *q);
