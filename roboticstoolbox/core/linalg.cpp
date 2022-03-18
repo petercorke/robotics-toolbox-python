@@ -25,25 +25,46 @@ extern "C"
     void _inv(double *m, double *inv)
     {
         inv[0] = m[0];
-        inv[1] = m[4];
-        inv[2] = m[8];
-
         inv[4] = m[1];
-        inv[5] = m[5];
-        inv[6] = m[9];
-
         inv[8] = m[2];
+
+        inv[1] = m[4];
+        inv[5] = m[5];
         inv[9] = m[6];
+
+        inv[2] = m[8];
+        inv[6] = m[9];
         inv[10] = m[10];
 
-        inv[3] = -(inv[0] * m[3] + inv[1] * m[7] + inv[2] * m[11]);
-        inv[7] = -(inv[4] * m[3] + inv[5] * m[7] + inv[6] * m[11]);
-        inv[11] = -(inv[8] * m[3] + inv[9] * m[7] + inv[10] * m[11]);
+        inv[12] = -(inv[0] * m[12] + inv[4] * m[13] + inv[8] * m[14]);
+        inv[13] = -(inv[1] * m[12] + inv[5] * m[13] + inv[9] * m[14]);
+        inv[14] = -(inv[2] * m[12] + inv[6] * m[13] + inv[10] * m[14]);
 
-        inv[12] = 0;
-        inv[13] = 0;
-        inv[14] = 0;
+        inv[3] = 0;
+        inv[7] = 0;
+        inv[11] = 0;
         inv[15] = 1;
+
+        // inv[0] = m[0];
+        // inv[1] = m[4];
+        // inv[2] = m[8];
+
+        // inv[4] = m[1];
+        // inv[5] = m[5];
+        // inv[6] = m[9];
+
+        // inv[8] = m[2];
+        // inv[9] = m[6];
+        // inv[10] = m[10];
+
+        // inv[3] = -(inv[0] * m[3] + inv[1] * m[7] + inv[2] * m[11]);
+        // inv[7] = -(inv[4] * m[3] + inv[5] * m[7] + inv[6] * m[11]);
+        // inv[11] = -(inv[8] * m[3] + inv[9] * m[7] + inv[10] * m[11]);
+
+        // inv[12] = 0;
+        // inv[13] = 0;
+        // inv[14] = 0;
+        // inv[15] = 1;
     }
 
     void _r2q(double *r, double *q)

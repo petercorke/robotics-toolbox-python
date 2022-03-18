@@ -383,7 +383,7 @@ extern "C"
 
         // Make our empty Jacobian
         npy_intp dims[2] = {6, n};
-        PyObject *py_J = PyArray_EMPTY(2, dims, NPY_DOUBLE, 0);
+        PyObject *py_J = PyArray_EMPTY(2, dims, NPY_DOUBLE, 1);
         J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_J);
 
         // Make sure q is number array
@@ -391,7 +391,7 @@ extern "C"
         // Get data out
         if (!_check_array_type(py_q))
             return NULL;
-        py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
         q = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q);
 
         // Check if tool is None
@@ -403,7 +403,7 @@ extern "C"
             if (!_check_array_type(py_tool))
                 return NULL;
             tool_used = 1;
-            py_np_tool = (PyObject *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+            py_np_tool = (PyObject *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
             tool = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_tool);
         }
 
@@ -514,7 +514,7 @@ extern "C"
         // Get data out
         if (!_check_array_type(py_q))
             return NULL;
-        py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
         q = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q);
 
         // Check the dimesnions of q
@@ -547,12 +547,12 @@ extern "C"
         // Allocate return array
         if (trajn == 1)
         {
-            py_ret = PyArray_EMPTY(2, dim2, NPY_DOUBLE, 0);
+            py_ret = PyArray_EMPTY(2, dim2, NPY_DOUBLE, 1);
         }
         else
         {
             dim3[0] = trajn;
-            py_ret = PyArray_EMPTY(3, dim3, NPY_DOUBLE, 0);
+            py_ret = PyArray_EMPTY(3, dim3, NPY_DOUBLE, 1);
         }
 
         // Get numpy reference to return array
@@ -570,7 +570,7 @@ extern "C"
             if (include_base)
             {
                 base_used = 1;
-                py_np_base = (PyObject *)PyArray_FROMANY(py_base, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+                py_np_base = (PyObject *)PyArray_FROMANY(py_base, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
                 base = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_base);
             }
         }
@@ -580,7 +580,7 @@ extern "C"
             if (!_check_array_type(py_tool))
                 return NULL;
             tool_used = 1;
-            py_np_tool = (PyObject *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+            py_np_tool = (PyObject *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
             tool = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_tool);
         }
 
@@ -726,7 +726,7 @@ extern "C"
         int nd = 2;
         ET *et;
         PyObject *py_et, *py_eta;
-        PyObject *py_ret = PyArray_EMPTY(nd, dims, NPY_DOUBLE, 0);
+        PyObject *py_ret = PyArray_EMPTY(nd, dims, NPY_DOUBLE, 1);
         double eta = 0;
         npy_float64 *ret;
 
@@ -800,39 +800,39 @@ extern "C"
         ct = cos(eta);
         st = sin(eta);
 
-        // data[0] = 1;
-        // data[4] = 0;
-        // data[8] = 0;
-        // data[12] = 0;
-        // data[1] = 0;
-        // data[5] = ct;
-        // data[9] = -st;
-        // data[13] = 0;
-        // data[2] = 0;
-        // data[6] = st;
-        // data[10] = ct;
-        // data[14] = 0;
-        // data[3] = 0;
-        // data[7] = 0;
-        // data[11] = 0;
-        // data[15] = 1;
-
         data[0] = 1;
-        data[1] = 0;
-        data[2] = 0;
-        data[3] = 0;
         data[4] = 0;
-        data[5] = ct;
-        data[6] = -st;
-        data[7] = 0;
         data[8] = 0;
-        data[9] = st;
-        data[10] = ct;
-        data[11] = 0;
         data[12] = 0;
+        data[1] = 0;
+        data[5] = ct;
+        data[9] = -st;
         data[13] = 0;
+        data[2] = 0;
+        data[6] = st;
+        data[10] = ct;
         data[14] = 0;
+        data[3] = 0;
+        data[7] = 0;
+        data[11] = 0;
         data[15] = 1;
+
+        // data[0] = 1;
+        // data[1] = 0;
+        // data[2] = 0;
+        // data[3] = 0;
+        // data[4] = 0;
+        // data[5] = ct;
+        // data[6] = -st;
+        // data[7] = 0;
+        // data[8] = 0;
+        // data[9] = st;
+        // data[10] = ct;
+        // data[11] = 0;
+        // data[12] = 0;
+        // data[13] = 0;
+        // data[14] = 0;
+        // data[15] = 1;
     }
 
     void ry(npy_float64 *data, double eta)
@@ -842,39 +842,39 @@ extern "C"
         ct = cos(eta);
         st = sin(eta);
 
-        // data[0] = ct;
-        // data[4] = 0;
-        // data[8] = st;
-        // data[12] = 0;
-        // data[1] = 0;
-        // data[5] = 1;
-        // data[9] = 0;
-        // data[13] = 0;
-        // data[2] = -st;
-        // data[6] = 0;
-        // data[10] = ct;
-        // data[14] = 0;
-        // data[3] = 0;
-        // data[7] = 0;
-        // data[11] = 0;
-        // data[15] = 1;
-
         data[0] = ct;
-        data[1] = 0;
-        data[2] = st;
-        data[3] = 0;
         data[4] = 0;
-        data[5] = 1;
-        data[6] = 0;
-        data[7] = 0;
-        data[8] = -st;
-        data[9] = 0;
-        data[10] = ct;
-        data[11] = 0;
+        data[8] = st;
         data[12] = 0;
+        data[1] = 0;
+        data[5] = 1;
+        data[9] = 0;
         data[13] = 0;
+        data[2] = -st;
+        data[6] = 0;
+        data[10] = ct;
         data[14] = 0;
+        data[3] = 0;
+        data[7] = 0;
+        data[11] = 0;
         data[15] = 1;
+
+        // data[0] = ct;
+        // data[1] = 0;
+        // data[2] = st;
+        // data[3] = 0;
+        // data[4] = 0;
+        // data[5] = 1;
+        // data[6] = 0;
+        // data[7] = 0;
+        // data[8] = -st;
+        // data[9] = 0;
+        // data[10] = ct;
+        // data[11] = 0;
+        // data[12] = 0;
+        // data[13] = 0;
+        // data[14] = 0;
+        // data[15] = 1;
     }
 
     void rz(npy_float64 *data, double eta)
@@ -884,64 +884,47 @@ extern "C"
         ct = cos(eta);
         st = sin(eta);
 
-        // data[0] = ct;
-        // data[4] = -st;
-        // data[8] = 0;
-        // data[12] = 0;
-        // data[1] = st;
-        // data[5] = ct;
-        // data[9] = 0;
-        // data[13] = 0;
-        // data[2] = 0;
-        // data[6] = 0;
-        // data[10] = 1;
-        // data[14] = 0;
-        // data[3] = 0;
-        // data[7] = 0;
-        // data[11] = 0;
-        // data[15] = 1;
-
         data[0] = ct;
-        data[1] = -st;
-        data[2] = 0;
-        data[3] = 0;
-        data[4] = st;
-        data[5] = ct;
-        data[6] = 0;
-        data[7] = 0;
+        data[4] = -st;
         data[8] = 0;
-        data[9] = 0;
-        data[10] = 1;
-        data[11] = 0;
         data[12] = 0;
+        data[1] = st;
+        data[5] = ct;
+        data[9] = 0;
         data[13] = 0;
+        data[2] = 0;
+        data[6] = 0;
+        data[10] = 1;
         data[14] = 0;
+        data[3] = 0;
+        data[7] = 0;
+        data[11] = 0;
         data[15] = 1;
+
+        // data[0] = ct;
+        // data[1] = -st;
+        // data[2] = 0;
+        // data[3] = 0;
+        // data[4] = st;
+        // data[5] = ct;
+        // data[6] = 0;
+        // data[7] = 0;
+        // data[8] = 0;
+        // data[9] = 0;
+        // data[10] = 1;
+        // data[11] = 0;
+        // data[12] = 0;
+        // data[13] = 0;
+        // data[14] = 0;
+        // data[15] = 1;
     }
 
     void tx(npy_float64 *data, double eta)
     {
-        // data[0] = 1;
-        // data[1] = 0;
-        // data[2] = 0;
-        // data[12] = eta;
-        // data[4] = 0;
-        // data[5] = 1;
-        // data[6] = 0;
-        // data[7] = 0;
-        // data[8] = 0;
-        // data[9] = 0;
-        // data[10] = 1;
-        // data[11] = 0;
-        // data[3] = 0;
-        // data[13] = 0;
-        // data[14] = 0;
-        // data[15] = 1;
-
         data[0] = 1;
         data[1] = 0;
         data[2] = 0;
-        data[3] = eta;
+        data[12] = eta;
         data[4] = 0;
         data[5] = 1;
         data[6] = 0;
@@ -950,31 +933,31 @@ extern "C"
         data[9] = 0;
         data[10] = 1;
         data[11] = 0;
-        data[12] = 0;
+        data[3] = 0;
         data[13] = 0;
         data[14] = 0;
         data[15] = 1;
+
+        // data[0] = 1;
+        // data[1] = 0;
+        // data[2] = 0;
+        // data[3] = eta;
+        // data[4] = 0;
+        // data[5] = 1;
+        // data[6] = 0;
+        // data[7] = 0;
+        // data[8] = 0;
+        // data[9] = 0;
+        // data[10] = 1;
+        // data[11] = 0;
+        // data[12] = 0;
+        // data[13] = 0;
+        // data[14] = 0;
+        // data[15] = 1;
     }
 
     void ty(npy_float64 *data, double eta)
     {
-        // data[0] = 1;
-        // data[1] = 0;
-        // data[2] = 0;
-        // data[3] = 0;
-        // data[4] = 0;
-        // data[5] = 1;
-        // data[6] = 0;
-        // data[13] = eta;
-        // data[8] = 0;
-        // data[9] = 0;
-        // data[10] = 1;
-        // data[11] = 0;
-        // data[12] = 0;
-        // data[7] = 0;
-        // data[14] = 0;
-        // data[15] = 1;
-
         data[0] = 1;
         data[1] = 0;
         data[2] = 0;
@@ -982,19 +965,16 @@ extern "C"
         data[4] = 0;
         data[5] = 1;
         data[6] = 0;
-        data[7] = eta;
+        data[13] = eta;
         data[8] = 0;
         data[9] = 0;
         data[10] = 1;
         data[11] = 0;
         data[12] = 0;
-        data[13] = 0;
+        data[7] = 0;
         data[14] = 0;
         data[15] = 1;
-    }
 
-    void tz(npy_float64 *data, double eta)
-    {
         // data[0] = 1;
         // data[1] = 0;
         // data[2] = 0;
@@ -1002,16 +982,19 @@ extern "C"
         // data[4] = 0;
         // data[5] = 1;
         // data[6] = 0;
-        // data[7] = 0;
+        // data[7] = eta;
         // data[8] = 0;
         // data[9] = 0;
         // data[10] = 1;
-        // data[14] = eta;
+        // data[11] = 0;
         // data[12] = 0;
         // data[13] = 0;
-        // data[11] = 0;
+        // data[14] = 0;
         // data[15] = 1;
+    }
 
+    void tz(npy_float64 *data, double eta)
+    {
         data[0] = 1;
         data[1] = 0;
         data[2] = 0;
@@ -1023,11 +1006,28 @@ extern "C"
         data[8] = 0;
         data[9] = 0;
         data[10] = 1;
-        data[11] = eta;
+        data[14] = eta;
         data[12] = 0;
         data[13] = 0;
-        data[14] = 0;
+        data[11] = 0;
         data[15] = 1;
+
+        // data[0] = 1;
+        // data[1] = 0;
+        // data[2] = 0;
+        // data[3] = 0;
+        // data[4] = 0;
+        // data[5] = 1;
+        // data[6] = 0;
+        // data[7] = 0;
+        // data[8] = 0;
+        // data[9] = 0;
+        // data[10] = 1;
+        // data[11] = eta;
+        // data[12] = 0;
+        // data[13] = 0;
+        // data[14] = 0;
+        // data[15] = 1;
     }
 
 } /* extern "C" */

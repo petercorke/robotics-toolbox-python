@@ -16,10 +16,10 @@ extern "C"
 #endif /* __cplusplus */
 
 // #include <Eigen/Dense>
-#define Matrix4dr Eigen::Matrix<double, 4, 4, Eigen::RowMajor>
+#define Matrix4dr Eigen::Matrix<double, 4, 4, Eigen::ColMajor>
 #define Matrix4dc Eigen::Matrix4d
-#define MapMatrix4dr Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>>
-#define MapMatrixJ Eigen::Map<Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::RowMajor>>
+#define MapMatrix4dr Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::ColMajor>>
+#define MapMatrixJ Eigen::Map<Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::ColMajor>>
 
     void _inv(double *m, double *invOut);
     void _r2q(double *r, double *q);
