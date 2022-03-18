@@ -238,7 +238,7 @@ extern "C"
             }
 
             // Calculate the Jacobian
-            _ETS_jacob0(ets, n, q, tool, J);
+            // _ETS_jacob0(ets, n, q, tool, J);
         }
 
         // Make our empty Hessian
@@ -385,6 +385,7 @@ extern "C"
         npy_intp dims[2] = {6, n};
         PyObject *py_J = PyArray_EMPTY(2, dims, NPY_DOUBLE, 1);
         J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_J);
+        MapMatrixJ eJ(J, 6, n);
 
         // Make sure q is number array
         // Cast to numpy array
@@ -408,7 +409,7 @@ extern "C"
         }
 
         // Do the job
-        _ETS_jacob0(ets, n, q, tool, J);
+        _ETS_jacob0(ets, n, q, tool, eJ);
 
         // Free the memory
         Py_DECREF(py_np_q);

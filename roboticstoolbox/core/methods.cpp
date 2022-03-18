@@ -122,12 +122,11 @@ extern "C"
         }
     }
 
-    void _ETS_jacob0(PyObject *ets, int n, double *q, double *tool, double *J)
+    void _ETS_jacob0(PyObject *ets, int n, double *q, double *tool, MapMatrixJ &eJ)
     {
         ET *et;
         Py_ssize_t m;
 
-        MapMatrixJ eJ(J, 6, n);
         double T[16];
         MapMatrix4dr eT(T);
         Matrix4dc U;
@@ -168,6 +167,7 @@ extern "C"
 
                 if (et->axis == 0)
                 {
+                    // eJ(Eigen::seq(0, j), Eigen::seq(2, j)) = U(Eigen::seq(0, 2), Eigen::seq(2, 2)).cross(temp(Eigen::seq(0, 2), Eigen::seq(2, 2)));
                     eJ(0, j) = U(0, 2) * temp(1, 3) - U(0, 1) * temp(2, 3);
                     eJ(1, j) = U(1, 2) * temp(1, 3) - U(1, 1) * temp(2, 3);
                     eJ(2, j) = U(2, 2) * temp(1, 3) - U(2, 1) * temp(2, 3);
