@@ -165,7 +165,7 @@ extern "C"
         {
             PyObject *ets = PyList_GET_ITEM(ets_list, i);
             npy_float64 *T = (npy_float64 *)PyArray_DATA((PyArrayObject *)PyList_GET_ITEM(T_list, i));
-            MapMatrix4dr eT(T);
+            MapMatrix4dc eT(T);
 
             _ETS_fkine(ets, q, NULL, NULL, eT);
         }
@@ -328,7 +328,7 @@ extern "C"
             }
 
             // Calculate the Jacobian
-            _ETS_jacobe(ets, n, q, tool, J);
+            // _ETS_jacobe(ets, n, q, tool, J);
         }
 
         // Make our empty Hessian
@@ -385,7 +385,7 @@ extern "C"
         npy_intp dims[2] = {6, n};
         PyObject *py_J = PyArray_EMPTY(2, dims, NPY_DOUBLE, 1);
         J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_J);
-        MapMatrixJ eJ(J, 6, n);
+        MapMatrixJc eJ(J, 6, n);
 
         // Make sure q is number array
         // Cast to numpy array
@@ -446,15 +446,16 @@ extern "C"
 
         // Make our empty Jacobian
         npy_intp dims[2] = {6, n};
-        PyObject *py_J = PyArray_EMPTY(2, dims, NPY_DOUBLE, 0);
+        PyObject *py_J = PyArray_EMPTY(2, dims, NPY_DOUBLE, 1);
         J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_J);
+        MapMatrixJc eJ(J, 6, n);
 
         // Make sure q is number array
         // Cast to numpy array
         // Get data out
         if (!_check_array_type(py_q))
             return NULL;
-        py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
         q = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q);
 
         // Check if tool is None
@@ -466,12 +467,12 @@ extern "C"
             if (!_check_array_type(py_tool))
                 return NULL;
             tool_used = 1;
-            py_np_tool = (PyObject *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+            py_np_tool = (PyObject *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
             tool = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_tool);
         }
 
         // Do the job
-        _ETS_jacobe(ets, n, q, tool, J);
+        _ETS_jacobe(ets, n, q, tool, eJ);
 
         // Free the memory
         Py_DECREF(py_np_q);
@@ -590,7 +591,7 @@ extern "C"
         {
             // Get pointers to the new section of return array and q array
             retp = ret + (4 * 4 * i);
-            MapMatrix4dr e_retp(retp);
+            MapMatrix4dc e_retp(retp);
             qp = q + (n * i);
             _ETS_fkine(ets, qp, base, tool, e_retp);
         }
@@ -631,7 +632,7 @@ extern "C"
             return NULL;
 
         et->T = (npy_float64 *)PyArray_DATA(py_T);
-        new (&et->Tm) MapMatrix4dr(et->T);
+        new (&et->Tm) MapMatrix4dc(et->T);
         et->qlim = (npy_float64 *)PyArray_DATA(py_qlim);
         et->axis = jointtype;
 
@@ -687,7 +688,7 @@ extern "C"
             return NULL;
 
         et->T = (npy_float64 *)PyArray_DATA(py_T);
-        new (&et->Tm) MapMatrix4dr(et->T);
+        new (&et->Tm) MapMatrix4dc(et->T);
         et->qlim = (npy_float64 *)PyArray_DATA(py_qlim);
 
         et->axis = jointtype;
@@ -751,7 +752,7 @@ extern "C"
         }
 
         ret = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_ret);
-        // MapMatrix4dr e_ret(ret);
+        // MapMatrix4dc e_ret(ret);
 
         _ET_T(et, ret, eta);
 

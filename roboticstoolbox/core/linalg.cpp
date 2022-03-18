@@ -190,7 +190,7 @@ extern "C"
         data[15] = 1;
     }
 
-    void eye4(Matrix4dr &data)
+    void eye4(Matrix4dc &data)
     {
         data(0, 0) = 1;
         data(0, 1) = 0;

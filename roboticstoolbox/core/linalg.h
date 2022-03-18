@@ -16,16 +16,20 @@ extern "C"
 #endif /* __cplusplus */
 
 // #include <Eigen/Dense>
-#define Matrix4dr Eigen::Matrix<double, 4, 4, Eigen::ColMajor>
 #define Matrix4dc Eigen::Matrix4d
-#define MapMatrix4dr Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::ColMajor>>
-#define MapMatrixJ Eigen::Map<Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::ColMajor>>
+#define Matrix4dr Eigen::Matrix<double, 4, 4, Eigen::RowMajor>
+
+#define MapMatrix4dc Eigen::Map<Matrix4dc>
+#define MapMatrix4dr Eigen::Map<Matrix4dc>
+
+#define MapMatrixJc Eigen::Map<Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::ColMajor>>
+#define MapMatrixJr Eigen::Map<Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::RowMajor>>
 
     void _inv(double *m, double *invOut);
     void _r2q(double *r, double *q);
     void _angle_axis(double *Te, double *Tep, double *e);
     void _eye4(double *data);
-    void eye4(Matrix4dr &data);
+    void eye4(Matrix4dc &data);
     void _copy(double *A, double *B);
     void _mult4(double *A, double *B, double *C);
     double _trace(double *a, int n);
