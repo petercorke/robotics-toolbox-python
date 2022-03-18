@@ -25,6 +25,9 @@ extern "C"
 #define MapMatrixJc Eigen::Map<Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::ColMajor>>
 #define MapMatrixJr Eigen::Map<Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::RowMajor>>
 
+#define MapMatrixHc Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>>
+#define MapMatrixHr Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+
     void _inv(double *m, double *invOut);
     void _r2q(double *r, double *q);
     void _angle_axis(double *Te, double *Tep, double *e);

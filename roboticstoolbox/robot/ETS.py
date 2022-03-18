@@ -37,7 +37,7 @@ from roboticstoolbox import rtb_get_param
 
 from collections import UserList
 from spatialmath.base import issymbol, getmatrix
-from fknm import ETS_fkine, ETS_jacob0, ETS_jacobe, ETS_hessian0, ETS_hessiane
+from fknm import ETS_init, ETS_fkine, ETS_jacob0, ETS_jacobe, ETS_hessian0, ETS_hessiane
 from copy import deepcopy
 from roboticstoolbox import rtb_get_param
 from roboticstoolbox.robot.ET import ET, ET2
@@ -53,9 +53,14 @@ class BaseETS(UserList):
         super().__init__(*args)
 
     def _update_internals(self):
-        self._fknm = [et.fknm for et in self.data]
         self._m = len(self.data)
         self._n = len([True for et in self.data if et.isjoint])
+        self._fknm = ETS_init(
+            [et.fknm for et in self.data],
+            self._n,
+            self._m,
+        )
+        # self._fknm = [et.fknm for et in self.data]
 
     def __str__(self, q: Union[str, None] = None):
         """

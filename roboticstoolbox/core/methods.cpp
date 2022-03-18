@@ -122,10 +122,10 @@ extern "C"
         }
     }
 
-    void _ETS_jacob0(PyObject *ets, int n, double *q, double *tool, MapMatrixJc &eJ)
+    void _ETS_jacob0(ETS *ets, int n, double *q, double *tool, MapMatrixJc &eJ)
     {
         ET *et;
-        Py_ssize_t m;
+        // Py_ssize_t m;
 
         double T[16];
         MapMatrix4dc eT(T);
@@ -141,13 +141,14 @@ extern "C"
         // Get the forward  kinematics into T
         _ETS_fkine(ets, q, (double *)NULL, tool, eT);
 
-        PyObject *iter_et = PyObject_GetIter(ets);
+        // PyObject *iter_et = PyObject_GetIter(ets);
 
-        m = PyList_GET_SIZE(ets);
-        for (int i = 0; i < m; i++)
+        // m = PyList_GET_SIZE(ets);
+        for (int i = 0; i < ets->m; i++)
         {
-            if (!(et = (ET *)PyCapsule_GetPointer(PyIter_Next(iter_et), "ET")))
-                return;
+            et = ets->ets[i];
+            // if (!(et = (ET *)PyCapsule_GetPointer(PyIter_Next(iter_et), "ET")))
+            //     return;
 
             if (et->isjoint)
             {
@@ -155,7 +156,7 @@ extern "C"
                 temp = U * ret;
                 U = temp;
 
-                if (i == m - 1 && tool != NULL)
+                if (i == ets->m - 1 && tool != NULL)
                 {
                     MapMatrix4dc e_tool(tool);
                     temp = U * e_tool;
@@ -247,13 +248,13 @@ extern "C"
             }
         }
 
-        Py_DECREF(iter_et);
+        // Py_DECREF(iter_et);
     }
 
-    void _ETS_jacobe(PyObject *ets, int n, double *q, double *tool, MapMatrixJc &eJ)
+    void _ETS_jacobe(ETS *ets, int n, double *q, double *tool, MapMatrixJc &eJ)
     {
         ET *et;
-        Py_ssize_t m;
+        // Py_ssize_t m;
 
         double T[16];
         MapMatrix4dc eT(T);
@@ -269,8 +270,8 @@ extern "C"
         // Get the forward  kinematics into T
         // _ETS_fkine(ets, q, (double *)NULL, tool, T);
 
-        PyList_Reverse(ets);
-        PyObject *iter_et = PyObject_GetIter(ets);
+        // PyList_Reverse(ets);
+        // PyObject *iter_et = PyObject_GetIter(ets);
 
         if (tool != NULL)
         {
@@ -281,11 +282,12 @@ extern "C"
             // _copy(temp, U);
         }
 
-        m = PyList_GET_SIZE(ets);
-        for (int i = 0; i < m; i++)
+        // m = PyList_GET_SIZE(ets);
+        for (int i = ets->m - 1; i >= 0; i--)
         {
-            if (!(et = (ET *)PyCapsule_GetPointer(PyIter_Next(iter_et), "ET")))
-                return;
+            // if (!(et = (ET *)PyCapsule_GetPointer(PyIter_Next(iter_et), "ET")))
+            //     return;
+            et = ets->ets[i];
 
             if (et->isjoint)
             {
@@ -381,8 +383,8 @@ extern "C"
             }
         }
 
-        PyList_Reverse(ets);
-        Py_DECREF(iter_et);
+        // PyList_Reverse(ets);
+        // Py_DECREF(iter_et);
 
         // free(T);
         // free(U);
@@ -390,14 +392,14 @@ extern "C"
         // free(ret);
     }
 
-    void _ETS_fkine(PyObject *ets, double *q, double *base, double *tool, MapMatrix4dc &e_ret)
+    void _ETS_fkine(ETS *ets, double *q, double *base, double *tool, MapMatrix4dc &e_ret)
     {
         ET *et;
-        Py_ssize_t m;
+        // Py_ssize_t m;
         Matrix4dc temp;
         Matrix4dc current;
 
-        PyObject *iter_et = PyObject_GetIter(ets);
+        // PyObject *iter_et = PyObject_GetIter(ets);
 
         if (base != NULL)
         {
@@ -410,11 +412,12 @@ extern "C"
             current = Eigen::Matrix4d::Identity();
         }
 
-        m = PyList_GET_SIZE(ets);
-        for (int i = 0; i < m; i++)
+        // m = PyList_GET_SIZE(ets);
+        for (int i = 0; i < ets->m; i++)
         {
-            if (!(et = (ET *)PyCapsule_GetPointer(PyIter_Next(iter_et), "ET")))
-                return;
+            et = ets->ets[i];
+            // if (!(et = (ET *)PyCapsule_GetPointer(PyIter_Next(iter_et), "ET")))
+            //     return;
 
             _ET_T(et, &e_ret(0), q[et->jindex]);
             temp = current * e_ret;
@@ -431,7 +434,7 @@ extern "C"
             e_ret = current;
         }
 
-        Py_DECREF(iter_et);
+        // Py_DECREF(iter_et);
     }
 
     void _ET_T(ET *et, double *ret, double eta)

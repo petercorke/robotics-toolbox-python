@@ -46,6 +46,10 @@ static PyMethodDef fknmMethods[] = {
      (PyCFunction)ETS_fkine,
      METH_VARARGS,
      "Link"},
+    {"ETS_init",
+     (PyCFunction)ETS_init,
+     METH_VARARGS,
+     "Link"},
     {"ET_update",
      (PyCFunction)ET_update,
      METH_VARARGS,
@@ -167,7 +171,8 @@ extern "C"
             npy_float64 *T = (npy_float64 *)PyArray_DATA((PyArrayObject *)PyList_GET_ITEM(T_list, i));
             MapMatrix4dc eT(T);
 
-            _ETS_fkine(ets, q, NULL, NULL, eT);
+            // TODO Add this back
+            // _ETS_fkine(ets, q, NULL, NULL, eT);
         }
 
         // Free the memory
@@ -181,18 +186,23 @@ extern "C"
 
     static PyObject *ETS_hessian0(PyObject *self, PyObject *args)
     {
+        ETS *ets;
         npy_float64 *H, *J, *q, *tool = NULL;
         PyObject *py_q, *py_J, *py_tool, *py_np_q, *py_np_tool, *py_np_J;
-        PyObject *ets;
+        PyObject *py_ets;
         int n, tool_used = 0, J_used = 0, q_used = 0;
 
         if (!PyArg_ParseTuple(
                 args, "iOOOO",
                 &n,
-                &ets,
+                &py_ets,
                 &py_q,
                 &py_J,
                 &py_tool))
+            return NULL;
+
+        // Extract the ETS object from the python object
+        if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
             return NULL;
 
         // Check if J is None
@@ -204,8 +214,9 @@ extern "C"
             if (!_check_array_type(py_J))
                 return NULL;
             J_used = 1;
-            py_np_J = (PyObject *)PyArray_FROMANY(py_J, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+            py_np_J = (PyObject *)PyArray_FROMANY(py_J, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
             J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_J);
+            MapMatrixJc eJ(J, 6, n);
         }
         else
         {
@@ -216,13 +227,14 @@ extern "C"
             if (!_check_array_type(py_q))
                 return NULL;
             q_used = 1;
-            py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+            py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
             q = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q);
 
             // Make our empty Jacobian
             npy_intp dimsJ[2] = {6, n};
-            PyObject *py_J = PyArray_EMPTY(2, dimsJ, NPY_DOUBLE, 0);
+            PyObject *py_J = PyArray_EMPTY(2, dimsJ, NPY_DOUBLE, 1);
             J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_J);
+            MapMatrixJc eJ(J, 6, n);
 
             // Check if tool is None
             // Make sure tool is number array
@@ -233,17 +245,17 @@ extern "C"
                 if (!_check_array_type(py_tool))
                     return NULL;
                 tool_used = 1;
-                py_np_tool = (PyObject *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+                py_np_tool = (PyObject *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
                 tool = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_tool);
             }
 
             // Calculate the Jacobian
-            // _ETS_jacob0(ets, n, q, tool, J);
+            _ETS_jacob0(ets, n, q, tool, eJ);
         }
 
         // Make our empty Hessian
         npy_intp dimsH[3] = {n, 6, n};
-        PyObject *py_H = PyArray_EMPTY(3, dimsH, NPY_DOUBLE, 0);
+        PyObject *py_H = PyArray_EMPTY(3, dimsH, NPY_DOUBLE, 1);
         H = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_H);
 
         // Do the job
@@ -271,18 +283,23 @@ extern "C"
 
     static PyObject *ETS_hessiane(PyObject *self, PyObject *args)
     {
+        ETS *ets;
         npy_float64 *H, *J, *q, *tool = NULL;
         PyObject *py_q, *py_J, *py_tool, *py_np_q, *py_np_tool, *py_np_J;
-        PyObject *ets;
+        PyObject *py_ets;
         int n, tool_used = 0, J_used = 0, q_used = 0;
 
         if (!PyArg_ParseTuple(
                 args, "iOOOO",
                 &n,
-                &ets,
+                &py_ets,
                 &py_q,
                 &py_J,
                 &py_tool))
+            return NULL;
+
+        // Extract the ETS object from the python object
+        if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
             return NULL;
 
         // Check if J is None
@@ -294,8 +311,9 @@ extern "C"
             if (!_check_array_type(py_J))
                 return NULL;
             J_used = 1;
-            py_np_J = (PyObject *)PyArray_FROMANY(py_J, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+            py_np_J = (PyObject *)PyArray_FROMANY(py_J, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
             J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_J);
+            MapMatrixJc eJ(J, 6, n);
         }
         else
         {
@@ -306,13 +324,14 @@ extern "C"
             if (!_check_array_type(py_q))
                 return NULL;
             q_used = 1;
-            py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+            py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
             q = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q);
 
             // Make our empty Jacobian
             npy_intp dimsJ[2] = {6, n};
-            PyObject *py_J = PyArray_EMPTY(2, dimsJ, NPY_DOUBLE, 0);
+            PyObject *py_J = PyArray_EMPTY(2, dimsJ, NPY_DOUBLE, 1);
             J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_J);
+            MapMatrixJc eJ(J, 6, n);
 
             // Check if tool is None
             // Make sure tool is number array
@@ -323,17 +342,17 @@ extern "C"
                 if (!_check_array_type(py_tool))
                     return NULL;
                 tool_used = 1;
-                py_np_tool = (PyObject *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+                py_np_tool = (PyObject *)PyArray_FROMANY(py_tool, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
                 tool = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_tool);
             }
 
             // Calculate the Jacobian
-            // _ETS_jacobe(ets, n, q, tool, J);
+            _ETS_jacobe(ets, n, q, tool, eJ);
         }
 
         // Make our empty Hessian
         npy_intp dimsH[3] = {n, 6, n};
-        PyObject *py_H = PyArray_EMPTY(3, dimsH, NPY_DOUBLE, 0);
+        PyObject *py_H = PyArray_EMPTY(3, dimsH, NPY_DOUBLE, 1);
         H = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_H);
 
         // Do the job
@@ -361,17 +380,22 @@ extern "C"
 
     static PyObject *ETS_jacob0(PyObject *self, PyObject *args)
     {
+        ETS *ets;
         npy_float64 *J, *q, *tool = NULL;
         PyObject *py_q, *py_tool, *py_np_q, *py_np_tool;
-        PyObject *ets;
+        PyObject *py_ets;
         int n, tool_used = 0;
 
         if (!PyArg_ParseTuple(
                 args, "iOOO",
                 &n,
-                &ets,
+                &py_ets,
                 &py_q,
                 &py_tool))
+            return NULL;
+
+        // Extract the ETS object from the python object
+        if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
             return NULL;
 
         // Inputs can be:
@@ -424,17 +448,22 @@ extern "C"
 
     static PyObject *ETS_jacobe(PyObject *self, PyObject *args)
     {
+        ETS *ets;
         npy_float64 *J, *q, *tool = NULL;
         PyObject *py_q, *py_tool, *py_np_q, *py_np_tool;
-        PyObject *ets;
+        PyObject *py_ets;
         int n, tool_used = 0;
 
         if (!PyArg_ParseTuple(
                 args, "iOOO",
                 &n,
-                &ets,
+                &py_ets,
                 &py_q,
                 &py_tool))
+            return NULL;
+
+        // Extract the ETS object from the python object
+        if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
             return NULL;
 
         // Inputs can be:
@@ -487,21 +516,25 @@ extern "C"
 
     static PyObject *ETS_fkine(PyObject *self, PyObject *args)
     {
+        ETS *ets;
         npy_intp dim2[2] = {4, 4}, dim3[3] = {1, 4, 4};
         int include_base, n = 0, q_nd, trajn = 1, tool_used = 0, base_used = 0;
         npy_float64 *ret, *retp, *q, *qp, *base = NULL, *tool = NULL;
         PyObject *py_q, *py_base, *py_tool, *py_np_q, *py_np_tool, *py_np_base;
-        PyObject *py_ret;
-        PyObject *ets;
+        PyObject *py_ret, *py_ets;
         npy_intp *q_shape;
 
         if (!PyArg_ParseTuple(
                 args, "OOOOi",
-                &ets,
+                &py_ets,
                 &py_q,
                 &py_base,
                 &py_tool,
                 &include_base))
+            return NULL;
+
+        // Extract the ETS object from the python object
+        if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
             return NULL;
 
         // Inputs can be:
@@ -606,6 +639,35 @@ extern "C"
             Py_DECREF(py_np_base);
 
         return py_ret;
+    }
+
+    static PyObject *ETS_init(PyObject *self, PyObject *args)
+    {
+        ETS *ets;
+        PyObject *etsl, *ret;
+
+        ets = (ETS *)PyMem_RawMalloc(sizeof(ETS));
+
+        if (!PyArg_ParseTuple(args, "Oii",
+                              &etsl,
+                              &ets->n,
+                              &ets->m))
+            return NULL;
+
+        ets->ets = (ET **)PyMem_RawMalloc(ets->m * sizeof(ET *));
+
+        PyObject *iter_et = PyObject_GetIter(etsl);
+
+        for (int i = 0; i < ets->m; i++)
+        {
+            if (!(ets->ets[i] = (ET *)PyCapsule_GetPointer(PyIter_Next(iter_et), "ET")))
+                return NULL;
+        }
+
+        Py_DECREF(iter_et);
+
+        ret = PyCapsule_New(ets, "ETS", NULL);
+        return ret;
     }
 
     static PyObject *ET_update(PyObject *self, PyObject *args)

@@ -23,6 +23,7 @@ extern "C"
     static PyObject *ETS_jacob0(PyObject *self, PyObject *args);
     static PyObject *ETS_jacobe(PyObject *self, PyObject *args);
     static PyObject *ETS_fkine(PyObject *self, PyObject *args);
+    static PyObject *ETS_init(PyObject *self, PyObject *args);
     static PyObject *ET_init(PyObject *self, PyObject *args);
     static PyObject *ET_update(PyObject *self, PyObject *args);
     static PyObject *ET_T(PyObject *self, PyObject *args);

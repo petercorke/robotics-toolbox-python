@@ -79,10 +79,15 @@ fknm = Extension(
         "./roboticstoolbox/core/fknm.cpp",
     ],
     include_dirs=["./roboticstoolbox/core/", numpy.get_include()],
-    # define_macros=[("EIGEN_USE_BLAS")],
+    # define_macros=[("EIGEN_USE_MKL_ALL", "1")],
     # extra_compile_args=["-Werror"],
     # extra_compile_args=["-fopenmp"],
+    # extra_compile_args=["-Ofast"],
     # extra_link_args=["-lgomp"],
+    # extra_compile_args=["-I/opt/intel/oneapi/mkl/2022.0.2/include"],
+    # extra_link_args=[
+    #     "-L/opt/intel/oneapi/mkl/2022.0.2/lib/intel64 -lmkl_rt -Wl,--no-as-needed -lpthread -lm -ldl"
+    # ],
 )
 
 
