@@ -70,16 +70,16 @@ class BaseET:
         if self.eta is None:
             if T is None:
                 self._joint = True
-                self._T = eye(4)
+                self._T = eye(4).copy(order="F")
                 if axis_func is None:
                     raise TypeError("For a variable joint, axis_func must be specified")
             else:
                 self._joint = False
-                self._T = T
+                self._T = T.copy(order="F")
         else:
             self._joint = False
             if axis_func is not None:
-                self._T = axis_func(self.eta)
+                self._T = axis_func(self.eta).copy(order="F")
             else:
                 raise TypeError(
                     "For a static joint either both `eta` and `axis_func` "
@@ -472,9 +472,9 @@ class BaseET:
         if inv.isjoint:
             inv._flip ^= True
         elif not inv.iselementary:
-            inv._T = npinv(inv._T)
+            inv._T = npinv(inv._T).copy(order="F")
         elif inv._eta is not None:
-            inv._T = npinv(inv._T)
+            inv._T = npinv(inv._T).copy(order="F")
             inv._eta = -inv._eta
 
         inv.__update_c()
