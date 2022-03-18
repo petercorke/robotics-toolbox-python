@@ -204,6 +204,8 @@ extern "C"
         if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
             return NULL;
 
+        MapMatrixJc eJ(NULL, 6, ets->n);
+
         // Check if J is None
         // Make sure J is number array
         // Cast to numpy array
@@ -215,7 +217,8 @@ extern "C"
             J_used = 1;
             py_np_J = (PyObject *)PyArray_FROMANY(py_J, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
             J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_J);
-            MapMatrixJc eJ(J, 6, ets->n);
+            // MapMatrixJc eJ(J, 6, ets->n);
+            new (&eJ) MapMatrixJc(J, 6, ets->n);
         }
         else
         {
@@ -233,7 +236,8 @@ extern "C"
             npy_intp dimsJ[2] = {6, ets->n};
             PyObject *py_J = PyArray_EMPTY(2, dimsJ, NPY_DOUBLE, 1);
             J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_J);
-            MapMatrixJc eJ(J, 6, ets->n);
+            // MapMatrixJc eJ(J, 6, ets->n);
+            new (&eJ) MapMatrixJc(J, 6, ets->n);
 
             // Check if tool is None
             // Make sure tool is number array
@@ -254,11 +258,12 @@ extern "C"
 
         // Make our empty Hessian
         npy_intp dimsH[3] = {ets->n, 6, ets->n};
-        PyObject *py_H = PyArray_EMPTY(3, dimsH, NPY_DOUBLE, 1);
+        PyObject *py_H = PyArray_EMPTY(3, dimsH, NPY_DOUBLE, 0);
         H = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_H);
+        MapMatrixHr eH(H, ets->n * 6, ets->n);
 
         // Do the job
-        _ETS_hessian(J, H);
+        _ETS_hessian(ets->n, eJ, eH);
 
         // Free the memory
         if (q_used)
@@ -300,6 +305,8 @@ extern "C"
         if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
             return NULL;
 
+        MapMatrixJc eJ(NULL, 6, ets->n);
+
         // Check if J is None
         // Make sure J is number array
         // Cast to numpy array
@@ -311,7 +318,8 @@ extern "C"
             J_used = 1;
             py_np_J = (PyObject *)PyArray_FROMANY(py_J, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
             J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_J);
-            MapMatrixJc eJ(J, 6, ets->n);
+            // MapMatrixJc eJ(J, 6, ets->n);
+            new (&eJ) MapMatrixJc(J, 6, ets->n);
         }
         else
         {
@@ -329,7 +337,8 @@ extern "C"
             npy_intp dimsJ[2] = {6, ets->n};
             PyObject *py_J = PyArray_EMPTY(2, dimsJ, NPY_DOUBLE, 1);
             J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_J);
-            MapMatrixJc eJ(J, 6, ets->n);
+            // MapMatrixJc eJ(J, 6, ets->n);
+            new (&eJ) MapMatrixJc(J, 6, ets->n);
 
             // Check if tool is None
             // Make sure tool is number array
@@ -350,11 +359,12 @@ extern "C"
 
         // Make our empty Hessian
         npy_intp dimsH[3] = {ets->n, 6, ets->n};
-        PyObject *py_H = PyArray_EMPTY(3, dimsH, NPY_DOUBLE, 1);
+        PyObject *py_H = PyArray_EMPTY(3, dimsH, NPY_DOUBLE, 0);
         H = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_H);
+        MapMatrixHr eH(H, ets->n * 6, ets->n);
 
         // Do the job
-        _ETS_hessian(J, H);
+        _ETS_hessian(ets->n, eJ, eH);
 
         // Free the memory
         if (q_used)
@@ -497,6 +507,10 @@ extern "C"
         }
 
         // Do the job
+        // for (int i = 0; i < 1000000; i++)
+        // {
+        //     _ETS_jacobe(ets, q, tool, eJ);
+        // }
         _ETS_jacobe(ets, q, tool, eJ);
 
         // Free the memory

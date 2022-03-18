@@ -8,10 +8,11 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
-// #include "linalg.h"
-#ifdef __cplusplus
+// #ifdef __cplusplus
 #include <Eigen/Dense>
-#endif /* __cplusplus */
+// #endif /* __cplusplus */
+
+#include "linalg.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -29,10 +30,6 @@ extern "C"
         ET **ets;
         int n;
         int m;
-
-#ifdef __cplusplus
-        Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>> Tm;
-#endif /* __cplusplus */
     };
 
     struct ET
@@ -45,9 +42,10 @@ extern "C"
         double *qlim; /* joint limits */
         void (*op)(double *data, double eta);
 
-#ifdef __cplusplus
-        Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>> Tm;
-#endif /* __cplusplus */
+        // #ifdef __cplusplus
+        // Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>> Tm;
+        MapMatrix4dc Tm;
+        // #endif /* __cplusplus */
     };
 
 #ifdef __cplusplus

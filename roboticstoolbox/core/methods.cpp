@@ -95,31 +95,22 @@ extern "C"
         // int j = 0;
     }
 
-    void _ETS_hessian(double *J, double *H)
+    void _ETS_hessian(int n, MapMatrixJc &J, MapMatrixHr &H)
     {
-        // int a, b;
-        // int n2 = 2 * n, n3 = 3 * n, n4 = 4 * n, n5 = 5 * n;
+        for (int j = 0; j < n; j++)
+        {
+            for (int i = j; i < n; i++)
+            {
+                H.block<3, 1>(j * 6, i) = J.block<3, 1>(3, j).cross(J.block<3, 1>(0, i));
+                H.block<3, 1>(j * 6 + 3, i) = J.block<3, 1>(3, j).cross(J.block<3, 1>(3, i));
 
-        // for (int j = 0; j < n; j++)
-        // {
-        //     a = j * 6 * n;
-        //     for (int i = j; i < n; i++)
-        //     {
-        //         b = i * 6 * n;
-        //         _cross(J + j + n3, J + i, H + a + i, n);
-        //         _cross(J + j + n3, J + i + n3, H + a + i + n3, n);
-
-        //         if (i != j)
-        //         {
-        //             H[b + j] = H[a + i];
-        //             H[b + j + n] = H[a + i + n];
-        //             H[b + j + n2] = H[a + i + n2];
-        //             H[b + j + n3] = 0;
-        //             H[b + j + n4] = 0;
-        //             H[b + j + n5] = 0;
-        //         }
-        //     }
-        // }
+                if (i != j)
+                {
+                    H.block<3, 1>(i * 6, j) = H.block<3, 1>(j * 6, i);
+                    H.block<3, 1>(i * 6 + 3, j) = Eigen::Vector3d::Zero();
+                }
+            }
+        }
     }
 
     void _ETS_jacob0(ETS *ets, double *q, double *tool, MapMatrixJc &eJ)

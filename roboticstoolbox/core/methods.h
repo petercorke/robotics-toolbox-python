@@ -18,7 +18,7 @@ extern "C"
 #endif /* __cplusplus */
 
     void _ETS_IK(PyObject *ets, int n, double *q, double *Tep, double *ret);
-    void _ETS_hessian(double *J, double *H);
+    void _ETS_hessian(int n, MapMatrixJc &J, MapMatrixHr &H);
     void _ETS_jacob0(ETS *ets, double *q, double *tool, MapMatrixJc &eJ);
     void _ETS_jacobe(ETS *ets, double *q, double *tool, MapMatrixJc &eJ);
     void _ETS_fkine(ETS *ets, double *q, double *base, double *tool, MapMatrix4dc &e_ret);

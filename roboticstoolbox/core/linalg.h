@@ -31,6 +31,9 @@ extern "C"
 #define MapMatrixHc Eigen::Map<MatrixHc>
 #define MapMatrixHr Eigen::Map<MatrixHr>
 
+#define Vector3 Eigen::Vector3d
+#define MapVector3 Eigen::Map<Vector3>
+
     void _inv(double *m, double *invOut);
     void _r2q(double *r, double *q);
     void _angle_axis(double *Te, double *Tep, double *e);
