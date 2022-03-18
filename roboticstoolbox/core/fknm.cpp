@@ -190,11 +190,10 @@ extern "C"
         npy_float64 *H, *J, *q, *tool = NULL;
         PyObject *py_q, *py_J, *py_tool, *py_np_q, *py_np_tool, *py_np_J;
         PyObject *py_ets;
-        int n, tool_used = 0, J_used = 0, q_used = 0;
+        int tool_used = 0, J_used = 0, q_used = 0;
 
         if (!PyArg_ParseTuple(
-                args, "iOOOO",
-                &n,
+                args, "OOOO",
                 &py_ets,
                 &py_q,
                 &py_J,
@@ -216,7 +215,7 @@ extern "C"
             J_used = 1;
             py_np_J = (PyObject *)PyArray_FROMANY(py_J, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
             J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_J);
-            MapMatrixJc eJ(J, 6, n);
+            MapMatrixJc eJ(J, 6, ets->n);
         }
         else
         {
@@ -231,10 +230,10 @@ extern "C"
             q = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q);
 
             // Make our empty Jacobian
-            npy_intp dimsJ[2] = {6, n};
+            npy_intp dimsJ[2] = {6, ets->n};
             PyObject *py_J = PyArray_EMPTY(2, dimsJ, NPY_DOUBLE, 1);
             J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_J);
-            MapMatrixJc eJ(J, 6, n);
+            MapMatrixJc eJ(J, 6, ets->n);
 
             // Check if tool is None
             // Make sure tool is number array
@@ -250,16 +249,16 @@ extern "C"
             }
 
             // Calculate the Jacobian
-            _ETS_jacob0(ets, n, q, tool, eJ);
+            _ETS_jacob0(ets, q, tool, eJ);
         }
 
         // Make our empty Hessian
-        npy_intp dimsH[3] = {n, 6, n};
+        npy_intp dimsH[3] = {ets->n, 6, ets->n};
         PyObject *py_H = PyArray_EMPTY(3, dimsH, NPY_DOUBLE, 1);
         H = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_H);
 
         // Do the job
-        _ETS_hessian(n, J, H);
+        _ETS_hessian(J, H);
 
         // Free the memory
         if (q_used)
@@ -287,11 +286,10 @@ extern "C"
         npy_float64 *H, *J, *q, *tool = NULL;
         PyObject *py_q, *py_J, *py_tool, *py_np_q, *py_np_tool, *py_np_J;
         PyObject *py_ets;
-        int n, tool_used = 0, J_used = 0, q_used = 0;
+        int tool_used = 0, J_used = 0, q_used = 0;
 
         if (!PyArg_ParseTuple(
-                args, "iOOOO",
-                &n,
+                args, "OOOO",
                 &py_ets,
                 &py_q,
                 &py_J,
@@ -313,7 +311,7 @@ extern "C"
             J_used = 1;
             py_np_J = (PyObject *)PyArray_FROMANY(py_J, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
             J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_J);
-            MapMatrixJc eJ(J, 6, n);
+            MapMatrixJc eJ(J, 6, ets->n);
         }
         else
         {
@@ -328,10 +326,10 @@ extern "C"
             q = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q);
 
             // Make our empty Jacobian
-            npy_intp dimsJ[2] = {6, n};
+            npy_intp dimsJ[2] = {6, ets->n};
             PyObject *py_J = PyArray_EMPTY(2, dimsJ, NPY_DOUBLE, 1);
             J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_J);
-            MapMatrixJc eJ(J, 6, n);
+            MapMatrixJc eJ(J, 6, ets->n);
 
             // Check if tool is None
             // Make sure tool is number array
@@ -347,16 +345,16 @@ extern "C"
             }
 
             // Calculate the Jacobian
-            _ETS_jacobe(ets, n, q, tool, eJ);
+            _ETS_jacobe(ets, q, tool, eJ);
         }
 
         // Make our empty Hessian
-        npy_intp dimsH[3] = {n, 6, n};
+        npy_intp dimsH[3] = {ets->n, 6, ets->n};
         PyObject *py_H = PyArray_EMPTY(3, dimsH, NPY_DOUBLE, 1);
         H = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_H);
 
         // Do the job
-        _ETS_hessian(n, J, H);
+        _ETS_hessian(J, H);
 
         // Free the memory
         if (q_used)
@@ -384,11 +382,10 @@ extern "C"
         npy_float64 *J, *q, *tool = NULL;
         PyObject *py_q, *py_tool, *py_np_q, *py_np_tool;
         PyObject *py_ets;
-        int n, tool_used = 0;
+        int tool_used = 0;
 
         if (!PyArg_ParseTuple(
-                args, "iOOO",
-                &n,
+                args, "OOO",
                 &py_ets,
                 &py_q,
                 &py_tool))
@@ -406,10 +403,10 @@ extern "C"
         // tool can be SE3s or 4x4 numpy array
 
         // Make our empty Jacobian
-        npy_intp dims[2] = {6, n};
+        npy_intp dims[2] = {6, ets->n};
         PyObject *py_J = PyArray_EMPTY(2, dims, NPY_DOUBLE, 1);
         J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_J);
-        MapMatrixJc eJ(J, 6, n);
+        MapMatrixJc eJ(J, 6, ets->n);
 
         // Make sure q is number array
         // Cast to numpy array
@@ -433,7 +430,7 @@ extern "C"
         }
 
         // Do the job
-        _ETS_jacob0(ets, n, q, tool, eJ);
+        _ETS_jacob0(ets, q, tool, eJ);
 
         // Free the memory
         Py_DECREF(py_np_q);
@@ -452,11 +449,10 @@ extern "C"
         npy_float64 *J, *q, *tool = NULL;
         PyObject *py_q, *py_tool, *py_np_q, *py_np_tool;
         PyObject *py_ets;
-        int n, tool_used = 0;
+        int tool_used = 0;
 
         if (!PyArg_ParseTuple(
-                args, "iOOO",
-                &n,
+                args, "OOO",
                 &py_ets,
                 &py_q,
                 &py_tool))
@@ -474,10 +470,10 @@ extern "C"
         // tool can be SE3s or 4x4 numpy array
 
         // Make our empty Jacobian
-        npy_intp dims[2] = {6, n};
+        npy_intp dims[2] = {6, ets->n};
         PyObject *py_J = PyArray_EMPTY(2, dims, NPY_DOUBLE, 1);
         J = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_J);
-        MapMatrixJc eJ(J, 6, n);
+        MapMatrixJc eJ(J, 6, ets->n);
 
         // Make sure q is number array
         // Cast to numpy array
@@ -501,7 +497,7 @@ extern "C"
         }
 
         // Do the job
-        _ETS_jacobe(ets, n, q, tool, eJ);
+        _ETS_jacobe(ets, q, tool, eJ);
 
         // Free the memory
         Py_DECREF(py_np_q);

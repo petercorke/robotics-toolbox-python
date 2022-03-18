@@ -95,7 +95,7 @@ extern "C"
         // int j = 0;
     }
 
-    void _ETS_hessian(int n, double *J, double *H)
+    void _ETS_hessian(double *J, double *H)
     {
         // int a, b;
         // int n2 = 2 * n, n3 = 3 * n, n4 = 4 * n, n5 = 5 * n;
@@ -122,86 +122,160 @@ extern "C"
         // }
     }
 
-    void _ETS_jacob0(ETS *ets, int n, double *q, double *tool, MapMatrixJc &eJ)
+    void _ETS_jacob0(ETS *ets, double *q, double *tool, MapMatrixJc &eJ)
     {
+        // ET *et;
+        // double T[16];
+        // MapMatrix4dc eT(T);
+        // Matrix4dc U;
+        // Matrix4dc invU;
+        // Matrix4dc temp;
+        // Matrix4dc ret;
+
+        // int j = 0;
+
+        // U = Eigen::Matrix4d::Identity();
+
+        // // Get the forward  kinematics into T
+        // _ETS_fkine(ets, q, (double *)NULL, tool, eT);
+
+        // for (int i = 0; i < ets->m; i++)
+        // {
+        //     et = ets->ets[i];
+
+        //     if (et->isjoint)
+        //     {
+        //         _ET_T(et, &ret(0), q[et->jindex]);
+        //         temp = U * ret;
+        //         U = temp;
+
+        //         if (i == ets->m - 1 && tool != NULL)
+        //         {
+        //             MapMatrix4dc e_tool(tool);
+        //             temp = U * e_tool;
+        //             U = temp;
+        //         }
+
+        //         _inv(&U(0), &invU(0));
+        //         temp = invU * eT;
+
+        //         if (et->axis == 0)
+        //         {
+        //             eJ(Eigen::seq(0, 2), j) = U(Eigen::seq(0, 2), 2) * temp(1, 3) - U(Eigen::seq(0, 2), 1) * temp(2, 3);
+
+        //             eJ(Eigen::seq(3, 5), j) = U(Eigen::seq(0, 2), 0);
+        //         }
+        //         else if (et->axis == 1)
+        //         {
+        //             eJ(Eigen::seq(0, 2), j) = U(Eigen::seq(0, 2), 0) * temp(2, 3) - U(Eigen::seq(0, 2), 2) * temp(0, 3);
+        //             eJ(Eigen::seq(3, 5), j) = U(Eigen::seq(0, 2), 1);
+        //         }
+        //         else if (et->axis == 2)
+        //         {
+        //             eJ(Eigen::seq(0, 2), j) = U(Eigen::seq(0, 2), 1) * temp(0, 3) - U(Eigen::seq(0, 2), 0) * temp(1, 3);
+        //             eJ(Eigen::seq(3, 5), j) = U(Eigen::seq(0, 2), 2);
+        //         }
+        //         else if (et->axis == 3)
+        //         {
+        //             eJ(Eigen::seq(0, 2), j) = U(Eigen::seq(0, 2), 0);
+        //             eJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
+        //         }
+        //         else if (et->axis == 4)
+        //         {
+        //             eJ(Eigen::seq(0, 2), j) = U(Eigen::seq(0, 2), 1);
+        //             eJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
+        //         }
+        //         else if (et->axis == 5)
+        //         {
+        //             eJ(Eigen::seq(0, 2), j) = U(Eigen::seq(0, 2), 2);
+        //             eJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
+        //         }
+        //         j++;
+        //     }
+        //     else
+        //     {
+        //         _ET_T(et, &ret(0), q[et->jindex]);
+        //         temp = U * ret;
+        //         U = temp;
+        //     }
+        // }
+
         ET *et;
+        Eigen::Matrix<double, 6, Eigen::Dynamic> tJ(6, ets->n);
         double T[16];
         MapMatrix4dc eT(T);
-        Matrix4dc U;
+        Matrix4dc U = Eigen::Matrix4d::Identity();
         Matrix4dc invU;
         Matrix4dc temp;
         Matrix4dc ret;
+        int j = ets->n - 1;
 
-        int j = 0;
+        if (tool != NULL)
+        {
+            Matrix4dc e_tool(tool);
+            temp = e_tool * U;
+            U = temp;
+        }
 
-        U = Eigen::Matrix4d::Identity();
-
-        // Get the forward  kinematics into T
-        _ETS_fkine(ets, q, (double *)NULL, tool, eT);
-
-        for (int i = 0; i < ets->m; i++)
+        for (int i = ets->m - 1; i >= 0; i--)
         {
             et = ets->ets[i];
 
             if (et->isjoint)
             {
-                _ET_T(et, &ret(0), q[et->jindex]);
-                temp = U * ret;
-                U = temp;
-
-                if (i == ets->m - 1 && tool != NULL)
-                {
-                    MapMatrix4dc e_tool(tool);
-                    temp = U * e_tool;
-                    U = temp;
-                }
-
-                _inv(&U(0), &invU(0));
-                temp = invU * eT;
-
                 if (et->axis == 0)
                 {
-                    eJ(Eigen::seq(0, 2), j) = U(Eigen::seq(0, 2), 2) * temp(1, 3) - U(Eigen::seq(0, 2), 1) * temp(2, 3);
-
-                    eJ(Eigen::seq(3, 5), j) = U(Eigen::seq(0, 2), 0);
+                    tJ(Eigen::seq(0, 2), j) = U(2, Eigen::seq(0, 2)) * U(1, 3) - U(1, Eigen::seq(0, 2)) * U(2, 3);
+                    tJ(Eigen::seq(3, 5), j) = U(0, Eigen::seq(0, 2));
                 }
                 else if (et->axis == 1)
                 {
-                    eJ(Eigen::seq(0, 2), j) = U(Eigen::seq(0, 2), 0) * temp(2, 3) - U(Eigen::seq(0, 2), 2) * temp(0, 3);
-                    eJ(Eigen::seq(3, 5), j) = U(Eigen::seq(0, 2), 1);
+                    tJ(Eigen::seq(0, 2), j) = U(0, Eigen::seq(0, 2)) * U(2, 3) - U(2, Eigen::seq(0, 2)) * U(0, 3);
+                    tJ(Eigen::seq(3, 5), j) = U(1, Eigen::seq(0, 2));
                 }
                 else if (et->axis == 2)
                 {
-                    eJ(Eigen::seq(0, 2), j) = U(Eigen::seq(0, 2), 1) * temp(0, 3) - U(Eigen::seq(0, 2), 0) * temp(1, 3);
-                    eJ(Eigen::seq(3, 5), j) = U(Eigen::seq(0, 2), 2);
+                    tJ(Eigen::seq(0, 2), j) = U(1, Eigen::seq(0, 2)) * U(0, 3) - U(0, Eigen::seq(0, 2)) * U(1, 3);
+                    tJ(Eigen::seq(3, 5), j) = U(2, Eigen::seq(0, 2));
                 }
                 else if (et->axis == 3)
                 {
-                    eJ(Eigen::seq(0, 2), j) = U(Eigen::seq(0, 2), 0);
-                    eJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
+                    tJ(Eigen::seq(0, 2), j) = U(0, Eigen::seq(0, 2));
+                    tJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
                 }
                 else if (et->axis == 4)
                 {
-                    eJ(Eigen::seq(0, 2), j) = U(Eigen::seq(0, 2), 1);
-                    eJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
+                    tJ(Eigen::seq(0, 2), j) = U(1, Eigen::seq(0, 2));
+                    tJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
                 }
                 else if (et->axis == 5)
                 {
-                    eJ(Eigen::seq(0, 2), j) = U(Eigen::seq(0, 2), 2);
-                    eJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
+                    tJ(Eigen::seq(0, 2), j) = U(2, Eigen::seq(0, 2));
+                    tJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
                 }
-                j++;
+
+                _ET_T(et, &ret(0), q[et->jindex]);
+                temp = ret * U;
+                U = temp;
+                j--;
             }
             else
             {
                 _ET_T(et, &ret(0), q[et->jindex]);
-                temp = U * ret;
+                temp = ret * U;
                 U = temp;
             }
         }
+
+        Eigen::Matrix<double, 6, 6> ev;
+        ev.topLeftCorner<3, 3>() = U.topLeftCorner<3, 3>();
+        ev.topRightCorner<3, 3>() = Eigen::Matrix3d::Zero();
+        ev.bottomLeftCorner<3, 3>() = Eigen::Matrix3d::Zero();
+        ev.bottomRightCorner<3, 3>() = U.topLeftCorner<3, 3>();
+        eJ = ev * tJ;
     }
 
-    void _ETS_jacobe(ETS *ets, int n, double *q, double *tool, MapMatrixJc &eJ)
+    void _ETS_jacobe(ETS *ets, double *q, double *tool, MapMatrixJc &eJ)
     {
         ET *et;
         double T[16];
@@ -210,7 +284,7 @@ extern "C"
         Matrix4dc invU;
         Matrix4dc temp;
         Matrix4dc ret;
-        int j = n - 1;
+        int j = ets->n - 1;
 
         if (tool != NULL)
         {

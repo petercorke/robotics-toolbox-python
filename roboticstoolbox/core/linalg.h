@@ -15,18 +15,21 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-// #include <Eigen/Dense>
 #define Matrix4dc Eigen::Matrix4d
 #define Matrix4dr Eigen::Matrix<double, 4, 4, Eigen::RowMajor>
 
 #define MapMatrix4dc Eigen::Map<Matrix4dc>
 #define MapMatrix4dr Eigen::Map<Matrix4dc>
 
-#define MapMatrixJc Eigen::Map<Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::ColMajor>>
-#define MapMatrixJr Eigen::Map<Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::RowMajor>>
+#define MatrixJc Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::ColMajor>
+#define MatrixJr Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::RowMajor>
+#define MapMatrixJc Eigen::Map<MatrixJc>
+#define MapMatrixJr Eigen::Map<MatrixJr>
 
-#define MapMatrixHc Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>>
-#define MapMatrixHr Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+#define MatrixHc Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>
+#define MatrixHr Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+#define MapMatrixHc Eigen::Map<MatrixHc>
+#define MapMatrixHr Eigen::Map<MatrixHr>
 
     void _inv(double *m, double *invOut);
     void _r2q(double *r, double *q);
