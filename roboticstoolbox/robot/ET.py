@@ -208,7 +208,7 @@ class BaseET:
             [In [1]: e
             Out [1]: tx(1)
         """
-        print(self.__str__())
+        p.text(str(self))
 
     def __deepcopy__(self, memo):
         cls = self.__class__
