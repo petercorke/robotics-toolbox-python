@@ -31,7 +31,7 @@ extern "C"
         int m;
 
 #ifdef __cplusplus
-        Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>> Tm;
+        Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>/**/> Tm;
 #endif /* __cplusplus */
     };
 
@@ -46,7 +46,7 @@ extern "C"
         void (*op)(double *data, double eta);
 
 #ifdef __cplusplus
-        Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>> Tm;
+        Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>/**/> Tm;
 #endif /* __cplusplus */
     };
 
