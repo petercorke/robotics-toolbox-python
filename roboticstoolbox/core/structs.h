@@ -19,34 +19,34 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-    typedef struct ET ET;
-    typedef struct ETS ETS;
+        typedef struct ET ET;
+        typedef struct ETS ETS;
 
-    struct ETS
-    {
-        /**********************************************************
-         *************** kinematic parameters *********************
-         **********************************************************/
-        ET **ets;
-        int n;
-        int m;
-    };
+        struct ETS
+        {
+                /**********************************************************
+                 *************** kinematic parameters *********************
+                 **********************************************************/
+                ET **ets;
+                int n;
+                int m;
+        };
 
-    struct ET
-    {
-        int isjoint;
-        int isflip;
-        int jindex;
-        int axis;
-        double *T;    /* link static transform */
-        double *qlim; /* joint limits */
-        void (*op)(double *data, double eta);
+        struct ET
+        {
+                int isjoint;
+                int isflip;
+                int jindex;
+                int axis;
+                double *T;    /* link static transform */
+                double *qlim; /* joint limits */
+                void (*op)(double *data, double eta);
 
-        // #ifdef __cplusplus
-        // Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>> Tm;
-        MapMatrix4dc Tm;
-        // #endif /* __cplusplus */
-    };
+                // #ifdef __cplusplus
+                // Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor>> Tm;
+                MapMatrix4dc Tm;
+                // #endif /* __cplusplus */
+        };
 
 #ifdef __cplusplus
 } /* extern "C" */

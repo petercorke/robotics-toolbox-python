@@ -139,7 +139,16 @@ setup(
     " control simulation robot-manipulator mobile-robot",
     packages=find_packages(exclude=["tests", "notebooks"]),
     package_data={"roboticstoolbox": extra_files},
-    scripts=["roboticstoolbox/bin/rtbtool"],
+    scripts = [
+        "roboticstoolbox/bin/rtbtool",
+    ],
+    entry_points = {
+        "console_scripts" : [
+            "eigdemo=roboticstoolbox.examples.eigdemo:main",
+            "tripleangledemo=roboticstoolbox.examples.tripleangledemo",
+            "twistdemo=roboticstoolbox.examples.twistdemo:main",
+        ]
+    },
     install_requires=req,
     extras_require={
         "collision": collision_req,

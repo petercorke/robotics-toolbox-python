@@ -852,7 +852,8 @@ class PlannerBase(ABC):
 
             # overlay obstacles
             c_map = mpl.colors.ListedColormap(colors)
-            self.occgrid.plot(image, cmap=c_map, zorder=1)
+            # self.occgrid.plot(image, cmap=c_map, zorder=1)
+            self.occgrid.plot(cmap=c_map, zorder=1)
         
         ax.set_facecolor((1, 1, 1)) # create white background
         ax.set_xlabel('x (cells)')
