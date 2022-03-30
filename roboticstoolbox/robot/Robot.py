@@ -949,9 +949,9 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
         ``robot.jacob_dot(q, qd)`` computes the rate of change of the
         Jacobian elements
-        
+
         .. math::
-        
+
             \dmat{J} = \frac{d \mat{J}}{d \vec{q}} \frac{d \vec{q}}{dt}
 
         where the first term is the rank-3 Hessian.
@@ -982,7 +982,6 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         """  # noqa
         n = len(q)
 
-
         if representation is None:
 
             if J0 is None:
@@ -1009,11 +1008,12 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
             # not actually sure this can be written in closed form
 
-            H = smb.numhess(lambda q: self.jacob0_analytical(q, representation=representation), q)
+            H = smb.numhess(
+                lambda q: self.jacob0_analytical(q, representation=representation), q
+            )
             # Jd = Ai @ Jd
 
-        return np.tensordot(H, qd, (0,0))
-
+        return np.tensordot(H, qd, (0, 0))
 
     def jacobm(self, q=None, J=None, H=None, end=None, start=None, axes="all"):
         r"""
@@ -1149,7 +1149,9 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         .. warning:: ``start`` and ``end`` must be on the same branch,
             with ``start`` closest to the base.
         """  # noqa
-        return self.ets(start, end).jacob0_analytical(q, tool=tool, representation=representation)
+        return self.ets(start, end).jacob0_analytical(
+            q, tool=tool, representation=representation
+        )
 
     # --------------------------------------------------------------------- #
 
@@ -2021,11 +2023,11 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         env.add(
             self,
             readonly=True,
-            #jointaxes=jointaxes,
-            #jointlabels=jointlabels,
-            #eeframe=eeframe,
-            #shadow=shadow,
-            #name=name,
+            # jointaxes=jointaxes,
+            # jointlabels=jointlabels,
+            # eeframe=eeframe,
+            # shadow=shadow,
+            # name=name,
         )
 
         env._add_teach_panel(self, q)
@@ -2174,7 +2176,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
     # Scene Graph section
     # --------------------------------------------------------------------- #
 
-    def _update_link_tf(self, q: ArrayLike = None):
+    def _update_link_tf(self, q: Union[ArrayLike, None] = None):
         """
         This private method updates the local transform of each link within
         this robot according to q (or self.q if q is none)

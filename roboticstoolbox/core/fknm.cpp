@@ -135,6 +135,7 @@ extern "C"
 
     static PyObject *Robot_link_T(PyObject *self, PyObject *args)
     {
+        ETS *ets;
         npy_float64 *q;
         PyObject *py_q, *py_np_q;
         PyArrayObject *py_self_q;
@@ -167,12 +168,16 @@ extern "C"
         n_links = PyList_GET_SIZE(ets_list);
         for (int i = 0; i < n_links; i++)
         {
-            PyObject *ets = PyList_GET_ITEM(ets_list, i);
+            PyObject *py_ets = PyList_GET_ITEM(ets_list, i);
+            // Extract the ETS object from the python object
+            if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
+                return NULL;
+
             npy_float64 *T = (npy_float64 *)PyArray_DATA((PyArrayObject *)PyList_GET_ITEM(T_list, i));
             MapMatrix4dc eT(T);
 
             // TODO Add this back
-            // _ETS_fkine(ets, q, NULL, NULL, eT);
+            _ETS_fkine(ets, q, NULL, NULL, eT);
         }
 
         // Free the memory
