@@ -264,6 +264,7 @@ class BaseERobot(Robot):
                 j += 1
         self._qlim = qlim
 
+        self._valid_qlim = False
         for i in range(self.n):
             if any(qlim[:, i] != 0) and not any(isnan(qlim[:, i])):
                 self._valid_qlim = True
@@ -1311,7 +1312,7 @@ class ERobot(BaseERobot):
                 raise TypeError("bad argument passed as gripper")
 
         links, name, urdf_string, urdf_filepath = ERobot.URDF_read(file_path)
-
+        print(cls)
         return cls(
             links,
             name=name,
