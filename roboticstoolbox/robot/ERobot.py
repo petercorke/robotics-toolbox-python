@@ -316,7 +316,7 @@ class BaseERobot(Robot):
             else:
                 jname = ""
             table.row(
-                #link.jindex,
+                # link.jindex,
                 k,
                 color + ee + link.name,
                 jname,
@@ -334,7 +334,9 @@ class BaseERobot(Robot):
             s += f" (by {self.manufacturer})"
         s += f", {self.n} joints ({self.structure})"
         if len(self.grippers) > 0:
-            s += f", {len(self.grippers)} gripper{'s' if len(self.grippers) > 1 else ''}"
+            s += (
+                f", {len(self.grippers)} gripper{'s' if len(self.grippers) > 1 else ''}"
+            )
         if self.nbranches > 1:
             s += f", {self.nbranches} branches"
         if self._hasdynamics:
@@ -652,7 +654,8 @@ class BaseERobot(Robot):
         """
         Privade method which will find the ETS of a gripper
         """
-        return gripper.links[0].ets * ET.SE3(gripper.tool)
+        # return gripper.links[0].ets * ET.SE3(gripper.tool)
+        return ETS(ET.SE3(gripper.tool))
 
     @lru_cache(maxsize=32)
     def ets(
