@@ -839,8 +839,6 @@ class BaseERobot(Robot):
                 else:
                     T *= SE2(link.A(q[link.jindex]))
 
-                print(T)
-                print(link.number)
                 Tall[link.number] = T
 
                 if link.nchildren == 1:
