@@ -188,7 +188,7 @@ class BaseETS(UserList):
         """
         print(self.__str__())
 
-    def joints(self) -> List[int]:  # Returns a list of ET's   joint_idx
+    def joint_idx(self) -> List[int]:
         """
         Get index of joint transforms
 
@@ -200,12 +200,29 @@ class BaseETS(UserList):
 
             >>> from roboticstoolbox import ET
             >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-            >>> e.joints()
+            >>> e.joint_idx()
 
         """
         return where([e.isjoint for e in self])[0]
 
-    def jointset(self) -> Set[int]:  #
+    def joints(self) -> List[ET]:
+        """
+        Get a list of the variable ETs with this ETS
+
+        :return: list of ETs that are joints
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import ET
+            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+            >>> e.joints()
+
+        """
+        return [e for e in self if e.isjoint]
+
+    def jindex_set(self) -> Set[int]:  #
         """
         Get set of joint indices
 
@@ -219,7 +236,7 @@ class BaseETS(UserList):
             >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
             >>> e.jointset()
         """
-        return set([self[j].jindex for j in self.joints()])  # type: ignore
+        return set([self[j].jindex for j in self.joint_idx()])  # type: ignore
 
     @cached_property
     def jindices(self) -> ndarray:
@@ -298,7 +315,9 @@ class BaseETS(UserList):
             >>> e.structure
 
         """
-        return "".join(["R" if self.data[i].isrotation else "P" for i in self.joints()])
+        return "".join(
+            ["R" if self.data[i].isrotation else "P" for i in self.joint_idx()]
+        )
 
     @property
     def n(self) -> int:
@@ -420,7 +439,7 @@ class BaseETS(UserList):
         segments = []
         start = 0
 
-        for j, k in enumerate(self.joints()):
+        for j, k in enumerate(self.joint_idx()):
             ets_j = self.data[start : k + 1]
             start = k + 1
             segments.append(ets_j)
@@ -610,7 +629,7 @@ class ETS(BaseETS):
         self._auto_jindex = False
 
         # Check if jindices are set
-        joints = [self[j] for j in self.joints()]
+        joints = self.joints()
 
         # Number of joints with a jindex
         jindices = 0
@@ -1497,7 +1516,7 @@ class ETS2(BaseETS):
         self._auto_jindex = False
 
         # Check if jindices are set
-        joints = [self[j] for j in self.joints()]
+        joints = self.joints()
 
         # Number of joints with a jindex
         jindices = 0
@@ -1772,7 +1791,7 @@ class ETS2(BaseETS):
 
         j = 0
         J = zeros((3, self.n))
-        etjoints = self.joints()
+        etjoints = self.joint_idx()
 
         if not all(array([self[i].jindex for i in etjoints])):
             # not all joints have a jindex it is required, set them

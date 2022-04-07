@@ -271,7 +271,7 @@ class TestETS2(unittest.TestCase):
         ans = set((0, 1, 2))
 
         r = a + b + c + d
-        nt.assert_equal(r.jointset(), ans)
+        nt.assert_equal(r.jindex_set(), ans)
 
     def test_split(self):
         deg = np.pi / 180
