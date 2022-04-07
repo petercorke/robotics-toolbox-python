@@ -344,6 +344,7 @@
       <parent link="${prefix}wrist_3_link" />
       <child link = "${prefix}ee_link" />
       <origin xyz="0.0 ${wrist_3_length} 0.0" rpy="0.0 0.0 ${pi/2.0}" />
+      <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
     </joint>
 
     <link name="${prefix}ee_link">
@@ -374,6 +375,7 @@
     <link name="${prefix}tool0"/>
     <joint name="${prefix}wrist_3_link-tool0_fixed_joint" type="fixed">
       <origin xyz="0 ${wrist_3_length} 0" rpy="${pi/-2.0} 0 0"/>
+      <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
       <parent link="${prefix}wrist_3_link"/>
       <child link="${prefix}tool0"/>
     </joint>
