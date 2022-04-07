@@ -271,6 +271,12 @@ class BaseERobot(Robot):
         # Initialise Robot object
         super().__init__(orlinks, **kwargs)
 
+        # Fix number of links for gripper links
+        self._nlinks = len(links)
+
+        for gripper in self.grippers:
+            self._nlinks += len(gripper.links)
+
         # SceneNode, set a reference to the first link
         self.scene_children = [self.links[0]]  # type: ignore
 
@@ -795,7 +801,7 @@ class BaseERobot(Robot):
 
     # --------------------------------------------------------------------- #
 
-    def fkine_all(self, q, old=None):
+    def fkine_all(self, q):
         """
         Compute the pose of every link frame
 
@@ -833,6 +839,8 @@ class BaseERobot(Robot):
                 else:
                     T *= SE2(link.A(q[link.jindex]))
 
+                print(T)
+                print(link.number)
                 Tall[link.number] = T
 
                 if link.nchildren == 1:
