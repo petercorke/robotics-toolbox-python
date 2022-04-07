@@ -101,7 +101,7 @@ class Trajectory:
     @property
     def qdd(self):
         """
-        Velocity trajectory
+        Acceleration trajectory
 
         :return: trajectory acceleration with one row per timestep, one column per axis
         :rtype: ndarray(n,m)
@@ -180,7 +180,11 @@ class Trajectory:
             ax.plot(self.t[k], self.s[k], color="green", **plotopts)
             k = np.where(k)[0][0]
             ax.plot(
-                self.t[k - 1 : k + 1], self.s[k - 1 : k + 1], color="green", label="linear", **plotopts
+                self.t[k - 1 : k + 1],
+                self.s[k - 1 : k + 1],
+                color="green",
+                label="linear",
+                **plotopts,
             )
 
             # decel phase
@@ -188,7 +192,11 @@ class Trajectory:
             ax.plot(self.t[k], self.s[k], color="blue", **plotopts)
             k = np.where(k)[0][0]
             ax.plot(
-                self.t[k - 1 : k + 1], self.s[k - 1 : k + 1], color="blue", label="deceleration", **plotopts
+                self.t[k - 1 : k + 1],
+                self.s[k - 1 : k + 1],
+                color="blue",
+                label="deceleration",
+                **plotopts,
             )
 
             ax.grid(True)
@@ -317,11 +325,11 @@ def quintic_func(q0, qf, T, qd0=0, qdf=0):
     # solve for the polynomial coefficients using least squares
     X = [
         [0, 0, 0, 0, 0, 1],
-        [T ** 5, T ** 4, T ** 3, T ** 2, T, 1],
+        [T**5, T**4, T**3, T**2, T, 1],
         [0, 0, 0, 0, 1, 0],
-        [5 * T ** 4, 4 * T ** 3, 3 * T ** 2, 2 * T, 1, 0],
+        [5 * T**4, 4 * T**3, 3 * T**2, 2 * T, 1, 0],
         [0, 0, 0, 2, 0, 0],
-        [20 * T ** 3, 12 * T ** 2, 6 * T, 2, 0, 0],
+        [20 * T**3, 12 * T**2, 6 * T, 2, 0, 0],
     ]
     coeffs, resid, rank, s = np.linalg.lstsq(
         X, np.r_[q0, qf, qd0, qdf, 0, 0], rcond=None
@@ -340,9 +348,11 @@ def quintic_func(q0, qf, T, qd0=0, qdf=0):
 
 # -------------------------------------------------------------------------- #
 
+
 def lspb(*args, **kwargs):
     warnings.warn("lsp is deprecated, use trapezoidal", FutureWarning)
     return trapezoidal(*args, **kwargs)
+
 
 def trapezoidal(q0, qf, t, V=None):
     """
@@ -459,7 +469,7 @@ def trapezoidal_func(q0, qf, tf, V=None):
                 pddk = 0
             elif tk <= tb:
                 # initial blend
-                pk = q0 + a / 2 * tk ** 2
+                pk = q0 + a / 2 * tk**2
                 pdk = a * tk
                 pddk = a
             elif tk <= (tf - tb):
@@ -469,7 +479,7 @@ def trapezoidal_func(q0, qf, tf, V=None):
                 pddk = 0
             elif tk <= tf:
                 # final blend
-                pk = qf - a / 2 * tf ** 2 + a * tf * tk - a / 2 * tk ** 2
+                pk = qf - a / 2 * tf**2 + a * tf * tk - a / 2 * tk**2
                 pdk = a * tf - a * tk
                 pddk = -a
             else:
@@ -567,7 +577,7 @@ def jtraj(q0, qf, t, qd0=None, qd1=None):
 
     # n = len(q0)
 
-    tt = np.array([ts ** 5, ts ** 4, ts ** 3, ts ** 2, ts, np.ones(ts.shape)]).T
+    tt = np.array([ts**5, ts**4, ts**3, ts**2, ts, np.ones(ts.shape)]).T
     coeffs = np.array([A, B, C, np.zeros(A.shape), E, F])  # 6xN
 
     qt = tt @ coeffs
@@ -580,7 +590,7 @@ def jtraj(q0, qf, t, qd0=None, qd1=None):
     coeffs = np.array(
         [np.zeros(A.shape), np.zeros(A.shape), 20 * A, 12 * B, 6 * C, np.zeros(A.shape)]
     )
-    qddt = tt @ coeffs / tscal ** 2
+    qddt = tt @ coeffs / tscal**2
 
     return Trajectory("jtraj", tv, qt, qdt, qddt, istime=True)
 
@@ -646,8 +656,6 @@ def mtraj(tfunc, q0, qf, t):
     istime = traj[0].istime
 
     return Trajectory("mtraj", x, y, yd, ydd, istime)
-
-
 
 
 # -------------------------------------------------------------------------- #
@@ -1012,6 +1020,7 @@ if __name__ == "__main__":
     # t.plot(block=True)
 
     from roboticstoolbox import *
+
     puma = models.DH.Puma560()
 
     traj = jtraj(puma.qz, puma.qr, 100)

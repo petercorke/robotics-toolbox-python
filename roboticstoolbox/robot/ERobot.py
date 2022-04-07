@@ -842,13 +842,16 @@ class BaseERobot(Robot):
 
                 Tall[link.number] = T
 
-                if link.nchildren == 1:
+                if link.nchildren == 0:
+                    # no children
+                    return
+                elif link.nchildren == 1:
+                    # one child
+                    if link in self.ee_links:
+                        # this link is an end-effector, go no further
+                        return
                     link = link.children[0]
                     continue
-
-                elif link.nchildren == 0:
-                    return
-
                 else:
                     # multiple children
                     for child in link.children:

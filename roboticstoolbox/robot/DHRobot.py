@@ -49,7 +49,7 @@ class DHRobot(Robot):
     :type name: str
     :param manufacturer: Manufacturer of the robot
     :type manufacturer: str
-    :param base: Locaation of the base
+    :param base: Location of the base
     :type base: SE3
     :param tool: Location of the tool
     :type tool: SE3
