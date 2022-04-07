@@ -4,6 +4,7 @@ import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
 from math import pi
 
+
 class UR5(ERobot):
     """
     Class that imports a UR5 URDF model
@@ -32,6 +33,8 @@ class UR5(ERobot):
         links, name, urdf_string, urdf_filepath = self.URDF_read(
             "ur_description/urdf/ur5_joint_limited_robot.urdf.xacro"
         )
+        # for link in links:
+        #     print(link)
 
         super().__init__(
             links,
@@ -62,7 +65,7 @@ class UR5(ERobot):
                 ]
             ),
         )
-        self.addconfiguration_attr("q1", [0, -pi/2, pi/2, 0, pi/2, 0])
+        self.addconfiguration_attr("q1", [0, -pi / 2, pi / 2, 0, pi / 2, 0])
 
 
 if __name__ == "__main__":  # pragma nocover
