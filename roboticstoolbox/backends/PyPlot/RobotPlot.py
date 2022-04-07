@@ -103,7 +103,7 @@ class RobotPlot:
 
             self.links[i].set_xdata(points[:, 0])
             self.links[i].set_ydata(points[:, 1])
-            self.links[0].set_3d_properties(points[:, 2])
+            self.links[i].set_3d_properties(points[:, 2])
 
             # Update the shadow of the robot links
             if self.shadow:
