@@ -21,6 +21,7 @@ from roboticstoolbox.models.URDF.KinovaGen3 import KinovaGen3
 from roboticstoolbox.models.URDF.YuMi import YuMi
 from roboticstoolbox.models.URDF.Fetch import Fetch
 from roboticstoolbox.models.URDF.FetchCamera import FetchCamera
+from roboticstoolbox.models.URDF.AL5D import AL5D
 
 __all__ = [
     "Panda",
@@ -46,4 +47,5 @@ __all__ = [
     "YuMi",
     "Fetch",
     "FetchCamera",
+    "AL5D",
 ]
