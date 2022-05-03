@@ -7,9 +7,9 @@ from spatialmath import SE3
 
 class FetchCamera(ERobot):
     """
-    Class that imports a Fetch URDF model
+    Class that imports a FetchCamera URDF model
 
-    ``Fetch()`` is a class which imports a Fetch robot definition
+    ``FetchCamera()`` is a class which imports a FetchCamera robot definition
     from a URDF file.  The model describes its kinematic and graphical
     characteristics.
 
@@ -21,12 +21,10 @@ class FetchCamera(ERobot):
 
     Defined joint configurations are:
 
-    - qz, zero joint angle configuration, 'L' shaped configuration
-    - qr, vertical 'READY' configuration
-    - qs, arm is stretched out in the x-direction
-    - qn, arm is at a nominal non-singular configuration
+    - qz, zero joint angle configuration
+    - qr, zero joint angle configuration
 
-    .. codeauthor:: Jesse Haviland
+    .. codeauthor:: Kerry He
     .. sectionauthor:: Peter Corke
     """
 

@@ -11,6 +11,7 @@ import webbrowser
 import numpy as np
 from spatialmath import SE3, SE2
 from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix, islistof
+from spatialgeometry import Cylinder
 
 from roboticstoolbox.robot.ELink import ELink, ELink2, BaseELink
 from roboticstoolbox.robot.ETS import ETS, ETS2
@@ -2026,8 +2027,6 @@ class ERobot(BaseERobot):
         end=None,
         start=None,
         collision_list=None,
-        wTcamp=None,
-        wTtp=None
     ):
         """
         Formulates an inequality contraint which, when optimised for will
@@ -2068,7 +2067,6 @@ class ERobot(BaseERobot):
         j = 0
         Ain = None
         bin = None
-        din = None
 
         def indiv_calculation(link, link_col, q):
             d, wTlp, wTcp = link_col.closest_point(shape, di)
@@ -2088,19 +2086,14 @@ class ERobot(BaseERobot):
 
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
-                if wTcamp is not None and wTtp is not None:
-                    length = np.linalg.norm(wTcp - wTcamp)
-                    total_length = np.linalg.norm(wTtp - wTcamp)
-                    dp *= length/total_length
-
                 l_Ain = np.zeros((1, self.n))
                 l_Ain[0, :n_dim] = norm_h @ Je
-                l_bin = (xi * (d - ds) / (di - ds)) + 0
+                l_bin = (xi * (d - ds) / (di - ds)) + dp      
             else:
                 l_Ain = None
                 l_bin = None
 
-            return l_Ain, l_bin, d, wTcp
+            return l_Ain, l_bin
 
         for link in links:
             if link.isjoint:
@@ -2112,7 +2105,7 @@ class ERobot(BaseERobot):
                 col_list = collision_list[j - 1]
 
             for link_col in col_list:
-                l_Ain, l_bin, d, wTcp = indiv_calculation(link, link_col, q)
+                l_Ain, l_bin = indiv_calculation(link, link_col, q)
 
                 if l_Ain is not None and l_bin is not None:
                     if Ain is None:
@@ -2125,29 +2118,30 @@ class ERobot(BaseERobot):
                     else:
                         bin = np.r_[bin, l_bin]
 
-                    if din is None:
-                        din = d
-                    else:
-                        din = np.r_[din, d]
-
-        return Ain, bin, din
+        return Ain, bin
 
     def vision_collision_damper(
         self,
         shape,
+        camera=None,
+        camera_n=0,
         q=None,
         di=0.3,
         ds=0.05,
         xi=1.0,
         end=None,
         start=None,
-        collision_list=None,
-        camera=None
+        collision_list=None
     ):
         """
         Formulates an inequality contraint which, when optimised for will
-        make it impossible for the robot to run into a collision. Requires
-        See examples/neo.py for use case
+        make it impossible for the robot to run into a line of sight. 
+        See examples/fetch_vision.py for use case
+        :param camera: The camera link, either as a robotic link or SE3 
+            pose
+        :type camera: ERobot or SE3
+        :param camera_n: Degrees of freedom of the camera link
+        :type camera_n: int
         :param ds: The minimum distance in which a joint is allowed to
             approach the collision object shape
         :type ds: float
@@ -2175,23 +2169,43 @@ class ERobot(BaseERobot):
 
         links, n, _ = self.get_path(start=start, end=end)
 
-        # if q is None:
-        #     q = np.copy(self.q)
-        # else:
-        #     q = getvector(q, n)
-
         j = 0
         Ain = None
         bin = None
-        din = None
+
+        def rotation_between_vectors(a, b):
+            a = a / np.linalg.norm(a)
+            b = b / np.linalg.norm(b)
+
+            angle = np.arccos(np.dot(a, b))
+            axis = np.cross(a, b)
+
+            return SE3.AngleAxis(angle, axis)
+
+
+        if isinstance(camera, ERobot):
+            wTcp = camera.fkine(camera.q, fast=True)[:3, 3]
+        elif isinstance(camera, SE3):
+            wTcp = camera.t
+
+        wTtp = shape.base.t
+
+        # Create line of sight object
+        los_mid = SE3((wTcp + wTtp) / 2)
+        los_orientation = rotation_between_vectors(np.array([0., 0., 1.]), wTcp - wTtp)
+
+        los = Cylinder(radius=0.001, 
+                       length=np.linalg.norm(wTcp - wTtp), 
+                       base=(los_mid * los_orientation)
+        )        
 
         def indiv_calculation(link, link_col, q):
-            d, wTlp, wTcp = link_col.closest_point(shape, di)
-
+            d, wTlp, wTvp = link_col.closest_point(los, di)
+        
             if d is not None:
-                lpTcp = -wTlp + wTcp
+                lpTvp = -wTlp + wTvp
 
-                norm = lpTcp / d
+                norm = lpTvp / d
                 norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
 
                 tool = SE3((np.linalg.inv(self.fkine(q, end=link, fast=True)) @ SE3(wTlp).A)[:3, 3])
@@ -2200,24 +2214,36 @@ class ERobot(BaseERobot):
                     q, end=link, tool=tool.A, fast=True
                 )
                 Je[:3, :] = self._base.A[:3, :3] @ Je[:3, :]
-
-                wTc = camera.fkine(camera.q, fast=True)
-                Jv = camera.jacob0(
-                    camera.q, tool=SE3(np.linalg.inv(wTc[:3, :3]) @ (wTcp - wTc[:3, -1])).A, fast=True
-                )
-                Jv[:3, :] = self._base.A[:3, :3] @ Jv[:3, :]
-
                 n_dim = Je.shape[1]
-                dp = norm_h @ Jv
-                l_Ain = np.zeros((1, self.n + 2 + 10))
+                
+
+                if isinstance(camera, ERobot):
+                    Jv = camera.jacob0(camera.q, fast=True)
+                    Jv[:3, :] = self._base.A[:3, :3] @ Jv[:3, :]
+
+                    Jv *= np.linalg.norm(wTvp - shape.base.t) / los.length
+                    
+                    dpc = norm_h @ Jv
+                    dpc = np.r_[
+                        dpc[0, :-camera_n], 
+                        np.zeros(self.n - (camera.n - camera_n)), 
+                        dpc[0, -camera_n:]
+                    ]
+                else:
+                    dpc = np.zeros((1, self.n + camera_n))
+
+                dpt = norm_h @ shape.v
+                dpt *= np.linalg.norm(wTvp - wTcp) / los.length
+
+                l_Ain = np.zeros((1, self.n + camera_n))
                 l_Ain[0, :n_dim] = norm_h @ Je
-                l_Ain -= np.r_[dp[0, :3], np.zeros(7), dp[0, 3:], np.zeros(9), 1]
-                l_bin = (xi * (d - ds) / (di - ds))
+                l_Ain -= dpc
+                l_bin = (xi * (d - ds) / (di - ds)) + dpt
             else:
                 l_Ain = None
                 l_bin = None
 
-            return l_Ain, l_bin, d, wTcp
+            return l_Ain, l_bin
         
         for link in links:
             if link.isjoint:
@@ -2229,7 +2255,7 @@ class ERobot(BaseERobot):
                 col_list = collision_list[j - 1]
 
             for link_col in col_list:
-                l_Ain, l_bin, d, wTcp = indiv_calculation(link, link_col, q)
+                l_Ain, l_bin = indiv_calculation(link, link_col, q)
 
                 if l_Ain is not None and l_bin is not None:
                     if Ain is None:
@@ -2242,12 +2268,7 @@ class ERobot(BaseERobot):
                     else:
                         bin = np.r_[bin, l_bin]
 
-                    if din is None:
-                        din = d
-                    else:
-                        din = np.r_[din, d]
-
-        return Ain, bin, din
+        return Ain, bin
 
     # inverse dynamics (recursive Newton-Euler) using spatial vector notation
     def rne(robot, q, qd, qdd, symbolic=False, gravity=None):
