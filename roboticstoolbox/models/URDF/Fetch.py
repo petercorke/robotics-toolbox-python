@@ -21,12 +21,10 @@ class Fetch(ERobot):
 
     Defined joint configurations are:
 
-    - qz, zero joint angle configuration, 'L' shaped configuration
-    - qr, vertical 'READY' configuration
-    - qs, arm is stretched out in the x-direction
-    - qn, arm is at a nominal non-singular configuration
+    - qz, zero joint angle configuration, arm is stretched out in the x-direction
+    - qr, tucked arm configuration
 
-    .. codeauthor:: Jesse Haviland
+    .. codeauthor:: Kerry He
     .. sectionauthor:: Peter Corke
     """
 
@@ -45,8 +43,6 @@ class Fetch(ERobot):
             urdf_filepath=urdf_filepath,
         )
 
-        # self.grippers[0].tool = SE3(0, 0, 0.1034)
-
         self.qdlim = np.array(
             [4.0, 4.0, 0.1, 1.25, 1.45, 1.57, 1.52, 1.57, 2.26, 2.26]
         )
@@ -54,7 +50,7 @@ class Fetch(ERobot):
         self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
 
         self.addconfiguration(
-            "qr", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            "qr", np.array([0, 0, 0.05, 1.32, 1.4, -0.2, 1.72, 0, 1.66, 0])
         )
 
 
