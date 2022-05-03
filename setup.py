@@ -19,6 +19,7 @@ req = [
     "ansitable",
     "swift-sim>=0.10.0",
     "qpsolvers",
+    "rtb-data",
     "progress",
 ]
 
@@ -43,7 +44,7 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
 extra_folders = [
     # 'roboticstoolbox/models/URDF/xacro',
     # 'roboticstoolbox/models/DH/meshes',
-    "roboticstoolbox/rtb-data",
+    # 'roboticstoolbox/data',
     "roboticstoolbox/core",
 ]
 
