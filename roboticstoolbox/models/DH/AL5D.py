@@ -76,7 +76,7 @@ class AL5D(DHRobot):
         joint_limits = [
                 [-pi/2, pi/2],
                 [-pi/2, pi/2],
-                [-pi,2, pi/2],
+                [-pi/2, pi/2],
                 [-pi/2, pi/2],
             ]
 
