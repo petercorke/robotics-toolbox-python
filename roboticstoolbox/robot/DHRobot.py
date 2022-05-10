@@ -1235,6 +1235,9 @@ class DHRobot(Robot):
         # compute Jacobian in world frame
         J0 = self.jacob0(q, T)
 
+        if representation is None:
+            return J0
+
         # compute rotational transform if analytical Jacobian required
 
         if representation == "rpy/xyz":
@@ -1385,10 +1388,10 @@ class DHRobot(Robot):
         """
 
         if base_wrench:
-            return self.rne_python(q, qd, qdd, 
-                                gravity=gravity, fext=fext,
-                                base_wrench=base_wrench)
-        
+            return self.rne_python(
+                q, qd, qdd, gravity=gravity, fext=fext, base_wrench=base_wrench
+            )
+
         trajn = 1
 
         try:

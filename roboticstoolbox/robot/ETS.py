@@ -6,7 +6,6 @@
 """
 
 from collections import UserList
-from functools import lru_cache, cached_property
 from numpy import (
     pi,
     where,
@@ -44,8 +43,18 @@ from roboticstoolbox.robot.ET import ET, ET2
 from spatialmath.base import getvector
 from spatialmath import SE3
 from typing import Union, overload, List, Set
+from sys import version_info
 
 ArrayLike = Union[list, ndarray, tuple, set]
+
+py_ver = version_info
+
+if version_info >= (3, 9):
+    from functools import cached_property
+
+    c_property = cached_property
+else:
+    c_property = property
 
 
 class BaseETS(UserList):
@@ -238,7 +247,7 @@ class BaseETS(UserList):
         """
         return set([self[j].jindex for j in self.joint_idx()])  # type: ignore
 
-    @cached_property
+    @c_property
     def jindices(self) -> ndarray:
         """
         Get an array of joint indices
@@ -255,7 +264,7 @@ class BaseETS(UserList):
         """
         return array([self[j].jindex for j in self.joints()])  # type: ignore
 
-    @cached_property
+    @c_property
     def qlim(self):
         r"""
         Joint limits
