@@ -42,28 +42,36 @@ class Tests:
         rep = "eul"
         q = self.q
         Ja = numjac(lambda q: tr2x(self.robot.fkine(q).A, representation=rep), q)
-        nt.assert_array_almost_equal(self.robot.jacob0_analytic(q, analytic=rep), Ja)
+        nt.assert_array_almost_equal(
+            self.robot.jacob0_analytical(q, representation=rep), Ja
+        )
 
     def test_jacob_analytical_rpy_xyz(self):
         rep = "rpy/xyz"
         q = self.q
         Ja = numjac(lambda q: tr2x(self.robot.fkine(q).A, representation=rep), q)
-        nt.assert_array_almost_equal(self.robot.jacob0_analytic(q, analytic=rep), Ja)
+        nt.assert_array_almost_equal(
+            self.robot.jacob0_analytical(q, representation=rep), Ja
+        )
 
     def test_jacob_analytical_rpy_zyx(self):
         rep = "rpy/zyx"
         q = self.q
         Ja = numjac(lambda q: tr2x(self.robot.fkine(q).A, representation=rep), q)
-        nt.assert_array_almost_equal(self.robot.jacob0_analytic(q, analytic=rep), Ja)
+        nt.assert_array_almost_equal(
+            self.robot.jacob0_analytical(q, representation=rep), Ja
+        )
 
     def test_jacob_analytical_exp(self):
         rep = "exp"
         q = self.q
         Ja = numjac(lambda q: tr2x(self.robot.fkine(q).A, representation=rep), q)
-        nt.assert_array_almost_equal(self.robot.jacob0_analytic(q, analytic=rep), Ja)
+        nt.assert_array_almost_equal(
+            self.robot.jacob0_analytical(q, representation=rep), Ja
+        )
 
     def test_jacob_dot(self):
-        j0 = self.robot.jacob_dot(self.q, self.qd)
+        j0 = self.robot.jacob0_dot(self.q, self.qd)
 
         H = numhess(lambda q: self.robot.jacob0(q), self.q)
         Jd = np.zeros((6, self.robot.n))
@@ -74,9 +82,11 @@ class Tests:
 
     def test_jacob_dot_analytical_eul(self):
         rep = "eul"
-        j0 = self.robot.jacob_dot(self.q, self.qd, analytical=rep)
+        j0 = self.robot.jacob0_dot(self.q, self.qd, representation=rep)
 
-        H = numhess(lambda q: self.robot.jacob0_analytic(q, analytic=rep), self.q)
+        H = numhess(
+            lambda q: self.robot.jacob0_analytical(q, representation=rep), self.q
+        )
         Jd = np.zeros((6, self.robot.n))
         for i in range(self.robot.n):
             Jd += H[i, :, :] * self.qd[i]
