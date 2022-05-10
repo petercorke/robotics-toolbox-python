@@ -28,18 +28,21 @@ jobs:
     - name: Checkout Swift
       uses: actions/checkout@v2
       with:
+        ref: future
         repository: jhavl/swift
         path: swift
 
     - name: Checkout Spatialmath
       uses: actions/checkout@v2
       with:
+        ref: future
         repository: petercorke/spatialmath-python
         path: sm
 
     - name: Checkout Spatialgeometry
       uses: actions/checkout@v2
       with:
+        ref: future
         repository: jhavl/spatialgeometry
         path: sg
         
