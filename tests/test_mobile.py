@@ -84,7 +84,7 @@ class RangeBearingSensorTest(unittest.TestCase):
     def test_init(self):
 
         self.assertIsInstance(self.rs.map, rtb.LandmarkMap)
-        # self.assertIsInstance(self.rs.robot, rtb.Vehicle)
+        self.assertIsInstance(self.rs.robot, rtb.Bicycle)
 
         self.assertIsInstance(str(self.rs), str)
 
@@ -97,10 +97,7 @@ class RangeBearingSensorTest(unittest.TestCase):
         # test missing samples
         rs = RangeBearingSensor(self.veh, self.map, every=2)
 
-        z, lm_id = rs.reading()
-        self.assertIsInstance(z, np.ndarray)
-        self.assertEqual(z.shape, (2,))
-
+        # first return is (None, None)
         z, lm_id = rs.reading()
         self.assertEqual(z, None)
 
@@ -108,16 +105,19 @@ class RangeBearingSensorTest(unittest.TestCase):
         self.assertIsInstance(z, np.ndarray)
         self.assertEqual(z.shape, (2,))
 
+        z, lm_id = rs.reading()
+        self.assertEqual(z, None)
+
     def test_h(self):
         xv = np.r_[2, 3, 0.5]
         p = np.r_[3, 4]
         z = self.rs.h(xv, 10)
         self.assertIsInstance(z, np.ndarray)
         self.assertEqual(z.shape, (2,))
-        self.assertAlmostEqual(z[0], np.linalg.norm(self.rs.map.landmark(10) - xv[:2]))
+        self.assertAlmostEqual(z[0], np.linalg.norm(self.rs.map[10] - xv[:2]))
         theta = z[1] + xv[2]
         nt.assert_almost_equal(
-            self.rs.map.landmark(10),
+            self.rs.map[10],
             xv[:2] + z[0] * np.r_[np.cos(theta), np.sin(theta)],
         )
 
@@ -138,7 +138,7 @@ class RangeBearingSensorTest(unittest.TestCase):
             nt.assert_almost_equal(z[k, :], self.rs.h(xv, k))
 
         # if vehicle at landmark 10 range=bearing=0
-        x = np.r_[self.map.landmark(10), 0]
+        x = np.r_[self.map[10], 0]
         z = self.rs.h(x, 10)
         self.assertEqual(tuple(z), (0, 0))
 
@@ -219,27 +219,22 @@ class LandMarkTest(unittest.TestCase):
 
         map = LandmarkMap(20)
 
-        self.assertEqual(map.nlandmarks, 20)
+        self.assertEqual(len(map), 20)
 
-        lm = map.landmark(0)
+        lm = map[0]
         self.assertIsInstance(lm, np.ndarray)
         self.assertTrue(lm.shape, (2,))
 
         self.assertIsInstance(str(lm), str)
-
-        self.assertEqual(map.x.shape, (20,))
-        self.assertEqual(map.y.shape, (20,))
-        self.assertEqual(map.xy.shape, (2, 20))
 
     def test_range(self):
         map = LandmarkMap(1000, workspace=[-10, 10, 100, 200])
 
         self.assertTrue(map._map.shape, (2, 1000))
 
-        x = map.x
-        y = map.y
-        self.assertTrue(all([-10 <= a <= 10 for a in x]))
-        self.assertTrue(all([100 <= a <= 200 for a in y]))
+        for x, y in map:
+            self.assertTrue(-10 <= x <= 10)
+            self.assertTrue(100 <= y <= 200)
 
     def test_plot(self):
         plt.clf()
