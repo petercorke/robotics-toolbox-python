@@ -1140,8 +1140,8 @@ class TestDHRobot(unittest.TestCase):
             [0.0000, -0.9652, -0.0000, 0.1941, 0.0000, 0.5791],
         ]
 
-        M0 = puma.inertia_x(q, representation="rpy/xyz")
-        M1 = puma.inertia_x(np.c_[q, q].T, representation="rpy/xyz")
+        M0 = puma.inertia_x(q, representation=None)
+        M1 = puma.inertia_x(np.c_[q, q].T, representation=None)
 
         nt.assert_array_almost_equal(M0, Mr, decimal=4)
         nt.assert_array_almost_equal(M1[0, :, :], Mr, decimal=4)
