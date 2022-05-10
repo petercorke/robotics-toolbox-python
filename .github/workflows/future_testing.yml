@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.9]
 
     steps:
     - name: Set up Python ${{ matrix.python-version }}
@@ -28,18 +28,21 @@ jobs:
     - name: Checkout Swift
       uses: actions/checkout@v2
       with:
+        ref: future
         repository: jhavl/swift
         path: swift
 
     - name: Checkout Spatialmath
       uses: actions/checkout@v2
       with:
+        ref: future
         repository: petercorke/spatialmath-python
         path: sm
 
     - name: Checkout Spatialgeometry
       uses: actions/checkout@v2
       with:
+        ref: future
         repository: jhavl/spatialgeometry
         path: sg
         
