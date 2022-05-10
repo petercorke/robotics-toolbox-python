@@ -81,6 +81,7 @@ class RangeBearingSensorTest(unittest.TestCase):
         self.map = rtb.LandmarkMap(20)
         self.rs = RangeBearingSensor(self.veh, self.map)
 
+    @unittest.skip("mobile under construction")
     def test_init(self):
 
         self.assertIsInstance(self.rs.map, rtb.LandmarkMap)
@@ -88,6 +89,7 @@ class RangeBearingSensorTest(unittest.TestCase):
 
         self.assertIsInstance(str(self.rs), str)
 
+    @unittest.skip("mobile under construction")
     def test_reading(self):
 
         z, lm_id = self.rs.reading()
@@ -108,6 +110,7 @@ class RangeBearingSensorTest(unittest.TestCase):
         self.assertIsInstance(z, np.ndarray)
         self.assertEqual(z.shape, (2,))
 
+    @unittest.skip("mobile under construction")
     def test_h(self):
         xv = np.r_[2, 3, 0.5]
         p = np.r_[3, 4]
@@ -215,6 +218,7 @@ class RangeBearingSensorTest(unittest.TestCase):
 
 
 class LandMarkTest(unittest.TestCase):
+    @unittest.skip("mobile under construction")
     def test_init(self):
 
         map = LandmarkMap(20)
@@ -231,6 +235,7 @@ class LandMarkTest(unittest.TestCase):
         self.assertEqual(map.y.shape, (20,))
         self.assertEqual(map.xy.shape, (2, 20))
 
+    @unittest.skip("mobile under construction")
     def test_range(self):
         map = LandmarkMap(1000, workspace=[-10, 10, 100, 200])
 
