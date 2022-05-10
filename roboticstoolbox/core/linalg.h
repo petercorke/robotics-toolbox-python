@@ -15,6 +15,8 @@ extern "C"
 {
 #endif /* __cplusplus */
 
+#define PI_2 1.57079632679489661923132169163975144
+
 #define Matrix4dc Eigen::Matrix4d
 #define Matrix4dr Eigen::Matrix<double, 4, 4, Eigen::RowMajor>
 
