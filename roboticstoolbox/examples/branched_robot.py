@@ -4,7 +4,7 @@
 """
 
 import swift
-import roboticstoolbox as rp
+import roboticstoolbox as rtb
 import spatialmath as sm
 import spatialgeometry as sg
 import numpy as np
@@ -12,7 +12,7 @@ import numpy as np
 env = swift.Swift()
 env.launch(realtime=True)
 
-r = rp.models.YuMi()
+r = rtb.models.YuMi()
 env.add(r)
 
 lTep = (
@@ -49,14 +49,10 @@ r_frame = sg.Axes(0.1)
 env.add(l_frame)
 env.add(r_frame)
 
-l_path, l_n, _ = r.get_path(end=r.grippers[0])
-r_path, r_n, _ = r.get_path(end=r.grippers[1])
 
-# Inner list comprehension gets a list jindicies from the links in l_path
-# Outer list comprehension removes None's from the list (a None kindex means
-# the link is static)
-l_jindex = [i for i in [link.jindex for link in l_path] if i]
-r_jindex = [i for i in [link.jindex for link in r_path] if i is not None]
+# Construct an ETS for the left and right arms
+la = r.ets(end=r.grippers[0])
+ra = r.ets(end=r.grippers[1])
 
 arrivedl = False
 arrivedr = False
@@ -67,18 +63,14 @@ gain = np.array([1, 1, 1, 1.6, 1.6, 1.6])
 
 while not arrivedl or not arrivedr:
 
-    vl, arrivedl = rp.p_servo(
-        r.fkine(r.q, end=r.grippers[0]), lTep, gain=gain, threshold=0.001
-    )
-    vr, arrivedr = rp.p_servo(
-        r.fkine(r.q, end=r.grippers[1]), rTep, gain=gain, threshold=0.001
-    )
+    vl, arrivedl = rtb.p_servo(la.fkine(r.q), lTep, gain=gain, threshold=0.001)
+    vr, arrivedr = rtb.p_servo(ra.fkine(r.q), rTep, gain=gain, threshold=0.001)
 
-    r.qd[l_jindex] = np.linalg.pinv(r.jacob0(r.q, end=r.grippers[0])) @ vl
-    r.qd[r_jindex] = np.linalg.pinv(r.jacob0(r.q, end=r.grippers[1])) @ vr
+    r.qd[la.jindices] = np.linalg.pinv(la.jacobe(r.q)) @ vl
+    r.qd[ra.jindices] = np.linalg.pinv(ra.jacobe(r.q)) @ vr
 
-    l_frame.base = r.fkine(r.q, end=r.grippers[0])
-    r_frame.base = r.fkine(r.q, end=r.grippers[1])
+    l_frame.T = la.fkine(r.q)
+    r_frame.T = ra.fkine(r.q)
 
     env.step(dt)
 
