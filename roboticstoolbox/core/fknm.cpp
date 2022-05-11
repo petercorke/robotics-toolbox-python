@@ -186,7 +186,7 @@ extern "C"
             Py_DECREF(py_np_q);
         }
 
-        return Py_None;
+        Py_RETURN_NONE;
     }
 
     static PyObject *ETS_hessian0(PyObject *self, PyObject *args)
