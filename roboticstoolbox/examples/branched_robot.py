@@ -12,6 +12,8 @@ import numpy as np
 env = swift.Swift()
 env.launch(realtime=True)
 
+env.set_camera_pose([1.4, 0, 0.7], [0, 0.0, 0.5])
+
 r = rtb.models.YuMi()
 env.add(r)
 
@@ -44,8 +46,12 @@ env.add(r_target)
 env.add(r_target_frame)
 
 
-l_frame = sg.Axes(0.1)
-r_frame = sg.Axes(0.1)
+l_frame = sg.Axes(0.1, pose=r.grippers[0].tool)
+r_frame = sg.Axes(0.1, pose=r.grippers[1].tool)
+
+l_frame.attach_to(r.grippers[0].links[0])
+r_frame.attach_to(r.grippers[1].links[0])
+
 env.add(l_frame)
 env.add(r_frame)
 
@@ -68,9 +74,6 @@ while not arrivedl or not arrivedr:
 
     r.qd[la.jindices] = np.linalg.pinv(la.jacobe(r.q)) @ vl
     r.qd[ra.jindices] = np.linalg.pinv(ra.jacobe(r.q)) @ vr
-
-    l_frame.T = la.fkine(r.q)
-    r_frame.T = ra.fkine(r.q)
 
     env.step(dt)
 
