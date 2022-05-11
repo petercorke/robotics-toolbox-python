@@ -1340,7 +1340,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
     # --------------------------------------------------------------------- #
 
     @property
-    def qd(self):
+    def qd(self) -> ndarray:
         """
         Get/set robot joint velocity (Robot superclass)
 
@@ -1357,7 +1357,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
     @qd.setter
     def qd(self, qd_new):
-        self._qd = getvector(qd_new, self.n)
+        self._qd = np.array(getvector(qd_new, self.n))
 
     # --------------------------------------------------------------------- #
 
