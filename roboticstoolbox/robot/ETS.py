@@ -262,7 +262,7 @@ class BaseETS(UserList):
             >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
             >>> e.jointset()
         """
-        return array([self[j].jindex for j in self.joints()])  # type: ignore
+        return array([j.jindex for j in self.joints()])  # type: ignore
 
     @c_property
     def qlim(self):
