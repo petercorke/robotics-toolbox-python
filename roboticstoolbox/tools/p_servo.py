@@ -3,7 +3,9 @@
 import numpy as np
 from spatialmath import SE3, base
 import math
+from typing import Union
 
+ArrayLike = Union[list, np.ndarray, tuple, set]
 
 def _angle_axis(T, Td):
     e = np.empty(6)
@@ -28,7 +30,7 @@ def _angle_axis(T, Td):
     return e
 
 
-def p_servo(wTe, wTep, gain=1.0, threshold=0.1, method="rpy"):
+def p_servo(wTe, wTep, gain: Union[float, ArrayLike]=1.0, threshold=0.1, method="rpy"):
     """
     Position-based servoing.
 
