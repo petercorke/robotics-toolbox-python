@@ -1447,7 +1447,7 @@ class ERobot(BaseERobot):
 
     # --------------------------------------------------------------------- #
 
-    def get_path(self, end=None, start=None, _fknm=False):
+    def get_path(self, end=None, start=None):
         """
         Find a path from start to end. The end must come after
         the start (ie end must be further away from the base link
@@ -1466,20 +1466,17 @@ class ERobot(BaseERobot):
         path = []
         n = 0
 
-        end, start, tool = self._get_limit_links(end, start)
+        end, start, tool = self._get_limit_links(end=end, start=start)
 
         # This is way faster than doing if x in y method
         try:
-            if _fknm:
-                return self._path_cache_fknm[start.name][end.name]
-            else:
-                return self._path_cache[start.name][end.name]
+            return self._path_cache[start.name][end.name]
         except KeyError:
             pass
 
         if start.name not in self._path_cache:
             self._path_cache[start.name] = {}
-            self._path_cache_fknm[start.name] = {}
+            # self._path_cache_fknm[start.name] = {}
 
         link = end
 
@@ -1498,18 +1495,15 @@ class ERobot(BaseERobot):
                 n += 1
 
         path.reverse()
-        path_fknm = [x._fknm for x in path]
+        # path_fknm = [x._fknm for x in path]
 
         if tool is None:
             tool = SE3()
 
         self._path_cache[start.name][end.name] = (path, n, tool)
-        self._path_cache_fknm[start.name][end.name] = (path_fknm, n, tool.A)
+        # self._path_cache_fknm[start.name][end.name] = (path_fknm, n, tool.A)
 
-        if _fknm:
-            return path_fknm, n, tool.A
-        else:
-            return path, n, tool
+        return path, n, tool
 
     def fkine(
         self,
@@ -1915,7 +1909,7 @@ class ERobot(BaseERobot):
         :rtype: ndarray(6), ndarray(6)
         """
 
-        start, end, _ = self._get_limit_links()
+        end, start, _ = self._get_limit_links(start=start, end=end)
 
         links, n, _ = self.get_path(start=start, end=end)
 
@@ -1935,11 +1929,9 @@ class ERobot(BaseERobot):
                 lpTcp = -wTlp + wTcp
 
                 norm = lpTcp / d
-                norm_h = expand_dims(concatenate((norm, 0, 0, 0)), axis=0)
+                norm_h = expand_dims(concatenate((norm, [0, 0, 0])), axis=0)
 
-                Je = self.jacobe(
-                    q, start=self.base_link, end=link, tool=link_col.base.A
-                )
+                Je = self.jacobe(q, start=self.base_link, end=link, tool=link_col.T)
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
                 l_Ain = zeros((1, n))
