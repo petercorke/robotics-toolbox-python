@@ -13,7 +13,7 @@ function repair_wheel {
 cd ./io
 
 # Compile wheels
-for PYBIN in /opt/python/cp3[6-8]*/bin; do
+for PYBIN in /opt/python/cp3[6-10]*/bin; do
     "${PYBIN}/pip" install .
     "${PYBIN}/pip" install pytest
     "${PYBIN}/pip" wheel /io/ --no-deps -w wheelhouse/
