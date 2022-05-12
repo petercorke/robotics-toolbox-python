@@ -136,7 +136,7 @@ setup(
     entry_points={
         "console_scripts": [
             "eigdemo=roboticstoolbox.examples.eigdemo:main",
-            "tripleangledemo=roboticstoolbox.examples.tripleangledemo",
+            "tripleangledemo=roboticstoolbox.examples.tripleangledemo:main",
             "twistdemo=roboticstoolbox.examples.twistdemo:main",
         ]
     },
