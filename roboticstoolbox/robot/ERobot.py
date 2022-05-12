@@ -8,7 +8,20 @@ from os.path import splitext
 import tempfile
 import subprocess
 import webbrowser
-from numpy import array, ndarray, isnan, zeros, eye, expand_dims, empty, concatenate
+from numpy import (
+    array,
+    ndarray,
+    isnan,
+    zeros,
+    eye,
+    expand_dims,
+    empty,
+    concatenate,
+    cross,
+    arccos,
+    dot,
+)
+from numpy.linalg import norm as npnorm, inv
 from spatialmath import SE3, SE2
 from spatialgeometry import Cylinder
 from spatialmath.base.argcheck import getvector, islistof
@@ -2019,7 +2032,6 @@ class ERobot(BaseERobot):
         :returns: Ain, Bin as the inequality contraints for an omptimisor
         :rtype: ndarray(6), ndarray(6)
         """
-        import numpy as np
 
         if start is None:
             start = self.base_link
@@ -2034,11 +2046,11 @@ class ERobot(BaseERobot):
         bin = None
 
         def rotation_between_vectors(a, b):
-            a = a / np.linalg.norm(a)
-            b = b / np.linalg.norm(b)
+            a = a / npnorm(a)
+            b = b / npnorm(b)
 
-            angle = np.arccos(np.dot(a, b))
-            axis = np.cross(a, b)
+            angle = arccos(dot(a, b))
+            axis = cross(a, b)
 
             return SE3.AngleAxis(angle, axis)
 
@@ -2051,13 +2063,11 @@ class ERobot(BaseERobot):
 
         # Create line of sight object
         los_mid = SE3((wTcp + wTtp) / 2)
-        los_orientation = rotation_between_vectors(
-            np.array([0.0, 0.0, 1.0]), wTcp - wTtp
-        )
+        los_orientation = rotation_between_vectors(array([0.0, 0.0, 1.0]), wTcp - wTtp)
 
         los = Cylinder(
             radius=0.001,
-            length=np.linalg.norm(wTcp - wTtp),
+            length=npnorm(wTcp - wTtp),
             base=(los_mid * los_orientation),
         )
 
@@ -2068,11 +2078,9 @@ class ERobot(BaseERobot):
                 lpTvp = -wTlp + wTvp
 
                 norm = lpTvp / d
-                norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
+                norm_h = expand_dims(concatenate((norm, [0, 0, 0])), axis=0)
 
-                tool = SE3(
-                    (np.linalg.inv(self.fkine(q, end=link).A) @ SE3(wTlp).A)[:3, 3]
-                )
+                tool = SE3((inv(self.fkine(q, end=link).A) @ SE3(wTlp).A)[:3, 3])
 
                 Je = self.jacob0(q, end=link, tool=tool.A)
                 Je[:3, :] = self._T[:3, :3] @ Je[:3, :]
@@ -2082,21 +2090,23 @@ class ERobot(BaseERobot):
                     Jv = camera.jacob0(camera.q)
                     Jv[:3, :] = self._T[:3, :3] @ Jv[:3, :]
 
-                    Jv *= np.linalg.norm(wTvp - shape.T[:3, -1]) / los.length
+                    Jv *= npnorm(wTvp - shape.T[:3, -1]) / los.length
 
                     dpc = norm_h @ Jv
-                    dpc = np.r_[
-                        dpc[0, :-camera_n],
-                        np.zeros(self.n - (camera.n - camera_n)),
-                        dpc[0, -camera_n:],
-                    ]
+                    dpc = concatenate(
+                        (
+                            dpc[0, :-camera_n],
+                            zeros(self.n - (camera.n - camera_n)),
+                            dpc[0, -camera_n:],
+                        )
+                    )
                 else:
-                    dpc = np.zeros((1, self.n + camera_n))
+                    dpc = zeros((1, self.n + camera_n))
 
                 dpt = norm_h @ shape.v
-                dpt *= np.linalg.norm(wTvp - wTcp) / los.length
+                dpt *= npnorm(wTvp - wTcp) / los.length
 
-                l_Ain = np.zeros((1, self.n + camera_n))
+                l_Ain = zeros((1, self.n + camera_n))
                 l_Ain[0, :n_dim] = norm_h @ Je
                 l_Ain -= dpc
                 l_bin = (xi * (d - ds) / (di - ds)) + dpt
