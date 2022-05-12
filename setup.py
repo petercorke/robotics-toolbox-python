@@ -92,7 +92,7 @@ fknm = Extension(
 
 setup(
     name="roboticstoolbox-python",
-    version="1.0.0",
+    version="1.0.1",
     description="A Python library for robotic education and research",
     long_description=long_description,
     long_description_content_type="text/markdown",
