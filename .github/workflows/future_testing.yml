@@ -60,6 +60,6 @@ jobs:
     - name: Test with pytest
       run: |
         cd rtb
-        pip install .[dev,collision,vpython]
+        pip install .[dev,collision]
         pip install pytest-timeout
         pytest --timeout=50 --timeout_method thread -s
