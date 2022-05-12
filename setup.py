@@ -11,13 +11,13 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 req = [
     "numpy>=1.17.4",
-    "spatialmath-python>=0.11",
-    "spatialgeometry>=0.2.0",
+    "spatialmath-python~=1.0.0",
+    "spatialgeometry~=1.0.0",
     "pgraph-python",
     "scipy",
     "matplotlib",
     "ansitable",
-    "swift-sim>=0.10.0",
+    "swift-sim~=1.0.0",
     "rtb-data",
     "progress",
 ]
@@ -90,19 +90,9 @@ fknm = Extension(
     # ],
 )
 
-
-# class build_ext_subclass(build_ext_with_blas):
-#     def build_extensions(self):
-#         compiler = self.compiler.compiler_type
-#         for e in self.extensions:
-#             e.extra_compile_args += ["-Ofast", "-fopenmp", "-march=native", "-std=c99"]
-#             e.extra_link_args += ["-fopenmp"]
-#         build_ext_with_blas.build_extensions(self)
-
-
 setup(
     name="roboticstoolbox-python",
-    version="0.11.0",
+    version="1.0.0",
     description="A Python library for robotic education and research",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -113,7 +103,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         # Indicate who your project is intended for
         "Intended Audience :: Developers",
         # Pick your license as you wish (should match "license" above)
@@ -124,6 +114,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     python_requires=">=3.6",
     project_urls={
@@ -139,11 +130,11 @@ setup(
     " control simulation robot-manipulator mobile-robot",
     packages=find_packages(exclude=["tests", "notebooks"]),
     package_data={"roboticstoolbox": extra_files},
-    scripts = [
+    scripts=[
         "roboticstoolbox/bin/rtbtool",
     ],
-    entry_points = {
-        "console_scripts" : [
+    entry_points={
+        "console_scripts": [
             "eigdemo=roboticstoolbox.examples.eigdemo:main",
             "tripleangledemo=roboticstoolbox.examples.tripleangledemo",
             "twistdemo=roboticstoolbox.examples.twistdemo:main",
