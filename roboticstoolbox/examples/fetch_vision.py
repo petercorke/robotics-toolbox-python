@@ -23,6 +23,7 @@ def transform_between_vectors(a, b):
 
     return sm.SE3.AngleAxis(angle, axis)
 
+
 # Launch the simulator Swift
 env = swift.Swift()
 env.launch()
@@ -43,7 +44,7 @@ sight_base = sm.SE3.Ry(np.pi / 2) * sm.SE3(0.0, 0.0, 2.5)
 centroid_sight = sg.Cylinder(
     radius=0.001,
     length=5.0,
-    base=fetch_camera.fkine(fetch_camera.q, fast=True) @ sight_base.A,
+    base=fetch_camera.fkine(fetch_camera.q).A @ sight_base.A,
 )
 
 # Add the Fetch and other shapes to the simulator
@@ -55,7 +56,7 @@ env.add(target)
 # Set the desired end-effector pose to the location of target
 Tep = fetch.fkine(fetch.q)
 Tep.A[:3, :3] = sm.SE3.Rz(np.pi).R
-Tep.A[:3, 3] = target.base.t
+Tep.A[:3, 3] = target.T[:3, -1]
 
 env.step()
 
@@ -68,9 +69,9 @@ n = n_base + n_arm + n_camera
 def step():
 
     # Find end-effector pose in world frame
-    wTe = fetch.fkine(fetch.q, fast=True)
+    wTe = fetch.fkine(fetch.q).A
     # Find camera pose in world frame
-    wTc = fetch_camera.fkine(fetch_camera.q, fast=True)
+    wTc = fetch_camera.fkine(fetch_camera.q).A
 
     # Find transform between end-effector and goal
     eTep = np.linalg.inv(wTe) @ Tep.A
@@ -87,34 +88,27 @@ def step():
     # Quadratic component of objective function
     Q = np.eye(n + 10)
 
-    Q[: n_base + n_arm, : n_base + n_arm]       *= 0.01                         # Robotic manipulator
-    Q[:n_base, :n_base]                         *= w_lambda(et, 1.0, -1.0)      # Mobile base
-    Q[n_base + n_arm : n, n_base + n_arm : n]   *= 0.01                         # Camera
-    Q[n : n + 3, n : n + 3]                     *= w_lambda(et, 1000.0, -2.0)   # Slack arm linear
-    Q[n + 3 : n + 6, n + 3 : n + 6]             *= w_lambda(et, 0.01, -5.0)     # Slack arm angular
-    Q[n + 6:-1, n + 6:-1]                       *= 100                          # Slack camera
-    Q[-1, -1]                                   *= w_lambda(et, 1000.0, 3.0)    # Slack self-occlusion
+    Q[: n_base + n_arm, : n_base + n_arm] *= 0.01  # Robotic manipulator
+    Q[:n_base, :n_base] *= w_lambda(et, 1.0, -1.0)  # Mobile base
+    Q[n_base + n_arm : n, n_base + n_arm : n] *= 0.01  # Camera
+    Q[n : n + 3, n : n + 3] *= w_lambda(et, 1000.0, -2.0)  # Slack arm linear
+    Q[n + 3 : n + 6, n + 3 : n + 6] *= w_lambda(et, 0.01, -5.0)  # Slack arm angular
+    Q[n + 6 : -1, n + 6 : -1] *= 100  # Slack camera
+    Q[-1, -1] *= w_lambda(et, 1000.0, 3.0)  # Slack self-occlusion
 
     # Calculate target velocities for end-effector to reach target
     v_manip, _ = rtb.p_servo(wTe, Tep, 1.5)
     v_manip[3:] *= 1.3
 
     # Calculate target angular velocity for camera to rotate towards target
-    head_rotation = transform_between_vectors(
-        np.array([1, 0, 0]), cTep[:3, 3]
-    )
+    head_rotation = transform_between_vectors(np.array([1, 0, 0]), cTep[:3, 3])
     v_camera, _ = rtb.p_servo(sm.SE3(), head_rotation, 25)
 
     # The equality contraints to achieve velocity targets
-    Aeq = np.c_[
-        fetch.jacobe(fetch.q, fast=True), 
-        np.zeros((6, 2)), 
-        np.eye(6), 
-        np.zeros((6, 4))
-    ]
+    Aeq = np.c_[fetch.jacobe(fetch.q), np.zeros((6, 2)), np.eye(6), np.zeros((6, 4))]
     beq = v_manip.reshape((6,))
 
-    jacobe_cam = fetch_camera.jacobe(fetch_camera.q, fast=True)[3:, :]
+    jacobe_cam = fetch_camera.jacobe(fetch_camera.q)[3:, :]
     Aeq_cam = np.c_[
         jacobe_cam[:, :3],
         np.zeros((3, 7)),
@@ -162,10 +156,12 @@ def step():
         xi=1.0,
         end=fetch.link_dict["gripper_link"],
         start=fetch.link_dict["shoulder_pan_link"],
-    )    
+    )
 
     if c_Ain is not None and c_bin is not None:
-        c_Ain = np.c_[c_Ain, np.zeros((c_Ain.shape[0], 9)), -np.ones((c_Ain.shape[0], 1))]
+        c_Ain = np.c_[
+            c_Ain, np.zeros((c_Ain.shape[0], 9)), -np.ones((c_Ain.shape[0], 1))
+        ]
 
         Ain = np.r_[Ain, c_Ain]
         bin = np.r_[bin, c_bin]
@@ -174,7 +170,8 @@ def step():
     c = np.concatenate(
         (
             np.zeros(n_base),
-            -fetch.jacobm(start=fetch.links[3]).reshape((n_arm,)),
+            # -fetch.jacobm(start=fetch.links[3]).reshape((n_arm,)),
+            np.zeros(n_arm),
             np.zeros(n_camera),
             np.zeros(10),
         )
@@ -182,7 +179,7 @@ def step():
 
     # Get base to face end-effector
     kε = 0.5
-    bTe = fetch.fkine(fetch.q, include_base=False, fast=True)
+    bTe = fetch.fkine(fetch.q, include_base=False).A
     θε = math.atan2(bTe[1, -1], bTe[0, -1])
     ε = kε * θε
     c[0] = -ε
@@ -217,7 +214,7 @@ def step():
 
     fetch.qd = qd
     fetch_camera.qd = qd_cam
-    centroid_sight._base = fetch_camera.fkine(fetch_camera.q, fast=True) @ sight_base.A
+    centroid_sight.T = fetch_camera.fkine(fetch_camera.q).A @ sight_base.A
 
     return arrived
 
@@ -226,4 +223,3 @@ arrived = False
 while not arrived:
     arrived = step()
     env.step(0.01)
-
