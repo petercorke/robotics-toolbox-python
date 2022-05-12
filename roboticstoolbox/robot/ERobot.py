@@ -8,8 +8,22 @@ from os.path import splitext
 import tempfile
 import subprocess
 import webbrowser
-from numpy import array, ndarray, isnan, zeros, eye, expand_dims, empty, concatenate
+from numpy import (
+    array,
+    ndarray,
+    isnan,
+    zeros,
+    eye,
+    expand_dims,
+    empty,
+    concatenate,
+    cross,
+    arccos,
+    dot,
+)
+from numpy.linalg import norm as npnorm, inv
 from spatialmath import SE3, SE2
+from spatialgeometry import Cylinder
 from spatialmath.base.argcheck import getvector, islistof
 from roboticstoolbox.robot.Link import Link, Link2, BaseLink
 from roboticstoolbox.robot.ETS import ETS, ETS2
@@ -1931,17 +1945,27 @@ class ERobot(BaseERobot):
                 norm = lpTcp / d
                 norm_h = expand_dims(concatenate((norm, [0, 0, 0])), axis=0)
 
+                # tool = (self.fkine(q, end=link).inv() * SE3(wTlp)).A[:3, 3]
+
+                # Je = self.jacob0(q, end=link, tool=tool)
+                # Je[:3, :] = self._T[:3, :3] @ Je[:3, :]
+
+                # n_dim = Je.shape[1]
+                # dp = norm_h @ shape.v
+                # l_Ain = zeros((1, self.n))
+
                 Je = self.jacobe(q, start=self.base_link, end=link, tool=link_col.T)
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
                 l_Ain = zeros((1, n))
+
                 l_Ain[0, :n_dim] = norm_h @ Je
                 l_bin = (xi * (d - ds) / (di - ds)) + dp
             else:
                 l_Ain = None
                 l_bin = None
 
-            return l_Ain, l_bin, d, wTcp
+            return l_Ain, l_bin
 
         for link in links:
             if link.isjoint:
@@ -1953,7 +1977,156 @@ class ERobot(BaseERobot):
                 col_list = collision_list[j - 1]
 
             for link_col in col_list:
-                l_Ain, l_bin, d, wTcp = indiv_calculation(link, link_col, q)
+                l_Ain, l_bin = indiv_calculation(link, link_col, q)
+
+                if l_Ain is not None and l_bin is not None:
+                    if Ain is None:
+                        Ain = l_Ain
+                    else:
+                        Ain = concatenate((Ain, l_Ain))
+
+                    if bin is None:
+                        bin = array(l_bin)
+                    else:
+                        bin = concatenate((bin, l_bin))
+
+        return Ain, bin
+
+    def vision_collision_damper(
+        self,
+        shape,
+        camera=None,
+        camera_n=0,
+        q=None,
+        di=0.3,
+        ds=0.05,
+        xi=1.0,
+        end=None,
+        start=None,
+        collision_list=None,
+    ):
+        """
+        Formulates an inequality contraint which, when optimised for will
+        make it impossible for the robot to run into a line of sight.
+        See examples/fetch_vision.py for use case
+        :param camera: The camera link, either as a robotic link or SE3
+            pose
+        :type camera: ERobot or SE3
+        :param camera_n: Degrees of freedom of the camera link
+        :type camera_n: int
+        :param ds: The minimum distance in which a joint is allowed to
+            approach the collision object shape
+        :type ds: float
+        :param di: The influence distance in which the velocity
+            damper becomes active
+        :type di: float
+        :param xi: The gain for the velocity damper
+        :type xi: float
+        :param from_link: The first link to consider, defaults to the base
+            link
+        :type from_link: ELink
+        :param to_link: The last link to consider, will consider all links
+            between from_link and to_link in the robot, defaults to the
+            end-effector link
+        :type to_link: ELink
+        :returns: Ain, Bin as the inequality contraints for an omptimisor
+        :rtype: ndarray(6), ndarray(6)
+        """
+
+        if start is None:
+            start = self.base_link
+
+        if end is None:
+            end = self.ee_link
+
+        links, n, _ = self.get_path(start=start, end=end)
+
+        j = 0
+        Ain = None
+        bin = None
+
+        def rotation_between_vectors(a, b):
+            a = a / npnorm(a)
+            b = b / npnorm(b)
+
+            angle = arccos(dot(a, b))
+            axis = cross(a, b)
+
+            return SE3.AngleAxis(angle, axis)
+
+        if isinstance(camera, ERobot):
+            wTcp = camera.fkine(camera.q).A[:3, 3]
+        elif isinstance(camera, SE3):
+            wTcp = camera.t
+
+        wTtp = shape.T[:3, -1]
+
+        # Create line of sight object
+        los_mid = SE3((wTcp + wTtp) / 2)
+        los_orientation = rotation_between_vectors(array([0.0, 0.0, 1.0]), wTcp - wTtp)
+
+        los = Cylinder(
+            radius=0.001,
+            length=npnorm(wTcp - wTtp),
+            base=(los_mid * los_orientation),
+        )
+
+        def indiv_calculation(link, link_col, q):
+            d, wTlp, wTvp = link_col.closest_point(los, di)
+
+            if d is not None:
+                lpTvp = -wTlp + wTvp
+
+                norm = lpTvp / d
+                norm_h = expand_dims(concatenate((norm, [0, 0, 0])), axis=0)
+
+                tool = SE3((inv(self.fkine(q, end=link).A) @ SE3(wTlp).A)[:3, 3])
+
+                Je = self.jacob0(q, end=link, tool=tool.A)
+                Je[:3, :] = self._T[:3, :3] @ Je[:3, :]
+                n_dim = Je.shape[1]
+
+                if isinstance(camera, ERobot):
+                    Jv = camera.jacob0(camera.q)
+                    Jv[:3, :] = self._T[:3, :3] @ Jv[:3, :]
+
+                    Jv *= npnorm(wTvp - shape.T[:3, -1]) / los.length
+
+                    dpc = norm_h @ Jv
+                    dpc = concatenate(
+                        (
+                            dpc[0, :-camera_n],
+                            zeros(self.n - (camera.n - camera_n)),
+                            dpc[0, -camera_n:],
+                        )
+                    )
+                else:
+                    dpc = zeros((1, self.n + camera_n))
+
+                dpt = norm_h @ shape.v
+                dpt *= npnorm(wTvp - wTcp) / los.length
+
+                l_Ain = zeros((1, self.n + camera_n))
+                l_Ain[0, :n_dim] = norm_h @ Je
+                l_Ain -= dpc
+                l_bin = (xi * (d - ds) / (di - ds)) + dpt
+            else:
+                l_Ain = None
+                l_bin = None
+
+            return l_Ain, l_bin
+
+        for link in links:
+            if link.isjoint:
+                j += 1
+
+            if collision_list is None:
+                col_list = link.collision
+            else:
+                col_list = collision_list[j - 1]
+
+            for link_col in col_list:
+                l_Ain, l_bin = indiv_calculation(link, link_col, q)
 
                 if l_Ain is not None and l_bin is not None:
                     if Ain is None:
