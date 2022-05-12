@@ -6,6 +6,7 @@
 
 from roboticstoolbox import DHRobot, RevoluteDH
 from math import pi
+import numpy as np
 
 
 class Planar2(DHRobot):
@@ -39,27 +40,32 @@ class Planar2(DHRobot):
 
         if symbolic:
             import spatialmath.base.symbolic as sym
+
             zero = sym.zero()
             pi = sym.pi()
-            a1, a2 = sym.symbol('a1 a2')
+            a1, a2 = sym.symbol("a1 a2")  # type: ignore
         else:
             from math import pi
+
             zero = 0.0
             a1 = 1
             a2 = 1
 
-        L = [
-                RevoluteDH(a=a1, alpha=zero),
-                RevoluteDH(a=a2, alpha=zero)
-            ]
+        L = [RevoluteDH(a=a1, alpha=zero), RevoluteDH(a=a2, alpha=zero)]
 
-        super().__init__(L, name='Planar 2 link', keywords=('planar',))
-        self.addconfiguration("qz", [0, 0])
-        self.addconfiguration("q1", [0, pi/2])
-        self.addconfiguration("q2", [pi/2, -pi/2])
+        super().__init__(L, name="Planar 2 link", keywords=("planar",))
+
+        self.qr = np.array([0, pi / 2])
+        self.qz = np.zeros(2)
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
+
+        self.addconfiguration_attr("q1", np.array([0, pi / 2]))
+        self.addconfiguration_attr("q2", np.array([pi / 2, -pi / 2]))
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     robot = Planar2()
     print(robot)

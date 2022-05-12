@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
+from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ERobot import ERobot
-from roboticstoolbox.robot.ELink import ELink
+from roboticstoolbox.robot.Link import Link
 import spatialgeometry as sg
 import spatialmath as sm
 
@@ -39,13 +40,13 @@ class Omni(ERobot):
 
         l, w, h = 0.55, 0.40, 0.35
 
-        b0 = ELink(v=ETS.rz(), name="base0", parent=None, qlim=[-1000, 1000])
+        b0 = Link(ETS(ET.Rz()), name="base0", parent=None, qlim=[-1000, 1000])
 
-        b1 = ELink(v=ETS.tx(), name="base1", parent=b0, qlim=[-1000, 1000])
+        b1 = Link(ETS(ET.tx()), name="base1", parent=b0, qlim=[-1000, 1000])
 
-        b2 = ELink(v=ETS.ty(), name="base2", parent=b1, qlim=[-1000, 1000])
+        b2 = Link(ETS(ET.ty()), name="base2", parent=b1, qlim=[-1000, 1000])
 
-        g0 = ELink(name="gripper", parent=b2)
+        g0 = Link(name="gripper", parent=b2)
 
         b2.geometry = sg.Cuboid(
             [l, w, h], base=sm.SE3(0, 0, h / 2), color=(163, 157, 134)
@@ -61,7 +62,11 @@ class Omni(ERobot):
             gripper_links=g0,
         )
 
-        self.addconfiguration("qz", np.array([0, 0, 0]))
+        self.qr = np.array([0, 0, 0])
+        self.qz = np.zeros(3)
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

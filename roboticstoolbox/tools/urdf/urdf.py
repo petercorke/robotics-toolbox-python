@@ -9,13 +9,19 @@ import roboticstoolbox as rtb
 import spatialgeometry as gm
 import copy
 import os
-import xml.etree.ElementTree as ET
-import spatialmath as sm
+import xml.etree.ElementTree as ETT
+from spatialmath import SE3
+from spatialmath.base import unitvec_norm, angvec2r, tr2rpy
+
 from io import BytesIO
 from roboticstoolbox.tools.data import rtb_path_to_datafile
+from pathlib import PurePosixPath
 
 
 from .utils import parse_origin, configure_origin
+
+# Global variable for the base path of the robot meshes
+_base_path = None
 
 
 class URDFType(object):
@@ -292,10 +298,15 @@ class Mesh(URDFType):
     @filename.setter
     def filename(self, value):
 
+        global _base_path
+
         if value.startswith("package://"):
             value = value.replace("package://", "")
 
-        value = rtb_path_to_datafile("xacro", value)
+        if _base_path is None:
+            value = rtb_path_to_datafile("xacro", value)
+        else:
+            value = _base_path / PurePosixPath(value)
 
         self._filename = str(value)
 
@@ -482,7 +493,7 @@ class Collision(URDFType):
         self.geometry = geometry
         self.name = name
         self.origin = origin
-        self.geometry.ob.base = origin
+        self.geometry.ob.T = origin
 
     @property
     def geometry(self):
@@ -546,7 +557,7 @@ class Visual(URDFType):
 
     def __init__(self, geometry, name=None, origin=None, material=None):
         self.geometry = geometry
-        geometry.ob.base = origin
+        geometry.ob.T = origin
         self.name = name
         self.origin = origin
         self.material = material
@@ -1652,7 +1663,7 @@ class URDF(URDFType):
 
         # build the list of links in URDF file order
         for link in self._links:
-            elink = rtb.ELink(
+            elink = rtb.Link(
                 name=link.name,
                 m=link.inertial.mass,
                 r=link.inertial.origin[:3, 3]
@@ -1687,64 +1698,69 @@ class URDF(URDFType):
             childlink._joint_name = joint.name
 
             # constant part of link transform
-            trans = sm.SE3(joint.origin).t
-            # TODO, find where reverse is used and change
-            # it to [::-1] or do that here
+            trans = SE3(joint.origin).t
             rot = joint.rpy
 
             # Check if axis of rotation/tanslation is not 1
             if np.count_nonzero(joint.axis) < 2:
-                childlink._ets = rtb.ETS.SE3(trans, rot)
+                ets = rtb.ET.SE3(SE3(trans) * SE3.RPY(rot))
             else:
                 # Normalise the joint axis to be along or about z axis
                 # Convert rest to static ETS
                 v = joint.axis
-                u, n = sm.base.unitvec_norm(v)
-                R = sm.base.angvec2r(n, u)
+                u, n = unitvec_norm(v)
+                R = angvec2r(n, u)
 
-                R_total = sm.SE3.RPY(joint.rpy) * R
-                rpy = sm.base.tr2rpy(R_total)
+                R_total = SE3.RPY(joint.rpy) * R
+                rpy = tr2rpy(R_total)
 
-                childlink._ets = rtb.ETS.SE3(trans, rpy)
+                ets = rtb.ET.SE3(SE3(trans) * SE3.RPY(rpy))
+
                 joint.axis = [0, 0, 1]
 
-            childlink._init_Ts()
-
             # variable part of link transform
+            var = None
             if joint.joint_type in ("revolute", "continuous"):  # pragma nocover # noqa
                 if joint.axis[0] == 1:
-                    var = rtb.ETS.rx()
+                    var = rtb.ET.Rx()
                 elif joint.axis[0] == -1:
-                    var = rtb.ETS.rx(flip=True)
+                    var = rtb.ET.Rx(flip=True)
                 elif joint.axis[1] == 1:
-                    var = rtb.ETS.ry()
+                    var = rtb.ET.Ry()
                 elif joint.axis[1] == -1:
-                    var = rtb.ETS.ry(flip=True)
+                    var = rtb.ET.Ry(flip=True)
                 elif joint.axis[2] == 1:
-                    var = rtb.ETS.rz()
+                    var = rtb.ET.Rz()
                 elif joint.axis[2] == -1:
-                    var = rtb.ETS.rz(flip=True)
+                    var = rtb.ET.Rz(flip=True)
             elif joint.joint_type == "prismatic":  # pragma nocover
                 if joint.axis[0] == 1:
-                    var = rtb.ETS.tx()
+                    var = rtb.ET.tx()
                 elif joint.axis[0] == -1:
-                    var = rtb.ETS.tx(flip=True)
+                    var = rtb.ET.tx(flip=True)
                 elif joint.axis[1] == 1:
-                    var = rtb.ETS.ty()
+                    var = rtb.ET.ty()
                 elif joint.axis[1] == -1:
-                    var = rtb.ETS.ty(flip=True)
+                    var = rtb.ET.ty(flip=True)
                 elif joint.axis[2] == 1:
-                    var = rtb.ETS.tz()
+                    var = rtb.ET.tz()
                 elif joint.axis[2] == -1:
-                    var = rtb.ETS.tz(flip=True)
+                    var = rtb.ET.tz(flip=True)
             elif joint.joint_type == "fixed":
                 var = None
 
-            childlink.v = var
+            if var is not None:
+                ets = ets * var
+
+            if isinstance(ets, rtb.ET):
+                ets = rtb.ETS(ets)
+
+            childlink.ets = ets
 
             # joint limit
             try:
-                childlink.qlim = [joint.limit.lower, joint.limit.upper]
+                if childlink.isjoint:
+                    childlink.qlim = [joint.limit.lower, joint.limit.upper]
             except AttributeError:
                 # no joint limits provided
                 pass
@@ -1881,21 +1897,21 @@ class URDF(URDFType):
         """
         if isinstance(file_obj, str):
             if os.path.isfile(file_obj):
-                parser = ET.XMLParser()
-                tree = ET.parse(file_obj, parser=parser)
+                parser = ETT.XMLParser()
+                tree = ETT.parse(file_obj, parser=parser)
                 path, _ = os.path.split(file_obj)
             else:
                 raise ValueError("{} is not a file".format(file_obj))
         else:
-            parser = ET.XMLParser()
-            tree = ET.parse(file_obj, parser=parser)
+            parser = ETT.XMLParser()
+            tree = ETT.parse(file_obj, parser=parser)
             path, _ = os.path.split(file_obj.name)
 
         node = tree.getroot()
         return URDF._from_xml(node, path)
 
     @staticmethod
-    def loadstr(str_obj, file_obj):
+    def loadstr(str_obj, file_obj, base_path=None):
         """Load a URDF from a file.
         Parameters
         ----------
@@ -1909,16 +1925,21 @@ class URDF(URDFType):
         urdf : :class:`.URDF`
             The parsed URDF.
         """
+        global _base_path
+
+        if base_path is not None:
+            _base_path = base_path
+
         if isinstance(str_obj, str):
             if os.path.isfile(file_obj):
-                parser = ET.XMLParser()
+                parser = ETT.XMLParser()
                 bytes_obj = BytesIO(bytes(str_obj, "utf-8"))
-                tree = ET.parse(bytes_obj, parser=parser)
+                tree = ETT.parse(bytes_obj, parser=parser)
                 path, _ = os.path.split(file_obj)
 
         else:  # pragma nocover
-            parser = ET.XMLParser()
-            tree = ET.parse(file_obj, parser=parser)
+            parser = ETT.XMLParser()
+            tree = ETT.parse(file_obj, parser=parser)
             path, _ = os.path.split(file_obj.name)
 
         node = tree.getroot()
@@ -1942,11 +1963,11 @@ class URDF(URDFType):
         valid_tags = set(["joint", "link", "transmission", "material"])
         kwargs = cls._parse(node, path)
 
-        extra_xml_node = ET.Element("extra")
+        extra_xml_node = ETT.Element("extra")
         for child in node:
             if child.tag not in valid_tags:
                 extra_xml_node.append(child)
 
-        # data = ET.ostring(extra_xml_node)
+        # data = ETT.ostring(extra_xml_node)
         # kwargs['other_xml'] = data
         return URDF(**kwargs)

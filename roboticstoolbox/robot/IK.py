@@ -12,18 +12,32 @@ from spatialmath import base
 from spatialmath import SE3
 import scipy.optimize as opt
 import math
-import qpsolvers as qp
+
 from roboticstoolbox.tools.p_servo import p_servo
 
 # iksol = namedtuple("IKsolution", "q, success, reason, iterations, residual",
 #     defaults=(None, False, None, None, None)) # Py >= 3.7 only
 iksol = namedtuple("IKsolution", "q, success, reason, iterations, residual")
 
+
+try:
+    import qpsolvers as qp
+
+    _qp = True
+except ImportError:  # pragma nocover
+    _qp = False
+
+
 # ===================================================================== #
 
 
 class IKMixin:
     def ikine_mmc(self, T, q0=None):
+
+        if not _qp:
+            raise ImportError(
+                "the package qpsolvers is required for this function. \nInstall using 'pip install qpsolvers'"
+            )
 
         arrived = False
 
@@ -759,14 +773,14 @@ class IKMixin:
         def cost(q, T, weight, costfun, stiffness):
             # T, weight, costfun, stiffness = args
             e = _angle_axis(self.fkine(q, end=end).A, T) * weight
-            E = (e ** 2).sum()
+            E = (e**2).sum()
 
             if stiffness > 0:
                 # Enforce a continuity constraint on joints, minimum bend
                 E += np.sum(np.diff(q) ** 2) * stiffness
 
             if costfun is not None:
-                E += (e ** 2).sum() + costfun(q)
+                E += (e**2).sum() + costfun(q)
 
             return E
 
@@ -850,7 +864,7 @@ class IKMixin:
         def cost(q, T, weight):
             # T, weight, costfun, stiffness = args
             e = _angle_axis(self.fkine(q, end=end).A, T) * weight
-            return (e ** 2).sum()
+            return (e**2).sum()
 
         for _ in T:
             res = global_minimizer(cost, **optdict)

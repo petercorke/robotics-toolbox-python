@@ -10,59 +10,86 @@ over red hand, is the corresponding eigenvalue.  The eigenvalue will be
 negative if the hands are anti-parallel.
 
 """
-
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from math import pi, sin, cos
 
-A = np.array([
-    [1, 2],
-    [3, 3]
-])
 
-e, x = np.linalg.eig(A)
-print(e)
-print(x)
+def eigdemo(A):
 
-print(f"λ1 = {e[0]:.3f}, x1 = {np.real(x[:,0].flatten())}")
-print(f"λ2 = {e[1]:.3f}, x2 = {np.real(x[:,1].flatten())}")
+    print('matrix A =')
+    print(A)
+    e, x = np.linalg.eig(A)
 
-s = np.max(np.abs(e))
+    print(f"λ1 = {e[0]:.3f}, x1 = {np.real(x[:,0].flatten())}")
+    print(f"λ2 = {e[1]:.3f}, x2 = {np.real(x[:,1].flatten())}")
 
-fig, ax = plt.subplots()
-plt.axis([-s, s, -s, s])
-plt.grid(True)
-plt.title('Eigenvector demonstration')
-plt.xlabel('x')
-plt.ylabel('y')
-plt.axis('equal')
-plt.xlim(-s, s)
-plt.ylim(-s, s)
-ax.set_aspect('equal')
+    s = np.max(np.abs(e))
 
-l1, = plt.plot([0, 0], [0, 0], color='r', linewidth=1.5)  # input vector
-l2, = plt.plot([0, 0], [0, 0], color='b', linewidth=1.5)  # transformed vector
+    fig, ax = plt.subplots()
+    plt.axis([-s, s, -s, s])
+    plt.grid(True)
+    plt.title('Eigenvector demonstration')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.axis('equal')
+    plt.xlim(-s, s)
+    plt.ylim(-s, s)
+    ax.set_aspect('equal')
 
-plt.legend(['$x$', r'${\bf A} x$'])
+    l1, = plt.plot([0, 0], [0, 0], color='r', linewidth=1.5)  # input vector
+    l2, = plt.plot([0, 0], [0, 0], color='b', linewidth=1.5)  # transformed vector
+
+    plt.legend(['$x$', r'${\bf A} x$'])
 
 
-def animate(theta):
+    def animate(theta):
 
-    x = np.r_[cos(theta), sin(theta)]
-    y = A @ x
+        x = np.r_[cos(theta), sin(theta)]
+        y = A @ x
 
-    l1.set_xdata([0, x[0]])
-    l1.set_ydata([0, x[1]])
+        l1.set_xdata([0, x[0]])
+        l1.set_ydata([0, x[1]])
 
-    l2.set_xdata([0, y[0]])
-    l2.set_ydata([0, y[1]])
+        l2.set_xdata([0, y[0]])
+        l2.set_ydata([0, y[1]])
 
-    return l1, l2
+        return l1, l2
 
 
-myAnimation = animation.FuncAnimation(
-    fig, animate, frames=np.linspace(
-        0, 2 * pi, 400), blit=True, interval=20, repeat=True)
+    myAnimation = animation.FuncAnimation(
+        fig, animate, frames=np.linspace(
+            0, 2 * pi, 400), blit=True, interval=20, repeat=True)
 
-plt.show(block=True)
+    plt.show(block=True)
+
+def main():
+
+    def help():
+        print("eigdemo          uses default matrix [1 2; 3 4]")
+        print("eigdemo a b c d  uses matrix [a b; c d]")
+        sys.exit(0)
+        
+    if len(sys.argv) == 5:
+
+        try:
+            vec = [float(a) for a in sys.argv[1:5]]
+            A = np.reshape(vec, (2,2))
+        except:
+            help()
+
+    elif sys.argv == 1:
+        A = np.array([
+            [1, 2],
+            [3, 3]
+        ])
+
+    else:
+        help()
+
+    eigdemo(A)
+
+if __name__ == "__main__":
+    main()

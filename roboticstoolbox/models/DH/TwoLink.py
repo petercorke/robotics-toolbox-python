@@ -5,6 +5,7 @@
 from roboticstoolbox import DHRobot, RevoluteDH
 from math import pi
 from spatialmath import SE3
+import numpy as np
 
 
 class TwoLink(DHRobot):
@@ -48,7 +49,7 @@ class TwoLink(DHRobot):
         - Robot has only 2 DoF.
         - Motor inertia is 0.
         - Link inertias are 0.
-        - Viscous and Coulomb friction is 0. 
+        - Viscous and Coulomb friction is 0.
 
     :Reference: Based on Fig 3-6 (p73) of Spong and Vidyasagar (1st edition).
 
@@ -59,14 +60,16 @@ class TwoLink(DHRobot):
 
         if symbolic:
             import spatialmath.base.symbolic as sym
+
             zero = sym.zero()
             pi = sym.pi()
-            a1, a2 = sym.symbol('a1 a2')
-            m1, m2 = sym.symbol('m1 m2')
-            c1, c2 = sym.symbol('c1 c2')
-            g = sym.symbol('g')
+            a1, a2 = sym.symbol("a1 a2")  # type: ignore
+            m1, m2 = sym.symbol("m1 m2")  # type: ignore
+            c1, c2 = sym.symbol("c1 c2")  # type: ignore
+            g = sym.symbol("g")
         else:
             from math import pi
+
             zero = 0.0
             a1 = 1
             a2 = 1
@@ -77,31 +80,30 @@ class TwoLink(DHRobot):
             g = 9.8
 
         links = [
-                RevoluteDH(a=a1, alpha=zero, m=m1, r=[c1, 0, 0]),
-                RevoluteDH(a=a2, alpha=zero, m=m2, r=[c2, 0, 0])
-            ]
+            RevoluteDH(a=a1, alpha=zero, m=m1, r=[c1, 0, 0]),
+            RevoluteDH(a=a2, alpha=zero, m=m2, r=[c2, 0, 0]),
+        ]
 
         super().__init__(
-            links,
-            symbolic=symbolic,
-            name='2 link', 
-            keywords=('planar', 'dynamics')
+            links, symbolic=symbolic, name="2 link", keywords=("planar", "dynamics")
         )
-        self.addconfiguration("qz", [0, 0])
-        self.addconfiguration("q1", [0, pi/2])
-        self.addconfiguration("q2", [pi/2, -pi/2])
-        self.addconfiguration("qn", [pi/6, -pi/6])
 
-        self.base = SE3.Rx(pi/2)
+        self.qr = np.array([pi / 6, -pi / 6])
+        self.qz = np.zeros(2)
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
+
+        self.addconfiguration_attr("qz", [0, 0])
+        self.addconfiguration_attr("q1", [0, pi / 2])
+        self.addconfiguration_attr("q2", [pi / 2, -pi / 2])
+        self.addconfiguration_attr("qn", [pi / 6, -pi / 6])
+
+        self.base = SE3.Rx(pi / 2)
         self.gravity = [0, 0, g]
 
-if __name__ == '__main__':   # pragma nocover
+
+if __name__ == "__main__":  # pragma nocover
 
     robot = TwoLink(symbolic=True)
     print(robot)
-
-
-
-
-
-

@@ -2,6 +2,7 @@
 
 import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
+from math import pi
 
 
 class UR5(ERobot):
@@ -32,6 +33,8 @@ class UR5(ERobot):
         links, name, urdf_string, urdf_filepath = self.URDF_read(
             "ur_description/urdf/ur5_joint_limited_robot.urdf.xacro"
         )
+        # for link in links:
+        #     print(link)
 
         super().__init__(
             links,
@@ -42,11 +45,14 @@ class UR5(ERobot):
             urdf_filepath=urdf_filepath,
         )
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
-        self.addconfiguration("qr", np.array([np.pi, 0, 0, 0, np.pi / 2, 0]))
+        self.qr = np.array([np.pi, 0, 0, 0, np.pi / 2, 0])
+        self.qz = np.zeros(6)
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
         # sol=robot.ikine_LM(SE3(0.5, -0.2, 0.2)@SE3.OA([1,0,0],[0,0,-1]))
-        self.addconfiguration(
+        self.addconfiguration_attr(
             "qn",
             np.array(
                 [
@@ -59,6 +65,7 @@ class UR5(ERobot):
                 ]
             ),
         )
+        self.addconfiguration_attr("q1", [0, -pi / 2, pi / 2, 0, pi / 2, 0])
 
 
 if __name__ == "__main__":  # pragma nocover

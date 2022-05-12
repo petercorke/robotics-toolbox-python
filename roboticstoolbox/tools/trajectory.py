@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import warnings
 from collections import namedtuple
 import matplotlib.pyplot as plt
 from spatialmath.base.argcheck import (
@@ -32,7 +33,7 @@ class Trajectory:
         :type sdd: ndarray(m) or ndarray(m,n)
         :param istime: ``t`` is time, otherwise step number
         :type istime: bool
-        :param tblend: blend duration (``lspb`` only)
+        :param tblend: blend duration (``trapezoidal`` only)
         :type istime: float
 
         The object has attributes:
@@ -147,11 +148,11 @@ class Trajectory:
         Plot the position, velocity and acceleration data.  The format of the
         plot depends on the function that created it.
 
-        - ``tpoly`` and ``lspb`` show the individual points with markers
-        - ``lspb`` color code the different motion phases
+        - ``quintic`` and ``trapezoidal`` show the individual points with markers
+        - ``trapezoidal`` color code the different motion phases
         - ``jtraj`` general m-axis trajectory, show legend
 
-        :seealso: :func:`~tpoly`, :func:`~lspb`
+        :seealso: :func:`~quintic`, :func:`~trapezoidal`
         """
 
         plotopts = {"marker": "o", "markersize": 3}
@@ -165,10 +166,10 @@ class Trajectory:
         ax = plt.subplot(3, 1, 1)
 
         # plot position
-        if self.name == "tpoly":
+        if self.name == "quintic":
             ax.plot(self.t, self.s, **plotopts)
 
-        elif self.name == "lspb":
+        elif self.name == "trapezoidal":
             # accel phase
             tf = self.t[-1]
             k = self.t <= self.tblend
@@ -179,7 +180,11 @@ class Trajectory:
             ax.plot(self.t[k], self.s[k], color="green", **plotopts)
             k = np.where(k)[0][0]
             ax.plot(
-                self.t[k - 1 : k + 1], self.s[k - 1 : k + 1], color="green", label="linear", **plotopts
+                self.t[k - 1 : k + 1],
+                self.s[k - 1 : k + 1],
+                color="green",
+                label="linear",
+                **plotopts,
             )
 
             # decel phase
@@ -187,7 +192,11 @@ class Trajectory:
             ax.plot(self.t[k], self.s[k], color="blue", **plotopts)
             k = np.where(k)[0][0]
             ax.plot(
-                self.t[k - 1 : k + 1], self.s[k - 1 : k + 1], color="blue", label="deceleration", **plotopts
+                self.t[k - 1 : k + 1],
+                self.s[k - 1 : k + 1],
+                color="blue",
+                label="deceleration",
+                **plotopts,
             )
 
             ax.grid(True)
@@ -201,36 +210,32 @@ class Trajectory:
         ax.set_xlim(0, max(self.t))
 
         if self.istime:
-            if self.name in ("traj", "mtraj", "mstraj"):
-                symbol = "q"
-            else:
-                symbol = "s"
-            ax.set_ylabel(f"${symbol}(t)$", **textopts)
+            ax.set_ylabel("$q(t)$", **textopts)
         else:
-            ax.set_ylabel("$s(k)$", **textopts)
+            ax.set_ylabel("$q(k)$", **textopts)
 
         # plot velocity
         ax = plt.subplot(3, 1, 2)
-        ax.plot(self.t, self.sd, "-o", **plotopts)
+        ax.plot(self.t, self.sd, **plotopts)
         ax.grid(True)
         ax.set_xlim(0, max(self.t))
 
         if self.istime:
-            ax.set_ylabel(f"$\dot{{{symbol}}}(t)$", **textopts)
+            ax.set_ylabel("$\dot{{q}}(t)$", **textopts)
         else:
-            ax.set_ylabel("$ds/dk$", **textopts)
+            ax.set_ylabel("$dq/dk$", **textopts)
 
         # plot acceleration
         ax = plt.subplot(3, 1, 3)
-        ax.plot(self.t, self.sdd, "-o", **plotopts)
+        ax.plot(self.t, self.sdd, **plotopts)
         ax.grid(True)
         ax.set_xlim(0, max(self.t))
 
         if self.istime:
-            ax.set_ylabel(f"$\ddot{{{symbol}}}(t)$", **textopts)
+            ax.set_ylabel(f"$\ddot{{q}}(t)$", **textopts)
             ax.set_xlabel("t (seconds)")
         else:
-            ax.set_ylabel("$d^2s/dk^2$", **textopts)
+            ax.set_ylabel("$d^2q/dk^2$", **textopts)
             ax.set_xlabel("k (step)")
 
         plt.show(block=block)
@@ -245,10 +250,10 @@ class Trajectory:
 
         :seealso: :func:`qplot`
         """
-        qplot(self.t, self.q, **kwargs)
+        xplot(self.t, self.q, **kwargs)
 
 
-def tpoly(q0, qf, t, qd0=0, qdf=0):
+def quintic(q0, qf, t, qd0=0, qdf=0):
     """
     Generate scalar polynomial trajectory
 
@@ -265,7 +270,7 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
     :return: trajectory
     :rtype: Trajectory instance
 
-    - ``tg = tpoly(q0, q1, m)`` is a scalar trajectory (Mx1) that varies
+    - ``tg = quintic(q0, q1, m)`` is a scalar trajectory (Mx1) that varies
       smoothly from ``q0`` to ``qf`` using a quintic polynomial.  The initial
       and final velocity and acceleration are zero. ``m`` is an integer scalar,
       indicating the total number of timesteps and
@@ -275,7 +280,7 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
             - Acceleration is in units of distance per trajectory step squared,
               *not* per second squared.
 
-    - ``tg = tpoly(q0, q1, t)`` as above but ``t`` is a uniformly-spaced time
+    - ``tg = quintic(q0, q1, t)`` as above but ``t`` is a uniformly-spaced time
       vector
 
             - Velocity is in units of distance per second.
@@ -292,7 +297,7 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
     - Robotics, Vision & Control, Chap 3,
       P. Corke, Springer 2011.
 
-    :seealso: :func:`lspb`, :func:`mtraj`.
+    :seealso: :func:`trapezoidal`, :func:`mtraj`.
     """
     if isinstance(t, int):
         t = np.arange(0, t)
@@ -304,7 +309,7 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
         raise TypeError("bad argument for time, must be int or vector")
     tf = max(t)
 
-    polyfunc = tpoly_func(q0, qf, tf, qd0, qdf)
+    polyfunc = quintic_func(q0, qf, tf, qd0, qdf)
 
     # evaluate the polynomials
     traj = polyfunc(t)
@@ -312,19 +317,19 @@ def tpoly(q0, qf, t, qd0=0, qdf=0):
     pd = traj[1]
     pdd = traj[2]
 
-    return Trajectory("tpoly", t, p, pd, pdd, istime)
+    return Trajectory("quintic", t, p, pd, pdd, istime)
 
 
-def tpoly_func(q0, qf, T, qd0=0, qdf=0):
+def quintic_func(q0, qf, T, qd0=0, qdf=0):
 
     # solve for the polynomial coefficients using least squares
     X = [
         [0, 0, 0, 0, 0, 1],
-        [T ** 5, T ** 4, T ** 3, T ** 2, T, 1],
+        [T**5, T**4, T**3, T**2, T, 1],
         [0, 0, 0, 0, 1, 0],
-        [5 * T ** 4, 4 * T ** 3, 3 * T ** 2, 2 * T, 1, 0],
+        [5 * T**4, 4 * T**3, 3 * T**2, 2 * T, 1, 0],
         [0, 0, 0, 2, 0, 0],
-        [20 * T ** 3, 12 * T ** 2, 6 * T, 2, 0, 0],
+        [20 * T**3, 12 * T**2, 6 * T, 2, 0, 0],
     ]
     coeffs, resid, rank, s = np.linalg.lstsq(
         X, np.r_[q0, qf, qd0, qdf, 0, 0], rcond=None
@@ -344,7 +349,12 @@ def tpoly_func(q0, qf, T, qd0=0, qdf=0):
 # -------------------------------------------------------------------------- #
 
 
-def lspb(q0, qf, t, V=None):
+def lspb(*args, **kwargs):
+    warnings.warn("lsp is deprecated, use trapezoidal", FutureWarning)
+    return trapezoidal(*args, **kwargs)
+
+
+def trapezoidal(q0, qf, t, V=None):
     """
     Scalar trapezoidal trajectory
 
@@ -362,7 +372,7 @@ def lspb(q0, qf, t, V=None):
     Computes a trapezoidal trajectory, which has a linear motion segment with
     parabolic blends.
 
-    - ``tg = lspb(q0, qf, t)`` is a scalar trajectory (Mx1) that varies
+    - ``tg = trapezoidal(q0, qf, t)`` is a scalar trajectory (Mx1) that varies
       smoothly from ``q0`` to ``qf`` in M steps using a constant velocity
       segment and parabolic blends.  Time ``t`` can be either:
 
@@ -377,7 +387,7 @@ def lspb(q0, qf, t, V=None):
 
             - Results are scaled to units of time.
 
-    - ``tg = lspb(q0, q1, t, V)``  as above but specifies the velocity of the
+    - ``tg = trapezoidal(q0, q1, t, V)``  as above but specifies the velocity of the
       linear segment which is normally computed automatically.
 
     The return value is an object that contains position, velocity and
@@ -393,9 +403,9 @@ def lspb(q0, qf, t, V=None):
     :References:
 
         - Robotics, Vision & Control, Chap 3,
-        P. Corke, Springer 2011.
+          P. Corke, Springer 2011.
 
-    :seealso: :func:`tpoly`, :func:`mtraj`.
+    :seealso: :func:`quintic`, :func:`mtraj`.
     """
 
     if isinstance(t, int):
@@ -409,20 +419,20 @@ def lspb(q0, qf, t, V=None):
 
     tf = max(t)
 
-    lspbfunc = lspb_func(q0, qf, tf, V)
+    trapezoidalfunc = trapezoidal_func(q0, qf, tf, V)
 
     # evaluate the polynomials
-    traj = lspbfunc(t)
+    traj = trapezoidalfunc(t)
     p = traj[0]
     pd = traj[1]
     pdd = traj[2]
 
-    traj = Trajectory("lspb", t, p, pd, pdd, istime)
-    traj.tblend = lspbfunc.tb
+    traj = Trajectory("trapezoidal", t, p, pd, pdd, istime)
+    traj.tblend = trapezoidalfunc.tb
     return traj
 
 
-def lspb_func(q0, qf, tf, V=None):
+def trapezoidal_func(q0, qf, tf, V=None):
 
     if V is None:
         # if velocity not specified, compute it
@@ -444,7 +454,7 @@ def lspb_func(q0, qf, tf, V=None):
     tb = (q0 - qf + V * tf) / V
     a = V / tb
 
-    def lspbfunc(t):
+    def trapezoidalfunc(t):
 
         p = []
         pd = []
@@ -453,9 +463,13 @@ def lspb_func(q0, qf, tf, V=None):
         if isscalar(t):
             t = [t]
         for tk in t:
-            if tk <= tb:
+            if tk < 0:
+                pk = q0
+                pdk = 0
+                pddk = 0
+            elif tk <= tb:
                 # initial blend
-                pk = q0 + a / 2 * tk ** 2
+                pk = q0 + a / 2 * tk**2
                 pdk = a * tk
                 pddk = a
             elif tk <= (tf - tb):
@@ -463,11 +477,15 @@ def lspb_func(q0, qf, tf, V=None):
                 pk = (qf + q0 - V * tf) / 2 + V * tk
                 pdk = V
                 pddk = 0
-            else:
+            elif tk <= tf:
                 # final blend
-                pk = qf - a / 2 * tf ** 2 + a * tf * tk - a / 2 * tk ** 2
+                pk = qf - a / 2 * tf**2 + a * tf * tk - a / 2 * tk**2
                 pdk = a * tf - a * tk
                 pddk = -a
+            else:
+                pk = qf
+                pdk = 0
+                pddk = 0
             p.append(pk)
             pd.append(pdk)
             pdd.append(pddk)
@@ -475,7 +493,7 @@ def lspb_func(q0, qf, tf, V=None):
 
     # return the function, but add some computed parameters as attributes
     # as a way of returning extra values without a tuple return
-    func = lspbfunc
+    func = trapezoidalfunc
     func.tb = tb
     func.V = V
 
@@ -525,7 +543,9 @@ def jtraj(q0, qf, t, qd0=None, qd1=None):
     if isinstance(t, int):
         tscal = 1.0
         ts = np.linspace(0, 1, t)  # normalized time from 0 -> 1
+        tv = ts * t
     else:
+        tv = t.flatten()
         tscal = max(t)
         ts = t.flatten() / tscal
 
@@ -557,7 +577,7 @@ def jtraj(q0, qf, t, qd0=None, qd1=None):
 
     # n = len(q0)
 
-    tt = np.array([ts ** 5, ts ** 4, ts ** 3, ts ** 2, ts, np.ones(ts.shape)]).T
+    tt = np.array([ts**5, ts**4, ts**3, ts**2, ts, np.ones(ts.shape)]).T
     coeffs = np.array([A, B, C, np.zeros(A.shape), E, F])  # 6xN
 
     qt = tt @ coeffs
@@ -570,16 +590,16 @@ def jtraj(q0, qf, t, qd0=None, qd1=None):
     coeffs = np.array(
         [np.zeros(A.shape), np.zeros(A.shape), 20 * A, 12 * B, 6 * C, np.zeros(A.shape)]
     )
-    qddt = tt @ coeffs / tscal ** 2
+    qddt = tt @ coeffs / tscal**2
 
-    return Trajectory("jtraj", t, qt, qdt, qddt, istime=True)
+    return Trajectory("jtraj", tv, qt, qdt, qddt, istime=True)
 
 
 def mtraj(tfunc, q0, qf, t):
     """
     Multi-axis trajectory
 
-    :param tfunc: a 1D trajectory function, eg. ``tpoly`` or ``lspb``
+    :param tfunc: a 1D trajectory function, eg. :func:`quintic` or :func:`trapezoidal`
     :type tfunc: callable
     :param q0: initial configuration
     :type q0: ndarray(m)
@@ -603,8 +623,8 @@ def mtraj(tfunc, q0, qf, t):
 
             tg = tfunc(s0, sF, n)
 
-    and possible values of TFUNC include ``lspb`` for a trapezoidal trajectory, or
-    ``tpoly`` for a polynomial trajectory.
+    and possible values of TFUNC include ``trapezoidal`` for a trapezoidal trajectory, or
+    ``quintic`` for a polynomial trajectory.
 
     The return value is an object that contains position, velocity and
     acceleration data.
@@ -612,7 +632,7 @@ def mtraj(tfunc, q0, qf, t):
     .. note:: The time vector, if given, is assumed to be monotonically increasing, and
         time scaling is based on the first and last element.
 
-    :seealso: :func:`tpoly`, :func:`lspb`
+    :seealso: :func:`quintic`, :func:`trapezoidal`
     """
 
     if not callable(tfunc):
@@ -636,109 +656,6 @@ def mtraj(tfunc, q0, qf, t):
     istime = traj[0].istime
 
     return Trajectory("mtraj", x, y, yd, ydd, istime)
-
-
-def qplot(
-    x,
-    y=None,
-    wrist=False,
-    unwrap=False,
-    block=False,
-    labels=None,
-    loc=None,
-    grid=True,
-    stack=False,
-    **kwargs,
-):
-    """
-    Plot trajectory data
-
-    :param q: trajectory, one row per timestep
-    :type q: ndarray(m,n)
-    :param t: time vector, optional
-    :type t: numpy ndarray, shape=(M,)
-    :param wrist: distinguish arm and wrist joints with line styles
-    :type wrist: bool
-    :param unwrap: unwrap joint angles so that they smoothly increase or
-        decrease when they pass through :math:`\pm \pi`
-    :type unwrap: bool
-    :param block: block until the plot is closed
-    :type block: bool
-    :param labels: legend labels
-    :type labels: list of str, or single string with space separated labels
-    :param kwargs: options passed to pyplot.plot
-    :param loc: legend location as per pyplot.legend
-    :type loc: str
-
-    This is a convenience function to plot trajectories, where each row represents one time step.
-
-    - ``qplot(q)`` plots the joint angles versus row number.  If N==6 a
-      conventional 6-axis robot is assumed, and the first three joints are
-      shown as solid lines, the last three joints (wrist) are shown as dashed
-      lines. A legend is also displayed.
-
-    - ``qplot(t, q)`` as above but displays the joint angle trajectory versus
-      time given the time vector T (Mx1).
-
-    Example::
-
-        >>> qplot(q, x, labels='x y z')
-
-    :seealso: :func:`jtraj`, :func:`numpy.unwrap`
-    """
-    if y is None:
-        q = x
-        t = np.arange(0, q.shape[0])
-    else:
-        t = x
-        q = y
-
-    if t.ndim != 1 or q.shape[0] != t.shape[0]:
-        raise ValueError("dimensions of arguments are not consistent")
-
-    if unwrap:
-        q = np.unwrap(q, axis=0)
-
-    n = q.shape[1]
-
-    if labels is None:
-        labels = [f"q{i}" for i in range(n)]
-    elif isinstance(labels, str):
-        labels = labels.split(" ")
-    elif not isinstance(labels, (tuple, list)):
-        raise TypeError("wrong type for labels")
-
-    fig, ax = plt.subplots()
-
-    if stack:
-        for i in range(n):
-            ax = plt.subplot(n, 1, i + 1)
-
-            plt.plot(t, q[:, i], **kwargs)
-
-            plt.grid(grid)
-            ax.set_ylabel(labels[i])
-            ax.set_xlim(t[0], t[-1])
-
-        ax.set_xlabel("Time (s)")
-
-    else:
-        if n == 6 and wrist:
-            plt.plot(t, q[:, 0:3], **kwargs)
-            plt.plot(t, q[:, 3:6], "--", **kwargs)
-        else:
-            plt.plot(t, q, **kwargs)
-
-        ax.legend(labels, loc=loc)
-
-        plt.grid(grid)
-        ax.set_xlabel("Time (s)")
-        ax.set_ylabel("Joint coordinates (rad,m)")
-        ax.set_xlim(t[0], t[-1])
-
-    plt.show(block=block)
-
-    return fig.get_axes()
 
 
 # -------------------------------------------------------------------------- #
@@ -781,7 +698,7 @@ def ctraj(T0, T1, t=None, s=None):
     Notes:
 
     - In the second case ``s`` could be generated by a scalar trajectory
-      generator such as ``tpoly`` or ``lspb`` (default).
+      generator such as ``quintic`` or ``trapezoidal`` (default).
     - Orientation interpolation is performed using unit-quaternion
       interpolation.
 
@@ -790,15 +707,15 @@ def ctraj(T0, T1, t=None, s=None):
     - Robotics, Vision & Control, Sec 3.1.5,
       Peter Corke, Springer 2011
 
-    :seealso: :func:`~roboticstoolbox.trajectory.lspb`,
+    :seealso: :func:`~roboticstoolbox.trajectory.trapezoidal`,
         :func:`~spatialmath.unitquaternion.interp`
     """
 
     if isinstance(t, int):
-        s = lspb(0, 1, t).s
+        s = trapezoidal(0, 1, t).s
     elif isvector(t):
         t = getvector(t)
-        s = lspb(0, 1, t / np.max(t)).s
+        s = trapezoidal(0, 1, t / np.max(t)).s
     elif isvector(s):
         s = getvector(s)
     else:
@@ -904,7 +821,7 @@ def mstraj(
     - ``tg`` has extra attributes ``arrive``, ``info`` and ``via``
 
 
-    :seealso: `lspb`, `ctraj`, `mtraj`
+    :seealso: :func:`trapezoidal`, :func:`ctraj`, :func:`mtraj`
     """
 
     if q0 is None:
@@ -1091,13 +1008,20 @@ def mstraj(
 
 if __name__ == "__main__":
 
-    t = tpoly(0, 1, 50)
-    t.plot()
+    # t = quintic(0, 1, 50)
+    # t.plot()
 
-    t = tpoly(0, 1, np.linspace(0, 1, 50))
-    t.plot()
+    # t = quintic(0, 1, np.linspace(0, 1, 50))
+    # t.plot()
 
-    t = lspb(0, 1, 50)
-    t.plot()
-    t = lspb(0, 1, np.linspace(0, 1, 50))
-    t.plot(block=True)
+    # t = trapezoidal(0, 1, 50)
+    # t.plot()
+    # t = trapezoidal(0, 1, np.linspace(0, 1, 50))
+    # t.plot(block=True)
+
+    from roboticstoolbox import *
+
+    puma = models.DH.Puma560()
+
+    traj = jtraj(puma.qz, puma.qr, 100)
+    traj.plot(block=True)

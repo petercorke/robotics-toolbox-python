@@ -3,22 +3,21 @@ import os
 
 # fmt: off
 import pip
-pip.main(['install', 'numpy>=1.18.0'])
+pip.main(['install', 'numpy>=1.17.4'])
 import numpy
 # fmt: on
 
 here = os.path.abspath(os.path.dirname(__file__))
 
 req = [
-    "numpy>=1.18.0",
-    "spatialmath-python>=0.11",
-    "spatialgeometry>=0.2.0",
+    "numpy>=1.17.4",
+    "spatialmath-python~=1.0.0",
+    "spatialgeometry~=1.0.0",
     "pgraph-python",
     "scipy",
     "matplotlib",
     "ansitable",
-    "swift-sim>=0.10.0",
-    "qpsolvers",
+    "swift-sim~=1.0.0",
     "rtb-data",
     "progress",
 ]
@@ -71,15 +70,29 @@ frne = Extension(
     include_dirs=["./roboticstoolbox/core/"],
 )
 
+# eig = "./roboticstoolbox/core/Eigen"
 fknm = Extension(
     "fknm",
-    sources=["./roboticstoolbox/core/fknm.c"],
+    sources=[
+        "./roboticstoolbox/core/methods.cpp",
+        "./roboticstoolbox/core/linalg.cpp",
+        "./roboticstoolbox/core/fknm.cpp",
+    ],
     include_dirs=["./roboticstoolbox/core/", numpy.get_include()],
+    # define_macros=[("EIGEN_USE_MKL_ALL", "1")],
+    # extra_compile_args=["-Werror"],
+    # extra_compile_args=["-fopenmp"],
+    # extra_compile_args=["-Ofast"],
+    # extra_link_args=["-lgomp"],
+    # extra_compile_args=["-I/opt/intel/oneapi/mkl/2022.0.2/include"],
+    # extra_link_args=[
+    #     "-L/opt/intel/oneapi/mkl/2022.0.2/lib/intel64 -lmkl_rt -Wl,--no-as-needed -lpthread -lm -ldl"
+    # ],
 )
 
 setup(
     name="roboticstoolbox-python",
-    version="0.11.0",
+    version="1.0.0",
     description="A Python library for robotic education and research",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -90,7 +103,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         # Indicate who your project is intended for
         "Intended Audience :: Developers",
         # Pick your license as you wish (should match "license" above)
@@ -101,6 +114,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     python_requires=">=3.6",
     project_urls={
@@ -109,13 +123,23 @@ setup(
         "Tracker": "https://github.com/petercorke/roboticstoolbox-python/issues",
         "Coverage": "https://codecov.io/gh/petercorke/roboticstoolbox-python",
     },
+    # cmdclass={"build_ext": build_ext_subclass},
     ext_modules=[frne, fknm],
     keywords="python robotics robotics-toolbox kinematics dynamics"
     " motion-planning trajectory-generation jacobian hessian"
     " control simulation robot-manipulator mobile-robot",
     packages=find_packages(exclude=["tests", "notebooks"]),
     package_data={"roboticstoolbox": extra_files},
-    scripts=["roboticstoolbox/bin/rtbtool"],
+    scripts=[
+        "roboticstoolbox/bin/rtbtool",
+    ],
+    entry_points={
+        "console_scripts": [
+            "eigdemo=roboticstoolbox.examples.eigdemo:main",
+            "tripleangledemo=roboticstoolbox.examples.tripleangledemo",
+            "twistdemo=roboticstoolbox.examples.twistdemo:main",
+        ]
+    },
     install_requires=req,
     extras_require={
         "collision": collision_req,

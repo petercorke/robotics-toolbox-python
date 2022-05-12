@@ -1,28 +1,3 @@
-"""
-
-Quintic Polynomials Planner
-
-author: Atsushi Sakai (@Atsushi_twi)
-
-Ref:
-
-- [Local Path planning And Motion Control For Agv In Positioning](http://ieeexplore.ieee.org/document/637936/)
-
-The MIT License (MIT)
-
-Copyright (c) 2016 - 2021 Atsushi Sakai
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-"""
-
 import math
 from collections import namedtuple
 
@@ -35,8 +10,16 @@ from roboticstoolbox.mobile.PlannerBase import PlannerBase
 
 show_animation = True
 
+# ======================================================================== #
 
-class QuinticPolynomial:
+# The following code is modified from Python Robotics
+# https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning
+# Quintic Polynomial Planner
+# Author: Atsushi Sakai 
+# Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
+
+class _QuinticPolynomial:
 
     def __init__(self, xs, vxs, axs, xe, vxe, axe, time):
         # calc coefficient of quintic polynomial
@@ -120,8 +103,8 @@ def quintic_polynomials_planner(sx, sy, syaw, sv, sa, gx, gy, gyaw, gv, ga, max_
     time, rx, ry, ryaw, rv, ra, rj = [], [], [], [], [], [], []
 
     for T in np.arange(MIN_T, MAX_T, MIN_T):
-        xqp = QuinticPolynomial(sx, vxs, axs, gx, vxg, axg, T)
-        yqp = QuinticPolynomial(sy, vys, ays, gy, vyg, ayg, T)
+        xqp = _QuinticPolynomial(sx, vxs, axs, gx, vxg, axg, T)
+        yqp = _QuinticPolynomial(sy, vys, ays, gy, vyg, ayg, T)
 
         time, rx, ry, ryaw, rv, ra, rj = [], [], [], [], [], [], []
 
@@ -157,7 +140,10 @@ def quintic_polynomials_planner(sx, sy, syaw, sv, sa, gx, gy, gyaw, gv, ga, max_
 
     return time, np.c_[rx, ry, ryaw], rv, ra, rj
 
+# ====================== RTB wrapper ============================= #
 
+# Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
 class QuinticPolyPlanner(PlannerBase):
     r"""
     Quintic polynomial path planner
@@ -186,7 +172,7 @@ class QuinticPolyPlanner(PlannerBase):
     ==================   ========================
     Feature              Capability
     ==================   ========================
-    Plan                 Configuration space
+    Plan                 :math:`\SE{2}`
     Obstacle avoidance   No
     Curvature            Continuous
     Motion               Forwards only
@@ -206,8 +192,23 @@ class QuinticPolyPlanner(PlannerBase):
         Sugimoto; Proceedings. IEEE/RSJ International Workshop on
         Intelligent Robots and Systems (IROS '89)  doi: 10.1109/IROS.1989.637936
 
-    .. note:: The path time is searched in the interval [``min_t``, `max_t`] in steps
+    .. note:: The path time is searched in the interval [``min_t``, ``max_t``] in steps
         of ``min_t``.
+
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import QuinticPolyPlanner
+        >>> import numpy as np
+        >>> start = (10, 10, np.deg2rad(10.0))
+        >>> goal = (30, -10, np.deg2rad(20.0))
+        >>> quintic = QuinticPolyPlanner(start_vel=1)
+        >>> path, status = quintic.query(start, goal)
+        >>> print(path[:5,:])
+
+    :thanks: based on quintic polynomial planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
+
 
     :seealso: :class:`Planner`
     """

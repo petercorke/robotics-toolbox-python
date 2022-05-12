@@ -8,99 +8,109 @@ import roboticstoolbox as rtb
 
 class LandmarkMap:
     """
-    LandmarkMap Map of planar point landmarks
+    Map of planar point landmarks
 
-    A LandmarkMap object represents a square 2D environment with a number of landmark
-    landmark pointself.
+    :param map: map or number of landmarks
+    :type map: ndarray(2, N) or int
+    :param workspace: workspace or map bounds, defaults to 10
+    :type workspace: scalar, array_like(2), array_like(4), optional
+    :param verbose: display debug information, defaults to True
+    :type verbose: bool, optional
+    :param seed: random number seed, defaults to 0
+    :type seed: int, optional
+    :return: a landmark map object
+    :rtype: LandmarkMap
 
-    Methods::
-      plot      Plot the landmark map
-      landmark   Return a specified map landmark
-      display   Display map parameters in human readable form
-      char      Convert map parameters to human readable string
-
-    Properties::
-      map         Matrix of map landmark coordinates 2xN
-      dim         The dimensions of the map region x,y in [-dim,dim]
-      nlandmarks   The number of map landmarks N
-
-    Examples::
-
-    To create a map for an area where X and Y are in the range -10 to +10 metres
-    and with 50 random landmark points
-           map = LandmarkMap(50, 10)
-    which can be displayed by
-           self.plot()
-
-    Reference::
-
-      Robotics, Vision & Control, Chap 6,
-      Peter Corke,
-      Springer 2011
-
-    See also RangeBearingSensor, EKF.
-    """
-    # TODO:
-    # add a name property, show in char()
-
-    #     properties
-    #         map    # map landmarks
-    #         dim         # map dimension
-    #         nlandmarks   # number of landmarks in map
-
-    #         verbose
-    #     end
-
-
-    def __init__(self, nlandmarks, workspace=10, verbose=True, seed=0):
-        """
-        Create a map of point landmark landmarks
-        %
-        # M = LandmarkMap(N, DIM, OPTIONS) is a LandmarkMap object that represents N random point landmarks
-        # in a planar region bounded by +/-DIM in the x- and y-directionself.
-        %
-        # Options::
-        # 'verbose'    Be verbose
-            
-        
-        %# TODO: dim can be a 4-vector
-        """
+    A LandmarkMap object represents a rectangular 2D environment with a number
+    of point landmarks. 
     
-        self._nlandmarks = nlandmarks
-        self._workspace = base.expand_dims(workspace)
+    The landmarks can be specified explicitly or be uniform randomly positioned
+    inside a region defined by the workspace.  The workspace can be numeric:
 
-        random = np.random.default_rng(seed)
-        x = random.uniform(self._workspace[0], self._workspace[1], nlandmarks)
-        y = random.uniform(self._workspace[2], self._workspace[3], nlandmarks)
+    ==============  =======  =======
+    ``workspace``   x-range  y-range
+    ==============  =======  =======
+    A (scalar)      -A:A     -A:A
+    [A, B]           A:B      A:B
+    [A, B, C, D]     A:B      C:D
+    ==============  =======  =======
 
-        self._map = np.c_[x, y].T
+    or any object that has a ``workspace`` attribute.
+
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import LandmarkMap
+        >>> map = LandmarkMap(20)
+        >>> print(map)
+        >>> print(map[3])  # coordinates of landmark 3
+    
+    The object is an iterator that returns consecutive landmark coordinates.
+
+    :Reference:
+
+        Robotics, Vision & Control, Chap 6,
+        Peter Corke,
+        Springer 2011
+
+    See also :class:`~roboticstoolbox.mobile.sensors.RangeBearingSensor` :class:`~roboticstoolbox.mobile.EKF`
+    """
+
+    def __init__(self, map, workspace=10, verbose=True, seed=0):
+    
+
+        try:
+            self._workspace = workspace.workspace
+        except:
+            self._workspace = base.expand_dims(workspace)
+
+        if base.ismatrix(map, (2, None)):
+            self._map = map
+            self._nlandmarks = map.shape[1]
+        elif isinstance(map, int):
+            self._nlandmarks = map
+
+            random = np.random.default_rng(seed)
+            x = random.uniform(self._workspace[0], self._workspace[1], self._nlandmarks)
+            y = random.uniform(self._workspace[2], self._workspace[3], self._nlandmarks)
+            self._map = np.c_[x, y].T
+
+        else:
+            raise ValueError('bad type for map')
+    
         self._verbose = verbose
 
 
     def __str__(self):
     # s = M.char() is a string showing map parameters in 
     # a compact human readable format. 
-        s = f"LandmarkMap object with {self._nlandmarks} landmarks, dim=" + str(self._workspace)
+        ws = self._workspace
+        s = f"LandmarkMap object with {self._nlandmarks} landmarks, workspace="
+        s += f"({ws[0]}: {ws[1]}, {ws[2]}: {ws[3]})"
         return s
 
-    def __len__(self):
-        return self.nlandmarks
+    def __repr__(self):
+        return str(self)
 
-    @property
-    def nlandmarks(self):
+    def __len__(self):
+        """
+        Number of landmarks in map
+
+        :return: number of landmarks in the map
+        :rtype: int
+        """
         return self._nlandmarks
 
-    @property
-    def x(self):
-        return self._map[0,:]
 
     @property
-    def y(self):
-        return self._map[1,:]
+    def landmarks(self):
+        """
+        xy-coordinates of all landmarks
 
-
-    @property
-    def xy(self):
+        :return: xy-coordinates for landmark points
+        :rtype: ndarray(2, n)
+        """
         return self._map
 
     @property
@@ -112,32 +122,35 @@ class LandmarkMap:
         :rtype: ndarray(4)
 
         Returns the bounds of the workspace as specified by constructor
-        option ``workspace``
+        option ``workspace``.
         """
         return self._workspace
 
-    def landmark(self, k):
+    def __getitem__(self, k):
         """
-        Get k'th landmarks from map
-        %
-        # F = M.landmark(K) is the coordinate (2x1) of the K'th landmark (landmark).
-        """
-        return self._map[:,k]
+        Get landmark coordinates from map
 
-    def plot(self, block=False, labels=False, **kwargs):
+        :param k: landmark index
+        :type k: int
+        :return: coordinate :math:`(x,y)` of k'th landmark
+        :rtype: ndarray(2)
         """
-        Plot the map
-        %
-        # M.plot() plots the landmark map in the current figure, as a square
-        # region with dimensions given by the M.dim property.  Each landmark
-        # is marked by a black diamond.
-        %
-        # M.plot(LS) as above, but the arguments LS
-        # are passed to plot and override the default marker style.
-        %
-        # Notes::
-        # - The plot is left with HOLD ON.
+        return self._map[:, k]
+
+    def plot(self, labels=False, block=False, **kwargs):
         """
+        Plot landmark map
+
+        :param labels: number the points on the plot, defaults to False
+        :type labels: bool, optional
+        :param block: block until figure is closed, defaults to False
+        :type block: bool, optional
+        :param kwargs: :meth:`~matplotlib.axes.Axes.plot` options
+
+        Plot landmark points using Matplotlib options.  Default style is black
+        crosses.
+        """
+
         ax = base.plotvol2(self._workspace)
         ax.set_aspect('equal')
 

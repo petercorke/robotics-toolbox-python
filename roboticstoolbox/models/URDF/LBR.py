@@ -47,9 +47,11 @@ class LBR(ERobot):
         # self.qdlim = np.array([
         #     2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0])
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0]))
+        self.qr = np.array([0, -0.3, 0, -1.9, 0, 1.5, np.pi / 4])
+        self.qz = np.zeros(7)
 
-        self.addconfiguration("qr", np.array([0, -0.3, 0, -1.9, 0, 1.5, np.pi / 4]))
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

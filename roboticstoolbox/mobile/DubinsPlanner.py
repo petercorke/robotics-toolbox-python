@@ -1,24 +1,12 @@
-"""
+# ======================================================================== #
 
-Dubins path planner sample code
+# The following code is modified from Python Robotics
+# https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning
+# Dubins planning
+# Author: Atsushi Sakai 
+# Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
 
-author Atsushi Sakai(@Atsushi_twi)
-
-The MIT License (MIT)
-
-Copyright (c) 2016 - 2021 Atsushi Sakai
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-"""
 import math
 from collections import namedtuple
 from roboticstoolbox.mobile import PlannerBase
@@ -303,7 +291,10 @@ def path_planning(start, goal, curvature, step_size=0.1):
     path = np.c_[x_list, y_list, yaw_list]
     return path, length, mode, lengths
 
-# ============================================================================
+# ====================== RTB wrapper ============================= #
+
+# Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
 class DubinsPlanner(PlannerBase):
     r"""
     Dubins path planner
@@ -318,7 +309,7 @@ class DubinsPlanner(PlannerBase):
     ==================   ========================
     Feature              Capability
     ==================   ========================
-    Plan                 Configuration space
+    Plan                 :math:`\SE{2}`
     Obstacle avoidance   No
     Curvature            Discontinuous
     Motion               Forwards only
@@ -326,14 +317,26 @@ class DubinsPlanner(PlannerBase):
 
     Creates a planner that finds the path between two configurations in the
     plane using forward motion only.  The path comprises upto 3 segments that are
-    straight lines or arcs with :math:`\pm` ``curvature``.
+    straight lines, or arcs with curvature of :math:`\pm` ``curvature``.
+
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import DubinsPlanner
+        >>> from math import pi
+        >>> dubins = DubinsPlanner(curvature=1.0)
+        >>> path, status = dubins.query(start=(0, 0, pi/2), goal=(1, 0, pi/2))
+        >>> print(path[:5,:])
+        >>> print(status)
 
     :reference: On Curves of Minimal Length with a Constraint on Average 
         Curvature, and with Prescribed Initial and Terminal Positions and 
         Tangents,  Dubins, L.E. (July 1957), American Journal of Mathematics.
         79(3): 497–516.
-    :author: Atsushi Sakai `PythonRobotics <https://github.com/AtsushiSakai/PythonRobotics>`_
-    :seealso: :class:`Planner`
+
+    :thanks: based on Dubins path planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
+    :seealso: :class:`ReedsSheppPlanner` :class:`PlannerBase`
     """
     def __init__(self, curvature=1, stepsize=0.1, **kwargs):
 
@@ -346,7 +349,7 @@ class DubinsPlanner(PlannerBase):
 
     def query(self, start, goal, **kwargs):
         r"""
-        Find a Dubins path
+        Find a path between two configurations
 
         :param start: start configuration :math:`(x, y, \theta)`
         :type start: array_like(3), optional
@@ -354,6 +357,8 @@ class DubinsPlanner(PlannerBase):
         :type goal: array_like(3), optional
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
+
+        The path comprises points equally spaced at a distance of ``stepsize``.
 
         The returned status value has elements:
 
@@ -364,11 +369,12 @@ class DubinsPlanner(PlannerBase):
         |             | a single letter code: either "L", "R" or "S" for    |
         |             | left turn, right turn or straight line respectively.|
         +-------------+-----------------------------------------------------+
+        | ``length``  | total path length                                   |
+        +-------------+-----------------------------------------------------+
         |``lengths``  | the length of each path segment. The sign of the    |
-        |             |length indicates the direction of travel.            |
+        |             | length indicates the direction of travel.           |
         +-------------+-----------------------------------------------------+
 
-        :seealso: :meth:`Planner.query`
         """
         super().query(start=start, goal=goal, next=False, **kwargs)
 

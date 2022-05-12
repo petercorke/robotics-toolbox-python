@@ -3,15 +3,23 @@
 @author: Jesse Haviland
 """
 
-import numpy as np
-from spatialmath import SE3
+# import numpy as np
+# from spatialmath import SE3
 import roboticstoolbox as rp
 from roboticstoolbox.robot.Link import Link, _listen_dyn
 from roboticstoolbox.robot.ETS import ETS
-
-_eps = np.finfo(np.float64).eps
-
+from roboticstoolbox.robot.ET import ET
+from spatialmath import SE3
+from typing import List, Union
 from functools import wraps
+from numpy import ndarray, cos, sin, array
+from spatialgeometry import Shape
+from copy import deepcopy
+
+# _eps = np.finfo(np.float64).eps
+
+
+ArrayLike = Union[list, ndarray, tuple, set]
 
 
 def _check_rne(func):
@@ -50,9 +58,8 @@ try:  # pragma: no cover
     # print('Using SymPy')
     import sympy as sym
 
-    def _issymbol(x):
+    def _issymbol(x):  # type: ignore
         return isinstance(x, sym.Expr)
-
 
 except ImportError:
 
@@ -60,18 +67,18 @@ except ImportError:
         return False
 
 
-def _cos(theta):
+def _cos(theta) -> float:
     if _issymbol(theta):
-        return sym.cos(theta)
+        return sym.cos(theta)  # type: ignore
     else:
-        return np.cos(theta)
+        return cos(theta)
 
 
-def _sin(theta):
+def _sin(theta) -> float:
     if _issymbol(theta):
-        return sym.sin(theta)
+        return sym.sin(theta)  # type: ignore
     else:
-        return np.sin(theta)
+        return sin(theta)
 
 
 # --------------------------------------------------------------#
@@ -125,16 +132,34 @@ class DHLink(Link):
     """
 
     def __init__(
-        self, d=0.0, alpha=0.0, theta=0.0, a=0.0, sigma=0, mdh=False, offset=0, **kwargs
+        self,
+        d=0.0,
+        alpha=0.0,
+        theta=0.0,
+        a=0.0,
+        sigma=0,
+        mdh=False,
+        offset=0,
+        flip=False,
+        qlim: Union[ArrayLike, None] = None,
+        **kwargs,
     ):
-
-        # TODO
-        #  probably should make DHLink(link) return a copy
-        #  probably should enforce keyword arguments, easy to make an
-        #    error with positional args
         super().__init__(**kwargs)
 
-        # Kinematic parameters
+        ets = self._to_ets(sigma, theta, d, alpha, a, offset, flip, mdh)
+        self._ets = ets
+
+        # Set the variable et
+        for et in ets:
+            if et.isjoint:
+                self._v = et
+                break
+
+        # Set the qlim if provided now we have an ETS
+        if qlim is not None and self.v:
+            self.v.qlim = qlim
+
+        # DH Kinematic parameters
         self.sigma = sigma
         self.theta = theta
         self.d = d
@@ -143,11 +168,165 @@ class DHLink(Link):
         self.mdh = mdh
         self.offset = offset
         self.id = None
+        self.mesh = None
+        self.number = None
+
+    def _to_ets(self, sigma, theta, d, alpha, a, offset, flip: bool, mdh):
+        ets = ETS()
+
+        isrevolute = False if sigma else True
+
+        # MDH format: a alpha theta d
+        if mdh:
+            if a != 0:
+                ets *= ET.tx(a)
+            if alpha != 0:
+                ets *= ET.Rx(alpha)
+
+            if isrevolute:
+                if offset != 0:
+                    ets *= ET.Rz(offset)
+
+                # Swapped d and theta: will make no difference to the transform
+                # But makes ets end with variable which is needed
+                if d != 0:
+                    ets *= ET.tz(d)
+
+                ets *= ET.Rz(flip=flip)  # joint
+            else:
+                if theta != 0:
+                    ets *= ET.Rz(theta)
+
+                if offset != 0:
+                    ets *= ET.tz(offset)
+
+                ets *= ET.tz(flip=flip)  # joint
+        else:
+            # DH format: theta d a alpha
+            if isrevolute:
+                if offset != 0:
+                    ets *= ET.Rz(offset)
+                ets *= ET.Rz(flip=flip)
+
+                if d != 0:
+                    ets *= ET.tz(d)
+            else:
+                if theta != 0:
+                    ets *= ET.Rz(theta)
+
+                if offset != 0:
+                    ets *= ET.tz(offset)
+                ets *= ET.tz(flip=flip)
+
+            if a != 0:
+                ets *= ET.tx(a)
+            if alpha != 0:
+                ets *= ET.Rx(alpha)
+
+        return ets
 
     @property
-    def isjoint(self):
-        # for compatibiity with ELink
+    def isjoint(self) -> bool:
+        """
+        Test if link has joint
+        :return: test if link has a joint
+        :rtype: bool
+        The ETS for each ELink comprises a constant part (possible the
+        identity) followed by an optional joint variable transform.
+        This property returns the whether the
+        .. runblock:: pycon
+            >>> from roboticstoolbox import models
+            >>> robot = models.URDF.Panda()
+            >>> robot[1].isjoint  # link with joint
+            >>> robot[8].isjoint  # static link
+        """
         return True
+
+    # @classmethod
+    # def StandardDH(cls, links: List["StandardDH"]) -> List["DHLink"]:
+    #     """
+    #     Takes a list of standard DH links and converts to a list
+    #     of modified DH parameters
+
+    #     """
+
+    #     new_links = []
+    #     ets = ETS()
+
+    #     # Make an ets of the whole Robot
+    #     for link in links:
+    #         ets += link.ets
+
+    #     # Split ETS with variables at the end
+    #     segs = ets.split()
+
+    #     # Construct MDH Links
+    #     for (seg, link) in zip(segs, links):
+    #         flip = True if seg[-1].isflip else False
+    #         isrevolute = True if seg[-1].axis[0] == "R" else False
+
+    #         a = 0.0
+    #         alpha = 0.0
+    #         theta = 0.0
+    #         d = 0.0
+    #         offset = 0.0
+
+    #         # Find MDH Parameters
+    #         for et in seg:
+    #             if et.axis == "tx":
+    #                 a = et.eta
+    #             elif et.axis == "Rx":
+    #                 alpha = et.eta
+    #             elif et.axis == "Rz" and not et.isjoint:
+    #                 offset = et.eta
+    #             elif et.axis == "Rz" and not isrevolute:
+    #                 theta = et.eta
+    #             elif et.axis == "tz" and isrevolute:
+    #                 d = et.eta
+
+    #         # Make the link
+    #         if isrevolute:
+    #             new_link = RevoluteMDH(
+    #                 d=d,
+    #                 a=a,
+    #                 alpha=alpha,
+    #                 offset=offset,
+    #                 qlim=link.qlim,
+    #                 flip=flip,
+    #                 name=link.name,
+    #                 m=link.m,
+    #                 r=link.r,
+    #                 I=link.I,
+    #                 Jm=link.Jm,
+    #                 B=link.B,
+    #                 Tc=link.Tc,
+    #                 G=link.G,
+    #                 geometry=link.geometry,
+    #                 collision=link.collision,
+    #             )
+    #         else:
+    #             new_link = PrismaticMDH(
+    #                 theta=theta,
+    #                 a=a,
+    #                 alpha=alpha,
+    #                 offset=offset,
+    #                 qlim=link.qlim,
+    #                 flip=flip,
+    #                 name=link.name,
+    #                 m=link.m,
+    #                 r=link.r,
+    #                 I=link.I,
+    #                 Jm=link.Jm,
+    #                 B=link.B,
+    #                 Tc=link.Tc,
+    #                 G=link.G,
+    #                 geometry=link.geometry,
+    #                 collision=link.collision,
+    #             )
+
+    #         new_links.append(new_link)
+
+    #     return new_links
 
     def __add__(self, L):
         if isinstance(L, DHLink):
@@ -175,6 +354,8 @@ class DHLink(Link):
             raise TypeError("Cannot add a Link with a non Link object")
 
     def __str__(self):
+
+        s = ""
 
         if self.offset == 0:
             offset = ""
@@ -209,6 +390,49 @@ class DHLink(Link):
         self._format(args, "alpha", "⍺")
         args.extend(super()._params())
         return name + "(" + ", ".join(args) + ")"
+
+    def __deepcopy__(self, memo):
+        kwargs = {
+            "name": deepcopy(self.name),
+            "joint_name": deepcopy(self._joint_name),
+            "m": deepcopy(self.m),
+            "r": deepcopy(self.r),
+            "I": deepcopy(self.I),
+            "Jm": deepcopy(self.Jm),
+            "B": deepcopy(self.B),
+            "Tc": deepcopy(self.Tc),
+            "G": deepcopy(self.G),
+            "qlim": deepcopy(self.qlim),
+            "geometry": [shape.copy() for shape in self._geometry],
+            "collision": [shape.copy() for shape in self._collision],
+            "d": deepcopy(self.d),
+            "alpha": deepcopy(self.alpha),
+            "theta": deepcopy(self.theta),
+            "a": deepcopy(self.a),
+            "sigma": deepcopy(self.sigma),
+            "mdh": deepcopy(self.mdh),
+            "offset": deepcopy(self.offset),
+            "flip": deepcopy(self.isflip),
+        }
+
+        cls = self.__class__
+
+        if "Revolute" in str(cls):
+            del kwargs["theta"]
+            del kwargs["sigma"]
+            del kwargs["mdh"]
+        elif "Prismatic" in str(cls):
+            del kwargs["d"]
+            del kwargs["sigma"]
+            del kwargs["mdh"]
+
+        result = cls(**kwargs)
+        result._robot = self.robot
+        result.sigma = self.sigma
+        result.number = self.number
+
+        memo[id(self)] = result
+        return result
 
     # -------------------------------------------------------------------------- #
 
@@ -369,7 +593,7 @@ class DHLink(Link):
 
     # -------------------------------------------------------------------------- #
 
-    def A(self, q):
+    def A(self, q: float) -> SE3:
         r"""
         Link transform matrix
 
@@ -413,7 +637,7 @@ class DHLink(Link):
         sa = _sin(self.alpha)
         ca = _cos(self.alpha)
 
-        if self.flip:
+        if self.ets[-1].isflip:
             q = -q + self.offset
         else:
             q = q + self.offset
@@ -431,7 +655,7 @@ class DHLink(Link):
 
         if self.mdh == 0:
             # standard DH
-            T = np.array(
+            T = array(
                 [
                     [ct, -st * ca, st * sa, self.a * ct],
                     [st, ct * ca, -ct * sa, self.a * st],
@@ -441,7 +665,7 @@ class DHLink(Link):
             )
         else:
             # modified DH
-            T = np.array(
+            T = array(
                 [
                     [ct, -st, 0, self.a],
                     [st * ca, ct * ca, -sa, -sa * d],
@@ -484,55 +708,6 @@ class DHLink(Link):
         else:
             return False
 
-    def ets(self):
-        ets = ETS()
-
-        if self.mdh:
-            # MDH format: a alpha theta d
-            if self.a != 0:
-                ets *= ETS.tx(self.a)
-            if self.alpha != 0:
-                ets *= ETS.rx(self.alpha)
-
-            if self.isrevolute:
-                if self.offset != 0:
-                    ets *= ETS.rz(self.offset)
-                ets *= ETS.rz(flip=self.flip)  # joint
-
-                if self.d != 0:
-                    ets *= ETS.tz(self.d)
-            elif self.isprismatic:
-                if self.theta != 0:
-                    ets *= ETS.rz(self.theta)
-
-                if self.offset != 0:
-                    ets *= ETS.tz(self.offset)
-                ets *= ETS.tz(flip=self.flip)  # joint
-
-        else:
-            # DH format: theta d a alpha
-
-            if self.isrevolute:
-                if self.offset != 0:
-                    ets *= ETS.rz(self.offset)
-                ets *= ETS.rz(flip=self.flip)
-
-                if self.d != 0:
-                    ets *= ETS.tz(self.d)
-            elif self.isprismatic:
-                if self.theta != 0:
-                    ets *= ETS.rz(self.theta)
-
-                if self.offset != 0:
-                    ets *= ETS.tz(self.offset)
-                ets *= ETS.tz(flip=self.flip)
-
-            if self.a != 0:
-                ets *= ETS.tx(self.a)
-            if self.alpha != 0:
-                ets *= ETS.rx(self.alpha)
-        return ets
-
 
 # -------------------------------------------------------------------------- #
 
@@ -540,7 +715,6 @@ class DHLink(Link):
 class RevoluteDH(DHLink):
     r"""
     Class for revolute links using standard DH convention
-
     :param d: kinematic - link offset
     :type d: float
     :param alpha: kinematic - link twist
@@ -549,12 +723,10 @@ class RevoluteDH(DHLink):
     :type a: float
     :param offset: kinematic - joint variable offset
     :type offset: float
-
     :param qlim: joint variable limits [min, max]
     :type qlim: float ndarray(1,2)
     :param flip: joint moves in opposite direction
     :type flip: bool
-
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
@@ -573,16 +745,11 @@ class RevoluteDH(DHLink):
     A subclass of the :class:`DHLink` class for a revolute joint that holds all
     information related to a robot link such as kinematics parameters,
     rigid-body inertial parameters, motor and transmission parameters.
-
     The link transform is
-
     :math:`\underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`
-
     where :math:`q_i` is the joint variable.
-
     :references:
         - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
-
     :seealso: :func:`PrismaticDH`, :func:`DHLink`, :func:`RevoluteMDH`
     """  # noqa
 
@@ -611,7 +778,6 @@ class RevoluteDH(DHLink):
 class PrismaticDH(DHLink):
     r"""
     Class for prismatic link using standard DH convention
-
     :param theta: kinematic: joint angle
     :type theta: float
     :param d: kinematic - link offset
@@ -622,12 +788,10 @@ class PrismaticDH(DHLink):
     :type a: float
     :param offset: kinematic - joint variable offset
     :type offset: float
-
     :param qlim: joint variable limits [min, max]
     :type qlim: float ndarray(1,2)
     :param flip: joint moves in opposite direction
     :type flip: bool
-
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
@@ -642,20 +806,14 @@ class PrismaticDH(DHLink):
     :type Tc: ndarray(2,)
     :param G: dynamic - gear ratio
     :type G: float
-
     A subclass of the DHLink class for a prismatic joint that holds all
     information related to a robot link such as kinematics parameters,
     rigid-body inertial parameters, motor and transmission parameters.
-
     The link transform is
-
     :math:`\mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`
-
     where :math:`q_i` is the joint variable.
-
     :references:
         - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
-
     :seealso: :func:`RevoluteDH`, :func:`DHLink`, :func:`PrismaticMDH`
     """  # noqa
 

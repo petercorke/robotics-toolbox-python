@@ -1,11 +1,9 @@
 """
 Python PRM
-@Author: Kristian Gibson
-TODO: Comments + Sphynx Docs Structured Text
-TODO: Bug-fix, testing
-
-Not ready for use yet.
+@Author: Peter Corke, original MATLAB code and Python version
+@Author: Kristian Gibson, initial MATLAB port
 """
+from multiprocessing.sharedctypes import Value
 from numpy import disp
 from scipy import integrate
 from spatialmath.base.animate import Animate
@@ -25,7 +23,7 @@ class PRMPlanner(PlannerBase):
     Distance transform path planner
 
     :param occgrid: occupancy grid
-    :type curvature: OccGrid or ndarray(w,h)
+    :type occgrid: :class:`BinaryOccGrid` or ndarray(h,w)
     :param npoints: number of random points, defaults to 100
     :type npoints: int, optional
     :param dist_thresh: distance threshold, a new point is only added to the
@@ -33,31 +31,44 @@ class PRMPlanner(PlannerBase):
         defaults to None
     :type dist_thresh: float, optional
     :param Planner: probabilistic roadmap path planner
-    :type Planner: PRMPlanner instance
+    :param kwargs: common planner options, see :class:`PlannerBase`
 
     ==================   ========================
     Feature              Capability
     ==================   ========================
     Plan                 Cartesian space
-    Obstacle avoidance   Yes
+    Obstacle avoidance   Yes, occupancy grid
     Curvature            Discontinuous
-    Motion               Forwards only
+    Motion               Omnidirectional
     ==================   ========================
 
     Creates a planner that finds the path between two points in the
-    plane using forward motion.  The path comprises a set of way points.
+    plane using omnidirectional motion.  The path comprises a set of way points.
 
-    :author: Peter Corke_
-    :seealso: :class:`Planner`
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import PRMPlanner
+        >>> import numpy as np
+        >>> simplegrid = np.zeros((6, 6));
+        >>> simplegrid[2:5, 3:5] = 1
+        >>> prm = PRMPlanner(simplegrid);
+        >>> prm.plan()
+        >>> path = prm.query(start=(5, 4), goal=(1,1))
+        >>> print(path.T)
+
+    :author: Peter Corke
+    :seealso: :class:`PlannerBase`
     """
-    def __init__(self, occ_grid=None, npoints=100, dist_thresh=None, **kwargs):
-        super().__init__(ndims=2, **kwargs)
+    def __init__(self, occgrid=None, npoints=100, dist_thresh=None, **kwargs):
+        super().__init__(occgrid, ndims=2, **kwargs)
 
         if dist_thresh is None:
             self._dist_thresh = 0.3 * self.occgrid.maxdim
 
         self._npoints = npoints
-        self._npoints0 = npoints
+        # self._npoints0 = npoints
         self._dist_thresh0 = self.dist_thresh
         self._graph = None
         self._v_goal = None
@@ -69,57 +80,59 @@ class PRMPlanner(PlannerBase):
 
     def __str__(self):
         s = super().__str__()
-        s += '\n  ' + str(self.graph)
+        if self.graph is not None:
+            s += '\n  ' + str(self.graph)
         return s
 
     @property
     def npoints(self):
+        """
+        Number of points in the roadmap
+
+        :return: Number of points
+        :rtype: int
+        """
         return self._npoints
 
     @property
-    def npoints0(self):
-        return self._npoints0
-
-    @property
     def dist_thresh(self):
+        """
+        Distance threshold
+
+        :return: distance threshold
+        :rtype: float
+
+        Edges are created between points if the distance between them is less
+        than this value.
+        """
         return self._dist_thresh
 
-    @property
-    def dist_thresh0(self):
-        return self._dist_thresh0
+    # @property
+    # def npoints0(self):
+    #     return self._npoints0
+
+    # @property
+    # def dist_thresh0(self):
+    #     return self._dist_thresh0
 
     @property
     def graph(self):
+        """
+        Roadmap graph
+
+        :return: roadmap as an undirected graph
+        :rtype: :class:`pgraph.UGraph` instance
+        """
         return self._graph
 
-    @property
-    def v_goal(self):
-        return self._v_goal
 
-    @property
-    def v_start(self):
-        return self._v_start
-
-    @property
-    def local_goal(self):
-        return self._local_goal
-
-    @property
-    def local_path(self):
-        return self._local_path
-
-    @property
-    def v_path(self):
-        return self._v_path
-
-
-    def create_roadmap(self, animate=None):
+    def _create_roadmap(self, npoints, dist_thresh, animate=None):
         # a = Animate(animate, fps=5)
-        self.progress_start(self.npoints)
+        self.progress_start(npoints)
 
         x = None
         y = None
-        for j in range(self.npoints):
+        for j in range(npoints):
             # find a random point in freespace
             while True:
                 # pick a random unoccupied point
@@ -130,7 +143,6 @@ class PRMPlanner(PlannerBase):
 
             # add it as a vertex to the graph
             vnew = self.graph.add_vertex([x, y])
-
 
         # compute distance between vertices
         for vertex in self.graph:
@@ -149,11 +161,11 @@ class PRMPlanner(PlannerBase):
             # create edges to vertex if permissible
             for distance, othervertex in distances:
                 # test if below distance threshold
-                if self.dist_thresh is not None and distance > self.dist_thresh:
+                if dist_thresh is not None and distance > dist_thresh:
                     break # sorted into ascending order, so we are done
 
                 # test if obstacle free path connecting them
-                if self.test_path(vertex, othervertex):
+                if self._test_path(vertex, othervertex):
                     # add an edge
                     self.graph.add_edge(vertex, othervertex, cost=distance)
             self.progress_next()
@@ -164,7 +176,7 @@ class PRMPlanner(PlannerBase):
             #     if not np.empty(movie):
             #         a.add()
 
-    def test_path(self, v1, v2, npoints=None):
+    def _test_path(self, v1, v2, npoints=None):
         # vector from v1 to v2
         dir = v2.coord - v1.coord
 
@@ -192,75 +204,97 @@ class PRMPlanner(PlannerBase):
         :type dist_thresh: float, optional
         :param animate: animate the planning algorithm iterations, defaults to False
         :type animate: bool, optional
+
+        Create a probablistic roadmap.  This is a graph connecting points
+        randomly selected from the free space of the occupancy grid. Edges are
+        created between points if the distance between them is less than
+        ``dist_thresh``.
+
+        The roadmap is a pgraph :obj:`~pgraph.PGraph.UGraph`
+        :class:`~pgraph.UGraph`
+        :class:`~pgraph.PGraph.UGraph`
+
+        :seealso: :meth:`query` :meth:`graph`
         """
 
         self.message('create the graph')
 
         if npoints is None:
-            npoints = self.npoints0
-        if dist_thresh is None:
-            dist_thresh = self.dist_thresh0;
+            npoints = self.npoints
 
-        self._npoints = npoints
-        self._dist_thresh = dist_thresh
+        if dist_thresh is None:
+            dist_thresh = self.dist_thresh
 
         self._graph = UGraph()
         self._v_path = np.array([])
 
-        self.randinit()  # reset the random number generator
-        self.create_roadmap(animate)
+        self.random_init()  # reset the random number generator
+        self._create_roadmap(npoints, dist_thresh, animate)
 
     def query(self, start, goal, **kwargs):
+        """
+        Find a path from start to goal using planner
+
+        :param start: start position :math:`(x, y)`, defaults to previously set value
+        :type start: array_like(), optional
+        :param goal: goal position :math:`(x, y)`, defaults to previously set value
+        :type goal: array_like(), optional
+        :param kwargs: options passed to :meth:`PlannerBase.query`
+        :return: path from start to goal, one point :math:`(x, y)` per row
+        :rtype: ndarray(N,2)
+
+        The path is a sparse sequence of waypoints, with variable distance
+        between them.
+
+        .. warning:: Waypoints 1 to N-2 are part of the roadmap, while waypoints
+            0 and N-1 are the start and goal respectively.  The first and last
+            motion segment is not guaranteed to be obstacle free.
+
+        """
         if self.graph.n == 0:
-            Error('RTB:PRM:noplan:query: no plan: run the planner')
+            raise RuntimeError('no plan computed')
 
         super().query(start=start, goal=goal, next=False, **kwargs)
 
-        # find vertices closest to start and goal
+        # find roadmap vertices closest to start and goal
         vstart, _ = self.graph.closest(self.start)
         vgoal, _ = self.graph.closest(self.goal)
 
+        # find A* path through the roadmap
         out = self.graph.path_Astar(vstart, vgoal)
         if out is None:
-            print('no path found')
-            return None
-
+            raise RuntimeError('no path found')
         path = [v.coord for v in out[0]]
-        path.insert(0, start)
-        path.append(goal)
+
+        path.insert(0, start)  # insert start at head of path
+        path.append(goal)  # append goal to end of path
+
         return np.array(path)
 
+    def plot(self, *args, vertex={}, edge={}, **kwargs):
+        """
+        Plot PRM path
 
-    def next(self, p):
-        if all(p[:] == self.goal):
-            n = np.array([])
-            return n
+        :param vertex: vertex style, defaults to {}
+        :type vertex: dict, optional
+        :param edge: edge style, defaults to {}
+        :type edge: dict, optional
 
-        if len(self._local_path) == 0:
-            if np.empty(self._g_path):
-                self._local_path = self.bresenham(p, self._goal)
-                self._local_path = self._local_path[1:len(self._local_path), :]
-                self._local_goal = np.array([])
-            else:
-                self._local_goal = self._g_path[0]
-                self._g_path = self._g_path[1:len(self._g_path)]
+        Displays:
+        
+        - the planner background (obstacles)
+        - the roadmap graph
+        - the path
 
-                self._local_path = bresenham(p, self.graph.coord(self._local_goal))
-                self._local_path = self._local_path[1:len(self._local_path), :]
-                self.graph.highlight_node(self._local_goal)
-
-        n = np.transpose(self._local_path[0, :])
-        self._local_pathh = self._local_path[1:len(self._local_path), :]
-        return n
-
-    def plot(self, *args, vertex=None, edge=None, **kwargs):
+        :seealso: :meth:`UGraph.plot`
+        """
+        # plot the obstacles and path
         super().plot(*args, **kwargs)
-        if vertex is None:
-            vertex=dict(markersize=4)
-        if edge is None:
-             edge=dict(linewidth=0.5)
+        vertex = {**dict(markersize=4), **vertex}
+        edge = {**dict(linewidth=0.5), **edge}
 
-        self.graph.plot(text=False, vertex=vertex, edge=edge)
+        # add the roadmap graph
+        self.graph.plot(text=False, vopt=vertex, eopt=edge)
 
 
 if __name__ == "__main__":
@@ -269,17 +303,16 @@ if __name__ == "__main__":
     # start and goal position
     start = (10, 10)
     goal = (50, 50)
-    robot_size = 5.0  # [m]
 
     occgrid = np.zeros((100, 100))
     occgrid[20:40, 15:30] = 1
 
-    prm = PRMPlanner(occgrid=occgrid, verbose=True, inflate=5)
+    prm = PRMPlanner(occgrid=occgrid, verbose=True)
 
     prm.plan()
     path = prm.query(start, goal)
     print(path)
 
     prm.plot(path, path_marker=dict(zorder=8, linewidth=2, markersize=6, color='k'))
-    prm.graph.plot(ax=plt.gca(), text=False, vertex=dict(markersize=4), edge=dict(linewidth=0.5))
+    prm.plot(ax=plt.gca(), text=False, vertex=dict(markersize=4), edge=dict(linewidth=0.5))
     plt.show(block=True)

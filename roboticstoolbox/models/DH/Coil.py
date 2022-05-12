@@ -42,7 +42,7 @@ class Coil(DHRobot):
     :references:
         - "A divide and conquer articulated-body algorithm for parallel O(log(n))
           calculation of rigid body dynamics, Part 2",
-          Int. J. Robotics Research, 18(9), pp 876-892. 
+          Int. J. Robotics Research, 18(9), pp 876-892.
 
     :seealso: :func:`Hyper`, :func:`Ball`
 
@@ -53,12 +53,11 @@ class Coil(DHRobot):
 
         if symbolic:
             import spatialmath.base.symbolic as sym
-            zero = sym.zero()
+
             pi = sym.pi()
         else:
             from math import pi
-            zero = 0.0
-            
+
         a = 1 / N
 
         links = []
@@ -66,19 +65,17 @@ class Coil(DHRobot):
             links.append(RevoluteDH(a=a, alpha=5 * pi / N))
 
         super().__init__(
-            links,
-            name="Hyper" + str(N),
-            keywords=('symbolic',),
-            symbolic=symbolic
+            links, name="Coil" + str(N), keywords=("symbolic",), symbolic=symbolic
         )
 
-        # zero angles, straight
-        self.addconfiguration("qz", np.zeros((N,)))
+        self.qr = np.array(np.ones(N) * 10 * pi / N)
+        self.qz = np.zeros(N)
 
-        # folded, helix with ~5.5 turns
-        self.addconfiguration("qf", np.ones((N,)) * 10 * pi / N)
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
-if __name__ == '__main__':    # pragma nocover
+
+if __name__ == "__main__":  # pragma nocover
 
     coil = Coil(N=10, symbolic=False)
     print(coil)

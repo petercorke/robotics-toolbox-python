@@ -1,3 +1,12 @@
+# ======================================================================== #
+
+# The following code is based on code from Python Robotics
+# https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning
+# RRTDubins planning
+# Author: Atsushi Sakai 
+# Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
+
 import math
 from collections import namedtuple
 from roboticstoolbox.mobile.OccGrid import PolygonMap
@@ -16,13 +25,81 @@ from pgraph import DGraph
 
 
 class RRTPlanner(PlannerBase):
+    """
+    Rapidly exploring tree planner
+
+    :param map: occupancy grid
+    :type map: :class:`PolygonMap`
+    :param vehicle: vehicle kinematic model
+    :type vehicle: :class:`VehicleBase` subclass
+    :param curvature: maximum path curvature, defaults to 1.0
+    :type curvature: float, optional
+    :param stepsize: spacing between points on the path, defaults to 0.2
+    :type stepsize: float, optional
+    :param showsamples: shows vehicle polygons for all random samples, defaults to False
+    :type showsamples: bool, optional
+    :param npoints: number of vertices in random tree, defaults to 50
+    :type npoints: int, optional
+
+    ==================   ========================
+    Feature              Capability
+    ==================   ========================
+    Plan                 :math:`\SE{2}`
+    Obstacle avoidance   Yes, polygons
+    Curvature            Discontinuous
+    Motion               Bidirectional
+    ==================   ========================
+
+    Creates a planner that finds the obstacle-free path between two
+    configurations in the plane using forward and backward motion.  The path
+    comprises multiple Dubins curves comprising straight lines, or arcs with
+    curvature of :math:`\pm` ``curvature``. Motion along the segments may be in
+    the forward or backward direction.
+
+    Polygons are used for obstacle avoidance:
+    
+    - the environment is defined by a set of polygons represented by a :class:`PolygonMap`
+    - the vehicle is defined by a single polygon specified by the ``polygon``
+      argument to its constructor
+
+    Example::
+
+        from roboticstoolbox import RRTPlanner
+        from spatialmath import Polygon2
+        from math import pi
+
+        # create polygonal obstacles
+        map = PolygonMap(workspace=[0, 10])
+        map.add([(5, 50), (5, 6), (6, 6), (6, 50)]) 
+        map.add([(5, 4), (5, -50), (6, -50), (6, 4)])
+
+        # create outline polygon for vehicle
+        l, w = 3, 1.5
+        vpolygon = Polygon2([(-l/2, w/2), (-l/2, -w/2), (l/2, -w/2), (l/2, w/2)])
+
+        # create vehicle model
+        vehicle = Bicycle(steer_max=1, L=2, polygon=vpolygon)
+
+        # create planner
+        rrt = RRTPlanner(map=map, vehicle=vehicle, npoints=50, seed=0)
+        # start and goal configuration
+        qs = (2, 8, -pi/2)
+        qg = (8, 2, -pi/2)
+
+        # plan path
+        rrt.plan(goal=qg)
+        path, status = rrt.query(start=qs)
+        print(path[:5,:])
+        print(status)
+
+
+    :seealso: :class:`DubinsPlanner` :class:`Vehicle` :class:`PlannerBase`
+    """
     def __init__(
         self,
-        map=None,
-        vehicle=None,
-        curvature=None,
-        expand_dis=3.0,
-        path_resolution=0.5,
+        map,
+        vehicle,
+        curvature=1.0,
         stepsize=0.2,
         showsamples=False,
         npoints=50,
@@ -31,8 +108,6 @@ class RRTPlanner(PlannerBase):
 
         super().__init__(ndims=2, **kwargs)
 
-        self.expand_dis = expand_dis
-        self.path_resolution = path_resolution
         self.npoints = npoints
         self.map = map
         self.showsamples = showsamples
@@ -52,16 +127,27 @@ class RRTPlanner(PlannerBase):
         # self.goal_yaw_th = np.deg2rad(1.0)
         # self.goal_xy_th = 0.5
 
-    def plan(self, goal, animation=True, search_until_npoints=True):
-        """
-        execute planning
+    def plan(self, goal, animate=True, search_until_npoints=True):
+        r"""
+        Plan paths to goal using RRT
 
-        animation: flag for animation on or off
+        :param goal: goal pose :math:`(x, y, \theta)`, defaults to previously set value
+        :type goal: array_like(3), optional
+
+        Compute a rapidly exploring random tree with its root at the ``goal``.
+        The tree will have ``npoints`` vertices spread uniformly randomly over
+        the workspace which is an attribute of the ``map``.
+
+        For every new point added, a Dubins path is computed to the nearest
+        vertex already in the graph.  Each configuration on that path, with
+        spacing of ``stepsize``, is tested for obstacle intersection.
+
+        :seealso: :meth:`query`
         """
         # TODO use validate
         self.goal = np.r_[goal]
         # self.goal = np.r_[goal]
-        self.randinit()
+        self.random_init()
 
         v = self.g.add_vertex(coord=goal)
         v.path = None
@@ -111,6 +197,29 @@ class RRTPlanner(PlannerBase):
         self.progress_end()
 
     def query(self, start):
+        r"""
+        Find a path from start configuration
+
+        :param start: start configuration :math:`(x, y, \theta)`
+        :type start: array_like(3), optional
+        :return: path and status
+        :rtype: ndarray(N,3), namedtuple
+
+        The path comprises points equally spaced at a distance of ``stepsize``.
+
+        The returned status value has elements:
+
+        +---------------+---------------------------------------------------+
+        | Element       |  Description                                      |
+        +---------------+---------------------------------------------------+
+        | ``length``    | total path length                                 |
+        +-------------+-----------------------------------------------------+
+        | ``initial_d`` | distance from start to first vertex in graph      |
+        +---------------+---------------------------------------------------+
+        | ``vertices``  | sequence of vertices in the graph                 |
+        +---------------+---------------------------------------------------+
+
+        """
         self._start = start
         vstart, d = self.g.closest(start)
 
@@ -129,37 +238,70 @@ class RRTPlanner(PlannerBase):
 
         return path, status
 
-    def generate_final_course(self, goal_ind):
-        path = [[self.end.x, self.end.y]]
-        node = self.node_list[goal_ind]
-        while node.parent is not None:
-            path.append([node.x, node.y])
-            node = node.parent
-        path.append([node.x, node.y])
+    # def _generate_final_course(self, goal_ind):
+    #     path = [[self.end.x, self.end.y]]
+    #     node = self.node_list[goal_ind]
+    #     while node.parent is not None:
+    #         path.append([node.x, node.y])
+    #         node = node.parent
+    #     path.append([node.x, node.y])
 
-        return path
+    #     return path
 
-    def calc_dist_to_goal(self, x, y):
+    # def _calc_dist_to_goal(self, x, y):
 
-        dx = x - self.goal.x
-        dy = y - self.end.y
-        return math.hypot(dx, dy)
+    #     dx = x - self.goal.x
+    #     dy = y - self.end.y
+    #     return math.hypot(dx, dy)
 
     def qrandom(self):
+        r"""
+        Random configuration
+
+        :return: random configuration :math:`(x, y, \theta)`
+        :rtype: ndarray(3)
+
+        Returns a random configuration where position :math:`(x, y)`
+        lies within the bounds of the ``map`` associated with this planner.
+
+        :seealso: :meth:`qrandom_free`
+        """
         return self.random.uniform(
             low=(self.map.workspace[0], self.map.workspace[2], -np.pi),
             high=(self.map.workspace[1], self.map.workspace[3], np.pi),
         )
 
     def qrandom_free(self):
+        r"""
+        Random obstacle free configuration
 
+        :return: random configuration :math:`(x, y, \theta)`
+        :rtype: ndarray(3)
+
+        Returns a random obstacle free configuration where position :math:`(x,
+        y)` lies within the bounds of the ``map`` associated with this planner.
+        Iterates on :meth:`qrandom`
+
+        :seealso: :meth:`qrandom` :meth:`iscollision`
+        """
         # iterate for a random freespace configuration
         while True:
-            q = self.random()
-            if not self.map.iscollision(self.vehicle.polygon(q)):
+            q = self.qrandom()
+            if not self.iscollision(q):
                 return q
 
     def iscollision(self, q):
+        r"""
+        Test if configuration is collision
+
+        :param q: vehicle configuration :math:`(x, y, \theta)`
+        :type q: array_like(3)
+        :return: collision status
+        :rtype: bool
+
+        Transforms the vehicle polygon and tests for intersection against
+        the polygonal obstacle map.
+        """
         return self.map.iscollision(self.vehicle.polygon(q))
 
 

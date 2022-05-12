@@ -8,7 +8,7 @@ class PR2(ERobot):
     def __init__(self):
 
         links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "pr2_description/robots/pr2.urdf.xacro", "pr2_description"
+            "pr2_description/robots/pr2.urdf.xacro", xacro_tld="pr2_description"
         )
 
         super().__init__(
@@ -24,7 +24,11 @@ class PR2(ERobot):
 
         self.manufacturer = "Willow Garage"
 
+        self.qr = np.zeros(31)
         self.qz = np.zeros(31)
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

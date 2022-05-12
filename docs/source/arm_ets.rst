@@ -12,12 +12,12 @@ Consider the example:
 .. runblock:: pycon
    :linenos:
 
-   >>> from roboticstoolbox import ETS
-   >>> ETS.rx(45, 'deg')
-   >>> ETS.tz(0.75)
-   >>> e = ETS.rx(0.3) * ETS.tz(0.75)
+   >>> from roboticstoolbox import ET
+   >>> ET.Rx(45, 'deg')
+   >>> ET.tz(0.75)
+   >>> e = ET.Rx(0.3) * ET.tz(0.75)
    >>> print(e)
-   >>> e.eval()
+   >>> e.fkine([])
 
 In lines 2-5 we defined two elementary transforms.  Line 2 defines a rotation
 of 45° about the x-axis, and line 4 defines a translation of 0.75m along the z-axis.
@@ -25,8 +25,8 @@ Compounding them in line 6, the result is the two elementary transforms in a
 sequence - an elementary transform sequence (ETS).  An ETS can be arbitrarily
 long.
 
-Line 8 *evaluates* the sequence, substituting in values, and the result is an
-SE(3) matrix encapsulated in an ``SE3`` object.
+Line 8 *evaluates* the forward kinematics of the sequence, substituting in values,
+and the result is an SE(3) matrix encapsulated in an ``4x4`` numpy array.
 
 The real power comes from having variable arguments to the elementary transforms
 as shown in this example where we define a simple two link planar manipulator.
@@ -35,18 +35,18 @@ as shown in this example where we define a simple two link planar manipulator.
 .. runblock:: pycon
    :linenos:
 
-   >>> from roboticstoolbox import ETS
-   >>> e = ETS.rz() * ETS.tx(1) * ETS.rz() * ETS.tx(1)
+   >>> from roboticstoolbox import ET
+   >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
    >>> print(e)
    >>> len(e)
    >>> e[1:3]
-   >>> e.eval([0, 0])
-   >>> e.eval([90, -90], 'deg')
+   >>> e.fkine([0, 0])
+   >>> e.fkine([1.57, -1.57])
 
-Line 2 succinctly describes the kinematics in terms of elementary transforms: a rotation around the z-axis by the
-first joint angle, then a translation in the x-direction, then a rotation around
-the z-axis by the second joint angle, and finally a translation in the
-x-direction.
+Line 2 succinctly describes the kinematics in terms of elementary transforms: a
+rotation around the z-axis by the first joint angle, then a translation in the
+x-direction, then a rotation around the z-axis by the second joint angle, and
+finally a translation in the x-direction.
 
 Line 3 creates the elementary transform sequence, with variable transforms.
 ``e`` is a single object that encapsulates a list of elementary transforms, and list like 
@@ -70,15 +70,16 @@ ETS - 3D
 --------
 
 .. autoclass:: roboticstoolbox.robot.ETS.ETS
-   :members: rx, ry, rz, tx, ty, tz, eta, n, joints, isjoint, isconstant, isrevolute, isprismatic, axis, config, __getitem__, pop, __mul__, __repr__, __str__, T, eval, compile, SE3, jacob0, hessian0
+   :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jointset, split, inv, compile, insert, fkine, jacob0, jacobe, hessian0, hessiane
    :undoc-members:
    :show-inheritance:
+   :member-order: bysource
 
 ETS - 2D
 --------
 
 .. autoclass:: roboticstoolbox.robot.ETS.ETS2
-   :members: r, tx, ty, eta, n, joints, isjoint, isconstant, isrevolute, isprismatic, axis, config, __getitem__, pop, __mul__, __repr__, __str__, T, eval, compile
+   :members: __str__, __repr__, __mul__, __getitem__, n, m, structure, joints, jointset, split, inv, compile, insert, fkine, jacob0, jacobe
    :undoc-members:
    :show-inheritance:
 

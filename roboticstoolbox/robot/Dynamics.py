@@ -15,6 +15,7 @@ import numpy as np
 from spatialmath.base import getvector, verifymatrix, isscalar, getmatrix, t2r, rot2jac
 from scipy import integrate, interpolate
 from spatialmath.base import symbolic as sym
+from roboticstoolbox import rtb_get_param
 
 from ansitable import ANSITable, Column
 import warnings
@@ -64,6 +65,7 @@ class DynamicsMixin:
             >>> robot.links[2].dyntable()
             >>> robot.dyntable()
         """
+        unicode = rtb_get_param("unicode")
         table = ANSITable(
             Column("j", colalign=">", headalign="^"),
             Column("m", colalign="<", headalign="^"),
@@ -73,7 +75,7 @@ class DynamicsMixin:
             Column("B", colalign="<", headalign="^"),
             Column("Tc", colalign="<", headalign="^"),
             Column("G", colalign="<", headalign="^"),
-            border="thin",
+            border="thin" if unicode else "ascii",
         )
 
         for j, link in enumerate(self):
@@ -184,11 +186,11 @@ class DynamicsMixin:
         self,
         T,
         q0,
-        torqfun=None,
-        targs=None,
+        torque=None,
+        torque_args={},
         qd0=None,
         solver="RK45",
-        sargs=None,
+        solver_args={},
         dt=None,
         progress=False,
     ):
@@ -201,15 +203,15 @@ class DynamicsMixin:
         :type q0: array_like
         :param qd0: initial joint velocities, assumed zero if not given
         :type qd0: array_like
-        :param torqfun: a function that computes torque as a function of time
+        :param torque: a function that computes torque as a function of time
         and/or state
-        :type torqfun: callable
-        :param targs: argumments passed to ``torqfun``
-        :type targs: dict
+        :type torque: callable
+        :param torque_args: positional arguments passed to ``torque``
+        :type torque_args: dict
         :type solver: name of scipy solver to use, RK45 is the default
         :param solver: str
-        :type sargs: arguments passed to the solver
-        :param sargs: dict
+        :type solver_args: arguments passed to the solver
+        :param solver_args: dict
         :type dt: time step for results
         :param dt: float
         :param progress: show progress bar, default False
@@ -268,8 +270,7 @@ class DynamicsMixin:
                 def myfunc(robot, t, q, qd, qstar, P, D):
                     return (qstar - q) * P + qd * D  # P, D are (6,)
 
-                targs = {'qstar': VALUE, 'P': VALUE, 'D': VALUE}
-                tg = robot.fdyn(10, q0, myfunc, targs=targs) )
+                tg = robot.fdyn(10, q0, myfunc, torque_args=(qstar, P, D)) )
 
         Many integrators have variable step length which is problematic if we
         want to animate the result.  If ``dt`` is specified then the solver
@@ -301,13 +302,9 @@ class DynamicsMixin:
             qd0 = np.zeros((n,))
         else:
             qd0 = getvector(qd0, n)
-        if torqfun is not None:
-            if not callable(torqfun):
+        if torque is not None:
+            if not callable(torque):
                 raise ValueError("torque function must be callable")
-        if sargs is None:
-            sargs = {}
-        if targs is None:
-            targs = {}
 
         # concatenate q and qd into the initial state vector
         x0 = np.r_[q0, qd0]
@@ -316,11 +313,11 @@ class DynamicsMixin:
         scipy_integrator = integrate.__dict__[solver]
 
         integrator = scipy_integrator(
-            lambda t, y: self._fdyn(t, y, torqfun, targs),
+            lambda t, y: self._fdyn(t, y, torque, torque_args),
             t0=0.0,
             y0=x0,
             t_bound=T,
-            **sargs,
+            **solver_args,
         )
 
         # initialize list of time and states
@@ -641,7 +638,7 @@ class DynamicsMixin:
                     B += link.Tc[0] / qd[j]
                 elif qd < 0:
                     B += link.Tc[1] / qd[j]
-            tf.append((J, B))
+            tf.append(((1,), (J, B)))
 
         return tf
 
@@ -854,8 +851,7 @@ class DynamicsMixin:
         else:
             return taug
 
-    def inertia_x(self, q=None, pinv=False, analytical="rpy-xyz", 
-            Ji=None):
+    def inertia_x(self, q=None, pinv=False, representation="rpy/xyz", Ji=None):
         r"""
         Operational space inertia matrix
 
@@ -864,7 +860,7 @@ class DynamicsMixin:
         :param pinv: use pseudo inverse rather than inverse
         :type pinv: bool
         :param analytical: the type of analytical Jacobian to use, default is
-            'rpy-xyz'
+            'rpy/xyz'
         :type analytical: str
         :return: The inertia matrix
         :rtype: ndarray(6,6) or ndarray(m,6,6)
@@ -883,8 +879,8 @@ class DynamicsMixin:
             =============  ========================================
             Value          Rotational representation
             =============  ========================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order (default)
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'rpy/xyz'``  RPY angular rates in XYZ order (default)
+            ``'rpy/zyx'``  RPY angular rates in XYZ order
             ``'eul'``      Euler angular rates in ZYZ order
             ``'exp'``      exponential coordinate rates
             =============  ========================================
@@ -919,7 +915,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0(q[0, :], analytical=analytical)
+                Ja = self.jacob0_analytical(q[0, :], representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -932,7 +928,7 @@ class DynamicsMixin:
             Mt = np.zeros((q.shape[0], 6, 6))
 
             for k, qk in enumerate(q):
-                Ja = self.jacob0(qk, analytical=analytical)
+                Ja = self.jacob0_analytical(qk, representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -942,8 +938,18 @@ class DynamicsMixin:
 
             return Mt
 
-    def coriolis_x(self, q, qd, pinv=False, analytical="rpy-xyz",
-        J=None, Ji=None, Jd=None, C=None, Mx=None):
+    def coriolis_x(
+        self,
+        q,
+        qd,
+        pinv=False,
+        representation="rpy/xyz",
+        J=None,
+        Ji=None,
+        Jd=None,
+        C=None,
+        Mx=None,
+    ):
         r"""
         Operational space Coriolis and centripetal term
 
@@ -954,7 +960,7 @@ class DynamicsMixin:
         :param pinv: use pseudo inverse rather than inverse
         :type pinv: bool
         :param analytical: the type of analytical Jacobian to use, default is
-            'rpy-xyz'
+            'rpy/xyz'
         :type analytical: str
         :return: Operational space velocity matrix
         :rtype: ndarray(6,6) or ndarray(m,6,6)
@@ -980,8 +986,8 @@ class DynamicsMixin:
             =============  ========================================
             Value          Rotational representation
             =============  ========================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order (default)
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'rpy/xyz'``  RPY angular rates in XYZ order (default)
+            ``'rpy/zyx'``  RPY angular rates in XYZ order
             ``'eul'``      Euler angular rates in ZYZ order
             ``'exp'``      exponential coordinate rates
             =============  ========================================
@@ -1020,7 +1026,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0(q[0, :], analytical=analytical)
+                Ja = self.jacob0_analytical(q[0, :], representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -1028,7 +1034,7 @@ class DynamicsMixin:
             if C is None:
                 C = self.coriolis(q[0, :], qd[0, :])
             if Mx is None:
-                Mx = self.inertia_x(q[0, :])
+                Mx = self.inertia_x(q[0, :], Ji=Ji)
             if Jd is None:
                 Jd = self.jacob_dot(q[0, :], qd[0, :], J0=Ja)
             return Ji.T @ (C - Mx @ Jd) @ Ji
@@ -1037,25 +1043,25 @@ class DynamicsMixin:
             Ct = np.zeros((q.shape[0], 6, 6))
 
             for k, (qk, qdk) in enumerate(zip(q, qd)):
-                J = self.jacob0(qk)
-                T = rot2jac(self.fkine(qk).A, representation=analytical)
-                Ja = T @ J
+
+                if Ji is None:
+                    Ja = self.jacob0_analytical(q[0, :], representation)
+                    if pinv:
+                        Ji = np.linalg.pinv(Ja)
+                    else:
+                        Ji = np.linalg.inv(Ja)
 
                 C = self.coriolis(qk, qdk)
-                Mx = self.inertia_x(qk)
+                Mx = self.inertia_x(qk, Ji=Ji)
                 Jd = self.jacob_dot(qk, qdk, J0=J)
-                # A = 1
 
-                if pinv:
-                    Ji = np.linalg.pinv(Ja)
-                else:
-                    Ji = np.linalg.inv(Ja)
                 Ct[k, :, :] = Ji.T @ (C - Mx @ Jd) @ Ji
 
             return Ct
 
-    def gravload_x(self, q=None, gravity=None, pinv=False, analytical="rpy-xyz",
-    Ji=None):
+    def gravload_x(
+        self, q=None, gravity=None, pinv=False, representation="rpy/xyz", Ji=None
+    ):
         """
         Operational space gravity load
 
@@ -1067,7 +1073,7 @@ class DynamicsMixin:
         :param pinv: use pseudo inverse rather than inverse
         :type pinv: bool
         :param analytical: the type of analytical Jacobian to use, default is
-            'rpy-xyz'
+            'rpy/xyz'
         :type analytical: str
         :return: The operational space gravity wrench
         :rtype: ndarray(6) or ndarray(m,6)
@@ -1089,8 +1095,8 @@ class DynamicsMixin:
             =============  ========================================
             Value          Rotational representation
             =============  ========================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order (default)
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
+            ``'rpy/xyz'``  RPY angular rates in XYZ order (default)
+            ``'rpy/zyx'``  RPY angular rates in XYZ order
             ``'eul'``      Euler angular rates in ZYZ order
             ``'exp'``      exponential coordinate rates
             =============  ========================================
@@ -1130,7 +1136,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0(q[0, :], analytical=analytical)
+                Ja = self.jacob0(q[0, :], analytical=representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -1144,7 +1150,7 @@ class DynamicsMixin:
             # z = np.zeros(self.n)
 
             for k, qk in enumerate(q):
-                Ja = self.jacob0(qk, analytical=analytical)
+                Ja = self.jacob0(qk, analytical=representation)
                 G = self.gravload(qk)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
@@ -1155,7 +1161,9 @@ class DynamicsMixin:
 
             return taug
 
-    def accel_x(self, q, xd, wrench, gravity=None, pinv=False, analytical="rpy-xyz"):
+    def accel_x(
+        self, q, xd, wrench, gravity=None, pinv=False, representation="rpy/xyz"
+    ):
         r"""
         Operational space acceleration due to applied wrench
 
@@ -1171,7 +1179,7 @@ class DynamicsMixin:
         :param pinv: use pseudo inverse rather than inverse
         :type pinv: bool
         :param analytical: the type of analytical Jacobian to use, default is
-            'rpy-xyz'
+            'rpy/xyz'
         :type analytical: str
         :return: Operational space accelerations of the end-effector
         :rtype: ndarray(6) or ndarray(m,6)
@@ -1222,9 +1230,7 @@ class DynamicsMixin:
 
         for k, (qk, xdk, wk) in enumerate(zip(q, xd, w)):
 
-            J = self.jacob0(qk)
-            T = rot2jac(self.fkine(qk).A, representation=analytical)
-            Ja = T @ J
+            Ja = self.jacob0(qk, analytical=representation)
             if pinv:
                 Ji = np.linalg.pinv(Ja)
             else:

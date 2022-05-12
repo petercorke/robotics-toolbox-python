@@ -21,12 +21,37 @@ def rtb_load_matfile(filename):
         - Uses SciPy ``io.loadmat`` to do the work.
         - If the filename has no path component, eg. ``map1.mat`, it will be 
           first be looked for in the folder ``roboticstoolbox/data``.
+        - MATLAB structs are converted to Python dicts, but extended so that
+          elements can be accessed using dot notation.
     
     :seealso: :func:`path_to_datafile`
     """
     from scipy.io import loadmat
+    from scipy.io.matlab.mio5_params import mat_struct
+    from collections import namedtuple
 
-    return rtb_load_data(filename, loadmat, squeeze_me=True, struct_as_record=False)
+    # get results as a dict
+    data = rtb_load_data(filename, loadmat, squeeze_me=True, struct_as_record=False)
+
+    # if elements are a scipy.io.matlab.mio5_params.mat_struct, that is, they
+    # were a MATLAB struct, convert them to a namedtuple
+    for key, value in data.items():
+        if isinstance(value, mat_struct):
+
+            # extend dict with a dot access method
+            class dictx(dict):
+                def __getattr__(self, key):
+                    try:
+                        return self[key]
+                    except KeyError as k:
+                        raise AttributeError(k)
+
+            d = dictx()
+            for v in value._fieldnames:
+                d[v] = getattr(value, v)
+            data[key] = d
+        
+    return data
 
 def rtb_load_jsonfile(filename):
     """
@@ -131,6 +156,7 @@ def rtb_path_to_datafile(*filename, local=True):
 
 if __name__ == "__main__":
 
+    house = rtb_load_matfile("data/house.mat");
     a = rtb_loadmat("map1.mat")
     print(a)
     a = rtb_loadmat("data/map1.mat")

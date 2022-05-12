@@ -1,7 +1,7 @@
 """
 Python Bug Planner
-@Author: Kristian Gibson
-@Author: Peter Corke
+@Author: Peter Corke, original MATLAB code and Python version
+@Author: Kristian Gibson, initial MATLAB port
 """
 from numpy import disp
 from scipy import integrate
@@ -21,50 +21,45 @@ class Bug2(PlannerBase):
 
     :param occgrid: occupancy grid
     :type occgrid: :class:`OccGrid` instance or ndarray(N,M)
-    :param kwargs: common arguments for :class:`Planner` superclass
-    :return: Planner subclass implementing Bug2 algorithm
-    :rtype: Bug2Planner instance
+    :param kwargs: common arguments for :class:`PlannerBase` superclass
+    :return: Bug2 reactive navigator
+    :rtype: Bug2 instance
 
-    Creates a planner object which be used to return a path from start
-    to goal.
+    Creates an object which simulates an automaton, capable of omnidirectional
+    motion, finding a path across an occupancy grid using only a bump sensor.
 
-    .. note:: This is not strictly a planner since it is entirely reactive.
-            Therefore, paths can be very inefficient.
-
-    :reference: Path-Planning Strategies for a Point Mobile Automaton Moving
-        Amidst Unknown Obstacles of Arbitrary Shape, Lumelsky and Stepanov,
+    :reference: "Path-Planning Strategies for a Point Mobile Automaton Moving
+        Amidst Unknown Obstacles of Arbitrary Shape", Lumelsky and Stepanov,
         Algorithmica (1987)2, pp.403-430
 
-    :author: Kristian Gibson and Peter Corke
-    :seealso: :class:`Planner`
+    .. note:: This class is not a planner, even though it subclasses
+        :class:`PlannerBase`. It can produce very inefficient paths.
+
+    :author: Kristian Gibson and Peter Corke, based on MATLAB version by Peter Corke
+    :seealso: :class:`PlannerBase`
     """
     def __init__(self, **kwargs):
 
         super().__init__(ndims=2, **kwargs)
 
-        self._h = []
+        self.H = []  # hit points
         self._j = 0
         self._step = 1
         self._m_line = None
         self._edge = None
         self._k = None
 
-    @property
-    def h(self):
-        """[summary]
-
-        Returns:
-            [type]: [description]
-        """
-        return self._h
-
-
-    @property
-    def step(self):
-        return self._step
 
     @property
     def m_line(self):
+        """
+        Get m-line
+
+        :return: m-line in homogeneous form
+        :rtype: ndarray(3)
+
+        This is the m-line computed for the last :meth:`run`.
+        """
         return self._m_line
 
     # override query method of base class
@@ -87,10 +82,10 @@ class Bug2(PlannerBase):
         :return: path from ``start`` to ``goal``
         :rtype: ndarray(2,N)
 
-        Compute the path from ``start`` to `goal` assuming the robot is capable
+        Compute the path from ``start`` to ``goal`` assuming the robot is capable
         of 8-way motion from its current cell to the next.
         
-        .. note:: ``start`` and `goal` are given as (x,y) coordinates in the
+        .. note:: ``start`` and ``goal`` are given as (x,y) coordinates in the
               occupancy grid map, not as matrix row and column coordinates.
 
         :seealso: :meth:`Bug2.plot`
@@ -123,12 +118,12 @@ class Bug2(PlannerBase):
         h = None
 
         trail_line, = plt.plot(0, 0, 'y.', label='robot path')
-        trail_head, = plt.plot(0, 0, 'ko', zorder=10)
+        trailHead, = plt.plot(0, 0, 'ko', zorder=10)
 
         # iterate using the next() method until we reach the goal
         while True:
             if animate:
-                trail_head.set_data(robot[0], robot[1])
+                trailHead.set_data(robot[0], robot[1])
                 if trail:
                     trail_line.set_data(path.T)
 
@@ -154,10 +149,20 @@ class Bug2(PlannerBase):
                 path = np.vstack((path, robot))
 
         # movie.done()
+        if animate:
+            trailHead.remove()
 
         return path
 
     def plot_m_line(self, ls=None):
+        """
+        Plot m-line
+
+        :param ls: linestyle, defaults to ``"k--"``
+        :type ls: str, optional
+
+        Plots the m-line on the current axes.
+        """
         if ls is None:
             ls = 'k--'
 
@@ -177,6 +182,15 @@ class Bug2(PlannerBase):
             plt.plot([x_min, x_max], y, ls, zorder=10, label='m-line')
 
     def next(self, position):
+        """
+        One step of the finite state automaton
+
+        :param position: current robot position
+        :type position: ndarray(2)
+        :raises RuntimeError: robot is trapped
+        :return: next robot position
+        :rtype: ndarray(2)
+        """
 
         l = None
         y = None
@@ -205,7 +219,7 @@ class Bug2(PlannerBase):
             # detect if next step is an obstacle
             if self.isoccupied(position + np.r_[dx, dy]):
                 self.message(f"  {position}: obstacle at {position + np.r_[dx, dy]}")
-                self.h.append(position)
+                self.H.append(position)  # save hit point
                 self._step = 2  # transition to step 2
                 self.message(f"  {position}: change to step 2")
 
@@ -233,8 +247,7 @@ class Bug2(PlannerBase):
                 self.message(f"  {position}: crossed the M-line")
 
                 # are we closer than when we encountered the obstacle?
-                if base.norm(position - self._goal) < base.norm(self._h[-1] - self._goal):
-                    # self._j += 1
+                if base.norm(position - self._goal) < base.norm(self.H[-1] - self._goal):
                     self._step = 1  # transition to step 1
                     self.message(f"  {position}: change to step 1")
                     return n
@@ -421,11 +434,11 @@ def hom_line(p1, p2):
 
 if __name__ == "__main__":
 
-    from roboticstoolbox import loadmat
+    from roboticstoolbox import rtb_load_matfile
 
-    vars = loadmat("data/map1.mat")
+    vars = rtb_load_matfile("data/map1.mat")
     map = vars['map']
 
-    bug = Bug2Planner(occgrid=map)
+    bug2 = Bug2(occgrid=map)
     # bug.plan()
-    path = bug.query([20, 10], [50, 35], animate=True)
+    path = bug2.run([20, 10], [50, 35], animate=True)

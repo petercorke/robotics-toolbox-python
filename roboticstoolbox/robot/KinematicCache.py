@@ -336,12 +336,28 @@ class KinematicCache:
             self._dict[key] = np.linalg.pinv(J)
         return self._dict[key]
 
+    def inertia(self, q):
+        key = ("inertia", self._qhash(q), self._qhash(qd))
+        if key not in self._dict:
+            # cache miss, compute it
+            C = self.inertia(q)
+            self._dict[key] = self._robot.inertia(q)
+        return self._dict[key]
+
     def coriolis(self, q, qd):
         key = ("coriolis", self._qhash(q), self._qhash(qd))
         if key not in self._dict:
             # cache miss, compute it
             C = self.coriolis(q, qd)
-            self._dict[key] = self._robot.coriolis_x(q, qd)
+            self._dict[key] = self._robot.coriolis(q, qd)
+        return self._dict[key]
+
+    def gravload(self, q):
+        key = ("gravload", self._qhash(q), self._qhash(qd))
+        if key not in self._dict:
+            # cache miss, compute it
+            C = self.gravload(q)
+            self._dict[key] = self._robot.gravload(q)
         return self._dict[key]
 
     def inertia_x(self, q, pinv=False, analytical="rpy-xyz"):
@@ -361,7 +377,7 @@ class KinematicCache:
         key = ("coriolis_x", self._qhash(q), self._qhash(qd), pinv, analytical)
         if key not in self._dict:
             # cache miss, compute it
-
+            Ja = self.jacob0(q, pinv=pinv, analytical=analytical)
             # get Jacobian inv or pinv from cache
             if pinv:
                 Ji = self.jacobe0_pinv(analytical=analytical)
@@ -369,10 +385,10 @@ class KinematicCache:
                 Ji = self.jacobe0_inv(analytical=analytical)
             # get inertia, Jacobian dot and Coriolis from cache
             Mx = self.inertia_x(q, pinv=pinv, analytical=analytical)
-            Jd = self.jacob_dot(q, J0=self.jacob0(q, analytical=analytical))
+            Jd = self.jacob_dot(q, J0=self.jacob0(q, J0=Ja, analytical=analytical))
             C = self.coriolis(q, qd)
             self._dict[key] = self._robot.coriolis_x(q, qd, pinv, analytical, 
-                J, Ji, Jd, C, Mx)
+                J=Ja, Ji=Ji, Jd=JD, C=C, Mx=Mx)
         return self._dict[key]
 
     def gravload_x(self, q, pinv=False, analytical="rpy-xyz"):
@@ -386,6 +402,27 @@ class KinematicCache:
             else:
                 Ji = self.jacobe0_inv(analytical=analytical)
             self._dict[key] = self._robot.gravload_x(q, Ji=Ji)
+        return self._dict[key]
+
+    def accel_x(self, q, qd, xd, wrench, pinv=False, analytical="rpy-xyz"):
+        key = ("accel_x", self._qhash(q), pinv, analytical)
+        if key not in self._dict:
+            # cache miss, compute it
+
+            Ja = self.jacob0(q, pinv=pinv, analytical=analytical)
+            # get Jacobian inv or pinv from cache
+            if pinv:
+                Ji = self.jacobe0_pinv(analytical=analytical)
+            else:
+                Ji = self.jacobe0_inv(analytical=analytical)
+            C = self.coriolis(q, qd)
+            Jd = self.jacob_dot(q, J0=Ja)
+
+            Mx = self.inertia_x(q, Ji=Ji, pinv=pinv, analytical=analytical)
+            Cx = self.coriolis_x(q, qd, pinv=pinv, analytical=analytical,
+                J=Ja, Ji=Ji, Jd=Jd, C=C, Mx=Mx)
+            Gx = self.gravload_x(q, Ji=Ji)
+            self._dict[key] = np.linalg.inv(Mx) @ (wrench - Cx @ xd - Gx)
         return self._dict[key]
 
 

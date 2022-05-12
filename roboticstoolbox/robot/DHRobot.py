@@ -9,20 +9,32 @@ import warnings
 import copy
 import numpy as np
 from roboticstoolbox.robot.Robot import Robot  # DHLink
-from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.DHLink import DHLink  # HACK
+from roboticstoolbox.robot.ETS import ETS, ET
+from roboticstoolbox.robot.DHLink import DHLink
+from roboticstoolbox import rtb_set_param
 from spatialmath.base.argcheck import getvector, isscalar, verifymatrix, getmatrix
 
 # from spatialmath import base
-from spatialmath.base import tr2jac, tr2eul, tr2rpy, t2r, eul2jac, rpy2jac
+from spatialmath.base import (
+    tr2jac,
+    tr2eul,
+    tr2rpy,
+    t2r,
+    eul2jac,
+    rpy2jac,
+    trlog,
+    rotvelxform,
+)
 from spatialmath import SE3, Twist3
 import spatialmath.base.symbolic as sym
 
 # from scipy.optimize import minimize, Bounds
 from ansitable import ANSITable, Column
 from scipy.linalg import block_diag
-from roboticstoolbox.robot.DHLink import _check_rne
+from roboticstoolbox.robot.DHLink import _check_rne, DHLink
+from roboticstoolbox import rtb_get_param
 from frne import init, frne, delete
+from numpy import any
 
 iksol = namedtuple("IKsolution", "q, success, reason")
 
@@ -69,6 +81,11 @@ class DHRobot(Robot):
 
         all_links = []
         self._n = 0
+
+        # If we are given a list of standard DH Links, we must convert
+        # them to modified DH links
+        # if any([isinstance(link, StandardDH) for link in links]):
+        #     links = DHLink.StandardDH(links)
 
         for link in links:
             if isinstance(link, DHLink):
@@ -125,6 +142,18 @@ class DHRobot(Robot):
         :rtype: str
         """
 
+        if np.array_equal(self.base.A, np.eye(4)):
+            base = None
+        else:
+            base = self.base
+
+        if np.array_equal(self.tool.A, np.eye(4)):
+            tool = None
+        else:
+            tool = self.tool
+
+        unicode = rtb_get_param("unicode")
+        border = "thin" if unicode else "ascii"
         s = f"DHRobot: {self.name}"
 
         if self.manufacturer is not None and len(self.manufacturer) > 0:
@@ -146,7 +175,7 @@ class DHRobot(Robot):
 
         def qstr(j, link):
             j += 1
-            if link.flip:
+            if link.isflip:
                 s = f"-q{j:d}"
             else:
                 s = f" q{j:d}"
@@ -169,7 +198,7 @@ class DHRobot(Robot):
                 else:
                     return str(theta * deg) + "\u00b0"
 
-        has_qlim = any([link._qlim is not None for link in self])
+        has_qlim = any([link.qlim is not None for link in self])
         if has_qlim:
             qlim_columns = [
                 Column("q⁻", headalign="^"),
@@ -178,7 +207,9 @@ class DHRobot(Robot):
             qlim = self.qlim
 
         else:
+            qlim = np.array([])  # satisfy type checker
             qlim_columns = []
+
         if self.mdh:
             # MDH format
             table = ANSITable(
@@ -187,7 +218,7 @@ class DHRobot(Robot):
                 Column("θⱼ", headalign="^"),
                 Column("dⱼ", headalign="^"),
                 *qlim_columns,
-                border="thick",
+                border=border,
             )
             for j, L in enumerate(self):
                 if has_qlim:
@@ -209,7 +240,7 @@ class DHRobot(Robot):
                 Column("aⱼ", headalign="^"),
                 Column("⍺ⱼ", headalign="^"),
                 *qlim_columns,
-                border="thick",
+                border=border,
             )
             for j, L in enumerate(self):
                 if has_qlim:
@@ -235,23 +266,23 @@ class DHRobot(Robot):
             table = ANSITable(
                 Column("", colalign=">"),
                 Column("", colalign="<"),
-                border="thin",
+                border=border,
                 header=False,
             )
-            if self._base is not None:
+            if base is not None:
                 table.row(
                     "base",
-                    self._base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
+                    base.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
                 )
-            if self._tool is not None:
+            if tool is not None:
                 table.row(
                     "tool",
-                    self._tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
+                    tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
                 )
             s += "\n" + str(table)
 
         # show named configurations
-        s += self.configurations_str()
+        s += self.configurations_str(border=border)
 
         return s
 
@@ -282,6 +313,60 @@ class DHRobot(Robot):
             tool=self.tool,
             gravity=self.gravity,
         )
+
+    def __deepcopy__(self, memo):
+
+        links = []
+
+        for link in self.links:
+            links.append(copy.deepcopy(link))
+
+        name = copy.deepcopy(self.name)
+        manufacturer = copy.deepcopy(self.manufacturer)
+        comment = copy.deepcopy(self.comment)
+        base = copy.deepcopy(self.base)
+        tool = copy.deepcopy(self.tool)
+        gravity = copy.deepcopy(self.gravity)
+        keywords = copy.deepcopy(self.keywords)
+        symbolic = copy.deepcopy(self.symbolic)
+        configs = copy.deepcopy(self.configs)
+
+        try:
+            if self.meshdir:
+                meshdir = copy.deepcopy(self.meshdir)
+            else:
+                meshdir = None
+        except AttributeError:
+            meshdir = None
+
+        # cls = self.__class__
+        result = DHRobot(
+            links,
+            meshdir=meshdir,
+            name=name,
+            manufacturer=manufacturer,
+            comment=comment,
+            base=base,
+            tool=tool,
+            gravity=gravity,
+            keywords=keywords,
+            symbolic=symbolic,
+            configs=configs,
+        )
+
+        # if a configuration was an attribute of original robot, make it an
+        # attribute of the deep copy
+        for config in configs:
+            if hasattr(self, config):
+                setattr(result, config, configs[config])
+
+        try:
+            setattr(result, "ikine_a", getattr(self, "ikine_a"))
+        except AttributeError:
+            pass
+
+        memo[id(self)] = result
+        return result
 
     # def copy(self):
     #     """
@@ -714,11 +799,10 @@ class DHRobot(Robot):
         """
         Joint axes as  twists
 
-        :param q: The joint configuration of the robot
-        :type q: array_like (n)
-        :return: a vector of Twist objects
-        :rtype: float ndarray(n,)
-        :return: Represents the pose of the tool
+        :param q: The joint configuration of the robot, defaults to zero
+        :return: a vector of joint axis twists
+        :rtype: Twist3 instance
+        :return: Pose of the tool
         :rtype: SE3 instance
 
         - ``tw, T0 = twists(q)`` calculates a vector of Twist objects (n) that
@@ -735,16 +819,16 @@ class DHRobot(Robot):
 
             >>> import roboticstoolbox as rtb
             >>> robot = rtb.models.DH.Puma560()
-            >>> tw, T0 = robot.twists(robot.qz)
+            >>> tw, T0 = robot.twists()
             >>> tw
             >>> T0
 
         """
 
         if q is None:
-            q = np.zeros((self.n))
+            q = np.zeros((self.n,))
 
-        T = self.fkine_all(q)
+        T = self.fkine_all(q)[1:]  # don't use first transform which is base
         tw = Twist3.Alloc(self.n)
         if self.mdh:
             # MDH case
@@ -772,7 +856,7 @@ class DHRobot(Robot):
 
         return tw, T[-1]
 
-    def ets(self):
+    def ets(self, *args, **kwargs):
         """
         Robot kinematics as an elemenary transform sequence
 
@@ -789,18 +873,28 @@ class DHRobot(Robot):
         """
 
         # optionally start with the base transform
-        if self._base is None:
+        if np.array_equal(self.base.A, np.eye(4)):
+            base = None
+        else:
+            base = self.base.A
+
+        if np.array_equal(self.tool.A, np.eye(4)):
+            tool = None
+        else:
+            tool = self.tool.A
+
+        if base is None:
             ets = ETS()
         else:
-            ets = ETS.SE3(self._base)
+            ets = ET.SE3(base)
 
         # add the links
         for link in self:
-            ets *= link.ets()
+            ets *= link.ets
 
         # optionally add the base transform
-        if self._tool is not None:
-            ets *= ETS.SE3(self._tool)
+        if tool is not None:
+            ets *= ET.SE3(tool)
 
         return ets
 
@@ -837,6 +931,16 @@ class DHRobot(Robot):
               kinematics are computed.
         """
 
+        if np.array_equal(self.base.A, np.eye(4)):
+            base = None
+        else:
+            base = self.base
+
+        if np.array_equal(self.tool.A, np.eye(4)):
+            tool = None
+        else:
+            tool = self.tool
+
         T = SE3.Empty()
         for qr in getmatrix(q, (None, self.n)):
 
@@ -846,13 +950,13 @@ class DHRobot(Robot):
                     Tr = L.A(q)
                     first = False
                 else:
-                    Tr *= L.A(q)
+                    Tr *= L.A(q)  # type: ignore
 
-            if self._base is not None:
-                Tr = self._base * Tr
-            if self._tool is not None:
-                Tr = Tr * self._tool
-            T.append(Tr)
+            if base is not None:
+                Tr = base * Tr  # type: ignore
+            if tool is not None:
+                Tr = Tr * tool  # type: ignore
+            T.append(Tr)  # type: ignore
 
         return T
 
@@ -975,14 +1079,14 @@ class DHRobot(Robot):
 
         n = self.n
         L = self.links
-        J = np.zeros((6, self.n), dtype=q.dtype)
+        J = np.zeros((6, self.n), dtype=q.dtype)  # type: ignore
 
         U = self.tool.A
 
         for j in range(n - 1, -1, -1):
             if self.mdh == 0:
                 # standard DH convention
-                U = L[j].A(q[j]).A @ U
+                U = L[j].A(q[j]).A @ U  # type: ignore
 
             if not L[j].sigma:
                 # revolute axis
@@ -1003,7 +1107,7 @@ class DHRobot(Robot):
 
             if self.mdh != 0:
                 # modified DH convention
-                U = L[j].A(q[j]).A @ U
+                U = L[j].A(q[j]).A @ U  # type: ignore
 
         # return top or bottom half if asked
         if half is not None:
@@ -1016,7 +1120,7 @@ class DHRobot(Robot):
 
         return J
 
-    def jacob0(self, q=None, T=None, half=None, analytical=None, start=None, end=None):
+    def jacob0(self, q=None, T=None, half=None, start=None, end=None):
         r"""
         Manipulator Jacobian in world frame
 
@@ -1026,27 +1130,14 @@ class DHRobot(Robot):
         :type T: SE3 instance
         :param half: return half Jacobian: 'trans' or 'rot'
         :type half: str
-        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
-        :type analytical: str
         :return J: The manipulator Jacobian in the world frame
         :rtype: ndarray(6,n)
 
-        - ``robot.jacob0(q)`` is the manipulator Jacobian matrix which maps
+        - ``robot.jacob0(q)`` is the manipulator geometric Jacobian matrix which maps
           joint velocity to end-effector spatial velocity.
 
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{0}\!\nu = \mathbf{J}_0(q) \dot{q}`.
-
-        ``analytical`` can be one of:
-
-            =============  ==================================
-            Value          Rotational representation
-            =============  ==================================
-            ``'rpy/xyz'``  RPY angular rates in XYZ order
-            ``'rpy/zyx'``  RPY angular rates in XYZ order
-            ``'eul'``      Euler angular rates in ZYZ order
-            ``'exp'``      exponential coordinate rates
-            =============  ==================================
 
         Example:
 
@@ -1056,7 +1147,7 @@ class DHRobot(Robot):
             >>> puma = rtb.models.DH.Puma560()
             >>> puma.jacob0([0, 0, 0, 0, 0, 0])
 
-        .. warning:: The **geometric Jacobian** is as described in texts by
+        .. warning:: This is the **geometric Jacobian** is as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a
             velocity twist as per the text by Lynch & Park.
@@ -1075,31 +1166,6 @@ class DHRobot(Robot):
         # compute Jacobian in EE frame and transform to world frame
         J0 = tr2jac(T) @ self.jacobe(q)
 
-        # compute rotational transform if analytical Jacobian required
-        if analytical is not None:
-
-            if analytical == "rpy/xyz":
-                rpy = tr2rpy(T, "xyz")
-                A = rpy2jac(rpy, "xyz")
-            elif analytical == "rpy/zyx":
-                rpy = tr2rpy(T, "zyx")
-                A = rpy2jac(rpy, "zyx")
-            elif analytical == "eul":
-                eul = tr2eul(T)
-                A = eul2jac(eul)
-            elif analytical == "exp":
-                # TODO: move to SMTB.base, Horner form with skew(v)
-                (theta, v) = trlog(t2r(T))
-                A = (
-                    np.eye(3, 3)
-                    - (1 - math.cos(theta)) / theta * skew(v)
-                    + (theta - math.sin(theta)) / theta * skew(v) ** 2
-                )
-            else:
-                raise ValueError("bad analytical value specified")
-
-            J0 = block_diag(np.eye(3, 3), np.linalg.inv(A)) @ J0
-
         # TODO optimize computation above if half matrix is returned
 
         # return top or bottom half if asked
@@ -1111,6 +1177,83 @@ class DHRobot(Robot):
             else:
                 raise ValueError("bad half specified")
         return J0
+
+    def jacob0_analytical(self, q, representation=None, T=None):
+        r"""
+        Manipulator Jacobian in world frame
+
+        :param q: Joint coordinate vector
+        :type q: ndarray(n)
+        :param representation: return analytical Jacobian instead of geometric Jacobian
+        :type representation: str
+        :param T: Forward kinematics if known, SE(3 matrix)
+        :type T: SE3 instance
+        :return J: The manipulator analytical Jacobian in the world frame
+        :rtype: ndarray(6,n)
+
+        Return the manipulator's analytical Jacobian matrix which maps
+        joint velocity to end-effector spatial velocity.
+
+        End-effector spatial velocity :math:`\nu_a = (v_x, v_y, v_z, \dot{\Gamma}_1, \dot{\Gamma}_2, \dot{\Gamma}_3)^T`
+        is related to joint velocity by :math:`{}^{0}\!\nu_a = \mathbf{J}_{a,0}(q) \dot{q}`.
+        Where :math:`\dvec{\Gamma} = (\dot{\Gamma}_1, \dot{\Gamma}_2, \dot{\Gamma}_3)` is
+        orientation rate expressed as one of:
+
+        ==================   ==================================
+        ``representation``          Rotational representation
+        ==================   ==================================
+        ``'rpy/xyz'``        RPY angular rates in XYZ order
+        ``'rpy/zyx'``        RPY angular rates in XYZ order
+        ``'eul'``            Euler angular rates in ZYZ order
+        ``'exp'``            exponential coordinate rates
+        ==================   ==================================
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> puma = rtb.models.DH.Puma560()
+            >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0], "rpy/xyz")
+
+        .. warning:: The **geometric Jacobian** is as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a
+            velocity twist as per the text by Lynch & Park.
+
+        .. note:: ``T`` can be passed in to save the cost of computing forward
+            kinematics which is needed to transform velocity from end-effector
+            frame to world frame.
+
+        """  # noqa
+        q = getvector(q, self.n)
+
+        # compute forward kinematics if not provided
+        if T is None:
+            T = self.fkine(q)
+
+        # compute Jacobian in world frame
+        J0 = self.jacob0(q, T)
+
+        if representation is None:
+            return J0
+
+        # compute rotational transform if analytical Jacobian required
+
+        if representation == "rpy/xyz":
+            gamma = tr2rpy(T.A, order="xyz")
+        elif representation == "rpy/zyx":
+            gamma = tr2rpy(T.A, order="zyx")
+        elif representation == "eul":
+            gamma = tr2eul(T.A)
+        elif representation == "exp":
+            # TODO: move to SMTB.base, Horner form with skew(v)
+            gamma = trlog(t2r(T.A), twist=True)
+        else:
+            raise ValueError("bad analytical value specified")
+
+        A = rotvelxform(gamma, representation=representation, inverse=True, full=True)
+        return A @ J0
 
     def hessian0(self, q=None, J0=None, start=None, end=None):
         r"""
@@ -1209,7 +1352,7 @@ class DHRobot(Robot):
             self._rne_ob = None
 
     @_check_rne
-    def rne(self, q, qd=None, qdd=None, gravity=None, fext=None):
+    def rne(self, q, qd=None, qdd=None, gravity=None, fext=None, base_wrench=False):
         r"""
         Inverse dynamics
 
@@ -1243,6 +1386,12 @@ class DHRobot(Robot):
 
         :seealso: :func:`rne_python`
         """
+
+        if base_wrench:
+            return self.rne_python(
+                q, qd, qdd, gravity=gravity, fext=fext, base_wrench=base_wrench
+            )
+
         trajn = 1
 
         try:
@@ -1295,7 +1444,7 @@ class DHRobot(Robot):
         gravity=None,
         fext=None,
         debug=False,
-        basewrench=False,
+        base_wrench=False,
     ):
         """
         Compute inverse dynamics via recursive Newton-Euler formulation
@@ -1310,8 +1459,8 @@ class DHRobot(Robot):
         :type fext: array-like(6), optional
         :param debug: print debug information to console, defaults to False
         :type debug: bool, optional
-        :param basewrench: compute the base wrench, defaults to False
-        :type basewrench: bool, optional
+        :param base_wrench: compute the base wrench, defaults to False
+        :type base_wrench: bool, optional
         :raises ValueError: for misshaped inputs
         :return: Joint force/torques
         :rtype: NumPy array
@@ -1336,6 +1485,11 @@ class DHRobot(Robot):
 
         :seealso: :func:`rne`
         """
+
+        if np.array_equal(self.base.A, np.eye(4)):
+            base = None
+        else:
+            base = self.base.A
 
         def removesmall(x):
             return x
@@ -1380,7 +1534,7 @@ class DHRobot(Robot):
         nk = q.shape[0]
 
         tau = np.zeros((nk, n), dtype=dtype)
-        if basewrench:
+        if base_wrench:
             wbase = np.zeros((nk, n), dtype=dtype)
 
         for k in range(nk):
@@ -1411,10 +1565,10 @@ class DHRobot(Robot):
             w = np.zeros((3,), dtype=dtype)
             # base has zero angular acceleration
             wd = np.zeros((3,), dtype=dtype)
-            vd = -gravity
+            vd = -gravity  # type: ignore
 
-            if self._base is not None:
-                Rb = t2r(self.base.A).T
+            if base is not None:
+                Rb = t2r(base).T
                 w = Rb @ w
                 wd = Rb @ wd
                 vd = Rb @ gravity
@@ -1440,9 +1594,9 @@ class DHRobot(Robot):
                 if self.mdh:
                     pstar = np.r_[link.a, -d * sym.sin(alpha), d * sym.cos(alpha)]
                     if j == 0:
-                        if self._base:
-                            Tj = self._base.A @ Tj
-                            pstar = self._base.A @ pstar
+                        if base:
+                            Tj = base @ Tj
+                            pstar = base @ pstar
                 else:
                     pstar = np.r_[link.a, d * sym.sin(alpha), d * sym.cos(alpha)]
 
@@ -1580,7 +1734,7 @@ class DHRobot(Robot):
                 #  no Coulomb friction if model is symbolic
                 tau[k, j] = (
                     t
-                    + link.G ** 2 * link.Jm * qdd_k[j]
+                    + link.G**2 * link.Jm * qdd_k[j]
                     - link.friction(qd_k[j], coulomb=not self.symbolic)
                 )
                 if debug:
@@ -1590,7 +1744,7 @@ class DHRobot(Robot):
                     print()
 
             # compute the base wrench and save it
-            if basewrench:
+            if base_wrench:
                 R = Rm[0]
                 nn = R @ nn
                 f = R @ f
@@ -1611,20 +1765,36 @@ class DHRobot(Robot):
         #     else:
         #         return tau
 
-        if tau.shape[0] == 1:
-            return tau.flatten()
+        if base_wrench:
+            if tau.shape[0] == 1:
+                return tau.flatten(), wbase.flatten()
+            else:
+                return tau, wbase
         else:
-            return tau
+            if tau.shape[0] == 1:
+                return tau.flatten()
+            else:
+                return tau
 
     # -------------------------------------------------------------------------- #
 
     def ikine_6s(self, T, config, ikfunc):
         # Undo base and tool transformations, but if they are not
         # set, skip the operation.  Nicer for symbolics
-        if self._base is not None:
-            T = self.base.inv() * T
-        if self._tool is not None:
-            T = self.tool.inv() * T
+        if np.array_equal(self.base.A, np.eye(4)):
+            base = None
+        else:
+            base = self.base
+
+        if np.array_equal(self.tool.A, np.eye(4)):
+            tool = None
+        else:
+            tool = self.tool
+
+        if base is not None:
+            T = base.inv() * T
+        if tool is not None:
+            T = tool.inv() * T
 
         # q = np.zeros((6,))
         solutions = []
