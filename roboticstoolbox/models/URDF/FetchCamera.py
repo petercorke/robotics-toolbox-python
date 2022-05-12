@@ -44,15 +44,13 @@ class FetchCamera(ERobot):
         )
 
         # self.grippers[0].tool = SE3(0, 0, 0.1034)
-        self.qdlim = np.array(
-            [4.0, 4.0, 0.1, 1.57, 1.57]
-        )
+        self.qdlim = np.array([4.0, 4.0, 0.1, 1.57, 1.57])
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0]))
+        self.qz = np.array([0, 0, 0, 0, 0])
+        self.qr = np.array([0, 0, 0, 0, 0])
 
-        self.addconfiguration(
-            "qr", np.array([0, 0, 0, 0, 0])
-        )
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

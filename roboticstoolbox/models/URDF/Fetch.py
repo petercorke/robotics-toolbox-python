@@ -43,15 +43,13 @@ class Fetch(ERobot):
             urdf_filepath=urdf_filepath,
         )
 
-        self.qdlim = np.array(
-            [4.0, 4.0, 0.1, 1.25, 1.45, 1.57, 1.52, 1.57, 2.26, 2.26]
-        )
+        self.qdlim = np.array([4.0, 4.0, 0.1, 1.25, 1.45, 1.57, 1.52, 1.57, 2.26, 2.26])
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+        self.qz = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        self.qr = np.array([0, 0, 0.05, 1.32, 1.4, -0.2, 1.72, 0, 1.66, 0])
 
-        self.addconfiguration(
-            "qr", np.array([0, 0, 0.05, 1.32, 1.4, -0.2, 1.72, 0, 1.66, 0])
-        )
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover
