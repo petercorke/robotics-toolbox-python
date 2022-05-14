@@ -197,7 +197,7 @@ class EllipsePlot:
 
         # points on unit circle
         theta = np.linspace(0.0, 2.0 * np.pi, 50)
-        y = np.array([np.cos(theta), np.sin(theta)])
+        # y = np.array([np.cos(theta), np.sin(theta)])
         # RVC2 p 602
         # x = sp.linalg.sqrtm(A) @ y
 

@@ -1130,7 +1130,7 @@ graph [rankdir=LR];
             for gripper in self.grippers:
                 if end == gripper or end == gripper.name:
                     tool = gripper.tool
-                    end_ret = gripper.links[0]
+                    # end_ret = gripper.links[0]
 
             # otherwise check for end in the links
             end_ret = self._getlink(end)

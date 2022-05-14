@@ -1929,7 +1929,7 @@ if __name__ == "__main__":  # pragma nocover
 
     puma = rtb.models.DH.Puma560()
     print(puma)
-    print(puma.jacob0(puma.qn, analytical="eul"))
+    # print(puma.jacob0(puma.qn, analytical="eul"))
     # puma.base = None
     # print('base', puma.base)
     # print('tool', puma.tool)

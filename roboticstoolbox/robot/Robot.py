@@ -2203,7 +2203,6 @@ if __name__ == "__main__":
 
     puma = rtb.models.DH.Puma560()
     a = puma.copy()
-    pass
 
     # from roboticstoolbox import ET2 as ET
 
