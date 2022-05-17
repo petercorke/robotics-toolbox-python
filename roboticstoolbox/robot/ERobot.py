@@ -43,7 +43,6 @@ from spatialmath import (
     SpatialInertia,
     SpatialForce,
 )
-import fknm
 from functools import lru_cache
 from typing import Union, overload, Dict, List, Tuple, Optional
 from copy import deepcopy

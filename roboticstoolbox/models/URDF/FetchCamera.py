@@ -2,7 +2,7 @@
 
 import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
-from spatialmath import SE3
+# from spatialmath import SE3
 
 
 class FetchCamera(ERobot):

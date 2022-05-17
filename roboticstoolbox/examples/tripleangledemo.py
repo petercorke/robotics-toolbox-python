@@ -137,7 +137,7 @@ def demo():
         lambda x: change_sequence("ZYZ"), desc="ZYZ (Euler angles)"
     )
 
-    button = swift.Button(lambda x: set("ZYX"), desc="Set to Zero")
+    swift.Button(lambda x: set("ZYX"), desc="Set to Zero")
 
     # button to reset joint angles
     def reset(e):
@@ -185,25 +185,25 @@ def demo():
 
     label = swift.Label(desc="Triple angle")
 
-    def chekked(e, el):
-        nlabel = "s: "
+    # def chekked(e, el):
+    #     nlabel = "s: "
 
-        if e[0]:
-            nlabel += "a"
-            r_one.value = 0
+    #     if e[0]:
+    #         nlabel += "a"
+    #         r_one.value = 0
 
-        if e[1]:
-            nlabel += "b"
-            r_two.value = 0
+    #     if e[1]:
+    #         nlabel += "b"
+    #         r_two.value = 0
 
-        if e[2]:
-            nlabel += "c"
-            r_three.value = 0
+    #     if e[2]:
+    #         nlabel += "c"
+    #         r_three.value = 0
 
-        if e[3]:
-            el.value = 1
+    #     if e[3]:
+    #         el.value = 1
 
-        label.desc = nlabel
+    #     label.desc = nlabel
 
     env.add(label)
     env.add(r_one)

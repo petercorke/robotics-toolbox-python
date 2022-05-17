@@ -20,8 +20,6 @@ from spatialmath.base import (
     tr2eul,
     tr2rpy,
     t2r,
-    eul2jac,
-    rpy2jac,
     trlog,
     rotvelxform,
 )

@@ -1,8 +1,6 @@
 from setuptools import setup, find_packages
 
-import pkg_resources
 import os
-import sys
 
 here = os.path.abspath(os.path.dirname(__file__))
 

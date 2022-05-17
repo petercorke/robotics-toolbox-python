@@ -2,7 +2,8 @@ import math
 import scipy.integrate
 import scipy.optimize
 import numpy as np
-import matplotlib.pyplot as plt
+
+# import matplotlib.pyplot as plt
 from collections import namedtuple
 from roboticstoolbox.mobile import *
 

@@ -1,11 +1,12 @@
-from roboticstoolbox import Bicycle, RandomPath, VehiclePolygon, VehicleIcon
-from spatialmath import *   # lgtm [py/polluting-import]
+# from roboticstoolbox import Bicycle, RandomPath, VehiclePolygon
+from roboticstoolbox import VehicleIcon
+from spatialmath import *  # lgtm [py/polluting-import]
 from math import pi
 
 dim = 10
 
 # v = VehiclePolygon()
-anim = VehicleIcon('greycar', scale=2)
+anim = VehicleIcon("greycar", scale=2)
 
 # veh = Bicycle(
 #     animation=anim,

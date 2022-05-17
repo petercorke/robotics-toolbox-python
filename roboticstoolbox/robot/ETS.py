@@ -858,7 +858,7 @@ class ETS(BaseETS):
 
         try:
             return ETS_fkine(self._fknm, q, base, tool, include_base)
-        except:
+        except BaseException:
             pass
 
         q = getmatrix(q, (None, None))

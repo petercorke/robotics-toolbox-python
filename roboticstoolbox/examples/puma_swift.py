@@ -5,7 +5,6 @@
 
 import swift
 import roboticstoolbox as rp
-import spatialmath as sm
 import numpy as np
 
 env = swift.Swift()
