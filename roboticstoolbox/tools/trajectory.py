@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from spatialmath.base.argcheck import (
     isvector,
     getvector,
-    assertmatrix,
+    # assertmatrix,
     getvector,
     isscalar,
 )

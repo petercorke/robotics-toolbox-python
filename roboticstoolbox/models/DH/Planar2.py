@@ -5,7 +5,6 @@
 """
 
 from roboticstoolbox import DHRobot, RevoluteDH
-from math import pi
 import numpy as np
 
 
