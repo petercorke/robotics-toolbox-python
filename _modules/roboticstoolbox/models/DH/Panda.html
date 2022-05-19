@@ -105,9 +105,9 @@
 
         <span class="c1"># deg = np.pi/180</span>
         <span class="n">mm</span> <span class="o">=</span> <span class="mf">1e-3</span>
-        <span class="n">tool_offset</span> <span class="o">=</span> <span class="p">(</span><span class="mi">103</span><span class="p">)</span><span class="o">*</span><span class="n">mm</span>
+        <span class="n">tool_offset</span> <span class="o">=</span> <span class="p">(</span><span class="mi">103</span><span class="p">)</span> <span class="o">*</span> <span class="n">mm</span>
 
-        <span class="n">flange</span> <span class="o">=</span> <span class="p">(</span><span class="mi">107</span><span class="p">)</span><span class="o">*</span><span class="n">mm</span>
+        <span class="n">flange</span> <span class="o">=</span> <span class="p">(</span><span class="mi">107</span><span class="p">)</span> <span class="o">*</span> <span class="n">mm</span>
         <span class="c1"># d7 = (58.4)*mm</span>
 
         <span class="c1"># This Panda model is defined using modified</span>
@@ -117,66 +117,134 @@
                 <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                 <span class="n">d</span><span class="o">=</span><span class="mf">0.333</span><span class="p">,</span>
                 <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">2.8973</span><span class="p">,</span> <span class="mf">2.8973</span><span class="p">])</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">2.8973</span><span class="p">,</span> <span class="mf">2.8973</span><span class="p">]),</span>
+                <span class="n">m</span><span class="o">=</span><span class="mf">4.970684</span><span class="p">,</span>
+                <span class="n">I</span><span class="o">=</span><span class="p">[</span>
+                    <span class="mf">7.03370e-01</span><span class="p">,</span>
+                    <span class="mf">7.06610e-01</span><span class="p">,</span>
+                    <span class="mf">9.11700e-03</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.39000e-04</span><span class="p">,</span>
+                    <span class="mf">1.91690e-02</span><span class="p">,</span>
+                    <span class="mf">6.77200e-03</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">G</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="p">),</span>
-
             <span class="n">RevoluteMDH</span><span class="p">(</span>
                 <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                 <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                <span class="n">alpha</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.7628</span><span class="p">,</span> <span class="mf">1.7628</span><span class="p">])</span>
+                <span class="n">alpha</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">1.7628</span><span class="p">,</span> <span class="mf">1.7628</span><span class="p">]),</span>
+                <span class="n">m</span><span class="o">=</span><span class="mf">0.646926</span><span class="p">,</span>
+                <span class="n">I</span><span class="o">=</span><span class="p">[</span>
+                    <span class="mf">7.96200e-03</span><span class="p">,</span>
+                    <span class="mf">2.81100e-02</span><span class="p">,</span>
+                    <span class="mf">2.59950e-02</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">3.92500e-03</span><span class="p">,</span>
+                    <span class="mf">7.04000e-04</span><span class="p">,</span>
+                    <span class="mf">1.02540e-02</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">G</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="p">),</span>
-
             <span class="n">RevoluteMDH</span><span class="p">(</span>
                 <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                 <span class="n">d</span><span class="o">=</span><span class="mf">0.316</span><span class="p">,</span>
-                <span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">2.8973</span><span class="p">,</span> <span class="mf">2.8973</span><span class="p">])</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">2.8973</span><span class="p">,</span> <span class="mf">2.8973</span><span class="p">]),</span>
+                <span class="n">m</span><span class="o">=</span><span class="mf">3.228604</span><span class="p">,</span>
+                <span class="n">I</span><span class="o">=</span><span class="p">[</span>
+                    <span class="mf">3.72420e-02</span><span class="p">,</span>
+                    <span class="mf">3.61550e-02</span><span class="p">,</span>
+                    <span class="mf">1.08300e-02</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">4.76100e-03</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.28050e-02</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.13960e-02</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">G</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="p">),</span>
-
             <span class="n">RevoluteMDH</span><span class="p">(</span>
                 <span class="n">a</span><span class="o">=</span><span class="mf">0.0825</span><span class="p">,</span>
                 <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                <span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">3.0718</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0698</span><span class="p">])</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">3.0718</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0698</span><span class="p">]),</span>
+                <span class="n">m</span><span class="o">=</span><span class="mf">3.587895</span><span class="p">,</span>
+                <span class="n">I</span><span class="o">=</span><span class="p">[</span>
+                    <span class="mf">2.58530e-02</span><span class="p">,</span>
+                    <span class="mf">1.95520e-02</span><span class="p">,</span>
+                    <span class="mf">2.83230e-02</span><span class="p">,</span>
+                    <span class="mf">7.79600e-03</span><span class="p">,</span>
+                    <span class="mf">8.64100e-03</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.33200e-03</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">G</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="p">),</span>
-
             <span class="n">RevoluteMDH</span><span class="p">(</span>
                 <span class="n">a</span><span class="o">=-</span><span class="mf">0.0825</span><span class="p">,</span>
                 <span class="n">d</span><span class="o">=</span><span class="mf">0.384</span><span class="p">,</span>
-                <span class="n">alpha</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">2.8973</span><span class="p">,</span> <span class="mf">2.8973</span><span class="p">])</span>
+                <span class="n">alpha</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">2.8973</span><span class="p">,</span> <span class="mf">2.8973</span><span class="p">]),</span>
+                <span class="n">m</span><span class="o">=</span><span class="mf">1.225946</span><span class="p">,</span>
+                <span class="n">I</span><span class="o">=</span><span class="p">[</span>
+                    <span class="mf">3.55490e-02</span><span class="p">,</span>
+                    <span class="mf">2.94740e-02</span><span class="p">,</span>
+                    <span class="mf">8.62700e-03</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">2.11700e-03</span><span class="p">,</span>
+                    <span class="mf">2.29000e-04</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">4.03700e-03</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">G</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="p">),</span>
-
             <span class="n">RevoluteMDH</span><span class="p">(</span>
                 <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                 <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                <span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.0175</span><span class="p">,</span> <span class="mf">3.7525</span><span class="p">])</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.0175</span><span class="p">,</span> <span class="mf">3.7525</span><span class="p">]),</span>
+                <span class="n">m</span><span class="o">=</span><span class="mf">1.666555</span><span class="p">,</span>
+                <span class="n">I</span><span class="o">=</span><span class="p">[</span>
+                    <span class="mf">1.96400e-03</span><span class="p">,</span>
+                    <span class="mf">4.35400e-03</span><span class="p">,</span>
+                    <span class="mf">5.43300e-03</span><span class="p">,</span>
+                    <span class="mf">1.09000e-04</span><span class="p">,</span>
+                    <span class="mf">3.41000e-04</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.15800e-03</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">G</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="p">),</span>
-
             <span class="n">RevoluteMDH</span><span class="p">(</span>
                 <span class="n">a</span><span class="o">=</span><span class="mf">0.088</span><span class="p">,</span>
                 <span class="n">d</span><span class="o">=</span><span class="n">flange</span><span class="p">,</span>
-                <span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">2.8973</span><span class="p">,</span> <span class="mf">2.8973</span><span class="p">])</span>
-            <span class="p">)</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">2.8973</span><span class="p">,</span> <span class="mf">2.8973</span><span class="p">]),</span>
+                <span class="n">m</span><span class="o">=</span><span class="mf">7.35522e-01</span><span class="p">,</span>
+                <span class="n">I</span><span class="o">=</span><span class="p">[</span>
+                    <span class="mf">1.25160e-02</span><span class="p">,</span>
+                    <span class="mf">1.00270e-02</span><span class="p">,</span>
+                    <span class="mf">4.81500e-03</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">4.28000e-04</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">7.41000e-04</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.19600e-03</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">G</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">),</span>
         <span class="p">]</span>
 
-        <span class="n">tool</span> <span class="o">=</span> <span class="n">transl</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tool_offset</span><span class="p">)</span> <span class="o">@</span>  <span class="n">trotz</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">tool</span> <span class="o">=</span> <span class="n">transl</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tool_offset</span><span class="p">)</span> <span class="o">@</span> <span class="n">trotz</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">L</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Panda&#39;</span><span class="p">,</span>
-            <span class="n">manufacturer</span><span class="o">=</span><span class="s1">&#39;Franka Emika&#39;</span><span class="p">,</span>
-            <span class="n">meshdir</span><span class="o">=</span><span class="s1">&#39;meshes/FRANKA-EMIKA/Panda&#39;</span><span class="p">,</span>
-            <span class="n">tool</span><span class="o">=</span><span class="n">tool</span><span class="p">)</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Panda&quot;</span><span class="p">,</span>
+            <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Franka Emika&quot;</span><span class="p">,</span>
+            <span class="n">meshdir</span><span class="o">=</span><span class="s2">&quot;meshes/FRANKA-EMIKA/Panda&quot;</span><span class="p">,</span>
+            <span class="n">tool</span><span class="o">=</span><span class="n">tool</span><span class="p">,</span>
+        <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">])</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
     <span class="n">panda</span> <span class="o">=</span> <span class="n">Panda</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="p">)</span>
@@ -190,7 +258,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

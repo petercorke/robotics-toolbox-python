@@ -130,36 +130,34 @@
 
         <span class="c1"># Turret, Shoulder, Elbow, Wrist, Claw</span>
         <span class="n">links</span> <span class="o">=</span> <span class="p">[</span>
-                 <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">90</span> <span class="o">*</span> <span class="n">deg</span><span class="p">),</span>  <span class="c1"># Turret</span>
-                 <span class="n">RevoluteDH</span><span class="p">(</span>
-                    <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">l2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>         <span class="c1"># Shoulder</span>
-                    <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mf">122.5</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]),</span>
-                 <span class="n">RevoluteDH</span><span class="p">(</span>
-                    <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="o">=-</span><span class="n">l3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>         <span class="c1"># Elbow</span>
-                    <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">340</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]),</span>
-                 <span class="n">RevoluteDH</span><span class="p">(</span>
-                    <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">l4</span><span class="o">+</span><span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>        <span class="c1"># Wrist</span>
-                    <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="mi">45</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">315</span> <span class="o">*</span> <span class="n">deg</span><span class="p">])</span>
-            <span class="p">]</span>
+            <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">90</span> <span class="o">*</span> <span class="n">deg</span><span class="p">),</span>  <span class="c1"># Turret</span>
+            <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">l2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mf">122.5</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]),</span>  <span class="c1"># Shoulder</span>
+            <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="o">=-</span><span class="n">l3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">340</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]),</span>  <span class="c1"># Elbow</span>
+            <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">l4</span> <span class="o">+</span> <span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="mi">45</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">315</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]),</span>  <span class="c1"># Wrist</span>
+        <span class="p">]</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">links</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Orion 5&quot;</span><span class="p">,</span>
             <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;RAWR Robotics&quot;</span><span class="p">,</span>
             <span class="n">base</span><span class="o">=</span><span class="n">SE3</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-            <span class="n">tool</span><span class="o">=</span><span class="n">SE3</span><span class="o">.</span><span class="n">Ry</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">))</span>
+            <span class="n">tool</span><span class="o">=</span><span class="n">SE3</span><span class="o">.</span><span class="n">Ry</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="s2">&quot;deg&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
 
-        <span class="c1"># zero angles, all folded up</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">]</span> <span class="o">*</span> <span class="n">deg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">90</span><span class="p">])</span> <span class="o">*</span> <span class="n">deg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
 
         <span class="c1"># stretched out vertically</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qv&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">]</span> <span class="o">*</span> <span class="n">deg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration_attr</span><span class="p">(</span><span class="s2">&quot;qv&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">]</span> <span class="o">*</span> <span class="n">deg</span><span class="p">)</span>
 
         <span class="c1"># arm horizontal, hand down</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qh&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">90</span><span class="p">]</span> <span class="o">*</span> <span class="n">deg</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration_attr</span><span class="p">(</span><span class="s2">&quot;qh&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">90</span><span class="p">]</span> <span class="o">*</span> <span class="n">deg</span><span class="p">)</span></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
     <span class="n">orion</span> <span class="o">=</span> <span class="n">Orion5</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">orion</span><span class="p">)</span>
@@ -173,7 +171,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

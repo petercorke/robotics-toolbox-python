@@ -74,15 +74,23 @@
 <span class="sd">@author: Jesse Haviland</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
+<span class="c1"># import numpy as np</span>
+<span class="c1"># from spatialmath import SE3</span>
 <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rp</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Link</span> <span class="kn">import</span> <span class="n">Link</span><span class="p">,</span> <span class="n">_listen_dyn</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ETS</span> <span class="kn">import</span> <span class="n">ETS</span>
-
-<span class="n">_eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
-
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ET</span> <span class="kn">import</span> <span class="n">ET</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">array</span>
+<span class="kn">from</span> <span class="nn">spatialgeometry</span> <span class="kn">import</span> <span class="n">Shape</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="c1"># _eps = np.finfo(np.float64).eps</span>
+
+
+<span class="n">ArrayLike</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">_check_rne</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
@@ -121,9 +129,8 @@
     <span class="c1"># print(&#39;Using SymPy&#39;)</span>
     <span class="kn">import</span> <span class="nn">sympy</span> <span class="k">as</span> <span class="nn">sym</span>
 
-    <span class="k">def</span> <span class="nf">_issymbol</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_issymbol</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
         <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sym</span><span class="o">.</span><span class="n">Expr</span><span class="p">)</span>
-
 
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
 
@@ -131,18 +138,18 @@
         <span class="k">return</span> <span class="kc">False</span>
 
 
-<span class="k">def</span> <span class="nf">_cos</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">_issymbol</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sym</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_sin</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">_issymbol</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">sym</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sym</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
 
 
 <span class="c1"># --------------------------------------------------------------#</span>
@@ -196,16 +203,34 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mdh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">mdh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">qlim</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-
-        <span class="c1"># TODO</span>
-        <span class="c1">#  probably should make DHLink(link) return a copy</span>
-        <span class="c1">#  probably should enforce keyword arguments, easy to make an</span>
-        <span class="c1">#    error with positional args</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="c1"># Kinematic parameters</span>
+        <span class="n">ets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_ets</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">flip</span><span class="p">,</span> <span class="n">mdh</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ets</span> <span class="o">=</span> <span class="n">ets</span>
+
+        <span class="c1"># Set the variable et</span>
+        <span class="k">for</span> <span class="n">et</span> <span class="ow">in</span> <span class="n">ets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">et</span><span class="o">.</span><span class="n">isjoint</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_v</span> <span class="o">=</span> <span class="n">et</span>
+                <span class="k">break</span>
+
+        <span class="c1"># Set the qlim if provided now we have an ETS</span>
+        <span class="k">if</span> <span class="n">qlim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">qlim</span> <span class="o">=</span> <span class="n">qlim</span>
+
+        <span class="c1"># DH Kinematic parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span>
@@ -214,11 +239,165 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span> <span class="o">=</span> <span class="n">mdh</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_to_ets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">flip</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">mdh</span><span class="p">):</span>
+        <span class="n">ets</span> <span class="o">=</span> <span class="n">ETS</span><span class="p">()</span>
+
+        <span class="n">isrevolute</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">sigma</span> <span class="k">else</span> <span class="kc">True</span>
+
+        <span class="c1"># MDH format: a alpha theta d</span>
+        <span class="k">if</span> <span class="n">mdh</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">alpha</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">isrevolute</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+
+                <span class="c1"># Swapped d and theta: will make no difference to the transform</span>
+                <span class="c1"># But makes ets end with variable which is needed</span>
+                <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">)</span>  <span class="c1"># joint</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">theta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">)</span>  <span class="c1"># joint</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># DH format: theta d a alpha</span>
+            <span class="k">if</span> <span class="n">isrevolute</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">theta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="n">flip</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">alpha</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rx</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ets</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">isjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># for compatibiity with ELink</span>
+    <span class="k">def</span> <span class="nf">isjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test if link has joint</span>
+<span class="sd">        :return: test if link has a joint</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        The ETS for each ELink comprises a constant part (possible the</span>
+<span class="sd">        identity) followed by an optional joint variable transform.</span>
+<span class="sd">        This property returns the whether the</span>
+<span class="sd">        .. runblock:: pycon</span>
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import models</span>
+<span class="sd">            &gt;&gt;&gt; robot = models.URDF.Panda()</span>
+<span class="sd">            &gt;&gt;&gt; robot[1].isjoint  # link with joint</span>
+<span class="sd">            &gt;&gt;&gt; robot[8].isjoint  # static link</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># @classmethod</span>
+    <span class="c1"># def StandardDH(cls, links: List[&quot;StandardDH&quot;]) -&gt; List[&quot;DHLink&quot;]:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Takes a list of standard DH links and converts to a list</span>
+    <span class="c1">#     of modified DH parameters</span>
+
+    <span class="c1">#     &quot;&quot;&quot;</span>
+
+    <span class="c1">#     new_links = []</span>
+    <span class="c1">#     ets = ETS()</span>
+
+    <span class="c1">#     # Make an ets of the whole Robot</span>
+    <span class="c1">#     for link in links:</span>
+    <span class="c1">#         ets += link.ets</span>
+
+    <span class="c1">#     # Split ETS with variables at the end</span>
+    <span class="c1">#     segs = ets.split()</span>
+
+    <span class="c1">#     # Construct MDH Links</span>
+    <span class="c1">#     for (seg, link) in zip(segs, links):</span>
+    <span class="c1">#         flip = True if seg[-1].isflip else False</span>
+    <span class="c1">#         isrevolute = True if seg[-1].axis[0] == &quot;R&quot; else False</span>
+
+    <span class="c1">#         a = 0.0</span>
+    <span class="c1">#         alpha = 0.0</span>
+    <span class="c1">#         theta = 0.0</span>
+    <span class="c1">#         d = 0.0</span>
+    <span class="c1">#         offset = 0.0</span>
+
+    <span class="c1">#         # Find MDH Parameters</span>
+    <span class="c1">#         for et in seg:</span>
+    <span class="c1">#             if et.axis == &quot;tx&quot;:</span>
+    <span class="c1">#                 a = et.eta</span>
+    <span class="c1">#             elif et.axis == &quot;Rx&quot;:</span>
+    <span class="c1">#                 alpha = et.eta</span>
+    <span class="c1">#             elif et.axis == &quot;Rz&quot; and not et.isjoint:</span>
+    <span class="c1">#                 offset = et.eta</span>
+    <span class="c1">#             elif et.axis == &quot;Rz&quot; and not isrevolute:</span>
+    <span class="c1">#                 theta = et.eta</span>
+    <span class="c1">#             elif et.axis == &quot;tz&quot; and isrevolute:</span>
+    <span class="c1">#                 d = et.eta</span>
+
+    <span class="c1">#         # Make the link</span>
+    <span class="c1">#         if isrevolute:</span>
+    <span class="c1">#             new_link = RevoluteMDH(</span>
+    <span class="c1">#                 d=d,</span>
+    <span class="c1">#                 a=a,</span>
+    <span class="c1">#                 alpha=alpha,</span>
+    <span class="c1">#                 offset=offset,</span>
+    <span class="c1">#                 qlim=link.qlim,</span>
+    <span class="c1">#                 flip=flip,</span>
+    <span class="c1">#                 name=link.name,</span>
+    <span class="c1">#                 m=link.m,</span>
+    <span class="c1">#                 r=link.r,</span>
+    <span class="c1">#                 I=link.I,</span>
+    <span class="c1">#                 Jm=link.Jm,</span>
+    <span class="c1">#                 B=link.B,</span>
+    <span class="c1">#                 Tc=link.Tc,</span>
+    <span class="c1">#                 G=link.G,</span>
+    <span class="c1">#                 geometry=link.geometry,</span>
+    <span class="c1">#                 collision=link.collision,</span>
+    <span class="c1">#             )</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             new_link = PrismaticMDH(</span>
+    <span class="c1">#                 theta=theta,</span>
+    <span class="c1">#                 a=a,</span>
+    <span class="c1">#                 alpha=alpha,</span>
+    <span class="c1">#                 offset=offset,</span>
+    <span class="c1">#                 qlim=link.qlim,</span>
+    <span class="c1">#                 flip=flip,</span>
+    <span class="c1">#                 name=link.name,</span>
+    <span class="c1">#                 m=link.m,</span>
+    <span class="c1">#                 r=link.r,</span>
+    <span class="c1">#                 I=link.I,</span>
+    <span class="c1">#                 Jm=link.Jm,</span>
+    <span class="c1">#                 B=link.B,</span>
+    <span class="c1">#                 Tc=link.Tc,</span>
+    <span class="c1">#                 G=link.G,</span>
+    <span class="c1">#                 geometry=link.geometry,</span>
+    <span class="c1">#                 collision=link.collision,</span>
+    <span class="c1">#             )</span>
+
+    <span class="c1">#         new_links.append(new_link)</span>
+
+    <span class="c1">#     return new_links</span>
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">DHLink</span><span class="p">):</span>
@@ -246,6 +425,8 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot add a Link with a non Link object&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">offset</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -280,6 +461,49 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="s2">&quot;⍺&quot;</span><span class="p">)</span>
         <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_params</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+            <span class="s2">&quot;joint_name&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_joint_name</span><span class="p">),</span>
+            <span class="s2">&quot;m&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">),</span>
+            <span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">),</span>
+            <span class="s2">&quot;I&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I</span><span class="p">),</span>
+            <span class="s2">&quot;Jm&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Jm</span><span class="p">),</span>
+            <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">),</span>
+            <span class="s2">&quot;Tc&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">),</span>
+            <span class="s2">&quot;G&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">),</span>
+            <span class="s2">&quot;qlim&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">),</span>
+            <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">shape</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span><span class="p">],</span>
+            <span class="s2">&quot;collision&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">shape</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collision</span><span class="p">],</span>
+            <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">),</span>
+            <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span>
+            <span class="s2">&quot;theta&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">),</span>
+            <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">),</span>
+            <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">),</span>
+            <span class="s2">&quot;mdh&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mdh</span><span class="p">),</span>
+            <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">),</span>
+            <span class="s2">&quot;flip&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isflip</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
+
+        <span class="k">if</span> <span class="s2">&quot;Revolute&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;theta&quot;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;mdh&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="s2">&quot;Prismatic&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;d&quot;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;mdh&quot;</span><span class="p">]</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">_robot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number</span>
+
+        <span class="n">memo</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)]</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span>
 
     <span class="c1"># -------------------------------------------------------------------------- #</span>
 
@@ -440,7 +664,7 @@
 
     <span class="c1"># -------------------------------------------------------------------------- #</span>
 
-<div class="viewcode-block" id="DHLink.A"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<div class="viewcode-block" id="DHLink.A"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SE3</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link transform matrix</span>
 
@@ -484,7 +708,7 @@
         <span class="n">sa</span> <span class="o">=</span> <span class="n">_sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
         <span class="n">ca</span> <span class="o">=</span> <span class="n">_cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isflip</span><span class="p">:</span>
             <span class="n">q</span> <span class="o">=</span> <span class="o">-</span><span class="n">q</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">q</span> <span class="o">=</span> <span class="n">q</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
@@ -502,7 +726,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># standard DH</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="p">[</span><span class="n">ct</span><span class="p">,</span> <span class="o">-</span><span class="n">st</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="n">st</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">ct</span><span class="p">],</span>
                     <span class="p">[</span><span class="n">st</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="o">-</span><span class="n">ct</span> <span class="o">*</span> <span class="n">sa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">st</span><span class="p">],</span>
@@ -512,7 +736,7 @@
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># modified DH</span>
-            <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="p">[</span><span class="n">ct</span><span class="p">,</span> <span class="o">-</span><span class="n">st</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">],</span>
                     <span class="p">[</span><span class="n">st</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="n">ct</span> <span class="o">*</span> <span class="n">ca</span><span class="p">,</span> <span class="o">-</span><span class="n">sa</span><span class="p">,</span> <span class="o">-</span><span class="n">sa</span> <span class="o">*</span> <span class="n">d</span><span class="p">],</span>
@@ -553,56 +777,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span>
-
-<div class="viewcode-block" id="DHLink.ets"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHLink.ets">[docs]</a>    <span class="k">def</span> <span class="nf">ets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">ets</span> <span class="o">=</span> <span class="n">ETS</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span><span class="p">:</span>
-            <span class="c1"># MDH format: a alpha theta d</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
-                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">)</span>  <span class="c1"># joint</span>
-
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
-                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">)</span>  <span class="c1"># joint</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># DH format: theta d a alpha</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isrevolute</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
-                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
-                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">flip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">ets</span> <span class="o">*=</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ets</span></div></div>
+            <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <span class="c1"># -------------------------------------------------------------------------- #</span>
@@ -611,7 +786,6 @@
 <div class="viewcode-block" id="RevoluteDH"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.RevoluteDH">[docs]</a><span class="k">class</span> <span class="nc">RevoluteDH</span><span class="p">(</span><span class="n">DHLink</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for revolute links using standard DH convention</span>
-
 <span class="sd">    :param d: kinematic - link offset</span>
 <span class="sd">    :type d: float</span>
 <span class="sd">    :param alpha: kinematic - link twist</span>
@@ -620,12 +794,10 @@
 <span class="sd">    :type a: float</span>
 <span class="sd">    :param offset: kinematic - joint variable offset</span>
 <span class="sd">    :type offset: float</span>
-
 <span class="sd">    :param qlim: joint variable limits [min, max]</span>
 <span class="sd">    :type qlim: float ndarray(1,2)</span>
 <span class="sd">    :param flip: joint moves in opposite direction</span>
 <span class="sd">    :type flip: bool</span>
-
 <span class="sd">    :param m: dynamic - link mass</span>
 <span class="sd">    :type m: float</span>
 <span class="sd">    :param r: dynamic - position of COM with respect to link frame</span>
@@ -644,16 +816,11 @@
 <span class="sd">    A subclass of the :class:`DHLink` class for a revolute joint that holds all</span>
 <span class="sd">    information related to a robot link such as kinematics parameters,</span>
 <span class="sd">    rigid-body inertial parameters, motor and transmission parameters.</span>
-
 <span class="sd">    The link transform is</span>
-
 <span class="sd">    :math:`\underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`</span>
-
 <span class="sd">    where :math:`q_i` is the joint variable.</span>
-
 <span class="sd">    :references:</span>
 <span class="sd">        - Robotics, Vision &amp; Control, P. Corke, Springer 2011, Chap 7.</span>
-
 <span class="sd">    :seealso: :func:`PrismaticDH`, :func:`DHLink`, :func:`RevoluteMDH`</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
@@ -682,7 +849,6 @@
 <div class="viewcode-block" id="PrismaticDH"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.PrismaticDH">[docs]</a><span class="k">class</span> <span class="nc">PrismaticDH</span><span class="p">(</span><span class="n">DHLink</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for prismatic link using standard DH convention</span>
-
 <span class="sd">    :param theta: kinematic: joint angle</span>
 <span class="sd">    :type theta: float</span>
 <span class="sd">    :param d: kinematic - link offset</span>
@@ -693,12 +859,10 @@
 <span class="sd">    :type a: float</span>
 <span class="sd">    :param offset: kinematic - joint variable offset</span>
 <span class="sd">    :type offset: float</span>
-
 <span class="sd">    :param qlim: joint variable limits [min, max]</span>
 <span class="sd">    :type qlim: float ndarray(1,2)</span>
 <span class="sd">    :param flip: joint moves in opposite direction</span>
 <span class="sd">    :type flip: bool</span>
-
 <span class="sd">    :param m: dynamic - link mass</span>
 <span class="sd">    :type m: float</span>
 <span class="sd">    :param r: dynamic - position of COM with respect to link frame</span>
@@ -713,20 +877,14 @@
 <span class="sd">    :type Tc: ndarray(2,)</span>
 <span class="sd">    :param G: dynamic - gear ratio</span>
 <span class="sd">    :type G: float</span>
-
 <span class="sd">    A subclass of the DHLink class for a prismatic joint that holds all</span>
 <span class="sd">    information related to a robot link such as kinematics parameters,</span>
 <span class="sd">    rigid-body inertial parameters, motor and transmission parameters.</span>
-
 <span class="sd">    The link transform is</span>
-
 <span class="sd">    :math:`\mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`</span>
-
 <span class="sd">    where :math:`q_i` is the joint variable.</span>
-
 <span class="sd">    :references:</span>
 <span class="sd">        - Robotics, Vision &amp; Control, P. Corke, Springer 2011, Chap 7.</span>
-
 <span class="sd">    :seealso: :func:`RevoluteDH`, :func:`DHLink`, :func:`PrismaticMDH`</span>
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
 
@@ -904,7 +1062,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

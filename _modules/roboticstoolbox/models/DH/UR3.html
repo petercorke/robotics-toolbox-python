@@ -102,7 +102,7 @@
 <span class="sd">    :References:</span>
 
 <span class="sd">        - `Parameters for calculations of kinematics and dynamics &lt;https://www.universal-robots.com/articles/ur/parameters-for-calculations-of-kinematics-and-dynamics&gt;`_</span>
-<span class="sd">        </span>
+
 <span class="sd">    :sealso: :func:`UR5`, :func:`UR10`</span>
 
 
@@ -113,10 +113,12 @@
 
         <span class="k">if</span> <span class="n">symbolic</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">spatialmath.base.symbolic</span> <span class="k">as</span> <span class="nn">sym</span>
+
             <span class="n">zero</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
             <span class="n">pi</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">pi</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+
             <span class="n">zero</span> <span class="o">=</span> <span class="mf">0.0</span>
 
         <span class="n">deg</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
@@ -126,49 +128,46 @@
         <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.24365</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.21325</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1519</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.11235</span><span class="p">,</span> <span class="mf">0.08535</span><span class="p">,</span> <span class="mf">0.0819</span><span class="p">]</span>
 
-        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">zero</span><span class="p">]</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">zero</span><span class="p">]</span>
 
         <span class="c1"># mass data, no inertia available</span>
         <span class="n">mass</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mf">3.42</span><span class="p">,</span> <span class="mf">1.26</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">]</span>
         <span class="n">center_of_mass</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span>   <span class="o">-</span><span class="mf">0.02</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                <span class="p">[</span><span class="mf">0.13</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>    <span class="mf">0.1157</span><span class="p">],</span>
-                <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>    <span class="mf">0.0238</span><span class="p">],</span>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span>    <span class="mi">0</span><span class="p">,</span>    <span class="mf">0.01</span><span class="p">],</span>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span>    <span class="mi">0</span><span class="p">,</span>    <span class="mf">0.01</span><span class="p">],</span>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span>    <span class="mi">0</span><span class="p">,</span>   <span class="o">-</span><span class="mf">0.02</span><span class="p">]</span>
-            <span class="p">]</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.13</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1157</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.0238</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02</span><span class="p">],</span>
+        <span class="p">]</span>
         <span class="n">links</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
             <span class="n">link</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span>
-                <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
-                <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
-                <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
-                <span class="n">m</span><span class="o">=</span><span class="n">mass</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
-                <span class="n">r</span><span class="o">=</span><span class="n">center_of_mass</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
-                <span class="n">G</span><span class="o">=</span><span class="mi">1</span>
+                <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">m</span><span class="o">=</span><span class="n">mass</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">r</span><span class="o">=</span><span class="n">center_of_mass</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">G</span><span class="o">=</span><span class="mi">1</span>
             <span class="p">)</span>
             <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
-    
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">links</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;UR3&quot;</span><span class="p">,</span>
             <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Universal Robotics&quot;</span><span class="p">,</span>
-            <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;dynamics&#39;</span><span class="p">,</span> <span class="s1">&#39;symbolic&#39;</span><span class="p">),</span>
-            <span class="n">symbolic</span><span class="o">=</span><span class="n">symbolic</span>
+            <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;dynamics&quot;</span><span class="p">,</span> <span class="s2">&quot;symbolic&quot;</span><span class="p">),</span>
+            <span class="n">symbolic</span><span class="o">=</span><span class="n">symbolic</span><span class="p">,</span>
         <span class="p">)</span>
-    
-        <span class="c1"># zero angles</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
-        <span class="c1"># horizontal along the x-axis</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">180</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">deg</span><span class="p">)</span></div>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>    <span class="c1"># pragma nocover</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">180</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">deg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
     <span class="n">ur3</span> <span class="o">=</span> <span class="n">UR3</span><span class="p">(</span><span class="n">symbolic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">ur3</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">ur3</span><span class="o">.</span><span class="n">dyntable</span><span class="p">())</span>
+    <span class="c1"># print(ur3.dyntable())</span>
 </pre></div>
 
            </div>
@@ -179,7 +178,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

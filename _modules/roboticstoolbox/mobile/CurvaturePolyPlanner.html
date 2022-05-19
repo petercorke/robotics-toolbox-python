@@ -69,14 +69,15 @@
            <div itemprop="articleBody">
              
   <h1>Source code for roboticstoolbox.mobile.CurvaturePolyPlanner</h1><div class="highlight"><pre>
-<span></span>
-<span class="kn">import</span> <span class="nn">math</span>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">scipy.integrate</span>
 <span class="kn">import</span> <span class="nn">scipy.optimize</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># import matplotlib.pyplot as plt</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.mobile</span> <span class="kn">import</span> <span class="o">*</span>
+
 
 <span class="k">def</span> <span class="nf">solvepath</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">q0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="c1"># x[:4] is 4 coeffs of curvature polynomial</span>
@@ -87,7 +88,7 @@
     <span class="k">def</span> <span class="nf">dotfunc</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">poly</span><span class="p">):</span>
         <span class="c1"># q = (x, y, θ)</span>
         <span class="c1"># qdot = (cosθ, sinθ, ϰ)</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="n">poly</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">s</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">poly</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">s</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">poly</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">s</span> <span class="o">+</span> <span class="n">poly</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">poly</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">s</span><span class="o">**</span><span class="mi">3</span> <span class="o">+</span> <span class="n">poly</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">s</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">poly</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">s</span> <span class="o">+</span> <span class="n">poly</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
         <span class="c1"># k = ((poly[0] * s + poly[1]) * s  + poly[2]) * s + poly[3]</span>
 
         <span class="c1"># save maximum curvature for this path solution</span>
@@ -102,10 +103,12 @@
     <span class="n">sol</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">integrate</span><span class="o">.</span><span class="n">solve_ivp</span><span class="p">(</span><span class="n">dotfunc</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">s_f</span><span class="p">],</span> <span class="n">q0</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">cpoly</span><span class="p">,),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">maxcurvature</span>
 
+
 <span class="k">def</span> <span class="nf">xcurvature</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="c1"># inequality constraint function, must be non-negative</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">maxcurvature</span> <span class="o">=</span> <span class="n">solvepath</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">q0</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">maxcurvature</span>
+
 
 <span class="k">def</span> <span class="nf">costfunc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">):</span>
     <span class="c1"># final cost of path from start with params</span>
@@ -120,53 +123,115 @@
     <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">path</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">goal</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">e</span>
-<div class="viewcode-block" id="CurvaturePolyPlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner">[docs]</a><span class="k">class</span> <span class="nc">CurvaturePolyPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
 
+
+<div class="viewcode-block" id="CurvaturePolyPlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner">[docs]</a><span class="k">class</span> <span class="nc">CurvaturePolyPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">curvature</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Continuous curvature path planner</span>
+
+<span class="sd">        :param curvature: , defaults to None</span>
+<span class="sd">        :type curvature: _type_, optional</span>
+
+<span class="sd">        ==================   ========================</span>
+<span class="sd">        Feature              Capability</span>
+<span class="sd">        ==================   ========================</span>
+<span class="sd">        Plan                 :math:`\SE{2}`</span>
+<span class="sd">        Obstacle avoidance   No</span>
+<span class="sd">        Curvature            Continuous</span>
+<span class="sd">        Motion               Forwards only</span>
+<span class="sd">        ==================   ========================</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import DubinsPlanner</span>
+<span class="sd">            &gt;&gt;&gt; from math import pi</span>
+<span class="sd">            &gt;&gt;&gt; planner = CurvaturePolyPlanner()</span>
+<span class="sd">            &gt;&gt;&gt; path, status = planner.query(start=(0, 0, pi/2), goal=(1, 0, pi/2))</span>
+<span class="sd">            &gt;&gt;&gt; print(path[:5,:])</span>
+<span class="sd">            &gt;&gt;&gt; print(status)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ndims</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">curvature</span> <span class="o">=</span> <span class="n">curvature</span>
 
 <div class="viewcode-block" id="CurvaturePolyPlanner.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.CurvaturePolyPlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find a path betwee two configurations</span>
+
+<span class="sd">        :param start: start configuration :math:`(x, y, \theta)`</span>
+<span class="sd">        :type start: array_like(3), optional</span>
+<span class="sd">        :param goal: goal configuration :math:`(x, y, \theta)`</span>
+<span class="sd">        :type goal: array_like(3), optional</span>
+<span class="sd">        :return: path and status</span>
+<span class="sd">        :rtype: ndarray(N,3), namedtuple</span>
+
+<span class="sd">        The path comprises points equally spaced at a distance of ``stepsize``.</span>
+
+<span class="sd">        The returned status value has elements:</span>
+
+<span class="sd">        +-------------------+-----------------------------------------------+</span>
+<span class="sd">        | Element           |  Description                                  |</span>
+<span class="sd">        +-------------------+-----------------------------------------------+</span>
+<span class="sd">        | ``length``        | total path length                             |</span>
+<span class="sd">        +-------------------+-----------------------------------------------+</span>
+<span class="sd">        | ``maxcurvature``  | maximum curvature on path                     |</span>
+<span class="sd">        +-------------------+-----------------------------------------------+</span>
+<span class="sd">        | ``poly``          | curvature polynomial coefficients             |</span>
+<span class="sd">        +-------------------+-----------------------------------------------+</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">goal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">goal</span><span class="p">]</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">start</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">start</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="o">=</span> <span class="n">goal</span>
 
-        <span class="c1"># initial estimate of path length is Euclidean distance </span>
+        <span class="c1"># initial estimate of path length is Euclidean distance</span>
         <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">goal</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
         <span class="c1"># state vector is kappa_0, a, b, c, s_f</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">curvature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">nlcontraints</span> <span class="o">=</span> <span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">NonlinearConstraint</span><span class="p">(</span><span class="n">xcurvature</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">curvature</span><span class="p">),)</span>
+            <span class="n">nlcontraints</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">NonlinearConstraint</span><span class="p">(</span><span class="n">xcurvature</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">curvature</span><span class="p">),</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">nlcontraints</span> <span class="o">=</span> <span class="p">()</span>
 
-        <span class="n">sol</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">costfunc</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span>
+        <span class="n">sol</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span>
+            <span class="n">costfunc</span><span class="p">,</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="p">],</span>
             <span class="n">constraints</span><span class="o">=</span><span class="n">nlcontraints</span><span class="p">,</span>
             <span class="n">bounds</span><span class="o">=</span><span class="p">[(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="kc">None</span><span class="p">)],</span>
-            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">))</span>
+            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">),</span>
+        <span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
-        <span class="n">path</span><span class="p">,</span> <span class="n">maxcurvature</span> <span class="o">=</span> <span class="n">solvepath</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">q0</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">dense_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_step</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">)</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">maxcurvature</span> <span class="o">=</span> <span class="n">solvepath</span><span class="p">(</span>
+            <span class="n">sol</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">q0</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">dense_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_step</span><span class="o">=</span><span class="mf">1e-2</span>
+        <span class="p">)</span>
 
-        <span class="n">status</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;CurvaturePolyStatus&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">,</span> <span class="s1">&#39;maxcurvature&#39;</span><span class="p">,</span> <span class="s1">&#39;poly&#39;</span><span class="p">])(</span><span class="n">sol</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">maxcurvature</span><span class="p">,</span> <span class="n">sol</span><span class="o">.</span><span class="n">x</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;CurvaturePolyStatus&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="s2">&quot;maxcurvature&quot;</span><span class="p">,</span> <span class="s2">&quot;poly&quot;</span><span class="p">])(</span>
+            <span class="n">sol</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">maxcurvature</span><span class="p">,</span> <span class="n">sol</span><span class="o">.</span><span class="n">x</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">status</span></div></div>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
 
     <span class="c1"># start = (1, 1, pi/4)</span>
     <span class="c1"># goal = (-3, -3, -pi/4)</span>
-    <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
-    <span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
+    <span class="c1"># start = (0, 0, -pi/4)</span>
+    <span class="c1"># goal = (1, 2, pi/4)</span>
 
-    <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="n">planner</span> <span class="o">=</span> <span class="n">CurvaturePolyPlanner</span><span class="p">()</span>
     <span class="n">path</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="n">planner</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;goal&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;goal&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
     <span class="n">planner</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -193,7 +258,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

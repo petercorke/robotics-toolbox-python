@@ -72,9 +72,10 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ET</span> <span class="kn">import</span> <span class="n">ET</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ETS</span> <span class="kn">import</span> <span class="n">ETS</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ERobot</span> <span class="kn">import</span> <span class="n">ERobot</span>
-<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ELink</span> <span class="kn">import</span> <span class="n">ELink</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Link</span> <span class="kn">import</span> <span class="n">Link</span>
 
 
 <div class="viewcode-block" id="Planar_Y"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.ETS.Planar_Y">[docs]</a><span class="k">class</span> <span class="nc">Planar_Y</span><span class="p">(</span><span class="n">ERobot</span><span class="p">):</span>
@@ -93,88 +94,47 @@
 <span class="sd">          Sequence, J. Haviland and P. Corke</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">deg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
-        <span class="n">mm</span> <span class="o">=</span> <span class="mf">1e-3</span>
+        <span class="c1"># deg = np.pi / 180</span>
+        <span class="c1"># mm = 1e-3</span>
         <span class="n">tool_offset</span> <span class="o">=</span> <span class="mi">1</span>
 
         <span class="c1"># trunk of the tree</span>
-        <span class="n">l0</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link0&#39;</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">parent</span><span class="o">=</span><span class="kc">None</span>
-        <span class="p">)</span>
+        <span class="n">l0</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">ETS</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;link0&quot;</span><span class="p">,</span> <span class="n">jindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-        <span class="n">l1</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link1&#39;</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">parent</span><span class="o">=</span><span class="n">l0</span>
-        <span class="p">)</span>
+        <span class="n">l1</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;link1&quot;</span><span class="p">,</span> <span class="n">jindex</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">l0</span><span class="p">)</span>
 
         <span class="c1"># branch 1</span>
-        <span class="n">l2</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link2a&#39;</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="n">parent</span><span class="o">=</span><span class="n">l1</span>
-        <span class="p">)</span>
+        <span class="n">l2</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;link2a&quot;</span><span class="p">,</span> <span class="n">jindex</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">l1</span><span class="p">)</span>
 
-        <span class="n">l3</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link3a&#39;</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-            <span class="n">parent</span><span class="o">=</span><span class="n">l2</span>
-        <span class="p">)</span>
+        <span class="n">l3</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;link3a&quot;</span><span class="p">,</span> <span class="n">jindex</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">l2</span><span class="p">)</span>
 
-        <span class="n">eea</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">tool_offset</span><span class="p">),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;eea&#39;</span><span class="p">,</span>
-            <span class="n">parent</span><span class="o">=</span><span class="n">l3</span>
-        <span class="p">)</span>
+        <span class="n">eea</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">ETS</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">tool_offset</span><span class="p">)),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;eea&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">l3</span><span class="p">)</span>
 
         <span class="c1"># branch 2</span>
-        <span class="n">l4</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link2b&#39;</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-            <span class="n">parent</span><span class="o">=</span><span class="n">l1</span>
-        <span class="p">)</span>
+        <span class="n">l4</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;link2b&quot;</span><span class="p">,</span> <span class="n">jindex</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">l1</span><span class="p">)</span>
 
-        <span class="n">l5</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS</span><span class="o">.</span><span class="n">rz</span><span class="p">(),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link3b&#39;</span><span class="p">,</span>
-            <span class="n">jindex</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-            <span class="n">parent</span><span class="o">=</span><span class="n">l4</span>
-        <span class="p">)</span>
+        <span class="n">l5</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;link3b&quot;</span><span class="p">,</span> <span class="n">jindex</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">l4</span><span class="p">)</span>
 
-        <span class="n">eeb</span> <span class="o">=</span> <span class="n">ELink</span><span class="p">(</span>
-            <span class="n">ETS</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">tool_offset</span><span class="p">),</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;eeb&#39;</span><span class="p">,</span>
-            <span class="n">parent</span><span class="o">=</span><span class="n">l5</span>
-        <span class="p">)</span>
+        <span class="n">eeb</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">ETS</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">tool_offset</span><span class="p">)),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;eeb&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">l5</span><span class="p">)</span>
 
         <span class="n">elinks</span> <span class="o">=</span> <span class="p">[</span><span class="n">l0</span><span class="p">,</span> <span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">,</span> <span class="n">l3</span><span class="p">,</span> <span class="n">l4</span><span class="p">,</span> <span class="n">l5</span><span class="p">,</span> <span class="n">eea</span><span class="p">,</span> <span class="n">eeb</span><span class="p">]</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">elinks</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Planar-Y&#39;</span>
-            <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">elinks</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Planar-Y&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
-            <span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
-            <span class="s2">&quot;qy&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
     <span class="n">robot</span> <span class="o">=</span> <span class="n">Planar_Y</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-
-
 </pre></div>
 
            </div>
@@ -185,7 +145,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

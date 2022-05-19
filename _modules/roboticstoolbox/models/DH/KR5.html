@@ -78,6 +78,7 @@
 
 <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">DHRobot</span><span class="p">,</span> <span class="n">RevoluteDH</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
 <div class="viewcode-block" id="KR5"><a class="viewcode-back" href="../../../../arm_dh.html#roboticstoolbox.models.DH.KR5">[docs]</a><span class="k">class</span> <span class="nc">KR5</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
@@ -117,34 +118,28 @@
 
         <span class="c1"># Updated values form ARTE git. Old values left as comments</span>
 
-        <span class="n">L1</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">0.18</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
-                        <span class="n">alpha</span><span class="o">=-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="c1"># alpha=pi / 2,</span>
-                        <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">155</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">155</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]</span>
-                        <span class="p">)</span>
-        <span class="n">L2</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># d=0.135,</span>
-                        <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># alpha=pi,</span>
-                        <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">180</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">65</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]</span>
-                        <span class="p">)</span>
-        <span class="n">L3</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span>
-                        <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># d=0.135,</span>
-                        <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="c1"># alpha=-pi / 2,</span>
-                        <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">158</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]</span>
-                        <span class="p">)</span>
-        <span class="n">L4</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                        <span class="n">d</span><span class="o">=-</span><span class="mf">0.62</span><span class="p">,</span>  <span class="c1"># d=0.62,</span>
-                        <span class="n">alpha</span><span class="o">=-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="c1"># alpha=pi / 2,</span>
-                        <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">350</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">350</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]</span>
-                        <span class="p">)</span>
-        <span class="n">L5</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                        <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                        <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="c1"># alpha=-pi / 2,</span>
-                        <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">130</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">130</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]</span>
-                        <span class="p">)</span>
-        <span class="n">L6</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                        <span class="n">d</span><span class="o">=-</span><span class="mf">0.115</span><span class="p">,</span>
-                        <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="p">,</span>
-                        <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">350</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">350</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]</span>
-                        <span class="p">)</span>
+        <span class="n">L1</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.18</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">155</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">155</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]</span>  <span class="c1"># alpha=pi / 2,</span>
+        <span class="p">)</span>
+        <span class="n">L2</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">180</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">65</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]</span>  <span class="c1"># d=0.135,  # alpha=pi,</span>
+        <span class="p">)</span>
+        <span class="n">L3</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span>
+            <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># d=0.135,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># alpha=-pi / 2,</span>
+            <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">158</span> <span class="o">*</span> <span class="n">deg</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">L4</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">d</span><span class="o">=-</span><span class="mf">0.62</span><span class="p">,</span>  <span class="c1"># d=0.62,</span>
+            <span class="n">alpha</span><span class="o">=-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># alpha=pi / 2,</span>
+            <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">350</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">350</span> <span class="o">*</span> <span class="n">deg</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">L5</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span>
+            <span class="n">a</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">130</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">130</span> <span class="o">*</span> <span class="n">deg</span><span class="p">]</span>  <span class="c1"># alpha=-pi / 2,</span>
+        <span class="p">)</span>
+        <span class="n">L6</span> <span class="o">=</span> <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="o">=-</span><span class="mf">0.115</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="p">,</span> <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">350</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">350</span> <span class="o">*</span> <span class="n">deg</span><span class="p">])</span>
 
         <span class="n">L</span> <span class="o">=</span> <span class="p">[</span><span class="n">L1</span><span class="p">,</span> <span class="n">L2</span><span class="p">,</span> <span class="n">L3</span><span class="p">,</span> <span class="n">L4</span><span class="p">,</span> <span class="n">L5</span><span class="p">,</span> <span class="n">L6</span><span class="p">]</span>
 
@@ -152,20 +147,29 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">L</span><span class="p">,</span>
             <span class="c1"># meshdir=&quot;KUKA/KR5_arc&quot;,</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;KR5&#39;</span><span class="p">,</span>
-            <span class="n">manufacturer</span><span class="o">=</span><span class="s1">&#39;KUKA&#39;</span><span class="p">,</span>
-            <span class="n">meshdir</span><span class="o">=</span><span class="s2">&quot;meshes/KUKA/KR5_arc&quot;</span><span class="p">)</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;KR5&quot;</span><span class="p">,</span>
+            <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;KUKA&quot;</span><span class="p">,</span>
+            <span class="n">meshdir</span><span class="o">=</span><span class="s2">&quot;meshes/KUKA/KR5_arc&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
-          <span class="s2">&quot;qk1&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
-          <span class="s2">&quot;qk2&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
-          <span class="s2">&quot;qk3&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">])</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration_attr</span><span class="p">(</span>
+            <span class="s2">&quot;qk1&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration_attr</span><span class="p">(</span>
+            <span class="s2">&quot;qk2&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration_attr</span><span class="p">(</span>
+            <span class="s2">&quot;qk3&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">6</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="p">)</span></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
     <span class="n">robot</span> <span class="o">=</span> <span class="n">KR5</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 </pre></div>
@@ -178,7 +182,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

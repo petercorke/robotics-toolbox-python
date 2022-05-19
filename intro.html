@@ -405,38 +405,41 @@ specified using additional keyword arguments.</p>
 <span class="linenos"> 2</span><span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>                  <span class="c1"># instantiate robot model</span>
 <span class="linenos"> 3</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="p">)</span>
 <span class="linenos"> 4</span><span class="go">DHRobot: Puma 560 (by Unimation), 6 joints (RRRRRR), dynamics, geometry, standard DH parameters</span>
-<span class="linenos"> 5</span><span class="go">┏━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
-<span class="linenos"> 6</span><span class="go">┃θⱼ  ┃   dⱼ   ┃   aⱼ   ┃   ⍺ⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
-<span class="linenos"> 7</span><span class="go">┣━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
-<span class="linenos"> 8</span><span class="go">┃ q1 ┃ 0.6718 ┃      0 ┃  90.0° ┃ -160.0° ┃ 160.0° ┃</span>
-<span class="linenos"> 9</span><span class="go">┃ q2 ┃      0 ┃ 0.4318 ┃   0.0° ┃ -110.0° ┃ 110.0° ┃</span>
-<span class="linenos">10</span><span class="go">┃ q3 ┃   0.15 ┃ 0.0203 ┃ -90.0° ┃ -135.0° ┃ 135.0° ┃</span>
-<span class="linenos">11</span><span class="go">┃ q4 ┃ 0.4318 ┃      0 ┃  90.0° ┃ -266.0° ┃ 266.0° ┃</span>
-<span class="linenos">12</span><span class="go">┃ q5 ┃      0 ┃      0 ┃ -90.0° ┃ -100.0° ┃ 100.0° ┃</span>
-<span class="linenos">13</span><span class="go">┃ q6 ┃      0 ┃      0 ┃   0.0° ┃ -266.0° ┃ 266.0° ┃</span>
-<span class="linenos">14</span><span class="go">┗━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
+<span class="linenos"> 5</span><span class="go">┌────┬────────┬────────┬────────┬─────────┬────────┐</span>
+<span class="linenos"> 6</span><span class="go">│θⱼ  │   dⱼ   │   aⱼ   │   ⍺ⱼ   │   q⁻    │   q⁺   │</span>
+<span class="linenos"> 7</span><span class="go">├────┼────────┼────────┼────────┼─────────┼────────┤</span>
+<span class="linenos"> 8</span><span class="go">│ q1 │ 0.6718 │      0 │  90.0° │ -160.0° │ 160.0° │</span>
+<span class="linenos"> 9</span><span class="go">│ q2 │      0 │ 0.4318 │   0.0° │ -110.0° │ 110.0° │</span>
+<span class="linenos">10</span><span class="go">│ q3 │   0.15 │ 0.0203 │ -90.0° │ -135.0° │ 135.0° │</span>
+<span class="linenos">11</span><span class="go">│ q4 │ 0.4318 │      0 │  90.0° │ -266.0° │ 266.0° │</span>
+<span class="linenos">12</span><span class="go">│ q5 │      0 │      0 │ -90.0° │ -100.0° │ 100.0° │</span>
+<span class="linenos">13</span><span class="go">│ q6 │      0 │      0 │   0.0° │ -266.0° │ 266.0° │</span>
+<span class="linenos">14</span><span class="go">└────┴────────┴────────┴────────┴─────────┴────────┘</span>
 <span class="linenos">15</span>
-<span class="linenos">16</span><span class="go">┌─────┬─────┬──────┬───────┬─────┬──────┬─────┐</span>
-<span class="linenos">17</span><span class="go">│name │ q0  │ q1   │ q2    │ q3  │ q4   │ q5  │</span>
-<span class="linenos">18</span><span class="go">├─────┼─────┼──────┼───────┼─────┼──────┼─────┤</span>
-<span class="linenos">19</span><span class="go">│  qz │  0° │  0°  │  0°   │  0° │  0°  │  0° │</span>
-<span class="linenos">20</span><span class="go">│  qr │  0° │  90° │ -90°  │  0° │  0°  │  0° │</span>
-<span class="linenos">21</span><span class="go">│  qs │  0° │  0°  │ -90°  │  0° │  0°  │  0° │</span>
-<span class="linenos">22</span><span class="go">│  qn │  0° │  45° │  180° │  0° │  45° │  0° │</span>
-<span class="linenos">23</span><span class="go">└─────┴─────┴──────┴───────┴─────┴──────┴─────┘</span>
-<span class="linenos">24</span>
-<span class="linenos">25</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
-<span class="linenos">26</span><span class="go">[ 0.      1.5708 -1.5708  0.      0.      0.    ]</span>
-<span class="linenos">27</span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">])</span>  <span class="c1"># forward kinematics</span>
-<span class="linenos">28</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-<span class="linenos">29</span><span class="go">   0.1217   -0.6067   -0.7856    0.2478    </span>
-<span class="linenos">30</span><span class="go">   0.8184    0.5092   -0.2665   -0.1259    </span>
-<span class="linenos">31</span><span class="go">   0.5617   -0.6105    0.5584    1.146     </span>
-<span class="linenos">32</span><span class="go">   0         0         0         1         </span>
-<span class="linenos">33</span>
-<span class="linenos">34</span><span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                          <span class="c1"># inverse kinematics</span>
-<span class="linenos">35</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
-<span class="linenos">36</span><span class="go">IKsolution(q=array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6]), success=True, reason=None, iterations=12, residual=8.513951146341011e-13)</span>
+<span class="linenos">16</span><span class="go">┌─┬──┐</span>
+<span class="linenos">17</span><span class="go">└─┴──┘</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="go">┌─────┬─────┬──────┬───────┬─────┬──────┬─────┐</span>
+<span class="linenos">20</span><span class="go">│name │ q0  │ q1   │ q2    │ q3  │ q4   │ q5  │</span>
+<span class="linenos">21</span><span class="go">├─────┼─────┼──────┼───────┼─────┼──────┼─────┤</span>
+<span class="linenos">22</span><span class="go">│  qr │  0° │  90° │ -90°  │  0° │  0°  │  0° │</span>
+<span class="linenos">23</span><span class="go">│  qz │  0° │  0°  │  0°   │  0° │  0°  │  0° │</span>
+<span class="linenos">24</span><span class="go">│  qn │  0° │  45° │  180° │  0° │  45° │  0° │</span>
+<span class="linenos">25</span><span class="go">│  qs │  0° │  0°  │ -90°  │  0° │  0°  │  0° │</span>
+<span class="linenos">26</span><span class="go">└─────┴─────┴──────┴───────┴─────┴──────┴─────┘</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+<span class="linenos">29</span><span class="go">[ 0.      1.5708 -1.5708  0.      0.      0.    ]</span>
+<span class="linenos">30</span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">])</span>  <span class="c1"># forward kinematics</span>
+<span class="linenos">31</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="linenos">32</span><span class="go">   0.1217   -0.6067   -0.7856    0.2478    </span>
+<span class="linenos">33</span><span class="go">   0.8184    0.5092   -0.2665   -0.1259    </span>
+<span class="linenos">34</span><span class="go">   0.5617   -0.6105    0.5584    1.146     </span>
+<span class="linenos">35</span><span class="go">   0         0         0         1         </span>
+<span class="linenos">36</span>
+<span class="linenos">37</span><span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                          <span class="c1"># inverse kinematics</span>
+<span class="linenos">38</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
+<span class="linenos">39</span><span class="go">IKsolution(q=array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6]), success=True, reason=None, iterations=12, residual=8.513951146341011e-13)</span>
 </pre></div>
 </div>
 <p>The Toolbox supports named joint configurations and these are shown in the table
@@ -489,27 +492,12 @@ Some provided robot models have an analytical solution coded, for example:</p>
 <h3>ETS notation<a class="headerlink" href="#ets-notation" title="Permalink to this headline"></a></h3>
 <p>A Puma robot can also be specified in ETS format <a class="reference internal" href="#corke07" id="id12"><span>[Corke07]</span></a> as a sequence of simple rigid-body transformations – pure translation
 or pure rotation – each with either a constant parameter or a free parameter which is a joint variable.</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span> <span class="k">as</span> <span class="n">ET</span>
-<span class="linenos"> 2</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
-<span class="linenos"> 3</span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Puma dimensions (m), see RVC2 Fig. 7.4 for details</span>
-<span class="linenos"> 4</span><span class="gp">&gt;&gt;&gt; </span><span class="n">l1</span> <span class="o">=</span> <span class="mf">0.672</span><span class="p">;</span> <span class="n">l2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.2337</span><span class="p">;</span> <span class="n">l3</span> <span class="o">=</span> <span class="mf">0.4318</span><span class="p">;</span> <span class="n">l4</span> <span class="o">=</span> <span class="mf">0.0203</span><span class="p">;</span> <span class="n">l5</span> <span class="o">=</span> <span class="mf">0.0837</span><span class="p">;</span> <span class="n">l6</span> <span class="o">=</span> <span class="mf">0.4318</span>
-<span class="linenos"> 5</span><span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l3</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">l4</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l5</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l6</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span>
-<span class="linenos"> 6</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-<span class="linenos"> 7</span><span class="go">tz(0.672) ⊕ Rz(q0) ⊕ ty(-0.2337) ⊕ Ry(q1) ⊕ tz(0.4318) ⊕ tx(0.0203) ⊕ ty(0.0837) ⊕ Ry(q2) ⊕ tz(0.4318) ⊕ Rz(q3) ⊕ Ry(q4) ⊕ Rz(q5)</span>
-<span class="linenos"> 8</span><span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-<span class="linenos"> 9</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
-<span class="linenos">10</span><span class="go">ERobot: noname, 6 joints (RRRRRR)</span>
-<span class="linenos">11</span><span class="go">┌───┬────────┬───────┬────────┬───────────────────────────────────────────────────────────────────┐</span>
-<span class="linenos">12</span><span class="go">│id │  link  │ joint │ parent │                                ETS                                │</span>
-<span class="linenos">13</span><span class="go">├───┼────────┼───────┼────────┼───────────────────────────────────────────────────────────────────┤</span>
-<span class="linenos">14</span><span class="go">│ 1 │ link0  │     0 │ BASE   │ {link0} = {BASE} ⊕ tz(0.672) ⊕ Rz(q0)                             │</span>
-<span class="linenos">15</span><span class="go">│ 2 │ link1  │     1 │ link0  │ {link1} = {link0} ⊕ ty(-0.2337) ⊕ Ry(q1)                          │</span>
-<span class="linenos">16</span><span class="go">│ 3 │ link2  │     2 │ link1  │ {link2} = {link1} ⊕ tz(0.4318) ⊕ tx(0.0203) ⊕ ty(0.0837) ⊕ Ry(q2) │</span>
-<span class="linenos">17</span><span class="go">│ 4 │ link3  │     3 │ link2  │ {link3} = {link2} ⊕ tz(0.4318) ⊕ Rz(q3)                           │</span>
-<span class="linenos">18</span><span class="go">│ 5 │ link4  │     4 │ link3  │ {link4} = {link3} ⊕ Ry(q4)                                        │</span>
-<span class="linenos">19</span><span class="go">│ 6 │ @link5 │     5 │ link4  │ {link5} = {link4} ⊕ Rz(q5)                                        │</span>
-<span class="linenos">20</span><span class="go">└───┴────────┴───────┴────────┴───────────────────────────────────────────────────────────────────┘</span>
-<span class="linenos">21</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="gt">Traceback (most recent call last):</span>
+<span class="linenos">2</span>  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="linenos">3</span><span class="gr">NameError</span>: <span class="n">name &#39;e&#39; is not defined</span>
+<span class="linenos">4</span><span class="gt">Traceback (most recent call last):</span>
+<span class="linenos">5</span>  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="linenos">6</span><span class="gr">NameError</span>: <span class="n">name &#39;robot&#39; is not defined</span>
 </pre></div>
 </div>
 <p>Line 3 defines the unique lengths of the Puma robot, and line 4 defines the kinematic chain in
@@ -529,17 +517,17 @@ which makes many models from the ROS universe available.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="p">)</span>
 <span class="go">DHRobot: Panda (by Franka Emika), 7 joints (RRRRRRR), dynamics, geometry, modified DH parameters</span>
-<span class="go">┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓</span>
-<span class="go">┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃   q⁻    ┃   q⁺   ┃</span>
-<span class="go">┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫</span>
-<span class="go">┃    0.0 ┃   0.0° ┃  q1 ┃ 0.333 ┃ -166.0° ┃ 166.0° ┃</span>
-<span class="go">┃    0.0 ┃ -90.0° ┃  q2 ┃   0.0 ┃ -101.0° ┃ 101.0° ┃</span>
-<span class="go">┃    0.0 ┃  90.0° ┃  q3 ┃ 0.316 ┃ -166.0° ┃ 166.0° ┃</span>
-<span class="go">┃ 0.0825 ┃  90.0° ┃  q4 ┃   0.0 ┃ -176.0° ┃  -4.0° ┃</span>
-<span class="go">┃-0.0825 ┃ -90.0° ┃  q5 ┃ 0.384 ┃ -166.0° ┃ 166.0° ┃</span>
-<span class="go">┃    0.0 ┃  90.0° ┃  q6 ┃   0.0 ┃   -1.0° ┃ 215.0° ┃</span>
-<span class="go">┃  0.088 ┃  90.0° ┃  q7 ┃ 0.107 ┃ -166.0° ┃ 166.0° ┃</span>
-<span class="go">┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛</span>
+<span class="go">┌────────┬────────┬─────┬───────┬─────────┬────────┐</span>
+<span class="go">│ aⱼ₋₁   │  ⍺ⱼ₋₁  │ θⱼ  │  dⱼ   │   q⁻    │   q⁺   │</span>
+<span class="go">├────────┼────────┼─────┼───────┼─────────┼────────┤</span>
+<span class="go">│    0.0 │   0.0° │  q1 │ 0.333 │ -166.0° │ 166.0° │</span>
+<span class="go">│    0.0 │ -90.0° │  q2 │   0.0 │ -101.0° │ 101.0° │</span>
+<span class="go">│    0.0 │  90.0° │  q3 │ 0.316 │ -166.0° │ 166.0° │</span>
+<span class="go">│ 0.0825 │  90.0° │  q4 │   0.0 │ -176.0° │  -4.0° │</span>
+<span class="go">│-0.0825 │ -90.0° │  q5 │ 0.384 │ -166.0° │ 166.0° │</span>
+<span class="go">│    0.0 │  90.0° │  q6 │   0.0 │   -1.0° │ 215.0° │</span>
+<span class="go">│  0.088 │  90.0° │  q7 │ 0.107 │ -166.0° │ 166.0° │</span>
+<span class="go">└────────┴────────┴─────┴───────┴─────────┴────────┘</span>
 
 <span class="go">┌─────┬──────┐</span>
 <span class="go">│tool │ None │</span>
@@ -548,8 +536,8 @@ which makes many models from the ROS universe available.</p>
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
 <span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤</span>
-<span class="go">│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │</span>
 <span class="go">│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │</span>
+<span class="go">│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │</span>
 <span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
@@ -569,26 +557,26 @@ end-effector must be specified.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">URDF</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">panda</span><span class="p">)</span>
-<span class="go">ERobot: panda (by Franka Emika), 7 joints (RRRRRRR), geometry, collision</span>
-<span class="go">┌───┬──────────────┬───────┬─────────────┬─────────────────────────────────────────────────────────────────────────────┐</span>
-<span class="go">│id │     link     │ joint │   parent    │                                     ETS                                     │</span>
-<span class="go">├───┼──────────────┼───────┼─────────────┼─────────────────────────────────────────────────────────────────────────────┤</span>
-<span class="go">│ 1 │ panda_link0  │       │ BASE        │ {panda_link0} = {BASE}                                                      │</span>
-<span class="go">│ 2 │ panda_link1  │     0 │ panda_link0 │ {panda_link1} = {panda_link0} ⊕ tz(0.333) ⊕ Rz(q0)                          │</span>
-<span class="go">│ 3 │ panda_link2  │     1 │ panda_link1 │ {panda_link2} = {panda_link1} ⊕ Rx(-90°) ⊕ Rz(q1)                           │</span>
-<span class="go">│ 4 │ panda_link3  │     2 │ panda_link2 │ {panda_link3} = {panda_link2} ⊕ ty(-0.316) ⊕ Rx(90°) ⊕ Rz(q2)               │</span>
-<span class="go">│ 5 │ panda_link4  │     3 │ panda_link3 │ {panda_link4} = {panda_link3} ⊕ tx(0.0825) ⊕ Rx(90°) ⊕ Rz(q3)               │</span>
-<span class="go">│ 6 │ panda_link5  │     4 │ panda_link4 │ {panda_link5} = {panda_link4} ⊕ tx(-0.0825) ⊕ ty(0.384) ⊕ Rx(-90°) ⊕ Rz(q4) │</span>
-<span class="go">│ 7 │ panda_link6  │     5 │ panda_link5 │ {panda_link6} = {panda_link5} ⊕ Rx(90°) ⊕ Rz(q5)                            │</span>
-<span class="go">│ 8 │ panda_link7  │     6 │ panda_link6 │ {panda_link7} = {panda_link6} ⊕ tx(0.088) ⊕ Rx(90°) ⊕ Rz(q6)                │</span>
-<span class="go">│ 9 │ @panda_link8 │       │ panda_link7 │ {panda_link8} = {panda_link7} ⊕ tz(0.107)                                   │</span>
-<span class="go">└───┴──────────────┴───────┴─────────────┴─────────────────────────────────────────────────────────────────────────────┘</span>
+<span class="go">ERobot: panda (by Franka Emika), 7 joints (RRRRRRR), 1 gripper, geometry, collision</span>
+<span class="go">┌─────┬──────────────┬───────┬─────────────┬────────────────────────────────────────────────┐</span>
+<span class="go">│link │     link     │ joint │   parent    │              ETS: parent to link               │</span>
+<span class="go">├─────┼──────────────┼───────┼─────────────┼────────────────────────────────────────────────┤</span>
+<span class="go">│   0 │ panda_link0  │       │ BASE        │                                                │</span>
+<span class="go">│   1 │ panda_link1  │     0 │ panda_link0 │ SE3(0, 0, 0.333) ⊕ Rz(q0)                      │</span>
+<span class="go">│   2 │ panda_link2  │     1 │ panda_link1 │ SE3(-90°, -0°, 0°) ⊕ Rz(q1)                    │</span>
+<span class="go">│   3 │ panda_link3  │     2 │ panda_link2 │ SE3(0, -0.316, 0; 90°, -0°, 0°) ⊕ Rz(q2)       │</span>
+<span class="go">│   4 │ panda_link4  │     3 │ panda_link3 │ SE3(0.0825, 0, 0; 90°, -0°, 0°) ⊕ Rz(q3)       │</span>
+<span class="go">│   5 │ panda_link5  │     4 │ panda_link4 │ SE3(-0.0825, 0.384, 0; -90°, -0°, 0°) ⊕ Rz(q4) │</span>
+<span class="go">│   6 │ panda_link6  │     5 │ panda_link5 │ SE3(90°, -0°, 0°) ⊕ Rz(q5)                     │</span>
+<span class="go">│   7 │ panda_link7  │     6 │ panda_link6 │ SE3(0.088, 0, 0; 90°, -0°, 0°) ⊕ Rz(q6)        │</span>
+<span class="go">│   8 │ @panda_link8 │       │ panda_link7 │ SE3(0, 0, 0.107)                               │</span>
+<span class="go">└─────┴──────────────┴───────┴─────────────┴────────────────────────────────────────────────┘</span>
 
 <span class="go">┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐</span>
 <span class="go">│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │</span>
 <span class="go">├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤</span>
-<span class="go">│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │</span>
 <span class="go">│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │</span>
+<span class="go">│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │</span>
 <span class="go">└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">panda</span><span class="o">.</span><span class="n">qz</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;panda_hand&#39;</span><span class="p">)</span>
@@ -714,7 +702,7 @@ At a singular configuration</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
 <span class="go">5</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">jsingu</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
-<span class="go">joint 5 is dependent on joint 3</span>
+<span class="go">column 5 = + 1 column_3</span>
 </pre></div>
 </div>
 <p>Jacobians can also be computed for symbolic joint variables as for forward kinematics above.</p>
@@ -979,7 +967,7 @@ making and SLAM; and a minimalist block-diagram simulation tool <a class="refere
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

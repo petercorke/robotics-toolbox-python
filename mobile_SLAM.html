@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Localization and Mapping &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="bdsim blocks" href="blocks.html" />
+    <link rel="prev" title="Mobile robot path planning" href="mobile_planner.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Robotics Toolbox for Python
+            <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Manipulator arms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="mobile.html">Mobile robots</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mobile_vehicle.html">Mobile robot kinematic models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile_vehicle_animation.html">Mobile robot animations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile_drivers.html">Mobile robot drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile_reactive.html">Reactive navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile_planner.html">Mobile robot path planning</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Localization and Mapping</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#state-estimation">State estimation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#extended-kalman-filter">Extended Kalman filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#particle-filter">Particle filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sensor-models">Sensor models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-roboticstoolbox.mobile.landmarkmap">Map models</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="mobile.html">Mobile robots</a> &raquo;</li>
+      <li>Localization and Mapping</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/mobile_SLAM.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="mobile_planner.html" class="btn btn-neutral float-left" title="Mobile robot path planning" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="blocks.html" class="btn btn-neutral float-right" title="bdsim blocks" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="localization-and-mapping">
+<h1>Localization and Mapping<a class="headerlink" href="#localization-and-mapping" title="Permalink to this headline"></a></h1>
+<p>These classes support simulation of vehicle and map estimation in a simple
+planar world with point landmarks.</p>
+<section id="state-estimation">
+<h2>State estimation<a class="headerlink" href="#state-estimation" title="Permalink to this headline"></a></h2>
+<p>Two state estimators are included.</p>
+<section id="extended-kalman-filter">
+<h3>Extended Kalman filter<a class="headerlink" href="#extended-kalman-filter" title="Permalink to this headline"></a></h3>
+<p>The EKF is capable of vehicle localization, map estimation or SLAM.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">EKF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_est</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joseph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_est</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joseph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Extended Kalman filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>robot</strong> (<em>2-tuple</em>) – robot motion model</p></li>
+<li><p><strong>sensor</strong> (<em>2-tuple</em><em>, </em><em>optional</em>) – vehicle mounted sensor model, defaults to None</p></li>
+<li><p><strong>map</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">LandmarkMap</span></code>, optional) – landmark map, defaults to None</p></li>
+<li><p><strong>P0</strong> (<em>ndarray</em><em>(</em><em>n</em><em>,</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – initial covariance matrix, defaults to None</p></li>
+<li><p><strong>x_est</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – initial state estimate, defaults to None</p></li>
+<li><p><strong>joseph</strong> (<em>bool</em><em>, </em><em>optional</em>) – use Joseph update of covariance, defaults to True</p></li>
+<li><p><strong>animate</strong> (<em>bool</em><em>, </em><em>optional</em>) – show animation of vehicle motion, defaults to True</p></li>
+<li><p><strong>x0</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – initial EKF state, defaults to [0, 0, 0]</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – display extra debug information, defaults to False</p></li>
+<li><p><strong>history</strong> (<em>bool</em><em>, </em><em>optional</em>) – retain step-by-step history, defaults to True</p></li>
+<li><p><strong>workspace</strong> (<em>scalar</em><em>, </em><em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>array_like</em><em>(</em><em>4</em><em>)</em>) – dimension of workspace, see <code class="xref py py-func docutils literal notranslate"><span class="pre">expand_dims()</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<p>This class solves several classical robotic estimation problems, which are
+selected according to the arguments:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 36%" />
+<col style="width: 10%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 11%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Problem</p></th>
+<th class="head"><p>len(x)</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">robot</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">sensor</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">map</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">P0</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Dead reckoning</p></td>
+<td><p>3</p></td>
+<td><p>(veh,V)</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+<td><p>P0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Map-based localization</p></td>
+<td><p>3</p></td>
+<td><p>(veh,V)</p></td>
+<td><p>(smodel,W)</p></td>
+<td><p>yes</p></td>
+<td><p>P0</p></td>
+</tr>
+<tr class="row-even"><td><p>Map creation</p></td>
+<td><p>2N</p></td>
+<td><p>(veh,None)</p></td>
+<td><p>(smodel,W)</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>SLAM</p></td>
+<td><p>3+2N</p></td>
+<td><p>(veh,V)</p></td>
+<td><p>(smodel,W)</p></td>
+<td><p>None</p></td>
+<td><p>P0</p></td>
+</tr>
+</tbody>
+</table>
+<p>where:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">veh</span></code> models the robotic vehicle kinematics and odometry and is a <a class="reference internal" href="mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleBase</span></code></a> subclass</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">V</span></code> is the estimated odometry (process) noise covariance as an ndarray(3,3)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">smodel</span></code> models the robot mounted sensor and is a <code class="xref py py-class docutils literal notranslate"><span class="pre">SensorBase</span></code> subclass</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">W</span></code> is the estimated sensor (measurement) noise covariance as an ndarray(2,2)</p></li>
+</ul>
+<p>The state vector has different lengths depending on the particular
+estimation problem, see below.</p>
+<p>At each iteration of the EKF:</p>
+<ul class="simple">
+<li><p>invoke the step method of the <code class="docutils literal notranslate"><span class="pre">robot</span></code></p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>obtains the next control input from the driver agent, and apply it
+as the vehicle control input</p></li>
+<li><p>the vehicle returns a noisy odometry estimate</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>the state prediction is computed</p></li>
+<li><p>the true pose is used to determine a noisy sensor observation</p></li>
+<li><p>the state is corrected, new landmarks are added to the map</p></li>
+</ul>
+<p>The working area of the robot is defined by <code class="docutils literal notranslate"><span class="pre">workspace</span></code> or inherited
+from the landmark map attached to the <code class="docutils literal notranslate"><span class="pre">sensor</span></code> (see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">expand_dims()</span></code>):</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">workspace</span></code></p></th>
+<th class="head"><p>x-range</p></th>
+<th class="head"><p>y-range</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A (scalar)</p></td>
+<td><p>-A:A</p></td>
+<td><p>-A:A</p></td>
+</tr>
+<tr class="row-odd"><td><p>[A, B]</p></td>
+<td><p>A:B</p></td>
+<td><p>A:B</p></td>
+</tr>
+<tr class="row-even"><td><p>[A, B, C, D]</p></td>
+<td><p>A:B</p></td>
+<td><p>C:D</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Dead-reckoning localization</strong></p>
+<p>The state <span class="math notranslate nohighlight">\(\vec{x} = (x, y, \theta)\)</span> is the estimated vehicle
+configuration.</p>
+<p>Create a vehicle with odometry covariance <code class="docutils literal notranslate"><span class="pre">V</span></code>, add a driver to it,
+run the Kalman filter with estimated covariances <code class="docutils literal notranslate"><span class="pre">V</span></code> and initial
+vehicle state covariance <code class="docutils literal notranslate"><span class="pre">P0</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">;</span>
+<span class="n">robot</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">(</span><span class="n">covar</span><span class="o">=</span><span class="n">V</span><span class="p">)</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">RandomPath</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">x_sdev</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)]</span>
+<span class="n">P0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">x_sdev</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">ekf</span> <span class="o">=</span> <span class="n">EKF</span><span class="p">(</span><span class="n">robot</span><span class="o">=</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">V</span><span class="p">),</span> <span class="n">P0</span><span class="o">=</span><span class="n">P0</span><span class="p">)</span>
+
+<span class="n">ekf</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>  <span class="c1"># run the simulation for 20 seconds</span>
+
+<span class="n">robot</span><span class="o">.</span><span class="n">plot_xy</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>  <span class="c1"># plot the true vehicle path</span>
+<span class="n">ekf</span><span class="o">.</span><span class="n">plot_xy</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>    <span class="c1"># overlay the estimated path</span>
+<span class="n">ekf</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span><span class="n">filled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>  <span class="c1"># overlay uncertainty ellipses</span>
+
+<span class="c1"># plot the covariance against time</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">ekf</span><span class="o">.</span><span class="n">get_t</span><span class="p">();</span>
+<span class="n">pn</span> <span class="o">=</span> <span class="n">ekf</span><span class="o">.</span><span class="n">get_Pnorm</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">pn</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>Map-based vehicle localization</strong></p>
+<p>The state <span class="math notranslate nohighlight">\(\vec{x} = (x, y, \theta)\)</span> is the estimated vehicle
+configuration.</p>
+<p>Create a vehicle with odometry covariance <code class="docutils literal notranslate"><span class="pre">V</span></code>, add a driver to it,
+create a map with 20 point landmarks, create a sensor that uses the map
+and vehicle state to estimate landmark range and bearing with covariance
+<code class="docutils literal notranslate"><span class="pre">W</span></code>, the Kalman filter with estimated covariances <code class="docutils literal notranslate"><span class="pre">V</span></code> and <code class="docutils literal notranslate"><span class="pre">W</span></code> and
+initial vehicle state covariance <code class="docutils literal notranslate"><span class="pre">P0</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">;</span>
+<span class="n">robot</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">(</span><span class="n">covar</span><span class="o">=</span><span class="n">V</span><span class="p">)</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">RandomPath</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="nb">map</span> <span class="o">=</span> <span class="n">LandmarkMap</span><span class="p">(</span><span class="n">nlandmarks</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mi">1</span><span class="p">)])</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">sensor</span> <span class="o">=</span> <span class="n">RangeBearingSensor</span><span class="p">(</span><span class="n">robot</span><span class="o">=</span><span class="n">robot</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="nb">map</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="n">W</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="nb">range</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">x_sdev</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)]</span>
+<span class="n">P0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">x_sdev</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">ekf</span> <span class="o">=</span> <span class="n">EKF</span><span class="p">(</span><span class="n">robot</span><span class="o">=</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">V</span><span class="p">),</span> <span class="n">P0</span><span class="o">=</span><span class="n">P0</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="nb">map</span><span class="p">,</span> <span class="n">sensor</span><span class="o">=</span><span class="p">(</span><span class="n">sensor</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
+
+<span class="n">ekf</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>  <span class="c1"># run the simulation for 20 seconds</span>
+
+<span class="nb">map</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>  <span class="c1">#  plot the map</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">plot_xy</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>  <span class="c1"># plot the true vehicle path</span>
+<span class="n">ekf</span><span class="o">.</span><span class="n">plot_xy</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>    <span class="c1"># overlay the estimated path</span>
+<span class="n">ekf</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">()</span>  <span class="c1"># overlay uncertainty ellipses</span>
+
+<span class="c1"># plot the covariance against time</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">ekf</span><span class="o">.</span><span class="n">get_t</span><span class="p">();</span>
+<span class="n">pn</span> <span class="o">=</span> <span class="n">ekf</span><span class="o">.</span><span class="n">get_Pnorm</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">pn</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>Vehicle-based map making</strong></p>
+<p>The state <span class="math notranslate nohighlight">\(\vec{x} = (x_0, y_0, \dots, x_{N-1}, y_{N-1})\)</span> is the
+estimated landmark positions where <span class="math notranslate nohighlight">\(N\)</span> is the number of landmarks.
+The state vector is initially empty, and is extended by 2 elements every
+time a new landmark is observed.</p>
+<p>Create a vehicle with perfect odometry (no covariance), add a driver to it,
+create a sensor that uses the map and vehicle state to estimate landmark range 
+and bearing with covariance <code class="docutils literal notranslate"><span class="pre">W</span></code>, the Kalman filter with estimated sensor 
+covariance <code class="docutils literal notranslate"><span class="pre">W</span></code>, then run the filter for N time steps:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">robot</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">add_driver</span><span class="p">(</span><span class="n">RandomPath</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="nb">map</span> <span class="o">=</span> <span class="n">LandmarkMap</span><span class="p">(</span><span class="n">nlandmarks</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mi">1</span><span class="p">)])</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">sensor</span> <span class="o">=</span> <span class="n">RangeBearingSensor</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+
+<span class="n">ekf</span> <span class="o">=</span> <span class="n">EKF</span><span class="p">(</span><span class="n">robot</span><span class="o">=</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">sensor</span><span class="o">=</span><span class="p">(</span><span class="n">sensor</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
+
+<span class="n">ekf</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>  <span class="c1"># run the simulation for 20 seconds</span>
+
+<span class="nb">map</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>  <span class="c1">#  plot the map</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">plot_xy</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>  <span class="c1"># plot the true vehicle path</span>
+</pre></div>
+</div>
+<p><strong>Simultaneous localization and mapping (SLAM)</strong></p>
+<p>The state <span class="math notranslate nohighlight">\(\vec{x} = (x, y, \theta, x_0, y_0, \dots, x_{N-1},
+y_{N-1})\)</span> is the estimated vehicle configuration followed by the
+estimated landmark positions where <span class="math notranslate nohighlight">\(N\)</span> is the number of landmarks.
+The state vector is initially of length 3, and is extended by 2 elements
+every time a new landmark is observed.</p>
+<p>Create a vehicle with odometry covariance <code class="docutils literal notranslate"><span class="pre">V</span></code>, add a driver to it,
+create a map with 20 point landmarks, create a sensor that uses the map
+and vehicle state to estimate landmark range and bearing with covariance
+<code class="docutils literal notranslate"><span class="pre">W</span></code>, the Kalman filter with estimated covariances <code class="docutils literal notranslate"><span class="pre">V</span></code> and <code class="docutils literal notranslate"><span class="pre">W</span></code> and
+initial state covariance <code class="docutils literal notranslate"><span class="pre">P0</span></code>, then run the filter to estimate the
+vehicle state at each time step and the map:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">;</span>
+<span class="n">robot</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">(</span><span class="n">covar</span><span class="o">=</span><span class="n">V</span><span class="p">)</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">RandomPath</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="nb">map</span> <span class="o">=</span> <span class="n">LandmarkMap</span><span class="p">(</span><span class="n">nlandmarks</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mi">1</span><span class="p">)])</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">sensor</span> <span class="o">=</span> <span class="n">RangeBearingSensor</span><span class="p">(</span><span class="n">robot</span><span class="o">=</span><span class="n">robot</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="nb">map</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="n">W</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span> <span class="nb">range</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">ekf</span> <span class="o">=</span> <span class="n">EKF</span><span class="p">(</span><span class="n">robot</span><span class="o">=</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">V</span><span class="p">),</span> <span class="n">P0</span><span class="o">=</span><span class="n">P0</span><span class="p">,</span> <span class="n">sensor</span><span class="o">=</span><span class="p">(</span><span class="n">sensor</span><span class="p">,</span> <span class="n">W</span><span class="p">))</span>
+
+<span class="n">ekf</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>  <span class="c1"># run the simulation for 20 seconds</span>
+
+<span class="nb">map</span><span class="o">.</span><span class="n">plot</span><span class="p">();</span> <span class="c1"># plot true map</span>
+<span class="n">ekf</span><span class="o">.</span><span class="n">plot_map</span><span class="p">();</span> <span class="c1"># plot estimated landmark position</span>
+
+<span class="n">robot</span><span class="o">.</span><span class="n">plot_xy</span><span class="p">();</span> <span class="c1"># plot true path</span>
+<span class="n">ekf</span><span class="o">.</span><span class="n">plot_xy</span><span class="p">();</span> <span class="c1"># plot estimated robot path</span>
+<span class="n">ekf</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">();</span> <span class="c1"># plot estimated covariance</span>
+
+<span class="c1"># plot the covariance against time</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">ekf</span><span class="o">.</span><span class="n">get_t</span><span class="p">();</span>
+<span class="n">pn</span> <span class="o">=</span> <span class="n">ekf</span><span class="o">.</span><span class="n">get_Pnorm</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">pn</span><span class="p">);</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.run" title="roboticstoolbox.mobile.EKF.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.x_est">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_est</span></span><a class="headerlink" href="#roboticstoolbox.mobile.EKF.x_est" title="Permalink to this definition"></a></dt>
+<dd><p>Get EKF state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>state vector</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n)</p>
+</dd>
+</dl>
+<p>Returns the value of the estimated state vector at the end of
+simulation. The dimensions depend on the problem being solved.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.P_est">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">P_est</span></span><a class="headerlink" href="#roboticstoolbox.mobile.EKF.P_est" title="Permalink to this definition"></a></dt>
+<dd><p>Get EKF covariance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>covariance matrix</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,n)</p>
+</dd>
+</dl>
+<p>Returns the value of the estimated covariance matrix at the end of
+simulation. The dimensions depend on the problem being solved.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.P0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">P0</span></span><a class="headerlink" href="#roboticstoolbox.mobile.EKF.P0" title="Permalink to this definition"></a></dt>
+<dd><p>Get initial EKF covariance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>covariance matrix</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,n)</p>
+</dd>
+</dl>
+<p>Returns the value of the covariance matrix passed to the constructor.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.V_est">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">V_est</span></span><a class="headerlink" href="#roboticstoolbox.mobile.EKF.V_est" title="Permalink to this definition"></a></dt>
+<dd><p>Get estimated odometry covariance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>odometry covariance</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(2,2)</p>
+</dd>
+</dl>
+<p>Returns the value of the estimated odometry covariance matrix passed to
+the constructor</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.W_est">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">W_est</span></span><a class="headerlink" href="#roboticstoolbox.mobile.EKF.W_est" title="Permalink to this definition"></a></dt>
+<dd><p>Get estimated sensor covariance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>sensor covariance</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(2,2)</p>
+</dd>
+</dl>
+<p>Returns the value of the estimated sensor covariance matrix passed to
+the constructor</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.robot">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">robot</span></span><a class="headerlink" href="#roboticstoolbox.mobile.EKF.robot" title="Permalink to this definition"></a></dt>
+<dd><p>Get robot object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot used in simulation</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleBase</span></code></a> subclass</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.sensor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sensor</span></span><a class="headerlink" href="#roboticstoolbox.mobile.EKF.sensor" title="Permalink to this definition"></a></dt>
+<dd><p>Get sensor object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>sensor used in simulation</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">SensorBase</span></code> subclass</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.map">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">map</span></span><a class="headerlink" href="#roboticstoolbox.mobile.EKF.map" title="Permalink to this definition"></a></dt>
+<dd><p>Get map object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>map used in simulation</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">LandmarkMap</span></code> subclass</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.verbose">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.EKF.verbose" title="Permalink to this definition"></a></dt>
+<dd><p>Get verbosity state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>verbosity</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.history">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">history</span></span><a class="headerlink" href="#roboticstoolbox.mobile.EKF.history" title="Permalink to this definition"></a></dt>
+<dd><p>Get EKF simulation history</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>simulation history</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of namedtuples</p>
+</dd>
+</dl>
+<p>At each simulation timestep a namedtuple of is appended to the history
+list.  It contains, for that time step, estimated state and covariance,
+and sensor observation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_t" title="roboticstoolbox.mobile.EKF.get_t"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_t()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_xyt" title="roboticstoolbox.mobile.EKF.get_xyt"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_xyt()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_map" title="roboticstoolbox.mobile.EKF.get_map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_map()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_P" title="roboticstoolbox.mobile.EKF.get_P"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_P()</span></code></a> 
+<a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_Pnorm" title="roboticstoolbox.mobile.EKF.get_Pnorm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_Pnorm()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.workspace">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">workspace</span></span><a class="headerlink" href="#roboticstoolbox.mobile.EKF.workspace" title="Permalink to this definition"></a></dt>
+<dd><p>Size of robot workspace</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>workspace bounds [xmin, xmax, ymin, ymax]</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(4)</p>
+</dd>
+</dl>
+<p>Returns the bounds of the workspace as specified by the constructor
+option <code class="docutils literal notranslate"><span class="pre">workspace</span></code></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.landmarks">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">landmarks</span></span><a class="headerlink" href="#roboticstoolbox.mobile.EKF.landmarks" title="Permalink to this definition"></a></dt>
+<dd><p>Get landmark information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>landmark information</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+<p>The dictionary is indexed by the landmark id and gives a 3-tuple:</p>
+<ul class="simple">
+<li><p>order in which landmark was seen</p></li>
+<li><p>number of times seen</p></li>
+</ul>
+<p>The order in which the landmark was first seen.  The first observed
+landmark has order 0 and so on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.landmark" title="roboticstoolbox.mobile.EKF.landmark"><code class="xref py py-meth docutils literal notranslate"><span class="pre">landmark()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.landmark">
+<span class="sig-name descname"><span class="pre">landmark</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.landmark"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.landmark" title="Permalink to this definition"></a></dt>
+<dd><p>Landmark information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>id</strong> (<em>int</em>) – landmark index</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>order in which it was first seen, number of times seen</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int, int</p>
+</dd>
+</dl>
+<p>The first observed landmark has order 0 and so on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.landmarks" title="roboticstoolbox.mobile.EKF.landmarks"><code class="xref py py-meth docutils literal notranslate"><span class="pre">landmarks()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.landmark_index" title="roboticstoolbox.mobile.EKF.landmark_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">landmark_index()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.landmark_mindex" title="roboticstoolbox.mobile.EKF.landmark_mindex"><code class="xref py py-meth docutils literal notranslate"><span class="pre">landmark_mindex()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.landmark_index">
+<span class="sig-name descname"><span class="pre">landmark_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.landmark_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.landmark_index" title="Permalink to this definition"></a></dt>
+<dd><p>Landmark index in complete state vector</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>id</strong> (<em>int</em>) – landmark index</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index in the state vector</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+<p>The return value <code class="docutils literal notranslate"><span class="pre">j</span></code> is the index of the x-coordinate of the landmark
+in the EKF state vector, and <code class="docutils literal notranslate"><span class="pre">j+1</span></code> is the index of the y-coordinate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.landmark" title="roboticstoolbox.mobile.EKF.landmark"><code class="xref py py-meth docutils literal notranslate"><span class="pre">landmark()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.landmark_mindex">
+<span class="sig-name descname"><span class="pre">landmark_mindex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.landmark_mindex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.landmark_mindex" title="Permalink to this definition"></a></dt>
+<dd><p>Landmark index in map state vector</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>id</strong> (<em>int</em>) – landmark index</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index in the state vector</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+<p>The return value <code class="docutils literal notranslate"><span class="pre">j</span></code> is the index of the x-coordinate of the landmark
+in the map vector, and <code class="docutils literal notranslate"><span class="pre">j+1</span></code> is the index of the y-coordinate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.landmark" title="roboticstoolbox.mobile.EKF.landmark"><code class="xref py py-meth docutils literal notranslate"><span class="pre">landmark()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.landmark_x">
+<span class="sig-name descname"><span class="pre">landmark_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.landmark_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.landmark_x" title="Permalink to this definition"></a></dt>
+<dd><p>Landmark position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>id</strong> (<em>int</em>) – landmark index</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>landmark position <span class="math notranslate nohighlight">\((x,y)\)</span></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>Returns the landmark position from the current state vector.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">movie</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.run" title="Permalink to this definition"></a></dt>
+<dd><p>Run the EKF simulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>float</em>) – maximum simulation time in seconds</p></li>
+<li><p><strong>animate</strong> (<em>bool</em><em>, </em><em>optional</em>) – animate motion of vehicle, defaults to False</p></li>
+<li><p><strong>movie</strong> (<em>str</em><em>, </em><em>optional</em>) – name of movie file to create, defaults to None</p></li>
+</ul>
+</dd>
+</dl>
+<p>Simulates the motion of a vehicle (under the control of a driving agent)
+and the EKF estimator.  The steps are:</p>
+<ul>
+<li><p>initialize the filter, vehicle and vehicle driver agent, sensor</p></li>
+<li><p>for each time step:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>step the vehicle and its driver agent, obtain odometry</p></li>
+<li><p>take a sensor reading</p></li>
+<li><p>execute the EKF</p></li>
+<li><p>save information as a namedtuple to the history list for later display</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.history" title="roboticstoolbox.mobile.EKF.history"><code class="xref py py-meth docutils literal notranslate"><span class="pre">history()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.landmark" title="roboticstoolbox.mobile.EKF.landmark"><code class="xref py py-meth docutils literal notranslate"><span class="pre">landmark()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.landmarks" title="roboticstoolbox.mobile.EKF.landmarks"><code class="xref py py-meth docutils literal notranslate"><span class="pre">landmarks()</span></code></a> 
+<a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_xyt" title="roboticstoolbox.mobile.EKF.get_xyt"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_xyt()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_t" title="roboticstoolbox.mobile.EKF.get_t"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_t()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_map" title="roboticstoolbox.mobile.EKF.get_map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_map()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_P" title="roboticstoolbox.mobile.EKF.get_P"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_P()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_Pnorm" title="roboticstoolbox.mobile.EKF.get_Pnorm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_Pnorm()</span></code></a>
+<a class="reference internal" href="#roboticstoolbox.mobile.EKF.plot_xy" title="roboticstoolbox.mobile.EKF.plot_xy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_xy()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.plot_ellipse" title="roboticstoolbox.mobile.EKF.plot_ellipse"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_ellipse()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.plot_error" title="roboticstoolbox.mobile.EKF.plot_error"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_error()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.plot_map" title="roboticstoolbox.mobile.EKF.plot_map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_map()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.get_t">
+<span class="sig-name descname"><span class="pre">get_t</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.get_t"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.get_t" title="Permalink to this definition"></a></dt>
+<dd><p>Get time from simulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>simulation time vector</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n)</p>
+</dd>
+</dl>
+<p>Return simulation time vector, starts at zero.  The timestep is an
+attribute of the <code class="docutils literal notranslate"><span class="pre">robot</span></code> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.run" title="roboticstoolbox.mobile.EKF.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.history" title="roboticstoolbox.mobile.EKF.history"><code class="xref py py-meth docutils literal notranslate"><span class="pre">history()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.get_xyt">
+<span class="sig-name descname"><span class="pre">get_xyt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.get_xyt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.get_xyt" title="Permalink to this definition"></a></dt>
+<dd><p>Get estimated vehicle trajectory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>vehicle trajectory where each row is configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,3)</p>
+</dd>
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.plot_xy" title="roboticstoolbox.mobile.EKF.plot_xy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_xy()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.run" title="roboticstoolbox.mobile.EKF.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.history" title="roboticstoolbox.mobile.EKF.history"><code class="xref py py-meth docutils literal notranslate"><span class="pre">history()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.plot_xy">
+<span class="sig-name descname"><span class="pre">plot_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.plot_xy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.plot_xy" title="Permalink to this definition"></a></dt>
+<dd><p>Plot estimated vehicle position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – position arguments passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.5.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></p></li>
+<li><p><strong>kwargs</strong> – keywords arguments passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.5.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></p></li>
+<li><p><strong>block</strong> (<em>bool</em><em>, </em><em>optional</em>) – hold plot until figure is closed, defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+<p>Plot the estimated vehicle path in the xy-plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_xyt" title="roboticstoolbox.mobile.EKF.get_xyt"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_xyt()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.plot_error" title="roboticstoolbox.mobile.EKF.plot_error"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_error()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.plot_ellipse" title="roboticstoolbox.mobile.EKF.plot_ellipse"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_ellipse()</span></code></a> <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_P()</span></code>
+<a class="reference internal" href="#roboticstoolbox.mobile.EKF.run" title="roboticstoolbox.mobile.EKF.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.history" title="roboticstoolbox.mobile.EKF.history"><code class="xref py py-meth docutils literal notranslate"><span class="pre">history()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.plot_ellipse">
+<span class="sig-name descname"><span class="pre">plot_ellipse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.plot_ellipse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.plot_ellipse" title="Permalink to this definition"></a></dt>
+<dd><p>Plot uncertainty ellipses</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>confidence</strong> (<em>float</em><em>, </em><em>optional</em>) – ellipse confidence interval, defaults to 0.95</p></li>
+<li><p><strong>N</strong> (<em>int</em><em>, </em><em>optional</em>) – number of ellipses to plot, defaults to 10</p></li>
+<li><p><strong>kwargs</strong> – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">spatialmath.base.graphics.plot_ellipse()</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<p>Plot <code class="docutils literal notranslate"><span class="pre">N</span></code> uncertainty ellipses spaced evenly along the trajectory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_P" title="roboticstoolbox.mobile.EKF.get_P"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_P()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.run" title="roboticstoolbox.mobile.EKF.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.history" title="roboticstoolbox.mobile.EKF.history"><code class="xref py py-meth docutils literal notranslate"><span class="pre">history()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.plot_error">
+<span class="sig-name descname"><span class="pre">plot_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bgcolor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.plot_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.plot_error" title="Permalink to this definition"></a></dt>
+<dd><p>Plot error with uncertainty bounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bgcolor</strong> (<em>str</em><em>, </em><em>optional</em>) – background color, defaults to ‘r’</p></li>
+<li><p><strong>confidence</strong> (<em>float</em><em>, </em><em>optional</em>) – confidence interval, defaults to 0.95</p></li>
+</ul>
+</dd>
+</dl>
+<p>Plot the error between actual and estimated vehicle 
+path <span class="math notranslate nohighlight">\((x, y, \theta)\)</span> versus time as three stacked plots.
+Heading error is wrapped into the range <span class="math notranslate nohighlight">\([-\pi,\pi)\)</span></p>
+<p>Behind each line draw a shaded polygon <code class="docutils literal notranslate"><span class="pre">bgcolor</span></code> showing the specified 
+<code class="docutils literal notranslate"><span class="pre">confidence</span></code> bounds based on the covariance at each time step.
+Ideally the lines should be within the shaded polygon <code class="docutils literal notranslate"><span class="pre">confidence</span></code>
+of the time.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Observations will decrease the uncertainty while periods of dead-reckoning increase it.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_P" title="roboticstoolbox.mobile.EKF.get_P"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_P()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.run" title="roboticstoolbox.mobile.EKF.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.history" title="roboticstoolbox.mobile.EKF.history"><code class="xref py py-meth docutils literal notranslate"><span class="pre">history()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.get_map">
+<span class="sig-name descname"><span class="pre">get_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.get_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.get_map" title="Permalink to this definition"></a></dt>
+<dd><p>Get estimated map</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>landmark coordinates <span class="math notranslate nohighlight">\((x, y)\)</span></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,2)</p>
+</dd>
+</dl>
+<p>Landmarks are returned in the order they were first observed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.landmarks" title="roboticstoolbox.mobile.EKF.landmarks"><code class="xref py py-meth docutils literal notranslate"><span class="pre">landmarks()</span></code></a>  <a class="reference internal" href="#roboticstoolbox.mobile.EKF.run" title="roboticstoolbox.mobile.EKF.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.history" title="roboticstoolbox.mobile.EKF.history"><code class="xref py py-meth docutils literal notranslate"><span class="pre">history()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.plot_map">
+<span class="sig-name descname"><span class="pre">plot_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ellipse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.plot_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.plot_map" title="Permalink to this definition"></a></dt>
+<dd><p>Plot estimated landmarks</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>marker</strong> (<em>dict</em><em>, </em><em>optional</em>) – plot marker for landmark, arguments passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.5.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a>, defaults to “r+”</p></li>
+<li><p><strong>ellipse</strong> (<em>dict</em><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_ellipse()</span></code>, defaults to None</p></li>
+<li><p><strong>confidence</strong> (<em>float</em><em>, </em><em>optional</em>) – ellipse confidence interval, defaults to 0.95</p></li>
+</ul>
+</dd>
+</dl>
+<p>Plot a marker  and covariance ellipses for each estimated landmark.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_map" title="roboticstoolbox.mobile.EKF.get_map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_map()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.run" title="roboticstoolbox.mobile.EKF.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.history" title="roboticstoolbox.mobile.EKF.history"><code class="xref py py-meth docutils literal notranslate"><span class="pre">history()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.get_P">
+<span class="sig-name descname"><span class="pre">get_P</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.get_P"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.get_P" title="Permalink to this definition"></a></dt>
+<dd><p>Get covariance matrices from simulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>k</strong> (<em>int</em><em>, </em><em>optional</em>) – timestep, defaults to None</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>covariance matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(n,n) or list of ndarray(n,n)</p>
+</dd>
+</dl>
+<p>If <code class="docutils literal notranslate"><span class="pre">k</span></code> is given return covariance from simulation timestep <code class="docutils literal notranslate"><span class="pre">k</span></code>, else
+return a list of all covariance matrices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_Pnorm" title="roboticstoolbox.mobile.EKF.get_Pnorm"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_Pnorm()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.run" title="roboticstoolbox.mobile.EKF.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.history" title="roboticstoolbox.mobile.EKF.history"><code class="xref py py-meth docutils literal notranslate"><span class="pre">history()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.get_Pnorm">
+<span class="sig-name descname"><span class="pre">get_Pnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.get_Pnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.get_Pnorm" title="Permalink to this definition"></a></dt>
+<dd><p>Get covariance norm from simulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>k</strong> (<em>int</em><em>, </em><em>optional</em>) – timestep, defaults to None</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>covariance matrix norm</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float or ndarray(n)</p>
+</dd>
+</dl>
+<p>If <code class="docutils literal notranslate"><span class="pre">k</span></code> is given return covariance norm from simulation timestep <code class="docutils literal notranslate"><span class="pre">k</span></code>, else
+return all covariance norms as a 1D NumPy array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.EKF.get_P" title="roboticstoolbox.mobile.EKF.get_P"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_P()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.run" title="roboticstoolbox.mobile.EKF.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF.history" title="roboticstoolbox.mobile.EKF.history"><code class="xref py py-meth docutils literal notranslate"><span class="pre">history()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.disp_P">
+<span class="sig-name descname"><span class="pre">disp_P</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">P</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.disp_P"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.disp_P" title="Permalink to this definition"></a></dt>
+<dd><p>Display covariance matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>P</strong> (<em>ndarray</em><em>(</em><em>n</em><em>,</em><em>n</em><em>)</em>) – covariance matrix</p></li>
+<li><p><strong>colorbar</strong> – add a colorbar</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type</dt>
+<dd class="field-even"><p>bool or dict</p>
+</dd>
+</dl>
+<p>Plot the elements of the covariance matrix as an image. If <code class="docutils literal notranslate"><span class="pre">colorbar</span></code>
+is True add a color bar, if <cite>colorbar</cite> is a dict add a color bar with
+these options passed to colorbar.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A log scale is used.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.imshow.html#matplotlib.axes.Axes.imshow" title="(in Matplotlib v3.5.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">imshow()</span></code></a> <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.colorbar.html#matplotlib.pyplot.colorbar" title="(in Matplotlib v3.5.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">matplotlib.pyplot.colorbar()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF.get_transform">
+<span class="sig-name descname"><span class="pre">get_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/EKF.html#EKF.get_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.EKF.get_transform" title="Permalink to this definition"></a></dt>
+<dd><p>Transformation from estimated map to true map frame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>map</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">LandmarkMap</span></code>) – known landmark positions</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>transform from <code class="docutils literal notranslate"><span class="pre">map</span></code> to estimated map frame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>SE2 instance</p>
+</dd>
+</dl>
+<p>Uses a least squares technique to find the transform between the
+landmark is world frame and the estimated landmarks in the SLAM
+reference frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">points2tr2()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="particle-filter">
+<h3>Particle filter<a class="headerlink" href="#particle-filter" title="Permalink to this headline"></a></h3>
+<p>The particle filter is capable of map-based vehicle localization.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">ParticleFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nparticles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/ParticleFilter.html#ParticleFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nparticles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/ParticleFilter.html#ParticleFilter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Particle filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>robot</strong> (<a class="reference internal" href="mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleBase</span></code></a> subclass,) – robot motion model</p></li>
+<li><p><strong>sensor</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">SensorBase</span></code> subclass) – vehicle mounted sensor model</p></li>
+<li><p><strong>R</strong> (<em>ndarray</em><em>(</em><em>3</em><em>,</em><em>3</em><em>)</em>) – covariance of the zero-mean Gaussian noise added to the particles at each step (diffusion)</p></li>
+<li><p><strong>L</strong> (<em>ndarray</em><em>(</em><em>2</em><em>,</em><em>2</em><em>)</em>) – covariance used in the sensor likelihood model</p></li>
+<li><p><strong>nparticles</strong> (<em>int</em><em>, </em><em>optional</em>) – number of particles, defaults to 500</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – random number seed, defaults to 0</p></li>
+<li><p><strong>x0</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – initial state, defaults to [0, 0, 0]</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – display extra debug information, defaults to False</p></li>
+<li><p><strong>history</strong> (<em>bool</em><em>, </em><em>optional</em>) – retain step-by-step history, defaults to True</p></li>
+<li><p><strong>workspace</strong> (<em>scalar</em><em>, </em><em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>array_like</em><em>(</em><em>4</em><em>)</em>) – dimension of workspace, see <code class="xref py py-func docutils literal notranslate"><span class="pre">expand_dims()</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<p>This class implements a Monte-Carlo estimator or particle filter for
+vehicle state, based on odometry, a landmark map, and landmark
+observations.  The state of each particle is a possible vehicle
+configuration <span class="math notranslate nohighlight">\((x,y,      heta)\)</span>.  Bootstrap particle resampling is 
+used.</p>
+<p>The working area is defined by <code class="docutils literal notranslate"><span class="pre">workspace</span></code> or inherited from the
+landmark map attached to the <code class="docutils literal notranslate"><span class="pre">sensor</span></code> (see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">expand_dims()</span></code>):</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">workspace</span></code></p></th>
+<th class="head"><p>x-range</p></th>
+<th class="head"><p>y-range</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A (scalar)</p></td>
+<td><p>-A:A</p></td>
+<td><p>-A:A</p></td>
+</tr>
+<tr class="row-odd"><td><p>[A, B]</p></td>
+<td><p>A:B</p></td>
+<td><p>A:B</p></td>
+</tr>
+<tr class="row-even"><td><p>[A, B, C, D]</p></td>
+<td><p>A:B</p></td>
+<td><p>C:D</p></td>
+</tr>
+</tbody>
+</table>
+<p>Particles are initially distributed uniform randomly over this area.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)])</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">robot</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">(</span><span class="n">covar</span><span class="o">=</span><span class="n">V</span><span class="p">,</span> <span class="n">animation</span><span class="o">=</span><span class="s2">&quot;car&quot;</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">RandomPath</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="n">robot</span><span class="p">)</span>
+
+<span class="nb">map</span> <span class="o">=</span> <span class="n">LandmarkMap</span><span class="p">(</span><span class="n">nlandmarks</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="n">robot</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+
+<span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mi">1</span><span class="p">)])</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">sensor</span> <span class="o">=</span> <span class="n">RangeBearingSensor</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="n">W</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mi">1</span><span class="p">)])</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span>
+<span class="n">pf</span> <span class="o">=</span> <span class="n">ParticleFilter</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">sensor</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">nparticles</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+
+<span class="n">pf</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="nb">map</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">plot_xy</span><span class="p">()</span>
+<span class="n">pf</span><span class="o">.</span><span class="n">plot_xy</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pf</span><span class="o">.</span><span class="n">get_std</span><span class="p">()[:</span><span class="mi">100</span><span class="p">,:])</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">seed=0</span></code> to get different behaviour from run to run.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.ParticleFilter.run" title="roboticstoolbox.mobile.ParticleFilter.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.robot">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">robot</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.robot" title="Permalink to this definition"></a></dt>
+<dd><p>Get robot object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot used in simulation</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleBase</span></code></a> subclass</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.sensor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sensor</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.sensor" title="Permalink to this definition"></a></dt>
+<dd><p>Get sensor object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>sensor used in simulation</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">SensorBase</span></code> subclass</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.map">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">map</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.map" title="Permalink to this definition"></a></dt>
+<dd><p>Get map object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>map used in simulation</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">LandmarkMap</span></code> subclass</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.verbose">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.verbose" title="Permalink to this definition"></a></dt>
+<dd><p>Get verbosity state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>verbosity</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.history">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">history</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.history" title="Permalink to this definition"></a></dt>
+<dd><p>Get EKF simulation history</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>simulation history</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of namedtuples</p>
+</dd>
+</dl>
+<p>At each simulation timestep a namedtuple of is appended to the history
+list.  It contains, for that time step, estimated state and covariance,
+and sensor observation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.ParticleFilter.get_t" title="roboticstoolbox.mobile.ParticleFilter.get_t"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_t()</span></code></a> <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_xy()</span></code> <a class="reference internal" href="#roboticstoolbox.mobile.ParticleFilter.get_std" title="roboticstoolbox.mobile.ParticleFilter.get_std"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_std()</span></code></a> 
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get_Pnorm()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.workspace">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">workspace</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.workspace" title="Permalink to this definition"></a></dt>
+<dd><p>Size of robot workspace</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>workspace bounds [xmin, xmax, ymin, ymax]</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(4)</p>
+</dd>
+</dl>
+<p>Returns the bounds of the workspace as specified by constructor
+option <code class="docutils literal notranslate"><span class="pre">workspace</span></code></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.random">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.random" title="Permalink to this definition"></a></dt>
+<dd><p>Get private random number generator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>NumPy random number generator</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.22)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a></p>
+</dd>
+</dl>
+<p>Has methods including:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">integers(low,</span> <span class="pre">high,</span> <span class="pre">size,</span> <span class="pre">endpoint)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">random(size)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uniform</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">normal(mean,</span> <span class="pre">std,</span> <span class="pre">size)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">multivariate_normal(mean,</span> <span class="pre">covar,</span> <span class="pre">size)</span></code></p></li>
+</ul>
+<p>The generator is initialized with the seed provided at constructor
+time every time <code class="docutils literal notranslate"><span class="pre">init</span></code> is called.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/ParticleFilter.html#ParticleFilter.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.run" title="Permalink to this definition"></a></dt>
+<dd><p>Run the particle filter simulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>float</em>) – maximum simulation time in seconds</p></li>
+<li><p><strong>animate</strong> (<em>bool</em><em>, </em><em>optional</em>) – animate motion of vehicle, defaults to False</p></li>
+<li><p><strong>movie</strong> (<em>str</em><em>, </em><em>optional</em>) – name of movie file to create, defaults to None</p></li>
+</ul>
+</dd>
+</dl>
+<p>Simulates the motion of a vehicle (under the control of a driving agent)
+and the EKF estimator.  The steps are:</p>
+<ul>
+<li><p>initialize the filter, vehicle and vehicle driver agent, sensor</p></li>
+<li><p>for each time step:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>step the vehicle and its driver agent, obtain odometry</p></li>
+<li><p>take a sensor reading</p></li>
+<li><p>execute the EKF</p></li>
+<li><p>save information as a namedtuple to the history list for later display</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.ParticleFilter.history" title="roboticstoolbox.mobile.ParticleFilter.history"><code class="xref py py-meth docutils literal notranslate"><span class="pre">history()</span></code></a> <code class="xref py py-meth docutils literal notranslate"><span class="pre">landmark()</span></code> <code class="xref py py-meth docutils literal notranslate"><span class="pre">landmarks()</span></code> 
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get_xy()</span></code> <a class="reference internal" href="#roboticstoolbox.mobile.ParticleFilter.get_t" title="roboticstoolbox.mobile.ParticleFilter.get_t"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_t()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.ParticleFilter.get_std" title="roboticstoolbox.mobile.ParticleFilter.get_std"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_std()</span></code></a>
+<a class="reference internal" href="#roboticstoolbox.mobile.ParticleFilter.plot_xy" title="roboticstoolbox.mobile.ParticleFilter.plot_xy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_xy()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.plot_pdf">
+<span class="sig-name descname"><span class="pre">plot_pdf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/ParticleFilter.html#ParticleFilter.plot_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.plot_pdf" title="Permalink to this definition"></a></dt>
+<dd><p>Plot particle PDF</p>
+<p>Displays a discrete PDF of vehicle position.  Creates a 3D plot where
+the x- and y-axes are the estimated vehicle position and the z-axis is
+the particle weight.  Each particle is represented by a a vertical line
+segment of height equal to particle weight.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.get_t">
+<span class="sig-name descname"><span class="pre">get_t</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/ParticleFilter.html#ParticleFilter.get_t"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.get_t" title="Permalink to this definition"></a></dt>
+<dd><p>Get time from simulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>simulation time vector</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n)</p>
+</dd>
+</dl>
+<p>Return simulation time vector, starts at zero.  The timestep is an
+attribute of the <code class="docutils literal notranslate"><span class="pre">robot</span></code> object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.get_xyt">
+<span class="sig-name descname"><span class="pre">get_xyt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/ParticleFilter.html#ParticleFilter.get_xyt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.get_xyt" title="Permalink to this definition"></a></dt>
+<dd><p>Get estimated vehicle trajectory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>vehicle trajectory where each row is configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,3)</p>
+</dd>
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.ParticleFilter.plot_xy" title="roboticstoolbox.mobile.ParticleFilter.plot_xy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_xy()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.ParticleFilter.run" title="roboticstoolbox.mobile.ParticleFilter.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.ParticleFilter.history" title="roboticstoolbox.mobile.ParticleFilter.history"><code class="xref py py-meth docutils literal notranslate"><span class="pre">history()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.get_std">
+<span class="sig-name descname"><span class="pre">get_std</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/ParticleFilter.html#ParticleFilter.get_std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.get_std" title="Permalink to this definition"></a></dt>
+<dd><p>Get standard deviation of particles</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>standard deviation of vehicle position estimate</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(n,2)</p>
+</dd>
+</dl>
+<p>Return the standard deviation <span class="math notranslate nohighlight">\((\sigma_x, \sigma_y)\)</span> of the
+particle cloud at each time step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.ParticleFilter.get_xyt" title="roboticstoolbox.mobile.ParticleFilter.get_xyt"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_xyt()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter.plot_xy">
+<span class="sig-name descname"><span class="pre">plot_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/ParticleFilter.html#ParticleFilter.plot_xy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.ParticleFilter.plot_xy" title="Permalink to this definition"></a></dt>
+<dd><p>Plot estimated vehicle position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – position arguments passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.5.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></p></li>
+<li><p><strong>kwargs</strong> – keywords arguments passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.5.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></p></li>
+<li><p><strong>block</strong> (<em>bool</em><em>, </em><em>optional</em>) – hold plot until figure is closed, defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+<p>Plot the estimated vehicle path in the xy-plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_xy()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="sensor-models">
+<h2>Sensor models<a class="headerlink" href="#sensor-models" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">RangeBearingSensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poly_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.sensors.SensorBase</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poly_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Range and bearing angke sensor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>robot</strong> (<a class="reference internal" href="mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleBase</span></code></a> subclass) – model of robot carrying the sensor</p></li>
+<li><p><strong>map</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">LandmarkMap</span></code> instance) – map of landmarks</p></li>
+<li><p><strong>polygon</strong> (<em>dict</em><em>, </em><em>optional</em>) – polygon style for sensing region, see <code class="xref py py-class docutils literal notranslate"><span class="pre">plot_polygon</span></code>, defaults to None</p></li>
+<li><p><strong>covar</strong> (<em>ndarray</em><em>(</em><em>2</em><em>,</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – covariance matrix for sensor readings, defaults to None</p></li>
+<li><p><strong>range</strong> (<em>float</em><em> or </em><em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – maximum range <span class="math notranslate nohighlight">\(r_{max}\)</span> or range span <span class="math notranslate nohighlight">\([r_{min}, r_{max}]\)</span>, defaults to None</p></li>
+<li><p><strong>angle</strong> (<em>float</em><em>, </em><em>optional</em>) – angular field of view, from <span class="math notranslate nohighlight">\([-\theta, \theta]\)</span> defaults to None</p></li>
+<li><p><strong>plot</strong> (<em>bool</em><em>, </em><em>optional</em>) – [description], defaults to False</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – random number seed, defaults to 0</p></li>
+<li><p><strong>kwargs</strong> – arguments passed to <code class="xref py py-class docutils literal notranslate"><span class="pre">SensorBase</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<p>Sensor object that returns the range and bearing angle <span class="math notranslate nohighlight">\((r,
+\beta)\)</span> to a point landmark from a robot-mounted sensor.  The sensor
+measurements are corrupted with zero-mean Gaussian noise with covariance
+<code class="docutils literal notranslate"><span class="pre">covar</span></code>.</p>
+<p>The sensor can have a maximum range, or a minimum and maximum range. The
+sensor can also have a restricted angular field of view.</p>
+<p>The sensing region can be displayed by setting the polygon parameter
+which can show an outline or a filled polygon.  This is updated every
+time <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.reading" title="roboticstoolbox.mobile.RangeBearingSensor.reading"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reading()</span></code></a> is called, based on the current configuration of
+the <code class="docutils literal notranslate"><span class="pre">robot</span></code>.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">Bicycle</span><span class="p">,</span> <span class="n">LandmarkMap</span><span class="p">,</span> <span class="n">RangeBearingSensor</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">map</span> <span class="o">=</span> <span class="n">LandmarkMap</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sensor</span> <span class="o">=</span> <span class="n">RangeBearingSensor</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="n">angle</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sensor</span><span class="p">)</span>
+<span class="go">RangeBearingSensor sensor class</span>
+<span class="go">  LandmarkMap object with 20 landmarks, workspace=(-10.0: 10.0, -10.0: 10.0)</span>
+<span class="go">  W = [ 0, 0 | 0, 0 ]</span>
+<span class="go">  sampled every 1 samples</span>
+<span class="go">  range: (0.5: 20.0)</span>
+<span class="go">  angle: (-0.785: 0.785)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">LandmarkMap</span></code> <a class="reference internal" href="#roboticstoolbox.mobile.EKF" title="roboticstoolbox.mobile.EKF"><code class="xref py py-class docutils literal notranslate"><span class="pre">EKF</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.init">
+<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.init" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize sensor</p>
+<ul class="simple">
+<li><p>reseed the random number generator</p></li>
+<li><p>reset the counter for handling the <code class="docutils literal notranslate"><span class="pre">every</span></code> and <code class="docutils literal notranslate"><span class="pre">fail</span></code> options</p></li>
+<li><p>reset the landmark log</p></li>
+<li><p>initalize plots</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">SensorBase.init()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.W">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">W</span></span><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.W" title="Permalink to this definition"></a></dt>
+<dd><p>Get sensor covariance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>sensor covariance</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(2,2)</p>
+</dd>
+</dl>
+<p>Returns the value of the sensor covariance matrix passed to
+the constructor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.reading">
+<span class="sig-name descname"><span class="pre">reading</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.reading"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.reading" title="Permalink to this definition"></a></dt>
+<dd><p>Choose landmark and return observation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>range and bearing angle to a landmark, and landmark id</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(2), int</p>
+</dd>
+</dl>
+<p>Returns an observation of a random visible landmark (range, bearing) and
+the <code class="docutils literal notranslate"><span class="pre">id</span></code> of that landmark. The landmark is chosen randomly from the
+set of all visible landmarks, those within the angular field of view and
+range limit.</p>
+<p>If constructor argument <code class="docutils literal notranslate"><span class="pre">every</span></code> is set then only return a valid
+reading on every <code class="docutils literal notranslate"><span class="pre">every</span></code> calls.</p>
+<p>If constructor argument <code class="docutils literal notranslate"><span class="pre">fail</span></code> is set then do not return a reading
+during that specified time interval.</p>
+<p>If no valid reading is available then return (None, None)</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">Bicycle</span><span class="p">,</span> <span class="n">LandmarkMap</span><span class="p">,</span> <span class="n">RangeBearingSensor</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">map</span> <span class="o">=</span> <span class="n">LandmarkMap</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sensor</span> <span class="o">=</span> <span class="n">RangeBearingSensor</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="n">angle</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sensor</span><span class="o">.</span><span class="n">reading</span><span class="p">())</span>
+<span class="go">(array([ 7.2691, -0.039 ]), 16)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>Noise with covariance <code class="docutils literal notranslate"><span class="pre">W</span></code> (set by constructor) is added to the
+reading</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">animate</span></code> option is set then show a line from the vehicle to
+the landmark</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">animate</span></code> option set and the angular and distance limits
+are set then display the sensor field of view as a polygon.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.h" title="roboticstoolbox.mobile.RangeBearingSensor.h"><code class="xref py py-meth docutils literal notranslate"><span class="pre">h()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.visible">
+<span class="sig-name descname"><span class="pre">visible</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.visible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.visible" title="Permalink to this definition"></a></dt>
+<dd><p>List of all visible landmarks</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of visible landmarks</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of int</p>
+</dd>
+</dl>
+<p>Return a list of the id of all landmarks that are visible, that is, it
+lies with the sensing range and field of view of the sensor at the
+robot’s current configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.isvisible" title="roboticstoolbox.mobile.RangeBearingSensor.isvisible"><code class="xref py py-meth docutils literal notranslate"><span class="pre">isvisible()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.h" title="roboticstoolbox.mobile.RangeBearingSensor.h"><code class="xref py py-meth docutils literal notranslate"><span class="pre">h()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.isvisible">
+<span class="sig-name descname"><span class="pre">isvisible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.isvisible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.isvisible" title="Permalink to this definition"></a></dt>
+<dd><p>Test if landmark is visible</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>id</strong> (<em>int</em>) – landmark id</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>visibility</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+<p>The landmark <code class="docutils literal notranslate"><span class="pre">id</span></code> is visible if it lies with the sensing range and
+field of view of the sensor at the robot’s current configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.visible" title="roboticstoolbox.mobile.RangeBearingSensor.visible"><code class="xref py py-meth docutils literal notranslate"><span class="pre">visible()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.h" title="roboticstoolbox.mobile.RangeBearingSensor.h"><code class="xref py py-meth docutils literal notranslate"><span class="pre">h()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.h">
+<span class="sig-name descname"><span class="pre">h</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landmark</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.h"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.h" title="Permalink to this definition"></a></dt>
+<dd><p>Landmark observation function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>array_like</em><em>(</em><em>N</em><em>,</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>landmark</strong> (<em>int</em><em> or </em><em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – landmark id or position, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>range and bearing angle to landmark math:<cite>(r,beta)</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(2) or ndarray(N,2)</p>
+</dd>
+</dl>
+<p>Return the range and bearing to a landmark:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.h(x)</span></code> is range and bearing to all landmarks, one row per landmark</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.h(x,</span> <span class="pre">id)</span></code> is range and bearing to landmark <code class="docutils literal notranslate"><span class="pre">id</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.h(x,</span> <span class="pre">p)</span></code> is range and bearing to landmark with coordinates <code class="docutils literal notranslate"><span class="pre">p</span></code></p></li>
+</ul>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">Bicycle</span><span class="p">,</span> <span class="n">LandmarkMap</span><span class="p">,</span> <span class="n">RangeBearingSensor</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">map</span> <span class="o">=</span> <span class="n">LandmarkMap</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sensor</span> <span class="o">=</span> <span class="n">RangeBearingSensor</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="n">angle</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">sensor</span><span class="o">.</span><span class="n">h</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+<span class="go">[10.7111  1.4826]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Noise with covariance (property <code class="docutils literal notranslate"><span class="pre">W</span></code>) is added to each row of <code class="docutils literal notranslate"><span class="pre">z</span></code>.</p></li>
+<li><p>Performs fast vectorized operation where <code class="docutils literal notranslate"><span class="pre">x</span></code> is an ndarray(n,3).</p></li>
+<li><p>The landmark is assumed to be visible, field of view and range limits are not
+applied.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.reading" title="roboticstoolbox.mobile.RangeBearingSensor.reading"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reading()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.Hx" title="roboticstoolbox.mobile.RangeBearingSensor.Hx"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Hx()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.Hw" title="roboticstoolbox.mobile.RangeBearingSensor.Hw"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Hw()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.Hp" title="roboticstoolbox.mobile.RangeBearingSensor.Hp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Hp()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.Hx">
+<span class="sig-name descname"><span class="pre">Hx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landmark</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.Hx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.Hx" title="Permalink to this definition"></a></dt>
+<dd><p>Jacobian dh/dx</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>arg</strong> (<em>int</em><em> or </em><em>array_like</em><em>(</em><em>2</em><em>)</em>) – landmark id or coordinate</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Jacobian matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(2,3)</p>
+</dd>
+</dl>
+<p>Compute the Jacobian of the observation function with respect to vehicle
+configuration <span class="math notranslate nohighlight">\(\partial h/\partial x\)</span></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sensor.Hx(q,</span> <span class="pre">id)</span></code> is Jacobian for landmark <code class="docutils literal notranslate"><span class="pre">id</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sensor.h(q,</span> <span class="pre">p)</span></code> is Jacobian for landmark with coordinates <code class="docutils literal notranslate"><span class="pre">p</span></code></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.h" title="roboticstoolbox.mobile.RangeBearingSensor.h"><code class="xref py py-meth docutils literal notranslate"><span class="pre">h()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.Hp" title="roboticstoolbox.mobile.RangeBearingSensor.Hp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Hp()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.Hw" title="roboticstoolbox.mobile.RangeBearingSensor.Hw"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Hw()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.Hp">
+<span class="sig-name descname"><span class="pre">Hp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landmark</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.Hp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.Hp" title="Permalink to this definition"></a></dt>
+<dd><p>Jacobian dh/dp</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>arg</strong> (<em>int</em><em> or </em><em>array_like</em><em>(</em><em>2</em><em>)</em>) – landmark id or coordinate</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Jacobian matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(2,2)</p>
+</dd>
+</dl>
+<p>Compute the Jacobian of the observation function with respect
+to landmark position <span class="math notranslate nohighlight">\(\partial h/\partial p\)</span></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sensor.Hp(x,</span> <span class="pre">id)</span></code> is Jacobian for landmark <code class="docutils literal notranslate"><span class="pre">id</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sensor.Hp(x,</span> <span class="pre">p)</span></code> is Jacobian for landmark with coordinates <code class="docutils literal notranslate"><span class="pre">p</span></code></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.h" title="roboticstoolbox.mobile.RangeBearingSensor.h"><code class="xref py py-meth docutils literal notranslate"><span class="pre">h()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.Hx" title="roboticstoolbox.mobile.RangeBearingSensor.Hx"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Hx()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.Hw" title="roboticstoolbox.mobile.RangeBearingSensor.Hw"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Hw()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.Hw">
+<span class="sig-name descname"><span class="pre">Hw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landmark</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.Hw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.Hw" title="Permalink to this definition"></a></dt>
+<dd><p>Jacobian dh/dw</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>arg</strong> (<em>int</em><em> or </em><em>array_like</em><em>(</em><em>2</em><em>)</em>) – landmark id or coordinate</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Jacobian matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(2,2)</p>
+</dd>
+</dl>
+<p>Compute the Jacobian of the observation function with respect
+to sensor noise <span class="math notranslate nohighlight">\(\partial h/\partial w\)</span></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sensor.Hw(x,</span> <span class="pre">id)</span></code> is Jacobian for landmark <code class="docutils literal notranslate"><span class="pre">id</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sensor.Hw(x,</span> <span class="pre">p)</span></code> is Jacobian for landmark with coordinates <code class="docutils literal notranslate"><span class="pre">p</span></code></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">landmark</span></code> are not used to compute this.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.h" title="roboticstoolbox.mobile.RangeBearingSensor.h"><code class="xref py py-meth docutils literal notranslate"><span class="pre">h()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.Hx" title="roboticstoolbox.mobile.RangeBearingSensor.Hx"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Hx()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.Hp" title="roboticstoolbox.mobile.RangeBearingSensor.Hp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Hp()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.g">
+<span class="sig-name descname"><span class="pre">g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.g" title="Permalink to this definition"></a></dt>
+<dd><p>Landmark position from sensor observation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>z</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – landmark observation <span class="math notranslate nohighlight">\((r, \beta)\)</span></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>landmark position <span class="math notranslate nohighlight">\((x, y)\)</span></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>Compute the world coordinate  of a landmark given
+the observation <code class="docutils literal notranslate"><span class="pre">z</span></code> from a vehicle state with <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.h" title="roboticstoolbox.mobile.RangeBearingSensor.h"><code class="xref py py-meth docutils literal notranslate"><span class="pre">h()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.Gx" title="roboticstoolbox.mobile.RangeBearingSensor.Gx"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Gx()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.Gz" title="roboticstoolbox.mobile.RangeBearingSensor.Gz"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Gz()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.Gx">
+<span class="sig-name descname"><span class="pre">Gx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.Gx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.Gx" title="Permalink to this definition"></a></dt>
+<dd><p>Jacobian dg/dx</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>z</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – landmark observation <span class="math notranslate nohighlight">\((r, \beta)\)</span></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Jacobian matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(2,3)</p>
+</dd>
+</dl>
+<p>Compute the Jacobian of the landmark position function with respect
+to landmark position <span class="math notranslate nohighlight">\(\partial g/\partial x\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.g" title="roboticstoolbox.mobile.RangeBearingSensor.g"><code class="xref py py-meth docutils literal notranslate"><span class="pre">g()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.Gz">
+<span class="sig-name descname"><span class="pre">Gz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.Gz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.Gz" title="Permalink to this definition"></a></dt>
+<dd><p>Jacobian dg/dz</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>z</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – landmark observation <span class="math notranslate nohighlight">\((r, \beta)\)</span></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Jacobian matrix</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(2,2)</p>
+</dd>
+</dl>
+<p>Compute the Jacobian of the landmark position function with respect
+to sensor observation <span class="math notranslate nohighlight">\(\partial g/\partial z\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.g" title="roboticstoolbox.mobile.RangeBearingSensor.g"><code class="xref py py-meth docutils literal notranslate"><span class="pre">g()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.map">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">map</span></span><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.map" title="Permalink to this definition"></a></dt>
+<dd><p>Landmark map associated with sensor (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">LandmarkMap</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Plot sensor observation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>id</strong> (<em>int</em>) – landmark id</p>
+</dd>
+</dl>
+<p>Draws a line from the robot to landmark <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The line is drawn using the <code class="docutils literal notranslate"><span class="pre">line_style</span></code> given at constructor time</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.random">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.random" title="Permalink to this definition"></a></dt>
+<dd><p>Get private random number generator (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>NumPy random number generator</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.22)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a></p>
+</dd>
+</dl>
+<p>Has methods including:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.integers.html#numpy.random.Generator.integers" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integers(low,</span> <span class="pre">high,</span> <span class="pre">size,</span> <span class="pre">endpoint)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.random.html#numpy.random.Generator.random" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">random(size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.uniform.html#numpy.random.Generator.uniform" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform(low,</span> <span class="pre">high,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.normal.html#numpy.random.Generator.normal" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">normal(mean,</span> <span class="pre">std,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.multivariate_normal.html#numpy.random.Generator.multivariate_normal" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">multivariate_normal(mean,</span> <span class="pre">covar,</span> <span class="pre">size)</span></code></a></p></li>
+</ul>
+</div></blockquote>
+<p>The generator is initialized with the seed provided at constructor
+time every time <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.init" title="roboticstoolbox.mobile.RangeBearingSensor.init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">init()</span></code></a> is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor.init" title="roboticstoolbox.mobile.RangeBearingSensor.init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">init()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.robot">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">robot</span></span><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.robot" title="Permalink to this definition"></a></dt>
+<dd><p>Robot associated with sensor (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>robot</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleBase</span></code></a> subclass</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.verbose">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.verbose" title="Permalink to this definition"></a></dt>
+<dd><p>Get verbosity state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>verbosity</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-roboticstoolbox.mobile.landmarkmap">
+<span id="map-models"></span><h2>Map models<a class="headerlink" href="#module-roboticstoolbox.mobile.landmarkmap" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.landmarkmap.LandmarkMap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.landmarkmap.</span></span><span class="sig-name descname"><span class="pre">LandmarkMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/landmarkmap.html#LandmarkMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.landmarkmap.LandmarkMap" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Map of planar point landmarks</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>map</strong> (<em>ndarray</em><em>(</em><em>2</em><em>, </em><em>N</em><em>) or </em><em>int</em>) – map or number of landmarks</p></li>
+<li><p><strong>workspace</strong> (<em>scalar</em><em>, </em><em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>array_like</em><em>(</em><em>4</em><em>)</em><em>, </em><em>optional</em>) – workspace or map bounds, defaults to 10</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – display debug information, defaults to True</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – random number seed, defaults to 0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a landmark map object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.landmarkmap.LandmarkMap" title="roboticstoolbox.mobile.landmarkmap.LandmarkMap">LandmarkMap</a></p>
+</dd>
+</dl>
+<p>A LandmarkMap object represents a rectangular 2D environment with a number
+of point landmarks.</p>
+<p>The landmarks can be specified explicitly or be uniform randomly positioned
+inside a region defined by the workspace.  The workspace can be numeric:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">workspace</span></code></p></th>
+<th class="head"><p>x-range</p></th>
+<th class="head"><p>y-range</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A (scalar)</p></td>
+<td><p>-A:A</p></td>
+<td><p>-A:A</p></td>
+</tr>
+<tr class="row-odd"><td><p>[A, B]</p></td>
+<td><p>A:B</p></td>
+<td><p>A:B</p></td>
+</tr>
+<tr class="row-even"><td><p>[A, B, C, D]</p></td>
+<td><p>A:B</p></td>
+<td><p>C:D</p></td>
+</tr>
+</tbody>
+</table>
+<p>or any object that has a <code class="docutils literal notranslate"><span class="pre">workspace</span></code> attribute.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">LandmarkMap</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">map</span> <span class="o">=</span> <span class="n">LandmarkMap</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">map</span><span class="p">)</span>
+<span class="go">LandmarkMap object with 20 landmarks, workspace=(-10.0: 10.0, -10.0: 10.0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">map</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># coordinates of landmark 3</span>
+<span class="go">[-9.6694  2.9438]</span>
+</pre></div>
+</div>
+<p>The object is an iterator that returns consecutive landmark coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Reference</dt>
+<dd class="field-odd"><p>Robotics, Vision &amp; Control, Chap 6,
+Peter Corke,
+Springer 2011</p>
+</dd>
+</dl>
+<p>See also <a class="reference internal" href="#roboticstoolbox.mobile.RangeBearingSensor" title="roboticstoolbox.mobile.sensors.RangeBearingSensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">RangeBearingSensor</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.EKF" title="roboticstoolbox.mobile.EKF"><code class="xref py py-class docutils literal notranslate"><span class="pre">EKF</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.landmarkmap.LandmarkMap.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/landmarkmap.html#LandmarkMap.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.landmarkmap.LandmarkMap.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.landmarkmap.LandmarkMap.landmarks">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">landmarks</span></span><a class="headerlink" href="#roboticstoolbox.mobile.landmarkmap.LandmarkMap.landmarks" title="Permalink to this definition"></a></dt>
+<dd><p>xy-coordinates of all landmarks</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>xy-coordinates for landmark points</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(2, n)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.landmarkmap.LandmarkMap.workspace">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">workspace</span></span><a class="headerlink" href="#roboticstoolbox.mobile.landmarkmap.LandmarkMap.workspace" title="Permalink to this definition"></a></dt>
+<dd><p>Size of map workspace</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>workspace bounds [xmin, xmax, ymin, ymax]</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ndarray(4)</p>
+</dd>
+</dl>
+<p>Returns the bounds of the workspace as specified by constructor
+option <code class="docutils literal notranslate"><span class="pre">workspace</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.landmarkmap.LandmarkMap.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/landmarkmap.html#LandmarkMap.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.landmarkmap.LandmarkMap.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Plot landmark map</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>labels</strong> (<em>bool</em><em>, </em><em>optional</em>) – number the points on the plot, defaults to False</p></li>
+<li><p><strong>block</strong> (<em>bool</em><em>, </em><em>optional</em>) – block until figure is closed, defaults to False</p></li>
+<li><p><strong>kwargs</strong> – <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.5.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a> options</p></li>
+</ul>
+</dd>
+</dl>
+<p>Plot landmark points using Matplotlib options.  Default style is black
+crosses.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mobile_planner.html" class="btn btn-neutral float-left" title="Mobile robot path planning" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="blocks.html" class="btn btn-neutral float-right" title="bdsim blocks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 19-May-2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

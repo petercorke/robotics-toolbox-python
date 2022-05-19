@@ -11,6 +11,7 @@ and state estimation.
 
    mobile_vehicle
    mobile_vehicle_animation
+   mobile_drivers
    mobile_reactive
    mobile_planner
-   mobile_EKF
+   mobile_SLAM

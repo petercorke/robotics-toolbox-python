@@ -70,11 +70,11 @@
              
   <h1>Source code for roboticstoolbox.robot.Robot</h1><div class="highlight"><pre>
 <span></span><span class="c1"># import sys</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractproperty</span>
-<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">abstractproperty</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
-<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span><span class="p">,</span> <span class="n">SE2</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">isvector</span><span class="p">,</span>
     <span class="n">getvector</span><span class="p">,</span>
@@ -82,11 +82,26 @@
     <span class="n">getunit</span><span class="p">,</span>
     <span class="n">verifymatrix</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">import</span> <span class="nn">spatialmath.base</span> <span class="k">as</span> <span class="nn">smb</span>
 <span class="kn">from</span> <span class="nn">ansitable</span> <span class="kn">import</span> <span class="n">ANSITable</span><span class="p">,</span> <span class="n">Column</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot</span> <span class="kn">import</span> <span class="n">PyPlot</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot.EllipsePlot</span> <span class="kn">import</span> <span class="n">EllipsePlot</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Dynamics</span> <span class="kn">import</span> <span class="n">DynamicsMixin</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ETS</span> <span class="kn">import</span> <span class="n">ETS</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.IK</span> <span class="kn">import</span> <span class="n">IKMixin</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">spatialgeometry</span> <span class="kn">import</span> <span class="n">Shape</span>
+<span class="kn">from</span> <span class="nn">fknm</span> <span class="kn">import</span> <span class="n">Robot_link_T</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
+<span class="kn">from</span> <span class="nn">spatialgeometry</span> <span class="kn">import</span> <span class="n">SceneNode</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Link</span> <span class="kn">import</span> <span class="n">BaseLink</span><span class="p">,</span> <span class="n">Link</span>
+
+<span class="c1"># from numpy import all, eye, isin</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Gripper</span> <span class="kn">import</span> <span class="n">Gripper</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="c1"># import scipy as sp</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">colors</span>
@@ -98,11 +113,13 @@
 
 <span class="n">_default_backend</span> <span class="o">=</span> <span class="kc">None</span>
 
+<span class="n">ArrayLike</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">]</span>
+
 <span class="c1"># TODO maybe this needs to be abstract</span>
 <span class="c1"># ikine functions need: fkine, jacobe, qlim methods from subclass</span>
 
 
-<div class="viewcode-block" id="Robot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot">[docs]</a><span class="k">class</span> <span class="nc">Robot</span><span class="p">(</span><span class="n">ABC</span><span class="p">,</span> <span class="n">DynamicsMixin</span><span class="p">,</span> <span class="n">IKMixin</span><span class="p">):</span>
+<div class="viewcode-block" id="Robot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot">[docs]</a><span class="k">class</span> <span class="nc">Robot</span><span class="p">(</span><span class="n">SceneNode</span><span class="p">,</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">DynamicsMixin</span><span class="p">,</span> <span class="n">IKMixin</span><span class="p">):</span>
 
     <span class="n">_color</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -112,23 +129,25 @@
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;noname&quot;</span><span class="p">,</span>
         <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="n">base</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">base</span><span class="o">=</span><span class="n">SE3</span><span class="p">(),</span>
+        <span class="n">tool</span><span class="o">=</span><span class="n">SE3</span><span class="p">(),</span>
         <span class="n">gravity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">keywords</span><span class="o">=</span><span class="p">(),</span>
         <span class="n">symbolic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">configs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span> <span class="o">=</span> <span class="n">manufacturer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">symbolic</span> <span class="o">=</span> <span class="n">symbolic</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tool</span> <span class="o">=</span> <span class="n">tool</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reach</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">base</span>
 
-        <span class="c1"># if base is None:</span>
-        <span class="c1">#     self.base = SE3()</span>
+        <span class="c1"># Initialise the scene node</span>
+        <span class="n">SceneNode</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_T</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">A</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tool</span> <span class="o">=</span> <span class="n">tool</span>
 
         <span class="k">if</span> <span class="n">keywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keywords</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;keywords must be a list or tuple&quot;</span><span class="p">)</span>
@@ -150,7 +169,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_hascollision</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">Link</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">BaseLink</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;links should all be Link subclass&quot;</span><span class="p">)</span>
 
             <span class="c1"># add link back to roboto</span>
@@ -163,9 +182,10 @@
             <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_hascollision</span> <span class="o">=</span> <span class="kc">True</span>
 
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ELink</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">Link</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_hasgeometry</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_links</span> <span class="o">=</span> <span class="n">links</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nlinks</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">links</span><span class="p">)</span>
 
@@ -174,31 +194,72 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">qd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">qdd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">control_type</span> <span class="o">=</span> <span class="s2">&quot;v&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_configdict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">control_mode</span> <span class="o">=</span> <span class="s2">&quot;v&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_dynchanged</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="c1"># URDF Parser Attempt</span>
-        <span class="c1"># # Search mesh dir for meshes</span>
-        <span class="c1"># if urdfdir is not None:</span>
-        <span class="c1">#     # Parse the URDF to obtain file paths and scales</span>
-        <span class="c1">#     data = self._get_stl_file_paths_and_scales(urdfdir)</span>
-        <span class="c1">#     # Obtain the base mesh</span>
-        <span class="c1">#     self.basemesh = [data[0][0], data[1][0], data[2][0]]</span>
-        <span class="c1">#     # Save the respective meshes to each link</span>
-        <span class="c1">#     for idx in range(1, self.n+1):</span>
-        <span class="c1">#         self._links[idx-1].mesh = [data[0][idx], data[1][idx],</span>
-        <span class="c1">#         data[2][idx]]</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     self.basemesh = None</span>
+        <span class="c1"># Set up named configuration property</span>
+        <span class="k">if</span> <span class="n">configs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">configs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configs</span> <span class="o">=</span> <span class="n">configs</span>
 
 <div class="viewcode-block" id="Robot.copy"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+
+        <span class="n">links</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
+            <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">link</span><span class="p">))</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">manufacturer</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manufacturer</span><span class="p">)</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comment</span><span class="p">)</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
+        <span class="n">tool</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tool</span><span class="p">)</span>
+        <span class="n">gravity</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
+        <span class="n">keywords</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">)</span>
+        <span class="n">symbolic</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolic</span><span class="p">)</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">)</span>
+
+        <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">links</span><span class="o">=</span><span class="n">links</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">manufacturer</span><span class="o">=</span><span class="n">manufacturer</span><span class="p">,</span>
+            <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span>
+            <span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">,</span>
+            <span class="n">tool</span><span class="o">=</span><span class="n">tool</span><span class="p">,</span>
+            <span class="n">gravity</span><span class="o">=</span><span class="n">gravity</span><span class="p">,</span>
+            <span class="n">keywords</span><span class="o">=</span><span class="n">keywords</span><span class="p">,</span>
+            <span class="n">symbolic</span><span class="o">=</span><span class="n">symbolic</span><span class="p">,</span>
+            <span class="n">configs</span><span class="o">=</span><span class="n">configs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># if a configuration was an attribute of original robot, make it an</span>
+        <span class="c1"># attribute of the deep copy</span>
+        <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">configs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">configs</span><span class="p">[</span><span class="n">config</span><span class="p">])</span>
+
+        <span class="n">memo</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)]</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">result</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_iter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iter</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">):</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_iter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_iter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">link</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
 
 <div class="viewcode-block" id="Robot.__getitem__"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -222,15 +283,7 @@
 <span class="sd">        .. note:: ``ERobot`` supports link lookup by name,</span>
 <span class="sd">            eg. ``robot[&#39;link1&#39;]``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">link_dict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;link </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> not in link dictionary&quot;</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;robot has no link dictionary&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
 
     <span class="c1"># URDF Parser Attempt</span>
     <span class="c1"># @staticmethod</span>
@@ -318,6 +371,10 @@
 <span class="sd">        :seealso: :func:`n`, :func:`nbranches`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nlinks</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">configs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configs</span>
 
     <span class="nd">@abstractproperty</span>
     <span class="k">def</span> <span class="nf">nbranches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -449,7 +506,40 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_default_backend</span> <span class="o">=</span> <span class="n">be</span>
 
-<div class="viewcode-block" id="Robot.addconfiguration"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.addconfiguration">[docs]</a>    <span class="k">def</span> <span class="nf">addconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;rad&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Robot.addconfiguration_attr"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.addconfiguration_attr">[docs]</a>    <span class="k">def</span> <span class="nf">addconfiguration_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rad&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a named joint configuration as an attribute (Robot superclass)</span>
+
+<span class="sd">        :param name: Name of the joint configuration</span>
+<span class="sd">        :param q: Joint configuration</span>
+<span class="sd">        :type q: Arraylike</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">            &gt;&gt;&gt; robot = rtb.models.DH.Puma560()</span>
+<span class="sd">            &gt;&gt;&gt; robot.addconfiguration_attr(&quot;mypos&quot;, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])</span>
+<span class="sd">            &gt;&gt;&gt; robot.mypos</span>
+<span class="sd">            &gt;&gt;&gt; robot.configs[&quot;mypos&quot;]</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - Used in robot model init method to store the ``qr`` configuration</span>
+<span class="sd">            - Dynamically adding attributes to objects can cause issues with</span>
+<span class="sd">              Python type checking.</span>
+<span class="sd">            - Configuration is also added to the robot instance&#39;s dictionary of</span>
+<span class="sd">              named configurations.</span>
+
+<span class="sd">        :seealso: :meth:`addconfiguration`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">getunit</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Robot.addconfiguration"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.addconfiguration">[docs]</a>    <span class="k">def</span> <span class="nf">addconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a named joint configuration (Robot superclass)</span>
 
@@ -458,22 +548,23 @@
 <span class="sd">        :param q: Joint configuration</span>
 <span class="sd">        :type q: ndarray(n) or list</span>
 
+<span class="sd">        Add a named configuration to the robot instance&#39;s dictionary of named</span>
+<span class="sd">        configurations.</span>
+
 <span class="sd">        Example:</span>
 
 <span class="sd">        .. runblock:: pycon</span>
 
 <span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
 <span class="sd">            &gt;&gt;&gt; robot = rtb.models.DH.Puma560()</span>
-<span class="sd">            &gt;&gt;&gt; robot.qz</span>
-<span class="sd">            &gt;&gt;&gt; robot.addconfiguration(&quot;mypos&quot;, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])</span>
-<span class="sd">            &gt;&gt;&gt; robot.mypos</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="n">getunit</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_configdict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span></div>
+<span class="sd">            &gt;&gt;&gt; robot.addconfiguration_attr(&quot;mypos&quot;, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])</span>
+<span class="sd">            &gt;&gt;&gt; robot.configs[&quot;mypos&quot;]</span>
 
-<div class="viewcode-block" id="Robot.configurations_str"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.configurations_str">[docs]</a>    <span class="k">def</span> <span class="nf">configurations_str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="sd">        :seealso: :meth:`addconfiguration`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_configs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span></div>
+
+<div class="viewcode-block" id="Robot.configurations_str"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.configurations_str">[docs]</a>    <span class="k">def</span> <span class="nf">configurations_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span><span class="p">):</span>
         <span class="n">deg</span> <span class="o">=</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
 
         <span class="c1"># TODO: factor this out of DHRobot</span>
@@ -489,17 +580,17 @@
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">theta</span> <span class="o">*</span> <span class="n">deg</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\u00b0</span><span class="s2">&quot;</span>
 
         <span class="c1"># show named configurations</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_configdict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_configs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">table</span> <span class="o">=</span> <span class="n">ANSITable</span><span class="p">(</span>
                 <span class="n">Column</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&gt;&quot;</span><span class="p">),</span>
                 <span class="o">*</span><span class="p">[</span>
                     <span class="n">Column</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;q</span><span class="si">{</span><span class="n">j</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">colalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">headalign</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
                 <span class="p">],</span>
-                <span class="n">border</span><span class="o">=</span><span class="s2">&quot;thin&quot;</span><span class="p">,</span>
+                <span class="n">border</span><span class="o">=</span><span class="n">border</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configdict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_configs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">qlist</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
@@ -914,7 +1005,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">w</span></div>
 
-<div class="viewcode-block" id="Robot.jacob_dot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.jacob_dot">[docs]</a>    <span class="k">def</span> <span class="nf">jacob_dot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Robot.jacob0_dot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.jacob0_dot">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0_dot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">representation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Derivative of Jacobian</span>
 
@@ -924,15 +1015,37 @@
 <span class="sd">        :type qd: ndarray(n)</span>
 <span class="sd">        :param J0: Jacobian in {0} frame</span>
 <span class="sd">        :type J0: ndarray(6,n)</span>
+<span class="sd">        :param representation: angular representation</span>
+<span class="sd">        :type representation: str</span>
 <span class="sd">        :return: The derivative of the manipulator Jacobian</span>
 <span class="sd">        :rtype:  ndarray(6,n)</span>
 
 <span class="sd">        ``robot.jacob_dot(q, qd)`` computes the rate of change of the</span>
-<span class="sd">        Jacobian elements.  If ``J0`` is already calculated for the joint</span>
+<span class="sd">        Jacobian elements</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \dmat{J} = \frac{d \mat{J}}{d \vec{q}} \frac{d \vec{q}}{dt}</span>
+
+<span class="sd">        where the first term is the rank-3 Hessian.</span>
+
+<span class="sd">         If ``J0`` is already calculated for the joint</span>
 <span class="sd">        coordinates ``q`` it can be passed in to to save computation time.</span>
 
 <span class="sd">        It is computed as the mode-3 product of the Hessian tensor and the</span>
 <span class="sd">        velocity vector.</span>
+
+<span class="sd">        The derivative of an analytical Jacobian can be obtained by setting</span>
+<span class="sd">        ``representation`` as</span>
+
+<span class="sd">        ==================   ==================================</span>
+<span class="sd">        ``representation``          Rotational representation</span>
+<span class="sd">        ==================   ==================================</span>
+<span class="sd">        ``&#39;rpy/xyz&#39;``        RPY angular rates in XYZ order</span>
+<span class="sd">        ``&#39;rpy/zyx&#39;``        RPY angular rates in XYZ order</span>
+<span class="sd">        ``&#39;eul&#39;``            Euler angular rates in ZYZ order</span>
+<span class="sd">        ``&#39;exp&#39;``            exponential coordinate rates</span>
+<span class="sd">        ==================   ==================================</span>
 
 <span class="sd">        :references:</span>
 <span class="sd">            - Kinematic Derivatives using the Elementary Transform</span>
@@ -940,17 +1053,40 @@
 
 <span class="sd">        :seealso: :func:`jacob0`, :func:`hessian0`</span>
 <span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">J0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">J0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-        <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J0</span><span class="p">)</span>
+        <span class="c1"># n = len(q)</span>
 
-        <span class="c1"># Jd = H qd using mode 3 product</span>
-        <span class="n">Jd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">Jd</span> <span class="o">+=</span> <span class="n">H</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">qd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">representation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
-        <span class="k">return</span> <span class="n">Jd</span></div>
+            <span class="k">if</span> <span class="n">J0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">J0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian0</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="n">J0</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># # determine analytic rotation</span>
+            <span class="c1"># T = self.fkine(q).A</span>
+            <span class="c1"># gamma = smb.r2x(smb.t2r(T), representation=representation)</span>
+
+            <span class="c1"># # get transformation angular velocity to analytic velocity</span>
+            <span class="c1"># Ai = smb.rotvelxform(</span>
+            <span class="c1">#     gamma, representation=representation, inverse=True, full=True</span>
+            <span class="c1"># )</span>
+
+            <span class="c1"># # get analytic rate from joint rates</span>
+            <span class="c1"># omega = J0[3:, :] @ qd</span>
+            <span class="c1"># gamma_dot = Ai[3:, 3:] @ omega</span>
+            <span class="c1"># Ai_dot = smb.rotvelxform_inv_dot(gamma, gamma_dot, full=True)</span>
+            <span class="c1"># Ai_dot = sp.linalg.block_diag(np.zeros((3, 3)), Ai_dot)</span>
+
+            <span class="c1"># Jd = Ai_dot @ J0 + Ai @ Jd</span>
+
+            <span class="c1"># not actually sure this can be written in closed form</span>
+
+            <span class="n">H</span> <span class="o">=</span> <span class="n">smb</span><span class="o">.</span><span class="n">numhess</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">q</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">jacob0_analytical</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">representation</span><span class="o">=</span><span class="n">representation</span><span class="p">),</span> <span class="n">q</span>
+            <span class="p">)</span>
+            <span class="c1"># Jd = Ai @ Jd</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Robot.jacobm"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.jacobm">[docs]</a>    <span class="k">def</span> <span class="nf">jacobm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -1023,16 +1159,72 @@
         <span class="n">manipulability</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="n">J</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
 
         <span class="n">J</span> <span class="o">=</span> <span class="n">J</span><span class="p">[</span><span class="n">axes</span><span class="p">,</span> <span class="p">:]</span>
-        <span class="n">H</span> <span class="o">=</span> <span class="n">H</span><span class="p">[</span><span class="n">axes</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">H</span><span class="p">[:,</span> <span class="n">axes</span><span class="p">,</span> <span class="p">:]</span>
 
         <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">J</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">J</span><span class="p">))</span>
         <span class="n">Jm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">c</span> <span class="o">=</span> <span class="n">J</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">H</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">])</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">J</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">H</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
             <span class="n">Jm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">manipulability</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="s2">&quot;F&quot;</span><span class="p">))</span> <span class="o">@</span> <span class="n">b</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Jm</span></div>
+
+<div class="viewcode-block" id="Robot.ets"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.ets">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">ets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ETS</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Robot.jacob0_analytical"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.jacob0_analytical">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0_analytical</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">q</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+        <span class="n">representation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rpy/xyz&quot;</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Link</span><span class="p">,</span> <span class="n">Gripper</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Link</span><span class="p">,</span> <span class="n">Gripper</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Manipulator analytical Jacobian in the ``start`` frame</span>
+
+<span class="sd">        :param q: Joint coordinate vector</span>
+<span class="sd">        :type q: Arraylike</span>
+<span class="sd">        :param representation: angular representation</span>
+<span class="sd">        :type representation: str</span>
+<span class="sd">        :param end: the particular link or gripper whose velocity the Jacobian</span>
+<span class="sd">            describes, defaults to the base link</span>
+<span class="sd">        :param start: the link considered as the end-effector, defaults to the robots&#39;s end-effector</span>
+<span class="sd">        :param tool: a static tool transformation matrix to apply to the</span>
+<span class="sd">            end of end, defaults to None</span>
+
+<span class="sd">        :return J: Manipulator Jacobian in the ``start`` frame</span>
+
+<span class="sd">        - ``robot.jacob0_analytical(q)`` is the manipulator Jacobian matrix which maps</span>
+<span class="sd">          joint  velocity to end-effector spatial velocity expressed in the</span>
+<span class="sd">          ``start`` frame.</span>
+
+<span class="sd">        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`</span>
+<span class="sd">        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.</span>
+
+<span class="sd">        ==================   ==================================</span>
+<span class="sd">        ``representation``          Rotational representation</span>
+<span class="sd">        ==================   ==================================</span>
+<span class="sd">        ``&#39;rpy/xyz&#39;``        RPY angular rates in XYZ order</span>
+<span class="sd">        ``&#39;rpy/zyx&#39;``        RPY angular rates in XYZ order</span>
+<span class="sd">        ``&#39;eul&#39;``            Euler angular rates in ZYZ order</span>
+<span class="sd">        ``&#39;exp&#39;``            exponential coordinate rates</span>
+<span class="sd">        ==================   ==================================</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">        .. runblock:: pycon</span>
+<span class="sd">            &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">            &gt;&gt;&gt; puma = rtb.models.ETS.Puma560()</span>
+<span class="sd">            &gt;&gt;&gt; puma.jacob0_analytical([0, 0, 0, 0, 0, 0])</span>
+
+<span class="sd">        .. warning:: ``start`` and ``end`` must be on the same branch,</span>
+<span class="sd">            with ``start`` closest to the base.</span>
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span><span class="o">.</span><span class="n">jacob0_analytical</span><span class="p">(</span>
+            <span class="n">q</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="n">tool</span><span class="p">,</span> <span class="n">representation</span><span class="o">=</span><span class="n">representation</span>
+        <span class="p">)</span></div>
 
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
@@ -1095,49 +1287,35 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">base</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">base</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SE3</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot base transform (Robot superclass)</span>
 
 <span class="sd">        - ``robot.base`` is the robot base transform</span>
 
 <span class="sd">        :return: robot tool transform</span>
-<span class="sd">        :rtype: SE3 instance</span>
 
 <span class="sd">        - ``robot.base = ...`` checks and sets the robot base transform</span>
 
-<span class="sd">        .. note:: The private attribute ``_base`` will be None in the case of</span>
-<span class="sd">            no base transform, but this property will return ``SE3()`` which</span>
-<span class="sd">            is an identity matrix.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot2</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">SE2</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">()</span>
 
         <span class="c1"># return a copy, otherwise somebody with</span>
         <span class="c1"># reference to the base can change it</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># This now returns the Scene Node transform</span>
+        <span class="c1"># self._T is a copy of SceneNode.__T</span>
+        <span class="k">return</span> <span class="n">SE3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="nd">@base</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">base</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
-        <span class="c1"># if not isinstance(T, SE3):</span>
-        <span class="c1">#     T = SE3(T)</span>
-        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">T</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot2</span><span class="p">):</span>
-            <span class="c1"># 2D robot</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">SE2</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">T</span>
-            <span class="k">elif</span> <span class="n">SE2</span><span class="o">.</span><span class="n">isvalid</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="o">=</span> <span class="n">SE2</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">Robot</span><span class="p">):</span>
-            <span class="c1"># all other 3D robots</span>
+    <span class="k">def</span> <span class="nf">base</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">]):</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">Robot</span><span class="p">):</span>
+            <span class="c1"># All 3D robots</span>
+            <span class="c1"># Set the SceneNode T</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_base</span> <span class="o">=</span> <span class="n">T</span>
-            <span class="k">elif</span> <span class="n">SE3</span><span class="o">.</span><span class="n">isvalid</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_T</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">A</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_T</span> <span class="o">=</span> <span class="n">T</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;base must be set to None (no tool), SE2, or SE3&quot;</span><span class="p">)</span>
@@ -1145,38 +1323,25 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">tool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">tool</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SE3</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot tool transform (Robot superclass)</span>
 
-<span class="sd">        - ``robot.tool`` is the robot name</span>
+<span class="sd">        - ``robot.tool`` is the robot tool transform</span>
 
 <span class="sd">        :return: robot tool transform</span>
-<span class="sd">        :rtype: SE3 instance</span>
 
 <span class="sd">        - ``robot.tool = ...`` checks and sets the robot tool transform</span>
 
-<span class="sd">        .. note:: The private attribute ``_tool`` will be None in the case of</span>
-<span class="sd">            no tool transform, but this property will return ``SE3()`` which</span>
-<span class="sd">            is an identity matrix.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">SE3</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span>
+        <span class="k">return</span> <span class="n">SE3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tool</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="nd">@tool</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">tool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
-        <span class="c1"># if not isinstance(T, SE3):</span>
-        <span class="c1">#     T = SE3(T)</span>
-        <span class="c1"># this is allowed to be none, it&#39;s helpful for symbolics rather than</span>
-        <span class="c1"># having an identity matrix</span>
-        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="o">=</span> <span class="n">T</span>
-        <span class="k">elif</span> <span class="n">SE3</span><span class="o">.</span><span class="n">isvalid</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">tool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SE3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">SE3</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">A</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;tool must be set to None (no tool) or an SE3&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tool</span> <span class="o">=</span> <span class="n">T</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1223,8 +1388,6 @@
             <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">limits</span>
 
-    <span class="c1"># TODO, the remaining functions, I have only a hazy understanding</span>
-    <span class="c1"># of how they work</span>
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
@@ -1250,7 +1413,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">qd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">qd</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot joint velocity (Robot superclass)</span>
 
@@ -1267,7 +1430,7 @@
 
     <span class="nd">@qd</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">qd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qd_new</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_qd</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">qd_new</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_qd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">getvector</span><span class="p">(</span><span class="n">qd_new</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
 
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
@@ -1293,9 +1456,8 @@
 
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
-    <span class="c1"># TODO could we change this to control_mode ?</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">control_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">control_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot control mode (Robot superclass)</span>
 
@@ -1308,12 +1470,12 @@
 
 <span class="sd">        .. note::  ???</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_type</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_mode</span>
 
-    <span class="nd">@control_type</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">control_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cn</span><span class="p">):</span>
+    <span class="nd">@control_mode</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">control_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cn</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">cn</span> <span class="o">==</span> <span class="s2">&quot;p&quot;</span> <span class="ow">or</span> <span class="n">cn</span> <span class="o">==</span> <span class="s2">&quot;v&quot;</span> <span class="ow">or</span> <span class="n">cn</span> <span class="o">==</span> <span class="s2">&quot;a&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_control_type</span> <span class="o">=</span> <span class="n">cn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_control_mode</span> <span class="o">=</span> <span class="n">cn</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Control type must be one of &#39;p&#39;, &#39;v&#39;, or &#39;a&#39;&quot;</span><span class="p">)</span>
 
@@ -1934,11 +2096,11 @@
         <span class="n">env</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">readonly</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">jointaxes</span><span class="o">=</span><span class="n">jointaxes</span><span class="p">,</span>
-            <span class="n">jointlabels</span><span class="o">=</span><span class="n">jointlabels</span><span class="p">,</span>
-            <span class="n">eeframe</span><span class="o">=</span><span class="n">eeframe</span><span class="p">,</span>
-            <span class="n">shadow</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="c1"># jointaxes=jointaxes,</span>
+            <span class="c1"># jointlabels=jointlabels,</span>
+            <span class="c1"># eeframe=eeframe,</span>
+            <span class="c1"># shadow=shadow,</span>
+            <span class="c1"># name=name,</span>
         <span class="p">)</span>
 
         <span class="n">env</span><span class="o">.</span><span class="n">_add_teach_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
@@ -1959,36 +2121,38 @@
 
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
-<div class="viewcode-block" id="Robot.closest_point"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.closest_point">[docs]</a>    <span class="k">def</span> <span class="nf">closest_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Robot.closest_point"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.closest_point">[docs]</a>    <span class="k">def</span> <span class="nf">closest_point</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">],]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        closest_point(shape, inf_dist) returns the minimum euclidean</span>
 <span class="sd">        distance between this robot and shape, provided it is less than</span>
 <span class="sd">        inf_dist. It will also return the points on self and shape in the</span>
 <span class="sd">        world frame which connect the line of length distance between the</span>
 <span class="sd">        shapes. If the distance is negative then the shapes are collided.</span>
+
 <span class="sd">        :param shape: The shape to compare distance to</span>
-<span class="sd">        :type shape: Shape</span>
 <span class="sd">        :param inf_dist: The minimum distance within which to consider</span>
 <span class="sd">            the shape</span>
-<span class="sd">        :type inf_dist: float</span>
 <span class="sd">        :param skip: Skip setting all shape transforms based on q, use this</span>
 <span class="sd">            option if using this method in conjuction with Swift to save time</span>
-<span class="sd">        :type skip: boolean</span>
+
 <span class="sd">        :returns: d, p1, p2 where d is the distance between the shapes,</span>
 <span class="sd">            p1 and p2 are the points in the world frame on the respective</span>
 <span class="sd">            shapes. The points returned are [x, y, z].</span>
-<span class="sd">        :rtype: float, ndarray(1x3), ndarray(1x3)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">skip</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_link_fk</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_link_tf</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_propogate_scene_tree</span><span class="p">()</span>
+            <span class="n">shape</span><span class="o">.</span><span class="n">_propogate_scene_tree</span><span class="p">()</span>
 
         <span class="n">d</span> <span class="o">=</span> <span class="mi">10000</span>
         <span class="n">p1</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">p2</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
-            <span class="n">td</span><span class="p">,</span> <span class="n">tp1</span><span class="p">,</span> <span class="n">tp2</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">closest_point</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="p">)</span>
+            <span class="n">td</span><span class="p">,</span> <span class="n">tp1</span><span class="p">,</span> <span class="n">tp2</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">closest_point</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">td</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">td</span> <span class="o">&lt;</span> <span class="n">d</span><span class="p">:</span>
                 <span class="n">d</span> <span class="o">=</span> <span class="n">td</span>
@@ -2000,7 +2164,7 @@
 
         <span class="k">return</span> <span class="n">d</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span></div>
 
-<div class="viewcode-block" id="Robot.collided"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.collided">[docs]</a>    <span class="k">def</span> <span class="nf">collided</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Robot.iscollided"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.iscollided">[docs]</a>    <span class="k">def</span> <span class="nf">iscollided</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        collided(shape) checks if this robot and shape have collided</span>
 <span class="sd">        :param shape: The shape to compare distance to</span>
@@ -2013,19 +2177,35 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">skip</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_link_fk</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_link_tf</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_propogate_scene_tree</span><span class="p">()</span>
+            <span class="n">shape</span><span class="o">.</span><span class="n">_propogate_scene_tree</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">collided</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">iscollided</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                 <span class="k">return</span> <span class="kc">True</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtb</span><span class="o">.</span><span class="n">ERobot</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">gripper</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">gripper</span><span class="o">.</span><span class="n">links</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">collided</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">iscollided</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                         <span class="k">return</span> <span class="kc">True</span>
 
         <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Robot.collided"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.collided">[docs]</a>    <span class="k">def</span> <span class="nf">collided</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        collided(shape) checks if this robot and shape have collided</span>
+<span class="sd">        :param shape: The shape to compare distance to</span>
+<span class="sd">        :type shape: Shape</span>
+<span class="sd">        :param skip: Skip setting all shape transforms based on q, use this</span>
+<span class="sd">            option if using this method in conjuction with Swift to save time</span>
+<span class="sd">        :type skip: boolean</span>
+<span class="sd">        :returns: True if shapes have collided</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;method collided is deprecated, use iscollided instead&quot;</span><span class="p">,</span> <span class="ne">FutureWarning</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iscollided</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Robot.joint_velocity_damper"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.joint_velocity_damper">[docs]</a>    <span class="k">def</span> <span class="nf">joint_velocity_damper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ps</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">pi</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -2063,14 +2243,45 @@
                 <span class="n">Bin</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">gain</span> <span class="o">*</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="n">ps</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">pi</span> <span class="o">-</span> <span class="n">ps</span><span class="p">)</span>
                 <span class="n">Ain</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
-        <span class="k">return</span> <span class="n">Ain</span><span class="p">,</span> <span class="n">Bin</span></div></div>
+        <span class="k">return</span> <span class="n">Ain</span><span class="p">,</span> <span class="n">Bin</span></div>
+
+    <span class="c1"># --------------------------------------------------------------------- #</span>
+    <span class="c1"># Scene Graph section</span>
+    <span class="c1"># --------------------------------------------------------------------- #</span>
+
+    <span class="k">def</span> <span class="nf">_update_link_tf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This private method updates the local transform of each link within</span>
+<span class="sd">        this robot according to q (or self.q if q is none)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">get_link_ets</span><span class="p">():</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">ets</span><span class="o">.</span><span class="n">_fknm</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">]</span>
+
+        <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">get_link_scene_node</span><span class="p">():</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">_T_reference</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">]</span>
+
+        <span class="n">Robot_link_T</span><span class="p">(</span><span class="n">get_link_ets</span><span class="p">(),</span> <span class="n">get_link_scene_node</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_q</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+
+        <span class="p">[</span><span class="n">gripper</span><span class="o">.</span><span class="n">_update_link_tf</span><span class="p">()</span> <span class="k">for</span> <span class="n">gripper</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">]</span></div>
+
+    <span class="c1"># --------------------------------------------------------------------- #</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
-    <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS2</span> <span class="k">as</span> <span class="n">ET</span>
+    <span class="k">pass</span>
 
-    <span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">r</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">r</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># import roboticstoolbox as rtb</span>
+
+    <span class="c1"># puma = rtb.models.DH.Puma560()</span>
+    <span class="c1"># a = puma.copy()</span>
+
+    <span class="c1"># from roboticstoolbox import ET2 as ET</span>
+
+    <span class="c1"># e = ET.R() * ET.tx(1) * ET.R() * ET.tx(1)</span>
     <span class="c1"># print(e)</span>
     <span class="c1"># r = Robot2(e)</span>
 
@@ -2088,7 +2299,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

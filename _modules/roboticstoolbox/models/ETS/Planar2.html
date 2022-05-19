@@ -72,9 +72,10 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ET</span> <span class="kn">import</span> <span class="n">ET2</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ETS</span> <span class="kn">import</span> <span class="n">ETS2</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ERobot</span> <span class="kn">import</span> <span class="n">ERobot2</span>
-<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ELink</span> <span class="kn">import</span> <span class="n">ELink2</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Link</span> <span class="kn">import</span> <span class="n">Link2</span>
 
 
 <div class="viewcode-block" id="Planar2"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.ETS.Planar2">[docs]</a><span class="k">class</span> <span class="nc">Planar2</span><span class="p">(</span><span class="n">ERobot2</span><span class="p">):</span>
@@ -93,33 +94,31 @@
 <span class="sd">          Sequence, J. Haviland and P. Corke</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">a1</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">a2</span> <span class="o">=</span> <span class="mi">1</span>
 
-        <span class="c1"># ets = ETS2.r() * ETS2.tx(a1) * ETS2.r() * ETS2.tx(a2)</span>
+        <span class="n">l0</span> <span class="o">=</span> <span class="n">Link2</span><span class="p">(</span><span class="n">ETS2</span><span class="p">(</span><span class="n">ET2</span><span class="o">.</span><span class="n">R</span><span class="p">()),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;link0&quot;</span><span class="p">)</span>
+        <span class="n">l1</span> <span class="o">=</span> <span class="n">Link2</span><span class="p">(</span><span class="n">ETS2</span><span class="p">(</span><span class="n">ET2</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">a1</span><span class="p">))</span> <span class="o">*</span> <span class="n">ET2</span><span class="o">.</span><span class="n">R</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;link1&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">l0</span><span class="p">)</span>
+        <span class="n">l2</span> <span class="o">=</span> <span class="n">Link2</span><span class="p">(</span><span class="n">ETS2</span><span class="p">(</span><span class="n">ET2</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">a2</span><span class="p">)),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">l1</span><span class="p">)</span>
 
-        <span class="n">l0</span> <span class="o">=</span> <span class="n">ELink2</span><span class="p">(</span><span class="n">ETS2</span><span class="o">.</span><span class="n">r</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link0&#39;</span><span class="p">)</span>
-        <span class="n">l1</span> <span class="o">=</span> <span class="n">ELink2</span><span class="p">(</span><span class="n">ETS2</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ETS2</span><span class="o">.</span><span class="n">r</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;link1&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">l0</span><span class="p">)</span>
-        <span class="n">l2</span> <span class="o">=</span> <span class="n">ELink2</span><span class="p">(</span><span class="n">ETS2</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">a2</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ee&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">l1</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">l0</span><span class="p">,</span> <span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Planar2&quot;</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;Planar 2D manipulator&quot;</span><span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">l0</span><span class="p">,</span> <span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">],</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Planar2&#39;</span><span class="p">,</span>
-            <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;Planar 2D manipulator&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
-            <span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
     <span class="n">robot</span> <span class="o">=</span> <span class="n">Planar2</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">fkine</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">qz</span><span class="p">))</span>
-
+    <span class="c1"># print(robot.fkine(robot.qz))</span>
 </pre></div>
 
            </div>
@@ -130,7 +129,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

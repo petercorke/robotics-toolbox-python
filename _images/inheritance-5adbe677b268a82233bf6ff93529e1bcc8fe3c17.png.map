@@ -1,0 +1,6 @@
+<map id="inheritanced41b53372b" name="inheritanced41b53372b">
+<area shape="rect" id="node3" href="#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="245,80,348,105"/>
+<area shape="rect" id="node2" href="arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot" target="_top" title="Construct an ERobot object" alt="" coords="396,80,547,105"/>
+<area shape="rect" id="node4" href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot" target="_top" title="ERobot.ERobot" alt="" coords="595,80,713,105"/>
+<area shape="rect" id="node7" title="Helper class that provides a standard way to create an ABC using" alt="" coords="63,153,139,179"/>
+</map>

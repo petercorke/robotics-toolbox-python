@@ -144,20 +144,20 @@
 
 
 <div class="viewcode-block" id="LatticePlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.LatticePlanner">[docs]</a><span class="k">class</span> <span class="nc">LatticePlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Lattice planner</span>
 
 <span class="sd">    :param costs: cost for straight, left-turn, right-turn, defaults to :math:`(1, \pi/2, \pi/2)`</span>
 <span class="sd">    :type costs: array_like(3), optional</span>
 <span class="sd">    :param root: configuration of root node, defaults to (0,0,0)</span>
 <span class="sd">    :type root: array_like(3), optional</span>
-<span class="sd">    :param kwargs: arguments passed to ``Planner`` constructor</span>
+<span class="sd">    :param kwargs: arguments passed to ``PlannerBase`` constructor</span>
 
 <span class="sd">    ==================   ========================</span>
 <span class="sd">    Feature              Capability</span>
 <span class="sd">    ==================   ========================</span>
-<span class="sd">    Plan                 Configuration space</span>
-<span class="sd">    Obstacle avoidance   Yes</span>
+<span class="sd">    Plan                 :math:`\SE{2}`</span>
+<span class="sd">    Obstacle avoidance   Yes, occupancy grid</span>
 <span class="sd">    Curvature            Discontinuous</span>
 <span class="sd">    Motion               Forwards only</span>
 <span class="sd">    ==================   ========================</span>
@@ -165,17 +165,40 @@
 <span class="sd">    The lattice planner incrementally builds a graph from the root vertex, at</span>
 <span class="sd">    each iteration adding three edges to the graph:</span>
 
-<span class="sd">    - straight ahead &#39;S&#39;</span>
-<span class="sd">    - turn left &#39;L&#39;</span>
-<span class="sd">    - turn right &#39;R&#39;</span>
+<span class="sd">    =====   ================</span>
+<span class="sd">    code    direction</span>
+<span class="sd">    =====   ================</span>
+<span class="sd">    &#39;S&#39;     straight ahead</span>
+<span class="sd">    &#39;L&#39;     turn left</span>
+<span class="sd">    &#39;R&#39;     turn right</span>
+<span class="sd">    =====   ================</span>
 
 <span class="sd">    If the configuration is already in the graph, the edge connects to that</span>
-<span class="sd">    existing vertex.</span>
+<span class="sd">    existing vertex.  The vertex is named after the sequence of moves required</span>
+<span class="sd">    to reach it from the root.  This means, that any configuration, ie.</span>
+<span class="sd">    :math:`(x, y, \theta)` can be reached by multiple paths and potentially have</span>
+<span class="sd">    multiple names.  The first name assigned to a vertex is permanent and is not</span>
+<span class="sd">    overriden.</span>
 
 <span class="sd">    If an occupancy grid exists and the configuration is an obstacle, then</span>
 <span class="sd">    the vertex is not added.</span>
 
-<span class="sd">    ``costs`` changes the weighting for path costs at query time.</span>
+<span class="sd">    The path through the lattice is found using A* graph search, and ``costs``</span>
+<span class="sd">    changes the weighting for path costs at query time.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    .. runblock:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; from roboticstoolbox import LatticePlanner</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; lattice = LatticePlanner();</span>
+<span class="sd">        &gt;&gt;&gt; lattice.plan(iterations=6)</span>
+<span class="sd">        &gt;&gt;&gt; path, status = lattice.query(start=(0, 0, 0), goal=(1, 2, np.pi/2))</span>
+<span class="sd">        &gt;&gt;&gt; print(path.T)</span>
+<span class="sd">        &gt;&gt;&gt; print(status)</span>
+
+<span class="sd">    :seealso: :meth:`plan` :meth:`query` :class:`PlannerBase`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">costs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -199,13 +222,13 @@
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">s</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  curvature=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curvature</span><span class="si">}</span><span class="s2">, stepsize=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="si">}</span><span class="s2">&quot;</span>
 
-<div class="viewcode-block" id="LatticePlanner.icoord"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.icoord">[docs]</a>    <span class="k">def</span> <span class="nf">icoord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyt</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_icoord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyt</span><span class="p">):</span>
         <span class="n">ix</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">xyt</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="n">iy</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">xyt</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
         <span class="n">it</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">xyt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">ix</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">iy</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">it</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">ix</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">iy</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">it</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">)&quot;</span>
 
-    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="LatticePlanner.plan"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">summary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a lattice plan</span>
 
@@ -216,6 +239,8 @@
 
 <span class="sd">        If an occupancy grid exists the if ``iterations`` is None the area of the</span>
 <span class="sd">        grid will be completely filled.</span>
+
+<span class="sd">        :seealso: :meth:`query`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">iterations</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;iterations must be finite if no occupancy grid is specified&#39;</span><span class="p">)</span>
@@ -241,7 +266,7 @@
                     <span class="c1"># theta is guaranteed to be in range [-pi, pi)</span>
 
                     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  MOVE&#39;</span><span class="p">,</span> <span class="n">move</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">icoord</span><span class="p">(</span><span class="n">xyt</span><span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  MOVE&#39;</span><span class="p">,</span> <span class="n">move</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_icoord</span><span class="p">(</span><span class="n">xyt</span><span class="p">))</span>
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isoccupied</span><span class="p">(</span><span class="n">xyt</span><span class="p">[:</span><span class="mi">2</span><span class="p">]):</span>
                         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
@@ -286,15 +311,17 @@
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;iteration </span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">, frontier length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frontier</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">iteration</span> <span class="o">&gt;=</span> <span class="n">iterations</span><span class="p">:</span>
                 <span class="k">break</span>
+        <span class="k">if</span> <span class="n">summary</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s2"> vertices and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">ne</span><span class="si">}</span><span class="s2"> edges created&quot;</span><span class="p">)</span></div>
             
-<div class="viewcode-block" id="LatticePlanner.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qs</span><span class="p">,</span> <span class="n">qg</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="LatticePlanner.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.LatticePlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find a path through the lattice</span>
 
-<span class="sd">        :param qs: initial configuration</span>
-<span class="sd">        :type qs: array_like(3)</span>
-<span class="sd">        :param qg: goal configuration</span>
-<span class="sd">        :type qg: array_like(3)</span>
+<span class="sd">        :param start: start configuration :math:`(x, y, \theta)`</span>
+<span class="sd">        :type start: array_like(3), optional</span>
+<span class="sd">        :param goal: goal configuration :math:`(x, y, \theta)`</span>
+<span class="sd">        :type goal: array_like(3), optional</span>
 <span class="sd">        :return: path and status</span>
 <span class="sd">        :rtype: ndarray(N,3), namedtuple</span>
 
@@ -309,20 +336,23 @@
 <span class="sd">        |             | a single letter code: either &quot;L&quot;, &quot;R&quot; or &quot;S&quot; for    |</span>
 <span class="sd">        |             | left turn, right turn or straight line respectively.|</span>
 <span class="sd">        +-------------+-----------------------------------------------------+</span>
-<span class="sd">        |``edges ``   | successive edges of the graph ``LatticeEdge`` type  |</span>
+<span class="sd">        |``edges``    | successive edges of the graph ``LatticeEdge`` type  |</span>
 <span class="sd">        +-------------+-----------------------------------------------------+</span>
 
-<span class="sd">        :seealso: :meth:`Planner.query`</span>
+<span class="sd">        :seealso: :meth:`plan`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">vs</span><span class="p">,</span> <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">closest</span><span class="p">(</span><span class="n">qs</span><span class="p">)</span>
+        <span class="n">vs</span><span class="p">,</span> <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">closest</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ds</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;start configuration is not in the lattice&#39;</span><span class="p">)</span>
-        <span class="n">vg</span><span class="p">,</span> <span class="n">dg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">closest</span><span class="p">(</span><span class="n">qg</span><span class="p">)</span>
+        <span class="n">vg</span><span class="p">,</span> <span class="n">dg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">closest</span><span class="p">(</span><span class="n">goal</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dg</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;goal configuration is not in the lattice&#39;</span><span class="p">)</span>
 
-        <span class="n">path</span><span class="p">,</span> <span class="n">cost</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">path_Astar</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">vg</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">path</span><span class="p">,</span> <span class="n">cost</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">path_Astar</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">vg</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;no path found&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span>
 
         <span class="n">status</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;LatticeStatus&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;cost&#39;</span><span class="p">,</span> <span class="s1">&#39;segments&#39;</span><span class="p">,</span> <span class="s1">&#39;edges&#39;</span><span class="p">])</span>
 
@@ -343,10 +373,10 @@
             <span class="c1"># 3D plot</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">):</span>
                 <span class="c1"># for every node</span>
-                <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;k&gt;&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;bo&#39;</span><span class="p">)</span>
+                <span class="c1"># if k == 0:</span>
+                <span class="c1">#     plt.plot(vertex.coord[0], vertex.coord[1], vertex.coord[2], &#39;k&gt;&#39;, markersize=10)</span>
+                <span class="c1"># else:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;bo&#39;</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">():</span>
                 <span class="n">edge</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -366,10 +396,10 @@
             <span class="c1"># 2D plot</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">):</span>
                 <span class="c1"># for every node</span>
-                <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;k&gt;&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;bo&#39;</span><span class="p">)</span>
+                <span class="c1"># if k == 0:</span>
+                <span class="c1">#     plt.plot(vertex.coord[0], vertex.coord[1], &#39;k&gt;&#39;, markersize=10)</span>
+                <span class="c1"># else:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vertex</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;bo&#39;</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">():</span>
                 <span class="n">edge</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
@@ -390,16 +420,21 @@
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
-    <span class="n">og</span> <span class="o">=</span> <span class="n">BinaryOccupancyGrid</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">value</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">og</span><span class="o">.</span><span class="n">set</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">lattice</span> <span class="o">=</span> <span class="n">LatticePlanner</span><span class="p">()</span>
+    <span class="n">lattice</span><span class="o">.</span><span class="n">plan</span><span class="p">(</span><span class="n">iterations</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="n">goal</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
-    <span class="n">lattice</span> <span class="o">=</span> <span class="n">LatticePlanner</span><span class="p">(</span><span class="n">occgrid</span><span class="o">=</span><span class="n">og</span><span class="p">)</span>
+    <span class="c1"># og = BinaryOccupancyGrid(workspace=[-5, 5, -5, 5], value=False)</span>
+    <span class="c1"># og.set([3, 3, -2, 3], True)</span>
 
-    <span class="n">lattice</span><span class="o">.</span><span class="n">plan</span><span class="p">(</span><span class="n">iterations</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">lattice</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+    <span class="c1"># lattice = LatticePlanner(occgrid=og)</span>
 
-    <span class="n">qs</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">qg</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># lattice.plan(iterations=10)</span>
+    <span class="c1"># print(lattice.graph)</span>
+
+    <span class="c1"># qs = (0, 0, np.pi/2)</span>
+    <span class="c1"># qg = (1, 0, np.pi/2)</span>
 
     <span class="c1"># print(&#39;qs&#39;)</span>
     <span class="c1"># vs, d = lattice.graph.closest(qs)</span>
@@ -419,15 +454,15 @@
     <span class="c1"># print(vs.neighbours())</span>
     <span class="c1"># print()</span>
 
-    <span class="n">path</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">qs</span><span class="p">,</span> <span class="n">qg</span><span class="p">)</span>
+    <span class="c1"># path, status = lattice.query(qs, qg)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+    <span class="c1"># print(path)</span>
+    <span class="c1"># print(status)</span>
 
 
-    <span class="n">lattice</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+    <span class="c1"># lattice.plot(path=path)</span>
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># plt.show(block=True)</span>
 
     <span class="c1"># ax = plt.gca()</span>
     <span class="c1"># ax.set_aspect(&#39;equal&#39;)</span>
@@ -444,7 +479,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

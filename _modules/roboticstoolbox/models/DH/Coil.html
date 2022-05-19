@@ -74,11 +74,8 @@
 <span class="sd">@author: Peter Corke</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">DHRobot</span><span class="p">,</span> <span class="n">RevoluteDH</span>
-<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
 
 
 <div class="viewcode-block" id="Coil"><a class="viewcode-back" href="../../../../arm_dh.html#roboticstoolbox.models.DH.Coil">[docs]</a><span class="k">class</span> <span class="nc">Coil</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
@@ -113,7 +110,7 @@
 <span class="sd">    :references:</span>
 <span class="sd">        - &quot;A divide and conquer articulated-body algorithm for parallel O(log(n))</span>
 <span class="sd">          calculation of rigid body dynamics, Part 2&quot;,</span>
-<span class="sd">          Int. J. Robotics Research, 18(9), pp 876-892. </span>
+<span class="sd">          Int. J. Robotics Research, 18(9), pp 876-892.</span>
 
 <span class="sd">    :seealso: :func:`Hyper`, :func:`Ball`</span>
 
@@ -124,12 +121,11 @@
 
         <span class="k">if</span> <span class="n">symbolic</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">spatialmath.base.symbolic</span> <span class="k">as</span> <span class="nn">sym</span>
-            <span class="n">zero</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
+
             <span class="n">pi</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">pi</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
-            <span class="n">zero</span> <span class="o">=</span> <span class="mf">0.0</span>
-            
+
         <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">N</span>
 
         <span class="n">links</span> <span class="o">=</span> <span class="p">[]</span>
@@ -137,19 +133,17 @@
             <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">5</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="n">N</span><span class="p">))</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">links</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Hyper&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">N</span><span class="p">),</span>
-            <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;symbolic&#39;</span><span class="p">,),</span>
-            <span class="n">symbolic</span><span class="o">=</span><span class="n">symbolic</span>
+            <span class="n">links</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Coil&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;symbolic&quot;</span><span class="p">,),</span> <span class="n">symbolic</span><span class="o">=</span><span class="n">symbolic</span>
         <span class="p">)</span>
 
-        <span class="c1"># zero angles, straight</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
 
-        <span class="c1"># folded, helix with ~5.5 turns</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qf&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">N</span><span class="p">,))</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span></div>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>    <span class="c1"># pragma nocover</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
     <span class="n">coil</span> <span class="o">=</span> <span class="n">Coil</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">symbolic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">coil</span><span class="p">)</span>
@@ -166,7 +160,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

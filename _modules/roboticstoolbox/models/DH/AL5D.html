@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>roboticstoolbox.models.DH.AL5D &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
+            <img src="../../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>roboticstoolbox.models.DH.AL5D</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for roboticstoolbox.models.DH.AL5D</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@author: Tassos Natsakis</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">DHRobot</span><span class="p">,</span> <span class="n">RevoluteMDH</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
+
+
+<div class="viewcode-block" id="AL5D"><a class="viewcode-back" href="../../../../arm_dh.html#roboticstoolbox.models.DH.AL5D">[docs]</a><span class="k">class</span> <span class="nc">AL5D</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that models a Lynxmotion AL5D manipulator</span>
+
+<span class="sd">    :param symbolic: use symbolic constants</span>
+<span class="sd">    :type symbolic: bool</span>
+
+<span class="sd">    ``AL5D()`` is an object which models a Lynxmotion AL5D robot and</span>
+<span class="sd">    describes its kinematic and dynamic characteristics using modified DH</span>
+<span class="sd">    conventions.</span>
+
+<span class="sd">    .. runblock:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">        &gt;&gt;&gt; robot = rtb.models.DH.AL5D()</span>
+<span class="sd">        &gt;&gt;&gt; print(robot)</span>
+
+<span class="sd">    Defined joint configurations are:</span>
+
+<span class="sd">    - qz, zero joint angle configuration</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        - SI units are used.</span>
+
+<span class="sd">    :References:</span>
+
+<span class="sd">        - &#39;Reference of the robot &lt;http://www.lynxmotion.com/c-130-al5d.aspx&gt;&#39;_</span>
+
+<span class="sd">    .. codeauthor:: Tassos Natsakis</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbolic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">symbolic</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">spatialmath.base.symbolic</span> <span class="k">as</span> <span class="nn">sym</span>
+
+            <span class="c1"># zero = sym.zero()</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">pi</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+
+            <span class="c1"># zero = 0.0</span>
+
+        <span class="c1"># robot length values (metres)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">,</span> <span class="mf">0.14679</span><span class="p">,</span> <span class="mf">0.17751</span><span class="p">]</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.06858</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="n">pi</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">pi</span><span class="p">]</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="p">[</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0427</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0427</span> <span class="o">-</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># mass data as measured</span>
+        <span class="c1"># mass = [0.187, 0.044, 0.207, 0.081]</span>
+
+        <span class="c1"># center of mass as calculated through CAD model</span>
+        <span class="n">center_of_mass</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="mf">0.01724</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.00389</span><span class="p">,</span> <span class="mf">0.00468</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.07084</span><span class="p">,</span> <span class="mf">0.00000</span><span class="p">,</span> <span class="mf">0.00190</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.05615</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.00251</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.00080</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.04318</span><span class="p">,</span> <span class="mf">0.00735</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.00523</span><span class="p">],</span>
+        <span class="p">]</span>
+
+        <span class="c1"># moments of inertia are practically zero</span>
+        <span class="n">moments_of_inertia</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">]</span>
+
+        <span class="n">joint_limits</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">]</span>
+
+        <span class="n">links</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="n">RevoluteMDH</span><span class="p">(</span>
+                <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                <span class="n">r</span><span class="o">=</span><span class="n">center_of_mass</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                <span class="n">I</span><span class="o">=</span><span class="n">moments_of_inertia</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                <span class="n">G</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">B</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">Tc</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="n">joint_limits</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+
+        <span class="n">tool</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mf">0.07719</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">links</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;AL5D&quot;</span><span class="p">,</span>
+            <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Lynxmotion&quot;</span><span class="p">,</span>
+            <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;dynamics&quot;</span><span class="p">,</span> <span class="s2">&quot;symbolic&quot;</span><span class="p">),</span>
+            <span class="n">symbolic</span><span class="o">=</span><span class="n">symbolic</span><span class="p">,</span>
+            <span class="n">tool</span><span class="o">=</span><span class="n">tool</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># zero angles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;home&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]))</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
+
+    <span class="n">al5d</span> <span class="o">=</span> <span class="n">AL5D</span><span class="p">(</span><span class="n">symbolic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">al5d</span><span class="p">)</span>
+    <span class="c1"># print(al5d.dyntable())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 19-May-2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

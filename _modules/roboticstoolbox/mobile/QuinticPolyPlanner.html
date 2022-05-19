@@ -69,32 +69,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for roboticstoolbox.mobile.QuinticPolyPlanner</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">Quintic Polynomials Planner</span>
-
-<span class="sd">author: Atsushi Sakai (@Atsushi_twi)</span>
-
-<span class="sd">Ref:</span>
-
-<span class="sd">- [Local Path planning And Motion Control For Agv In Positioning](http://ieeexplore.ieee.org/document/637936/)</span>
-
-<span class="sd">The MIT License (MIT)</span>
-
-<span class="sd">Copyright (c) 2016 - 2021 Atsushi Sakai</span>
-
-<span class="sd">Permission is hereby granted, free of charge, to any person obtaining a copy</span>
-<span class="sd">of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
-<span class="sd">in the Software without restriction, including without limitation the rights</span>
-<span class="sd">to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
-<span class="sd">copies of the Software, and to permit persons to whom the Software is</span>
-<span class="sd">furnished to do so, subject to the following conditions:</span>
-
-<span class="sd">The above copyright notice and this permission notice shall be included in all</span>
-<span class="sd">copies or substantial portions of the Software.</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="kn">import</span> <span class="nn">math</span>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -106,8 +81,16 @@
 
 <span class="n">show_animation</span> <span class="o">=</span> <span class="kc">True</span>
 
+<span class="c1"># ======================================================================== #</span>
 
-<span class="k">class</span> <span class="nc">QuinticPolynomial</span><span class="p">:</span>
+<span class="c1"># The following code is modified from Python Robotics</span>
+<span class="c1"># https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning</span>
+<span class="c1"># Quintic Polynomial Planner</span>
+<span class="c1"># Author: Atsushi Sakai </span>
+<span class="c1"># Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors</span>
+<span class="c1"># Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE </span>
+
+<span class="k">class</span> <span class="nc">_QuinticPolynomial</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">vxs</span><span class="p">,</span> <span class="n">axs</span><span class="p">,</span> <span class="n">xe</span><span class="p">,</span> <span class="n">vxe</span><span class="p">,</span> <span class="n">axe</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
         <span class="c1"># calc coefficient of quintic polynomial</span>
@@ -191,8 +174,8 @@
     <span class="n">time</span><span class="p">,</span> <span class="n">rx</span><span class="p">,</span> <span class="n">ry</span><span class="p">,</span> <span class="n">ryaw</span><span class="p">,</span> <span class="n">rv</span><span class="p">,</span> <span class="n">ra</span><span class="p">,</span> <span class="n">rj</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">MIN_T</span><span class="p">,</span> <span class="n">MAX_T</span><span class="p">,</span> <span class="n">MIN_T</span><span class="p">):</span>
-        <span class="n">xqp</span> <span class="o">=</span> <span class="n">QuinticPolynomial</span><span class="p">(</span><span class="n">sx</span><span class="p">,</span> <span class="n">vxs</span><span class="p">,</span> <span class="n">axs</span><span class="p">,</span> <span class="n">gx</span><span class="p">,</span> <span class="n">vxg</span><span class="p">,</span> <span class="n">axg</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
-        <span class="n">yqp</span> <span class="o">=</span> <span class="n">QuinticPolynomial</span><span class="p">(</span><span class="n">sy</span><span class="p">,</span> <span class="n">vys</span><span class="p">,</span> <span class="n">ays</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">vyg</span><span class="p">,</span> <span class="n">ayg</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+        <span class="n">xqp</span> <span class="o">=</span> <span class="n">_QuinticPolynomial</span><span class="p">(</span><span class="n">sx</span><span class="p">,</span> <span class="n">vxs</span><span class="p">,</span> <span class="n">axs</span><span class="p">,</span> <span class="n">gx</span><span class="p">,</span> <span class="n">vxg</span><span class="p">,</span> <span class="n">axg</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+        <span class="n">yqp</span> <span class="o">=</span> <span class="n">_QuinticPolynomial</span><span class="p">(</span><span class="n">sy</span><span class="p">,</span> <span class="n">vys</span><span class="p">,</span> <span class="n">ays</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">vyg</span><span class="p">,</span> <span class="n">ayg</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
 
         <span class="n">time</span><span class="p">,</span> <span class="n">rx</span><span class="p">,</span> <span class="n">ry</span><span class="p">,</span> <span class="n">ryaw</span><span class="p">,</span> <span class="n">rv</span><span class="p">,</span> <span class="n">ra</span><span class="p">,</span> <span class="n">rj</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
 
@@ -228,7 +211,10 @@
 
     <span class="k">return</span> <span class="n">time</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">rx</span><span class="p">,</span> <span class="n">ry</span><span class="p">,</span> <span class="n">ryaw</span><span class="p">],</span> <span class="n">rv</span><span class="p">,</span> <span class="n">ra</span><span class="p">,</span> <span class="n">rj</span>
 
+<span class="c1"># ====================== RTB wrapper ============================= #</span>
 
+<span class="c1"># Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python</span>
+<span class="c1"># Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE </span>
 <div class="viewcode-block" id="QuinticPolyPlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.QuinticPolyPlanner">[docs]</a><span class="k">class</span> <span class="nc">QuinticPolyPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Quintic polynomial path planner</span>
@@ -257,7 +243,7 @@
 <span class="sd">    ==================   ========================</span>
 <span class="sd">    Feature              Capability</span>
 <span class="sd">    ==================   ========================</span>
-<span class="sd">    Plan                 Configuration space</span>
+<span class="sd">    Plan                 :math:`\SE{2}`</span>
 <span class="sd">    Obstacle avoidance   No</span>
 <span class="sd">    Curvature            Continuous</span>
 <span class="sd">    Motion               Forwards only</span>
@@ -277,8 +263,23 @@
 <span class="sd">        Sugimoto; Proceedings. IEEE/RSJ International Workshop on</span>
 <span class="sd">        Intelligent Robots and Systems (IROS &#39;89)  doi: 10.1109/IROS.1989.637936</span>
 
-<span class="sd">    .. note:: The path time is searched in the interval [``min_t``, `max_t`] in steps</span>
+<span class="sd">    .. note:: The path time is searched in the interval [``min_t``, ``max_t``] in steps</span>
 <span class="sd">        of ``min_t``.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    .. runblock:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; from roboticstoolbox import QuinticPolyPlanner</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; start = (10, 10, np.deg2rad(10.0))</span>
+<span class="sd">        &gt;&gt;&gt; goal = (30, -10, np.deg2rad(20.0))</span>
+<span class="sd">        &gt;&gt;&gt; quintic = QuinticPolyPlanner(start_vel=1)</span>
+<span class="sd">        &gt;&gt;&gt; path, status = quintic.query(start, goal)</span>
+<span class="sd">        &gt;&gt;&gt; print(path[:5,:])</span>
+
+<span class="sd">    :thanks: based on quintic polynomial planning from `Python Robotics &lt;https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning&gt;`_</span>
+
 
 <span class="sd">    :seealso: :class:`Planner`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -376,7 +377,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

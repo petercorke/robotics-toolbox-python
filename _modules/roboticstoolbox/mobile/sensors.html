@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>roboticstoolbox.mobile.sensors &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
+            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>roboticstoolbox.mobile.sensors</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for roboticstoolbox.mobile.sensors</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
+<span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Sensor Sensor superclass</span>
+
+<span class="sd">An abstract superclass to represent robot navigation sensorself.</span>
+
+<span class="sd">Methods::</span>
+<span class="sd">  plot        plot a line from robot to map feature</span>
+<span class="sd">  display     print the parameters in human readable form</span>
+<span class="sd">  char        convert to string</span>
+
+<span class="sd">Properties::</span>
+<span class="sd">robot   The Vehicle object on which the sensor is mounted</span>
+<span class="sd">map     The PointMap object representing the landmarks around the robot</span>
+
+<span class="sd">Reference::</span>
+
+<span class="sd">  Robotics, Vision &amp; Control,</span>
+<span class="sd">  Peter Corke,</span>
+<span class="sd">  Springer 2011</span>
+
+<span class="sd">See also RangeBearingSensor, EKF, Vehicle, Landmarkself.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">class</span> <span class="nc">SensorBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="c1"># TODO, pose option, wrt vehicle</span>
+
+    <span class="c1"># robot</span>
+    <span class="c1"># map</span>
+    
+    <span class="c1"># verbose</span>
+    
+    <span class="c1"># ls</span>
+    <span class="c1"># animate     # animate sensor measurements</span>
+    <span class="c1"># interval    # measurement return subsample factor</span>
+    <span class="c1"># fail</span>
+    <span class="c1"># delay</span>
+        
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="n">every</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fail</span><span class="o">=</span><span class="p">[],</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sensor.Sensor Sensor object constructor</span>
+<span class="sd">        %</span>
+<span class="sd">        # S = Sensor(VEHICLE, MAP, OPTIONS) is a sensor mounted on a vehicle</span>
+<span class="sd">        # described by the Vehicle subclass object VEHICLE and observing landmarks</span>
+<span class="sd">        # in a map described by the LandmarkMap class object self.</span>
+<span class="sd">        %</span>
+<span class="sd">        # Options::</span>
+<span class="sd">        # &#39;animate&#39;    animate the action of the laser scanner</span>
+<span class="sd">        # &#39;ls&#39;,LS      laser scan lines drawn with style ls (default &#39;r-&#39;)</span>
+<span class="sd">        # &#39;skip&#39;, I    return a valid reading on every I&#39;th call</span>
+<span class="sd">        # &#39;fail&#39;,T     sensor simulates failure between timesteps T=[TMIN,TMAX]</span>
+<span class="sd">        %</span>
+<span class="sd">        # Notes::</span>
+<span class="sd">        # - Animation shows a ray from the vehicle position to the selected</span>
+<span class="sd">        #   landmark.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span> <span class="o">=</span> <span class="n">robot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_map</span> <span class="o">=</span> <span class="nb">map</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_every</span> <span class="o">=</span> <span class="n">every</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fail</span> <span class="o">=</span>  <span class="n">fail</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">delay</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_animate</span> <span class="o">=</span> <span class="n">animate</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize sensor (superclass)</span>
+
+<span class="sd">        - reseed the random number generator</span>
+<span class="sd">        - reset the counter for handling the ``every`` and ``fail`` options</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_random</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert sensor parameters to a string (superclass)</span>
+<span class="sd">        %</span>
+<span class="sd">        # s = self.char() is a string showing sensor parameters in</span>
+<span class="sd">        # a compact human readable format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> sensor class</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;  &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">robot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Robot associated with sensor (superclass)</span>
+
+<span class="sd">        :return: robot</span>
+<span class="sd">        :rtype: :class:`VehicleBase` subclass</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Landmark map associated with sensor (superclass)</span>
+
+<span class="sd">        :return: robot</span>
+<span class="sd">        :rtype: :class:`LandmarkMap`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get private random number generator (superclass)</span>
+
+<span class="sd">        :return: NumPy random number generator</span>
+<span class="sd">        :rtype: :class:`numpy.random.Generator`</span>
+
+<span class="sd">        Has methods including:</span>
+
+<span class="sd">            - :meth:`integers(low, high, size, endpoint) &lt;numpy.random.Generator.integers&gt;`</span>
+<span class="sd">            - :meth:`random(size) &lt;numpy.random.Generator.random&gt;`</span>
+<span class="sd">            - :meth:`uniform(low, high, size) &lt;numpy.random.Generator.uniform&gt;`</span>
+<span class="sd">            - :meth:`normal(mean, std, size) &lt;numpy.random.Generator.normal&gt;`</span>
+<span class="sd">            - :meth:`multivariate_normal(mean, covar, size) &lt;numpy.random.Generator.multivariate_normal&gt;`</span>
+
+<span class="sd">        The generator is initialized with the seed provided at constructor</span>
+<span class="sd">        time every time :meth:`init` is called.</span>
+
+<span class="sd">        :seealso: :meth:`init`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get verbosity state</span>
+
+<span class="sd">        :return: verbosity</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span>
+
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot sensor observation</span>
+
+<span class="sd">        :param id: landmark id</span>
+<span class="sd">        :type id: int</span>
+
+<span class="sd">        Draws a line from the robot to landmark ``id``.</span>
+<span class="sd">        </span>
+<span class="sd">        .. note::</span>
+<span class="sd">            - The line is drawn using the ``line_style`` given at constructor time</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+        <span class="c1"># if isempty(self.ls)</span>
+        <span class="c1">#     return</span>
+        <span class="c1"># end</span>
+        
+        <span class="c1"># h = findobj(gca, &#39;tag&#39;, &#39;sensor&#39;)</span>
+        <span class="c1"># if isempty(h)</span>
+        <span class="c1">#     # no sensor line, create one</span>
+        <span class="c1">#     h = plot(0, 0, self.ls, &#39;tag&#39;, &#39;sensor&#39;)</span>
+        <span class="c1"># end</span>
+        
+        <span class="c1"># # there is a sensor line animate it</span>
+        
+        <span class="c1"># if lm_id == 0</span>
+        <span class="c1">#     set(h, &#39;Visible&#39;, &#39;off&#39;)</span>
+        <span class="c1"># else</span>
+        <span class="c1">#     xi = self.self.map(:,lm_id)</span>
+        <span class="c1">#     set(h, &#39;Visible&#39;, &#39;on&#39;, &#39;XData&#39;, [self.robot.x[0], xi[0]], &#39;YData&#39;, [self.robot.x[1], xi[1]])</span>
+        <span class="c1"># end</span>
+        <span class="c1"># pause(self.delay)</span>
+
+        <span class="c1"># drawnow</span>
+
+
+<span class="c1"># ======================================================================== #</span>
+
+<span class="c1"># visibility function, for one id, or return list of visible</span>
+<span class="c1"># covar can be 2x2 or (2,)</span>
+<span class="c1"># .W property</span>
+<div class="viewcode-block" id="RangeBearingSensor"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor">[docs]</a><span class="k">class</span> <span class="nc">RangeBearingSensor</span><span class="p">(</span><span class="n">SensorBase</span><span class="p">):</span>
+
+
+<div class="viewcode-block" id="RangeBearingSensor.__init__"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> 
+            <span class="n">line_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">poly_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">covar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+            <span class="nb">range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">angle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Range and bearing angke sensor</span>
+
+<span class="sd">        :param robot: model of robot carrying the sensor</span>
+<span class="sd">        :type robot: :class:`VehicleBase` subclass</span>
+<span class="sd">        :param map: map of landmarks</span>
+<span class="sd">        :type map: :class:`LandmarkMap` instance</span>
+<span class="sd">        :param polygon: polygon style for sensing region, see :class:`~spatialmath.base.graphics.plot_polygon`, defaults to None</span>
+<span class="sd">        :type polygon: dict, optional</span>
+<span class="sd">        :param covar: covariance matrix for sensor readings, defaults to None</span>
+<span class="sd">        :type covar: ndarray(2,2), optional</span>
+<span class="sd">        :param range: maximum range :math:`r_{max}` or range span :math:`[r_{min}, r_{max}]`, defaults to None</span>
+<span class="sd">        :type range: float or array_like(2), optional</span>
+<span class="sd">        :param angle: angular field of view, from :math:`[-\theta, \theta]` defaults to None</span>
+<span class="sd">        :type angle: float, optional</span>
+<span class="sd">        :param plot: [description], defaults to False</span>
+<span class="sd">        :type plot: bool, optional</span>
+<span class="sd">        :param seed: random number seed, defaults to 0</span>
+<span class="sd">        :type seed: int, optional</span>
+<span class="sd">        :param kwargs: arguments passed to :class:`SensorBase`</span>
+
+<span class="sd">        Sensor object that returns the range and bearing angle :math:`(r,</span>
+<span class="sd">        \beta)` to a point landmark from a robot-mounted sensor.  The sensor</span>
+<span class="sd">        measurements are corrupted with zero-mean Gaussian noise with covariance</span>
+<span class="sd">        ``covar``.</span>
+
+<span class="sd">        The sensor can have a maximum range, or a minimum and maximum range. The</span>
+<span class="sd">        sensor can also have a restricted angular field of view.</span>
+
+<span class="sd">        The sensing region can be displayed by setting the polygon parameter</span>
+<span class="sd">        which can show an outline or a filled polygon.  This is updated every</span>
+<span class="sd">        time :meth:`reading` is called, based on the current configuration of</span>
+<span class="sd">        the ``robot``.</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import Bicycle, LandmarkMap, RangeBearingSensor</span>
+<span class="sd">            &gt;&gt;&gt; from math import pi</span>
+<span class="sd">            &gt;&gt;&gt; robot = Bicycle()</span>
+<span class="sd">            &gt;&gt;&gt; map = LandmarkMap(20)</span>
+<span class="sd">            &gt;&gt;&gt; sensor = RangeBearingSensor(robot, map, range=(0.5, 20), angle=pi/4)</span>
+<span class="sd">            &gt;&gt;&gt; print(sensor)</span>
+
+<span class="sd">        :seealso: :class:`~roboticstoolbox.mobile.LandmarkMap` :class:`~roboticstoolbox.mobile.EKF`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># call the superclass constructor</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_line_style</span> <span class="o">=</span> <span class="n">line_style</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_poly_style</span> <span class="o">=</span> <span class="n">poly_style</span>
+
+        <span class="k">if</span> <span class="n">covar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">base</span><span class="o">.</span><span class="n">isvector</span><span class="p">(</span><span class="n">covar</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">covar</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">base</span><span class="o">.</span><span class="n">ismatrix</span><span class="p">(</span><span class="n">covar</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_W</span> <span class="o">=</span> <span class="n">covar</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad value for covar, must have shape (2,) or (2,2)&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_r_range</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">range</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_r_range</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="nb">range</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_r_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="nb">range</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">angle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_theta_range</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_theta_range</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_theta_range</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">angle</span><span class="p">,</span> <span class="n">angle</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_animate</span> <span class="o">=</span> <span class="n">plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_landmarklog</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_random</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span></div>
+        
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  W = </span><span class="si">{</span><span class="n">base</span><span class="o">.</span><span class="n">array2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_W</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  sampled every </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_every</span><span class="si">}</span><span class="s2"> samples</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  range: (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  angle: (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+<div class="viewcode-block" id="RangeBearingSensor.init"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize sensor</span>
+
+<span class="sd">        - reseed the random number generator</span>
+<span class="sd">        - reset the counter for handling the ``every`` and ``fail`` options</span>
+<span class="sd">        - reset the landmark log</span>
+<span class="sd">        - initalize plots</span>
+
+<span class="sd">        :seealso: :meth:`SensorBase.init`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_landmarklog</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_animate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">W</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get sensor covariance</span>
+
+<span class="sd">        :return: sensor covariance</span>
+<span class="sd">        :rtype: ndarray(2,2)</span>
+
+<span class="sd">        Returns the value of the sensor covariance matrix passed to</span>
+<span class="sd">        the constructor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_covar</span>
+    
+
+<div class="viewcode-block" id="RangeBearingSensor.reading"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.reading">[docs]</a>    <span class="k">def</span> <span class="nf">reading</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Choose landmark and return observation</span>
+
+<span class="sd">        :return: range and bearing angle to a landmark, and landmark id</span>
+<span class="sd">        :rtype: ndarray(2), int</span>
+
+<span class="sd">        Returns an observation of a random visible landmark (range, bearing) and</span>
+<span class="sd">        the ``id`` of that landmark. The landmark is chosen randomly from the</span>
+<span class="sd">        set of all visible landmarks, those within the angular field of view and</span>
+<span class="sd">        range limit.</span>
+<span class="sd">        </span>
+<span class="sd">        If constructor argument ``every`` is set then only return a valid</span>
+<span class="sd">        reading on every ``every`` calls.</span>
+
+<span class="sd">        If constructor argument ``fail`` is set then do not return a reading</span>
+<span class="sd">        during that specified time interval.</span>
+
+<span class="sd">        If no valid reading is available then return (None, None)</span>
+
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import Bicycle, LandmarkMap, RangeBearingSensor</span>
+<span class="sd">            &gt;&gt;&gt; from math import pi</span>
+<span class="sd">            &gt;&gt;&gt; robot = Bicycle()</span>
+<span class="sd">            &gt;&gt;&gt; map = LandmarkMap(20)</span>
+<span class="sd">            &gt;&gt;&gt; sensor = RangeBearingSensor(robot, map, range=(0.5, 20), angle=pi/4)</span>
+<span class="sd">            &gt;&gt;&gt; print(sensor.reading())</span>
+<span class="sd">    </span>
+<span class="sd">        .. note::</span>
+
+<span class="sd">            - Noise with covariance ``W`` (set by constructor) is added to the</span>
+<span class="sd">              reading</span>
+<span class="sd">            - If ``animate`` option is set then show a line from the vehicle to</span>
+<span class="sd">              the landmark</span>
+<span class="sd">                - If ``animate`` option set and the angular and distance limits</span>
+<span class="sd">                  are set then display the sensor field of view as a polygon.</span>
+
+<span class="sd">        :seealso: :meth:`h`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># TODO probably should return K=0 to indicated invalid</span>
+        
+        <span class="c1"># model a sensor that emits readings every interval samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># check conditions for NOT returning a value</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lm_id</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="c1"># sample interval</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_every</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_landmarklog</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># simulated failure, fail is a list of 2-tuples giving (start,end) times</span>
+        <span class="c1"># for a sensor failure</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fail</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">start</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">&lt;</span> <span class="n">end</span> <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fail</span><span class="p">]):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_landmarklog</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        
+        <span class="c1"># create a polygon to indicate the active sensing area based on range+angle limits</span>
+        <span class="c1"># if self.animate &amp;&amp; ~isempty(self.theta_range) &amp;&amp; ~isempty(self.r_range)</span>
+        <span class="c1">#     h = findobj(gca, &#39;tag&#39;, &#39;sensor-area&#39;)</span>
+        <span class="c1">#     if isempty(h)</span>
+                
+        <span class="c1">#         th=linspace(self.theta_range[0], self.theta_range[1], 20)</span>
+        <span class="c1">#         x = self.r_range[1] * cos(th)</span>
+        <span class="c1">#         y = self.r_range[1] * sin(th)</span>
+        <span class="c1">#         if self.r_range[0] &gt; 0</span>
+        <span class="c1">#             th = flip(th)</span>
+        <span class="c1">#             x = [x self.r_range[0] * cos(th)]</span>
+        <span class="c1">#             y = [y self.r_range[0] * sin(th)]</span>
+        <span class="c1">#         else</span>
+        <span class="c1">#             x = [x 0]</span>
+        <span class="c1">#             y = [y 0]</span>
+        <span class="c1">#         end</span>
+        <span class="c1">#         # no sensor zone, create one</span>
+        <span class="c1">#         plot_poly([x; y], &#39;fillcolor&#39;, &#39;r&#39;, &#39;alpha&#39;, 0.1, &#39;edgecolor&#39;, &#39;none&#39;, &#39;animate&#39;, &#39;tag&#39;, &#39;sensor-area&#39;)</span>
+        <span class="c1">#     else</span>
+        <span class="c1">#         hg = get(h, &#39;Parent&#39;)</span>
+        <span class="c1">#         plot_poly(h, self.robot.x)</span>
+        
+        <span class="n">zk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visible</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">zk</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># more than 1 visible landmark, pick a random one</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zk</span><span class="p">))</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">zk</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">lm_id</span> <span class="o">=</span> <span class="n">zk</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sensor:: feature </span><span class="si">{</span><span class="n">lm_id</span><span class="si">}</span><span class="s2">: (</span><span class="si">{</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">zk</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># just 1 visible landmark</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">zk</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">lm_id</span> <span class="o">=</span> <span class="n">zk</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sensor:: feature </span><span class="si">{</span><span class="n">lm_id</span><span class="si">}</span><span class="s2">: (</span><span class="si">{</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sensor:: no features</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_landmarklog</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># compute the range and bearing from robot to feature</span>
+        <span class="c1"># z = self.h(self.robot.x, lm_id)  </span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_animate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span>
+        
+        <span class="c1"># add the reading to the landmark log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_landmarklog</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span>
+
+        <span class="c1"># add noise with covariance W</span>
+        <span class="n">z</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_W</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="n">z</span><span class="p">,</span> <span class="n">lm_id</span></div>
+
+<div class="viewcode-block" id="RangeBearingSensor.visible"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.visible">[docs]</a>    <span class="k">def</span> <span class="nf">visible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        List of all visible landmarks</span>
+
+<span class="sd">        :return: list of visible landmarks</span>
+<span class="sd">        :rtype: list of int</span>
+
+<span class="sd">        Return a list of the id of all landmarks that are visible, that is, it</span>
+<span class="sd">        lies with the sensing range and field of view of the sensor at the</span>
+<span class="sd">        robot&#39;s current configuration.</span>
+
+<span class="sd">        :seealso: :meth:`isvisible` :meth:`h`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get range/bearing to all landmarks</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">zk</span> <span class="o">=</span> <span class="p">[(</span><span class="n">z</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">z</span><span class="p">)]</span>
+        <span class="c1"># a list of tuples, each tuple is ((range, bearing), k)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">zk</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">zk</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">zk</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">zk</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># find all within angular range as well</span>
+            <span class="n">zk</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">zk</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">zk</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">zk</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">zk</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RangeBearingSensor.isvisible"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.isvisible">[docs]</a>    <span class="k">def</span> <span class="nf">isvisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test if landmark is visible</span>
+
+<span class="sd">        :param id: landmark id</span>
+<span class="sd">        :type id: int</span>
+<span class="sd">        :return: visibility</span>
+<span class="sd">        :rtype: bool</span>
+
+<span class="sd">        The landmark ``id`` is visible if it lies with the sensing range and</span>
+<span class="sd">        field of view of the sensor at the robot&#39;s current configuration.</span>
+
+<span class="sd">        :seealso: :meth:`visible` :meth:`h`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> \
+        <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="RangeBearingSensor.h"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.h">[docs]</a>    <span class="k">def</span> <span class="nf">h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">landmark</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Landmark observation function</span>
+
+<span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
+<span class="sd">        :type x: array_like(3), array_like(N,3)</span>
+<span class="sd">        :param landmark: landmark id or position, defaults to None</span>
+<span class="sd">        :type landmark: int or array_like(2), optional</span>
+<span class="sd">        :return: range and bearing angle to landmark math:`(r,\beta)`</span>
+<span class="sd">        :rtype: ndarray(2) or ndarray(N,2)</span>
+
+<span class="sd">        Return the range and bearing to a landmark:</span>
+
+<span class="sd">        - ``.h(x)`` is range and bearing to all landmarks, one row per landmark</span>
+<span class="sd">        - ``.h(x, id)`` is range and bearing to landmark ``id``</span>
+<span class="sd">        - ``.h(x, p)`` is range and bearing to landmark with coordinates ``p``</span>
+<span class="sd">        </span>
+<span class="sd">        .. runblock:: pycon</span>
+
+<span class="sd">            &gt;&gt;&gt; from roboticstoolbox import Bicycle, LandmarkMap, RangeBearingSensor</span>
+<span class="sd">            &gt;&gt;&gt; from math import pi</span>
+<span class="sd">            &gt;&gt;&gt; robot = Bicycle()</span>
+<span class="sd">            &gt;&gt;&gt; map = LandmarkMap(20)</span>
+<span class="sd">            &gt;&gt;&gt; sensor = RangeBearingSensor(robot, map, range=(0.5, 20), angle=pi/4)</span>
+<span class="sd">            &gt;&gt;&gt; z = sensor.h((1, 2, pi/2), 3)</span>
+<span class="sd">            &gt;&gt;&gt; print(z)</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - Noise with covariance (property ``W``) is added to each row of ``z``.</span>
+<span class="sd">            - Performs fast vectorized operation where ``x`` is an ndarray(n,3).</span>
+<span class="sd">            - The landmark is assumed to be visible, field of view and range limits are not</span>
+<span class="sd">              applied.</span>
+
+<span class="sd">        :seealso: :meth:`reading` :meth:`Hx` :meth:`Hw` :meth:`Hp`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get the landmarks, one per row</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># x is Nx3 set of vehicle states, do vectorized form</span>
+            <span class="c1"># used by particle filter</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">x</span>
+
+        <span class="k">if</span> <span class="n">landmark</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># self.h(XV)   all landmarks</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">landmarks</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">landmarks</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">y</span>
+        <span class="k">elif</span> <span class="n">base</span><span class="o">.</span><span class="n">isinteger</span><span class="p">(</span><span class="n">landmark</span><span class="p">):</span>
+            <span class="c1"># landmark id</span>
+            <span class="c1"># self.h(XV, JF)</span>
+            <span class="n">xlm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">landmark</span><span class="p">]</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">xlm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="n">xlm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># landmark position</span>
+            <span class="c1"># self.h(XV, XF)</span>
+            <span class="n">xlm</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">landmark</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">xlm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="n">xlm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span>
+
+        <span class="c1"># compute range and bearing (Vectorized code)</span>
+
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dy</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> 
+                <span class="n">base</span><span class="o">.</span><span class="n">angdiff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">),</span> <span class="n">t</span><span class="p">)</span> 
+            <span class="p">]</span>  <span class="c1"># range &amp; bearing as columns</span>
+
+        <span class="k">if</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">z</span></div>
+
+<div class="viewcode-block" id="RangeBearingSensor.Hx"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.Hx">[docs]</a>    <span class="k">def</span> <span class="nf">Hx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">landmark</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Jacobian dh/dx</span>
+
+<span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
+<span class="sd">        :type x: array_like(3)</span>
+<span class="sd">        :param arg: landmark id or coordinate</span>
+<span class="sd">        :type arg: int or array_like(2)</span>
+<span class="sd">        :return: Jacobian matrix</span>
+<span class="sd">        :rtype: ndarray(2,3)</span>
+
+<span class="sd">        Compute the Jacobian of the observation function with respect to vehicle</span>
+<span class="sd">        configuration :math:`\partial h/\partial x`</span>
+
+<span class="sd">        - ``sensor.Hx(q, id)`` is Jacobian for landmark ``id``</span>
+<span class="sd">        - ``sensor.h(q, p)`` is Jacobian for landmark with coordinates ``p``</span>
+<span class="sd">        </span>
+<span class="sd">        :seealso: :meth:`h` :meth:`Hp` :meth:`Hw`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="n">isinteger</span><span class="p">(</span><span class="n">landmark</span><span class="p">):</span>
+            <span class="c1"># landmark index provided</span>
+            <span class="n">xf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">landmark</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># assume it is a coordinate</span>
+            <span class="n">xf</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">landmark</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">Delta</span> <span class="o">=</span> <span class="n">xf</span> <span class="o">-</span> <span class="n">x</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Delta</span><span class="p">)</span>
+        <span class="c1"># fmt: off</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">Delta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">r</span><span class="p">,</span>    <span class="o">-</span><span class="n">Delta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">r</span><span class="p">,</span>      <span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span> <span class="n">Delta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">Delta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>  <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="p">])</span></div>
+        <span class="c1"># fmt: on</span>
+
+<div class="viewcode-block" id="RangeBearingSensor.Hp"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.Hp">[docs]</a>    <span class="k">def</span> <span class="nf">Hp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">landmark</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Jacobian dh/dp</span>
+
+<span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
+<span class="sd">        :type x: array_like(3)</span>
+<span class="sd">        :param arg: landmark id or coordinate</span>
+<span class="sd">        :type arg: int or array_like(2)</span>
+<span class="sd">        :return: Jacobian matrix</span>
+<span class="sd">        :rtype: ndarray(2,2)</span>
+
+<span class="sd">        Compute the Jacobian of the observation function with respect</span>
+<span class="sd">        to landmark position :math:`\partial h/\partial p`</span>
+
+<span class="sd">        - ``sensor.Hp(x, id)`` is Jacobian for landmark ``id``</span>
+<span class="sd">        - ``sensor.Hp(x, p)`` is Jacobian for landmark with coordinates ``p``</span>
+<span class="sd">        </span>
+<span class="sd">        :seealso: :meth:`h` :meth:`Hx` :meth:`Hw`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="n">isinteger</span><span class="p">(</span><span class="n">landmark</span><span class="p">):</span>
+            <span class="n">xf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">landmark</span><span class="p">(</span><span class="n">landmark</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xf</span> <span class="o">=</span> <span class="n">landmark</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">Delta</span> <span class="o">=</span> <span class="n">xf</span> <span class="o">-</span> <span class="n">x</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Delta</span><span class="p">)</span>
+        <span class="c1"># fmt: off</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span> <span class="n">Delta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">r</span><span class="p">,</span>      <span class="n">Delta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">r</span><span class="p">],</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">Delta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>   <span class="n">Delta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span>
+            <span class="p">])</span></div>
+        <span class="c1"># fmt: on</span>
+
+<div class="viewcode-block" id="RangeBearingSensor.Hw"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.Hw">[docs]</a>    <span class="k">def</span> <span class="nf">Hw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">landmark</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Jacobian dh/dw</span>
+
+<span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
+<span class="sd">        :type x: array_like(3)</span>
+<span class="sd">        :param arg: landmark id or coordinate</span>
+<span class="sd">        :type arg: int or array_like(2)</span>
+<span class="sd">        :return: Jacobian matrix</span>
+<span class="sd">        :rtype: ndarray(2,2)</span>
+
+<span class="sd">        Compute the Jacobian of the observation function with respect</span>
+<span class="sd">        to sensor noise :math:`\partial h/\partial w`</span>
+
+<span class="sd">        - ``sensor.Hw(x, id)`` is Jacobian for landmark ``id``</span>
+<span class="sd">        - ``sensor.Hw(x, p)`` is Jacobian for landmark with coordinates ``p``</span>
+
+<span class="sd">        .. note:: ``x`` and ``landmark`` are not used to compute this.</span>
+<span class="sd">        </span>
+<span class="sd">        :seealso: :meth:`h` :meth:`Hx` :meth:`Hp`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RangeBearingSensor.g"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.g">[docs]</a>    <span class="k">def</span> <span class="nf">g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Landmark position from sensor observation</span>
+
+<span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
+<span class="sd">        :type x: array_like(3)</span>
+<span class="sd">        :param z: landmark observation :math:`(r, \beta)`</span>
+<span class="sd">        :type z: array_like(2)</span>
+<span class="sd">        :return: landmark position :math:`(x, y)`</span>
+<span class="sd">        :rtype: ndarray(2)</span>
+
+<span class="sd">        Compute the world coordinate  of a landmark given</span>
+<span class="sd">        the observation ``z`` from a vehicle state with ``x``.</span>
+
+<span class="sd">        :seealso: :meth:`h` :meth:`Gx` :meth:`Gz`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="nb">range</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">bearing</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># bearing angle in vehicle frame</span>
+
+        <span class="c1"># fmt: off</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span>
+            <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">range</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">bearing</span><span class="p">),</span>
+            <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="nb">range</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">bearing</span><span class="p">)</span>
+                <span class="p">]</span></div>
+        <span class="c1"># fmt: on</span>
+
+<div class="viewcode-block" id="RangeBearingSensor.Gx"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.Gx">[docs]</a>    <span class="k">def</span> <span class="nf">Gx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Jacobian dg/dx</span>
+
+<span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
+<span class="sd">        :type x: array_like(3)</span>
+<span class="sd">        :param z: landmark observation :math:`(r, \beta)`</span>
+<span class="sd">        :type z: array_like(2)</span>
+<span class="sd">        :return: Jacobian matrix</span>
+<span class="sd">        :rtype: ndarray(2,3)</span>
+
+<span class="sd">        Compute the Jacobian of the landmark position function with respect</span>
+<span class="sd">        to landmark position :math:`\partial g/\partial x`</span>
+
+<span class="sd">        :seealso: :meth:`g`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">r</span><span class="p">,</span> <span class="n">bearing</span> <span class="o">=</span> <span class="n">z</span>
+
+        <span class="c1"># fmt: off</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span>   <span class="o">-</span><span class="n">r</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span> <span class="o">+</span> <span class="n">bearing</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span>   <span class="mi">1</span><span class="p">,</span>    <span class="n">r</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span> <span class="o">+</span> <span class="n">bearing</span><span class="p">)],</span>
+                <span class="p">])</span></div>
+        <span class="c1"># fmt: on</span>
+
+<div class="viewcode-block" id="RangeBearingSensor.Gz"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.Gz">[docs]</a>    <span class="k">def</span> <span class="nf">Gz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Jacobian dg/dz</span>
+
+<span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
+<span class="sd">        :type x: array_like(3)</span>
+<span class="sd">        :param z: landmark observation :math:`(r, \beta)`</span>
+<span class="sd">        :type z: array_like(2)</span>
+<span class="sd">        :return: Jacobian matrix</span>
+<span class="sd">        :rtype: ndarray(2,2)</span>
+
+<span class="sd">        Compute the Jacobian of the landmark position function with respect</span>
+<span class="sd">        to sensor observation :math:`\partial g/\partial z`</span>
+
+<span class="sd">        :seealso: :meth:`g`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">r</span><span class="p">,</span> <span class="n">bearing</span> <span class="o">=</span> <span class="n">z</span>
+        <span class="c1"># fmt: off</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="p">[</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span> <span class="o">+</span> <span class="n">bearing</span><span class="p">),</span>   <span class="o">-</span><span class="n">r</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span> <span class="o">+</span> <span class="n">bearing</span><span class="p">)],</span>
+            <span class="p">[</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span> <span class="o">+</span> <span class="n">bearing</span><span class="p">),</span>    <span class="n">r</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span> <span class="o">+</span> <span class="n">bearing</span><span class="p">)],</span>
+            <span class="p">])</span></div></div>
+        <span class="c1"># fmt: on</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    
+    <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">Bicycle</span><span class="p">,</span> <span class="n">LandmarkMap</span><span class="p">,</span> <span class="n">RangeBearingSensor</span>
+    <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+    <span class="n">robot</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>
+    <span class="nb">map</span> <span class="o">=</span> <span class="n">LandmarkMap</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">sensor</span> <span class="o">=</span> <span class="n">RangeBearingSensor</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="n">angle</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">sensor</span><span class="o">.</span><span class="n">reading</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">sensor</span><span class="o">.</span><span class="n">visible</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">sensor</span><span class="o">.</span><span class="n">isvisible</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">sensor</span><span class="o">.</span><span class="n">isvisible</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 19-May-2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

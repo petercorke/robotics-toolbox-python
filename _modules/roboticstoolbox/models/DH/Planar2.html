@@ -76,7 +76,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">DHRobot</span><span class="p">,</span> <span class="n">RevoluteDH</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
 <div class="viewcode-block" id="Planar2"><a class="viewcode-back" href="../../../../arm_dh.html#roboticstoolbox.models.DH.Planar2">[docs]</a><span class="k">class</span> <span class="nc">Planar2</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
@@ -110,27 +110,32 @@
 
         <span class="k">if</span> <span class="n">symbolic</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">spatialmath.base.symbolic</span> <span class="k">as</span> <span class="nn">sym</span>
+
             <span class="n">zero</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
             <span class="n">pi</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">pi</span><span class="p">()</span>
-            <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;a1 a2&#39;</span><span class="p">)</span>
+            <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;a1 a2&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+
             <span class="n">zero</span> <span class="o">=</span> <span class="mf">0.0</span>
             <span class="n">a1</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">a2</span> <span class="o">=</span> <span class="mi">1</span>
 
-        <span class="n">L</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">a1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">zero</span><span class="p">),</span>
-                <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">a2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">zero</span><span class="p">)</span>
-            <span class="p">]</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="p">[</span><span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">a1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">zero</span><span class="p">),</span> <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">a2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">zero</span><span class="p">)]</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Planar 2 link&#39;</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;planar&#39;</span><span class="p">,))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;q1&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;q2&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">])</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Planar 2 link&quot;</span><span class="p">,</span> <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;planar&quot;</span><span class="p">,))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">qr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration_attr</span><span class="p">(</span><span class="s2">&quot;q1&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration_attr</span><span class="p">(</span><span class="s2">&quot;q2&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]))</span></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
     <span class="n">robot</span> <span class="o">=</span> <span class="n">Planar2</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
@@ -144,7 +149,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>roboticstoolbox.mobile.ParticleFilter &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
+            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>roboticstoolbox.mobile.ParticleFilter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for roboticstoolbox.mobile.ParticleFilter</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Python EKF Planner</span>
+<span class="sd">@Author: Peter Corke, original MATLAB code and Python version</span>
+<span class="sd">@Author: Kristian Gibson, initial MATLAB port</span>
+
+<span class="sd">Based on code by Paul Newman, Oxford University, </span>
+<span class="sd">http://www.robots.ox.ac.uk/~pnewman</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Monte-carlo based localisation for estimating vehicle pose based on</span>
+<span class="sd">odometry and observations of known landmarks.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># TODO: refactor this and EKF, RNG, history, common plots, animation, movie</span>
+
+<div class="viewcode-block" id="ParticleFilter"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter">[docs]</a><span class="k">class</span> <span class="nc">ParticleFilter</span><span class="p">:</span>
+    
+<div class="viewcode-block" id="ParticleFilter.__init__"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">,</span> <span class="n">sensor</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">nparticles</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Particle filter</span>
+
+<span class="sd">        :param robot: robot motion model</span>
+<span class="sd">        :type robot: :class:`VehicleBase` subclass,</span>
+<span class="sd">        :param sensor: vehicle mounted sensor model</span>
+<span class="sd">        :type sensor: :class:`SensorBase` subclass</span>
+<span class="sd">        :param R: covariance of the zero-mean Gaussian noise added to the particles at each step (diffusion)</span>
+<span class="sd">        :type R: ndarray(3,3)</span>
+<span class="sd">        :param L: covariance used in the sensor likelihood model</span>
+<span class="sd">        :type L: ndarray(2,2)</span>
+<span class="sd">        :param nparticles: number of particles, defaults to 500</span>
+<span class="sd">        :type nparticles: int, optional</span>
+<span class="sd">        :param seed: random number seed, defaults to 0</span>
+<span class="sd">        :type seed: int, optional</span>
+<span class="sd">        :param x0: initial state, defaults to [0, 0, 0]</span>
+<span class="sd">        :type x0: array_like(3), optional</span>
+<span class="sd">        :param verbose: display extra debug information, defaults to False</span>
+<span class="sd">        :type verbose: bool, optional</span>
+<span class="sd">        :param history: retain step-by-step history, defaults to True</span>
+<span class="sd">        :type history: bool, optional</span>
+<span class="sd">        :param workspace: dimension of workspace, see :func:`~spatialmath.base.graphics.expand_dims`</span>
+<span class="sd">        :type workspace: scalar, array_like(2), array_like(4)</span>
+
+<span class="sd">        This class implements a Monte-Carlo estimator or particle filter for</span>
+<span class="sd">        vehicle state, based on odometry, a landmark map, and landmark</span>
+<span class="sd">        observations.  The state of each particle is a possible vehicle</span>
+<span class="sd">        configuration :math:`(x,y,\theta)`.  Bootstrap particle resampling is </span>
+<span class="sd">        used.</span>
+
+<span class="sd">        The working area is defined by ``workspace`` or inherited from the</span>
+<span class="sd">        landmark map attached to the ``sensor`` (see</span>
+<span class="sd">        :func:`~spatialmath.base.graphics.expand_dims`):</span>
+
+<span class="sd">        ==============  =======  =======</span>
+<span class="sd">        ``workspace``   x-range  y-range</span>
+<span class="sd">        ==============  =======  =======</span>
+<span class="sd">        A (scalar)      -A:A     -A:A</span>
+<span class="sd">        [A, B]           A:B      A:B</span>
+<span class="sd">        [A, B, C, D]     A:B      C:D</span>
+<span class="sd">        ==============  =======  =======</span>
+
+<span class="sd">        Particles are initially distributed uniform randomly over this area.</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            V = np.diag([0.02, np.radians(0.5)]) ** 2</span>
+<span class="sd">            robot = Bicycle(covar=V, animation=&quot;car&quot;, workspace=10)</span>
+<span class="sd">            robot.control = RandomPath(workspace=robot)</span>
+
+<span class="sd">            map = LandmarkMap(nlandmarks=20, workspace=robot.workspace)</span>
+
+<span class="sd">            W = np.diag([0.1, np.radians(1)]) ** 2</span>
+<span class="sd">            sensor = RangeBearingSensor(robot, map, covar=W, plot=True)</span>
+
+<span class="sd">            R = np.diag([0.1, 0.1, np.radians(1)]) ** 2</span>
+<span class="sd">            L = np.diag([0.1, 0.1])</span>
+<span class="sd">            pf = ParticleFilter(robot, sensor, R, L, nparticles=1000)</span>
+
+<span class="sd">            pf.run(T=10)</span>
+
+<span class="sd">            map.plot()</span>
+<span class="sd">            robot.plot_xy()</span>
+<span class="sd">            pf.plot_xy()</span>
+
+<span class="sd">            plt.plot(pf.get_std()[:100,:])</span>
+
+<span class="sd">        .. note:: Set ``seed=0`` to get different behaviour from run to run.</span>
+
+<span class="sd">        :seealso: :meth:`run`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span> <span class="o">=</span> <span class="n">robot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensor</span> <span class="o">=</span> <span class="n">sensor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">R</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="n">L</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span> <span class="o">=</span> <span class="n">nparticles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_animate</span> <span class="o">=</span> <span class="n">animate</span>
+
+        <span class="c1"># self.dim = sensor.map.dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w0</span> <span class="o">=</span> <span class="mf">0.05</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="n">x0</span>
+
+        <span class="c1"># create a private random number stream if required</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_random</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_keep_history</span> <span class="o">=</span> <span class="n">history</span>     <span class="c1">#  keep history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_htuple</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;PFlog&quot;</span><span class="p">,</span> <span class="s2">&quot;t odo xest std weights&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="o">=</span> <span class="n">sensor</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">workspace</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">workspace</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#ParticleFilter.char Convert to string</span>
+        <span class="c1">#</span>
+        <span class="c1"># PF.char() is a string representing the state of the ParticleFilter</span>
+        <span class="c1"># object in human-readable form.</span>
+        <span class="c1">#</span>
+        <span class="c1"># See also ParticleFilter.display.</span>
+
+        <span class="k">def</span> <span class="nf">indent</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+            <span class="n">spaces</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">n</span>
+            <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">spaces</span><span class="p">)</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ParticleFilter object: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="si">}</span><span class="s2"> particles&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">R:  &#39;</span> <span class="o">+</span> <span class="n">base</span><span class="o">.</span><span class="n">array2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">L:  &#39;</span> <span class="o">+</span> <span class="n">base</span><span class="o">.</span><span class="n">array2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="n">indent</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">robot: &quot;</span>  <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="n">indent</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">sensor: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">robot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get robot object</span>
+
+<span class="sd">        :return: robot used in simulation</span>
+<span class="sd">        :rtype: :class:`VehicleBase` subclass</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get sensor object</span>
+
+<span class="sd">        :return: sensor used in simulation</span>
+<span class="sd">        :rtype: :class:`SensorBase` subclass</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensor</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get map object</span>
+
+<span class="sd">        :return: map used in simulation</span>
+<span class="sd">        :rtype: :class:`LandmarkMap` subclass</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get verbosity state</span>
+
+<span class="sd">        :return: verbosity</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">history</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get EKF simulation history</span>
+
+<span class="sd">        :return: simulation history</span>
+<span class="sd">        :rtype: list of namedtuples</span>
+
+<span class="sd">        At each simulation timestep a namedtuple of is appended to the history</span>
+<span class="sd">        list.  It contains, for that time step, estimated state and covariance,</span>
+<span class="sd">        and sensor observation.</span>
+
+<span class="sd">        :seealso: :meth:`get_t` :meth:`get_xy` :meth:`get_std` </span>
+<span class="sd">            :meth:`get_Pnorm` </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Size of robot workspace</span>
+
+<span class="sd">        :return: workspace bounds [xmin, xmax, ymin, ymax]</span>
+<span class="sd">        :rtype: ndarray(4)</span>
+
+<span class="sd">        Returns the bounds of the workspace as specified by constructor</span>
+<span class="sd">        option ``workspace``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get private random number generator</span>
+
+<span class="sd">        :return: NumPy random number generator</span>
+<span class="sd">        :rtype: :class:`numpy.random.Generator`</span>
+
+<span class="sd">        Has methods including:</span>
+
+<span class="sd">        - ``integers(low, high, size, endpoint)``</span>
+<span class="sd">        - ``random(size)``</span>
+<span class="sd">        - ``uniform``</span>
+<span class="sd">        - ``normal(mean, std, size)``</span>
+<span class="sd">        - ``multivariate_normal(mean, covar, size)``</span>
+
+<span class="sd">        The generator is initialized with the seed provided at constructor</span>
+<span class="sd">        time every time ``init`` is called.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random</span>
+
+    <span class="k">def</span> <span class="nf">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1">#ParticleFilter.init Initialize the particle filter</span>
+        <span class="c1">#</span>
+        <span class="c1"># PF.init() initializes the particle distribution and clears the</span>
+        <span class="c1"># history.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Notes::</span>
+        <span class="c1"># - If initial particle states were given to the constructor the states are</span>
+        <span class="c1">#   set to this value, else a random distribution over the map is used.</span>
+        <span class="c1"># - Invoked by the run() method.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+
+        <span class="c1">#clear the history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># create a new private random number generator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_random</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_t</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># initialize particles</span>
+        <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span>
+        <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># create initial particle distribution as uniformly randomly distributed</span>
+            <span class="c1"># over the map workspace and heading angles</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="p">,))</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="p">,))</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="p">,))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">t</span><span class="p">]</span> 
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="p">,))</span>
+
+
+<div class="viewcode-block" id="ParticleFilter.run"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the particle filter simulation</span>
+
+<span class="sd">        :param T: maximum simulation time in seconds</span>
+<span class="sd">        :type T: float</span>
+<span class="sd">        :param animate: animate motion of vehicle, defaults to False</span>
+<span class="sd">        :type animate: bool, optional</span>
+<span class="sd">        :param movie: name of movie file to create, defaults to None</span>
+<span class="sd">        :type movie: str, optional</span>
+
+<span class="sd">        Simulates the motion of a vehicle (under the control of a driving agent)</span>
+<span class="sd">        and the EKF estimator.  The steps are:</span>
+
+<span class="sd">        - initialize the filter, vehicle and vehicle driver agent, sensor</span>
+<span class="sd">        - for each time step:</span>
+
+<span class="sd">            - step the vehicle and its driver agent, obtain odometry</span>
+<span class="sd">            - take a sensor reading</span>
+<span class="sd">            - execute the EKF</span>
+<span class="sd">            - save information as a namedtuple to the history list for later display</span>
+
+<span class="sd">        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks` </span>
+<span class="sd">            :meth:`get_xy` :meth:`get_t` :meth:`get_std`</span>
+<span class="sd">            :meth:`plot_xy`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">)</span>
+
+        <span class="c1"># anim = Animate(opt.movie)</span>
+
+        <span class="c1"># display the initial particles</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_animate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;go&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;particle&#39;</span><span class="p">)</span>
+        <span class="c1"># set(self.h, &#39;Tag&#39;, &#39;particles&#39;)</span>
+        
+        <span class="c1"># self.robot.plot()</span>
+
+        <span class="c1"># iterate over time</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">dt</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">()</span></div>
+            <span class="c1"># anim.add()</span>
+        <span class="c1"># anim.close()</span>
+
+    <span class="k">def</span> <span class="nf">_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+             
+        <span class="c1">#fprintf(&#39;---- step\n&#39;)</span>
+        <span class="n">odo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>        <span class="c1"># move the robot</span>
+
+        <span class="c1"># update the particles based on odometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="n">odo</span><span class="p">)</span>
+
+        <span class="c1"># get a sensor reading</span>
+        <span class="n">z</span><span class="p">,</span> <span class="n">lm_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">reading</span><span class="p">()</span>         
+
+        <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_observe</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">lm_id</span><span class="p">)</span>
+            <span class="c1">#fprintf(&#39; observe beacon #d\n&#39;, lm_id)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_select</span><span class="p">()</span>
+
+        <span class="c1"># our estimate is simply the mean of the particles</span>
+        <span class="n">x_est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">std_est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># std is more complex for angles, need to account for 2pi wrap</span>
+        <span class="n">std_est</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">angdiff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">x_est</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># display the updated particles</span>
+        <span class="c1"># set(self.h, &#39;Xdata&#39;, self.x(:,1), &#39;Ydata&#39;, self.x(:,2), &#39;Zdata&#39;, self.x(:,3))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_animate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">set_xdata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        
+        <span class="c1"># if ~isempty(self.anim)</span>
+        <span class="c1">#     self.anim.add()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keep_history</span><span class="p">:</span>
+            <span class="n">hist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_htuple</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">_t</span><span class="p">,</span>
+                <span class="n">odo</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="n">x_est</span><span class="p">,</span>
+                <span class="n">std_est</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ParticleFilter.plot_pdf"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.plot_pdf">[docs]</a>    <span class="k">def</span> <span class="nf">plot_pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot particle PDF</span>
+
+<span class="sd">        Displays a discrete PDF of vehicle position.  Creates a 3D plot where</span>
+<span class="sd">        the x- and y-axes are the estimated vehicle position and the z-axis is</span>
+<span class="sd">        the particle weight.  Each particle is represented by a a vertical line</span>
+<span class="sd">        segment of height equal to particle weight.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">plotvol3</span><span class="p">()</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span> <span class="n">weight</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">):</span>
+            <span class="c1"># ax.plot([x, x], [y, y], [0, weight], &#39;r&#39;)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">weight</span><span class="p">],</span> <span class="s1">&#39;skyblue&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="s1">&#39;k.&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s1">&#39;particle weight&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">view_init</span><span class="p">(</span><span class="mi">29</span><span class="p">,</span> <span class="mi">59</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">odo</span><span class="p">):</span>
+        <span class="c1"># step 2</span>
+        <span class="c1"># update the particle state based on odometry and a random perturbation</span>
+
+        <span class="c1"># Straightforward code:</span>
+        <span class="c1">#</span>
+        <span class="c1"># for i=1:self.nparticles</span>
+        <span class="c1">#    x = self.robot.f( self.x(i,:), odo)&#39; + sqrt(self.R)*self.randn[2,0]   </span>
+        <span class="c1">#    x[2] = angdiff(x[2])</span>
+        <span class="c1">#    self.x(i,:) = x</span>
+        <span class="c1">#</span>
+        <span class="c1"># Vectorized code:</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">odo</span><span class="p">)</span> <span class="o">+</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="p">)</span>   
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">angdiff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+
+
+    <span class="k">def</span> <span class="nf">_observe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">lm_id</span><span class="p">):</span>
+        <span class="c1"># step 3</span>
+        <span class="c1"># predict observation and score the particles</span>
+        
+        <span class="c1"># Straightforward code:</span>
+        <span class="c1">#</span>
+        <span class="c1"># for p = 1:self.nparticles</span>
+        <span class="c1">#    # what do we expect observation to be for this particle?</span>
+        <span class="c1">#    # use the sensor model h(.)</span>
+        <span class="c1">#    z_pred = self.sensor.h( self.x(p,:), lm_id)</span>
+        <span class="c1">#    </span>
+        <span class="c1">#    # how different is it</span>
+        <span class="c1">#    innov[0] = z[0] - z_pred[0]</span>
+        <span class="c1">#    innov[1] = angdiff(z[1], z_pred[1])</span>
+        <span class="c1">#    </span>
+        <span class="c1">#    # get likelihood (new importance). Assume Gaussian but any PDF works!</span>
+        <span class="c1">#    # If predicted obs is very different from actual obs this score will be low</span>
+        <span class="c1">#    #  ie. this particle is not very good at predicting the observation.</span>
+        <span class="c1">#    # A lower score means it is less likely to be selected for the next generation...</span>
+        <span class="c1">#    # The weight is never zero.</span>
+        <span class="c1">#    self.weight(p) = exp(-0.5*innov&#39;*inv(self.L)*innov) + 0.05</span>
+        <span class="c1"># end</span>
+        <span class="c1">#</span>
+        <span class="c1"># Vectorized code:</span>
+
+        <span class="n">invL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)</span>
+        <span class="n">z_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">lm_id</span><span class="p">)</span>
+        <span class="n">z_pred</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">z_pred</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">z_pred</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">angdiff</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">z_pred</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">LL</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">invL</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">invL</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="o">*</span><span class="n">invL</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">z_pred</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">z_pred</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">z_pred</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_pred</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">@</span> <span class="n">LL</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w0</span>  
+
+
+
+    <span class="k">def</span> <span class="nf">_select</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># step 4</span>
+        <span class="c1"># select particles based on their weights</span>
+        <span class="c1">#       </span>
+        <span class="c1"># particles with large weights will occupy a greater percentage of the</span>
+        <span class="c1"># y axis in a cummulative plot</span>
+        <span class="n">cdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="c1"># so randomly (uniform) choosing y values is more likely to correspond to</span>
+        <span class="c1"># better particles...</span>
+        <span class="n">iselect</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="p">,))</span>
+
+        <span class="c1"># find the particle that corresponds to each y value (just a look up)</span>
+        <span class="n">interpfun</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">cdf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="p">),</span> 
+                <span class="n">assume_sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="s1">&#39;extrapolate&#39;</span><span class="p">)</span>
+        <span class="n">inextgen</span> <span class="o">=</span> <span class="n">interpfun</span><span class="p">(</span><span class="n">iselect</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+        <span class="c1"># copy selected particles for next generation..</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">inextgen</span><span class="p">,</span> <span class="p">:]</span>
+
+<div class="viewcode-block" id="ParticleFilter.get_t"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.get_t">[docs]</a>    <span class="k">def</span> <span class="nf">get_t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get time from simulation</span>
+
+<span class="sd">        :return: simulation time vector</span>
+<span class="sd">        :rtype: ndarray(n)</span>
+
+<span class="sd">        Return simulation time vector, starts at zero.  The timestep is an</span>
+<span class="sd">        attribute of the ``robot`` object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">t</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="ParticleFilter.get_xyt"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.get_xyt">[docs]</a>    <span class="k">def</span> <span class="nf">get_xyt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get estimated vehicle trajectory</span>
+
+<span class="sd">        :return: vehicle trajectory where each row is configuration :math:`(x, y, \theta)`</span>
+<span class="sd">        :rtype: ndarray(n,3)</span>
+
+<span class="sd">        :seealso: :meth:`plot_xy` :meth:`run` :meth:`history`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">xest</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="ParticleFilter.get_std"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.get_std">[docs]</a>    <span class="k">def</span> <span class="nf">get_std</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get standard deviation of particles</span>
+
+<span class="sd">        :return: standard deviation of vehicle position estimate</span>
+<span class="sd">        :rtype: ndarray(n,2)</span>
+
+<span class="sd">        Return the standard deviation :math:`(\sigma_x, \sigma_y)` of the</span>
+<span class="sd">        particle cloud at each time step.</span>
+
+<span class="sd">        :seealso: :meth:`get_xyt`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">std</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="ParticleFilter.plot_xy"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.plot_xy">[docs]</a>    <span class="k">def</span> <span class="nf">plot_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot estimated vehicle position</span>
+
+<span class="sd">        :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`</span>
+<span class="sd">        :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`</span>
+<span class="sd">        :param block: hold plot until figure is closed, defaults to False</span>
+<span class="sd">        :type block: bool, optional</span>
+
+<span class="sd">        Plot the estimated vehicle path in the xy-plane.</span>
+
+<span class="sd">        :seealso: :meth:`get_xy`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">xyt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_xyt</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xyt</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xyt</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+        <span class="c1"># plt.show(block=block)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 19-May-2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

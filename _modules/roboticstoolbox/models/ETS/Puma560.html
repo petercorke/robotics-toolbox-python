@@ -69,8 +69,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for roboticstoolbox.models.ETS.Puma560</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ETS</span> <span class="k">as</span> <span class="n">ET</span>
+<span></span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ET</span> <span class="k">as</span> <span class="n">ET</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ERobot</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
 <div class="viewcode-block" id="Puma560"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.ETS.Puma560">[docs]</a><span class="k">class</span> <span class="nc">Puma560</span><span class="p">(</span><span class="n">ERobot</span><span class="p">):</span>
@@ -107,24 +108,34 @@
         <span class="n">l5</span> <span class="o">=</span> <span class="mf">0.0837</span>
         <span class="n">l6</span> <span class="o">=</span> <span class="mf">0.4318</span>
 
-        <span class="n">e</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l2</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l3</span><span class="p">)</span> <span class="o">*</span> \
-            <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">l4</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l5</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l6</span><span class="p">)</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> \
-            <span class="n">ET</span><span class="o">.</span><span class="n">ry</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">rz</span><span class="p">()</span> <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">e</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Puma560&#39;</span><span class="p">,</span>
-            <span class="n">manufacturer</span><span class="o">=</span><span class="s1">&#39;Unimation&#39;</span><span class="p">,</span>
-            <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;ETS-based model&#39;</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l1</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span>
+            <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l2</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Ry</span><span class="p">()</span>
+            <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l3</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="n">l4</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">ty</span><span class="p">(</span><span class="n">l5</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Ry</span><span class="p">()</span>
+            <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tz</span><span class="p">(</span><span class="n">l6</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span>
+            <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Ry</span><span class="p">()</span>
+            <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">Rz</span><span class="p">()</span>
+            <span class="o">*</span> <span class="n">ET</span><span class="o">.</span><span class="n">tx</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
-            <span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span>
-            <span class="s2">&quot;qbent&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;deg&#39;</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">e</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Puma560&quot;</span><span class="p">,</span> <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Unimation&quot;</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;ETS-based model&quot;</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">qr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>   <span class="c1"># pragma nocover</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
     <span class="n">robot</span> <span class="o">=</span> <span class="n">Puma560</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
@@ -138,7 +149,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

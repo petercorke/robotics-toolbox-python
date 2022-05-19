@@ -1,0 +1,6 @@
+<map id="inheritancef10af52183" name="inheritancef10af52183">
+<area shape="rect" id="node1" href="#roboticstoolbox.robot.ELink.ELink" target="_top" title="ELink.ELink" alt="" coords="513,31,609,56"/>
+<area shape="rect" id="node2" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" target="_top" title="ETS link class" alt="" coords="385,31,465,56"/>
+<area shape="rect" id="node3" href="arm_superclass.html#roboticstoolbox.robot.Link.BaseLink" target="_top" title="Link superclass" alt="" coords="225,31,337,56"/>
+<area shape="rect" id="node5" title="Helper class that provides a standard way to create an ABC using" alt="" coords="53,55,129,80"/>
+</map>

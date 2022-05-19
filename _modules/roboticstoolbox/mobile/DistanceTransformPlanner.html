@@ -70,12 +70,8 @@
              
   <h1>Source code for roboticstoolbox.mobile.DistanceTransformPlanner</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Python ReedShepp Planner</span>
-<span class="sd">@Author: Kristian Gibson</span>
-<span class="sd">TODO: Comments + Sphynx Docs Structured Text</span>
-<span class="sd">TODO: Bug-fix, testing</span>
-
-<span class="sd">Not ready for use yet.</span>
+<span class="sd">@Author: Peter Corke, original MATLAB code and Python version</span>
+<span class="sd">@Author: Kristian Gibson, initial MATLAB port</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">disp</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
@@ -94,29 +90,51 @@
 <span class="sd">    Distance transform path planner</span>
 
 <span class="sd">    :param occgrid: occupancy grid</span>
-<span class="sd">    :type curvature: OccGrid or ndarray(w,h)</span>
+<span class="sd">    :type occgrid: :class:`BinaryOccGrid` or ndarray(h,w)</span>
 <span class="sd">    :param metric: distane metric, one of: &quot;euclidean&quot; [default], &quot;manhattan&quot;</span>
 <span class="sd">    :type metric: str optional</span>
-<span class="sd">    :param Planner: distance transform path planner</span>
-<span class="sd">    :type Planner: DistanceTransformPlanner instance</span>
+<span class="sd">    :param kwargs: common planner options, see :class:`PlannerBase`</span>
 
 <span class="sd">    ==================   ========================</span>
 <span class="sd">    Feature              Capability</span>
 <span class="sd">    ==================   ========================</span>
-<span class="sd">    Plan                 Cartesian space</span>
-<span class="sd">    Obstacle avoidance   Yes</span>
+<span class="sd">    Plan                 :math:`\mathbb{R}^2`, discrete</span>
+<span class="sd">    Obstacle avoidance   Yes, occupancy grid</span>
 <span class="sd">    Curvature            Discontinuous</span>
-<span class="sd">    Motion               Forwards only</span>
+<span class="sd">    Motion               Omnidirectional</span>
 <span class="sd">    ==================   ========================</span>
 
-<span class="sd">    Also known as wavefront, grassfire or brushfire planning algorithm.</span>
+<span class="sd">    Creates a planner that finds the path between two points in the 2D grid</span>
+<span class="sd">    using omnidirectional motion and avoiding occupied cells.  The path</span>
+<span class="sd">    comprises a set of 4- or -way connected points in adjacent cells.  Also</span>
+<span class="sd">    known as the wavefront, grassfire or brushfire planning algorithm.</span>
 
-<span class="sd">    Creates a planner that finds the path between two points in the</span>
-<span class="sd">    plane using forward motion.  The path comprises a set of points in</span>
-<span class="sd">    adjacent cells.</span>
+<span class="sd">    The map is described by a 2D occupancy ``occgrid`` whose elements are zero</span>
+<span class="sd">    if traversable of nonzero if untraversable, ie. an obstacle.</span>
+<span class="sd">    </span>
+<span class="sd">    The cells are assumed to be unit squares. Crossing the cell horizontally or</span>
+<span class="sd">    vertically is a travel distance of 1, and for the Euclidean distance</span>
+<span class="sd">    measure, the crossing the cell diagonally is a distance of :math:`\sqrt{2}`.</span>
 
-<span class="sd">    :author: Peter Corke_</span>
-<span class="sd">    :seealso: :class:`Planner`</span>
+<span class="sd">    Example:</span>
+
+<span class="sd">    .. runblock:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; from roboticstoolbox import DistanceTransformPlanner</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; simplegrid = np.zeros((6, 6));</span>
+<span class="sd">        &gt;&gt;&gt; simplegrid[2:5, 3:5] = 1</span>
+<span class="sd">        &gt;&gt;&gt; dx = DistanceTransformPlanner(simplegrid, goal=(1, 1), distance=&quot;manhattan&quot;);</span>
+<span class="sd">        &gt;&gt;&gt; dx.plan()</span>
+<span class="sd">        &gt;&gt;&gt; path = dx.query(start=(5, 4))</span>
+<span class="sd">        &gt;&gt;&gt; print(path.T)</span>
+
+<span class="sd">    .. warning:: The distance planner is iterative and implemented in Python, will</span>
+<span class="sd">        be slow for very large occupancy grids.</span>
+
+<span class="sd">    :author: Peter Corke</span>
+
+<span class="sd">    :seealso: :meth:`plan` :meth:`query` :class:`PlannerBase`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">occgrid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -127,10 +145,26 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the distance metric</span>
+
+<span class="sd">        :return: Get the metric, either &quot;euclidean&quot; or &quot;manhattan&quot;</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">distancemap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the distance map</span>
+
+<span class="sd">        :return: distance map</span>
+<span class="sd">        :rtype: ndarray(h,w)</span>
+
+<span class="sd">        The 2D array, the same size as the passed occupancy grid, has elements</span>
+<span class="sd">        equal to nan if they contain an obstacle, otherwise the minimum</span>
+<span class="sd">        obstacle-free distance to the goal using the particular distance metric.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distancemap</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -143,10 +177,19 @@
 
         <span class="k">return</span> <span class="n">s</span>
 
-    <span class="k">def</span> <span class="nf">goal_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_distancemap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
-
 <div class="viewcode-block" id="DistanceTransformPlanner.plan"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plan path using distance transform</span>
+
+<span class="sd">        :param goal: goal position :math:`(x, y)`, defaults to previously set value</span>
+<span class="sd">        :type goal: array_like(2), optional</span>
+
+<span class="sd">        Compute the distance transform for all non-obstacle cells, which is the</span>
+<span class="sd">        minimum obstacle-free distance to the goal using the particular distance</span>
+<span class="sd">        metric.</span>
+
+<span class="sd">        :seealso: :meth:`query`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># show = None</span>
         <span class="c1"># if animate:</span>
         <span class="c1">#     show = 0.05</span>
@@ -163,13 +206,24 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span>
             <span class="n">goal</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">,</span>
             <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">,</span>
-            <span class="n">animate</span><span class="o">=</span><span class="n">animate</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+            <span class="n">animate</span><span class="o">=</span><span class="n">animate</span>
         <span class="p">)</span></div>
 
-    <span class="c1"># Use plot from parent class</span>
+<div class="viewcode-block" id="DistanceTransformPlanner.next"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find next point on the path</span>
 
-    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+<span class="sd">        :param position: current robot position</span>
+<span class="sd">        :type position: array_like(2)</span>
+<span class="sd">        :raises RuntimeError: no plan has been computed</span>
+<span class="sd">        :return: next robot position</span>
+<span class="sd">        :rtype: ndarray(2)</span>
+<span class="sd">        </span>
+<span class="sd">        Return the robot position that is one step closer to the goal. Called</span>
+<span class="sd">        by :meth:`query` to find a path from start to goal.</span>
+
+<span class="sd">        :seealso: :meth:`plan` :meth:`query`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distancemap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">Error</span><span class="p">(</span><span class="s2">&quot;No distance map computed, you need to plan.&quot;</span><span class="p">)</span>
 
@@ -212,9 +266,25 @@
         <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="nb">next</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">next</span>
+            <span class="k">return</span> <span class="nb">next</span></div>
 
-    <span class="k">def</span> <span class="nf">plot_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DistanceTransformPlanner.plot_3d"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner.plot_3d">[docs]</a>    <span class="k">def</span> <span class="nf">plot_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot path on 3D cost surface</span>
+
+<span class="sd">        :param path: robot path, defaults to None</span>
+<span class="sd">        :type path: ndarray(N,2), optional</span>
+<span class="sd">        :param ls: dictionary of Matplotlib linestyle options, defaults to None</span>
+<span class="sd">        :type ls: dict, optional</span>
+<span class="sd">        :return: Matplotlib 3D axes</span>
+<span class="sd">        :rtype: Axes</span>
+
+<span class="sd">        Creates a 3D plot showing distance from the goal as a cost surface.</span>
+<span class="sd">        Overlays the path if given.</span>
+
+<span class="sd">        .. warning:: The visualization is poor because of Matplotlib&#39;s poor hidden</span>
+<span class="sd">            line/surface handling.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">gca</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
 
@@ -224,22 +294,22 @@
             <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">antialiased</span><span class="o">=</span><span class="kc">False</span>  <span class="c1"># cmap=&#39;gray&#39;,</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># k = sub2ind(np.shape(self._distancemap), p[:, 1], p[:, 0])</span>
-            <span class="n">height</span> <span class="o">=</span> <span class="n">distance</span><span class="p">[</span><span class="n">p</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">height</span><span class="p">)</span>
+            <span class="n">height</span> <span class="o">=</span> <span class="n">distance</span><span class="p">[</span><span class="n">path</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">path</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">path</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">path</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">height</span><span class="p">,</span> <span class="o">**</span><span class="n">ls</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">ax</span></div>
+        <span class="k">return</span> <span class="n">ax</span></div></div>
 
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
-<span class="k">def</span> <span class="nf">distancexform</span><span class="p">(</span><span class="n">occgrid</span><span class="p">,</span> <span class="n">goal</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;cityblock&quot;</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">distancexform</span><span class="p">(</span><span class="n">occgrid</span><span class="p">,</span> <span class="n">goal</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;cityblock&quot;</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">summary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Distance transform for path planning</span>
 
@@ -339,7 +409,7 @@
 
         <span class="n">ninf</span> <span class="o">=</span> <span class="n">ninfnow</span>
 
-    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">summary</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">count</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2"> iterations, </span><span class="si">{</span><span class="n">ninf</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2"> unreachable cells&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">distance</span>
 
@@ -400,7 +470,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

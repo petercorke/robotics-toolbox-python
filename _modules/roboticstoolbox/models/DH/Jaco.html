@@ -71,10 +71,10 @@
   <h1>Source code for roboticstoolbox.models.DH.Jaco</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">DHRobot</span><span class="p">,</span> <span class="n">RevoluteDH</span>
-<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
+<span class="c1"># from spatialmath import SE3</span>
 
 
 <div class="viewcode-block" id="Jaco"><a class="viewcode-back" href="../../../../arm_dh.html#roboticstoolbox.models.DH.Jaco">[docs]</a><span class="k">class</span> <span class="nc">Jaco</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
@@ -114,13 +114,15 @@
 
         <span class="k">if</span> <span class="n">symbolic</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">spatialmath.base.symbolic</span> <span class="k">as</span> <span class="nn">sym</span>
-            <span class="n">zero</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
+
+            <span class="c1"># zero = sym.zero()</span>
             <span class="n">pi</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">pi</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
-            <span class="n">zero</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="n">deg</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>    
+            <span class="c1"># zero = 0.0</span>
+
+        <span class="n">deg</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
         <span class="c1"># robot length values (metres)</span>
         <span class="n">D1</span> <span class="o">=</span> <span class="mf">0.2755</span>
         <span class="n">D2</span> <span class="o">=</span> <span class="mf">0.4100</span>
@@ -129,40 +131,44 @@
         <span class="n">D5</span> <span class="o">=</span> <span class="mf">0.0743</span>
         <span class="n">D6</span> <span class="o">=</span> <span class="mf">0.1687</span>
         <span class="n">e2</span> <span class="o">=</span> <span class="mf">0.0098</span>
-        
+
         <span class="c1"># alternate parameters</span>
         <span class="n">aa</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="n">deg</span>
-        <span class="n">ca</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
+        <span class="c1"># ca = cos(aa)</span>
         <span class="n">sa</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
-        <span class="n">c2a</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">aa</span><span class="p">)</span>
+        <span class="c1"># c2a = cos(2 * aa)</span>
         <span class="n">s2a</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">aa</span><span class="p">)</span>
-        <span class="n">d4b</span> <span class="o">=</span> <span class="n">D3</span> <span class="o">+</span> <span class="n">sa</span> <span class="o">/</span><span class="n">s2a</span> <span class="o">*</span> <span class="n">D4</span>
+        <span class="n">d4b</span> <span class="o">=</span> <span class="n">D3</span> <span class="o">+</span> <span class="n">sa</span> <span class="o">/</span> <span class="n">s2a</span> <span class="o">*</span> <span class="n">D4</span>
         <span class="n">d5b</span> <span class="o">=</span> <span class="n">sa</span> <span class="o">/</span> <span class="n">s2a</span> <span class="o">*</span> <span class="n">D4</span> <span class="o">+</span> <span class="n">sa</span> <span class="o">/</span> <span class="n">s2a</span> <span class="o">*</span> <span class="n">D5</span>
         <span class="n">d6b</span> <span class="o">=</span> <span class="n">sa</span> <span class="o">/</span> <span class="n">s2a</span> <span class="o">*</span> <span class="n">D5</span> <span class="o">+</span> <span class="n">D6</span>
-        
+
         <span class="c1"># and build a serial link manipulator</span>
-        
+
         <span class="c1"># offsets from the table on page 4, &quot;Mico&quot; angles are the passed joint</span>
         <span class="c1"># angles.  &quot;DH Algo&quot; are the result after adding the joint angle offset.</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-                    <span class="p">[</span>
-                        <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="n">d</span><span class="o">=</span><span class="n">D1</span><span class="p">,</span>   <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                        <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="p">,</span>    <span class="n">a</span><span class="o">=</span><span class="n">D2</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>    <span class="n">offset</span><span class="o">=-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
-                        <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>  <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="n">d</span><span class="o">=-</span><span class="n">e2</span><span class="p">,</span>  <span class="n">offset</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
-                        <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">aa</span><span class="p">,</span>  <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="n">d</span><span class="o">=-</span><span class="n">d4b</span><span class="p">),</span>
-                        <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">aa</span><span class="p">,</span>  <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="n">d</span><span class="o">=-</span><span class="n">d5b</span><span class="p">,</span> <span class="n">offset</span><span class="o">=-</span><span class="n">pi</span><span class="p">),</span>
-                        <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="p">,</span>    <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="n">d</span><span class="o">=-</span><span class="n">d6b</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="n">deg</span><span class="p">)</span>
-                    <span class="p">],</span>
-                    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Jaco&#39;</span><span class="p">,</span> 
-                    <span class="n">manufacturer</span><span class="o">=</span><span class="s1">&#39;Kinova&#39;</span><span class="p">,</span>
-                    <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;symbolic&#39;</span><span class="p">,)</span>
-                <span class="p">)</span>
+            <span class="p">[</span>
+                <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">D1</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">D2</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="o">=-</span><span class="n">e2</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">aa</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="o">=-</span><span class="n">d4b</span><span class="p">),</span>
+                <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">aa</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="o">=-</span><span class="n">d5b</span><span class="p">,</span> <span class="n">offset</span><span class="o">=-</span><span class="n">pi</span><span class="p">),</span>
+                <span class="n">RevoluteDH</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="o">=-</span><span class="n">d6b</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">deg</span><span class="p">),</span>
+            <span class="p">],</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Jaco&quot;</span><span class="p">,</span>
+            <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Kinova&quot;</span><span class="p">,</span>
+            <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;symbolic&quot;</span><span class="p">,),</span>
+        <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s1">&#39;qz&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="c1"># zero angles</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s1">&#39;qr&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">270</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">deg</span><span class="p">)</span> <span class="c1"># vertical pose as per Fig 2</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">270</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">deg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>    <span class="c1"># pragma nocover</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
     <span class="n">jaco</span> <span class="o">=</span> <span class="n">Jaco</span><span class="p">(</span><span class="n">symbolic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">jaco</span><span class="p">)</span>
@@ -176,7 +182,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>roboticstoolbox.mobile.drivers &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
+            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>roboticstoolbox.mobile.drivers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for roboticstoolbox.mobile.drivers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Python Vehicle</span>
+<span class="sd">@Author: Peter Corke, original MATLAB code and Python version</span>
+<span class="sd">@Author: Kristian Gibson, initial MATLAB port</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">tan</span><span class="p">,</span> <span class="n">atan2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span><span class="p">,</span> <span class="n">linalg</span><span class="p">,</span> <span class="n">interpolate</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">patches</span>
+<span class="kn">import</span> <span class="nn">matplotlib.transforms</span> <span class="k">as</span> <span class="nn">mtransforms</span>
+
+<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE2</span><span class="p">,</span> <span class="n">base</span>
+<span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+
+
+<div class="viewcode-block" id="VehicleDriverBase"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.VehicleDriverBase">[docs]</a><span class="k">class</span> <span class="nc">VehicleDriverBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract Vehicle driver class</span>
+
+<span class="sd">    Abtract class that can drive a mobile robot.</span>
+
+<span class="sd">    :seealso: :class:`RandomPath`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VehicleDriverBase.demand"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.VehicleDriverBase.demand">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">demand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute speed and heading</span>
+
+<span class="sd">        :return: speed and steering for :class:`VehicleBase`</span>
+
+<span class="sd">        When an instance of a :class:`VehicleDriverBase` class is attached as </span>
+<span class="sd">        the control for an instance of a :class:`VehicleBase` class, this method</span>
+<span class="sd">        is called at each time step to provide the control input.</span>
+
+<span class="sd">        Has access to the vehicle and its state through the :meth:`vehicle`</span>
+<span class="sd">        property.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="VehicleDriverBase.init"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.VehicleDriverBase.init">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize driving agent</span>
+
+<span class="sd">        Called at the start of a simulation run.  Used to initialize state</span>
+<span class="sd">        including random number generator state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vehicle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set/get the vehicle under control</span>
+
+<span class="sd">        :getter: return :class:`VehicleBase` instance</span>
+<span class="sd">        :setter: set :class:`VehicleBase` instance</span>
+
+<span class="sd">        .. note:: The setter is invoked by ``vehicle.control = driver``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_veh</span>
+
+    <span class="nd">@vehicle</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">vehicle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_veh</span> <span class="o">=</span> <span class="n">v</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+<span class="c1"># ========================================================================= #</span>
+
+<div class="viewcode-block" id="RandomPath"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.RandomPath">[docs]</a><span class="k">class</span> <span class="nc">RandomPath</span><span class="p">(</span><span class="n">VehicleDriverBase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="RandomPath.__init__"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.RandomPath.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workspace</span><span class="p">,</span> <span class="n">speed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dthresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">headinggain</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">goalmarkerstyle</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Driving agent for random path</span>
+
+<span class="sd">        :param workspace: dimension of workspace, see :func:`spatialmath.base.exand_dims`</span>
+<span class="sd">        :type workspace: scalar, array_like(2), array_like(4)</span>
+<span class="sd">        :param speed: forward speed, defaults to 1</span>
+<span class="sd">        :type speed: float, optional</span>
+<span class="sd">        :param dthresh: distance threshold, defaults to 0.05</span>
+<span class="sd">        :type dthresh: float, optional</span>
+
+<span class="sd">        :raises ValueError: [description]</span>
+
+<span class="sd">        Returns a *driver* object that drives the attached vehicle to a </span>
+<span class="sd">        sequence of random waypoints.</span>
+
+<span class="sd">        The driver is connected to the vehicle by::</span>
+
+<span class="sd">            Vehicle(control=driver)</span>
+<span class="sd">        </span>
+<span class="sd">        or::</span>
+
+<span class="sd">            veh = Vehicle()</span>
+<span class="sd">            veh.control = driver</span>
+<span class="sd">        </span>
+<span class="sd">        The waypoints are positioned inside a rectangular region defined by</span>
+<span class="sd">        the vehicle that is specified by  (see ``plotvol2``):</span>
+
+<span class="sd">        ==============  =======  =======</span>
+<span class="sd">        ``workspace``   x-range  y-range</span>
+<span class="sd">        ==============  =======  =======</span>
+<span class="sd">        A (scalar)      -A:A     -A:A</span>
+<span class="sd">        [A, B]           A:B      A:B</span>
+<span class="sd">        [A, B, C, D]     A:B      C:D</span>
+<span class="sd">        ==============  =======  =======</span>
+
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - It is possible in some cases for the vehicle to move outside the desired</span>
+<span class="sd">              region, for instance if moving to a waypoint near the edge, the limited</span>
+<span class="sd">              turning circle may cause the vehicle to temporarily move outside.</span>
+<span class="sd">            - The vehicle chooses a new waypoint when it is closer than ``dthresh``</span>
+<span class="sd">              to the current waypoint.</span>
+<span class="sd">            - Uses its own random number generator so as to not influence the performance</span>
+<span class="sd">              of other randomized algorithms such as path planning.</span>
+
+<span class="sd">        :seealso: :class:`Bicycle` :class:`Unicycle` :func:`~spatialmath.base.graphics.plotvol2`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># TODO options to specify region, maybe accept a Map object?</span>
+        
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="s1">&#39;workspace&#39;</span><span class="p">):</span>
+            <span class="c1"># workspace can be defined by an object with a workspace attribute</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span> <span class="o">=</span> <span class="n">speed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dthresh</span> <span class="o">=</span> <span class="n">dthresh</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_goal_marker</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">goalmarkerstyle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_goal_marker_style</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;markersize&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> 
+                <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;linestyle&#39;</span><span class="p">:</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span>
+                <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_goal_marker_style</span> <span class="o">=</span> <span class="n">goalmarkerstyle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_headinggain</span> <span class="o">=</span> <span class="n">headinggain</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_prev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_random</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dthresh</span> <span class="o">=</span> <span class="n">dthresh</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                                    <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_veh</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;%RandomPath.char Convert to string</span>
+<span class="sd">        %</span>
+<span class="sd">        % s = R.char() is a string showing driver parameters and state in in </span>
+<span class="sd">        % a compact human readable format. &quot;&quot;&quot;</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;RandomPath driver object</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  X </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">; Y </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">, dthresh=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dthresh</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  current goal=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Size of robot driving workspace</span>
+
+<span class="sd">        :return: workspace bounds [xmin, xmax, ymin, ymax]</span>
+<span class="sd">        :rtype: ndarray(4)</span>
+
+<span class="sd">        Returns the bounds of the workspace as specified by constructor</span>
+<span class="sd">        option ``workspace``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span>
+
+<div class="viewcode-block" id="RandomPath.init"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.RandomPath.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize random path driving agent</span>
+
+<span class="sd">        :param ax: axes in which to draw via points, defaults to None</span>
+<span class="sd">        :type ax: Axes, optional</span>
+
+<span class="sd">        Called at the start of a simulation run.  Ensures that the </span>
+<span class="sd">        random number generated is reseeded to ensure that </span>
+<span class="sd">        the sequence of random waypoints is repeatable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_random</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed</span><span class="p">)</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># delete(driver.h_goal);   % delete the goal</span>
+        <span class="c1"># driver.h_goal = [];</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_goal_marker</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_goal_marker_style</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;random waypoint&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="RandomPath.demand"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.RandomPath.demand">[docs]</a>    <span class="k">def</span> <span class="nf">demand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute speed and heading for random waypoint</span>
+<span class="sd">            %</span>
+<span class="sd">            % [SPEED,STEER] = R.demand() is the speed and steer angle to</span>
+<span class="sd">            % drive the vehicle toward the next waypoint.  When the vehicle is</span>
+<span class="sd">            % within R.dtresh a new waypoint is chosen.</span>
+<span class="sd">            %</span>
+<span class="sd">            % See also Vehicle.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_new_goal</span><span class="p">()</span>
+
+        <span class="c1"># if nearly at goal point, choose the next one</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_veh</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dthresh</span> <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d_prev</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-3</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_new_goal</span><span class="p">()</span>
+        <span class="c1"># elif d &gt; 2 * self._d_prev:</span>
+        <span class="c1">#     self.choose_goal()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d_prev</span> <span class="o">=</span> <span class="n">d</span>
+
+        <span class="n">speed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span>
+
+        <span class="n">goal_heading</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_veh</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_veh</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span>
+        <span class="n">delta_heading</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">angdiff</span><span class="p">(</span><span class="n">goal_heading</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_veh</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">speed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_headinggain</span> <span class="o">*</span> <span class="n">delta_heading</span><span class="p">]</span></div>
+
+    <span class="c1">## private method, invoked from demand() to compute a new waypoint</span>
+    
+    <span class="k">def</span> <span class="nf">_new_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="c1"># choose a uniform random goal within inner 80% of driving area</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span>
+            <span class="n">gx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">r</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="n">r</span><span class="p">]</span>
+
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span>
+            <span class="n">gy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">r</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="n">r</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">gx</span><span class="p">,</span> <span class="n">gy</span><span class="p">]</span>
+
+            <span class="c1"># check not too close to last goal</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_veh</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dthresh</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_veh</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;set goal: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># update the goal marker</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal_marker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_goal_marker</span><span class="o">.</span><span class="n">set_xdata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_goal_marker</span><span class="o">.</span><span class="n">set_ydata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<span class="c1"># ========================================================================= #</span>
+
+<span class="k">class</span> <span class="nc">PurePursuit</span><span class="p">(</span><span class="n">VehicleDriverBase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">speed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">demand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<span class="c1"># ========================================================================= #</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="kn">import</span> <span class="nn">unittest</span>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 19-May-2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

@@ -70,15 +70,13 @@
              
   <h1>Source code for roboticstoolbox.mobile.Animations</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Python Vehicle</span>
-<span class="sd">@Author: Kristian Gibson</span>
-<span class="sd">@Author: Peter Corke</span>
+<span class="sd">@Author: Peter Corke, original MATLAB code and Python version</span>
+<span class="sd">@Author: Kristian Gibson, initial MATLAB port</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">tan</span><span class="p">,</span> <span class="n">atan2</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span><span class="p">,</span> <span class="n">atan2</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span><span class="p">,</span> <span class="n">linalg</span><span class="p">,</span> <span class="n">interpolate</span>
+<span class="c1"># from scipy import integrate, linalg, interpolate</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">patches</span><span class="p">,</span> <span class="n">colors</span>
@@ -87,77 +85,45 @@
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE2</span><span class="p">,</span> <span class="n">base</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">rtb_load_data</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Class to support animation of a vehicle on Matplotlib plot</span>
-
-<span class="sd">There are three concrete subclasses:</span>
-
-<span class="sd">- ``VehicleMarker`` animates a Matplotlib marker</span>
-<span class="sd">- ``VehiclePolygon`` animates a polygon, including predefined shapes</span>
-<span class="sd">- ``VehicleIcon`` animates an image</span>
-
-
-
-<span class="sd">These can be used in two different ways, firstly::</span>
-
-<span class="sd">    a.add()</span>
-<span class="sd">    a.update(q)</span>
-
-<span class="sd">adds an instance of the animation shape to the plot and subsequent calls</span>
-<span class="sd">to ``update`` will animate it.</span>
-
-<span class="sd">Secondly::</span>
-
-<span class="sd">    a.plot(q)</span>
-
-<span class="sd">adds an instance of the animation shape to the plot with the specified</span>
-<span class="sd">configuration.  It cannot be moved, but the method does return a reference</span>
-<span class="sd">to the Matplotlib object added to the plot.</span>
-
-<span class="sd">Any of these can be passed to a Vehicle subclass object to make an animation</span>
-<span class="sd">during simulation::</span>
-
-<span class="sd">        a = VehiclePolygon(&#39;car&#39;, color=&#39;r&#39;)</span>
-<span class="sd">        veh = Bicycle()</span>
-<span class="sd">        veh.run(animation=a)</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-
-<span class="k">class</span> <span class="nc">VehicleAnimationBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleAnimationBase"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleAnimationBase">[docs]</a><span class="k">class</span> <span class="nc">VehicleAnimationBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class to support animation of a vehicle on Matplotlib plot</span>
+<span class="sd">    Abstract base class to support animation of a vehicle on Matplotlib plot</span>
 
 <span class="sd">    There are three concrete subclasses:</span>
 
 <span class="sd">    - ``VehicleMarker`` animates a Matplotlib marker</span>
-<span class="sd">    - ``VehiclePolygon`` animates a polygon, including predefined shapes</span>
+<span class="sd">    - ``VehiclePolygon`` animates a polygon shape (outline or filled), including predefined shapes</span>
 <span class="sd">    - ``VehicleIcon`` animates an image</span>
 
-<span class="sd">    These can be used in two different ways, firstly::</span>
+<span class="sd">    An instance ``a`` of these classes can be used in three different ways, firstly::</span>
 
+<span class="sd">        a = VehiclePolygon(&quot;car&quot;, color=&quot;red&quot;)</span>
 <span class="sd">        a.add()</span>
-<span class="sd">        a.update(q)</span>
-<span class="sd">    </span>
+
 <span class="sd">    adds an instance of the animation shape to the plot and subsequent calls</span>
-<span class="sd">    to ``update`` will animate it.</span>
+<span class="sd">    to::</span>
 
-<span class="sd">    Secondly::</span>
+<span class="sd">        a.update(q)</span>
 
+<span class="sd">    will animate it.</span>
+
+<span class="sd">    Secondly, an instance can be passed to a Vehicle subclass object to make an animation</span>
+<span class="sd">    during simulation::</span>
+
+<span class="sd">            a = VehiclePolygon(&quot;car&quot;, color=&quot;red&quot;)</span>
+<span class="sd">            veh = Bicycle(animation=a)</span>
+
+<span class="sd">    Thirdly::</span>
+
+<span class="sd">        a = VehiclePolygon(&quot;car&quot;, color=&quot;red&quot;)</span>
 <span class="sd">        a.plot(q)</span>
 
 <span class="sd">    adds an instance of the animation shape to the plot with the specified</span>
 <span class="sd">    configuration.  It cannot be moved, but the method does return a reference</span>
 <span class="sd">    to the Matplotlib object added to the plot.</span>
 
-<span class="sd">    Any of these can be passed to a Vehicle subclass object to make an animation</span>
-<span class="sd">    during simulation::</span>
-
-<span class="sd">            a = VehiclePolygon(&#39;car&#39;, color=&#39;r&#39;)</span>
-<span class="sd">            veh = Bicycle()</span>
-<span class="sd">            veh.run(animation=a)</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_object</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="kc">None</span>
@@ -168,9 +134,15 @@
 
 <span class="sd">        :param ax: Axis to add to, defaults to current axis</span>
 <span class="sd">        :type ax: Axes, optional</span>
+<span class="sd">        :param kwargs: additional arguments passed to Matplotlib :meth:`~matplotlib.axes.Axes.plot`, which</span>
+<span class="sd">            override arguments given to the constructor.</span>
 
 <span class="sd">        A reference to the animation object is kept, and it will be deleted</span>
 <span class="sd">        from the plot when the ``VehicleAnimation`` object is garbage collected.</span>
+
+<span class="sd">        The animation is not displayed until :meth:`update` is called.</span>
+
+<span class="sd">        :seealso: :meth:`update`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
@@ -181,28 +153,28 @@
 
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Update the vehicle animation</span>
+<span class="sd">        Update the vehicle animation (superclass)</span>
 
-<span class="sd">        :param q: vehicle configuration</span>
-<span class="sd">        :type q: ndarray(2) or ndarray(3)</span>
+<span class="sd">        :param q: vehicle position or configuration</span>
+<span class="sd">        :type q: array_like(2) or array_like(3)</span>
 
-<span class="sd">        The graphical depiction of the vehicle position or pose is updated.</span>
+<span class="sd">        The graphical depiction of the vehicle position or configuration is updated.</span>
 
-<span class="sd">        For ``AnimationMarker`` only position can be depicted so the third element</span>
-<span class="sd">        of ``q``, if given, is ignored.</span>
+<span class="sd">        :seealso: :meth:`add`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add vehicle to the current plot</span>
+<span class="sd">        Add vehicle to the current plot (superclass)</span>
 
-<span class="sd">        :param q: vehicle configuration</span>
-<span class="sd">        :type q: ndarray(2) or ndarray(3)</span>
+<span class="sd">        :param q: vehicle position or configuration</span>
+<span class="sd">        :type q: array_like(2) or array_like(3)</span>
+<span class="sd">        :param kwargs: additional arguments passed to Matplotlib :meth:`~matplotlib.axes.Axes.plot`, which</span>
+<span class="sd">            override arguments given to the constructor.</span>
 <span class="sd">        :return: reference to Matplotlib object</span>
 
-<span class="sd">        A reference to the animation object is kept, and it will be deleted</span>
-<span class="sd">        from the plot when the ``VehicleAnimation`` object is garbage collected.</span>
+<span class="sd">        The animation object is rendered into the current axes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
@@ -211,26 +183,26 @@
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span></div>
 
 <span class="c1"># ========================================================================= #</span>
-
 <div class="viewcode-block" id="VehicleMarker"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleMarker">[docs]</a><span class="k">class</span> <span class="nc">VehicleMarker</span><span class="p">(</span><span class="n">VehicleAnimationBase</span><span class="p">):</span>
-
 <div class="viewcode-block" id="VehicleMarker.__init__"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleMarker.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create graphical animation of vehicle as a Matplotlib marker</span>
 
-<span class="sd">        :param kwargs: additional arguments passed to matplotlib ``plot``.</span>
+<span class="sd">        :param kwargs: additional arguments passed to Matplotlib :meth:`~matplotlib.axes.Axes.plot`.</span>
 <span class="sd">        :return: animation object</span>
 <span class="sd">        :rtype: VehicleAnimation</span>
 
 <span class="sd">        Creates an object that can be passed to a ``Vehicle`` subclass to depict</span>
-<span class="sd">        the moving robot as a simple matplotlib marker during simulation.</span>
+<span class="sd">        the moving robot as a simple Matplotlib marker during simulation.</span>
 
-<span class="sd">        For example, a blue filled square, is::</span>
+<span class="sd">        The default marker is a red filled circle with a white outline.</span>
 
-<span class="sd">            a = VehicleMarker(marker=&#39;s&#39;, markerfacecolor=&#39;b&#39;)</span>
+<span class="sd">        For example, to animate a simulation with a blue square marker::</span>
+
+<span class="sd">            a = VehicleMarker(marker=&quot;s&quot;, markerfacecolor=&quot;b&quot;)</span>
 <span class="sd">            veh = Bicycle(driver=RandomPath(10), animation=a)</span>
 <span class="sd">            veh.run()</span>
 
@@ -241,13 +213,12 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;markerfacecolor&#39;</span><span class="p">:</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;markeredgecolor&#39;</span><span class="p">:</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;markersize&#39;</span><span class="p">:</span> <span class="mi">12</span>
+                <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;markerfacecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;markeredgecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;markersize&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">kwargs</span></div>
-        
 
     <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">.</span><span class="n">set_xdata</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -256,47 +227,47 @@
     <span class="k">def</span> <span class="nf">_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_object</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_object</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">**</span><span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">})[</span><span class="mi">0</span><span class="p">]</span></div>
+
 
 <span class="c1"># ========================================================================= #</span>
 
 <div class="viewcode-block" id="VehiclePolygon"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehiclePolygon">[docs]</a><span class="k">class</span> <span class="nc">VehiclePolygon</span><span class="p">(</span><span class="n">VehicleAnimationBase</span><span class="p">):</span>
-
-<div class="viewcode-block" id="VehiclePolygon.__init__"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehiclePolygon.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s1">&#39;car&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="VehiclePolygon.__init__"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehiclePolygon.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s2">&quot;car&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create graphical animation of vehicle as a polygon</span>
 
-<span class="sd">        :param shape: polygon shape as vertices or a predefined shape, defaults to &#39;car&#39;</span>
+<span class="sd">        :param shape: polygon shape as vertices or a predefined shape, defaults to &quot;car&quot;</span>
 <span class="sd">        :type shape: ndarray(2,n) or str</span>
 <span class="sd">        :param scale: Length of the vehicle on the plot, defaults to 1</span>
 <span class="sd">        :type scale: float</span>
-<span class="sd">        :param kwargs: additional arguments passed to matplotlib patch such as</span>
+<span class="sd">        :param kwargs: additional arguments passed to Matplotlib :class:`~matplotlib.patches.Polygon` such as</span>
 <span class="sd">            ``color`` (face+edge), ``alpha``, ``facecolor``, ``edgecolor``,</span>
 <span class="sd">            ``linewidth`` etc.</span>
 <span class="sd">        :raises ValueError: unknown shape name</span>
 <span class="sd">        :raises TypeError: bad shape argument</span>
 <span class="sd">        :return: animation object</span>
-<span class="sd">        :rtype: VehicleAnimation</span>
+<span class="sd">        :rtype: VehiclePolygon</span>
 
-<span class="sd">        Creates an object that can be passed to a ``Vehicle`` subclass to </span>
+<span class="sd">        Creates an object that can be passed to a ``Vehicle`` subclass to</span>
 <span class="sd">        depict the moving robot as a polygon during simulation.</span>
 
-<span class="sd">        For example, a red filled car-shaped polygon is::</span>
+<span class="sd">        For example, to animate a simulation with a red filled car-shaped polygon::</span>
 
-<span class="sd">            a = VehiclePolygon(&#39;car&#39;, color=&#39;r&#39;)</span>
-<span class="sd">            veh = Bicycle()</span>
-<span class="sd">            veh.run(animation=a)</span>
+<span class="sd">            a = VehiclePolygon(&quot;car&quot;, color=&quot;r&quot;)</span>
+<span class="sd">            veh = Bicycle(driver=RandomPath(10), animation=a)</span>
+<span class="sd">            veh.run()</span>
 
 <span class="sd">        ``shape`` can be:</span>
 
 <span class="sd">            * ``&quot;car&quot;``  a rectangle with chamfered front corners</span>
-<span class="sd">            * ``&quot;triangle&quot;`` a triangle</span>
-<span class="sd">            * an Nx2 NumPy array of vertices, does not have to be closed.</span>
+<span class="sd">            * ``&quot;triangle&quot;`` an isocles triangle pointing in the forward direction</span>
+<span class="sd">            * an 2xN NumPy array of vertices, does not have to be closed.</span>
 
-<span class="sd">        The polygon is scaled to an image with a length of ``scale`` in the units of</span>
-<span class="sd">        the plot.</span>
+<span class="sd">        The polygon is scaled to an image with a length of ``scale`` in the</span>
+<span class="sd">        vehicle x-direction, in the units of the plot.</span>
 
-<span class="sd">        :seealso: :func:`~Vehicle`</span>
+<span class="sd">        :seealso: :func:`~Vehicle` :class:`matplotlib.patches.Polygon`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -304,30 +275,34 @@
             <span class="n">h</span> <span class="o">=</span> <span class="mf">0.3</span>
             <span class="n">t</span> <span class="o">=</span> <span class="mf">0.8</span>  <span class="c1"># start of head taper</span>
             <span class="n">c</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># centre x coordinate</span>
-            <span class="n">w</span> <span class="o">=</span> <span class="mi">1</span>    <span class="c1"># width in x direction</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># width in x direction</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">shape</span> <span class="o">==</span> <span class="s1">&#39;car&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-                    <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span>     <span class="n">h</span><span class="p">],</span>
-                    <span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">c</span><span class="p">,</span>  <span class="n">h</span><span class="p">],</span>
-                    <span class="p">[</span><span class="n">w</span> <span class="o">-</span> <span class="n">c</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
-                    <span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">c</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="p">],</span>
-                    <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span>    <span class="o">-</span><span class="n">h</span><span class="p">],</span>
-                <span class="p">])</span><span class="o">.</span><span class="n">T</span>
-            <span class="k">elif</span> <span class="n">shape</span> <span class="o">==</span> <span class="s1">&#39;triangle&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-                    <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span>  <span class="n">h</span><span class="p">],</span>
-                    <span class="p">[</span> <span class="n">w</span><span class="p">,</span>  <span class="mi">0</span><span class="p">],</span>
-                    <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="p">],</span>
-                <span class="p">])</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">if</span> <span class="n">shape</span> <span class="o">==</span> <span class="s2">&quot;car&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">],</span>
+                        <span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">],</span>
+                        <span class="p">[</span><span class="n">w</span> <span class="o">-</span> <span class="n">c</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">c</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="p">],</span>
+                        <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="p">],</span>
+                    <span class="p">]</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">elif</span> <span class="n">shape</span> <span class="o">==</span> <span class="s2">&quot;triangle&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">],</span>
+                        <span class="p">[</span><span class="n">w</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="p">],</span>
+                    <span class="p">]</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">T</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;unknown vehicle shape name&#39;</span><span class="p">)</span>
-            
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;unknown vehicle shape name&quot;</span><span class="p">)</span>
+
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">shape</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_coords</span> <span class="o">=</span> <span class="n">shape</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;unknown shape argument&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;unknown shape argument&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_coords</span> <span class="o">*=</span> <span class="n">scale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">kwargs</span></div>
 
@@ -339,24 +314,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># if animation is initialized</span>
             <span class="n">xy</span> <span class="o">=</span> <span class="n">SE2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coords</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">.</span><span class="n">set_xy</span><span class="p">(</span><span class="n">xy</span><span class="o">.</span><span class="n">T</span><span class="p">)</span></div>
 
+
 <span class="c1"># ========================================================================= #</span>
 
-<div class="viewcode-block" id="VehicleIcon"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleIcon">[docs]</a><span class="k">class</span> <span class="nc">VehicleIcon</span><span class="p">(</span><span class="n">VehicleAnimationBase</span><span class="p">):</span>
 
+<div class="viewcode-block" id="VehicleIcon"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleIcon">[docs]</a><span class="k">class</span> <span class="nc">VehicleIcon</span><span class="p">(</span><span class="n">VehicleAnimationBase</span><span class="p">):</span>
 <div class="viewcode-block" id="VehicleIcon.__init__"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleIcon.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create graphical animation of vehicle as an icon</span>
+<span class="sd">        Create graphical animation of vehicle as an image icon</span>
 
 <span class="sd">        :param filename: Standard icon name or a path to an image</span>
 <span class="sd">        :type filename: str</span>
 <span class="sd">        :param origin: Origin of the vehicle coordinate frame, defaults to centre</span>
-<span class="sd">        :type origin: 2-tuple</span>
+<span class="sd">        :type origin: array_like(2)</span>
 <span class="sd">        :param scale: Length of the vehicle on the plot, defaults to 1</span>
 <span class="sd">        :type scale: float</span>
 <span class="sd">        :param rotation: Vehicle icon heading in degrees, defaults to 0</span>
@@ -365,57 +341,62 @@
 <span class="sd">        :return: animation object</span>
 <span class="sd">        :rtype: VehicleAnimation</span>
 
-<span class="sd">        Creates an object that can be passed to a ``Vehicle`` subclass to </span>
-<span class="sd">        depict the moving robot as a polygon during simulation.</span>
+<span class="sd">        Creates an object that can be passed to a ``Vehicle`` subclass to</span>
+<span class="sd">        depict the moving robot as an image icon during simulation.  The image</span>
+<span class="sd">        is translated and rotated to represent the vehicle configuration. </span>
 
-<span class="sd">        For example, the image of a red car is::</span>
-
-<span class="sd">            a = VehicleIcon(&#39;redcar&#39;, scale=2)</span>
-<span class="sd">            veh = Bicycle()</span>
-<span class="sd">            veh.run(animation=a)</span>
-
-<span class="sd">        ``filename`` can be:</span>
-
-<span class="sd">            * ``&quot;greycar&quot;`` a grey and white car (top view)</span>
-<span class="sd">            * ``&quot;redcar&quot;`` a red car (top view)</span>
-<span class="sd">            * ``&quot;piano&quot;`` a piano (top view)</span>
-<span class="sd">            * path to an image file, including extension</span>
-
-<span class="sd">        .. image:: ../../rtb-data/rtbdata/data/greycar.png</span>
-<span class="sd">          :width: 200px</span>
-<span class="sd">          :align: center</span>
-
-<span class="sd">        .. image:: ../../rtb-data/rtbdata/data/redcar.png</span>
-<span class="sd">          :width: 300px</span>
-<span class="sd">          :align: center</span>
-
-<span class="sd">        .. image:: ../../rtb-data/rtbdata/data/piano.png</span>
-<span class="sd">          :width: 300px</span>
-<span class="sd">          :align: center</span>
-
-
-<span class="sd">        The car is scaled to an image with a length of ``scale`` in the units of</span>
-<span class="sd">        the plot.</span>
+<span class="sd">        The car is scaled to an image with a horizontal length (width) of</span>
+<span class="sd">        ``scale`` in the units of the plot. By default the image is assumed to</span>
+<span class="sd">        contain a car parallel to the x-axis and facing right.  If the vehicle</span>
+<span class="sd">        is facing upward set ``rotation`` to 90.</span>
 
 <span class="sd">        The vehicle rotates about its ``origin`` which is expressed in terms of</span>
 <span class="sd">        normalized coordinates in the range 0 to 1.  By default it is in the</span>
 <span class="sd">        middle of the icon image, (0.2, 0.5) moves it toward the back of the</span>
 <span class="sd">        vehicle, (0.8, 0.5) moves it toward the front of the vehicle.</span>
 
-<span class="sd">        .. note:: </span>
-<span class="sd">        </span>
-<span class="sd">            - The standard icons are kept in ``roboticstoolbox/data``</span>
-<span class="sd">            - By default the image is assumed to contain a car parallel to</span>
-<span class="sd">              the x-axis and facing right.  If the vehicle is facing upward</span>
-<span class="sd">              set ``rotation`` to 90.</span>
+<span class="sd">        ``filename`` can be an included image:</span>
 
-<span class="sd">        :seealso: :func:`~Vehicle`</span>
+<span class="sd">            * ``&quot;greycar&quot;`` a grey and white car (top view)</span>
+<span class="sd">            * ``&quot;redcar&quot;`` a red car (top view)</span>
+<span class="sd">            * ``&quot;piano&quot;`` a piano (top view)</span>
+
+<span class="sd">        or the path to an image file, including extension.</span>
+
+<span class="sd">        The included images are:</span>
+
+<span class="sd">        .. image:: ../../rtb-data/rtbdata/data/greycar.png</span>
+<span class="sd">           :width: 200px</span>
+<span class="sd">           :align: center</span>
+<span class="sd">           :alt: &quot;greycar&quot;</span>
+
+<span class="sd">        .. image:: ../../rtb-data/rtbdata/data/redcar.png</span>
+<span class="sd">           :width: 300px</span>
+<span class="sd">           :align: center</span>
+<span class="sd">           :alt: &quot;redcar&quot;</span>
+
+<span class="sd">        .. image:: ../../rtb-data/rtbdata/data/piano.png</span>
+<span class="sd">           :width: 200px</span>
+<span class="sd">           :align: center</span>
+<span class="sd">           :alt: &quot;piano&quot;</span>
+
+<span class="sd">        For example, to animate a simulation with the red car icon::</span>
+
+<span class="sd">            a = VehicleIcon(&quot;redcar&quot;, scale=2)</span>
+<span class="sd">            veh = Bicycle(driver=RandomPath(10), animation=a)</span>
+<span class="sd">            veh.run(animation=a)</span>
+
+<span class="sd">        .. note:: The standard icons are provided in the package ``rtb-data``</span>
+
+<span class="sd">        :seealso: :class:`Vehicle`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># try the default folder first</span>
-                <span class="n">image</span> <span class="o">=</span> <span class="n">rtb_load_data</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">imread</span><span class="p">)</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">rtb_load_data</span><span class="p">(</span>
+                    <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">imread</span>
+                <span class="p">)</span>
             <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> is not a provided icon&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -423,7 +404,7 @@
                 <span class="n">image</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;icon file </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">)</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="n">rotation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="n">image</span>
 
@@ -435,15 +416,13 @@
         <span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
             <span class="c1"># width &gt;= height</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">scale</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span><span class="n">scale</span> <span class="o">*</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># width &lt; height</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="n">scale</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
 
-
     <span class="k">def</span> <span class="nf">_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-
         <span class="k">def</span> <span class="nf">imshow_affine</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">get_extent</span><span class="p">()</span>
@@ -451,33 +430,39 @@
             <span class="k">return</span> <span class="n">im</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
-        <span class="n">extent</span> <span class="o">=</span> <span class="p">[</span>  <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span><span class="p">,</span> 
-                    <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span><span class="p">,</span> 
-                    <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> 
-                    <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span>
-                <span class="p">]</span>
+        <span class="n">extent</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span><span class="p">,</span>
+            <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span><span class="p">,</span>
+            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span>
+            <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span>
+        <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
 
         <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="s1">&#39;color&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span>
-            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;color&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span>
             <span class="n">rgb</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">to_rgb</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
-            <span class="n">cmapdata</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;red&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)],</span>
-                        <span class="s1">&#39;green&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rgb</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)],</span>
-                        <span class="s1">&#39;blue&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rgb</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)]</span>
-                        <span class="p">}</span>
-            <span class="n">cmap</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">LinearSegmentedColormap</span><span class="p">(</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">segmentdata</span><span class="o">=</span><span class="n">cmapdata</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
-            <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cmap&#39;</span><span class="p">:</span> <span class="n">cmap</span><span class="p">}</span>
+            <span class="n">cmapdata</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;red&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)],</span>
+                <span class="s2">&quot;green&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rgb</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)],</span>
+                <span class="s2">&quot;blue&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">rgb</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)],</span>
+            <span class="p">}</span>
+            <span class="n">cmap</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">LinearSegmentedColormap</span><span class="p">(</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">segmentdata</span><span class="o">=</span><span class="n">cmapdata</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cmap&quot;</span><span class="p">:</span> <span class="n">cmap</span><span class="p">}</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cmap&#39;</span><span class="p">:</span> <span class="s1">&#39;gray&#39;</span><span class="p">}</span>
-        <span class="k">if</span> <span class="s1">&#39;zorder&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">args</span><span class="p">[</span><span class="s1">&#39;zorder&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
-            
-        <span class="bp">self</span><span class="o">.</span><span class="n">_object</span> <span class="o">=</span> <span class="n">imshow_affine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="p">,</span>
-                            <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
-                            <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="n">clip_on</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                            <span class="o">**</span><span class="p">{</span><span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">})</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cmap&quot;</span><span class="p">:</span> <span class="s2">&quot;gray&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="s2">&quot;zorder&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">args</span><span class="p">[</span><span class="s2">&quot;zorder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_object</span> <span class="o">=</span> <span class="n">imshow_affine</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="p">,</span>
+            <span class="n">interpolation</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
+            <span class="n">clip_on</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="o">**</span><span class="p">{</span><span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">},</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
 
@@ -486,11 +471,14 @@
         <span class="n">center_x</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">center_y</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="n">T</span> <span class="o">=</span> <span class="p">(</span><span class="n">mtransforms</span><span class="o">.</span><span class="n">Affine2D</span><span class="p">()</span>
-                    <span class="o">.</span><span class="n">rotate_deg_around</span><span class="p">(</span><span class="n">center_x</span><span class="p">,</span> <span class="n">center_y</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span><span class="p">)</span>
-                    <span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">transData</span><span class="p">)</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mtransforms</span><span class="o">.</span><span class="n">Affine2D</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">rotate_deg_around</span><span class="p">(</span><span class="n">center_x</span><span class="p">,</span> <span class="n">center_y</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">transData</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_object</span><span class="o">.</span><span class="n">set_transform</span><span class="p">(</span><span class="n">T</span><span class="p">)</span></div>
+
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
@@ -499,13 +487,13 @@
 
     <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 
-    <span class="n">v</span> <span class="o">=</span> <span class="n">VehiclePolygon</span><span class="p">()</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">VehiclePolygon</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
     <span class="c1"># v = VehicleIcon(&#39;greycar2&#39;, scale=2, rotation=90)</span>
 
     <span class="n">veh</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">(</span><span class="n">covar</span><span class="o">=</span><span class="n">V</span><span class="p">,</span> <span class="n">animation</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">control</span><span class="o">=</span><span class="n">RandomPath</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">veh</span><span class="p">)</span>
 
-    <span class="n">odo</span> <span class="o">=</span> <span class="n">veh</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">odo</span> <span class="o">=</span> <span class="n">veh</span><span class="o">.</span><span class="n">step</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">])</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">odo</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="n">veh</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
@@ -513,19 +501,20 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">veh</span><span class="o">.</span><span class="n">f</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">odo</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">control</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
-        <span class="n">goal_heading</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span><span class="n">goal</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">goal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="n">goal_heading</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span><span class="n">goal</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">goal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">d_heading</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">angdiff</span><span class="p">(</span><span class="n">goal_heading</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
         <span class="n">v</span><span class="o">.</span><span class="n">stopif</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">goal</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">d_heading</span><span class="p">)</span>
 
-    <span class="n">veh</span><span class="o">.</span><span class="n">control</span><span class="o">=</span><span class="n">RandomPath</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="n">veh</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">veh</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">RandomPath</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">veh</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="c1"># plt.show()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 
-    <span class="n">veh</span><span class="o">.</span><span class="n">plot_xyt_t</span><span class="p">()</span>
+    <span class="n">veh</span><span class="o">.</span><span class="n">plot_xyt</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="c1"># veh.plot(p)</span>
 
     <span class="c1"># t, x = veh.path(5, u=control)</span>
@@ -535,7 +524,6 @@
 
     <span class="c1"># ax.set_xlim(-5, 5)</span>
     <span class="c1"># ax.set_ylim(-5, 5)</span>
-
 
     <span class="c1"># v = VehicleAnimation.Polygon(shape=&#39;triangle&#39;, maxdim=0.1, color=&#39;r&#39;)</span>
     <span class="c1"># v = VehicleAnimation.Icon(&#39;car3.png&#39;, maxdim=2, centre=[0.3, 0.5])</span>
@@ -559,7 +547,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

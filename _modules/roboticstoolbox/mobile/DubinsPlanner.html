@@ -69,27 +69,15 @@
            <div itemprop="articleBody">
              
   <h1>Source code for roboticstoolbox.mobile.DubinsPlanner</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="c1"># ======================================================================== #</span>
 
-<span class="sd">Dubins path planner sample code</span>
+<span class="c1"># The following code is modified from Python Robotics</span>
+<span class="c1"># https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning</span>
+<span class="c1"># Dubins planning</span>
+<span class="c1"># Author: Atsushi Sakai</span>
+<span class="c1"># Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors</span>
+<span class="c1"># Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE</span>
 
-<span class="sd">author Atsushi Sakai(@Atsushi_twi)</span>
-
-<span class="sd">The MIT License (MIT)</span>
-
-<span class="sd">Copyright (c) 2016 - 2021 Atsushi Sakai</span>
-
-<span class="sd">Permission is hereby granted, free of charge, to any person obtaining a copy</span>
-<span class="sd">of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
-<span class="sd">in the Software without restriction, including without limitation the rights</span>
-<span class="sd">to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
-<span class="sd">copies of the Software, and to permit persons to whom the Software is</span>
-<span class="sd">furnished to do so, subject to the following conditions:</span>
-
-<span class="sd">The above copyright notice and this permission notice shall be included in all</span>
-<span class="sd">copies or substantial portions of the Software.</span>
-
-<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.mobile</span> <span class="kn">import</span> <span class="n">PlannerBase</span>
@@ -98,6 +86,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
+
 
 <span class="k">def</span> <span class="nf">left_straight_left</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
     <span class="n">sa</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
@@ -158,6 +147,7 @@
 
     <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">mode</span>
 
+
 <span class="k">def</span> <span class="nf">right_straight_left</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
     <span class="n">sa</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
     <span class="n">sb</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
@@ -190,7 +180,9 @@
         <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">mode</span>
 
     <span class="n">p</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_0_2pi</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="n">tmp_rlr</span><span class="p">))</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_0_2pi</span><span class="p">(</span><span class="n">alpha</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">ca</span> <span class="o">-</span> <span class="n">cb</span><span class="p">,</span> <span class="n">d</span> <span class="o">-</span> <span class="n">sa</span> <span class="o">+</span> <span class="n">sb</span><span class="p">)</span> <span class="o">+</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_0_2pi</span><span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">))</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_0_2pi</span><span class="p">(</span>
+        <span class="n">alpha</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">ca</span> <span class="o">-</span> <span class="n">cb</span><span class="p">,</span> <span class="n">d</span> <span class="o">-</span> <span class="n">sa</span> <span class="o">+</span> <span class="n">sb</span><span class="p">)</span> <span class="o">+</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_0_2pi</span><span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="n">q</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_0_2pi</span><span class="p">(</span><span class="n">alpha</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">-</span> <span class="n">t</span> <span class="o">+</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_0_2pi</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">mode</span>
 
@@ -203,7 +195,7 @@
     <span class="n">c_ab</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span>
 
     <span class="n">mode</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;L&quot;</span><span class="p">,</span> <span class="s2">&quot;R&quot;</span><span class="p">,</span> <span class="s2">&quot;L&quot;</span><span class="p">]</span>
-    <span class="n">tmp_lrl</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.0</span> <span class="o">-</span> <span class="n">d</span> <span class="o">*</span> <span class="n">d</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">c_ab</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span> <span class="n">sa</span> <span class="o">+</span> <span class="n">sb</span><span class="p">))</span> <span class="o">/</span> <span class="mf">8.0</span>
+    <span class="n">tmp_lrl</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.0</span> <span class="o">-</span> <span class="n">d</span> <span class="o">*</span> <span class="n">d</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">c_ab</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">sa</span> <span class="o">+</span> <span class="n">sb</span><span class="p">))</span> <span class="o">/</span> <span class="mf">8.0</span>
     <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">tmp_lrl</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">mode</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_0_2pi</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="n">tmp_lrl</span><span class="p">))</span>
@@ -213,20 +205,24 @@
     <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">mode</span>
 
 
-<span class="k">def</span> <span class="nf">dubins_path_planning_from_origin</span><span class="p">(</span><span class="n">end_x</span><span class="p">,</span> <span class="n">end_y</span><span class="p">,</span> <span class="n">end_yaw</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span>
-                                     <span class="n">step_size</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">dubins_path_planning_from_origin</span><span class="p">(</span><span class="n">end_x</span><span class="p">,</span> <span class="n">end_y</span><span class="p">,</span> <span class="n">end_yaw</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">step_size</span><span class="p">):</span>
     <span class="n">dx</span> <span class="o">=</span> <span class="n">end_x</span>
     <span class="n">dy</span> <span class="o">=</span> <span class="n">end_y</span>
     <span class="n">D</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">D</span> <span class="o">*</span> <span class="n">curvature</span>
 
     <span class="n">theta</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_0_2pi</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">))</span>
-    <span class="n">alpha</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_0_2pi</span><span class="p">(</span><span class="o">-</span> <span class="n">theta</span><span class="p">)</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_0_2pi</span><span class="p">(</span><span class="o">-</span><span class="n">theta</span><span class="p">)</span>
     <span class="n">beta</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_0_2pi</span><span class="p">(</span><span class="n">end_yaw</span> <span class="o">-</span> <span class="n">theta</span><span class="p">)</span>
 
-    <span class="n">planners</span> <span class="o">=</span> <span class="p">[</span><span class="n">left_straight_left</span><span class="p">,</span> <span class="n">right_straight_right</span><span class="p">,</span> <span class="n">left_straight_right</span><span class="p">,</span>
-                <span class="n">right_straight_left</span><span class="p">,</span> <span class="n">right_left_right</span><span class="p">,</span>
-                <span class="n">left_right_left</span><span class="p">]</span>
+    <span class="n">planners</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">left_straight_left</span><span class="p">,</span>
+        <span class="n">right_straight_right</span><span class="p">,</span>
+        <span class="n">left_straight_right</span><span class="p">,</span>
+        <span class="n">right_straight_left</span><span class="p">,</span>
+        <span class="n">right_left_right</span><span class="p">,</span>
+        <span class="n">left_right_left</span><span class="p">,</span>
+    <span class="p">]</span>
 
     <span class="n">best_cost</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
     <span class="n">bt</span><span class="p">,</span> <span class="n">bp</span><span class="p">,</span> <span class="n">bq</span><span class="p">,</span> <span class="n">best_mode</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
@@ -236,20 +232,32 @@
         <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="n">cost</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">q</span><span class="p">))</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">best_cost</span> <span class="o">&gt;</span> <span class="n">cost</span><span class="p">:</span>
             <span class="n">bt</span><span class="p">,</span> <span class="n">bp</span><span class="p">,</span> <span class="n">bq</span><span class="p">,</span> <span class="n">best_mode</span> <span class="o">=</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">mode</span>
             <span class="n">best_cost</span> <span class="o">=</span> <span class="n">cost</span>
     <span class="n">lengths</span> <span class="o">=</span> <span class="p">[</span><span class="n">bt</span><span class="p">,</span> <span class="n">bp</span><span class="p">,</span> <span class="n">bq</span><span class="p">]</span>
 
     <span class="n">x_list</span><span class="p">,</span> <span class="n">y_list</span><span class="p">,</span> <span class="n">yaw_list</span><span class="p">,</span> <span class="n">directions</span> <span class="o">=</span> <span class="n">generate_local_course</span><span class="p">(</span>
-        <span class="nb">sum</span><span class="p">(</span><span class="n">lengths</span><span class="p">),</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">best_mode</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">step_size</span><span class="p">)</span>
+        <span class="nb">sum</span><span class="p">(</span><span class="n">lengths</span><span class="p">),</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">best_mode</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">step_size</span>
+    <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">x_list</span><span class="p">,</span> <span class="n">y_list</span><span class="p">,</span> <span class="n">yaw_list</span><span class="p">,</span> <span class="n">best_mode</span><span class="p">,</span> <span class="n">best_cost</span><span class="p">,</span> <span class="n">lengths</span>
 
 
-<span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">max_curvature</span><span class="p">,</span> <span class="n">origin_x</span><span class="p">,</span> <span class="n">origin_y</span><span class="p">,</span>
-                <span class="n">origin_yaw</span><span class="p">,</span> <span class="n">path_x</span><span class="p">,</span> <span class="n">path_y</span><span class="p">,</span> <span class="n">path_yaw</span><span class="p">,</span> <span class="n">directions</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span>
+    <span class="n">ind</span><span class="p">,</span>
+    <span class="n">length</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">,</span>
+    <span class="n">max_curvature</span><span class="p">,</span>
+    <span class="n">origin_x</span><span class="p">,</span>
+    <span class="n">origin_y</span><span class="p">,</span>
+    <span class="n">origin_yaw</span><span class="p">,</span>
+    <span class="n">path_x</span><span class="p">,</span>
+    <span class="n">path_y</span><span class="p">,</span>
+    <span class="n">path_yaw</span><span class="p">,</span>
+    <span class="n">directions</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
         <span class="n">path_x</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">origin_x</span> <span class="o">+</span> <span class="n">length</span> <span class="o">/</span> <span class="n">max_curvature</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">origin_yaw</span><span class="p">)</span>
         <span class="n">path_y</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">origin_y</span> <span class="o">+</span> <span class="n">length</span> <span class="o">/</span> <span class="n">max_curvature</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">origin_yaw</span><span class="p">)</span>
@@ -279,8 +287,7 @@
     <span class="k">return</span> <span class="n">path_x</span><span class="p">,</span> <span class="n">path_y</span><span class="p">,</span> <span class="n">path_yaw</span><span class="p">,</span> <span class="n">directions</span>
 
 
-<span class="k">def</span> <span class="nf">generate_local_course</span><span class="p">(</span><span class="n">total_length</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">max_curvature</span><span class="p">,</span>
-                          <span class="n">step_size</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">generate_local_course</span><span class="p">(</span><span class="n">total_length</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">max_curvature</span><span class="p">,</span> <span class="n">step_size</span><span class="p">):</span>
     <span class="n">n_point</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">trunc</span><span class="p">(</span><span class="n">total_length</span> <span class="o">/</span> <span class="n">step_size</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span>
 
     <span class="n">path_x</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_point</span><span class="p">)]</span>
@@ -303,28 +310,47 @@
             <span class="n">d</span> <span class="o">=</span> <span class="o">-</span><span class="n">step_size</span>
 
         <span class="c1"># set origin state</span>
-        <span class="n">origin_x</span><span class="p">,</span> <span class="n">origin_y</span><span class="p">,</span> <span class="n">origin_yaw</span> <span class="o">=</span> \
-            <span class="n">path_x</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">path_y</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">path_yaw</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">origin_x</span><span class="p">,</span> <span class="n">origin_y</span><span class="p">,</span> <span class="n">origin_yaw</span> <span class="o">=</span> <span class="n">path_x</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">path_y</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">path_yaw</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
 
         <span class="n">index</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="n">lengths</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">lengths</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">pd</span> <span class="o">=</span> <span class="o">-</span> <span class="n">d</span> <span class="o">-</span> <span class="n">ll</span>
+            <span class="n">pd</span> <span class="o">=</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span> <span class="n">ll</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">pd</span> <span class="o">=</span> <span class="n">d</span> <span class="o">-</span> <span class="n">ll</span>
 
         <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">pd</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
             <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">path_x</span><span class="p">,</span> <span class="n">path_y</span><span class="p">,</span> <span class="n">path_yaw</span><span class="p">,</span> <span class="n">directions</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span>
-                <span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">max_curvature</span><span class="p">,</span> <span class="n">origin_x</span><span class="p">,</span> <span class="n">origin_y</span><span class="p">,</span> <span class="n">origin_yaw</span><span class="p">,</span>
-                <span class="n">path_x</span><span class="p">,</span> <span class="n">path_y</span><span class="p">,</span> <span class="n">path_yaw</span><span class="p">,</span> <span class="n">directions</span><span class="p">)</span>
+                <span class="n">index</span><span class="p">,</span>
+                <span class="n">pd</span><span class="p">,</span>
+                <span class="n">m</span><span class="p">,</span>
+                <span class="n">max_curvature</span><span class="p">,</span>
+                <span class="n">origin_x</span><span class="p">,</span>
+                <span class="n">origin_y</span><span class="p">,</span>
+                <span class="n">origin_yaw</span><span class="p">,</span>
+                <span class="n">path_x</span><span class="p">,</span>
+                <span class="n">path_y</span><span class="p">,</span>
+                <span class="n">path_yaw</span><span class="p">,</span>
+                <span class="n">directions</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">pd</span> <span class="o">+=</span> <span class="n">d</span>
 
         <span class="n">ll</span> <span class="o">=</span> <span class="n">l</span> <span class="o">-</span> <span class="n">pd</span> <span class="o">-</span> <span class="n">d</span>  <span class="c1"># calc remain length</span>
 
         <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">path_x</span><span class="p">,</span> <span class="n">path_y</span><span class="p">,</span> <span class="n">path_yaw</span><span class="p">,</span> <span class="n">directions</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span>
-            <span class="n">index</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">max_curvature</span><span class="p">,</span> <span class="n">origin_x</span><span class="p">,</span> <span class="n">origin_y</span><span class="p">,</span> <span class="n">origin_yaw</span><span class="p">,</span>
-            <span class="n">path_x</span><span class="p">,</span> <span class="n">path_y</span><span class="p">,</span> <span class="n">path_yaw</span><span class="p">,</span> <span class="n">directions</span><span class="p">)</span>
+            <span class="n">index</span><span class="p">,</span>
+            <span class="n">l</span><span class="p">,</span>
+            <span class="n">m</span><span class="p">,</span>
+            <span class="n">max_curvature</span><span class="p">,</span>
+            <span class="n">origin_x</span><span class="p">,</span>
+            <span class="n">origin_y</span><span class="p">,</span>
+            <span class="n">origin_yaw</span><span class="p">,</span>
+            <span class="n">path_x</span><span class="p">,</span>
+            <span class="n">path_y</span><span class="p">,</span>
+            <span class="n">path_yaw</span><span class="p">,</span>
+            <span class="n">directions</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path_x</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -337,6 +363,7 @@
         <span class="n">directions</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">path_x</span><span class="p">,</span> <span class="n">path_y</span><span class="p">,</span> <span class="n">path_yaw</span><span class="p">,</span> <span class="n">directions</span>
+
 
 <span class="k">def</span> <span class="nf">path_planning</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -363,7 +390,8 @@
     <span class="n">le_yaw</span> <span class="o">=</span> <span class="n">g_yaw</span> <span class="o">-</span> <span class="n">s_yaw</span>
 
     <span class="n">lp_x</span><span class="p">,</span> <span class="n">lp_y</span><span class="p">,</span> <span class="n">lp_yaw</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">lengths</span> <span class="o">=</span> <span class="n">dubins_path_planning_from_origin</span><span class="p">(</span>
-        <span class="n">le_xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">le_xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">le_yaw</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">step_size</span><span class="p">)</span>
+        <span class="n">le_xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">le_xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">le_yaw</span><span class="p">,</span> <span class="n">curvature</span><span class="p">,</span> <span class="n">step_size</span>
+    <span class="p">)</span>
 
     <span class="n">rot</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">rot2</span><span class="p">(</span><span class="o">-</span><span class="n">s_yaw</span><span class="p">)</span>
     <span class="n">converted_xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">lp_x</span><span class="p">,</span> <span class="n">lp_y</span><span class="p">])</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">rot</span>
@@ -374,7 +402,11 @@
     <span class="n">path</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">x_list</span><span class="p">,</span> <span class="n">y_list</span><span class="p">,</span> <span class="n">yaw_list</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">lengths</span>
 
-<span class="c1"># ============================================================================</span>
+
+<span class="c1"># ====================== RTB wrapper ============================= #</span>
+
+<span class="c1"># Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python</span>
+<span class="c1"># Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE</span>
 <div class="viewcode-block" id="DubinsPlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner">[docs]</a><span class="k">class</span> <span class="nc">DubinsPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dubins path planner</span>
@@ -389,7 +421,7 @@
 <span class="sd">    ==================   ========================</span>
 <span class="sd">    Feature              Capability</span>
 <span class="sd">    ==================   ========================</span>
-<span class="sd">    Plan                 Configuration space</span>
+<span class="sd">    Plan                 :math:`\SE{2}`</span>
 <span class="sd">    Obstacle avoidance   No</span>
 <span class="sd">    Curvature            Discontinuous</span>
 <span class="sd">    Motion               Forwards only</span>
@@ -397,15 +429,28 @@
 
 <span class="sd">    Creates a planner that finds the path between two configurations in the</span>
 <span class="sd">    plane using forward motion only.  The path comprises upto 3 segments that are</span>
-<span class="sd">    straight lines or arcs with :math:`\pm` ``curvature``.</span>
+<span class="sd">    straight lines, or arcs with curvature of :math:`\pm` ``curvature``.</span>
 
-<span class="sd">    :reference: On Curves of Minimal Length with a Constraint on Average </span>
-<span class="sd">        Curvature, and with Prescribed Initial and Terminal Positions and </span>
+<span class="sd">    Example:</span>
+
+<span class="sd">    .. runblock:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; from roboticstoolbox import DubinsPlanner</span>
+<span class="sd">        &gt;&gt;&gt; from math import pi</span>
+<span class="sd">        &gt;&gt;&gt; dubins = DubinsPlanner(curvature=1.0)</span>
+<span class="sd">        &gt;&gt;&gt; path, status = dubins.query(start=(0, 0, pi/2), goal=(1, 0, pi/2))</span>
+<span class="sd">        &gt;&gt;&gt; print(path[:5,:])</span>
+<span class="sd">        &gt;&gt;&gt; print(status)</span>
+
+<span class="sd">    :reference: On Curves of Minimal Length with a Constraint on Average</span>
+<span class="sd">        Curvature, and with Prescribed Initial and Terminal Positions and</span>
 <span class="sd">        Tangents,  Dubins, L.E. (July 1957), American Journal of Mathematics.</span>
 <span class="sd">        79(3): 497–516.</span>
-<span class="sd">    :author: Atsushi Sakai `PythonRobotics &lt;https://github.com/AtsushiSakai/PythonRobotics&gt;`_</span>
-<span class="sd">    :seealso: :class:`Planner`</span>
+
+<span class="sd">    :thanks: based on Dubins path planning from `Python Robotics &lt;https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning&gt;`_</span>
+<span class="sd">    :seealso: :class:`ReedsSheppPlanner` :class:`PlannerBase`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">curvature</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stepsize</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ndims</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -413,11 +458,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span> <span class="o">=</span> <span class="n">stepsize</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  curvature=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curvature</span><span class="si">}</span><span class="s2">, stepsize=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  curvature=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curvature</span><span class="si">}</span><span class="s2">, stepsize=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="DubinsPlanner.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DubinsPlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Find a Dubins path</span>
+<span class="sd">        Find a path between two configurations</span>
 
 <span class="sd">        :param start: start configuration :math:`(x, y, \theta)`</span>
 <span class="sd">        :type start: array_like(3), optional</span>
@@ -425,6 +473,8 @@
 <span class="sd">        :type goal: array_like(3), optional</span>
 <span class="sd">        :return: path and status</span>
 <span class="sd">        :rtype: ndarray(N,3), namedtuple</span>
+
+<span class="sd">        The path comprises points equally spaced at a distance of ``stepsize``.</span>
 
 <span class="sd">        The returned status value has elements:</span>
 
@@ -435,30 +485,35 @@
 <span class="sd">        |             | a single letter code: either &quot;L&quot;, &quot;R&quot; or &quot;S&quot; for    |</span>
 <span class="sd">        |             | left turn, right turn or straight line respectively.|</span>
 <span class="sd">        +-------------+-----------------------------------------------------+</span>
+<span class="sd">        | ``length``  | total path length                                   |</span>
+<span class="sd">        +-------------+-----------------------------------------------------+</span>
 <span class="sd">        |``lengths``  | the length of each path segment. The sign of the    |</span>
-<span class="sd">        |             |length indicates the direction of travel.            |</span>
+<span class="sd">        |             | length indicates the direction of travel.           |</span>
 <span class="sd">        +-------------+-----------------------------------------------------+</span>
 
-<span class="sd">        :seealso: :meth:`Planner.query`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="n">goal</span><span class="p">,</span> <span class="nb">next</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">path</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">lengths</span> <span class="o">=</span> <span class="n">path_planning</span><span class="p">(</span>
-            <span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">goal</span><span class="p">,</span>
-            <span class="n">curvature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_curvature</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span><span class="p">)</span>
+            <span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+            <span class="n">goal</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">goal</span><span class="p">,</span>
+            <span class="n">curvature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_curvature</span><span class="p">,</span>
+            <span class="n">step_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span><span class="p">,</span>
+        <span class="p">)</span>
 
-        <span class="n">status</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;DubinsStatus&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;segments&#39;</span><span class="p">,</span> <span class="s1">&#39;length&#39;</span><span class="p">,</span> <span class="s1">&#39;seglengths&#39;</span><span class="p">])</span>
-        
+        <span class="n">status</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;DubinsStatus&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;segments&quot;</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="s2">&quot;seglengths&quot;</span><span class="p">])</span>
+
         <span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">status</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lengths</span><span class="p">),</span> <span class="n">lengths</span><span class="p">)</span></div></div>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
 
-    <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
-    <span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span>
+    <span class="c1"># start = (1, 1, pi/4)</span>
+    <span class="c1"># goal = (-3, -3, -pi/4)</span>
 
-    <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="n">dubins</span> <span class="o">=</span> <span class="n">DubinsPlanner</span><span class="p">(</span><span class="n">curvature</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
     <span class="n">path</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="n">dubins</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">)</span>
@@ -488,7 +543,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

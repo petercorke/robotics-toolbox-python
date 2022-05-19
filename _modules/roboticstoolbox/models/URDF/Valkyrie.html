@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>roboticstoolbox.models.URDF.Valkyrie &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
+            <img src="../../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>roboticstoolbox.models.URDF.Valkyrie</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for roboticstoolbox.models.URDF.Valkyrie</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ERobot</span> <span class="kn">import</span> <span class="n">ERobot</span><span class="p">,</span> <span class="n">Link</span>
+
+
+<div class="viewcode-block" id="Valkyrie"><a class="viewcode-back" href="../../../../arm_erobot.html#roboticstoolbox.models.URDF.Valkyrie">[docs]</a><span class="k">class</span> <span class="nc">Valkyrie</span><span class="p">(</span><span class="n">ERobot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that imports a NASA Valkyrie URDF model</span>
+
+<span class="sd">    ``Valkyrie()`` is a class which imports a NASA Valkyrie robot definition</span>
+<span class="sd">    from a URDF file.  The model describes its kinematic and graphical</span>
+<span class="sd">    characteristics.</span>
+
+<span class="sd">    .. runblock:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; import roboticstoolbox as rtb</span>
+<span class="sd">        &gt;&gt;&gt; robot = rtb.models.URDF.Valkyrie()</span>
+<span class="sd">        &gt;&gt;&gt; print(robot)</span>
+
+<span class="sd">    Defined joint configurations are:</span>
+
+<span class="sd">    - qz, zero joint angle configuration, &#39;L&#39; shaped configuration</span>
+<span class="sd">    - qr, vertical &#39;READY&#39; configuration</span>
+
+<span class="sd">    :reference:</span>
+<span class="sd">        - https://github.com/gkjohnson/nasa-urdf-robots</span>
+
+<span class="sd">    .. codeauthor:: Peter Corke</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">variant</span> <span class="ow">in</span> <span class="s2">&quot;ABCD&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;variant must be in the range A-D&quot;</span><span class="p">)</span>
+
+        <span class="n">links</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">urdf_string</span><span class="p">,</span> <span class="n">urdf_filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">URDF_read</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;val_description/model/robots/valkyrie_</span><span class="si">{</span><span class="n">variant</span><span class="si">}</span><span class="s2">.urdf&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># We wish to add an intermediate link between gripper_r_base and</span>
+        <span class="c1"># @gripper_r_finger_r/l</span>
+        <span class="c1"># This is because gripper_r_base contains a revolute joint which is</span>
+        <span class="c1"># a part of the core kinematic chain and not the gripper.</span>
+        <span class="c1"># So we wish for gripper_r_base to be part of the robot and</span>
+        <span class="c1"># @gripper_r_finger_r/l to be in the gripper underneath a parent Link</span>
+        <span class="c1"># gripper_r_base = links[13]</span>
+        <span class="c1"># gripper_l_base = links[33]</span>
+
+        <span class="c1"># # Find the finger links</span>
+        <span class="c1"># r_gripper_links = [link for link in links if link.parent == gripper_r_base]</span>
+        <span class="c1"># l_gripper_links = [link for link in links if link.parent == gripper_l_base]</span>
+
+        <span class="c1"># # New intermediate links</span>
+        <span class="c1"># r_gripper = Link(name=&quot;rightGripper&quot;, parent=gripper_r_base)</span>
+        <span class="c1"># l_gripper = Link(name=&quot;leftGripper&quot;, parent=gripper_l_base)</span>
+        <span class="c1"># links.append(r_gripper)</span>
+        <span class="c1"># links.append(l_gripper)</span>
+
+        <span class="c1"># # Set the finger link parent to be the new gripper base link</span>
+        <span class="c1"># for g_link in r_gripper_links:</span>
+        <span class="c1">#     g_link._parent = r_gripper</span>
+
+        <span class="c1"># for g_link in l_gripper_links:</span>
+        <span class="c1">#     g_link._parent = l_gripper</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">links</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;NASA&quot;</span><span class="p">,</span>
+            <span class="c1"># gripper_links=[r_gripper, l_gripper],</span>
+            <span class="n">urdf_string</span><span class="o">=</span><span class="n">urdf_string</span><span class="p">,</span>
+            <span class="n">urdf_filepath</span><span class="o">=</span><span class="n">urdf_filepath</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+        <span class="c1"># self.addconfiguration_attr(&quot;qz&quot;, np.array([0, 0, 0, 0, 0, 0, 0]))</span>
+        <span class="c1"># self.addconfiguration_attr(&quot;qr&quot;, np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]))</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
+
+    <span class="n">robot</span> <span class="o">=</span> <span class="n">Valkyrie</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">robot</span><span class="o">.</span><span class="n">n</span><span class="p">,)))</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">hold</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 19-May-2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

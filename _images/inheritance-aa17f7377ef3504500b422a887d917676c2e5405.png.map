@@ -1,0 +1,5 @@
+<map id="inheritance1209b9c66c" name="inheritance1209b9c66c">
+<area shape="rect" id="node1" href="#roboticstoolbox.robot.Link.BaseLink" target="_top" title="Link superclass" alt="" coords="225,31,337,56"/>
+<area shape="rect" id="node4" href="#roboticstoolbox.robot.Link.Link" target="_top" title="ETS link class" alt="" coords="385,31,465,56"/>
+<area shape="rect" id="node3" title="Helper class that provides a standard way to create an ABC using" alt="" coords="53,55,129,80"/>
+</map>

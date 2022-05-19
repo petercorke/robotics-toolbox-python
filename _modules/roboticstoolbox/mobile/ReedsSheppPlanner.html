@@ -69,28 +69,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for roboticstoolbox.mobile.ReedsSheppPlanner</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">Reeds Shepp path planner sample code</span>
-
-<span class="sd">author Atsushi Sakai(@Atsushi_twi)</span>
-
-<span class="sd">The MIT License (MIT)</span>
-
-<span class="sd">Copyright (c) 2016 - 2021 Atsushi Sakai</span>
-
-<span class="sd">Permission is hereby granted, free of charge, to any person obtaining a copy</span>
-<span class="sd">of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
-<span class="sd">in the Software without restriction, including without limitation the rights</span>
-<span class="sd">to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
-<span class="sd">copies of the Software, and to permit persons to whom the Software is</span>
-<span class="sd">furnished to do so, subject to the following conditions:</span>
-
-<span class="sd">The above copyright notice and this permission notice shall be included in all</span>
-<span class="sd">copies or substantial portions of the Software.</span>
-
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">math</span>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.mobile.PlannerBase</span> <span class="kn">import</span> <span class="n">PlannerBase</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -98,8 +77,16 @@
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
 
+<span class="c1"># ======================================================================== #</span>
 
-<span class="k">class</span> <span class="nc">Path</span><span class="p">:</span>
+<span class="c1"># The following code is modified from Python Robotics</span>
+<span class="c1"># https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning</span>
+<span class="c1"># D* grid planning</span>
+<span class="c1"># Author: Atsushi Sakai </span>
+<span class="c1"># Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors</span>
+<span class="c1"># Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE </span>
+
+<span class="k">class</span> <span class="nc">_Path</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lengths</span> <span class="o">=</span> <span class="p">[]</span>
@@ -144,7 +131,7 @@
 
 
 <span class="k">def</span> <span class="nf">set_path</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">ctypes</span><span class="p">):</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">()</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">_Path</span><span class="p">()</span>
     <span class="n">path</span><span class="o">.</span><span class="n">ctypes</span> <span class="o">=</span> <span class="n">ctypes</span>
     <span class="n">path</span><span class="o">.</span><span class="n">lengths</span> <span class="o">=</span> <span class="n">lengths</span>
 
@@ -444,8 +431,10 @@
 
     <span class="k">return</span> <span class="n">bpath</span>
 
-<span class="c1"># ============================================================================</span>
+<span class="c1"># ====================== RTB wrapper ============================= #</span>
 
+<span class="c1"># Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python</span>
+<span class="c1"># Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE </span>
 <div class="viewcode-block" id="ReedsSheppPlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner">[docs]</a><span class="k">class</span> <span class="nc">ReedsSheppPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reeds-Shepp path planner</span>
@@ -460,7 +449,7 @@
 <span class="sd">    ==================   ========================</span>
 <span class="sd">    Feature              Capability</span>
 <span class="sd">    ==================   ========================</span>
-<span class="sd">    Plan                 Configuration space</span>
+<span class="sd">    Plan                 :math:`\SE{2}`</span>
 <span class="sd">    Obstacle avoidance   No</span>
 <span class="sd">    Curvature            Discontinuous</span>
 <span class="sd">    Motion               Bidirectional</span>
@@ -468,14 +457,26 @@
 
 <span class="sd">    Creates a planner that finds the path between two configurations in the</span>
 <span class="sd">    plane using forward and backward motion.  The path comprises upto 3 segments</span>
-<span class="sd">    that are straight lines or arcs with :math:`\pm` ``curvature``.</span>
+<span class="sd">    that are straight lines, or arcs with  curvature of :math:`\pm`</span>
+<span class="sd">    ``curvature``.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    .. runblock:: pycon</span>
+
+<span class="sd">        &gt;&gt;&gt; from roboticstoolbox import ReedsSheppPlanner</span>
+<span class="sd">        &gt;&gt;&gt; from math import pi</span>
+<span class="sd">        &gt;&gt;&gt; reedshepp = ReedsSheppPlanner(curvature=1.0)</span>
+<span class="sd">        &gt;&gt;&gt; path, status = reedshepp.query(start=(0, 0, pi/2), goal=(1, 0, pi/2))</span>
+<span class="sd">        &gt;&gt;&gt; print(path[:5,:])</span>
+<span class="sd">        &gt;&gt;&gt; print(status)</span>
 
 <span class="sd">    :reference: Optimal paths for a car that goes both forwards and backwards,</span>
 <span class="sd">        Reeds, J.A. and L.A. Shepp, Pacific J. Math., 145 (1990), </span>
 <span class="sd">        pp. 367–393. </span>
 
-<span class="sd">    :author: Atsushi Sakai `PythonRobotics &lt;https://github.com/AtsushiSakai/PythonRobotics&gt;`_</span>
-<span class="sd">    :seealso: :class:`Planner`</span>
+<span class="sd">    :thanks: based on Reeds-Shepp path planning from `Python Robotics &lt;https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning&gt;`_</span>
+<span class="sd">    :seealso: :class:`DubinsPlanner` :class:`PlannerBase`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">curvature</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stepsize</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ndims</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -487,7 +488,7 @@
 
 <div class="viewcode-block" id="ReedsSheppPlanner.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.ReedsSheppPlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Find Reeds-Shepp path</span>
+<span class="sd">        Find a path between two configurations</span>
 
 <span class="sd">        :param start: start configuration :math:`(x, y, \theta)`</span>
 <span class="sd">        :type start: array_like(3), optional</span>
@@ -495,6 +496,8 @@
 <span class="sd">        :type goal: array_like(3), optional</span>
 <span class="sd">        :return: path and status</span>
 <span class="sd">        :rtype: ndarray(N,3), namedtuple</span>
+
+<span class="sd">        The path comprises points equally spaced at a distance of ``stepsize``.</span>
 
 <span class="sd">        The returned status value has elements:</span>
 
@@ -505,8 +508,10 @@
 <span class="sd">        |             | a single letter code: either &quot;L&quot;, &quot;R&quot; or &quot;S&quot; for    |</span>
 <span class="sd">        |             | left turn, right turn or straight line respectively.|</span>
 <span class="sd">        +-------------+-----------------------------------------------------+</span>
+<span class="sd">        | ``length``  | total path length                                   |</span>
+<span class="sd">        +-------------+-----------------------------------------------------+</span>
 <span class="sd">        |``lengths``  | the length of each path segment. The sign of the    |</span>
-<span class="sd">        |             |length indicates the direction of travel.            |</span>
+<span class="sd">        |             | length indicates the direction of travel.           |</span>
 <span class="sd">        +-------------+-----------------------------------------------------+</span>
 <span class="sd">        |``direction``| the direction of motion at each point on the path   |</span>
 <span class="sd">        +-------------+-----------------------------------------------------+</span>
@@ -514,7 +519,6 @@
 <span class="sd">        .. note:: The direction of turning is reversed when travelling </span>
 <span class="sd">            backwards.</span>
 
-<span class="sd">        :seealso: :meth:`Planner.query`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="n">goal</span><span class="p">,</span> <span class="nb">next</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -573,7 +577,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

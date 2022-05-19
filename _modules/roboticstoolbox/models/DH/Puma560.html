@@ -129,7 +129,7 @@
 
 <span class="sd">    .. warning:: Compared to the MATLAB version of the Toolbox this model</span>
 <span class="sd">        includes the pedestal, making the z-coordinates 26 inches larger.</span>
-<span class="sd">        </span>
+
 <span class="sd">    :references:</span>
 <span class="sd">        - &quot;A search for consensus among model parameters reported for the PUMA</span>
 <span class="sd">          560 robot&quot;, P. Corke and B. Armstrong-Helouvry,</span>
@@ -147,22 +147,24 @@
 
         <span class="k">if</span> <span class="n">symbolic</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">spatialmath.base.symbolic</span> <span class="k">as</span> <span class="nn">sym</span>
+
             <span class="n">zero</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
             <span class="n">pi</span> <span class="o">=</span> <span class="n">sym</span><span class="o">.</span><span class="n">pi</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+
             <span class="n">zero</span> <span class="o">=</span> <span class="mf">0.0</span>
 
         <span class="n">deg</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
         <span class="n">inch</span> <span class="o">=</span> <span class="mf">0.0254</span>
 
-        <span class="n">base</span> <span class="o">=</span> <span class="mf">26.45</span> <span class="o">*</span> <span class="n">inch</span>    <span class="c1"># from mounting surface to shoulder axis</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="mf">26.45</span> <span class="o">*</span> <span class="n">inch</span>  <span class="c1"># from mounting surface to shoulder axis</span>
 
         <span class="n">L</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">RevoluteDH</span><span class="p">(</span>
-                <span class="n">d</span><span class="o">=</span><span class="n">base</span><span class="p">,</span>       <span class="c1"># link length (Dennavit-Hartenberg notation)</span>
-                <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>          <span class="c1"># link offset (Dennavit-Hartenberg notation)</span>
-                <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>   <span class="c1"># link twist (Dennavit-Hartenberg notation)</span>
+                <span class="n">d</span><span class="o">=</span><span class="n">base</span><span class="p">,</span>  <span class="c1"># link length (Dennavit-Hartenberg notation)</span>
+                <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># link offset (Dennavit-Hartenberg notation)</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># link twist (Dennavit-Hartenberg notation)</span>
                 <span class="n">I</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                 <span class="c1"># inertia tensor of link with respect to</span>
                 <span class="c1"># center of mass I = [L_xx, L_yy, L_zz,</span>
@@ -170,31 +172,33 @@
                 <span class="n">r</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                 <span class="c1"># distance of ith origin to center of mass [x,y,z]</span>
                 <span class="c1"># in link reference frame</span>
-                <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>          <span class="c1"># mass of link</span>
-                <span class="n">Jm</span><span class="o">=</span><span class="mf">200e-6</span><span class="p">,</span>    <span class="c1"># actuator inertia</span>
-                <span class="n">G</span><span class="o">=-</span><span class="mf">62.6111</span><span class="p">,</span>   <span class="c1"># gear ratio</span>
-                <span class="n">B</span><span class="o">=</span><span class="mf">1.48e-3</span><span class="p">,</span>    <span class="c1"># actuator viscous friction coefficient (measured</span>
-                              <span class="c1"># at the motor)</span>
+                <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># mass of link</span>
+                <span class="n">Jm</span><span class="o">=</span><span class="mf">200e-6</span><span class="p">,</span>  <span class="c1"># actuator inertia</span>
+                <span class="n">G</span><span class="o">=-</span><span class="mf">62.6111</span><span class="p">,</span>  <span class="c1"># gear ratio</span>
+                <span class="n">B</span><span class="o">=</span><span class="mf">1.48e-3</span><span class="p">,</span>  <span class="c1"># actuator viscous friction coefficient (measured</span>
+                <span class="c1"># at the motor)</span>
                 <span class="n">Tc</span><span class="o">=</span><span class="p">[</span><span class="mf">0.395</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.435</span><span class="p">],</span>
                 <span class="c1"># actuator Coulomb friction coefficient for</span>
                 <span class="c1"># direction [-,+] (measured at the motor)</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">160</span><span class="o">*</span><span class="n">deg</span><span class="p">,</span> <span class="mi">160</span><span class="o">*</span><span class="n">deg</span><span class="p">]</span>    <span class="c1"># minimum and maximum joint angle</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">160</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">160</span> <span class="o">*</span> <span class="n">deg</span><span class="p">],</span>  <span class="c1"># minimum and maximum joint angle</span>
             <span class="p">),</span>
-
             <span class="n">RevoluteDH</span><span class="p">(</span>
-                <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.4318</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">zero</span><span class="p">,</span>
+                <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">a</span><span class="o">=</span><span class="mf">0.4318</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">zero</span><span class="p">,</span>
                 <span class="n">I</span><span class="o">=</span><span class="p">[</span><span class="mf">0.13</span><span class="p">,</span> <span class="mf">0.524</span><span class="p">,</span> <span class="mf">0.539</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                 <span class="n">r</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.3638</span><span class="p">,</span> <span class="mf">0.006</span><span class="p">,</span> <span class="mf">0.2275</span><span class="p">],</span>
                 <span class="n">m</span><span class="o">=</span><span class="mf">17.4</span><span class="p">,</span>
                 <span class="n">Jm</span><span class="o">=</span><span class="mf">200e-6</span><span class="p">,</span>
                 <span class="n">G</span><span class="o">=</span><span class="mf">107.815</span><span class="p">,</span>
-                <span class="n">B</span><span class="o">=</span><span class="mf">.817e-3</span><span class="p">,</span>
+                <span class="n">B</span><span class="o">=</span><span class="mf">0.817e-3</span><span class="p">,</span>
                 <span class="n">Tc</span><span class="o">=</span><span class="p">[</span><span class="mf">0.126</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.071</span><span class="p">],</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">110</span><span class="o">*</span><span class="n">deg</span><span class="p">,</span> <span class="mi">110</span><span class="o">*</span><span class="n">deg</span><span class="p">],</span>  <span class="c1"># qlim=[-45*deg, 225*deg]</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">110</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">110</span> <span class="o">*</span> <span class="n">deg</span><span class="p">],</span>  <span class="c1"># qlim=[-45*deg, 225*deg]</span>
             <span class="p">),</span>
-
             <span class="n">RevoluteDH</span><span class="p">(</span>
-                <span class="n">d</span><span class="o">=</span><span class="mf">0.15005</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">0.0203</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">d</span><span class="o">=</span><span class="mf">0.15005</span><span class="p">,</span>
+                <span class="n">a</span><span class="o">=</span><span class="mf">0.0203</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
                 <span class="n">I</span><span class="o">=</span><span class="p">[</span><span class="mf">0.066</span><span class="p">,</span> <span class="mf">0.086</span><span class="p">,</span> <span class="mf">0.0125</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                 <span class="n">r</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">0.0203</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0141</span><span class="p">,</span> <span class="mf">0.070</span><span class="p">],</span>
                 <span class="n">m</span><span class="o">=</span><span class="mf">4.8</span><span class="p">,</span>
@@ -202,11 +206,12 @@
                 <span class="n">G</span><span class="o">=-</span><span class="mf">53.7063</span><span class="p">,</span>
                 <span class="n">B</span><span class="o">=</span><span class="mf">1.38e-3</span><span class="p">,</span>
                 <span class="n">Tc</span><span class="o">=</span><span class="p">[</span><span class="mf">0.132</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.105</span><span class="p">],</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">135</span><span class="o">*</span><span class="n">deg</span><span class="p">,</span> <span class="mi">135</span><span class="o">*</span><span class="n">deg</span><span class="p">]</span>  <span class="c1"># qlim=[-225*deg, 45*deg]</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">135</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">135</span> <span class="o">*</span> <span class="n">deg</span><span class="p">],</span>  <span class="c1"># qlim=[-225*deg, 45*deg]</span>
             <span class="p">),</span>
-
             <span class="n">RevoluteDH</span><span class="p">(</span>
-                <span class="n">d</span><span class="o">=</span><span class="mf">0.4318</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">d</span><span class="o">=</span><span class="mf">0.4318</span><span class="p">,</span>
+                <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
                 <span class="n">I</span><span class="o">=</span><span class="p">[</span><span class="mf">1.8e-3</span><span class="p">,</span> <span class="mf">1.3e-3</span><span class="p">,</span> <span class="mf">1.8e-3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                 <span class="n">r</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.019</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                 <span class="n">m</span><span class="o">=</span><span class="mf">0.82</span><span class="p">,</span>
@@ -214,11 +219,12 @@
                 <span class="n">G</span><span class="o">=</span><span class="mf">76.0364</span><span class="p">,</span>
                 <span class="n">B</span><span class="o">=</span><span class="mf">71.2e-6</span><span class="p">,</span>
                 <span class="n">Tc</span><span class="o">=</span><span class="p">[</span><span class="mf">11.2e-3</span><span class="p">,</span> <span class="o">-</span><span class="mf">16.9e-3</span><span class="p">],</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">266</span><span class="o">*</span><span class="n">deg</span><span class="p">,</span> <span class="mi">266</span><span class="o">*</span><span class="n">deg</span><span class="p">]</span>  <span class="c1"># qlim=[-110*deg, 170*deg]</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">266</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">266</span> <span class="o">*</span> <span class="n">deg</span><span class="p">],</span>  <span class="c1"># qlim=[-110*deg, 170*deg]</span>
             <span class="p">),</span>
-
             <span class="n">RevoluteDH</span><span class="p">(</span>
-                <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
                 <span class="n">I</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3e-3</span><span class="p">,</span> <span class="mf">0.4e-3</span><span class="p">,</span> <span class="mf">0.3e-3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                 <span class="n">r</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                 <span class="n">m</span><span class="o">=</span><span class="mf">0.34</span><span class="p">,</span>
@@ -226,11 +232,12 @@
                 <span class="n">G</span><span class="o">=</span><span class="mf">71.923</span><span class="p">,</span>
                 <span class="n">B</span><span class="o">=</span><span class="mf">82.6e-6</span><span class="p">,</span>
                 <span class="n">Tc</span><span class="o">=</span><span class="p">[</span><span class="mf">9.26e-3</span><span class="p">,</span> <span class="o">-</span><span class="mf">14.5e-3</span><span class="p">],</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="o">*</span><span class="n">deg</span><span class="p">,</span> <span class="mi">100</span><span class="o">*</span><span class="n">deg</span><span class="p">]</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">100</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">deg</span><span class="p">],</span>
             <span class="p">),</span>
-
             <span class="n">RevoluteDH</span><span class="p">(</span>
-                <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">zero</span><span class="p">,</span>
+                <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">zero</span><span class="p">,</span>
                 <span class="n">I</span><span class="o">=</span><span class="p">[</span><span class="mf">0.15e-3</span><span class="p">,</span> <span class="mf">0.15e-3</span><span class="p">,</span> <span class="mf">0.04e-3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                 <span class="n">r</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.032</span><span class="p">],</span>
                 <span class="n">m</span><span class="o">=</span><span class="mf">0.09</span><span class="p">,</span>
@@ -238,30 +245,31 @@
                 <span class="n">G</span><span class="o">=</span><span class="mf">76.686</span><span class="p">,</span>
                 <span class="n">B</span><span class="o">=</span><span class="mf">36.7e-6</span><span class="p">,</span>
                 <span class="n">Tc</span><span class="o">=</span><span class="p">[</span><span class="mf">3.96e-3</span><span class="p">,</span> <span class="o">-</span><span class="mf">10.5e-3</span><span class="p">],</span>
-                <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">266</span><span class="o">*</span><span class="n">deg</span><span class="p">,</span> <span class="mi">266</span><span class="o">*</span><span class="n">deg</span><span class="p">]</span>
-            <span class="p">)</span>
+                <span class="n">qlim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">266</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span> <span class="mi">266</span> <span class="o">*</span> <span class="n">deg</span><span class="p">],</span>
+            <span class="p">),</span>
         <span class="p">]</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">L</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Puma 560&quot;</span><span class="p">,</span>
             <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Unimation&quot;</span><span class="p">,</span>
-            <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;dynamics&#39;</span><span class="p">,</span> <span class="s1">&#39;symbolic&#39;</span><span class="p">,</span> <span class="s1">&#39;mesh&#39;</span><span class="p">),</span>
+            <span class="n">keywords</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;dynamics&quot;</span><span class="p">,</span> <span class="s2">&quot;symbolic&quot;</span><span class="p">,</span> <span class="s2">&quot;mesh&quot;</span><span class="p">),</span>
             <span class="n">symbolic</span><span class="o">=</span><span class="n">symbolic</span><span class="p">,</span>
-            <span class="n">meshdir</span><span class="o">=</span><span class="s2">&quot;meshes/UNIMATE/puma560&quot;</span>
+            <span class="n">meshdir</span><span class="o">=</span><span class="s2">&quot;meshes/UNIMATE/puma560&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="c1"># zero angles, L shaped pose</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
-
-        <span class="c1"># ready pose, arm up</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
-
-        <span class="c1"># straight and horizontal</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qs&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
 
         <span class="c1"># nominal table top picking pose</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qn&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qr&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qz&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration</span><span class="p">(</span><span class="s2">&quot;qn&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">qn</span><span class="p">)</span>
+
+        <span class="c1"># straight and horizontal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addconfiguration_attr</span><span class="p">(</span><span class="s2">&quot;qs&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
 
 <div class="viewcode-block" id="Puma560.ikine_a"><a class="viewcode-back" href="../../../../arm_dh.html#roboticstoolbox.models.DH.Puma560.ikine_a">[docs]</a>    <span class="k">def</span> <span class="nf">ikine_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;lun&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -298,11 +306,12 @@
 
 <span class="sd">        :author: based on MATLAB code by Robert Biro with Gary Von McMurray,</span>
 <span class="sd">            GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95</span>
-<span class="sd"> </span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="nf">ik3</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s1">&#39;lun&#39;</span><span class="p">):</span>
 
-            <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_validate</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;lr&#39;</span><span class="p">,</span> <span class="s1">&#39;ud&#39;</span><span class="p">,</span> <span class="s1">&#39;nf&#39;</span><span class="p">))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">ik3</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;lun&quot;</span><span class="p">):</span>
+
+            <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_validate</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;lr&quot;</span><span class="p">,</span> <span class="s2">&quot;ud&quot;</span><span class="p">,</span> <span class="s2">&quot;nf&quot;</span><span class="p">))</span>
 
             <span class="c1"># solve for the first three joints</span>
 
@@ -314,7 +323,7 @@
 
             <span class="c1"># The following parameters are extracted from the Homogeneous</span>
             <span class="c1"># Transformation as defined in equation 1, p. 34</span>
-            
+
             <span class="n">Px</span><span class="p">,</span> <span class="n">Py</span><span class="p">,</span> <span class="n">Pz</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">t</span>
             <span class="n">Pz</span> <span class="o">-=</span> <span class="n">d1</span>  <span class="c1"># offset the pedestal height</span>
             <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,))</span>
@@ -325,13 +334,12 @@
             <span class="c1"># based on the configuration parameter n1</span>
 
             <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Px</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Py</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s1">&#39;r&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;r&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
                 <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">Py</span><span class="p">,</span> <span class="n">Px</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">d3</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="s1">&#39;l&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="s2">&quot;l&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
                 <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">Py</span><span class="p">,</span> <span class="n">Px</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">d3</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad configuration string&#39;</span><span class="p">)</span>
-
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;bad configuration string&quot;</span><span class="p">)</span>
 
             <span class="c1"># Solve for theta[1]</span>
             <span class="c1"># V114 is defined in equation 43, p.39.</span>
@@ -339,28 +347,28 @@
             <span class="c1"># Psi is defined in equation 49, p.40.</span>
             <span class="c1"># theta[1] uses equations 50 and 51, p.40, based on the</span>
             <span class="c1"># configuration parameter n2</span>
-            <span class="k">if</span> <span class="s1">&#39;u&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;u&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
                 <span class="n">n2</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="k">elif</span> <span class="s1">&#39;d&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="s2">&quot;d&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
                 <span class="n">n2</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad configuration string&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;bad configuration string&quot;</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="s1">&#39;l&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;l&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
                 <span class="n">n2</span> <span class="o">=</span> <span class="o">-</span><span class="n">n2</span>
 
             <span class="n">V114</span> <span class="o">=</span> <span class="n">Px</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">Py</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
             <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">V114</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Pz</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 
-            <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s2">&quot;raise&quot;</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">Psi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span>
                         <span class="p">(</span><span class="n">a2</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">d4</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">a3</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">V114</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Pz</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-                        <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">a2</span> <span class="o">*</span> <span class="n">r</span><span class="p">))</span>
+                        <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">a2</span> <span class="o">*</span> <span class="n">r</span><span class="p">)</span>
+                    <span class="p">)</span>
                 <span class="k">except</span> <span class="ne">FloatingPointError</span><span class="p">:</span>
                     <span class="k">return</span> <span class="s2">&quot;Out of reach&quot;</span>
-
 
             <span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">Pz</span><span class="p">,</span> <span class="n">V114</span><span class="p">)</span> <span class="o">+</span> <span class="n">n2</span> <span class="o">*</span> <span class="n">Psi</span>
 
@@ -377,7 +385,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ikine_6s</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">ik3</span><span class="p">)</span></div></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>    <span class="c1"># pragma nocover</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma nocover</span>
 
     <span class="n">puma</span> <span class="o">=</span> <span class="n">Puma560</span><span class="p">(</span><span class="n">symbolic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">puma</span><span class="p">)</span>
@@ -399,7 +407,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 22-Mar-2022.
+      <span class="lastupdated">Last updated on 19-May-2022.
       </span></p>
   </div>
 

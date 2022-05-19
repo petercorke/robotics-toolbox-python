@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>roboticstoolbox.mobile.PlannerBase &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
+            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>roboticstoolbox.mobile.PlannerBase</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for roboticstoolbox.mobile.PlannerBase</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Python Navigation Abstract Class</span>
+<span class="sd">@Author: Peter Corke</span>
+<span class="sd">@Author: Kristian Gibson</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+
+<span class="c1"># from scipy import integrate</span>
+<span class="c1"># from scipy.ndimage import interpolation</span>
+<span class="kn">from</span> <span class="nn">spatialmath.base.transforms2d</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">spatialmath.base.vectors</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># from spatialmath import SE2, SE3</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.mobile.OccGrid</span> <span class="kn">import</span> <span class="n">BaseOccupancyGrid</span><span class="p">,</span> <span class="n">BinaryOccupancyGrid</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.mobile.Animations</span> <span class="kn">import</span> <span class="n">VehiclePolygon</span>
+<span class="kn">from</span> <span class="nn">colored</span> <span class="kn">import</span> <span class="n">fg</span><span class="p">,</span> <span class="n">attr</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">progress.bar</span> <span class="kn">import</span> <span class="n">FillingCirclesBar</span>
+
+    <span class="n">_progress</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">_progress</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="PlannerBase"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase">[docs]</a><span class="k">class</span> <span class="nc">PlannerBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mobile robot motion planner (superclass)</span>
+
+<span class="sd">    :param occgrid: occupancy grid, defaults to None</span>
+<span class="sd">    :type occgrid: :class:`OccGrid` instance of ndarray(N,M), optional</span>
+<span class="sd">    :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to None</span>
+<span class="sd">    :type start: array_like(2) or array_like(3), optional</span>
+<span class="sd">    :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to None</span>
+<span class="sd">    :type goal: array_like(2) or array_like(3), optional</span>
+<span class="sd">    :param inflate: obstacle inflation, defaults to 0</span>
+<span class="sd">    :type inflate: float, optional</span>
+<span class="sd">    :param ndims: dimensionality of the planning, either 2 for :math:`\mathbb{R}^2` or</span>
+<span class="sd">        3 for :math:`\SE{2}`</span>
+<span class="sd">    :param ndims: int, optional</span>
+<span class="sd">    :param verbose: verbosity, defaults to False</span>
+<span class="sd">    :type verbose: bool, optional</span>
+<span class="sd">    :param msgcolor: color for message channel printing</span>
+<span class="sd">    :type msgcolor: str, defaults to yellow</span>
+<span class="sd">    :param seed: seed provided to private random number generator, defaults to None</span>
+<span class="sd">    :type seed: int, optional</span>
+
+<span class="sd">    Superclass for all mobile robot motion planners.  Key functionality</span>
+<span class="sd">    includes:</span>
+
+<span class="sd">    - encapsulates an occupancy grid and optionally inflates it</span>
+<span class="sd">    - validates ``start`` and ``goal`` if given</span>
+<span class="sd">    - encapsulates a private random number generator with specifiable seed</span>
+<span class="sd">    - encapsulates state such as start, goal, and the plan</span>
+<span class="sd">    - provides a message channel for diagnostic output</span>
+
+<span class="sd">    The start and goal can be specifed in various ways:</span>
+
+<span class="sd">    - at constructor time by the arguments ``start`` or ``goal``</span>
+<span class="sd">    - by assigning the attributes ``start`` or ``goal``</span>
+<span class="sd">    - at planning time by specifying ``goal`` to :meth:`plan`</span>
+<span class="sd">    - at query time by specifying ``start`` to :meth:`query`</span>
+
+<span class="sd">    :seealso: :class:`OccGrid`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">occgrid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">inflate</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">ndims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">msgcolor</span><span class="o">=</span><span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
+        <span class="n">progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">unused</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">ndims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ndims must be specified&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ndims</span> <span class="o">=</span> <span class="n">ndims</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_msgcolor</span> <span class="o">=</span> <span class="n">msgcolor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_private_random</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inflate</span> <span class="o">=</span> <span class="n">inflate</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_progress</span> <span class="o">=</span> <span class="n">progress</span> <span class="ow">and</span> <span class="n">_progress</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">marker</span> <span class="o">=</span> <span class="n">marker</span>
+
+        <span class="k">if</span> <span class="n">occgrid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">occgrid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">occgrid</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="c1"># it&#39;s a NumPy array</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span> <span class="o">=</span> <span class="n">BinaryOccupancyGrid</span><span class="p">(</span><span class="n">occgrid</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">occgrid</span><span class="p">,</span> <span class="n">BinaryOccupancyGrid</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span> <span class="o">=</span> <span class="n">occgrid</span>  <span class="c1"># original occgrid for reference</span>
+
+            <span class="k">if</span> <span class="n">inflate</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span><span class="o">.</span><span class="n">inflate</span><span class="p">(</span><span class="n">inflate</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_endpoint</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_endpoint</span><span class="p">(</span><span class="n">goal</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compact representation of the planner</span>
+
+<span class="sd">        :return: pretty printed representation</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: &quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  Start: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  Goal: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">goal</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set/get start point or configuration (superclass)</span>
+
+<span class="sd">        :getter: Return start point or configuration</span>
+<span class="sd">        :rtype: ndarray(2) or ndarray(3)</span>
+<span class="sd">        :setter: Set start point or configuration</span>
+<span class="sd">        :param: array_like(2) or array_like(3)</span>
+
+<span class="sd">        The start is either a point :math:`(x, y)` or a configuration :math:`(x, y, \theta)`.</span>
+
+<span class="sd">        :seealso: :meth:`goal`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span>
+
+    <span class="nd">@start</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isoccupied</span><span class="p">(</span><span class="n">start</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Start location inside obstacle&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">goal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set/get goal point or configuration (superclass)</span>
+
+<span class="sd">        :getter: Return goal pointor configuration</span>
+<span class="sd">        :rtype: ndarray(2) or ndarray(3)</span>
+<span class="sd">        :setter: Set goal point or configuration</span>
+<span class="sd">        :param: array_like(2) or array_like(3)</span>
+
+<span class="sd">        The goal is either a point :math:`(x, y)` or a configuration :math:`(x, y, \theta)`.</span>
+
+<span class="sd">        :seealso: :meth:`goal`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span>
+
+    <span class="nd">@goal</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set goal point or configuration for planning</span>
+
+<span class="sd">        :param goal: Set goal :math:`(x, y)` or configuration :math:`(x, y, \theta)`</span>
+<span class="sd">        :type goal: array_like(2) or array_like(3)</span>
+<span class="sd">        :raises ValueError: if goal point is occupied</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">goal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isoccupied</span><span class="p">(</span><span class="n">goal</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Goal location inside obstacle&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">goal</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get verbosity</span>
+
+<span class="sd">        :return: verbosity</span>
+<span class="sd">        :rtype: bool</span>
+
+<span class="sd">        If ``verbosity`` print more diagnostic messages to the planner&#39;s</span>
+<span class="sd">        message channel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span>
+
+    <span class="nd">@verbose</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set verbosity</span>
+
+<span class="sd">        :param v: verbosity</span>
+<span class="sd">        :type v: bool</span>
+
+<span class="sd">        If ``verbosity`` print more diagnostic messages to the planner&#39;s</span>
+<span class="sd">        message channel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="n">v</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get private random number generator</span>
+
+<span class="sd">        :return: NumPy random number generator</span>
+<span class="sd">        :rtype: :class:`numpy.random.Generator`</span>
+
+<span class="sd">        Has methods including:</span>
+
+<span class="sd">        - :meth:`integers(low, high, size, endpoint) &lt;numpy.random.Generator.integers&gt;`</span>
+<span class="sd">        - :meth:`random(size) &lt;numpy.random.Generator.random&gt;`</span>
+<span class="sd">        - :meth:`uniform(low, high, size) &lt;numpy.random.Generator.uniform&gt;`</span>
+<span class="sd">        - :meth:`normal(mean, std, size) &lt;numpy.random.Generator.normal&gt;`</span>
+<span class="sd">        - :meth:`multivariate_normal(mean, covar, size) &lt;numpy.random.Generator.multivariate_normal&gt;`</span>
+
+<span class="sd">        The generator is initialized with the seed provided at constructor</span>
+<span class="sd">        time.</span>
+
+<span class="sd">        :seealso: :func:`numpy.random.default_rng`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_private_random</span>
+
+<div class="viewcode-block" id="PlannerBase.random_init"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.random_init">[docs]</a>    <span class="k">def</span> <span class="nf">random_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize private random number generator</span>
+
+<span class="sd">        :param seed: random number seed, defaults to value given to constructor</span>
+<span class="sd">        :type seed: int</span>
+
+<span class="sd">        The private random number generator is initialized.  The seed is ``seed``</span>
+<span class="sd">        or the value given to the constructor.  If None, the generator will</span>
+<span class="sd">        be randomly seeded using a seed from the operating system.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_private_random</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span></div>
+
+    <span class="c1"># def randinit(self):</span>
+    <span class="c1">#     if self._seed is not None:</span>
+    <span class="c1">#         self._private_random = np.random.default_rng(seed=self._seed)</span>
+
+<div class="viewcode-block" id="PlannerBase.plan"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plan path (superclass)</span>
+
+<span class="sd">        :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value passed to constructor</span>
+<span class="sd">        :type start: array_like(2) or array_like(3), optional</span>
+<span class="sd">        :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value passed to constructor</span>
+<span class="sd">        :type goal: array_like(2) or array_like(3), optional</span>
+
+<span class="sd">        The implementation depends on the particular planner.  Some may have</span>
+<span class="sd">        no planning phase.  The plan may also depend on just the start or goal.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">occgrid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Occupancy grid</span>
+
+<span class="sd">        :return: occupancy grid used for planning</span>
+<span class="sd">        :rtype: :class:`OccGrid` or subclass or None</span>
+
+<span class="sd">        Returns the occupancy grid that was optionally inflated at constructor time.</span>
+
+<span class="sd">        :seealso: :meth:`validate_endpoint` :meth:`isoccupied`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span>
+
+<div class="viewcode-block" id="PlannerBase.isoccupied"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.isoccupied">[docs]</a>    <span class="k">def</span> <span class="nf">isoccupied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test if point is occupied (superclass)</span>
+
+<span class="sd">        :param p: world coordinate (x, y)</span>
+<span class="sd">        :type p: array_like(2)</span>
+<span class="sd">        :return: occupancy status of corresponding grid cell</span>
+<span class="sd">        :rtype: bool</span>
+
+<span class="sd">        The world coordinate is transformed and the status of the occupancy</span>
+<span class="sd">        grid cell is returned.  If the point lies outside the bounds of</span>
+<span class="sd">        the occupancy grid return True (obstacle)</span>
+
+<span class="sd">        If there is no occupancy grid this function always returns False (free).</span>
+
+<span class="sd">        :seealso:  :meth:`occgrid` :meth:`validate_endpoint` :meth:`BinaryOccGrid.isoccupied`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="o">.</span><span class="n">isoccupied</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PlannerBase.validate_endpoint"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.validate_endpoint">[docs]</a>    <span class="k">def</span> <span class="nf">validate_endpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate start or goal point</span>
+
+<span class="sd">        :param p: the point</span>
+<span class="sd">        :type p: array_like(2)</span>
+<span class="sd">        :param dtype: data type for point coordinates, defaults to None</span>
+<span class="sd">        :type dtype: str, optional</span>
+<span class="sd">        :raises ValueError: point is inside obstacle</span>
+<span class="sd">        :return: point as a NumPy array of specified dtype</span>
+<span class="sd">        :rtype: ndarray(2)</span>
+
+<span class="sd">        The coordinate is tested to be a free cell in the occupancy grid.</span>
+
+<span class="sd">        :seealso: :meth:`isoccupied` :meth:`occgrid`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ndims</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isoccupied</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Point is inside obstacle&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p</span></div>
+
+<div class="viewcode-block" id="PlannerBase.progress_start"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.progress_start">[docs]</a>    <span class="k">def</span> <span class="nf">progress_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a progress bar (superclass)</span>
+
+<span class="sd">        :param n: Number of iterations in the operation</span>
+<span class="sd">        :type n: int</span>
+
+<span class="sd">        Create a progress bar for an operation that has ``n`` steps, for</span>
+<span class="sd">        example::</span>
+
+<span class="sd">            planner.progress_start(100)</span>
+<span class="sd">            for i in range(100):</span>
+<span class="sd">                # ...</span>
+<span class="sd">                planner.progress_next()</span>
+<span class="sd">            planner.progress_end()</span>
+
+<span class="sd">        .. warning: Requires that the ``progress`` package is installed.</span>
+
+<span class="sd">        :seealso: :meth:`progress_next` :meth:`progress_end`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">_progress</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bar</span> <span class="o">=</span> <span class="n">FillingCirclesBar</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(percent).1f%%</span><span class="s2"> - </span><span class="si">%(eta)d</span><span class="s2">s&quot;</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PlannerBase.progress_next"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.progress_next">[docs]</a>    <span class="k">def</span> <span class="nf">progress_next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Increment a progress bar (superclass)</span>
+
+<span class="sd">        Create a progress bar for an operation that has ``n`` steps, for</span>
+<span class="sd">        example::</span>
+
+<span class="sd">            planner.progress_start(100)</span>
+<span class="sd">            for i in range(100):</span>
+<span class="sd">                # ...</span>
+<span class="sd">                planner.progress_next()</span>
+<span class="sd">            planner.progress_end()</span>
+
+<span class="sd">        .. warning: Requires that the ``progress`` package is installed.</span>
+
+<span class="sd">        :seealso: :meth:`progress_start` :meth:`progress_end`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">_progress</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bar</span><span class="o">.</span><span class="n">next</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PlannerBase.progress_end"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.progress_end">[docs]</a>    <span class="k">def</span> <span class="nf">progress_end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finalize a progress bar  (superclass)</span>
+
+<span class="sd">        Remove/cleanip a progress bar, for</span>
+<span class="sd">        example::</span>
+
+<span class="sd">            planner.progress_start(100)</span>
+<span class="sd">            for i in range(100):</span>
+<span class="sd">                # ...</span>
+<span class="sd">                planner.progress_next()</span>
+<span class="sd">            planner.progress_end()</span>
+
+<span class="sd">        .. warning: Requires that the ``progress`` package is installed.</span>
+
+<span class="sd">        :seealso: :meth:`progress_start` :meth:`progress_next`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">_progress</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bar</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PlannerBase.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">next</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">movie</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find a path from start to goal using planner (superclass)</span>
+
+<span class="sd">        :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value specified to constructor</span>
+<span class="sd">        :type start: array_like(), optional</span>
+<span class="sd">        :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value specified to constructor</span>
+<span class="sd">        :type goal: array_like(), optional</span>
+<span class="sd">        :param dtype: data type for point coordinates, defaults to None</span>
+<span class="sd">        :type dtype: str, optional</span>
+<span class="sd">        :param next: invoke :meth:`next` method of class, defaults to True</span>
+<span class="sd">        :type next: bool, optional</span>
+<span class="sd">        :param animate: show the vehicle path, defaults to False</span>
+<span class="sd">        :type animate: bool, optional</span>
+<span class="sd">        :return: path from start to goal, one point :math:`(x, y)` or configuration :math:`(x, y, \theta)` per row</span>
+<span class="sd">        :rtype: ndarray(N,2) or ndarray(N,3)</span>
+
+<span class="sd">        Find a path from ``start`` to ``goal`` using a previously computed plan.</span>
+
+<span class="sd">        This is a generic method that works for any planner</span>
+<span class="sd">        (:math:`\mathbb{R}^2` or :math:`\SE{2}`) that can incrementally</span>
+<span class="sd">        determine the next point on the path.  The method performs the following</span>
+<span class="sd">        steps:</span>
+
+<span class="sd">        - Validate start and goal</span>
+<span class="sd">        - If ``animate``, visualize the environment using :meth:`plot`</span>
+<span class="sd">        - Iterate on the class&#39;s :meth:`next` method until the ``goal`` is</span>
+<span class="sd">          achieved, and if ``animate`` plot points.</span>
+
+<span class="sd">        :seealso: :meth:`next` :meth:`plan`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># make sure start and goal are set and valid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_endpoint</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_endpoint</span><span class="p">(</span><span class="n">goal</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="c1"># if movie is not None:</span>
+        <span class="c1">#     animate = True</span>
+
+        <span class="k">if</span> <span class="n">animate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+        <span class="c1"># movie = MovieWriter(movie)</span>
+
+        <span class="n">robot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="p">[</span><span class="n">robot</span><span class="p">]</span>
+
+        <span class="k">while</span> <span class="nb">next</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">animate</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">robot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;y.&quot;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+
+            <span class="c1"># get next point on the path</span>
+            <span class="n">robot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+
+            <span class="c1"># are we are done?</span>
+            <span class="k">if</span> <span class="n">robot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+            <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PlannerBase.plot"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">line</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">line_r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">configspace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">unwrap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">direction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">background</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">path_marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">path_marker_reverse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">goal_marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_vehicle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">goal_vehicle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">bgargs</span><span class="o">=</span><span class="p">{},</span>
+        <span class="o">**</span><span class="n">unused</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot vehicle path (superclass)</span>
+
+<span class="sd">        :param path: path, defaults to None</span>
+<span class="sd">        :type path: (N, 2) or ndarray(N, 3)</span>
+<span class="sd">        :param direction: travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</span>
+<span class="sd">        :type direction: array_like(N), optional</span>
+<span class="sd">        :param line: line style for forward motion, default is striped yellow on black</span>
+<span class="sd">        :type line: sequence of dict of arguments for ``plot``</span>
+<span class="sd">        :param line_r: line style for reverse motion, default is striped red on black</span>
+<span class="sd">        :type line_r: sequence of dict of arguments for ``plot``</span>
+
+<span class="sd">        :param configspace: plot the path in 3D configuration space, input must be 3xN.</span>
+<span class="sd">            Start and goal style will be given by ``qstart_marker`` and ``qgoal_marker``, defaults to False</span>
+<span class="sd">        :type configspace: bool, optional</span>
+<span class="sd">        :param unwrap: for configuration space plot unwrap :math:`\theta` so</span>
+<span class="sd">            there are no discontinuities at :math:`\pm \pi`, defaults to True</span>
+<span class="sd">        :type unwrap: bool, optional</span>
+<span class="sd">        :param background: plot occupancy grid if present, default True</span>
+<span class="sd">        :type background: bool, optional</span>
+<span class="sd">        :param start_marker: style for marking start point</span>
+<span class="sd">        :type start_marker: dict, optional</span>
+<span class="sd">        :param goal_marker: style for marking goal point</span>
+<span class="sd">        :type goal_marker: dict, optional</span>
+<span class="sd">        :param start_vehicle: style for vehicle animation object at start configuration</span>
+<span class="sd">        :type start_vehicle: dict</span>
+<span class="sd">        :param goal_vehicle: style for vehicle animation object at goal configuration</span>
+<span class="sd">        :type goal_vehicle: dict</span>
+<span class="sd">        :param start: start position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value previously set</span>
+<span class="sd">        :type start: array_like(2) or array_like(3), optional</span>
+<span class="sd">        :param goal: goal position :math:`(x, y)` or configuration :math:`(x, y, \theta)`, defaults to value previously set</span>
+<span class="sd">        :type goal: array_like(2) or array_like(3), optional</span>
+<span class="sd">        :param bgargs: arguments passed to :meth:`plot_bg`, defaults to None</span>
+<span class="sd">        :type bgargs: dict, optional</span>
+<span class="sd">        :param ax: axes to plot into</span>
+<span class="sd">        :type ax: matplotlib axes</span>
+<span class="sd">        :param block: block after displaying the plot</span>
+<span class="sd">        :type block: bool, optional</span>
+
+<span class="sd">        Plots the start and goal location/pose if they are specified by</span>
+<span class="sd">        ``start`` or ``goal`` or were set by the object constructor or</span>
+<span class="sd">        ``plan`` or ``query`` method.</span>
+
+<span class="sd">        If the ``start`` and ``goal`` have length 2, planning in</span>
+<span class="sd">        :math:`\mathbb{R}^2`, then markers are drawn using styles specified by</span>
+<span class="sd">        ``start_marker`` and ``end_marker`` which are dicts using Matplotlib</span>
+<span class="sd">        keywords, for example::</span>
+
+<span class="sd">            planner.plot(path, start=dict(marker=&#39;s&#39;, color=&#39;b&#39;))</span>
+
+<span class="sd">        If the ``start`` and ``goal`` have length 3, planning in :math:`\SE{2}`,</span>
+<span class="sd">        and ``configspace`` is False, then direction-indicating markers are used</span>
+<span class="sd">        to display start and goal configuration. These are also given as dicts</span>
+<span class="sd">        but have two items: ``&#39;shape&#39;`` which is the shape of the polygonal</span>
+<span class="sd">        marker and is either ``&#39;triangle&#39;`` or ``&#39;car&#39;``.  The second item</span>
+<span class="sd">        ``&#39;args&#39;`` is passed to :func:`base.plot_poly` and Matplotlib and could</span>
+<span class="sd">        have values such as ``filled=True`` or ``color``.</span>
+
+<span class="sd">        If ``configspace`` is False then a 3D plot is created and the start and</span>
+<span class="sd">        goal are indicated by Matplotlib markers specified by the dicts</span>
+<span class="sd">        ``start_marker`` and ``end_marker``</span>
+
+<span class="sd">        Default values are provided for all markers:</span>
+
+<span class="sd">            - the start point is a circle</span>
+<span class="sd">            - the goal point is a star</span>
+<span class="sd">            - the start vehicle style is a ``VehiclePolygon(shape=&#39;car&#39;)`` as</span>
+<span class="sd">              an unfilled outline</span>
+<span class="sd">            - the goal vehicle style is a ``VehiclePolygon(shape=&#39;car&#39;)`` as</span>
+<span class="sd">              a transparent filled shape</span>
+
+<span class="sd">        If ``background`` is True then the background of the plot is either or</span>
+<span class="sd">        both of:</span>
+
+<span class="sd">        - the occupancy grid</span>
+<span class="sd">        - the distance field of the planner</span>
+
+<span class="sd">        Additional arguments ``bgargs`` can be passed through to :meth:`plot_bg`</span>
+
+<span class="sd">        If ``path`` is specified it has one column per point and either 2 or 3 rows:</span>
+
+<span class="sd">        - 2 rows describes motion in the :math:`xy`-plane and a 2D plot  is created</span>
+<span class="sd">        - 3 rows describes motion in the :math:`xy\theta`-configuration space. By</span>
+<span class="sd">          default only the :math:`xy`-plane is plotted unless ``configspace``</span>
+<span class="sd">          is True in which case motion in :math:`xy\theta`-configuration space</span>
+<span class="sd">          is shown as a 3D plot.</span>
+
+<span class="sd">        If the planner supports bi-directional motion then the ``direction``</span>
+<span class="sd">        option gives the direction for each point on the path.</span>
+
+<span class="sd">        Forward motion segments are drawn using style information from ``line``</span>
+<span class="sd">        while reverse motion segments are drawn using style information from</span>
+<span class="sd">        ``line_r``. These are each a sequence of dicts of Matplotlib plot</span>
+<span class="sd">        options which can draw an arbitrary number of lines on top of each</span>
+<span class="sd">        other.  The default::</span>
+
+<span class="sd">            line = (</span>
+<span class="sd">                    {color:&#39;black&#39;, linewidth:4},</span>
+<span class="sd">                    {color:&#39;yellow&#39;, linewidth:3, dashes:(5,5)}</span>
+<span class="sd">                )</span>
+
+<span class="sd">        will draw a blackline of width 4 with a dashed yellow line of width 3</span>
+<span class="sd">        plotted on top, giving a line of alternating black and yellow dashes.</span>
+
+<span class="sd">        :seealso: :meth:`plot_bg` :func:`base.plot_poly`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># create default markers</span>
+
+        <span class="c1"># passed to Matplotlib plot()</span>
+        <span class="k">if</span> <span class="n">start_marker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start_marker</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;markeredgecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;markerfacecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;markersize&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="s2">&quot;zorder&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="s2">&quot;linestyle&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="k">if</span> <span class="n">goal_marker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">goal_marker</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;markeredgecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;markerfacecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;markersize&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+                <span class="s2">&quot;zorder&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="s2">&quot;linestyle&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+
+        <span class="c1"># create defaut line styles</span>
+        <span class="k">if</span> <span class="n">line</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;yellow&quot;</span><span class="p">,</span> <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;dashes&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)},</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">line_r</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">line_r</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;dashes&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)},</span>
+            <span class="p">)</span>
+
+        <span class="c1"># passed to VehiclePolygon</span>
+        <span class="k">if</span> <span class="n">start_vehicle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start_vehicle</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;facecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;edgecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">goal_vehicle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">goal_vehicle</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">}</span>
+
+        <span class="n">ndims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ndims</span>
+
+        <span class="k">if</span> <span class="n">ndims</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">configspace</span><span class="p">:</span>
+            <span class="n">ndims</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">configspace</span> <span class="ow">and</span> <span class="n">ndims</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;path should have </span><span class="si">{</span><span class="n">ndims</span><span class="si">}</span><span class="s2"> rows&quot;</span><span class="p">)</span>
+
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">axes_logic</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ndims</span><span class="p">)</span>
+
+        <span class="c1"># plot occupancy grid background</span>
+        <span class="k">if</span> <span class="n">background</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_bg</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">bgargs</span><span class="p">)</span>
+
+        <span class="c1"># mark the path</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ndims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="c1"># 2D case</span>
+                <span class="k">if</span> <span class="n">direction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># bidirectional motion</span>
+                    <span class="n">direction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">direction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">path</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="s2">&quot;direction vector must have same length as path&quot;</span>
+                        <span class="p">)</span>
+
+                    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="nb">dir</span> <span class="o">=</span> <span class="n">direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">change</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="nb">dir</span> <span class="o">!=</span> <span class="n">direction</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">change</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">k</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">k</span> <span class="o">=</span> <span class="n">change</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+                        <span class="k">for</span> <span class="n">style</span> <span class="ow">in</span> <span class="n">line</span> <span class="k">if</span> <span class="nb">dir</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">line_r</span><span class="p">:</span>
+                            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">path</span><span class="p">[:</span><span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">path</span><span class="p">[:</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="o">**</span><span class="n">style</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">change</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="k">break</span>
+                        <span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:]</span>
+                        <span class="n">direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">direction</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:,</span> <span class="p">:]</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># forward motion only</span>
+                    <span class="k">for</span> <span class="n">style</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">path</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">path</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="o">**</span><span class="n">style</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">ndims</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="c1"># 3D case</span>
+                <span class="k">if</span> <span class="n">direction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># bidirectional motion</span>
+
+                    <span class="n">direction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">direction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">path</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="s2">&quot;direction vector must have same length as path&quot;</span>
+                        <span class="p">)</span>
+                    <span class="n">theta</span> <span class="o">=</span> <span class="n">path</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">unwrap</span><span class="p">:</span>
+                        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+                    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="nb">dir</span> <span class="o">=</span> <span class="n">direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">change</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="nb">dir</span> <span class="o">!=</span> <span class="n">direction</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">change</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">k</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">k</span> <span class="o">=</span> <span class="n">change</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+                        <span class="k">for</span> <span class="n">style</span> <span class="ow">in</span> <span class="n">line</span> <span class="k">if</span> <span class="nb">dir</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">line_r</span><span class="p">:</span>
+                            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">path</span><span class="p">[:</span><span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">path</span><span class="p">[:</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">theta</span><span class="p">[:</span><span class="n">k</span><span class="p">],</span> <span class="o">**</span><span class="n">style</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">change</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="k">break</span>
+                        <span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:]</span>
+                        <span class="n">direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">direction</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:,</span> <span class="p">:]</span>
+                        <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:]</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># forward motion only</span>
+                    <span class="n">theta</span> <span class="o">=</span> <span class="n">path</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">unwrap</span><span class="p">:</span>
+                        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">style</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">path</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">path</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">theta</span><span class="p">,</span> <span class="o">**</span><span class="n">style</span><span class="p">)</span>
+
+        <span class="c1"># mark start and goal if requested</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_endpoint</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+        <span class="k">if</span> <span class="n">goal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">goal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_endpoint</span><span class="p">(</span><span class="n">goal</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">goal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">goal</span>
+
+        <span class="k">if</span> <span class="n">ndims</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ndims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># proper 2d plot</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">start_marker</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">goal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">goal</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">goal</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;goal&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">goal_marker</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">ndims</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ndims</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># 2d projection of 3d plot, show start/goal configuration</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">axes_get_scale</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">marker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">marker</span> <span class="o">=</span> <span class="n">VehiclePolygon</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="s2">&quot;car&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">marker</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="o">**</span><span class="n">start_vehicle</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">goal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">marker</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">goal</span><span class="p">,</span> <span class="o">**</span><span class="n">goal_vehicle</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">ndims</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># 3d plot</span>
+
+            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">start</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">start</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">start_marker</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">goal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">unwrap</span><span class="p">:</span>
+                    <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">theta</span> <span class="o">=</span> <span class="n">goal</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">goal</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">goal</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">theta</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;goal&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">goal_marker</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ndims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\theta$&quot;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+    <span class="k">def</span> <span class="nf">_qmarker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="mf">0.3</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="mf">0.8</span>  <span class="c1"># start of head taper</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># centre x coordinate</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># width in x direction</span>
+        <span class="k">if</span> <span class="n">shape</span> <span class="o">==</span> <span class="s2">&quot;car&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">w</span> <span class="o">-</span> <span class="n">c</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">t</span> <span class="o">-</span> <span class="n">c</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="p">],</span>
+                    <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="p">],</span>
+                <span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">elif</span> <span class="n">shape</span> <span class="o">==</span> <span class="s2">&quot;triangle&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">w</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                    <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="p">],</span>
+                    <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">],</span>
+                <span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+<div class="viewcode-block" id="PlannerBase.plot_bg"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.plot_bg">[docs]</a>    <span class="k">def</span> <span class="nf">plot_bg</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">inflated</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">unused</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot background (superclass)</span>
+
+<span class="sd">        :param distance: override distance field, defaults to None</span>
+<span class="sd">        :type distance: ndarray(N,M), optional</span>
+<span class="sd">        :param cmap: Specify a colormap for the distance field, defaults to &#39;gray&#39;</span>
+<span class="sd">        :type cmap: str or Colormap, optional</span>
+
+<span class="sd">        Displays the background which is either the occupancy grid or a distance</span>
+<span class="sd">        field.  The distance field encodes the distance of a point from the goal, small</span>
+<span class="sd">        distance is dark, a large distance is bright.</span>
+
+<span class="sd">        If the planner has an occupancy grid then that will be displayed with:</span>
+<span class="sd">            - free cells in white</span>
+<span class="sd">            - occupied cells in red</span>
+<span class="sd">            - inflated occupied cells in pink</span>
+
+<span class="sd">        If distance is provided, or the planner has a distancemap attribute</span>
+<span class="sd">        the the distance field will be used as the background and obstacle cells</span>
+<span class="sd">        (actual or inflated) will be shown in red. A colorbar is added.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span><span class="p">,</span> <span class="n">BaseOccupancyGrid</span><span class="p">):</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">plotvol2</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span><span class="o">.</span><span class="n">workspace</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">axes_logic</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># create color map for free space + obstacle:</span>
+        <span class="c1">#   free space, color index = 1, white, alpha=0 to allow background and grid lines to show</span>
+        <span class="c1">#   obstacle, color index = 2, red, alpha=1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inflate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">inflated</span><span class="p">:</span>
+            <span class="c1"># 0 background (white, transparent)</span>
+            <span class="c1"># 1 inflated obstacle (pink)</span>
+            <span class="c1"># 2 original obstacle (red)</span>
+            <span class="n">colors</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid0</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># 0 background</span>
+            <span class="c1"># 1 obstacle</span>
+            <span class="n">colors</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="o">.</span><span class="n">grid</span>
+
+        <span class="k">if</span> <span class="n">distance</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;distancemap&quot;</span><span class="p">):</span>
+            <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distancemap</span>
+
+        <span class="k">if</span> <span class="n">distance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># distance field with obstacles</span>
+
+            <span class="c1"># find largest finite value</span>
+
+            <span class="n">v</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="n">vmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">v</span><span class="p">)])</span>
+
+            <span class="c1"># create a copy of greyscale color map</span>
+            <span class="n">c_map</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">))</span>
+            <span class="c1"># c_map.set_bad(color=(1,0,0,1))  # nan and inf are red</span>
+
+            <span class="c1"># change all inf to large value, so they are not &#39;bad&#39; ie. red</span>
+            <span class="n">distance</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">distance</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">vmax</span>
+            <span class="n">c_map</span><span class="o">.</span><span class="n">set_over</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># ex-infs are now blue</span>
+
+            <span class="c1"># display image</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+                <span class="n">distance</span><span class="p">,</span>
+                <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span>
+                <span class="n">interpolation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">cmap</span><span class="o">=</span><span class="n">c_map</span><span class="p">,</span>
+                <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="c1"># add colorbar</span>
+            <span class="n">scalar_mappable_c_map</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">c_map</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">colorbar</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span>
+                    <span class="n">scalar_mappable_c_map</span><span class="p">,</span>
+                    <span class="n">shrink</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span>
+                    <span class="n">aspect</span><span class="o">=</span><span class="mi">20</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Distance&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">colorbar</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s2">&quot;label&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">colorbar</span><span class="p">:</span>
+                    <span class="n">colorbar</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Distance&quot;</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">scalar_mappable_c_map</span><span class="p">,</span> <span class="o">**</span><span class="n">colorbar</span><span class="p">)</span>
+            <span class="c1"># overlay obstacles</span>
+            <span class="n">c_map</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">ListedColormap</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">c_map</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># occupancy grid only</span>
+
+            <span class="c1"># overlay obstacles</span>
+            <span class="n">c_map</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">ListedColormap</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
+            <span class="c1"># self.occgrid.plot(image, cmap=c_map, zorder=1)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">c_map</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># create white background</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;x (cells)&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;y (cells)&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># lock axis limits to current value</span>
+        <span class="c1"># ax.set_xlim(ax.get_xlim())</span>
+        <span class="c1"># ax.set_ylim(ax.get_ylim())</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PlannerBase.message"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.message">[docs]</a>    <span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print message to message channel</span>
+
+<span class="sd">        :param s: message to print</span>
+<span class="sd">        :type s: str</span>
+<span class="sd">        :param color: color to print it, defaults to color specified at</span>
+<span class="sd">            constructor time.</span>
+<span class="sd">        :type color: str, optional</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_msgcolor</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">fg</span><span class="p">(</span><span class="n">color</span><span class="p">),</span> <span class="s2">&quot;Planner:: &quot;</span> <span class="o">+</span> <span class="n">s</span><span class="p">,</span> <span class="n">attr</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span></div></div>
+
+    <span class="c1"># @staticmethod</span>
+    <span class="c1"># def show_distance(d):</span>
+    <span class="c1">#     d[np.isinf(d)] = None</span>
+    <span class="c1">#     ax = plt.gca()</span>
+    <span class="c1">#     c_map = plt.get_cmap(&quot;Greys&quot;)</span>
+    <span class="c1">#     plt.clim(0, np.max(d[:]))</span>
+    <span class="c1">#     plt.figimage(d)</span>
+    <span class="c1">#     plt.xlabel(&#39;X&#39;)</span>
+    <span class="c1">#     plt.ylabel(&#39;Y&#39;)</span>
+    <span class="c1">#     plt.show()</span>
+
+
+<span class="k">class</span> <span class="nc">MovieWriter</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save animation as a movie file</span>
+
+<span class="sd">        :param filename: name of movie file, or tuple containing filename and</span>
+<span class="sd">            frame interval</span>
+<span class="sd">        :type filename: str or tuple(str, float)</span>
+<span class="sd">        :param interval: frame interval, defaults to 0.1</span>
+<span class="sd">        :type interval: float, optional</span>
+<span class="sd">        :param fig: figure to record for the movie</span>
+<span class="sd">        :type fig: figure reference</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            movie = MovieWriter(filename)</span>
+
+<span class="sd">            while ...</span>
+<span class="sd">                movie.add()</span>
+
+<span class="sd">            movie.done()</span>
+
+<span class="sd">        To avoid extra user-logic, if ``MovieWriter`` is called with ``filename`` equal to None,</span>
+<span class="sd">        then the writer will do nothing when the ``add`` and ``done`` methods are called.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set up formatting for the movie files</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">filename</span><span class="p">,</span> <span class="n">interval</span> <span class="o">=</span> <span class="n">filename</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;overwriting movie&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;creating movie&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FFMpegWriter</span><span class="p">(</span>
+            <span class="n">fps</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">interval</span><span class="p">),</span> <span class="n">extra_args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-vcodec&quot;</span><span class="p">,</span> <span class="s2">&quot;libx264&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add frame to the movie</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">grab_frame</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 19-May-2022.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>
