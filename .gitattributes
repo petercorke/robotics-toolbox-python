@@ -3,3 +3,4 @@
 notebooks/* linguist-documentation
 docs/* linguist-documentation
 examples/* linguist-documentation
+roboticstoolbox/core/Eigen/** linguist-vendored

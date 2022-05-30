@@ -236,7 +236,7 @@ Or you can run them, and experiment with them, at [mybinder.org](https://mybinde
 
 The toolbox is incredibly useful for developing and prototyping algorithms for research, thanks to the exhaustive set of well documented and mature robotic functions exposed through clean and painless APIs. Additionally, the ease at which a user can visualize their algorithm supports a rapid prototyping paradigm.
 
-Check out our ICRA 2021 paper on [IEEE Xplore](https://ieeexplore.ieee.org/document/9561366) or get the PDF from [Peter's website](https://petercorke.com/download/31/python-tools/1296/python_toolbox_icra_2020-5.pdf).
+Check out our ICRA 2021 paper on [IEEE Xplore](https://ieeexplore.ieee.org/document/9561366) or get the PDF from [Peter's website](https://bit.ly/icra_rtb).
 
 If the toolbox helped you in your research, please cite 
 

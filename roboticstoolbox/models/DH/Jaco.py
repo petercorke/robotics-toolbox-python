@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from math import pi, sin, cos
+from math import sin, cos
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
-from spatialmath import SE3
+# from spatialmath import SE3
 
 
 class Jaco(DHRobot):
@@ -44,12 +44,12 @@ class Jaco(DHRobot):
         if symbolic:
             import spatialmath.base.symbolic as sym
 
-            zero = sym.zero()
+            # zero = sym.zero()
             pi = sym.pi()
         else:
             from math import pi
 
-            zero = 0.0
+            # zero = 0.0
 
         deg = pi / 180
         # robot length values (metres)
@@ -63,9 +63,9 @@ class Jaco(DHRobot):
 
         # alternate parameters
         aa = 30 * deg
-        ca = cos(aa)
+        # ca = cos(aa)
         sa = sin(aa)
-        c2a = cos(2 * aa)
+        # c2a = cos(2 * aa)
         s2a = sin(2 * aa)
         d4b = D3 + sa / s2a * D4
         d5b = sa / s2a * D4 + sa / s2a * D5

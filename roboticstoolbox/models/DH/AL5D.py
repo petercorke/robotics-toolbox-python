@@ -43,12 +43,12 @@ class AL5D(DHRobot):
         if symbolic:
             import spatialmath.base.symbolic as sym
 
-            zero = sym.zero()
+            # zero = sym.zero()
             pi = sym.pi()
         else:
             from math import pi
 
-            zero = 0.0
+            # zero = 0.0
 
         # robot length values (metres)
         a = [0, 0.002, 0.14679, 0.17751]
@@ -58,7 +58,7 @@ class AL5D(DHRobot):
         offset = [pi / 2, pi, -0.0427, -0.0427 - pi / 2]
 
         # mass data as measured
-        mass = [0.187, 0.044, 0.207, 0.081]
+        # mass = [0.187, 0.044, 0.207, 0.081]
 
         # center of mass as calculated through CAD model
         center_of_mass = [

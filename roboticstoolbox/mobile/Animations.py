@@ -2,11 +2,10 @@
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
-from abc import ABC, abstractmethod
-import warnings
-from math import pi, sin, cos, tan, atan2
+from abc import ABC
+from math import pi, atan2
 import numpy as np
-from scipy import integrate, linalg, interpolate
+# from scipy import integrate, linalg, interpolate
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib import patches, colors

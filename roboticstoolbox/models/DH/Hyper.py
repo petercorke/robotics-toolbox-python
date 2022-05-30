@@ -7,7 +7,6 @@
 # from math import pi
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
-from spatialmath import SE3
 
 
 class Hyper(DHRobot):

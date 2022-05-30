@@ -9,7 +9,6 @@ import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
 import qpsolvers as qp
-import cProfile
 
 # Launch the simulator Swift
 env = swift.Swift()

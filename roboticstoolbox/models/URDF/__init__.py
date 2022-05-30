@@ -19,6 +19,8 @@ from roboticstoolbox.models.URDF.PR2 import PR2
 from roboticstoolbox.models.URDF.LBR import LBR
 from roboticstoolbox.models.URDF.KinovaGen3 import KinovaGen3
 from roboticstoolbox.models.URDF.YuMi import YuMi
+from roboticstoolbox.models.URDF.Fetch import Fetch
+from roboticstoolbox.models.URDF.FetchCamera import FetchCamera
 from roboticstoolbox.models.URDF.Valkyrie import Valkyrie
 from roboticstoolbox.models.URDF.AL5D import AL5D
 
@@ -44,6 +46,8 @@ __all__ = [
     "LBR",
     "KinovaGen3",
     "YuMi",
+    "Fetch",
+    "FetchCamera",
     "Valkyrie",
     "AL5D",
 ]

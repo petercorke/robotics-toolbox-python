@@ -7,6 +7,7 @@ from spatialmath import base
 
 from spatialmath.geom2d import Polygon2
 
+
 class BaseMap(ABC):
     def __init__(self, workspace=None, name=None, **unused):
         """
@@ -35,10 +36,9 @@ class BaseMap(ABC):
             self.dy = workspace[3] - workspace[2]
         self._name = name
 
-class BaseOccupancyGrid(BaseMap):
 
-    def __init__(self, grid=None, origin=(0, 0), 
-            value=0, cellsize=1, **kwargs):
+class BaseOccupancyGrid(BaseMap):
+    def __init__(self, grid=None, origin=(0, 0), value=0, cellsize=1, **kwargs):
         """
         Occupancy grid (superclass)
 
@@ -53,7 +53,7 @@ class BaseOccupancyGrid(BaseMap):
         :param kwargs: options passed to :class:`~roboticstoolbox.mobile.OccGrid.BaseMap`
 
         This object supports a user-defined coordinate system and grid size.
-        World coordinates are converted to grid coordinates to lookup the 
+        World coordinates are converted to grid coordinates to lookup the
         occupancy status.
 
         The grid can be initialized by:
@@ -69,11 +69,12 @@ class BaseOccupancyGrid(BaseMap):
             self._origin = base.getvector(origin, 2)
 
         elif self._workspace is not None:
-            self._grid = np.full(np.floor(np.r_[self.dx, self.dy] / cellsize).astype(int) + 1, value)
+            self._grid = np.full(
+                np.floor(np.r_[self.dx, self.dy] / cellsize).astype(int) + 1, value
+            )
             self._origin = np.r_[self._workspace[0], self._workspace[2]]
 
         self._cellsize = cellsize
-        
 
     def copy(self):
         """
@@ -82,7 +83,12 @@ class BaseOccupancyGrid(BaseMap):
         :return: copy of the ocupancy grid
         :rtype: OccGrid
         """
-        return self.__class__(self._grid.copy(), cellsize=self._cellsize, origin=self._origin, name=self._name)
+        return self.__class__(
+            self._grid.copy(),
+            cellsize=self._cellsize,
+            origin=self._origin,
+            name=self._name,
+        )
 
     def __repr__(self):
         return str(self)
@@ -133,7 +139,7 @@ class BaseOccupancyGrid(BaseMap):
         :return: maximum world x-coordinate
         :rtype: float
         """
-        return (self._grid.shape[1] -1 ) * self._cellsize + self._origin[0]
+        return (self._grid.shape[1] - 1) * self._cellsize + self._origin[0]
 
     @property
     def ymin(self):
@@ -153,7 +159,7 @@ class BaseOccupancyGrid(BaseMap):
         :return: maximum world y-coordinate
         :rtype: float
         """
-        return (self._grid.shape[0] -1 ) * self._cellsize + self._origin[1]
+        return (self._grid.shape[0] - 1) * self._cellsize + self._origin[1]
 
     @property
     def shape(self):
@@ -166,7 +172,6 @@ class BaseOccupancyGrid(BaseMap):
         This is the shape of the NumPy array that holds the occupancy grid.
         """
         return self._grid.shape
-
 
     @property
     def maxdim(self):
@@ -221,7 +226,7 @@ class BaseOccupancyGrid(BaseMap):
         """
         bl = self.w2g([region[0], region[2]])
         tr = self.w2g([region[1], region[3]])
-        self.grid[bl[1]:tr[1]+1,bl[0]:tr[0]+1] = value
+        self.grid[bl[1] : tr[1] + 1, bl[0] : tr[0] + 1] = value
 
     def g2w(self, p):
         """
@@ -253,7 +258,6 @@ class BaseOccupancyGrid(BaseMap):
         """
         return (np.round((p - self._origin) / self._cellsize)).astype(int)
 
-
     def plot(self, map=None, ax=None, block=False, **kwargs):
         """
         Plot the occupancy grid (superclass)
@@ -272,20 +276,19 @@ class BaseOccupancyGrid(BaseMap):
         The grid is a NumPy boolean array which has values 0 (false=unoccupied)
         and 1 (true=occupied).  Passing a `cmap` option to imshow can be used
         to control the displayed color of free space and obstacles.
- 
+
         """
 
         ax = base.axes_logic(ax, 2)
-        
+
         if map is None:
             map = self._grid
-            kwargs['extent'] = self.workspace
+            kwargs["extent"] = self.workspace
 
-        ax.imshow(map, origin='lower', interpolation=None, **kwargs)
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
+        ax.imshow(map, origin="lower", interpolation=None, **kwargs)
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
         plt.show(block=block)
-
 
     def line_w(self, p1, p2):
         """
@@ -314,7 +317,7 @@ class BaseOccupancyGrid(BaseMap):
     def _line(self, p1, p2):
 
         x, y = base.bresenham(p1, p2, array=self.grid)
-        z =  np.ravel_multi_index(np.vstack((y, x)), self.grid.shape)
+        z = np.ravel_multi_index(np.vstack((y, x)), self.grid.shape)
         return z
 
     @property
@@ -327,8 +330,8 @@ class BaseOccupancyGrid(BaseMap):
         """
         return self._grid.reshape(-1)
 
-class BinaryOccupancyGrid(BaseOccupancyGrid):
 
+class BinaryOccupancyGrid(BaseOccupancyGrid):
     def __init__(self, grid=None, **kwargs):
         """
         Create a binary occupancy grid instance
@@ -345,7 +348,7 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
         (occupied) corresponding to input values > 0.
 
         This object supports a user-defined coordinate system and grid size.
-        World coordinates are converted to grid coordinates to lookup the 
+        World coordinates are converted to grid coordinates to lookup the
         occupancy status.
 
         Example:
@@ -368,7 +371,7 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
             elif isinstance(grid, BinaryOccupancyGrid):
                 grid = grid.grid
             else:
-                raise ValueError('argument must be NumPy array or BinaryOccupancyGrid')
+                raise ValueError("argument must be NumPy array or BinaryOccupancyGrid")
 
         super().__init__(grid=grid, **kwargs)
 
@@ -412,18 +415,19 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
         A circular structuring element is created and used to dilate the
         stored occupancy grid.
 
-        Successive calls to ``inflate`` will compound the inflation. 
+        Successive calls to ``inflate`` will compound the inflation.
 
         :seealso: :func:`scipy.ndimage.binary_dilation`
         """
         # Generate a circular structuring element
         r = round(radius / self._cellsize)
-        Y, X = np.meshgrid(np.arange(-r, r+1), np.arange(-r, r+1))
+        Y, X = np.meshgrid(np.arange(-r, r + 1), np.arange(-r, r + 1))
         SE = X**2 + Y**2 <= r**2
         SE = SE.astype(int)
 
         # do the inflation using SciPy
         self._grid = sp.binary_dilation(self._grid, SE)
+
 
 class OccupancyGrid(BaseOccupancyGrid):
     """
@@ -432,7 +436,7 @@ class OccupancyGrid(BaseOccupancyGrid):
 
     The elements of the array are floats and can represent occupancy
     probability or traversal cost.
-    
+
     Example:
 
     .. runblock:: pycon
@@ -447,7 +451,6 @@ class OccupancyGrid(BaseOccupancyGrid):
     :seealso: :class:`BinaryOccupancyGrid`
     """
 
-
     def __str__(self):
         s = super().__str__()
 
@@ -456,8 +459,8 @@ class OccupancyGrid(BaseOccupancyGrid):
         s += f", min {g.min()}, max {g.max()}, mean {g.mean()}"
         return s
 
-class PolygonMap(BaseMap):
 
+class PolygonMap(BaseMap):
     def __init__(self, workspace=None, polygons=[]):
         """
         Polygonal obstacle map
@@ -493,9 +496,11 @@ class PolygonMap(BaseMap):
         """
 
         if isinstance(polygon, Polygon2):
-            self.polygons.append(polygon)
+            self.polygons.append(polygon)  # lgtm [py/modification-of-default-value]
         else:
-            self.polygons.append(Polygon2(polygon))
+            self.polygons.append(
+                Polygon2(polygon)
+            )  # lgtm [py/modification-of-default-value]
 
     def iscollision(self, polygon):
         """
@@ -517,7 +522,7 @@ class PolygonMap(BaseMap):
         base.plotvol2(self.workspace)
 
         for polygon in self.polygons:
-            polygon.plot(color='r')
+            polygon.plot(color="r")
 
         plt.show(block=block)
 
@@ -550,6 +555,7 @@ class PolygonMap(BaseMap):
         Returns the bounds of the occupancy grid.
         """
         return self._workspace
+
 
 if __name__ == "__main__":
 

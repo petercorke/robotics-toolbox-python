@@ -1,13 +1,13 @@
 from copy import copy as ccopy, deepcopy
 from abc import ABC
-from multiprocessing.sharedctypes import Value
+# from multiprocessing.sharedctypes import Value
 import numpy as np
 from functools import wraps
 from spatialmath.base import getvector, isscalar, isvector, ismatrix
 from spatialmath import SE3, SE2
 from ansitable import ANSITable, Column
 from spatialgeometry import Shape, SceneNode, SceneGroup
-from typing import List, Union, Type, Tuple, overload
+from typing import List, Union, Tuple, overload
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.ET import ET, ET2

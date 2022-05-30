@@ -145,9 +145,9 @@ class BaseETS(UserList):
                         _j = j
                     else:
                         _j = et.jindex
-                    qvar = q.format(
+                    qvar = q.format(  # lgtm [py/str-format/surplus-argument]  # noqa
                         _j, _j + 1
-                    )  # lgtm [py/str-format/surplus-argument]  # noqa
+                    )
                 # else:
                 #     qvar = ""
 
@@ -858,7 +858,7 @@ class ETS(BaseETS):
 
         try:
             return ETS_fkine(self._fknm, q, base, tool, include_base)
-        except:
+        except BaseException:
             pass
 
         q = getmatrix(q, (None, None))

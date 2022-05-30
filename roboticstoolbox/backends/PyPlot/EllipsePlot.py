@@ -4,7 +4,7 @@
 """
 
 import numpy as np
-import scipy as sp
+# import scipy as sp
 from spatialmath import base
 import matplotlib.pyplot as plt
 
@@ -22,7 +22,7 @@ class ShapePlot:
             ax = self.ax
 
         if ax is None:
-            fig = plt.figure()
+            plt.figure()
             ax = plt.axes(projection="3d")
             self.ax = ax
 
@@ -109,7 +109,7 @@ class EllipsePlot:
             ax = self.ax
 
         if ax is None:
-            fig = plt.figure()
+            plt.figure()
             ax = plt.axes(projection="3d")
             self.ax = ax
 
@@ -196,8 +196,8 @@ class EllipsePlot:
             centre = self.centre
 
         # points on unit circle
-        theta = np.linspace(0.0, 2.0 * np.pi, 50)
-        y = np.array([np.cos(theta), np.sin(theta)])
+        # theta = np.linspace(0.0, 2.0 * np.pi, 50)
+        # y = np.array([np.cos(theta), np.sin(theta)])
         # RVC2 p 602
         # x = sp.linalg.sqrtm(A) @ y
 

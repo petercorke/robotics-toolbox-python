@@ -2,7 +2,6 @@ import numpy as np
 from math import pi
 from roboticstoolbox import DHRobot, RevoluteDH
 from spatialmath import SE3
-from spatialmath import base
 
 
 class Baxter(DHRobot):
