@@ -16,6 +16,7 @@
 #include <numpy/arrayobject.h>
 #include <math.h>
 #include <Eigen/Dense>
+#include <iostream>
 
 static PyMethodDef fknmMethods[] = {
     {"IK",
@@ -87,47 +88,46 @@ extern "C"
 {
     static PyObject *IK(PyObject *self, PyObject *args)
     {
-        npy_float64 *q, *Tep, *ret;
+        ETS *ets;
+        npy_float64 *np_Tep, *np_ret;
         PyObject *py_q, *py_Tep;
         PyArrayObject *py_np_q, *py_np_Tep;
-        PyObject *ets;
+        PyObject *py_ets;
         int n;
         PyObject *py_ret;
-        npy_intp dim1[2] = {2, 4};
+        npy_intp dim[1] = {7};
+
 
         if (!PyArg_ParseTuple(
-                args, "iOOO",
-                &n,
-                &ets,
-                &py_q,
+                args, "OO",
+                &py_ets,
                 &py_Tep))
             return NULL;
-
-        // Make sure q is number array
-        // Cast to numpy array
-        // Get data out
-        if (!_check_array_type(py_q))
-            return NULL;
-        py_np_q = (PyArrayObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
-        q = (npy_float64 *)PyArray_DATA(py_np_q);
 
         if (!_check_array_type(py_Tep))
             return NULL;
 
+        // Extract the ETS object from the python object
+        if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
+            return NULL;
+
         py_np_Tep = (PyArrayObject *)PyArray_FROMANY(py_Tep, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
-        Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
+        np_Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
+        MapMatrix4dc Tep(np_Tep);
 
-        py_ret = PyArray_EMPTY(2, dim1, NPY_DOUBLE, 0);
-        ret = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_ret);
+        py_ret = PyArray_EMPTY(1, dim, NPY_DOUBLE, 0);
+        np_ret = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_ret);
+        // MapMatrix4dc Tep(np_Tep);
 
-        // __mult4(2, 4, )
+        std::cout << Tep << std::endl;
 
-        _ETS_IK(ets, n, q, Tep, ret);
+
+
+        // _ETS_IK(ets, n, q, Tep, ret);
 
         // _angle_axis(Te, Tep, ret);
 
         // Free the memory
-        Py_DECREF(py_np_q);
         Py_DECREF(py_np_Tep);
 
         return py_ret;
