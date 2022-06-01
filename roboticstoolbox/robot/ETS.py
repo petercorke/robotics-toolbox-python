@@ -288,17 +288,18 @@ class BaseETS(UserList):
             >>> robot.qlim
         """
         limits = zeros((2, self.n))
-        for i, j in enumerate(self.joints()):
-            if self.data[j].isrotation:
-                if self.data[j].qlim is None:
+
+        for i, et in enumerate(self.joints()):
+            if et.isrotation:
+                if et.qlim is None:
                     v = [-pi, pi]
                 else:
-                    v = self.data[j].qlim
-            elif self.data[j].istranslation:
-                if self.data[j].qlim is None:
+                    v = et.qlim
+            elif et.istranslation:
+                if et.qlim is None:
                     raise ValueError("undefined prismatic joint limit")
                 else:
-                    v = self.data[j].qlim
+                    v = et.qlim
             else:
                 raise ValueError("Undefined Joint Type")
             limits[:, i] = v
