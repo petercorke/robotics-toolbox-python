@@ -30,6 +30,12 @@ extern "C"
                 ET **ets;
                 int n;
                 int m;
+
+                // While this information is stored in the ET's
+                // Its much faster for IK to cahce it here
+                double *qlim_l;
+                double *qlim_h;
+                double *q_range2;
         };
 
         struct ET
