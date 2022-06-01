@@ -75,6 +75,7 @@ fknm = Extension(
     "fknm",
     sources=[
         "./roboticstoolbox/core/methods.cpp",
+        "./roboticstoolbox/core/ik.cpp",
         "./roboticstoolbox/core/linalg.cpp",
         "./roboticstoolbox/core/fknm.cpp",
     ],
