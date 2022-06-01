@@ -9,6 +9,7 @@
 
 #include "fknm.h"
 #include "methods.h"
+#include "ik.h"
 #include "linalg.h"
 #include "structs.h"
 
@@ -19,8 +20,8 @@
 #include <iostream>
 
 static PyMethodDef fknmMethods[] = {
-    {"IK",
-     (PyCFunction)IK,
+    {"IK_lm_chan",
+     (PyCFunction)IK_lm_chan,
      METH_VARARGS,
      "Link"},
     {"Robot_link_T",
@@ -86,28 +87,32 @@ PyMODINIT_FUNC PyInit_fknm(void)
 
 extern "C"
 {
-    static PyObject *IK(PyObject *self, PyObject *args)
+
+    
+    static PyObject *IK_lm_chan(PyObject *self, PyObject *args)
     {
         ETS *ets;
-        npy_float64 *np_Tep, *np_ret, *np_q0;
+        npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
         PyArrayObject *py_np_Tep;
-        PyObject *py_ets, *py_ret, *py_Tep, *py_q0, *py_np_q0;
+        PyObject *py_ets, *py_ret, *py_Tep, *py_q0, *py_np_q0, *py_we, *py_np_we;
         PyObject *py_tup, *py_it, *py_search, *py_solution, *py_E;
         npy_intp dim[1] = {1};
-        int ilimit, slimit, q0_used = 0, reject_jl;
-        double tol, E;
+        int ilimit, slimit, q0_used = 0, we_used = 0, reject_jl;
+        double tol, E, lambda;
 
         int it = 0, search = 0, solution = 0;
 
         if (!PyArg_ParseTuple(
-                args, "OOOiidi",
+                args, "OOOiidiOd",
                 &py_ets,
                 &py_Tep,
                 &py_q0,
                 &ilimit,
                 &slimit,
                 &tol,
-                &reject_jl))
+                &reject_jl,
+                &py_we,
+                &lambda))
             return NULL;
 
         if (!_check_array_type(py_Tep))
@@ -117,8 +122,9 @@ extern "C"
         if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
             return NULL;
 
-        // Assign empty q0
+        // Assign empty q0 and we
         MapVectorX q0(NULL, 0);
+        MapVectorX we(NULL, 0);
 
         // Check if q0 is None
         if (py_q0 != Py_None)
@@ -135,7 +141,19 @@ extern "C"
             new (&q0) MapVectorX(np_q0, ets->n);
         }
 
-        // std::cout << q0.size() << '\n';
+        // Check if we is None
+        if (py_we != Py_None)
+        {
+            // Make sure we is number array
+            // Cast to numpy array
+            // Get data out
+            if (!_check_array_type(py_we))
+                return NULL;
+            we_used = 1;
+            py_np_we = (PyObject *)PyArray_FROMANY(py_we, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
+            np_we = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_we);
+            new (&we) MapVectorX(np_we, 6);
+        }
 
         // Set the dimension of the returned array to match the number of joints
         dim[0] = ets->n;
@@ -156,9 +174,7 @@ extern "C"
         // std::cout << Tep << std::endl;
         // std::cout << ret << std::endl;
 
-        _IK_LM_Chan(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E);
-
-        // _angle_axis(Te, Tep, ret);
+        _IK_LM_Chan(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E, lambda, we);
 
         // Free the memory
         Py_DECREF(py_np_Tep);
@@ -168,8 +184,12 @@ extern "C"
             Py_DECREF(py_np_q0);
         }
 
-        // Build the return tuple
+        if (we_used)
+        {
+            Py_DECREF(py_np_we);
+        }
 
+        // Build the return tuple
         py_it = Py_BuildValue("i", it);
         py_search = Py_BuildValue("i", search);
         py_solution = Py_BuildValue("i", solution);
