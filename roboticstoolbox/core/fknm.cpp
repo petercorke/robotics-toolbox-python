@@ -89,19 +89,25 @@ extern "C"
     static PyObject *IK(PyObject *self, PyObject *args)
     {
         ETS *ets;
-        npy_float64 *np_Tep, *np_ret;
-        PyObject *py_q, *py_Tep;
-        PyArrayObject *py_np_q, *py_np_Tep;
-        PyObject *py_ets;
-        int n;
-        PyObject *py_ret;
-        npy_intp dim[1] = {7};
+        npy_float64 *np_Tep, *np_ret, *np_q0;
+        PyArrayObject *py_np_Tep;
+        PyObject *py_ets, *py_ret, *py_Tep, *py_q0, *py_np_q0;
+        PyObject *py_tup, *py_it, *py_search, *py_solution, *py_E;
+        npy_intp dim[1] = {1};
+        int ilimit, slimit, q0_used = 0, reject_jl;
+        double tol, E;
 
+        int it = 0, search = 0, solution = 0;
 
         if (!PyArg_ParseTuple(
-                args, "OO",
+                args, "OOOiidi",
                 &py_ets,
-                &py_Tep))
+                &py_Tep,
+                &py_q0,
+                &ilimit,
+                &slimit,
+                &tol,
+                &reject_jl))
             return NULL;
 
         if (!_check_array_type(py_Tep))
@@ -111,26 +117,67 @@ extern "C"
         if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
             return NULL;
 
+        // Assign empty q0
+        MapVectorX q0(NULL, 0);
+
+        // Check if q0 is None
+        if (py_q0 != Py_None)
+        {
+            // Make sure q is number array
+            // Cast to numpy array
+            // Get data out
+            if (!_check_array_type(py_q0))
+                return NULL;
+            q0_used = 1;
+            py_np_q0 = (PyObject *)PyArray_FROMANY(py_q0, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
+            np_q0 = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q0);
+            // MapVectorX q0(np_q0, ets->n);
+            new (&q0) MapVectorX(np_q0, ets->n);
+        }
+
+        // std::cout << q0.size() << '\n';
+
+        // Set the dimension of the returned array to match the number of joints
+        dim[0] = ets->n;
+
         py_np_Tep = (PyArrayObject *)PyArray_FROMANY(py_Tep, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
         np_Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
-        MapMatrix4dc Tep(np_Tep);
+
+        // Tep in row major from Python
+        MapMatrix4dr row_Tep(np_Tep);
+
+        // Convert to col major here
+        Matrix4dc Tep = row_Tep;
 
         py_ret = PyArray_EMPTY(1, dim, NPY_DOUBLE, 0);
         np_ret = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_ret);
-        // MapMatrix4dc Tep(np_Tep);
+        MapVectorX ret(np_ret, ets->n);
 
-        std::cout << Tep << std::endl;
+        // std::cout << Tep << std::endl;
+        // std::cout << ret << std::endl;
 
-
-
-        // _ETS_IK(ets, n, q, Tep, ret);
+        _IK_LM_Chan(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E);
 
         // _angle_axis(Te, Tep, ret);
 
         // Free the memory
         Py_DECREF(py_np_Tep);
 
-        return py_ret;
+        if (q0_used)
+        {
+            Py_DECREF(py_np_q0);
+        }
+
+        // Build the return tuple
+
+        py_it = Py_BuildValue("i", it);
+        py_search = Py_BuildValue("i", search);
+        py_solution = Py_BuildValue("i", solution);
+        py_E = Py_BuildValue("d", E);
+
+        py_tup = PyTuple_Pack(5, py_ret, py_solution, py_it, py_search, py_E);
+
+        return py_tup;
     }
 
     static PyObject *Robot_link_T(PyObject *self, PyObject *args)
@@ -658,8 +705,10 @@ extern "C"
 
     static PyObject *ETS_init(PyObject *self, PyObject *args)
     {
+        ET *et;
         ETS *ets;
         PyObject *etsl, *ret;
+        int j = 0;
 
         ets = (ETS *)PyMem_RawMalloc(sizeof(ETS));
 
@@ -679,6 +728,25 @@ extern "C"
                 return NULL;
         }
 
+        ets->qlim_l = (double *)PyMem_RawMalloc(ets->n * sizeof(double));
+        ets->qlim_h = (double *)PyMem_RawMalloc(ets->n * sizeof(double));
+        ets->q_range2 = (double *)PyMem_RawMalloc(ets->n * sizeof(double));
+
+        // Cache joint limits
+        for (int i = 0; i < ets->m; i++)
+        {
+            et = ets->ets[i];
+
+            if (et->isjoint)
+            {
+                ets->qlim_l[j] = et->qlim[0];
+                ets->qlim_h[j] = et->qlim[1];
+                ets->q_range2[j] = (et->qlim[1] - et->qlim[0]) / 2.0;
+
+                j += 1;
+            }
+        }
+
         Py_DECREF(iter_et);
 
         ret = PyCapsule_New(ets, "ETS", NULL);
@@ -691,6 +759,7 @@ extern "C"
         int jointtype;
         PyObject *ret, *py_et;
         PyArrayObject *py_T, *py_qlim;
+        npy_float64 *np_qlim;
         int isjoint, isflip, jindex;
 
         et = (ET *)PyMem_RawMalloc(sizeof(ET));
@@ -708,9 +777,12 @@ extern "C"
         if (!(et = (ET *)PyCapsule_GetPointer(py_et, "ET")))
             return NULL;
 
+        np_qlim = (npy_float64 *)PyArray_DATA(py_qlim);
+        et->qlim[0] = np_qlim[0];
+        et->qlim[1] = np_qlim[1];
+
         et->T = (npy_float64 *)PyArray_DATA(py_T);
         new (&et->Tm) MapMatrix4dc(et->T);
-        et->qlim = (npy_float64 *)PyArray_DATA(py_qlim);
         et->axis = jointtype;
 
         et->isjoint = isjoint;
@@ -752,6 +824,7 @@ extern "C"
         int jointtype;
         PyObject *ret;
         PyArrayObject *py_T, *py_qlim;
+        npy_float64 *np_qlim;
 
         et = (ET *)PyMem_RawMalloc(sizeof(ET));
 
@@ -764,9 +837,13 @@ extern "C"
                               &PyArray_Type, &py_qlim))
             return NULL;
 
+        np_qlim = (npy_float64 *)PyArray_DATA(py_qlim);
+        et->qlim = (double *)PyMem_RawMalloc(2 * sizeof(double));
+        et->qlim[0] = np_qlim[0];
+        et->qlim[1] = np_qlim[1];
+
         et->T = (npy_float64 *)PyArray_DATA(py_T);
         new (&et->Tm) MapMatrix4dc(et->T);
-        et->qlim = (npy_float64 *)PyArray_DATA(py_qlim);
 
         et->axis = jointtype;
 

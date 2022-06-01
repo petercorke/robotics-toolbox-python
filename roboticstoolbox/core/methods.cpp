@@ -12,87 +12,177 @@
 
 extern "C"
 {
-    void _ETS_IK(PyObject *ets, int n, double *q, double *Tep, double *ret)
+
+    void _IK_LM_Chan(ETS *ets, Matrix4dc Tep, MapVectorX q0, int ilimit, int slimit, double tol, int reject_jl, MapVectorX q, int *it, int *search, int *solution, double *E)
     {
-        // double E;
-        double *Te = (double *)PyMem_RawCalloc(16, sizeof(double));
-        double *e = (double *)PyMem_RawCalloc(6, sizeof(double));
+        int iter = 0;
+        double lambda = 1.0;
 
-        double *a = (double *)PyMem_RawCalloc(6, sizeof(double));
-        // a[0] = 1.0;
-        // a[1] = 4.0;
-        // a[2] = 2.0;
-        // a[3] = 5.0;
-        // a[4] = 3.0;
-        // a[5] = 6.0;
-        a[0] = 1.0;
-        a[1] = 2.0;
-        a[2] = 3.0;
-        a[3] = 4.0;
-        a[4] = 5.0;
-        a[5] = 6.0;
-        double *b = (double *)PyMem_RawCalloc(12, sizeof(double));
-        b[0] = 11.0;
-        b[1] = 15.0;
-        b[2] = 19.0;
-        b[3] = 12.0;
-        b[4] = 16.0;
-        b[5] = 20.0;
-        b[6] = 13.0;
-        b[7] = 17.0;
-        b[8] = 21.0;
-        b[9] = 14.0;
-        b[10] = 18.0;
-        b[11] = 22.0;
-        // b[0] = 11.0;
-        // b[1] = 12.0;
-        // b[2] = 13.0;
-        // b[3] = 14.0;
-        // b[4] = 15.0;
-        // b[5] = 16.0;
-        // b[6] = 17.0;
-        // b[7] = 18.0;
-        // b[8] = 19.0;
-        // b[9] = 20.0;
-        // b[10] = 21.0;
-        // b[11] = 22.0;
+        double *np_Te = (double *)PyMem_RawCalloc(16, sizeof(double));
+        MapMatrix4dc Te(np_Te);
 
-        // double *U = (double *)PyMem_RawCalloc(16, sizeof(double));
-        // double *invU = (double *)PyMem_RawCalloc(16, sizeof(double));
-        // double *temp = (double *)PyMem_RawCalloc(16, sizeof(double));
-        // double *ret = (double *)PyMem_RawCalloc(16, sizeof(double));
-        // Py_ssize_t m;
-        int arrived = 0, iter = 0;
+        double *np_J = (double *)PyMem_RawCalloc(6 * ets->n, sizeof(double));
+        MapMatrixJc J(np_J, 6, ets->n);
 
-        while (arrived == 0 && iter < 500)
+        double *np_e = (double *)PyMem_RawCalloc(6, sizeof(double));
+        MapVectorX e(np_e, 6);
+
+        Matrix6dc We = Matrix6dc::Identity();
+
+        Eigen::MatrixXd Wn(ets->n, ets->n);
+        Eigen::MatrixXd EyeN = Eigen::MatrixXd::Identity(ets->n, ets->n);
+
+        VectorX g(ets->n);
+
+        // Set the first q0
+        if (q0.size() == ets->n)
         {
-            // Current pose Te
-            // _ETS_fkine(ets, q, (double *)NULL, NULL, Te);
-
-            // Angle axis error e
-            _angle_axis(Te, Tep, e);
-
-            // Squared error E
-            // E = 0.5 * e @ We @ e
-            // E = 0.5 * (e[0] * e[0] + e[1] * e[1] + e[2] * e[2] + e[3] * e[3] + e[4] * e[4] + e[5] * e[5]);
+            q = q0;
+        }
+        else
+        {
+            q = _rand_q(ets);
         }
 
-        // _ETS_fkine(ets, q, (double *)NULL, NULL, Te);
+        // Global search up to slimit
+        while (*search < slimit)
+        {
 
-        // for (int i = 0; i < 2; i++)
-        // {
-        //     for (int j = 0; j < 4; j++)
-        //     {
-        //         ret[i * 4 + j] = 0.0;
-        //     }
-        // }
+            while (iter < ilimit)
+            {
+                // Current pose Te
+                _ETS_fkine(ets, q.data(), (double *)NULL, NULL, Te);
 
-        // _mult_T(2, 3, 0, a, 3, 4, 0, b, ret);
-        // _mult_T(3, 2, 1, a, 3, 4, 0, b, ret);
-        // _mult_T(3, 2, 1, a, 4, 3, 1, b, ret);
-        // _mult_T(2, 3, 0, a, 4, 3, 1, b, ret);
+                // Angle axis error e
+                _angle_axis(Te, Tep, e);
 
-        // int j = 0;
+                // Squared error E
+                *E = 0.5 * e.transpose() * We * e;
+
+                if (*E < tol)
+                {
+                    // We have arrived
+
+                    // Check for joint limit violation
+                    if (reject_jl)
+                    {
+                        *solution = _check_lim(ets, q);
+                    }
+                    else
+                    {
+                        *solution = 1;
+                    }
+
+                    break;
+                }
+
+                // Jacobian Matric J
+                _ETS_jacob0(ets, q.data(), (double *)NULL, J);
+
+                // Weighting matrix Wn
+                Wn = lambda * *E * EyeN;
+
+                // The vector g
+                g = J.transpose() * We * e;
+
+                // Work out the joint velocity qd
+                q += (J.transpose() * We * J + Wn).inverse() * g;
+
+                iter += 1;
+            }
+
+            if (*solution)
+            {
+                *it += iter;
+                // std::cout << "Search: " << *search << " Iter: " << *it << " Solution: " << *solution << " E: " << *E << " e: " << e.transpose() << '\n';
+                break;
+            }
+
+            // std::cout << "Search: " << *search << " Iter: " << *it << " Solution: " << *solution << " E: " << *E << " e: " << e.transpose() << '\n';
+            *it += iter;
+            iter = 0;
+            *search += 1;
+            q = _rand_q(ets);
+        }
+
+        free(np_e);
+        free(np_Te);
+        free(np_J);
+    }
+
+    int _check_lim(ETS *ets, MapVectorX q)
+    {
+        for (int i = 0; i < ets->n; i++)
+        {
+            if (q(i) < ets->qlim_l[i] || q(i) > ets->qlim_h[i])
+            {
+                // std::cout << "Joint limit: " << q.transpose() << "  :  " << q(i) << "\n";
+                return 0;
+            }
+        }
+
+        return 1;
+    }
+
+    void _angle_axis(MapMatrix4dc Te, Matrix4dc Tep, MapVectorX e)
+    {
+        int i, j, k;
+        double num, li_norm, R_tr, ang;
+        Matrix3dc R;
+        Vector3 li;
+
+        // e[:3] = Tep[:3, 3] - Te[:3, 3]
+        e.block<3, 1>(0, 0) = Tep.block<3, 1>(0, 3) - Te.block<3, 1>(0, 3);
+
+        // R = Tep.R @ T.R.T
+        // R = Tep[:3, :3] @ T[:3, :3].T
+        R = Tep.block<3, 3>(0, 0) * Te.block<3, 3>(0, 0).transpose();
+
+        // li = np.array([R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]]);
+        li << R(2, 1) - R(1, 2), R(0, 2) - R(2, 0), R(1, 0) - R(0, 1);
+
+        // if base.iszerovec(li)
+        li_norm = li.norm();
+
+        R_tr = R.trace();
+        if (li_norm < 1e-6)
+        {
+            // diagonal matrix case
+            // if np.trace(R) > 0
+            if (R_tr > 0)
+            {
+                // (1,1,1) case
+                // a = np.zeros((3, ));
+                e.block<3, 1>(3, 0) << 0, 0, 0;
+            }
+            else
+            {
+                // a = np.pi / 2 * (np.diag(R) + 1);
+                e(3) = PI_2 * (R(0, 0) + 1);
+                e(4) = PI_2 * (R(1, 1) + 1);
+                e(5) = PI_2 * (R(2, 2) + 1);
+            }
+        }
+        else
+        {
+            // non-diagonal matrix case
+            // a = math.atan2(li_norm, np.trace(R) - 1) * li / li_norm
+            ang = atan2(li_norm, R_tr - 1);
+            e.block<3, 1>(3, 0) = ang * li / li_norm;
+        }
+    }
+
+    VectorX _rand_q(ETS *ets)
+    {
+        Eigen::Map<Eigen::ArrayXd> qlim_l(ets->qlim_l, ets->n);
+        Eigen::Map<Eigen::ArrayXd> q_range2(ets->q_range2, ets->n);
+
+        VectorX q = VectorX::Random(ets->n);
+
+        q = (q.array() + 1) * q_range2;
+        q = q.array() + qlim_l;
+
+        return q;
     }
 
     void _ETS_hessian(int n, MapMatrixJc &J, MapMatrixHr &H)
