@@ -20,8 +20,24 @@
 #include <iostream>
 
 static PyMethodDef fknmMethods[] = {
-    {"IK_lm_chan",
-     (PyCFunction)IK_lm_chan,
+    {"IK_GN",
+     (PyCFunction)IK_GN,
+     METH_VARARGS,
+     "Link"},
+    {"IK_NR",
+     (PyCFunction)IK_NR,
+     METH_VARARGS,
+     "Link"},
+    {"IK_LM_Chan",
+     (PyCFunction)IK_LM_Chan,
+     METH_VARARGS,
+     "Link"},
+    {"IK_LM_Wampler",
+     (PyCFunction)IK_LM_Wampler,
+     METH_VARARGS,
+     "Link"},
+    {"IK_LM_Sugihara",
+     (PyCFunction)IK_LM_Sugihara,
      METH_VARARGS,
      "Link"},
     {"Robot_link_T",
@@ -88,8 +104,237 @@ PyMODINIT_FUNC PyInit_fknm(void)
 extern "C"
 {
 
-    
-    static PyObject *IK_lm_chan(PyObject *self, PyObject *args)
+    static PyObject *IK_GN(PyObject *self, PyObject *args)
+    {
+        ETS *ets;
+        npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
+        PyArrayObject *py_np_Tep;
+        PyObject *py_ets, *py_ret, *py_Tep, *py_q0, *py_np_q0, *py_we, *py_np_we;
+        PyObject *py_tup, *py_it, *py_search, *py_solution, *py_E;
+        npy_intp dim[1] = {1};
+        int ilimit, slimit, q0_used = 0, we_used = 0, reject_jl, use_pinv;
+        double tol, E, pinv_damping;
+
+        int it = 0, search = 1, solution = 0;
+
+        if (!PyArg_ParseTuple(
+                args, "OOOiidiOid",
+                &py_ets,
+                &py_Tep,
+                &py_q0,
+                &ilimit,
+                &slimit,
+                &tol,
+                &reject_jl,
+                &py_we,
+                &use_pinv,
+                &pinv_damping))
+            return NULL;
+
+        if (!_check_array_type(py_Tep))
+            return NULL;
+
+        // Extract the ETS object from the python object
+        if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
+            return NULL;
+
+        // Assign empty q0 and we
+        MapVectorX q0(NULL, 0);
+        MapVectorX we(NULL, 0);
+
+        // Check if q0 is None
+        if (py_q0 != Py_None)
+        {
+            // Make sure q is number array
+            // Cast to numpy array
+            // Get data out
+            if (!_check_array_type(py_q0))
+                return NULL;
+            q0_used = 1;
+            py_np_q0 = (PyObject *)PyArray_FROMANY(py_q0, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
+            np_q0 = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q0);
+            // MapVectorX q0(np_q0, ets->n);
+            new (&q0) MapVectorX(np_q0, ets->n);
+        }
+
+        // Check if we is None
+        if (py_we != Py_None)
+        {
+            // Make sure we is number array
+            // Cast to numpy array
+            // Get data out
+            if (!_check_array_type(py_we))
+                return NULL;
+            we_used = 1;
+            py_np_we = (PyObject *)PyArray_FROMANY(py_we, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
+            np_we = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_we);
+            new (&we) MapVectorX(np_we, 6);
+        }
+
+        // Set the dimension of the returned array to match the number of joints
+        dim[0] = ets->n;
+
+        py_np_Tep = (PyArrayObject *)PyArray_FROMANY(py_Tep, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        np_Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
+
+        // Tep in row major from Python
+        MapMatrix4dr row_Tep(np_Tep);
+
+        // Convert to col major here
+        Matrix4dc Tep = row_Tep;
+
+        py_ret = PyArray_EMPTY(1, dim, NPY_DOUBLE, 0);
+        np_ret = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_ret);
+        MapVectorX ret(np_ret, ets->n);
+
+        _IK_GN(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E, we, use_pinv, pinv_damping);
+
+        // Free the memory
+        Py_DECREF(py_np_Tep);
+
+        if (q0_used)
+        {
+            Py_DECREF(py_np_q0);
+        }
+
+        if (we_used)
+        {
+            Py_DECREF(py_np_we);
+        }
+
+        // Build the return tuple
+        py_it = Py_BuildValue("i", it);
+        py_search = Py_BuildValue("i", search);
+        py_solution = Py_BuildValue("i", solution);
+        py_E = Py_BuildValue("d", E);
+
+        py_tup = PyTuple_Pack(5, py_ret, py_solution, py_it, py_search, py_E);
+
+        Py_DECREF(py_it);
+        Py_DECREF(py_search);
+        Py_DECREF(py_solution);
+        Py_DECREF(py_E);
+        Py_DECREF(py_ret);
+
+        return py_tup;
+    }
+
+    static PyObject *IK_NR(PyObject *self, PyObject *args)
+    {
+        ETS *ets;
+        npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
+        PyArrayObject *py_np_Tep;
+        PyObject *py_ets, *py_ret, *py_Tep, *py_q0, *py_np_q0, *py_we, *py_np_we;
+        PyObject *py_tup, *py_it, *py_search, *py_solution, *py_E;
+        npy_intp dim[1] = {1};
+        int ilimit, slimit, q0_used = 0, we_used = 0, reject_jl, use_pinv;
+        double tol, E, pinv_damping;
+
+        int it = 0, search = 1, solution = 0;
+
+        if (!PyArg_ParseTuple(
+                args, "OOOiidiOid",
+                &py_ets,
+                &py_Tep,
+                &py_q0,
+                &ilimit,
+                &slimit,
+                &tol,
+                &reject_jl,
+                &py_we,
+                &use_pinv,
+                &pinv_damping))
+            return NULL;
+
+        if (!_check_array_type(py_Tep))
+            return NULL;
+
+        // Extract the ETS object from the python object
+        if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
+            return NULL;
+
+        // Assign empty q0 and we
+        MapVectorX q0(NULL, 0);
+        MapVectorX we(NULL, 0);
+
+        // Check if q0 is None
+        if (py_q0 != Py_None)
+        {
+            // Make sure q is number array
+            // Cast to numpy array
+            // Get data out
+            if (!_check_array_type(py_q0))
+                return NULL;
+            q0_used = 1;
+            py_np_q0 = (PyObject *)PyArray_FROMANY(py_q0, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
+            np_q0 = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q0);
+            // MapVectorX q0(np_q0, ets->n);
+            new (&q0) MapVectorX(np_q0, ets->n);
+        }
+
+        // Check if we is None
+        if (py_we != Py_None)
+        {
+            // Make sure we is number array
+            // Cast to numpy array
+            // Get data out
+            if (!_check_array_type(py_we))
+                return NULL;
+            we_used = 1;
+            py_np_we = (PyObject *)PyArray_FROMANY(py_we, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
+            np_we = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_we);
+            new (&we) MapVectorX(np_we, 6);
+        }
+
+        // Set the dimension of the returned array to match the number of joints
+        dim[0] = ets->n;
+
+        py_np_Tep = (PyArrayObject *)PyArray_FROMANY(py_Tep, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        np_Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
+
+        // Tep in row major from Python
+        MapMatrix4dr row_Tep(np_Tep);
+
+        // Convert to col major here
+        Matrix4dc Tep = row_Tep;
+
+        py_ret = PyArray_EMPTY(1, dim, NPY_DOUBLE, 0);
+        np_ret = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_ret);
+        MapVectorX ret(np_ret, ets->n);
+
+        _IK_NR(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E, we, use_pinv, pinv_damping);
+
+        // Free the memory
+        Py_DECREF(py_np_Tep);
+
+        if (q0_used)
+        {
+            Py_DECREF(py_np_q0);
+        }
+
+        if (we_used)
+        {
+            Py_DECREF(py_np_we);
+        }
+
+        // Build the return tuple
+        py_it = Py_BuildValue("i", it);
+        py_search = Py_BuildValue("i", search);
+        py_solution = Py_BuildValue("i", solution);
+        py_E = Py_BuildValue("d", E);
+
+        py_tup = PyTuple_Pack(5, py_ret, py_solution, py_it, py_search, py_E);
+
+        Py_DECREF(py_it);
+        Py_DECREF(py_search);
+        Py_DECREF(py_solution);
+        Py_DECREF(py_E);
+        Py_DECREF(py_ret);
+
+        return py_tup;
+    }
+
+    static PyObject *IK_LM_Chan(PyObject *self, PyObject *args)
     {
         ETS *ets;
         npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
@@ -100,7 +345,7 @@ extern "C"
         int ilimit, slimit, q0_used = 0, we_used = 0, reject_jl;
         double tol, E, lambda;
 
-        int it = 0, search = 0, solution = 0;
+        int it = 0, search = 1, solution = 0;
 
         if (!PyArg_ParseTuple(
                 args, "OOOiidiOd",
@@ -196,6 +441,246 @@ extern "C"
         py_E = Py_BuildValue("d", E);
 
         py_tup = PyTuple_Pack(5, py_ret, py_solution, py_it, py_search, py_E);
+
+        Py_DECREF(py_it);
+        Py_DECREF(py_search);
+        Py_DECREF(py_solution);
+        Py_DECREF(py_E);
+        Py_DECREF(py_ret);
+
+        return py_tup;
+    }
+
+    static PyObject *IK_LM_Wampler(PyObject *self, PyObject *args)
+    {
+        ETS *ets;
+        npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
+        PyArrayObject *py_np_Tep;
+        PyObject *py_ets, *py_ret, *py_Tep, *py_q0, *py_np_q0, *py_we, *py_np_we;
+        PyObject *py_tup, *py_it, *py_search, *py_solution, *py_E;
+        npy_intp dim[1] = {1};
+        int ilimit, slimit, q0_used = 0, we_used = 0, reject_jl;
+        double tol, E, lambda;
+
+        int it = 0, search = 1, solution = 0;
+
+        if (!PyArg_ParseTuple(
+                args, "OOOiidiOd",
+                &py_ets,
+                &py_Tep,
+                &py_q0,
+                &ilimit,
+                &slimit,
+                &tol,
+                &reject_jl,
+                &py_we,
+                &lambda))
+            return NULL;
+
+        if (!_check_array_type(py_Tep))
+            return NULL;
+
+        // Extract the ETS object from the python object
+        if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
+            return NULL;
+
+        // Assign empty q0 and we
+        MapVectorX q0(NULL, 0);
+        MapVectorX we(NULL, 0);
+
+        // Check if q0 is None
+        if (py_q0 != Py_None)
+        {
+            // Make sure q is number array
+            // Cast to numpy array
+            // Get data out
+            if (!_check_array_type(py_q0))
+                return NULL;
+            q0_used = 1;
+            py_np_q0 = (PyObject *)PyArray_FROMANY(py_q0, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
+            np_q0 = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q0);
+            // MapVectorX q0(np_q0, ets->n);
+            new (&q0) MapVectorX(np_q0, ets->n);
+        }
+
+        // Check if we is None
+        if (py_we != Py_None)
+        {
+            // Make sure we is number array
+            // Cast to numpy array
+            // Get data out
+            if (!_check_array_type(py_we))
+                return NULL;
+            we_used = 1;
+            py_np_we = (PyObject *)PyArray_FROMANY(py_we, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
+            np_we = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_we);
+            new (&we) MapVectorX(np_we, 6);
+        }
+
+        // Set the dimension of the returned array to match the number of joints
+        dim[0] = ets->n;
+
+        py_np_Tep = (PyArrayObject *)PyArray_FROMANY(py_Tep, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        np_Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
+
+        // Tep in row major from Python
+        MapMatrix4dr row_Tep(np_Tep);
+
+        // Convert to col major here
+        Matrix4dc Tep = row_Tep;
+
+        py_ret = PyArray_EMPTY(1, dim, NPY_DOUBLE, 0);
+        np_ret = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_ret);
+        MapVectorX ret(np_ret, ets->n);
+
+        // std::cout << Tep << std::endl;
+        // std::cout << ret << std::endl;
+
+        _IK_LM_Wampler(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E, lambda, we);
+
+        // Free the memory
+        Py_DECREF(py_np_Tep);
+
+        if (q0_used)
+        {
+            Py_DECREF(py_np_q0);
+        }
+
+        if (we_used)
+        {
+            Py_DECREF(py_np_we);
+        }
+
+        // Build the return tuple
+        py_it = Py_BuildValue("i", it);
+        py_search = Py_BuildValue("i", search);
+        py_solution = Py_BuildValue("i", solution);
+        py_E = Py_BuildValue("d", E);
+
+        py_tup = PyTuple_Pack(5, py_ret, py_solution, py_it, py_search, py_E);
+
+        Py_DECREF(py_it);
+        Py_DECREF(py_search);
+        Py_DECREF(py_solution);
+        Py_DECREF(py_E);
+        Py_DECREF(py_ret);
+
+        return py_tup;
+    }
+
+    static PyObject *IK_LM_Sugihara(PyObject *self, PyObject *args)
+    {
+        ETS *ets;
+        npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
+        PyArrayObject *py_np_Tep;
+        PyObject *py_ets, *py_ret, *py_Tep, *py_q0, *py_np_q0, *py_we, *py_np_we;
+        PyObject *py_tup, *py_it, *py_search, *py_solution, *py_E;
+        npy_intp dim[1] = {1};
+        int ilimit, slimit, q0_used = 0, we_used = 0, reject_jl;
+        double tol, E, lambda;
+
+        int it = 0, search = 1, solution = 0;
+
+        if (!PyArg_ParseTuple(
+                args, "OOOiidiOd",
+                &py_ets,
+                &py_Tep,
+                &py_q0,
+                &ilimit,
+                &slimit,
+                &tol,
+                &reject_jl,
+                &py_we,
+                &lambda))
+            return NULL;
+
+        if (!_check_array_type(py_Tep))
+            return NULL;
+
+        // Extract the ETS object from the python object
+        if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
+            return NULL;
+
+        // Assign empty q0 and we
+        MapVectorX q0(NULL, 0);
+        MapVectorX we(NULL, 0);
+
+        // Check if q0 is None
+        if (py_q0 != Py_None)
+        {
+            // Make sure q is number array
+            // Cast to numpy array
+            // Get data out
+            if (!_check_array_type(py_q0))
+                return NULL;
+            q0_used = 1;
+            py_np_q0 = (PyObject *)PyArray_FROMANY(py_q0, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
+            np_q0 = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q0);
+            // MapVectorX q0(np_q0, ets->n);
+            new (&q0) MapVectorX(np_q0, ets->n);
+        }
+
+        // Check if we is None
+        if (py_we != Py_None)
+        {
+            // Make sure we is number array
+            // Cast to numpy array
+            // Get data out
+            if (!_check_array_type(py_we))
+                return NULL;
+            we_used = 1;
+            py_np_we = (PyObject *)PyArray_FROMANY(py_we, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
+            np_we = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_we);
+            new (&we) MapVectorX(np_we, 6);
+        }
+
+        // Set the dimension of the returned array to match the number of joints
+        dim[0] = ets->n;
+
+        py_np_Tep = (PyArrayObject *)PyArray_FROMANY(py_Tep, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        np_Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
+
+        // Tep in row major from Python
+        MapMatrix4dr row_Tep(np_Tep);
+
+        // Convert to col major here
+        Matrix4dc Tep = row_Tep;
+
+        py_ret = PyArray_EMPTY(1, dim, NPY_DOUBLE, 0);
+        np_ret = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_ret);
+        MapVectorX ret(np_ret, ets->n);
+
+        // std::cout << Tep << std::endl;
+        // std::cout << ret << std::endl;
+
+        _IK_LM_Sugihara(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E, lambda, we);
+
+        // Free the memory
+        Py_DECREF(py_np_Tep);
+
+        if (q0_used)
+        {
+            Py_DECREF(py_np_q0);
+        }
+
+        if (we_used)
+        {
+            Py_DECREF(py_np_we);
+        }
+
+        // Build the return tuple
+        py_it = Py_BuildValue("i", it);
+        py_search = Py_BuildValue("i", search);
+        py_solution = Py_BuildValue("i", solution);
+        py_E = Py_BuildValue("d", E);
+
+        py_tup = PyTuple_Pack(5, py_ret, py_solution, py_it, py_search, py_E);
+
+        Py_DECREF(py_it);
+        Py_DECREF(py_search);
+        Py_DECREF(py_solution);
+        Py_DECREF(py_E);
+        Py_DECREF(py_ret);
 
         return py_tup;
     }

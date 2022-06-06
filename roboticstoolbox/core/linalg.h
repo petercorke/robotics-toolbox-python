@@ -27,7 +27,7 @@ extern "C"
 
 #define Matrix6dc Eigen::Matrix<double, 6, 6, Eigen::ColMajor>
 
-#define MatrixJc Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::ColMajor>
+#define MatrixJc Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>
 #define MatrixJr Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::RowMajor>
 #define MapMatrixJc Eigen::Map<MatrixJc>
 #define MapMatrixJr Eigen::Map<MatrixJr>
