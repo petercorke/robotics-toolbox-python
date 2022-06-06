@@ -20,6 +20,7 @@ from numpy import (
     max,
     where,
 )
+from numpy.random import uniform
 from numpy.linalg import inv, det, cond, pinv, matrix_rank, svd, eig
 from spatialmath import SE3, SE2
 from spatialmath.base import (
@@ -36,7 +37,19 @@ from roboticstoolbox import rtb_get_param
 
 from collections import UserList
 from spatialmath.base import issymbol, getmatrix
-from fknm import ETS_init, ETS_fkine, ETS_jacob0, ETS_jacobe, ETS_hessian0, ETS_hessiane
+from fknm import (
+    ETS_init,
+    ETS_fkine,
+    ETS_jacob0,
+    ETS_jacobe,
+    ETS_hessian0,
+    ETS_hessiane,
+    IK_NR,
+    IK_GN,
+    IK_LM_Chan,
+    IK_LM_Wampler,
+    IK_LM_Sugihara,
+)
 from copy import deepcopy
 from roboticstoolbox import rtb_get_param
 from roboticstoolbox.robot.ET import ET, ET2
@@ -571,6 +584,42 @@ class BaseETS(UserList):
             robot = ERobot2(self)
 
         robot.teach(*args, **kwargs)
+
+    def random_q(self, i: int = 1) -> ndarray:
+        """
+        Generate a random valid joint configuration
+
+        :param i: number of configurations to generate
+
+        Generates a random q vector within the joint limits defined by
+        `self.qlim`.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> import roboticstoolbox as rtb
+            >>> robot = rtb.models.Panda()
+            >>> ets = robot.ets()
+            >>> q = ets.random_q()
+            >>> q
+
+        """
+
+        if i == 1:
+            q = zeros(self.n)
+
+            for i in range(self.n):
+                q[i] = uniform(self.qlim[0, i], self.qlim[1, i])
+
+        else:
+            q = zeros((i, self.n))
+
+            for j in range(i):
+                for i in range(self.n):
+                    q[j, i] = uniform(self.qlim[0, i], self.qlim[1, i])
+
+        return q
 
 
 class ETS(BaseETS):
@@ -1453,6 +1502,555 @@ class ETS(BaseETS):
         #     return w[0]
         # else:
         return w
+
+    def ik_lm_chan(
+        self,
+        Tep: Union[ndarray, SE3],
+        q0: Union[ndarray, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        reject_jl: bool = True,
+        we: Union[ndarray, None] = None,
+        λ: float = 1.0,
+    ) -> tuple[ndarray, int, int, int, float]:
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan's Method)
+
+        :param Tep: The desired end-effector pose or pose trajectory
+        :param q0: initial joint configuration (default to random valid joint
+            configuration contrained by the joint limits of the robot)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param reject_jl: constrain the solution to being within the joint limits of
+            the robot (reject solution with invalid joint configurations and perfrom
+            another search up to the slimit)
+        :param we: a mask vector which weights the end-effector error priority.
+            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
+            respectively
+        :param λ: value of lambda for the damping matrix Wn
+
+        :return: inverse kinematic solution
+        :rtype: tuple (q, success, iterations, searches, residual)
+
+        ``sol = ets.ik_lm_chan(Tep)`` are the joint coordinates (n) corresponding
+        to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
+        This method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a tuple with elements:
+
+        ============    ==========  ===============================================
+        Element         Type        Description
+        ============    ==========  ===============================================
+        ``q``           ndarray(n)  joint coordinates in units of radians or metres
+        ``success``     int         whether a solution was found
+        ``iterations``  int         total number of iterations
+        ``searches``    int         total number of searches
+        ``residual``    float       final value of cost function
+        ============    ==========  ===============================================
+
+        If ``success == 0`` the ``q`` values will be valid numbers, but the
+        solution will be in error.  The amount of error is indicated by
+        the ``residual``.
+
+        **Joint Limits**:
+
+        ``sol = robot.ikine_LM(T, slimit=100)`` which is the deafualt for this method.
+        The solver will initialise a solution attempt with a random valid q0 and
+        perform a maximum of ilimit steps within this attempt. If a solution is not
+        found, this process is repeated up to slimit times.
+
+        **Global search**:
+
+        ``sol = robot.ikine_LM(T, reject_jl=True)`` is the deafualt for this method.
+        By setting reject_jl to True, the solver will discard any solution which
+        violates the defined joint limits of the robot. The solver will then
+        re-initialise with a new random q0 and repeat the process up to slimit times.
+        Note that finding a solution with valid joint coordinates takes longer than
+        without.
+
+        **Underactuated robots:**
+
+        For the case where the manipulator has fewer than 6 DOF the
+        solution space has more dimensions than can be spanned by the
+        manipulator joint coordinates.
+
+        In this case we specify the ``we`` option where the ``we`` vector
+        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+        will be ignored in reaching a solution.  The we vector has six
+        elements that correspond to translation in X, Y and Z, and rotation
+        about X, Y and Z respectively. The value can be 0 (for ignore)
+        or above to assign a priority relative to other Cartesian DoF. The number
+        of non-zero elements must equal the number of manipulator DOF.
+
+        For example when using a 3 DOF manipulator tool orientation might
+        be unimportant, in which case use the option ``we=[1, 1, 1, 0, 0, 0]``.
+
+
+
+        .. note::
+
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - Implements a Levenberg-Marquadt variable-damping solver.
+            - The tolerance is computed on the norm of the error between
+                current and desired tool pose.  This norm is computed from
+                distances and angles without any kind of weighting.
+            - The inverse kinematic solution is generally not unique, and
+                depends on the initial guess ``q0``.
+
+        :references:
+            TODO
+
+        :seealso:
+            TODO
+        """
+
+        return IK_LM_Chan(self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+
+    def ik_lm_wampler(
+        self,
+        Tep: Union[ndarray, SE3],
+        q0: Union[ndarray, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        reject_jl: bool = True,
+        we: Union[ndarray, None] = None,
+        λ: float = 1.0,
+    ) -> tuple[ndarray, int, int, int, float]:
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan's Method)
+
+        :param Tep: The desired end-effector pose or pose trajectory
+        :param q0: initial joint configuration (default to random valid joint
+            configuration contrained by the joint limits of the robot)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param reject_jl: constrain the solution to being within the joint limits of
+            the robot (reject solution with invalid joint configurations and perfrom
+            another search up to the slimit)
+        :param we: a mask vector which weights the end-effector error priority.
+            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
+            respectively
+        :param λ: value of lambda for the damping matrix Wn
+
+        :return: inverse kinematic solution
+        :rtype: tuple (q, success, iterations, searches, residual)
+
+        ``sol = ets.ik_lm_chan(Tep)`` are the joint coordinates (n) corresponding
+        to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
+        This method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a tuple with elements:
+
+        ============    ==========  ===============================================
+        Element         Type        Description
+        ============    ==========  ===============================================
+        ``q``           ndarray(n)  joint coordinates in units of radians or metres
+        ``success``     int         whether a solution was found
+        ``iterations``  int         total number of iterations
+        ``searches``    int         total number of searches
+        ``residual``    float       final value of cost function
+        ============    ==========  ===============================================
+
+        If ``success == 0`` the ``q`` values will be valid numbers, but the
+        solution will be in error.  The amount of error is indicated by
+        the ``residual``.
+
+        **Joint Limits**:
+
+        ``sol = robot.ikine_LM(T, slimit=100)`` which is the deafualt for this method.
+        The solver will initialise a solution attempt with a random valid q0 and
+        perform a maximum of ilimit steps within this attempt. If a solution is not
+        found, this process is repeated up to slimit times.
+
+        **Global search**:
+
+        ``sol = robot.ikine_LM(T, reject_jl=True)`` is the deafualt for this method.
+        By setting reject_jl to True, the solver will discard any solution which
+        violates the defined joint limits of the robot. The solver will then
+        re-initialise with a new random q0 and repeat the process up to slimit times.
+        Note that finding a solution with valid joint coordinates takes longer than
+        without.
+
+        **Underactuated robots:**
+
+        For the case where the manipulator has fewer than 6 DOF the
+        solution space has more dimensions than can be spanned by the
+        manipulator joint coordinates.
+
+        In this case we specify the ``we`` option where the ``we`` vector
+        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+        will be ignored in reaching a solution.  The we vector has six
+        elements that correspond to translation in X, Y and Z, and rotation
+        about X, Y and Z respectively. The value can be 0 (for ignore)
+        or above to assign a priority relative to other Cartesian DoF. The number
+        of non-zero elements must equal the number of manipulator DOF.
+
+        For example when using a 3 DOF manipulator tool orientation might
+        be unimportant, in which case use the option ``we=[1, 1, 1, 0, 0, 0]``.
+
+
+
+        .. note::
+
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - Implements a Levenberg-Marquadt variable-damping solver.
+            - The tolerance is computed on the norm of the error between
+                current and desired tool pose.  This norm is computed from
+                distances and angles without any kind of weighting.
+            - The inverse kinematic solution is generally not unique, and
+                depends on the initial guess ``q0``.
+
+        :references:
+            TODO
+
+        :seealso:
+            TODO
+        """
+
+        return IK_LM_Wampler(self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+
+    def ik_lm_sugihara(
+        self,
+        Tep: Union[ndarray, SE3],
+        q0: Union[ndarray, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        reject_jl: bool = True,
+        we: Union[ndarray, None] = None,
+        λ: float = 1.0,
+    ) -> tuple[ndarray, int, int, int, float]:
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan's Method)
+
+        :param Tep: The desired end-effector pose or pose trajectory
+        :param q0: initial joint configuration (default to random valid joint
+            configuration contrained by the joint limits of the robot)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param reject_jl: constrain the solution to being within the joint limits of
+            the robot (reject solution with invalid joint configurations and perfrom
+            another search up to the slimit)
+        :param we: a mask vector which weights the end-effector error priority.
+            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
+            respectively
+        :param λ: value of lambda for the damping matrix Wn
+
+        :return: inverse kinematic solution
+        :rtype: tuple (q, success, iterations, searches, residual)
+
+        ``sol = ets.ik_lm_chan(Tep)`` are the joint coordinates (n) corresponding
+        to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
+        This method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a tuple with elements:
+
+        ============    ==========  ===============================================
+        Element         Type        Description
+        ============    ==========  ===============================================
+        ``q``           ndarray(n)  joint coordinates in units of radians or metres
+        ``success``     int         whether a solution was found
+        ``iterations``  int         total number of iterations
+        ``searches``    int         total number of searches
+        ``residual``    float       final value of cost function
+        ============    ==========  ===============================================
+
+        If ``success == 0`` the ``q`` values will be valid numbers, but the
+        solution will be in error.  The amount of error is indicated by
+        the ``residual``.
+
+        **Joint Limits**:
+
+        ``sol = robot.ikine_LM(T, slimit=100)`` which is the deafualt for this method.
+        The solver will initialise a solution attempt with a random valid q0 and
+        perform a maximum of ilimit steps within this attempt. If a solution is not
+        found, this process is repeated up to slimit times.
+
+        **Global search**:
+
+        ``sol = robot.ikine_LM(T, reject_jl=True)`` is the deafualt for this method.
+        By setting reject_jl to True, the solver will discard any solution which
+        violates the defined joint limits of the robot. The solver will then
+        re-initialise with a new random q0 and repeat the process up to slimit times.
+        Note that finding a solution with valid joint coordinates takes longer than
+        without.
+
+        **Underactuated robots:**
+
+        For the case where the manipulator has fewer than 6 DOF the
+        solution space has more dimensions than can be spanned by the
+        manipulator joint coordinates.
+
+        In this case we specify the ``we`` option where the ``we`` vector
+        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+        will be ignored in reaching a solution.  The we vector has six
+        elements that correspond to translation in X, Y and Z, and rotation
+        about X, Y and Z respectively. The value can be 0 (for ignore)
+        or above to assign a priority relative to other Cartesian DoF. The number
+        of non-zero elements must equal the number of manipulator DOF.
+
+        For example when using a 3 DOF manipulator tool orientation might
+        be unimportant, in which case use the option ``we=[1, 1, 1, 0, 0, 0]``.
+
+
+
+        .. note::
+
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - Implements a Levenberg-Marquadt variable-damping solver.
+            - The tolerance is computed on the norm of the error between
+                current and desired tool pose.  This norm is computed from
+                distances and angles without any kind of weighting.
+            - The inverse kinematic solution is generally not unique, and
+                depends on the initial guess ``q0``.
+
+        :references:
+            TODO
+
+        :seealso:
+            TODO
+        """
+
+        return IK_LM_Sugihara(self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+
+    def ik_nr(
+        self,
+        Tep: Union[ndarray, SE3],
+        q0: Union[ndarray, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        reject_jl: bool = True,
+        we: Union[ndarray, None] = None,
+        use_pinv: int = True,
+        pinv_damping: float = 0.0,
+    ) -> tuple[ndarray, int, int, int, float]:
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan's Method)
+
+        :param Tep: The desired end-effector pose or pose trajectory
+        :param q0: initial joint configuration (default to random valid joint
+            configuration contrained by the joint limits of the robot)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param reject_jl: constrain the solution to being within the joint limits of
+            the robot (reject solution with invalid joint configurations and perfrom
+            another search up to the slimit)
+        :param we: a mask vector which weights the end-effector error priority.
+            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
+            respectively
+        :param λ: value of lambda for the damping matrix Wn
+
+        :return: inverse kinematic solution
+        :rtype: tuple (q, success, iterations, searches, residual)
+
+        ``sol = ets.ik_lm_chan(Tep)`` are the joint coordinates (n) corresponding
+        to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
+        This method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a tuple with elements:
+
+        ============    ==========  ===============================================
+        Element         Type        Description
+        ============    ==========  ===============================================
+        ``q``           ndarray(n)  joint coordinates in units of radians or metres
+        ``success``     int         whether a solution was found
+        ``iterations``  int         total number of iterations
+        ``searches``    int         total number of searches
+        ``residual``    float       final value of cost function
+        ============    ==========  ===============================================
+
+        If ``success == 0`` the ``q`` values will be valid numbers, but the
+        solution will be in error.  The amount of error is indicated by
+        the ``residual``.
+
+        **Joint Limits**:
+
+        ``sol = robot.ikine_LM(T, slimit=100)`` which is the deafualt for this method.
+        The solver will initialise a solution attempt with a random valid q0 and
+        perform a maximum of ilimit steps within this attempt. If a solution is not
+        found, this process is repeated up to slimit times.
+
+        **Global search**:
+
+        ``sol = robot.ikine_LM(T, reject_jl=True)`` is the deafualt for this method.
+        By setting reject_jl to True, the solver will discard any solution which
+        violates the defined joint limits of the robot. The solver will then
+        re-initialise with a new random q0 and repeat the process up to slimit times.
+        Note that finding a solution with valid joint coordinates takes longer than
+        without.
+
+        **Underactuated robots:**
+
+        For the case where the manipulator has fewer than 6 DOF the
+        solution space has more dimensions than can be spanned by the
+        manipulator joint coordinates.
+
+        In this case we specify the ``we`` option where the ``we`` vector
+        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+        will be ignored in reaching a solution.  The we vector has six
+        elements that correspond to translation in X, Y and Z, and rotation
+        about X, Y and Z respectively. The value can be 0 (for ignore)
+        or above to assign a priority relative to other Cartesian DoF. The number
+        of non-zero elements must equal the number of manipulator DOF.
+
+        For example when using a 3 DOF manipulator tool orientation might
+        be unimportant, in which case use the option ``we=[1, 1, 1, 0, 0, 0]``.
+
+
+
+        .. note::
+
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - Implements a Levenberg-Marquadt variable-damping solver.
+            - The tolerance is computed on the norm of the error between
+                current and desired tool pose.  This norm is computed from
+                distances and angles without any kind of weighting.
+            - The inverse kinematic solution is generally not unique, and
+                depends on the initial guess ``q0``.
+
+        :references:
+            TODO
+
+        :seealso:
+            TODO
+        """
+
+        return IK_NR(
+            self._fknm,
+            Tep,
+            q0,
+            ilimit,
+            slimit,
+            tol,
+            reject_jl,
+            we,
+            use_pinv,
+            pinv_damping,
+        )
+
+    def ik_gn(
+        self,
+        Tep: Union[ndarray, SE3],
+        q0: Union[ndarray, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        reject_jl: bool = True,
+        we: Union[ndarray, None] = None,
+        use_pinv: int = True,
+        pinv_damping: float = 0.0,
+    ) -> tuple[ndarray, int, int, int, float]:
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan's Method)
+
+        :param Tep: The desired end-effector pose or pose trajectory
+        :param q0: initial joint configuration (default to random valid joint
+            configuration contrained by the joint limits of the robot)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param reject_jl: constrain the solution to being within the joint limits of
+            the robot (reject solution with invalid joint configurations and perfrom
+            another search up to the slimit)
+        :param we: a mask vector which weights the end-effector error priority.
+            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
+            respectively
+        :param λ: value of lambda for the damping matrix Wn
+
+        :return: inverse kinematic solution
+        :rtype: tuple (q, success, iterations, searches, residual)
+
+        ``sol = ets.ik_lm_chan(Tep)`` are the joint coordinates (n) corresponding
+        to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
+        This method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a tuple with elements:
+
+        ============    ==========  ===============================================
+        Element         Type        Description
+        ============    ==========  ===============================================
+        ``q``           ndarray(n)  joint coordinates in units of radians or metres
+        ``success``     int         whether a solution was found
+        ``iterations``  int         total number of iterations
+        ``searches``    int         total number of searches
+        ``residual``    float       final value of cost function
+        ============    ==========  ===============================================
+
+        If ``success == 0`` the ``q`` values will be valid numbers, but the
+        solution will be in error.  The amount of error is indicated by
+        the ``residual``.
+
+        **Joint Limits**:
+
+        ``sol = robot.ikine_LM(T, slimit=100)`` which is the deafualt for this method.
+        The solver will initialise a solution attempt with a random valid q0 and
+        perform a maximum of ilimit steps within this attempt. If a solution is not
+        found, this process is repeated up to slimit times.
+
+        **Global search**:
+
+        ``sol = robot.ikine_LM(T, reject_jl=True)`` is the deafualt for this method.
+        By setting reject_jl to True, the solver will discard any solution which
+        violates the defined joint limits of the robot. The solver will then
+        re-initialise with a new random q0 and repeat the process up to slimit times.
+        Note that finding a solution with valid joint coordinates takes longer than
+        without.
+
+        **Underactuated robots:**
+
+        For the case where the manipulator has fewer than 6 DOF the
+        solution space has more dimensions than can be spanned by the
+        manipulator joint coordinates.
+
+        In this case we specify the ``we`` option where the ``we`` vector
+        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+        will be ignored in reaching a solution.  The we vector has six
+        elements that correspond to translation in X, Y and Z, and rotation
+        about X, Y and Z respectively. The value can be 0 (for ignore)
+        or above to assign a priority relative to other Cartesian DoF. The number
+        of non-zero elements must equal the number of manipulator DOF.
+
+        For example when using a 3 DOF manipulator tool orientation might
+        be unimportant, in which case use the option ``we=[1, 1, 1, 0, 0, 0]``.
+
+
+
+        .. note::
+
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - Implements a Levenberg-Marquadt variable-damping solver.
+            - The tolerance is computed on the norm of the error between
+                current and desired tool pose.  This norm is computed from
+                distances and angles without any kind of weighting.
+            - The inverse kinematic solution is generally not unique, and
+                depends on the initial guess ``q0``.
+
+        :references:
+            TODO
+
+        :seealso:
+            TODO
+        """
+
+        return IK_GN(
+            self._fknm,
+            Tep,
+            q0,
+            ilimit,
+            slimit,
+            tol,
+            reject_jl,
+            we,
+            use_pinv,
+            pinv_damping,
+        )
 
 
 class ETS2(BaseETS):
