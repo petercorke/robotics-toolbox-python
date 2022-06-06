@@ -8,7 +8,7 @@ from typing import Union
 ArrayLike = Union[list, np.ndarray, tuple, set]
 
 
-def _angle_axis(T, Td):
+def angle_axis(T, Td):
     e = np.empty(6)
     e[:3] = Td[:3, -1] - T[:3, -1]
     R = Td[:3, :3] @ T[:3, :3].T
@@ -81,7 +81,7 @@ def p_servo(
         # Angular error
         e[3:] = base.tr2rpy(eTep, unit="rad", order="zyx", check=False)
     else:
-        e = _angle_axis(wTe, wTep)
+        e = angle_axis(wTe, wTep)
 
     if base.isscalar(gain):
         k = gain * np.eye(6)
