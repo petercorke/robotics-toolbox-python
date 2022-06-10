@@ -55,7 +55,7 @@ from roboticstoolbox import rtb_get_param
 from roboticstoolbox.robot.ET import ET, ET2
 from spatialmath.base import getvector
 from spatialmath import SE3
-from typing import Union, overload, List, Set
+from typing import Union, overload, List, Set, Tuple
 from sys import version_info
 
 ArrayLike = Union[list, ndarray, tuple, set]
@@ -1513,7 +1513,7 @@ class ETS(BaseETS):
         reject_jl: bool = True,
         we: Union[ndarray, None] = None,
         λ: float = 1.0,
-    ) -> tuple[ndarray, int, int, int, float]:
+    ) -> Tuple[ndarray, int, int, int, float]:
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan's Method)
 
@@ -1618,7 +1618,7 @@ class ETS(BaseETS):
         reject_jl: bool = True,
         we: Union[ndarray, None] = None,
         λ: float = 1.0,
-    ) -> tuple[ndarray, int, int, int, float]:
+    ) -> Tuple[ndarray, int, int, int, float]:
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan's Method)
 
@@ -1723,7 +1723,7 @@ class ETS(BaseETS):
         reject_jl: bool = True,
         we: Union[ndarray, None] = None,
         λ: float = 1.0,
-    ) -> tuple[ndarray, int, int, int, float]:
+    ) -> Tuple[ndarray, int, int, int, float]:
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan's Method)
 
@@ -1816,7 +1816,9 @@ class ETS(BaseETS):
             TODO
         """
 
-        return IK_LM_Sugihara(self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+        return IK_LM_Sugihara(
+            self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
+        )
 
     def ik_nr(
         self,
@@ -1829,7 +1831,7 @@ class ETS(BaseETS):
         we: Union[ndarray, None] = None,
         use_pinv: int = True,
         pinv_damping: float = 0.0,
-    ) -> tuple[ndarray, int, int, int, float]:
+    ) -> Tuple[ndarray, int, int, int, float]:
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan's Method)
 
@@ -1946,7 +1948,7 @@ class ETS(BaseETS):
         we: Union[ndarray, None] = None,
         use_pinv: int = True,
         pinv_damping: float = 0.0,
-    ) -> tuple[ndarray, int, int, int, float]:
+    ) -> Tuple[ndarray, int, int, int, float]:
         """
         Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan's Method)
 
