@@ -10,7 +10,7 @@ class UR3(DHRobot):
     :param symbolic: use symbolic constants
     :type symbolic: bool
 
-    ``UR3()`` is an object which models a Unimation Puma560 robot and
+    ``UR3()`` is an object which models a Universal Robotics UR3 robot and
     describes its kinematic and dynamic characteristics using standard DH
     conventions.
 

@@ -10,7 +10,7 @@ class UR10(DHRobot):
     :param symbolic: use symbolic constants
     :type symbolic: bool
 
-    ``UR10()`` is an object which models a Unimation Puma560 robot and
+    ``UR10()`` is an object which models a Universal Robotics UR10 robot and
     describes its kinematic and dynamic characteristics using standard DH
     conventions.
 
