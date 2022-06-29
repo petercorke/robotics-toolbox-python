@@ -1762,7 +1762,6 @@ class ERobot(BaseERobot):
         n: int = 3,
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
-        tool: Union[ndarray, SE3, None] = None,
     ):
         r"""
         Manipulator Forward Kinematics nth Partial Derivative
@@ -1787,106 +1786,7 @@ class ERobot(BaseERobot):
               Sequence, J. Haviland and P. Corke
         """
 
-        end, start, _ = self._get_limit_links(end, start)
-
-        def cross(a, b):
-            x = a[1] * b[2] - a[2] * b[1]
-            y = a[2] * b[0] - a[0] * b[2]
-            z = a[0] * b[1] - a[1] * b[0]
-            return array([x, y, z])
-
-        _, nl, _ = self.get_path(end, start)
-
-        J = self.jacob0(q, end=end, start=start)
-        H = self.hessian0(q, end=end, start=start, J0=J)
-
-        d = [J, H]
-        size = [6, nl, nl]
-        count = array([0, 0])
-        c = 2
-
-        def add_indices(indices, c):
-            total = len(indices * 2)
-            new_indices = []
-
-            for i in range(total):
-                j = i // 2
-                new_indices.append([])
-                new_indices[i].append(indices[j][0].copy())
-                new_indices[i].append(indices[j][1].copy())
-
-                # if even number
-                if i % 2 == 0:
-                    new_indices[i][0].append(c)
-                # if odd number
-                else:
-                    new_indices[i][1].append(c)
-
-            return new_indices
-
-        def add_pdi(pdi):
-            total = len(pdi * 2)
-            new_pdi = []
-
-            for i in range(total):
-                j = i // 2
-                new_pdi.append([])
-                new_pdi[i].append(pdi[j][0])
-                new_pdi[i].append(pdi[j][1])
-
-                # if even number
-                if i % 2 == 0:
-                    new_pdi[i][0] += 1
-                # if odd number
-                else:
-                    new_pdi[i][1] += 1
-
-            return new_pdi
-
-        # these are the indices used for the hessian
-        indices = [[[1], [0]]]
-
-        # the are the pd indices used in the cross prods
-        pdi = [[0, 0]]
-
-        while len(d) != n:
-            size.append(nl)
-            count = concatenate((count, 0))
-            indices = add_indices(indices, c)
-            pdi = add_pdi(pdi)
-            c += 1
-
-            pd = zeros(size)
-
-            for i in range(nl**c):
-
-                rot = zeros(3)
-                trn = zeros(3)
-
-                for j in range(len(indices)):
-                    pdr0 = d[pdi[j][0]]
-                    pdr1 = d[pdi[j][1]]
-
-                    idx0 = count[indices[j][0]]
-                    idx1 = count[indices[j][1]]
-
-                    rot += cross(pdr0[(slice(3, 6), *idx0)], pdr1[(slice(3, 6), *idx1)])
-
-                    trn += cross(pdr0[(slice(3, 6), *idx0)], pdr1[(slice(0, 3), *idx1)])
-
-                pd[(slice(0, 3), *count)] = trn
-                pd[(slice(3, 6), *count)] = rot
-
-                count[0] += 1
-                for j in range(len(count)):
-                    if count[j] == nl:
-                        count[j] = 0
-                        if j != len(count) - 1:
-                            count[j + 1] += 1
-
-            d.append(pd)
-
-        return d[-1]
+        return self.ets(start, end).partial_fkine0(q, n=n)
 
     def link_collision_damper(
         self,

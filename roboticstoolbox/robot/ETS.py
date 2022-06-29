@@ -19,6 +19,9 @@ from numpy import (
     min,
     max,
     where,
+    cross,
+    flip,
+    concatenate,
 )
 from numpy.random import uniform
 from numpy.linalg import inv, det, cond, pinv, matrix_rank, svd, eig
@@ -1502,6 +1505,171 @@ class ETS(BaseETS):
         #     return w[0]
         # else:
         return w
+
+    def partial_fkine0(self, q: ArrayLike, n: int) -> ndarray:
+        r"""
+        Manipulator Forward Kinematics nth Partial Derivative
+
+        The manipulator Hessian tensor maps joint acceleration to end-effector
+        spatial acceleration, expressed in the ee frame. This
+        function calulcates this based on the ETS of the robot. One of Je or q
+        is required. Supply Je if already calculated to save computation time
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: ArrayLike
+        :param end: the final link/Gripper which the Hessian represents
+        :param start: the first link which the Hessian represents
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+
+        :return: The nth Partial Derivative of the forward kinematics
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+                Sequence, J. Haviland and P. Corke
+        """
+
+        # Calculate the Jacobian and Hessian
+        J = self.jacob0(q)
+        H = self.hessian0(q)
+
+        # A list of derivatives, starting with the jacobian and hessian
+        dT = [J, H]
+
+        # The tensor dimensions of the latest derivative
+        # Set to the current size of the Hessian
+        size = [self.n, 6, self.n]
+
+        # An array which keeps track of the index of the partial derivative
+        # we are calculating
+        # It stores the indices in the order: "j, k, l. m, n, o, ..."
+        # where count is extended to match oder of the partial derivative
+        count = array([0, 0])
+
+        # The order of derivative for which we are calculating
+        # The Hessian is the 2nd-order so we start with c = 2
+        c = 2
+
+        def add_indices(indices, c):
+            total = len(indices * 2)
+            new_indices = []
+
+            for i in range(total):
+                j = i // 2
+                new_indices.append([])
+                new_indices[i].append(indices[j][0].copy())
+                new_indices[i].append(indices[j][1].copy())
+
+                if i % 2 == 0:
+                    # if even number
+                    new_indices[i][0].append(c)
+                else:
+                    # if odd number
+                    new_indices[i][1].append(c)
+
+            return new_indices
+
+        def add_pdi(pdi):
+            total = len(pdi * 2)
+            new_pdi = []
+
+            for i in range(total):
+                j = i // 2
+                new_pdi.append([])
+                new_pdi[i].append(pdi[j][0])
+                new_pdi[i].append(pdi[j][1])
+
+                # if even number
+                if i % 2 == 0:
+                    new_pdi[i][0] += 1
+                # if odd number
+                else:
+                    new_pdi[i][1] += 1
+
+            return new_pdi
+
+        # these are the indices used for the hessian
+        indices = [[[1], [0]]]
+
+        # The partial derivative indices (pdi)
+        # the are the pd indices used in the cross products
+        pdi = [[0, 0]]
+
+        # The length of dT correspods to the number of derivatives we have calculated
+        while len(dT) != n:
+
+            # Add to the start of the tensor size list
+            size.insert(0, self.n)
+
+            # Add an axis to the count array
+            count = concatenate(([0], count))
+
+            # This variables corresponds to indices within the previous partial derivatives
+            # to be cross prodded
+            # The order is: "[j, k, l, m, n, o, ...]"
+            # Although, our partial derivatives have the order: pd[..., o, n, m, l, k, cartesian DoF, j]
+            # For example, consider the Hessian Tensor H[n, 6, n], the index H[k, :, j]. This corrsponds
+            # to the second partial derivative of the kinematics of joint j with respect to joint k.
+            indices = add_indices(indices, c)
+
+            # This variable corresponds to the indices in Td which corresponds to the
+            # partial derivatives we need to use
+            pdi = add_pdi(pdi)
+
+            c += 1
+
+            # Allocate our new partial derivative tensor
+            pd = zeros(size)
+
+            # We need to loop n^c times
+            # There are n^c columns to calculate
+            for _ in range(self.n**c):
+
+                # Allocate the rotation and translation components
+                rot = zeros(3)
+                trn = zeros(3)
+
+                # This loop calculates a single column ([trn, rot]) of the tensor for dT(x)
+                for j in range(len(indices)):
+                    pdr0 = dT[pdi[j][0]]
+                    pdr1 = dT[pdi[j][1]]
+
+                    idx0 = count[indices[j][0]]
+                    idx1 = count[indices[j][1]]
+
+                    # This is a list of indices selecting the slices of the previous tensor
+                    idx0_slices = flip(idx0[1:])
+                    idx1_slices = flip(idx1[1:])
+
+                    # This index selecting the column within the 2d slice of the previous tensor
+                    idx0_n = idx0[0]
+                    idx1_n = idx1[0]
+
+                    # Use our indices to select the rotational column from pdr0 and pdr1
+                    col0_rot = pdr0[(*idx0_slices, slice(3, 6), idx0_n)]
+                    col1_rot = pdr1[(*idx1_slices, slice(3, 6), idx1_n)]
+
+                    # Use our indices to select the translational column from pdr1
+                    col1_trn = pdr1[(*idx1_slices, slice(0, 3), idx1_n)]
+
+                    # Perform the cross product as described in the maths above
+                    rot += cross(col0_rot, col1_rot)
+                    trn += cross(col0_rot, col1_trn)
+
+                pd[(*flip(count[1:]), slice(0, 3), count[0])] = trn
+                pd[(*flip(count[1:]), slice(3, 6), count[0])] = rot
+
+                count[0] += 1
+                for j in range(len(count)):
+                    if count[j] == self.n:
+                        count[j] = 0
+                        if j != len(count) - 1:
+                            count[j + 1] += 1
+
+            dT.append(pd)
+
+        return dT[-1]
 
     def ik_lm_chan(
         self,
