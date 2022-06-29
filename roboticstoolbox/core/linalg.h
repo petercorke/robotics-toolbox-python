@@ -16,6 +16,8 @@ extern "C"
 #endif /* __cplusplus */
 
 #define PI_2 1.57079632679489661923132169163975144
+#define PI 3.14159265358979323846264338327950288
+#define PI_x2 6.283185307179586
 
 #define Matrix3dc Eigen::Matrix3d
 
