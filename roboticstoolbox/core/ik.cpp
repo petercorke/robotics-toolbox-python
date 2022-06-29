@@ -91,6 +91,12 @@ extern "C"
                 {
                     // We have arrived
 
+                    // wrap q to +- pi
+                    for (int i = 0; i < ets->n; i++)
+                    {
+                        q(i) = std::fmod(q(i), PI);
+                    }
+
                     // Check for joint limit violation
                     if (reject_jl)
                     {
@@ -106,9 +112,6 @@ extern "C"
 
                 // Jacobian Matric J
                 _ETS_jacob0(ets, q.data(), (double *)NULL, J);
-
-                // g = J.T @ We @ e
-                // robot.q += np.linalg.inv(J.T @ We @ J) @ g
 
                 g = J.transpose() * We * e;
                 Jw = J.transpose() * We * J;
@@ -221,6 +224,12 @@ extern "C"
                 if (*E < tol)
                 {
                     // We have arrived
+
+                    // wrap q to +- pi
+                    for (int i = 0; i < ets->n; i++)
+                    {
+                        q(i) = std::fmod(q(i), PI);
+                    }
 
                     // Check for joint limit violation
                     if (reject_jl)
@@ -339,6 +348,12 @@ extern "C"
                 {
                     // We have arrived
 
+                    // wrap q to +- pi
+                    for (int i = 0; i < ets->n; i++)
+                    {
+                        q(i) = std::fmod(q(i), PI);
+                    }
+
                     // Check for joint limit violation
                     if (reject_jl)
                     {
@@ -447,6 +462,12 @@ extern "C"
                 {
                     // We have arrived
 
+                    // wrap q to +- pi
+                    for (int i = 0; i < ets->n; i++)
+                    {
+                        q(i) = std::fmod(q(i), PI);
+                    }
+
                     // Check for joint limit violation
                     if (reject_jl)
                     {
@@ -552,6 +573,12 @@ extern "C"
                 if (*E < tol)
                 {
                     // We have arrived
+
+                    // wrap q to +- pi
+                    for (int i = 0; i < ets->n; i++)
+                    {
+                        q(i) = std::fmod(q(i), PI);
+                    }
 
                     // Check for joint limit violation
                     if (reject_jl)
