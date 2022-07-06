@@ -244,7 +244,7 @@ import spatialmath as sm
 import numpy as np
 
 env = swift.Swift()
-env.launch()
+env.launch(realtime=True)
 
 panda = rp.models.Panda()
 panda.q = panda.qr
