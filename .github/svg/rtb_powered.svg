@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  width="185" height="20" viewBox="0 0 185 20">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="185" height="20" role="img"
+    aria-label="powered by robotics toolbox">
+    <title>powered by robotics toolbox</title>
 
     <clipPath id="r">
         <rect width="185" height="20" rx="3" fill="#fff" />
