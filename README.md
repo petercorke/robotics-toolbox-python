@@ -42,10 +42,6 @@ A Python implementation of the <a href="https://github.com/petercorke/robotics-t
 - [Using the Toolbox in your Open Source Code?](#7)
 - [Common Issues and Solutions](#8)
 
-
-
-
-
 <br>
 
 <a id='1'></a>
@@ -86,10 +82,6 @@ The Toolbox provides:
 The Toolbox leverages the [Spatial Maths Toolbox for Python](https://github.com/petercorke/spatialmath-python) to
 provide support for data types such as SO(n) and SE(n) matrices, quaternions, twists and spatial vectors.
 
-
-
-
-
 <br>
 
 <a id='2'></a>
@@ -129,7 +121,6 @@ cd robotics-toolbox-python
 pip3 install -e .
 ```
 
-
 <br>
 
 <a id='3'></a>
@@ -147,9 +138,6 @@ This tutorial comes with two articles to cover the theory and 12 Jupyter Noteboo
 </td>
 </tr>
 </table>
-
-
-
 
 <br>
 
@@ -195,13 +183,11 @@ We will compute the forward kinematics next
 Te = robot.fkine(robot.qr)  # forward kinematics
 print(Te)
 
-	0.995     0         0.09983   0.484     
-	0        -1         0         0         
-	0.09983   0        -0.995     0.4126    
-	0         0         0         1   
+	0.995     0         0.09983   0.484
+	0        -1         0         0
+	0.09983   0        -0.995     0.4126
+	0         0         0         1
 ```
-
-
 
 We can solve inverse kinematics very easily. We first choose an SE(3) pose
 defined in terms of position and orientation (end-effector z-axis down (A=-Z) and finger
@@ -220,10 +206,10 @@ print(sol)
 q_pickup = sol[0]
 print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
 
-	 1         -8.913e-05  -0.0003334  0.5996    
-	-8.929e-05 -1          -0.0004912 -0.2998    
-	-0.0003334  0.0004912  -1          0.1001    
-	 0          0           0          1        
+	 1         -8.913e-05  -0.0003334  0.5996
+	-8.929e-05 -1          -0.0004912 -0.2998
+	-0.0003334  0.0004912  -1          0.1001
+	 0          0           0          1
 ```
 
 We can animate a path from the ready pose `qr` configuration to this pickup configuration
@@ -248,7 +234,6 @@ robot.plot(qt.q)
 <p align="center">
 	<img src="./docs/figs/panda2.gif">
 </p>
-
 
 We can also experiment with velocity controllers in Swift. Here is a resolved-rate motion control example
 
@@ -281,15 +266,13 @@ while not arrived:
 # env.hold()
 ```
 
+<p align="center">
+	<img src="./docs/figs/panda3.gif">
+</p>
+
 ### Run some examples
 
 The [`notebooks`](https://github.com/petercorke/robotics-toolbox-python/tree/master/notebooks) folder contains some tutorial Jupyter notebooks which you can browse on GitHub. Additionally, have a look in the [`examples`](https://github.com/petercorke/robotics-toolbox-python/tree/master/roboticstoolbox/examples) folder for many ready to run examples.
-
-
-
-
-
-
 
 <br>
 
@@ -333,12 +316,6 @@ J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for
 
 <br>
 
-
-
-
-
-
-
 <br>
 
 <a id='6'></a>
@@ -347,7 +324,7 @@ J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for
 
 Check out our ICRA 2021 paper on [IEEE Xplore](https://ieeexplore.ieee.org/document/9561366) or get the PDF from [Peter's website](https://bit.ly/icra_rtb).
 
-If the toolbox helped you in your research, please cite 
+If the toolbox helped you in your research, please cite
 
 ```
 @inproceedings{rtb,
@@ -359,9 +336,6 @@ If the toolbox helped you in your research, please cite
   organization={IEEE}
 }
 ```
-
-
-
 
 <br>
 
@@ -376,6 +350,7 @@ For the powered by robotics toolbox badge
 [![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 
 copy the following
+
 ```
 [![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 ```
@@ -385,11 +360,10 @@ For the powered by python robotics badge
 [![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/pr_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 
 copy the following
+
 ```
 [![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/pr_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 ```
-
-
 
 <br>
 
