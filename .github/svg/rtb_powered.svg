@@ -1,34 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="185" height="20" viewBox="0 0 185 20">
-    <defs>
-        <style>
-            .cls-5 {
-                isolation: isolate;
-                font-size: 11px;
-                font-family: Verdana;
-            }
-
-            .cls-9 {
-                fill: #222;
-            }
-
-            .cls-7,
-            .cls-8 {
-                fill: none;
-                stroke: #222;
-                stroke-linecap: round;
-                stroke-width: 1.6px;
-            }
-
-            .cls-8 {
-                stroke-linejoin: round;
-            }
-
-            .cls-9 {
-                fill-rule: evenodd;
-            }
-        </style>
-    </defs>
-
 
     <clipPath id="r">
         <rect width="185" height="20" rx="3" fill="#fff" />
@@ -46,15 +16,13 @@
         <text x="1220" y="140" transform="scale(.1)" fill="#222" textLength="830">robotics toolbox</text>
     </g>
 
-
-
-
     <g id="Layer_2" data-name="Layer 2">
         <g id="Layer_1-2" data-name="Layer 1">
-            <path class="cls-7" transform="translate(-14.5 0)" d="M192.32,5.94l-3.77-2-2,1-1.88,1,2,4.71" />
-            <path class="cls-8" transform="translate(-14.5 0)"
-                d="M186.67,10.78h3.14l1,1.75h-4.58l-.89,1.75h6.36l.9,1.75h-8.16" />
-            <path class="cls-9" transform="translate(-14.5 0)"
+            <path fill="none" stroke="#222" stroke-linecap="round" stroke-width="1.6px" transform="translate(-14.5 0)"
+                d="M192.32,5.94l-3.77-2-2,1-1.88,1,2,4.71" />
+            <path fill="none" stroke="#222" stroke-linecap="round" stroke-width="1.6px" stroke-linejoin="round"
+                transform="translate(-14.5 0)" d="M186.67,10.78h3.14l1,1.75h-4.58l-.89,1.75h6.36l.9,1.75h-8.16" />
+            <path fill="#222" transform="translate(-14.5 0)"
                 d="M193.18,8.48a2.09,2.09,0,0,0,.59-1.5,1.79,1.79,0,0,0-1.61-1.9A1.74,1.74,0,0,0,190.6,7a2.14,2.14,0,0,0,.59,1.47l.7-1.32a.36.36,0,0,1,.65,0Z" />
         </g>
     </g>
