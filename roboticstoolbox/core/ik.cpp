@@ -69,7 +69,7 @@ extern "C"
         }
         else
         {
-            q = _rand_q(ets);
+            _rand_q(ets, q);
         }
 
         // Global search up to slimit
@@ -138,7 +138,7 @@ extern "C"
             *it += iter;
             iter = 0;
             *search += 1;
-            q = _rand_q(ets);
+            _rand_q(ets, q);
         }
 
         free(np_e);
@@ -203,7 +203,7 @@ extern "C"
         }
         else
         {
-            q = _rand_q(ets);
+            _rand_q(ets, q);
         }
 
         // Global search up to slimit
@@ -272,7 +272,7 @@ extern "C"
             *it += iter;
             iter = 0;
             *search += 1;
-            q = _rand_q(ets);
+            _rand_q(ets, q);
         }
 
         free(np_e);
@@ -326,7 +326,7 @@ extern "C"
         }
         else
         {
-            q = _rand_q(ets);
+            _rand_q(ets, q);
         }
 
         // Global search up to slimit
@@ -392,7 +392,7 @@ extern "C"
             *it += iter;
             iter = 0;
             *search += 1;
-            q = _rand_q(ets);
+            _rand_q(ets, q);
         }
 
         free(np_e);
@@ -440,7 +440,7 @@ extern "C"
         }
         else
         {
-            q = _rand_q(ets);
+            _rand_q(ets, q);
         }
 
         // Global search up to slimit
@@ -503,7 +503,7 @@ extern "C"
             *it += iter;
             iter = 0;
             *search += 1;
-            q = _rand_q(ets);
+            _rand_q(ets, q);
         }
 
         free(np_e);
@@ -552,7 +552,7 @@ extern "C"
         }
         else
         {
-            q = _rand_q(ets);
+            _rand_q(ets, q);
         }
 
         // Global search up to slimit
@@ -618,7 +618,7 @@ extern "C"
             *it += iter;
             iter = 0;
             *search += 1;
-            q = _rand_q(ets);
+            _rand_q(ets, q);
         }
 
         free(np_e);
@@ -703,17 +703,17 @@ extern "C"
         }
     }
 
-    VectorX _rand_q(ETS *ets)
+    void _rand_q(ETS *ets, MapVectorX q)
     {
         Eigen::Map<Eigen::ArrayXd> qlim_l(ets->qlim_l, ets->n);
         Eigen::Map<Eigen::ArrayXd> q_range2(ets->q_range2, ets->n);
 
-        VectorX q = VectorX::Random(ets->n);
+        q = VectorX::Random(ets->n);
 
         q = (q.array() + 1) * q_range2;
         q = q.array() + qlim_l;
 
-        return q;
+        // return q;
     }
 
 } /* extern "C" */

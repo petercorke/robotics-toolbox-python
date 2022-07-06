@@ -48,7 +48,7 @@ extern "C"
         double lambda, MapVectorX we);
 
     void _pseudo_inverse(Eigen::Map<Eigen::MatrixXd> J, Eigen::Map<Eigen::MatrixXd> J_pinv, double damping);
-    VectorX _rand_q(ETS *ets);
+    void _rand_q(ETS *ets, MapVectorX q);
     int _check_lim(ETS *ets, MapVectorX q);
     void _angle_axis(MapMatrix4dc Te, Matrix4dc Tep, MapVectorX e);
 

@@ -17,7 +17,6 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-    VectorX _rand_q(ETS *ets);
     int _check_lim(ETS *ets, MapVectorX q);
     void _angle_axis(MapMatrix4dc Te, Matrix4dc Tep, MapVectorX e);
     void _ETS_hessian(int n, MapMatrixJc &J, MapMatrixHr &H);
