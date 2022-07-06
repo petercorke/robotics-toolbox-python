@@ -9,7 +9,6 @@
     <g clip-path="url(#r)">
         <rect width="76" height="20" fill="#555" />
         <rect x="76" width="109" height="20" fill="#86c440" />
-        <rect width="185" height="20" fill="url(#s)" />
     </g>
 
     <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif"
