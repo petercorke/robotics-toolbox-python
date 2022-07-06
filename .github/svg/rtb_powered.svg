@@ -8,13 +8,13 @@
             }
 
             .cls-9 {
-                fill: #414042;
+                fill: #222;
             }
 
             .cls-7,
             .cls-8 {
                 fill: none;
-                stroke: #414042;
+                stroke: #222;
                 stroke-linecap: round;
                 stroke-width: 1.6px;
             }
@@ -43,7 +43,7 @@
     <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif"
         text-rendering="geometricPrecision" font-size="110">
         <text x="385" y="140" transform="scale(.1)" fill="#fff" textLength="630">powered by</text>
-        <text x="1220" y="140" transform="scale(.1)" fill="#414042" textLength="830">robotics toolbox</text>
+        <text x="1220" y="140" transform="scale(.1)" fill="#222" textLength="830">robotics toolbox</text>
     </g>
 
 
