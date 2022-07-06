@@ -16,6 +16,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -88,16 +89,16 @@
            <div itemprop="articleBody">
              
   <section id="mobile-robot-drivers">
-<h1>Mobile robot drivers<a class="headerlink" href="#mobile-robot-drivers" title="Permalink to this headline"></a></h1>
+<h1>Mobile robot drivers<a class="headerlink" href="#mobile-robot-drivers" title="Permalink to this heading"></a></h1>
 <p>These classes can drive a mobile robot around a workplace. Useful for testing
 localization algorithms.</p>
 <section id="random-path">
-<h2>Random Path<a class="headerlink" href="#random-path" title="Permalink to this headline"></a></h2>
+<h2>Random Path<a class="headerlink" href="#random-path" title="Permalink to this heading"></a></h2>
 <blockquote>
 <div><dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.drivers.RandomPath">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.drivers.</span></span><span class="sig-name descname"><span class="pre">RandomPath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">workspace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dthresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headinggain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goalmarkerstyle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/drivers.html#RandomPath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.drivers.RandomPath" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.drivers.VehicleDriverBase" title="roboticstoolbox.mobile.drivers.VehicleDriverBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.drivers.VehicleDriverBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.drivers.VehicleDriverBase" title="roboticstoolbox.mobile.drivers.VehicleDriverBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleDriverBase</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.drivers.RandomPath.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">workspace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dthresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headinggain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goalmarkerstyle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/drivers.html#RandomPath.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.drivers.RandomPath.__init__" title="Permalink to this definition"></a></dt>
@@ -240,12 +241,12 @@ the sequence of random waypoints is repeatable.</p>
 </div></blockquote>
 </section>
 <section id="superclass">
-<h2>Superclass<a class="headerlink" href="#superclass" title="Permalink to this headline"></a></h2>
+<h2>Superclass<a class="headerlink" href="#superclass" title="Permalink to this heading"></a></h2>
 <blockquote>
 <div><dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.drivers.VehicleDriverBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.drivers.</span></span><span class="sig-name descname"><span class="pre">VehicleDriverBase</span></span><a class="reference internal" href="_modules/roboticstoolbox/mobile/drivers.html#VehicleDriverBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.drivers.VehicleDriverBase" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Abstract Vehicle driver class</p>
 <p>Abtract class that can drive a mobile robot.</p>
 <dl class="field-list simple">
@@ -313,7 +314,7 @@ including random number generator state.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 28-May-2022.
+      <span class="lastupdated">Last updated on 06-Jul-2022.
       </span></p>
   </div>
 

@@ -16,6 +16,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -89,7 +90,7 @@
            <div itemprop="articleBody">
              
   <section id="mobile-robot-animations">
-<h1>Mobile robot animations<a class="headerlink" href="#mobile-robot-animations" title="Permalink to this headline"></a></h1>
+<h1>Mobile robot animations<a class="headerlink" href="#mobile-robot-animations" title="Permalink to this heading"></a></h1>
 <p>These classes create a graphical object that can be animated to show vehicle
 position or pose.</p>
 <div class="graphviz"><img src="_images/inheritance-8ab107decc8310f96d8b7f4105448816ee602d85.png" alt="Inheritance diagram of roboticstoolbox.VehicleMarker, roboticstoolbox.VehiclePolygon, roboticstoolbox.VehicleIcon" usemap="#inheritance666068883b" class="inheritance graphviz" /></div>
@@ -136,11 +137,11 @@ to the Matplotlib object added to the plot.</p>
 </dd></dl>
 
 <section id="simple-marker">
-<h2>Simple marker<a class="headerlink" href="#simple-marker" title="Permalink to this headline"></a></h2>
+<h2>Simple marker<a class="headerlink" href="#simple-marker" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleMarker">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">VehicleMarker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehicleMarker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.VehicleAnimationBase" title="roboticstoolbox.mobile.Animations.VehicleAnimationBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.Animations.VehicleAnimationBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.VehicleAnimationBase" title="roboticstoolbox.mobile.Animations.VehicleAnimationBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleAnimationBase</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleMarker.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehicleMarker.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.__init__" title="Permalink to this definition"></a></dt>
@@ -239,11 +240,11 @@ override arguments given to the constructor.</p></li>
 
 </section>
 <section id="polygon-shape">
-<h2>Polygon shape<a class="headerlink" href="#polygon-shape" title="Permalink to this headline"></a></h2>
+<h2>Polygon shape<a class="headerlink" href="#polygon-shape" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.VehiclePolygon">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">VehiclePolygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'car'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehiclePolygon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.VehicleAnimationBase" title="roboticstoolbox.mobile.Animations.VehicleAnimationBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.Animations.VehicleAnimationBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.VehicleAnimationBase" title="roboticstoolbox.mobile.Animations.VehicleAnimationBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleAnimationBase</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.VehiclePolygon.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'car'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehiclePolygon.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.__init__" title="Permalink to this definition"></a></dt>
@@ -359,11 +360,11 @@ override arguments given to the constructor.</p></li>
 
 </section>
 <section id="image-icon">
-<h2>Image icon<a class="headerlink" href="#image-icon" title="Permalink to this headline"></a></h2>
+<h2>Image icon<a class="headerlink" href="#image-icon" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleIcon">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">VehicleIcon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehicleIcon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.VehicleAnimationBase" title="roboticstoolbox.mobile.Animations.VehicleAnimationBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.Animations.VehicleAnimationBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.VehicleAnimationBase" title="roboticstoolbox.mobile.Animations.VehicleAnimationBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleAnimationBase</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleIcon.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehicleIcon.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.__init__" title="Permalink to this definition"></a></dt>
@@ -504,7 +505,7 @@ override arguments given to the constructor.</p></li>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 28-May-2022.
+      <span class="lastupdated">Last updated on 06-Jul-2022.
       </span></p>
   </div>
 

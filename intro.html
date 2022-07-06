@@ -16,6 +16,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -110,9 +111,9 @@
            <div itemprop="articleBody">
              
   <section id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline"></a></h1>
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h1>
 <section id="id1">
-<h2>Introduction<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
+<h2>Introduction<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
 <p>This is a modified version of a paper accepted to ICRA2021 <a class="reference internal" href="#corke21a" id="id2"><span>[corke21a]</span></a>.</p>
 <p>The Robotics Toolbox for MATLAB® (RTB-M) was created around 1991 to support
 Peter Corke’s PhD research and was first published in 1995-6 <a class="reference internal" href="#corke95" id="id3"><span>[Corke95]</span></a>
@@ -133,7 +134,7 @@ version control tools including rcs, cvs, svn and git.  A support forum on
 Google Groups was established in 2008 and as of 2020 has over 1400 members.</p>
 </section>
 <section id="a-python-version">
-<h2>A Python version<a class="headerlink" href="#a-python-version" title="Permalink to this headline"></a></h2>
+<h2>A Python version<a class="headerlink" href="#a-python-version" title="Permalink to this heading"></a></h2>
 <p>The imperative for a Python version has long existed and the first port was
 started in 2008 but ultimately failed for lack of ongoing resources to complete
 a sufficient subset of functionality. Subsequent attempts have all met the same
@@ -164,7 +165,7 @@ rigid-body trees.  Support branched, but not closed-loop or parallel, robots</p>
 </ul>
 </section>
 <section id="spatial-math-layer">
-<h2>Spatial math layer<a class="headerlink" href="#spatial-math-layer" title="Permalink to this headline"></a></h2>
+<h2>Spatial math layer<a class="headerlink" href="#spatial-math-layer" title="Permalink to this heading"></a></h2>
 <p>Robotics and computer vision require us to describe position, orientation and
 pose in 3D space. Mobile robotics has the same requirement, but generally for 2D
 space. We therefore need tools to represent quantities such as rigid-body
@@ -252,7 +253,7 @@ and components can be extracted such as the rotation submatrix (line 11) and tra
 </div>
 <p>which again demonstrates several alternative constructors.</p>
 <section id="multiple-values">
-<h3>Multiple values<a class="headerlink" href="#multiple-values" title="Permalink to this headline"></a></h3>
+<h3>Multiple values<a class="headerlink" href="#multiple-values" title="Permalink to this heading"></a></h3>
 <p>To support sequences of values each of these types inherits list properties from <code class="docutils literal notranslate"><span class="pre">collections.UserList</span></code></p>
 <figure class="align-default" id="id17">
 <a class="reference internal image-reference" href="_images/pose-values.png"><img alt="Any of the SMTB-P pose classes can contain a list of values" src="_images/pose-values.png" style="width: 600px;" /></a>
@@ -281,7 +282,7 @@ across the sequence</p>
 </figure>
 </section>
 <section id="common-constructors">
-<h3>Common constructors<a class="headerlink" href="#common-constructors" title="Permalink to this headline"></a></h3>
+<h3>Common constructors<a class="headerlink" href="#common-constructors" title="Permalink to this heading"></a></h3>
 <p>The Toolboxes classes are somewhat polymorphic and share many “variant constructors” that allow object construction:</p>
 <ul class="simple">
 <li><p>with orientation expressed in terms of canonic axis rotations, Euler vectors, angle-vector pair,
@@ -294,7 +295,7 @@ corresponding Lie algebra element.</p></li>
 </ul>
 </section>
 <section id="common-methods-and-operators">
-<h3>Common methods and operators<a class="headerlink" href="#common-methods-and-operators" title="Permalink to this headline"></a></h3>
+<h3>Common methods and operators<a class="headerlink" href="#common-methods-and-operators" title="Permalink to this heading"></a></h3>
 <p>The types all have an inverse method <code class="docutils literal notranslate"><span class="pre">.inv()</span></code> and support composition with the inverse using the <code class="docutils literal notranslate"><span class="pre">/</span></code> operator
 and integer exponentiation (repeated composition) using the <code class="docutils literal notranslate"><span class="pre">**</span></code> operator.
 Other overloaded operators include <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">*=</span></code>, <code class="docutils literal notranslate"><span class="pre">**</span></code>, <code class="docutils literal notranslate"><span class="pre">**=</span></code>, <code class="docutils literal notranslate"><span class="pre">/</span></code>, <code class="docutils literal notranslate"><span class="pre">/=</span></code>, <code class="docutils literal notranslate"><span class="pre">==</span></code>, <code class="docutils literal notranslate"><span class="pre">!=</span></code>, <code class="docutils literal notranslate"><span class="pre">+</span></code>, <code class="docutils literal notranslate"><span class="pre">-</span></code>.</p>
@@ -304,7 +305,7 @@ the group.
 Operations such as addition, which are not group operations, yield a NumPy array rather than a class instance.</p>
 </section>
 <section id="performance">
-<h3>Performance<a class="headerlink" href="#performance" title="Permalink to this headline"></a></h3>
+<h3>Performance<a class="headerlink" href="#performance" title="Permalink to this heading"></a></h3>
 <p>These benefits come at a price in terms of execution time due to the overhead of
 constructors, methods which wrap base functions, and type checking. The
 Toolbox supports SymPy which provides powerful symbolic support for Python and
@@ -354,9 +355,9 @@ numbers.</p>
 </section>
 </section>
 <section id="robotics-toolbox">
-<h2>Robotics Toolbox<a class="headerlink" href="#robotics-toolbox" title="Permalink to this headline"></a></h2>
+<h2>Robotics Toolbox<a class="headerlink" href="#robotics-toolbox" title="Permalink to this heading"></a></h2>
 <section id="robot-models">
-<h3>Robot models<a class="headerlink" href="#robot-models" title="Permalink to this headline"></a></h3>
+<h3>Robot models<a class="headerlink" href="#robot-models" title="Permalink to this heading"></a></h3>
 <p>The Toolbox ships with over 30 robot models, most of which are purely kinematic
 but some have inertial and frictional parameters. Kinematic models can be
 specified in a variety of ways:  standard or modified Denavit-Hartenberg (DH,
@@ -364,7 +365,7 @@ MDH) notation, as an ETS string <a class="reference internal" href="#corke07" id
 file.</p>
 </section>
 <section id="denavit-hartenberg-parameters">
-<h3>Denavit-Hartenberg parameters<a class="headerlink" href="#denavit-hartenberg-parameters" title="Permalink to this headline"></a></h3>
+<h3>Denavit-Hartenberg parameters<a class="headerlink" href="#denavit-hartenberg-parameters" title="Permalink to this heading"></a></h3>
 <p>To specify a kinematic model using DH notation, we create a new subclass of <code class="docutils literal notranslate"><span class="pre">DHRobot</span></code> and pass the superclass constructor
 a list of link objects.  For example, a Puma560 is simply:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">DHRobot</span><span class="p">(</span>
@@ -489,7 +490,7 @@ Some provided robot models have an analytical solution coded, for example:</p>
 <p>where we have specified a left-handed, elbow up and wrist no-flip configuration.</p>
 </section>
 <section id="ets-notation">
-<h3>ETS notation<a class="headerlink" href="#ets-notation" title="Permalink to this headline"></a></h3>
+<h3>ETS notation<a class="headerlink" href="#ets-notation" title="Permalink to this heading"></a></h3>
 <p>A Puma robot can also be specified in ETS format <a class="reference internal" href="#corke07" id="id12"><span>[Corke07]</span></a> as a sequence of simple rigid-body transformations – pure translation
 or pure rotation – each with either a constant parameter or a free parameter which is a joint variable.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="gt">Traceback (most recent call last):</span>
@@ -509,7 +510,7 @@ The <code class="docutils literal notranslate"><span class="pre">ERobot</span></
 can also represent more general branched mechanisms.</p>
 </section>
 <section id="erobot-rigid-body-tree-and-urdf-import">
-<h3>ERobot: rigid-body tree and URDF import<a class="headerlink" href="#erobot-rigid-body-tree-and-urdf-import" title="Permalink to this headline"></a></h3>
+<h3>ERobot: rigid-body tree and URDF import<a class="headerlink" href="#erobot-rigid-body-tree-and-urdf-import" title="Permalink to this heading"></a></h3>
 <p>The final approach to manipulator modeling is to an import a URDF file.  The Toolbox includes a parser with built-in xacro processor
 which makes many models from the ROS universe available.</p>
 <p>Provided models, such as for Panda or Puma, are again encapsulated as classes:</p>
@@ -609,7 +610,7 @@ Animations can be recorded as MP4 files or animated GIF files which are useful f
 </section>
 </section>
 <section id="trajectories">
-<h2>Trajectories<a class="headerlink" href="#trajectories" title="Permalink to this headline"></a></h2>
+<h2>Trajectories<a class="headerlink" href="#trajectories" title="Permalink to this heading"></a></h2>
 <p>A joint-space trajectory for the Puma robot from its zero angle
 pose to the upright (or READY) pose in 100 steps is</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
@@ -659,7 +660,7 @@ joint coordinates for each inverse kinematic solution
 is taken as the result of the solution at the previous time step.</p>
 </section>
 <section id="symbolic-manipulation">
-<h2>Symbolic manipulation<a class="headerlink" href="#symbolic-manipulation" title="Permalink to this headline"></a></h2>
+<h2>Symbolic manipulation<a class="headerlink" href="#symbolic-manipulation" title="Permalink to this heading"></a></h2>
 <p>As mentioned earlier, the Toolbox supports symbolic manipulation using SymPy. For example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">spatialmath.base</span> <span class="k">as</span> <span class="nn">base</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">psi</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">sym</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;φ, ϴ, ψ&#39;</span><span class="p">)</span>
@@ -688,7 +689,7 @@ x-coordinate of the end-effector is given by line 7.</p>
 including C, Python and Octave/MATLAB.</p>
 </section>
 <section id="differential-kinematics">
-<h2>Differential kinematics<a class="headerlink" href="#differential-kinematics" title="Permalink to this headline"></a></h2>
+<h2>Differential kinematics<a class="headerlink" href="#differential-kinematics" title="Permalink to this heading"></a></h2>
 <p>The Toolbox computes Jacobians:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">J</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">jacob0</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">J</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">jacobe</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
@@ -740,7 +741,7 @@ Jacobian:</p>
 </div>
 <p>such that <span class="math notranslate nohighlight">\(\dot{m} = \mat{J}_m(\vec{q}) \dvec{q}\)</span>.</p>
 <section id="dynamics">
-<h3>Dynamics<a class="headerlink" href="#dynamics" title="Permalink to this headline"></a></h3>
+<h3>Dynamics<a class="headerlink" href="#dynamics" title="Permalink to this heading"></a></h3>
 <p>The Python Toolbox supports several approaches to computing dynamics.
 For models defined using standard or modified DH notation we use a classical version of the recursive Newton-Euler
 algorithm implemented in Python or C.</p>
@@ -791,10 +792,10 @@ velocity, acceleration, momentum, force and inertia.</p>
 </section>
 </section>
 <section id="new-capability">
-<h2>New capability<a class="headerlink" href="#new-capability" title="Permalink to this headline"></a></h2>
+<h2>New capability<a class="headerlink" href="#new-capability" title="Permalink to this heading"></a></h2>
 <p>There are several areas of innovation compared to the MATLAB version of the Toolbox.</p>
 <section id="branched-mechanisms">
-<h3>Branched mechanisms<a class="headerlink" href="#branched-mechanisms" title="Permalink to this headline"></a></h3>
+<h3>Branched mechanisms<a class="headerlink" href="#branched-mechanisms" title="Permalink to this heading"></a></h3>
 <p>The RTB-M <code class="docutils literal notranslate"><span class="pre">SerialLink</span></code> class had no option to express branching. In RTB-P the
 equivalent class is <code class="docutils literal notranslate"><span class="pre">DHRobot</span></code> is similarly limited, but a new class <code class="docutils literal notranslate"><span class="pre">ERobot</span></code>
 is more general and allows for branching (but not closed kinematic loops). The
@@ -804,7 +805,7 @@ structure closely mirrors the URDF representation, allowing for easy import of
 URDF models.</p>
 </section>
 <section id="collision-checking">
-<h3>Collision checking<a class="headerlink" href="#collision-checking" title="Permalink to this headline"></a></h3>
+<h3>Collision checking<a class="headerlink" href="#collision-checking" title="Permalink to this heading"></a></h3>
 <p>RTB-M had a simple, contributed but unsupported, collision checking capability.
 This is dramatically improved in the Python version using <a class="reference internal" href="#pybullet" id="id13"><span>[PyBullet]</span></a>
 which supports primitive shapes such as Cylinders, Spheres and Boxes as well as
@@ -829,7 +830,7 @@ segment defined by two points in the world frame</p>
 </div>
 </section>
 <section id="interfaces">
-<h3>Interfaces<a class="headerlink" href="#interfaces" title="Permalink to this headline"></a></h3>
+<h3>Interfaces<a class="headerlink" href="#interfaces" title="Permalink to this heading"></a></h3>
 <p>RTB-M could only animate a robot in a figure, and there was limited but
 not-well-supported ability to interface to V-REP and a physical robot. The
 Python version supports a simple, but universal API to a robot inspired by the
@@ -864,7 +865,7 @@ or real.</p>
 devices. Still frames and animations can be recorded.</p>
 </section>
 <section id="code-engineering">
-<h3>Code engineering<a class="headerlink" href="#code-engineering" title="Permalink to this headline"></a></h3>
+<h3>Code engineering<a class="headerlink" href="#code-engineering" title="Permalink to this heading"></a></h3>
 <p>The code is implemented in Python <span class="math notranslate nohighlight">\(\ge 3.6\)</span> and all code is hosted on GitHub and
 unit-testing is performed using GitHub-actions. Test coverage is uploaded to
 <code class="docutils literal notranslate"><span class="pre">codecov.io</span></code> for visualization and trending, and we use <code class="docutils literal notranslate"><span class="pre">lgtm.com</span></code> to perform
@@ -893,7 +894,7 @@ installed.</p>
 </section>
 </section>
 <section id="conclusion">
-<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline"></a></h2>
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this heading"></a></h2>
 <p>This article has introduced and demonstrated in tutorial form the principle
 features of the Robotics Toolbox for Python which runs on Mac, Windows and Linux
 using Python 3.6 or better. The code is free and open, and released under the
@@ -908,7 +909,7 @@ generation; mobile robotics motion models, planners, EKF localization, map
 making and SLAM; and a minimalist block-diagram simulation tool <a class="reference internal" href="#bdsim" id="id15"><span>[bdsim]</span></a>.</p>
 </section>
 <section id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this headline"></a></h2>
+<h2>References<a class="headerlink" href="#references" title="Permalink to this heading"></a></h2>
 <dl class="citation">
 <dt class="label" id="corke95"><span class="brackets"><a class="fn-backref" href="#id3">Corke95</a></span></dt>
 <dd><p><a class="reference external" href="http://www.petercorke.com/RTB/ARA95.pdf">P. Corke. “A computer tool for simulation and analysis: the Robotics Toolbox for MATLAB”. In Proc. National Conf. Australian Robot Association, pages 319–330, Melbourne, July 1995.</a></p>
@@ -967,7 +968,7 @@ making and SLAM; and a minimalist block-diagram simulation tool <a class="refere
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 28-May-2022.
+      <span class="lastupdated">Last updated on 06-Jul-2022.
       </span></p>
   </div>
 

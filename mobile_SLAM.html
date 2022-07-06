@@ -16,6 +16,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -95,14 +96,14 @@
            <div itemprop="articleBody">
              
   <section id="localization-and-mapping">
-<h1>Localization and Mapping<a class="headerlink" href="#localization-and-mapping" title="Permalink to this headline"></a></h1>
+<h1>Localization and Mapping<a class="headerlink" href="#localization-and-mapping" title="Permalink to this heading"></a></h1>
 <p>These classes support simulation of vehicle and map estimation in a simple
 planar world with point landmarks.</p>
 <section id="state-estimation">
-<h2>State estimation<a class="headerlink" href="#state-estimation" title="Permalink to this headline"></a></h2>
+<h2>State estimation<a class="headerlink" href="#state-estimation" title="Permalink to this heading"></a></h2>
 <p>Two state estimators are included.</p>
 <section id="extended-kalman-filter">
-<h3>Extended Kalman filter<a class="headerlink" href="#extended-kalman-filter" title="Permalink to this headline"></a></h3>
+<h3>Extended Kalman filter<a class="headerlink" href="#extended-kalman-filter" title="Permalink to this heading"></a></h3>
 <p>The EKF is capable of vehicle localization, map estimation or SLAM.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.EKF">
@@ -949,7 +950,7 @@ reference frame.</p>
 
 </section>
 <section id="particle-filter">
-<h3>Particle filter<a class="headerlink" href="#particle-filter" title="Permalink to this headline"></a></h3>
+<h3>Particle filter<a class="headerlink" href="#particle-filter" title="Permalink to this heading"></a></h3>
 <p>The particle filter is capable of map-based vehicle localization.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.ParticleFilter">
@@ -1149,7 +1150,7 @@ option <code class="docutils literal notranslate"><span class="pre">workspace</s
 <dd class="field-odd"><p>NumPy random number generator</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.22)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a></p>
 </dd>
 </dl>
 <p>Has methods including:</p>
@@ -1291,11 +1292,11 @@ particle cloud at each time step.</p>
 </section>
 </section>
 <section id="sensor-models">
-<h2>Sensor models<a class="headerlink" href="#sensor-models" title="Permalink to this headline"></a></h2>
+<h2>Sensor models<a class="headerlink" href="#sensor-models" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">RangeBearingSensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poly_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.sensors.SensorBase</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SensorBase</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.RangeBearingSensor.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poly_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/sensors.html#RangeBearingSensor.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RangeBearingSensor.__init__" title="Permalink to this definition"></a></dt>
@@ -1747,17 +1748,17 @@ to sensor observation <span class="math notranslate nohighlight">\(\partial g/\p
 <dd class="field-odd"><p>NumPy random number generator</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.22)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a></p>
 </dd>
 </dl>
 <p>Has methods including:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.integers.html#numpy.random.Generator.integers" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integers(low,</span> <span class="pre">high,</span> <span class="pre">size,</span> <span class="pre">endpoint)</span></code></a></p></li>
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.random.html#numpy.random.Generator.random" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">random(size)</span></code></a></p></li>
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.uniform.html#numpy.random.Generator.uniform" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform(low,</span> <span class="pre">high,</span> <span class="pre">size)</span></code></a></p></li>
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.normal.html#numpy.random.Generator.normal" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">normal(mean,</span> <span class="pre">std,</span> <span class="pre">size)</span></code></a></p></li>
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.multivariate_normal.html#numpy.random.Generator.multivariate_normal" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">multivariate_normal(mean,</span> <span class="pre">covar,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.integers.html#numpy.random.Generator.integers" title="(in NumPy v1.23)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integers(low,</span> <span class="pre">high,</span> <span class="pre">size,</span> <span class="pre">endpoint)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.random.html#numpy.random.Generator.random" title="(in NumPy v1.23)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">random(size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.uniform.html#numpy.random.Generator.uniform" title="(in NumPy v1.23)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform(low,</span> <span class="pre">high,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.normal.html#numpy.random.Generator.normal" title="(in NumPy v1.23)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">normal(mean,</span> <span class="pre">std,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.multivariate_normal.html#numpy.random.Generator.multivariate_normal" title="(in NumPy v1.23)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">multivariate_normal(mean,</span> <span class="pre">covar,</span> <span class="pre">size)</span></code></a></p></li>
 </ul>
 </div></blockquote>
 <p>The generator is initialized with the seed provided at constructor
@@ -1801,7 +1802,7 @@ time every time <a class="reference internal" href="#roboticstoolbox.mobile.Rang
 
 </section>
 <section id="module-roboticstoolbox.mobile.landmarkmap">
-<span id="map-models"></span><h2>Map models<a class="headerlink" href="#module-roboticstoolbox.mobile.landmarkmap" title="Permalink to this headline"></a></h2>
+<span id="map-models"></span><h2>Map models<a class="headerlink" href="#module-roboticstoolbox.mobile.landmarkmap" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.landmarkmap.LandmarkMap">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.landmarkmap.</span></span><span class="sig-name descname"><span class="pre">LandmarkMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/landmarkmap.html#LandmarkMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.landmarkmap.LandmarkMap" title="Permalink to this definition"></a></dt>
@@ -1942,7 +1943,7 @@ crosses.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 28-May-2022.
+      <span class="lastupdated">Last updated on 06-Jul-2022.
       </span></p>
   </div>
 

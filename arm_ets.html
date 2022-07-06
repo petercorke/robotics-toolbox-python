@@ -16,6 +16,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -94,7 +95,7 @@
            <div itemprop="articleBody">
              
   <section id="elementary-transform-sequence-ets-models">
-<h1>Elementary transform sequence (ETS) models<a class="headerlink" href="#elementary-transform-sequence-ets-models" title="Permalink to this headline"></a></h1>
+<h1>Elementary transform sequence (ETS) models<a class="headerlink" href="#elementary-transform-sequence-ets-models" title="Permalink to this heading"></a></h1>
 <p><em>Code author: Jesse Haviland</em></p>
 <p>Elementary transforms are canonic rotations or translations about, or along,
 the x-, y- or z-axes.  The amount of rotation or translation can be a constant
@@ -165,11 +166,11 @@ Peter I. Corke, IEEE Transactions on Robotics, 23(3), pp 590-594, June 2007.</p>
 </ul>
 </div></blockquote>
 <section id="ets-3d">
-<h2>ETS - 3D<a class="headerlink" href="#ets-3d" title="Permalink to this headline"></a></h2>
+<h2>ETS - 3D<a class="headerlink" href="#ets-3d" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></span><span class="sig-name descname"><span class="pre">ETS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">roboticstoolbox.robot.ETS.ETS</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">roboticstoolbox.robot.ET.ET</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">roboticstoolbox.robot.ET.ET</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">roboticstoolbox.robot.ETS.ETS</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">roboticstoolbox.robot.ET.ET</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">roboticstoolbox.robot.ETS.ETS</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ETS.BaseETS</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></span><span class="sig-name descname"><span class="pre">ETS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">ETS</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ET</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ET</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">ETS</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ET</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">ETS</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseETS</span></code></p>
 <p>This class implements an elementary transform sequence (ETS) for 3D</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -214,12 +215,12 @@ J. Haviland and P. Corke</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.__mul__">
-<span class="sig-name descname"><span class="pre">__mul__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">roboticstoolbox.robot.ET.ET</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">roboticstoolbox.robot.ETS.ETS</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">roboticstoolbox.robot.ETS.ETS</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.__mul__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.__mul__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__mul__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ET</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">ETS</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">ETS</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.__mul__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.__mul__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.compile">
-<span class="sig-name descname"><span class="pre">compile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">roboticstoolbox.robot.ETS.ETS</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.compile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.compile" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">compile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">ETS</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.compile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.compile" title="Permalink to this definition"></a></dt>
 <dd><p>Compile an ETS</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -272,7 +273,7 @@ ETs are compounded, leading to a constant ET which is denoted by
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.insert">
-<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">roboticstoolbox.robot.ET.ET</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">roboticstoolbox.robot.ETS.ETS</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.insert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.insert" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ET</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><span class="pre">ETS</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.insert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.insert" title="Permalink to this definition"></a></dt>
 <dd><p>Insert value</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -293,6 +294,247 @@ ETs are compounded, leading to a constant ET which is denoted by
 <span class="go">[ET.Rz(jindex=0), ET.tx(eta=1.0), ET.Ry(), ET.Rz(jindex=1), ET.tx(eta=1.0)]</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.fkine">
+<span class="sig-name descname"><span class="pre">fkine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">SE3</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">SE3</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">SE3</span></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.fkine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.fkine" title="Permalink to this definition"></a></dt>
+<dd><p>Forward kinematics</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ArrayLike</em>) – Joint coordinates</p></li>
+<li><p><strong>base</strong> – base transform, optional</p></li>
+<li><p><strong>tool</strong> – tool transform, optional</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The transformation matrix representing the pose of the
+end-effector</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">ets.fkine(q)</span></code> evaluates forward kinematics for the robot at
+joint configuration <code class="docutils literal notranslate"><span class="pre">q</span></code>.</p></li>
+</ul>
+<p><strong>Trajectory operation</strong>:
+If <code class="docutils literal notranslate"><span class="pre">q</span></code> has multiple rows (mxn), it is considered a trajectory and the
+result is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> instance with <code class="docutils literal notranslate"><span class="pre">m</span></code> values.
+.. note:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">The</span> <span class="n">robot</span><span class="s1">&#39;s base tool transform, if set, is incorporated</span>
+  <span class="n">into</span> <span class="n">the</span> <span class="n">result</span><span class="o">.</span>
+<span class="o">-</span> <span class="n">A</span> <span class="n">tool</span> <span class="n">transform</span><span class="p">,</span> <span class="k">if</span> <span class="n">provided</span><span class="p">,</span> <span class="ow">is</span> <span class="n">incorporated</span> <span class="n">into</span> <span class="n">the</span> <span class="n">result</span><span class="o">.</span>
+<span class="o">-</span> <span class="n">Works</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">end</span><span class="o">-</span><span class="n">effector</span> <span class="n">link</span> <span class="n">to</span> <span class="n">the</span> <span class="n">base</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.jacob0">
+<span class="sig-name descname"><span class="pre">jacob0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">SE3</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.jacob0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jacob0" title="Permalink to this definition"></a></dt>
+<dd><p>Jacobian in base frame
+:param q: Joint coordinate vector
+:type q: ArrayLike
+:param tool: a static tool transformation matrix to apply to the</p>
+<blockquote>
+<div><p>end of end, defaults to None</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Return J</dt>
+<dd class="field-odd"><p>Manipulator Jacobian in the base frame</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">jacob0(q)</span></code> is the ETS Jacobian matrix which maps joint
+velocity to spatial velocity in the {0} frame.
+End-effector spatial velocity <span class="math notranslate nohighlight">\(\nu = (v_x, v_y, v_z, \omega_x,
+\omega_y, \omega_z)^T\)</span> is related to joint velocity by
+<span class="math notranslate nohighlight">\({}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}\)</span>.
+If <code class="docutils literal notranslate"><span class="pre">ets.eval(q)</span></code> is already computed it can be passed in as <code class="docutils literal notranslate"><span class="pre">T</span></code> to
+reduce computation time.
+An ETS represents the relative pose from the {0} frame to the end frame
+{e}. This is the composition of mAny relative poses, some constant and
+some functions of the joint variables, which we can write as
+<span class="math notranslate nohighlight">\(\mathbf{E}(q)\)</span>.
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{}</span><span class="o">^</span><span class="mi">0</span> <span class="n">T_e</span> <span class="o">=</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">E</span><span class="p">}(</span><span class="n">q</span><span class="p">)</span> \<span class="ow">in</span> \<span class="n">mbox</span><span class="p">{</span><span class="n">SE</span><span class="p">}(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The temporal derivative of this is the spatial
+velocity <span class="math notranslate nohighlight">\(\nu\)</span> which is a 6-vector is related to the rate of
+change of joint coordinates by the Jacobian matrix.
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{}</span><span class="o">^</span><span class="mi">0</span> \<span class="n">nu</span> <span class="o">=</span> <span class="p">{}</span><span class="o">^</span><span class="mi">0</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">J</span><span class="p">}(</span><span class="n">q</span><span class="p">)</span> \<span class="n">dot</span><span class="p">{</span><span class="n">q</span><span class="p">}</span> \<span class="ow">in</span> \<span class="n">mathbb</span><span class="p">{</span><span class="n">R</span><span class="p">}</span><span class="o">^</span><span class="mi">6</span>
+</pre></div>
+</div>
+<p>This velocity can be expressed relative to the {0} frame or the {e}
+frame.
+:references:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://arxiv.org/abs/2010.08696">Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke</a></p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.jacobe" title="roboticstoolbox.robot.ETS.ETS.jacobe"><code class="xref py py-func docutils literal notranslate"><span class="pre">jacobe()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.hessian0" title="roboticstoolbox.robot.ETS.ETS.hessian0"><code class="xref py py-func docutils literal notranslate"><span class="pre">hessian0()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.jacobe">
+<span class="sig-name descname"><span class="pre">jacobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">SE3</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.jacobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jacobe" title="Permalink to this definition"></a></dt>
+<dd><p>Manipulator geometric Jacobian in the end-effector frame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ArrayLike</em>) – Joint coordinate vector</p></li>
+<li><p><strong>tool</strong> – a static tool transformation matrix to apply to the
+end of end, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return J</dt>
+<dd class="field-even"><p>Manipulator Jacobian in the end-effector frame</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ets.jacobe(q)</span></code> is the manipulator Jacobian matrix which maps
+joint  velocity to end-effector spatial velocity expressed in the
+end-effector frame.</p></li>
+</ul>
+<p>End-effector spatial velocity <span class="math notranslate nohighlight">\(\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T\)</span>
+is related to joint velocity by <span class="math notranslate nohighlight">\({}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}\)</span>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This is the <strong>geometric Jacobian</strong> as described in texts by
+Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+described in terms of translational and angular velocity, not a
+velocity twist as per the text by Lynch &amp; Park.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.hessian0">
+<span class="sig-name descname"><span class="pre">hessian0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">SE3</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.hessian0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.hessian0" title="Permalink to this definition"></a></dt>
+<dd><p>Manipulator Hessian</p>
+<p>The manipulator Hessian tensor maps joint acceleration to end-effector
+spatial acceleration, expressed in the world-coordinate frame. This
+function calulcates this based on the ETS of the robot.</p>
+<p>One of J0 or q
+is required. Supply J0 if already calculated to save computation time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ArrayLike</em>) – The joint angles/configuration of the robot.</p></li>
+<li><p><strong>J0</strong> – The manipulator Jacobian in the 0 frame</p></li>
+<li><p><strong>tool</strong> – a static tool transformation matrix to apply to the
+end frame, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The manipulator Hessian in 0 frame</p>
+</dd>
+</dl>
+<p>This method computes the manipulator Hessian in the base frame.  If
+we take the time derivative of the differential kinematic relationship
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">nu</span>    <span class="o">&amp;=</span> \<span class="n">mat</span><span class="p">{</span><span class="n">J</span><span class="p">}(</span>\<span class="n">vec</span><span class="p">{</span><span class="n">q</span><span class="p">})</span> \<span class="n">dvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span> \\
+\<span class="n">alpha</span> <span class="o">&amp;=</span> \<span class="n">dmat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span> \<span class="n">dvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span> <span class="o">+</span> \<span class="n">mat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span> \<span class="n">ddvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>where
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">dmat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span> <span class="o">=</span> \<span class="n">mat</span><span class="p">{</span><span class="n">H</span><span class="p">}</span> \<span class="n">dvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>and <span class="math notranslate nohighlight">\(\mat{H} \in \mathbb{R}^{6\times n \times n}\)</span> is the
+Hessian tensor.
+The elements of the Hessian are
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mat</span><span class="p">{</span><span class="n">H</span><span class="p">}</span><span class="n">_</span><span class="p">{</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">}</span> <span class="o">=</span>  \<span class="n">frac</span><span class="p">{</span><span class="n">d</span><span class="o">^</span><span class="mi">2</span> <span class="n">u_i</span><span class="p">}{</span><span class="n">d</span> <span class="n">q_j</span> <span class="n">d</span> <span class="n">q_k</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(u = \{t_x, t_y, t_z, r_x, r_y, r_z\}\)</span> are the elements
+of the spatial velocity vector.
+Similarly, we can write
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span><span class="n">_</span><span class="p">{</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">}</span> <span class="o">=</span> \<span class="n">frac</span><span class="p">{</span><span class="n">d</span> <span class="n">u_i</span><span class="p">}{</span><span class="n">d</span> <span class="n">q_j</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.hessiane">
+<span class="sig-name descname"><span class="pre">hessiane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Je</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">SE3</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.hessiane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.hessiane" title="Permalink to this definition"></a></dt>
+<dd><p>Manipulator Hessian</p>
+<p>The manipulator Hessian tensor maps joint acceleration to end-effector
+spatial acceleration, expressed in the world-coordinate frame. This
+function calulcates this based on the ETS of the robot.</p>
+<p>One of Je or q
+is required. Supply Je if already calculated to save computation time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>ArrayLike</em>) – The joint angles/configuration of the robot.</p></li>
+<li><p><strong>Je</strong> – The manipulator Jacobian in the ee frame</p></li>
+<li><p><strong>tool</strong> – a static tool transformation matrix to apply to the
+end frame, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The manipulator Hessian in ee frame</p>
+</dd>
+</dl>
+<p>This method computes the manipulator Hessian in the ee frame.  If
+we take the time derivative of the differential kinematic relationship
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">nu</span>    <span class="o">&amp;=</span> \<span class="n">mat</span><span class="p">{</span><span class="n">J</span><span class="p">}(</span>\<span class="n">vec</span><span class="p">{</span><span class="n">q</span><span class="p">})</span> \<span class="n">dvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span> \\
+\<span class="n">alpha</span> <span class="o">&amp;=</span> \<span class="n">dmat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span> \<span class="n">dvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span> <span class="o">+</span> \<span class="n">mat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span> \<span class="n">ddvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>where
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">dmat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span> <span class="o">=</span> \<span class="n">mat</span><span class="p">{</span><span class="n">H</span><span class="p">}</span> \<span class="n">dvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>and <span class="math notranslate nohighlight">\(\mat{H} \in \mathbb{R}^{6\times n \times n}\)</span> is the
+Hessian tensor.
+The elements of the Hessian are
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mat</span><span class="p">{</span><span class="n">H</span><span class="p">}</span><span class="n">_</span><span class="p">{</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">}</span> <span class="o">=</span>  \<span class="n">frac</span><span class="p">{</span><span class="n">d</span><span class="o">^</span><span class="mi">2</span> <span class="n">u_i</span><span class="p">}{</span><span class="n">d</span> <span class="n">q_j</span> <span class="n">d</span> <span class="n">q_k</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(u = \{t_x, t_y, t_z, r_x, r_y, r_z\}\)</span> are the elements
+of the spatial velocity vector.
+Similarly, we can write
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span><span class="n">_</span><span class="p">{</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">}</span> <span class="o">=</span> \<span class="n">frac</span><span class="p">{</span><span class="n">d</span> <span class="n">u_i</span><span class="p">}{</span><span class="n">d</span> <span class="n">q_j</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Kinematic Derivatives using the Elementary Transform
+Sequence, J. Haviland and P. Corke</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -463,7 +705,7 @@ of joints in order from left to right.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.joints">
-<span class="sig-name descname"><span class="pre">joints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">roboticstoolbox.robot.ET.ET</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.joints" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">joints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ET</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.joints" title="Permalink to this definition"></a></dt>
 <dd><p>Get a list of the variable ETs with this ETS</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -516,256 +758,15 @@ the reversed order of the transforms.</p>
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.fkine">
-<span class="sig-name descname"><span class="pre">fkine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">spatialmath.pose3d.SE3</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">spatialmath.pose3d.SE3</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">spatialmath.pose3d.SE3</span></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.fkine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.fkine" title="Permalink to this definition"></a></dt>
-<dd><p>Forward kinematics</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>ArrayLike</em>) – Joint coordinates</p></li>
-<li><p><strong>base</strong> – base transform, optional</p></li>
-<li><p><strong>tool</strong> – tool transform, optional</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The transformation matrix representing the pose of the
-end-effector</p>
-</dd>
-</dl>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">ets.fkine(q)</span></code> evaluates forward kinematics for the robot at
-joint configuration <code class="docutils literal notranslate"><span class="pre">q</span></code>.</p></li>
-</ul>
-<p><strong>Trajectory operation</strong>:
-If <code class="docutils literal notranslate"><span class="pre">q</span></code> has multiple rows (mxn), it is considered a trajectory and the
-result is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> instance with <code class="docutils literal notranslate"><span class="pre">m</span></code> values.
-.. note:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">The</span> <span class="n">robot</span><span class="s1">&#39;s base tool transform, if set, is incorporated</span>
-  <span class="n">into</span> <span class="n">the</span> <span class="n">result</span><span class="o">.</span>
-<span class="o">-</span> <span class="n">A</span> <span class="n">tool</span> <span class="n">transform</span><span class="p">,</span> <span class="k">if</span> <span class="n">provided</span><span class="p">,</span> <span class="ow">is</span> <span class="n">incorporated</span> <span class="n">into</span> <span class="n">the</span> <span class="n">result</span><span class="o">.</span>
-<span class="o">-</span> <span class="n">Works</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">end</span><span class="o">-</span><span class="n">effector</span> <span class="n">link</span> <span class="n">to</span> <span class="n">the</span> <span class="n">base</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">References</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p>Kinematic Derivatives using the Elementary Transform
-Sequence, J. Haviland and P. Corke</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.jacob0">
-<span class="sig-name descname"><span class="pre">jacob0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">spatialmath.pose3d.SE3</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.jacob0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jacob0" title="Permalink to this definition"></a></dt>
-<dd><p>Jacobian in base frame
-:param q: Joint coordinate vector
-:type q: ArrayLike
-:param tool: a static tool transformation matrix to apply to the</p>
-<blockquote>
-<div><p>end of end, defaults to None</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Return J</dt>
-<dd class="field-odd"><p>Manipulator Jacobian in the base frame</p>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">jacob0(q)</span></code> is the ETS Jacobian matrix which maps joint
-velocity to spatial velocity in the {0} frame.
-End-effector spatial velocity <span class="math notranslate nohighlight">\(\nu = (v_x, v_y, v_z, \omega_x,
-\omega_y, \omega_z)^T\)</span> is related to joint velocity by
-<span class="math notranslate nohighlight">\({}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}\)</span>.
-If <code class="docutils literal notranslate"><span class="pre">ets.eval(q)</span></code> is already computed it can be passed in as <code class="docutils literal notranslate"><span class="pre">T</span></code> to
-reduce computation time.
-An ETS represents the relative pose from the {0} frame to the end frame
-{e}. This is the composition of mAny relative poses, some constant and
-some functions of the joint variables, which we can write as
-<span class="math notranslate nohighlight">\(\mathbf{E}(q)\)</span>.
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{}</span><span class="o">^</span><span class="mi">0</span> <span class="n">T_e</span> <span class="o">=</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">E</span><span class="p">}(</span><span class="n">q</span><span class="p">)</span> \<span class="ow">in</span> \<span class="n">mbox</span><span class="p">{</span><span class="n">SE</span><span class="p">}(</span><span class="mi">3</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>The temporal derivative of this is the spatial
-velocity <span class="math notranslate nohighlight">\(\nu\)</span> which is a 6-vector is related to the rate of
-change of joint coordinates by the Jacobian matrix.
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{}</span><span class="o">^</span><span class="mi">0</span> \<span class="n">nu</span> <span class="o">=</span> <span class="p">{}</span><span class="o">^</span><span class="mi">0</span> \<span class="n">mathbf</span><span class="p">{</span><span class="n">J</span><span class="p">}(</span><span class="n">q</span><span class="p">)</span> \<span class="n">dot</span><span class="p">{</span><span class="n">q</span><span class="p">}</span> \<span class="ow">in</span> \<span class="n">mathbb</span><span class="p">{</span><span class="n">R</span><span class="p">}</span><span class="o">^</span><span class="mi">6</span>
-</pre></div>
-</div>
-<p>This velocity can be expressed relative to the {0} frame or the {e}
-frame.
-:references:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><a class="reference external" href="https://arxiv.org/abs/2010.08696">Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke</a></p></li>
-</ul>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.jacobe" title="roboticstoolbox.robot.ETS.ETS.jacobe"><code class="xref py py-func docutils literal notranslate"><span class="pre">jacobe()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.hessian0" title="roboticstoolbox.robot.ETS.ETS.hessian0"><code class="xref py py-func docutils literal notranslate"><span class="pre">hessian0()</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.jacobe">
-<span class="sig-name descname"><span class="pre">jacobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">spatialmath.pose3d.SE3</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.jacobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.jacobe" title="Permalink to this definition"></a></dt>
-<dd><p>Manipulator geometric Jacobian in the end-effector frame</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>ArrayLike</em>) – Joint coordinate vector</p></li>
-<li><p><strong>tool</strong> – a static tool transformation matrix to apply to the
-end of end, defaults to None</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return J</dt>
-<dd class="field-even"><p>Manipulator Jacobian in the end-effector frame</p>
-</dd>
-</dl>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ets.jacobe(q)</span></code> is the manipulator Jacobian matrix which maps
-joint  velocity to end-effector spatial velocity expressed in the
-end-effector frame.</p></li>
-</ul>
-<p>End-effector spatial velocity <span class="math notranslate nohighlight">\(\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T\)</span>
-is related to joint velocity by <span class="math notranslate nohighlight">\({}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}\)</span>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This is the <strong>geometric Jacobian</strong> as described in texts by
-Corke, Spong etal., Siciliano etal.  The end-effector velocity is
-described in terms of translational and angular velocity, not a
-velocity twist as per the text by Lynch &amp; Park.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.hessian0">
-<span class="sig-name descname"><span class="pre">hessian0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">spatialmath.pose3d.SE3</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.hessian0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.hessian0" title="Permalink to this definition"></a></dt>
-<dd><p>Manipulator Hessian</p>
-<p>The manipulator Hessian tensor maps joint acceleration to end-effector
-spatial acceleration, expressed in the world-coordinate frame. This
-function calulcates this based on the ETS of the robot.</p>
-<p>One of J0 or q
-is required. Supply J0 if already calculated to save computation time</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>ArrayLike</em>) – The joint angles/configuration of the robot.</p></li>
-<li><p><strong>J0</strong> – The manipulator Jacobian in the 0 frame</p></li>
-<li><p><strong>tool</strong> – a static tool transformation matrix to apply to the
-end frame, defaults to None</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The manipulator Hessian in 0 frame</p>
-</dd>
-</dl>
-<p>This method computes the manipulator Hessian in the base frame.  If
-we take the time derivative of the differential kinematic relationship
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">nu</span>    <span class="o">&amp;=</span> \<span class="n">mat</span><span class="p">{</span><span class="n">J</span><span class="p">}(</span>\<span class="n">vec</span><span class="p">{</span><span class="n">q</span><span class="p">})</span> \<span class="n">dvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span> \\
-\<span class="n">alpha</span> <span class="o">&amp;=</span> \<span class="n">dmat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span> \<span class="n">dvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span> <span class="o">+</span> \<span class="n">mat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span> \<span class="n">ddvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>where
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">dmat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span> <span class="o">=</span> \<span class="n">mat</span><span class="p">{</span><span class="n">H</span><span class="p">}</span> \<span class="n">dvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>and <span class="math notranslate nohighlight">\(\mat{H} \in \mathbb{R}^{6\times n \times n}\)</span> is the
-Hessian tensor.
-The elements of the Hessian are
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mat</span><span class="p">{</span><span class="n">H</span><span class="p">}</span><span class="n">_</span><span class="p">{</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">}</span> <span class="o">=</span>  \<span class="n">frac</span><span class="p">{</span><span class="n">d</span><span class="o">^</span><span class="mi">2</span> <span class="n">u_i</span><span class="p">}{</span><span class="n">d</span> <span class="n">q_j</span> <span class="n">d</span> <span class="n">q_k</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>where <span class="math notranslate nohighlight">\(u = \{t_x, t_y, t_z, r_x, r_y, r_z\}\)</span> are the elements
-of the spatial velocity vector.
-Similarly, we can write
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span><span class="n">_</span><span class="p">{</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">}</span> <span class="o">=</span> \<span class="n">frac</span><span class="p">{</span><span class="n">d</span> <span class="n">u_i</span><span class="p">}{</span><span class="n">d</span> <span class="n">q_j</span><span class="p">}</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">References</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p>Kinematic Derivatives using the Elementary Transform
-Sequence, J. Haviland and P. Corke</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.hessiane">
-<span class="sig-name descname"><span class="pre">hessiane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Je</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">spatialmath.pose3d.SE3</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS.hessiane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.hessiane" title="Permalink to this definition"></a></dt>
-<dd><p>Manipulator Hessian</p>
-<p>The manipulator Hessian tensor maps joint acceleration to end-effector
-spatial acceleration, expressed in the world-coordinate frame. This
-function calulcates this based on the ETS of the robot.</p>
-<p>One of Je or q
-is required. Supply Je if already calculated to save computation time</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>ArrayLike</em>) – The joint angles/configuration of the robot.</p></li>
-<li><p><strong>Je</strong> – The manipulator Jacobian in the ee frame</p></li>
-<li><p><strong>tool</strong> – a static tool transformation matrix to apply to the
-end frame, defaults to None</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The manipulator Hessian in ee frame</p>
-</dd>
-</dl>
-<p>This method computes the manipulator Hessian in the ee frame.  If
-we take the time derivative of the differential kinematic relationship
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">nu</span>    <span class="o">&amp;=</span> \<span class="n">mat</span><span class="p">{</span><span class="n">J</span><span class="p">}(</span>\<span class="n">vec</span><span class="p">{</span><span class="n">q</span><span class="p">})</span> \<span class="n">dvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span> \\
-\<span class="n">alpha</span> <span class="o">&amp;=</span> \<span class="n">dmat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span> \<span class="n">dvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span> <span class="o">+</span> \<span class="n">mat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span> \<span class="n">ddvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>where
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">dmat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span> <span class="o">=</span> \<span class="n">mat</span><span class="p">{</span><span class="n">H</span><span class="p">}</span> \<span class="n">dvec</span><span class="p">{</span><span class="n">q</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>and <span class="math notranslate nohighlight">\(\mat{H} \in \mathbb{R}^{6\times n \times n}\)</span> is the
-Hessian tensor.
-The elements of the Hessian are
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mat</span><span class="p">{</span><span class="n">H</span><span class="p">}</span><span class="n">_</span><span class="p">{</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">}</span> <span class="o">=</span>  \<span class="n">frac</span><span class="p">{</span><span class="n">d</span><span class="o">^</span><span class="mi">2</span> <span class="n">u_i</span><span class="p">}{</span><span class="n">d</span> <span class="n">q_j</span> <span class="n">d</span> <span class="n">q_k</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>where <span class="math notranslate nohighlight">\(u = \{t_x, t_y, t_z, r_x, r_y, r_z\}\)</span> are the elements
-of the spatial velocity vector.
-Similarly, we can write
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">mat</span><span class="p">{</span><span class="n">J</span><span class="p">}</span><span class="n">_</span><span class="p">{</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">}</span> <span class="o">=</span> \<span class="n">frac</span><span class="p">{</span><span class="n">d</span> <span class="n">u_i</span><span class="p">}{</span><span class="n">d</span> <span class="n">q_j</span><span class="p">}</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">References</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p>Kinematic Derivatives using the Elementary Transform
-Sequence, J. Haviland and P. Corke</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
 <section id="ets-2d">
-<h2>ETS - 2D<a class="headerlink" href="#ets-2d" title="Permalink to this headline"></a></h2>
+<h2>ETS - 2D<a class="headerlink" href="#ets-2d" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></span><span class="sig-name descname"><span class="pre">ETS2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">roboticstoolbox.robot.ETS.ETS2</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">roboticstoolbox.robot.ET.ET2</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">roboticstoolbox.robot.ET.ET2</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">roboticstoolbox.robot.ETS.ETS2</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">roboticstoolbox.robot.ET.ET2</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">roboticstoolbox.robot.ETS.ETS2</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.robot.ETS.BaseETS</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.ETS.</span></span><span class="sig-name descname"><span class="pre">ETS2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">ETS2</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ET2</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ET2</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">ETS2</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ET2</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">ETS2</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseETS</span></code></p>
 <p>This class implements an elementary transform sequence (ETS) for 2D</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -980,7 +981,7 @@ of joints in order from left to right.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.joints">
-<span class="sig-name descname"><span class="pre">joints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">roboticstoolbox.robot.ET.ET</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.joints" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">joints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ET</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.joints" title="Permalink to this definition"></a></dt>
 <dd><p>Get a list of the variable ETs with this ETS</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1035,12 +1036,12 @@ the reversed order of the transforms.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.__mul__">
-<span class="sig-name descname"><span class="pre">__mul__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">roboticstoolbox.robot.ET.ET2</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">roboticstoolbox.robot.ETS.ETS2</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">roboticstoolbox.robot.ETS.ETS2</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.__mul__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.__mul__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__mul__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ET2</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">ETS2</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">ETS2</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.__mul__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.__mul__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.compile">
-<span class="sig-name descname"><span class="pre">compile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">roboticstoolbox.robot.ETS.ETS2</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.compile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.compile" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">compile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">ETS2</span></a></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.compile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.compile" title="Permalink to this definition"></a></dt>
 <dd><p>Compile an ETS2</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1059,7 +1060,7 @@ ETs are compounded, leading to a constant ET which is denoted by
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.insert">
-<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">roboticstoolbox.robot.ET.ET2</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">roboticstoolbox.robot.ETS.ETS2</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.insert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.insert" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ET2</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS2" title="roboticstoolbox.robot.ETS.ETS2"><span class="pre">ETS2</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.insert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.insert" title="Permalink to this definition"></a></dt>
 <dd><p>Insert value</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1084,7 +1085,7 @@ ETs are compounded, leading to a constant ET which is denoted by
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.fkine">
-<span class="sig-name descname"><span class="pre">fkine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">spatialmath.pose2d.SE2</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">spatialmath.pose2d.SE2</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">spatialmath.pose2d.SE2</span></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.fkine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.fkine" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fkine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">SE2</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">SE2</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">SE2</span></span></span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.fkine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.fkine" title="Permalink to this definition"></a></dt>
 <dd><p>Forward kinematics
 :param q: Joint coordinates
 :type q: ArrayLike
@@ -1122,12 +1123,12 @@ Sequence, J. Haviland and P. Corke</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.jacob0">
-<span class="sig-name descname"><span class="pre">jacob0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.jacob0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.jacob0" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">jacob0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.jacob0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.jacob0" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS2.jacobe">
-<span class="sig-name descname"><span class="pre">jacobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.22)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.jacobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.jacobe" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">jacobe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/robot/ETS.html#ETS2.jacobe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS2.jacobe" title="Permalink to this definition"></a></dt>
 <dd><p>Jacobian in base frame</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1165,7 +1166,7 @@ is related to joint velocity by <span class="math notranslate nohighlight">\({}^
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 28-May-2022.
+      <span class="lastupdated">Last updated on 06-Jul-2022.
       </span></p>
   </div>
 

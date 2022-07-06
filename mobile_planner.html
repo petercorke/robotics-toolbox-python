@@ -16,6 +16,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -113,7 +114,7 @@
            <div itemprop="articleBody">
              
   <section id="mobile-robot-path-planning">
-<h1>Mobile robot path planning<a class="headerlink" href="#mobile-robot-path-planning" title="Permalink to this headline"></a></h1>
+<h1>Mobile robot path planning<a class="headerlink" href="#mobile-robot-path-planning" title="Permalink to this heading"></a></h1>
 <p>A set of path planners for robots operating in planar environments with
 configuration <span class="math notranslate nohighlight">\(\vec{q} \in \mathbb{R}^2\)</span> or <span class="math notranslate nohighlight">\(\vec{q} \in \SE{2}\)</span>.
 All inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code>.</p>
@@ -197,13 +198,13 @@ All inherit from <code class="xref py py-class docutils literal notranslate"><sp
 </tbody>
 </table>
 <section id="discrete-grid-based-planners">
-<h2>Discrete (Grid-based) planners<a class="headerlink" href="#discrete-grid-based-planners" title="Permalink to this headline"></a></h2>
+<h2>Discrete (Grid-based) planners<a class="headerlink" href="#discrete-grid-based-planners" title="Permalink to this heading"></a></h2>
 <section id="distance-transform-planner">
-<h3>Distance transform planner<a class="headerlink" href="#distance-transform-planner" title="Permalink to this headline"></a></h3>
+<h3>Distance transform planner<a class="headerlink" href="#distance-transform-planner" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.DistanceTransformPlanner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">DistanceTransformPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occgrid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'euclidean'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DistanceTransformPlanner.html#DistanceTransformPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DistanceTransformPlanner" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
 <p>Distance transform path planner</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -688,11 +689,11 @@ message channel.</p>
 
 </section>
 <section id="d-planner">
-<h3>D* planner<a class="headerlink" href="#d-planner" title="Permalink to this headline"></a></h3>
+<h3>D* planner<a class="headerlink" href="#d-planner" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.DstarPlanner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">DstarPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">costmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DstarPlanner.html#DstarPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DstarPlanner" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
 <p>D* path planner</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1075,11 +1076,11 @@ message channel.</p>
 
 </section>
 <section id="prm-planner">
-<h3>PRM planner<a class="headerlink" href="#prm-planner" title="Permalink to this headline"></a></h3>
+<h3>PRM planner<a class="headerlink" href="#prm-planner" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.PRMPlanner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">PRMPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occgrid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/PRMPlanner.html#PRMPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PRMPlanner" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
 <p>Distance transform path planner</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1389,11 +1390,11 @@ message channel.</p>
 
 </section>
 <section id="lattice-planner">
-<h3>Lattice planner<a class="headerlink" href="#lattice-planner" title="Permalink to this headline"></a></h3>
+<h3>Lattice planner<a class="headerlink" href="#lattice-planner" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.LatticePlanner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">LatticePlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">costs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/LatticePlanner.html#LatticePlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.LatticePlanner" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
 <p>Lattice planner</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1768,15 +1769,15 @@ message channel.</p>
 </section>
 </section>
 <section id="continuous-configuration-space-planners">
-<h2>Continuous configuration-space planners<a class="headerlink" href="#continuous-configuration-space-planners" title="Permalink to this headline"></a></h2>
+<h2>Continuous configuration-space planners<a class="headerlink" href="#continuous-configuration-space-planners" title="Permalink to this heading"></a></h2>
 <p>These planners do not support planning around obstacles, but allow for the
 start and goal configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span> to be specified.</p>
 <section id="dubins-path-planner">
-<h3>Dubins path planner<a class="headerlink" href="#dubins-path-planner" title="Permalink to this headline"></a></h3>
+<h3>Dubins path planner<a class="headerlink" href="#dubins-path-planner" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.DubinsPlanner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">DubinsPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curvature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/DubinsPlanner.html#DubinsPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.DubinsPlanner" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
 <p>Dubins path planner</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2127,11 +2128,11 @@ message channel.</p>
 
 </section>
 <section id="reeds-shepp-path-planner">
-<h3>Reeds-Shepp path planner<a class="headerlink" href="#reeds-shepp-path-planner" title="Permalink to this headline"></a></h3>
+<h3>Reeds-Shepp path planner<a class="headerlink" href="#reeds-shepp-path-planner" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.ReedsSheppPlanner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">ReedsSheppPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curvature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/ReedsSheppPlanner.html#ReedsSheppPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.ReedsSheppPlanner" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
 <p>Reeds-Shepp path planner</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2485,11 +2486,11 @@ message channel.</p>
 
 </section>
 <section id="curvature-polynomial-planner">
-<h3>Curvature-polynomial planner<a class="headerlink" href="#curvature-polynomial-planner" title="Permalink to this headline"></a></h3>
+<h3>Curvature-polynomial planner<a class="headerlink" href="#curvature-polynomial-planner" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.CurvaturePolyPlanner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">CurvaturePolyPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curvature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/CurvaturePolyPlanner.html#CurvaturePolyPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.CurvaturePolyPlanner" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.CurvaturePolyPlanner.query">
 <span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/CurvaturePolyPlanner.html#CurvaturePolyPlanner.query"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.CurvaturePolyPlanner.query" title="Permalink to this definition"></a></dt>
@@ -2765,11 +2766,11 @@ message channel.</p>
 
 </section>
 <section id="quintic-polynomial-planner">
-<h3>Quintic-polynomial planner<a class="headerlink" href="#quintic-polynomial-planner" title="Permalink to this headline"></a></h3>
+<h3>Quintic-polynomial planner<a class="headerlink" href="#quintic-polynomial-planner" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.QuinticPolyPlanner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">QuinticPolyPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_jerk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/QuinticPolyPlanner.html#QuinticPolyPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.QuinticPolyPlanner" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
 <p>Quintic polynomial path planner</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3144,11 +3145,11 @@ message channel.</p>
 
 </section>
 <section id="rrt-planner">
-<h3>RRT planner<a class="headerlink" href="#rrt-planner" title="Permalink to this headline"></a></h3>
+<h3>RRT planner<a class="headerlink" href="#rrt-planner" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.RRTPlanner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">RRTPlanner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vehicle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curvature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showsamples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/RRTPlanner.html#RRTPlanner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.RRTPlanner" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.PlannerBase.PlannerBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
 <p>Rapidly exploring tree planner</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3573,15 +3574,15 @@ message channel.</p>
 </section>
 </section>
 <section id="map-classes">
-<h2>Map classes<a class="headerlink" href="#map-classes" title="Permalink to this headline"></a></h2>
+<h2>Map classes<a class="headerlink" href="#map-classes" title="Permalink to this heading"></a></h2>
 <section id="occupancy-grid-classes">
-<h3>Occupancy grid classes<a class="headerlink" href="#occupancy-grid-classes" title="Permalink to this headline"></a></h3>
+<h3>Occupancy grid classes<a class="headerlink" href="#occupancy-grid-classes" title="Permalink to this heading"></a></h3>
 <section id="binary-occupancy-grid">
-<h4>Binary Occupancy grid<a class="headerlink" href="#binary-occupancy-grid" title="Permalink to this headline"></a></h4>
+<h4>Binary Occupancy grid<a class="headerlink" href="#binary-occupancy-grid" title="Permalink to this heading"></a></h4>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">BinaryOccupancyGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#BinaryOccupancyGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid" title="roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid" title="roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOccupancyGrid</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#BinaryOccupancyGrid.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.__init__" title="Permalink to this definition"></a></dt>
@@ -3928,11 +3929,11 @@ value. No check is made on the validity of the coordinate.</p>
 
 </section>
 <section id="occupancy-grid">
-<h4>Occupancy grid<a class="headerlink" href="#occupancy-grid" title="Permalink to this headline"></a></h4>
+<h4>Occupancy grid<a class="headerlink" href="#occupancy-grid" title="Permalink to this heading"></a></h4>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">OccupancyGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cellsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#OccupancyGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid" title="roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid" title="roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOccupancyGrid</span></code></a></p>
 <p>General occupancy grid</p>
 <p>The elements of the array are floats and can represent occupancy
 probability or traversal cost.</p>
@@ -4242,11 +4243,11 @@ value. No check is made on the validity of the coordinate.</p>
 </section>
 </section>
 <section id="polygon-map">
-<h3>Polygon map<a class="headerlink" href="#polygon-map" title="Permalink to this headline"></a></h3>
+<h3>Polygon map<a class="headerlink" href="#polygon-map" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.PolygonMap">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">PolygonMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygons</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#PolygonMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PolygonMap" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.OccGrid.BaseMap" title="roboticstoolbox.mobile.OccGrid.BaseMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.OccGrid.BaseMap</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.OccGrid.BaseMap" title="roboticstoolbox.mobile.OccGrid.BaseMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMap</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.PolygonMap.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygons</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#PolygonMap.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PolygonMap.__init__" title="Permalink to this definition"></a></dt>
@@ -4370,13 +4371,13 @@ on the first enclosure.</p>
 </section>
 </section>
 <section id="supporting-classes">
-<h2>Supporting classes<a class="headerlink" href="#supporting-classes" title="Permalink to this headline"></a></h2>
+<h2>Supporting classes<a class="headerlink" href="#supporting-classes" title="Permalink to this heading"></a></h2>
 <section id="planner-superclass">
-<h3>Planner superclass<a class="headerlink" href="#planner-superclass" title="Permalink to this headline"></a></h3>
+<h3>Planner superclass<a class="headerlink" href="#planner-superclass" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.PlannerBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">PlannerBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occgrid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inflate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msgcolor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'yellow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">unused</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/PlannerBase.html#PlannerBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PlannerBase" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Mobile robot motion planner (superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -4492,22 +4493,22 @@ message channel.</p>
 <dd class="field-odd"><p>NumPy random number generator</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.22)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a></p>
 </dd>
 </dl>
 <p>Has methods including:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.integers.html#numpy.random.Generator.integers" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integers(low,</span> <span class="pre">high,</span> <span class="pre">size,</span> <span class="pre">endpoint)</span></code></a></p></li>
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.random.html#numpy.random.Generator.random" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">random(size)</span></code></a></p></li>
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.uniform.html#numpy.random.Generator.uniform" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform(low,</span> <span class="pre">high,</span> <span class="pre">size)</span></code></a></p></li>
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.normal.html#numpy.random.Generator.normal" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">normal(mean,</span> <span class="pre">std,</span> <span class="pre">size)</span></code></a></p></li>
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.multivariate_normal.html#numpy.random.Generator.multivariate_normal" title="(in NumPy v1.22)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">multivariate_normal(mean,</span> <span class="pre">covar,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.integers.html#numpy.random.Generator.integers" title="(in NumPy v1.23)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integers(low,</span> <span class="pre">high,</span> <span class="pre">size,</span> <span class="pre">endpoint)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.random.html#numpy.random.Generator.random" title="(in NumPy v1.23)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">random(size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.uniform.html#numpy.random.Generator.uniform" title="(in NumPy v1.23)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform(low,</span> <span class="pre">high,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.normal.html#numpy.random.Generator.normal" title="(in NumPy v1.23)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">normal(mean,</span> <span class="pre">std,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.multivariate_normal.html#numpy.random.Generator.multivariate_normal" title="(in NumPy v1.23)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">multivariate_normal(mean,</span> <span class="pre">covar,</span> <span class="pre">size)</span></code></a></p></li>
 </ul>
 <p>The generator is initialized with the seed provided at constructor
 time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="(in NumPy v1.22)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.random.default_rng()</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="(in NumPy v1.23)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.random.default_rng()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4864,17 +4865,17 @@ constructor time.</p></li>
 
 </section>
 <section id="occupancy-grid-base-classes">
-<h3>Occupancy grid base classes<a class="headerlink" href="#occupancy-grid-base-classes" title="Permalink to this headline"></a></h3>
+<h3>Occupancy grid base classes<a class="headerlink" href="#occupancy-grid-base-classes" title="Permalink to this heading"></a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.OccGrid.BaseMap">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.OccGrid.</span></span><span class="sig-name descname"><span class="pre">BaseMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">unused</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#BaseMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.OccGrid.BaseMap" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.OccGrid.</span></span><span class="sig-name descname"><span class="pre">BaseOccupancyGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cellsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#BaseOccupancyGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.OccGrid.BaseMap" title="roboticstoolbox.mobile.OccGrid.BaseMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">roboticstoolbox.mobile.OccGrid.BaseMap</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.OccGrid.BaseMap" title="roboticstoolbox.mobile.OccGrid.BaseMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMap</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid.copy">
 <span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#BaseOccupancyGrid.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid.copy" title="Permalink to this definition"></a></dt>
@@ -5153,7 +5154,7 @@ points given in world coordinates.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 28-May-2022.
+      <span class="lastupdated">Last updated on 06-Jul-2022.
       </span></p>
   </div>
 
