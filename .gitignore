@@ -1,3 +1,6 @@
+
+*.doctree
+
 # Vim
 *.sw*
 

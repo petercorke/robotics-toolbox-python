@@ -45,7 +45,7 @@ except ImportError:
 # setup defaults
 np.set_printoptions(
     linewidth=120,
-    formatter={"float": lambda x: f"{x:8.4g}" if abs(x) > 1e-10 else f"{0:8.4g}"},
+    formatter={"float": lambda x: f"{0:8.4g}" if abs(x) < 1e-10 else f"{x:8.4g}"},
 )
 
 parser = argparse.ArgumentParser("Robotics Toolbox shell")

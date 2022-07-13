@@ -87,14 +87,14 @@ class PoseGraph:
     #     center
     #     cellsize
 
-    def __init__(self, filename, laser=False, verbose=False):
+    def __init__(self, filename, lidar=False, verbose=False):
         # parse the file data
         # we assume g2o format
         #    VERTEX* vertex_id X Y THETA
         #    EDGE* startvertex_id endvertex_id X Y THETA IXX IXY IYY IXT IYT ITT
         # vertex numbers start at 0
         
-        self.laser = laser
+        self.lidar = lidar
         
         self.graph = pgraph.UGraph(verbose=verbose)
 
@@ -110,7 +110,7 @@ class PoseGraph:
         with opener(path, 'r') as f:
 
             toroformat = False
-            nlaser = 0
+            nlidar = 0
             
             # indices into ROBOTLASER1 record for the 3x3 info matrix in column major
             # order
@@ -126,7 +126,7 @@ class PoseGraph:
             # we keep an array self. = vindex(gi) to map g2o vertex index to PGraph vertex index
             
             self.vindex = {}
-            firstlaser = True
+            firstlidar = True
             for line in f:
                 # for zip file, we get data as bytes not str
                 if isinstance(line, bytes):
@@ -207,10 +207,10 @@ class PoseGraph:
                     v1.connect(v2, edge=e)
                         
                 elif tokens[0] == 'ROBOTLASER1':
-                    if not laser:
+                    if not lidar:
                         continue
                     
-                    # laser records are associated with the immediately 
+                    # lidar records are associated with the immediately 
                     # preceding VERTEX record
                     #
                     # not quite sure what all the fields are
@@ -221,23 +221,23 @@ class PoseGraph:
                     # 5 maximum range possible
                     # ?
                     # 8 N = number of beams
-                    # 9 to 9+N laser range data
+                    # 9 to 9+N lidar range data
                     # ?
                     # 9+N+12 timestamp (*nix timestamp)
-                    # 9+N+13 laser type (str)
+                    # 9+N+13 lidar type (str)
 
 
-                    if firstlaser:
+                    if firstlidar:
                         nbeams = int(tokens[8])
-                        lasermeta = tokens[2:6]
-                        firstlaser = False
+                        lidarmeta = tokens[2:6]
+                        firstlidar = False
 
                     # add attributes to the most recent vertex created
                     v.theta = np.arange(0, nbeams) * float(tokens[4]) + float(tokens[2])
                     v.range = np.array([float(x) for x in tokens[9:nbeams+9]])
                     v.time = float(tokens[21+nbeams])
                     self.vindex[v.index] = v
-                    nlaser+= 1
+                    nlidar+= 1
                 else:
                     raise RuntimeError(f"Unexpected line  {line} in {filename}")
 
@@ -247,15 +247,15 @@ class PoseGraph:
                 filetype = "g2o"
             print(f"loaded {filetype} format file: {self.graph.n} vertices, {self.graph.ne} edges")
             
-            if nlaser > 0:
-                lasermeta = [float(x) for x in lasermeta]
+            if nlidar > 0:
+                lidarmeta = [float(x) for x in lidarmeta]
                 
-                self._angmin = lasermeta[0]
-                self._angmax = sum(lasermeta[0:2])
-                self._maxrange = lasermeta[3]
+                self._angmin = lidarmeta[0]
+                self._angmax = sum(lidarmeta[0:2])
+                self._maxrange = lidarmeta[3]
 
                 fov = np.degrees([self._angmin, self._angmax])
-                print(f"  {nlaser} laser scans: {nbeams} beams, fov {fov[0]:.1f}° to {fov[1]:.1f}°, max range {self._maxrange}")
+                print(f"  {nlidar} lidar scans: {nbeams} beams, fov {fov[0]:.1f}° to {fov[1]:.1f}°, max range {self._maxrange}")
 
     
     def scan(self, i):
@@ -286,14 +286,20 @@ class PoseGraph:
         return self.vindex[i].time
     
     def plot(self, **kwargs):
-        if not 'vertex' in kwargs:
-            kwargs['vertex'] = dict(markersize=8, markerfacecolor='blue', markeredgecolor='None')
-        if not 'edge' in kwargs:
-            kwargs['edge'] = dict(linewidth=1, color='black')
-        self.graph.plot(colorcomponents=False, **kwargs)
+        if not 'vopt' in kwargs:
+            kwargs['vopt'] = dict(markersize=8, markerfacecolor='blue', markeredgecolor='None')
+        if not 'eopt' in kwargs:
+            kwargs['eopt'] = dict(linewidth=1)
+        self.graph.plot(colorcomponents=False, force2d=True, **kwargs)
         plt.xlabel('x')
         plt.ylabel('y')
         plt.grid(True)
+
+    def scanmatch(self, s1, s2):
+        p1 = self.scanxy(s1)
+        p2 = self.scanxy(s2)
+        T = base.ICP2d(p1, p2)
+        return SE2(T)
     
     def scanmap(self, occgrid, maxrange=None):
         # note about maxrange timing
@@ -320,7 +326,7 @@ class PoseGraph:
 
                 # all cells along the ray
                 try:
-                    k = occgrid.line(p1, p2)
+                    k = occgrid._line(p1, p2)
                 except ValueError:
                     # silently ignore rays to points outside the grid map
                     continue
@@ -409,11 +415,23 @@ class PoseGraph:
     def optimize(self, iterations = 10, animate = False, retain = False, **kwargs):
         
         eprev  =  math.inf
+
+        if animate and retain:
+            colors = plt.cm.Greys(np.linspace(0.3, 1, iterations))
+            if 'eopt' in kwargs:
+                eo = kwargs['eopt']
+                kwargs = {k: v for (k, v) in kwargs.items() if k != 'eopt'}
+            else:
+                eo = {}
+
         for i in range(iterations):
             if animate:
                 if not retain:
                     plt.clf()
-                self.graph.plot(**kwargs)
+                    eopt = eo
+                else:
+                    eopt = {**eo, **dict(color=tuple(colors[i, :]), label=i)}
+                self.graph.plot(eopt=eopt, force2d=True, colorcomponents=False, **kwargs)
                 plt.pause(0.5)
             
             energy = self.linearize_and_solve()
@@ -530,7 +548,7 @@ class PoseGraph:
 
 if __name__ == "__main__":
 
-    scan = PoseGraph('killian.g2o', laser=True, verbose=False)
+    scan = PoseGraph('killian.g2o', lidar=True, verbose=False)
     print(scan.graph.nc)
     # scan.plot()
     w = scan.scanmap(maxrange=40)

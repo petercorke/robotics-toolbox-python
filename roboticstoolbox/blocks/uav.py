@@ -6,7 +6,7 @@ import time
 
 from bdsim.components import TransferBlock, FunctionBlock
 from bdsim.graphics import GraphicsBlock
-# ------------------------------------------------------------------------ #
+
 
 class MultiRotor(TransferBlock):
     """
@@ -15,13 +15,13 @@ class MultiRotor(TransferBlock):
     .. table::
        :align: left
     
-       +------------+---------+---------+
-       | inputs     | outputs |  states |
-       +------------+---------+---------+
-       | 1          | 1       | 16      |
-       +------------+---------+---------+
-       | A(4,)      | dict    |         | 
-       +------------+---------+---------+
+    +------------+---------+---------+
+    | inputs     | outputs |  states |
+    +------------+---------+---------+
+    | 1          | 1       | 16      |
+    +------------+---------+---------+
+    | ndarray(4) | dict    |         | 
+    +------------+---------+---------+
     """
     nin = 1
     nout = 1
@@ -78,25 +78,25 @@ class MultiRotor(TransferBlock):
 	#   R = f(n)
 	#   n` = inv(W)*o
 	# 
-    def __init__(self, model, *inputs, groundcheck=True, speedcheck=True, x0=None, **kwargs):
+    def __init__(self, model, groundcheck=True, speedcheck=True, x0=None, **blockargs):
         r"""
-        Create a a multi-rotor dynamic model block.
+        Create a multi-rotor dynamic model block.
 
-        :param model: Vehicle geometric and inertial parameters
+        :param model: A dictionary of vehicle geometric and inertial properties
         :type model: dict
-        :param ``*inputs``: Optional incoming connections
-        :type ``*inputs``: Block or Plug
-        :param groundcheck: Prevent vehicle moving below ground, defaults to True
+        :param groundcheck: Prevent vehicle moving below ground :math:`z>0`, defaults to True
         :type groundcheck: bool
-        :param speedcheck: Check for zero rotor speed, defaults to True
+        :param speedcheck: Check for non-positive rotor speed, defaults to True
         :type speedcheck: bool
         :param x0: Initial state, defaults to None
-        :type x0: float, optional
-        :param ``**kwargs``: common Block options
+        :type x0: array_like(6) or array_like(12), optional
+        :param blockargs: |BlockOptions|
+        :type blockargs: dict
         :return: a MULTIROTOR block
         :rtype: MultiRotor instance
         
-        
+        Dynamic model of a multi-rotor flying robot, includes rotor flapping.
+
         **Block ports**
         
             :input ω: a vector of input rotor speeds in (radians/sec).  These are,
@@ -109,10 +109,57 @@ class MultiRotor(TransferBlock):
                 - ``w`` angular rates in the world frame as yaw-pitch-roll rates (radians/second)
                 - ``a1s`` longitudinal flapping angles (radians)
                 - ``b1s`` lateral flapping angles (radians)
-            
-        Based on MATLAB code developed by Pauline Pounds 2004.
+
+        **Model parameters**
+
+        The dynamic model is a dict with the following key/value pairs.
+
+        ===========   ==========================================
+        key           description
+        ===========   ==========================================
+        ``nrotors``   Number of rotors (even integer)                       
+        ``J``         Flyer rotational inertia matrix (3x3)
+        ``h``         Height of rotors above CoG
+        ``d``         Length of flyer arms
+        ``nb``        Number of blades per rotor
+        ``r``         Rotor radius
+        ``c``         Blade chord
+        ``e``         Flapping hinge offset
+        ``Mb``        Rotor blade mass
+        ``Mc``        Estimated hub clamp mass
+        ``ec``        Blade root clamp displacement
+        ``Ib``        Rotor blade rotational inertia
+        ``Ic``        Estimated root clamp inertia
+        ``mb``        Static blade moment
+        ``Ir``        Total rotor inertia
+        ``Ct``        Non-dim. thrust coefficient
+        ``Cq``        Non-dim. torque coefficient
+        ``sigma``     Rotor solidity ratio
+        ``thetat``    Blade tip angle
+        ``theta0``    Blade root angle
+        ``theta1``    Blade twist angle
+        ``theta75``   3/4 blade angle
+        ``thetai``    Blade ideal root approximation
+        ``a``         Lift slope gradient
+        ``A``         Rotor disc area
+        ``gamma``     Lock number
+        ===========   ==========================================
+
+        .. note::
+            - SI units are used.
+            - Based on MATLAB code developed by Pauline Pounds 2004.
+
+        :References:
+            - Design, Construction and Control of a Large Quadrotor micro air vehicle.
+              P.Pounds, `PhD thesis <https://openresearch-repository.anu.edu.au/handle/1885/146543>`_
+              Australian National University, 2007.
+
+        :seealso: :class:`MultiRotorMixer` :class:`MultiRotorPlot`
         """
-        super().__init__(nin=1, nout=1, inputs=inputs, **kwargs)
+        if model is None:
+            raise ValueError('no model provided')
+            
+        super().__init__(nin=1, nout=1, **blockargs)
         self.type = 'quadrotor'
     
         try:
@@ -122,10 +169,22 @@ class MultiRotor(TransferBlock):
         assert nrotors % 2 == 0, 'Must have an even number of rotors'
         
         self.nstates = 12
-        if x0 is not None:
-            assert len(x0) == self.nstates, "x0 is the wrong length"
-        else:
+        if x0 is None:
             x0 = np.zeros((self.nstates,))
+        else:
+            x0 = np.r_[x0]
+            if len(x0) == 6:
+                # assume all derivative are zero
+                x0 = np.r_[x0, np.zeros((6,))]
+            elif len(x0) == 4:
+                # assume x,y,z,yaw
+                x0 = np.r_[x0[:3], 0, 0, x0[3], np.zeros((6,))]
+            elif len(x0) == 3:
+                # assume x,y,z
+                x0 = np.r_[x0[:3], np.zeros((9,))]
+            elif len(x0) != self.nstates:
+                raise ValueError("x0 is the wrong length")
+            
         self._x0 = x0
         
         self.nrotors = nrotors
@@ -177,13 +236,23 @@ class MultiRotor(TransferBlock):
                 ]) / cos(the)
         
         # return velocity in the body frame
+
+        vd = np.linalg.inv(R) @ self._x[6:9]   # translational velocity mapped to body frame
+        rpyd = iW @ self._x[9:12]               # RPY rates mapped to body frame
+
         out = {}
+
         out['x'] = self._x[0:6]
-        out['vb'] = np.linalg.inv(R) @ self._x[6:9]   # translational velocity mapped to body frame
-        out['w'] = iW @ self._x[9:12]               # RPY rates mapped to body frame
+        out['trans'] = np.r_[self._x[:3], vd]
+        out['rot'] = np.r_[self._x[3:6], rpyd]
+
         out['a1s'] = self.a1s
         out['b1s'] = self.b1s
-        out['X'] = self._x
+        out['X'] = np.r_[self._x[:6], vd, rpyd]
+
+        # sys = [ x(1:6);
+        #     inv(R)*x(7:9);   % translational velocity mapped to body frame
+        #     iW*x(10:12)]; 
     
         return [out]
     
@@ -215,6 +284,11 @@ class MultiRotor(TransferBlock):
         phi = n[0]    # yaw
         the = n[1]    # pitch
         psi = n[2]    # roll
+
+    # phi = n(1);    % yaw
+    # the = n(2);    % pitch
+    # psi = n(3);    % roll
+
         
         # rotz(phi)*roty(the)*rotx(psi)
         # BBF > Inertial rotation matrix
@@ -238,6 +312,16 @@ class MultiRotor(TransferBlock):
                     [cos(the), sin(psi)*sin(the), cos(psi)*sin(the)]
                 ]) / cos(the)
     
+
+    #     % rotz(phi)*roty(the)*rotx(psi)
+    # R = [cos(the)*cos(phi) sin(psi)*sin(the)*cos(phi)-cos(psi)*sin(phi) cos(psi)*sin(the)*cos(phi)+sin(psi)*sin(phi);   %BBF > Inertial rotation matrix
+    #      cos(the)*sin(phi) sin(psi)*sin(the)*sin(phi)+cos(psi)*cos(phi) cos(psi)*sin(the)*sin(phi)-sin(psi)*cos(phi);
+    #      -sin(the)         sin(psi)*cos(the)                            cos(psi)*cos(the)];
+    
+    # iW = [0        sin(psi)          cos(psi);             %inverted Wronskian
+    #       0        cos(psi)*cos(the) -sin(psi)*cos(the);
+    #       cos(the) sin(psi)*sin(the) cos(psi)*sin(the)] / cos(the);
+
         # ROTOR MODEL
         T = np.zeros((3,4))
         Q = np.zeros((3,4))
@@ -281,23 +365,27 @@ class MultiRotor(TransferBlock):
     
             # Rotor drag torque - note that this preserves w[i] direction sign
     
-            Q[:,i] = -model['Cq'] * model['rho'] * model['A'] * model['r']**3 * w[i] * abs(w[i])* e3  
+            Q[:,i] = -model['Cq'] * model['rho'] * model['A'] * model['r']**3 * w[i] * abs(w[i]) * e3  
     
             tau[:,i] = np.cross(T[:,i], self.D[:,i])    # Torque due to rotor thrust
     
+        # print(f"{tau=}")
+        # print(f"{T=}")
         # RIGID BODY DYNAMIC MODEL
         dz = v
         dn = iW @ o
         
         dv = model['g'] * e3 + R @ np.sum(T, axis=1) / model['M']
-        
+        do = -np.linalg.inv(model['J']) @ (np.cross(o, model['J'] @ o) + np.sum(tau, axis=1) + np.sum(Q, axis=1)) # row sum of torques
+    
+        # dv = quad.g*e3 + R*(1/quad.M)*sum(T,2);
+        # do = inv(quad.J)*(cross(-o,quad.J*o) + sum(tau,2) + sum(Q,2)); %row sum of torques
+
         # vehicle can't fall below ground, remember z is down
         if self.groundcheck and z[2] > 0:
             z[0] = 0
             dz[0] = 0
-    
-        do = np.linalg.inv(model['J']) @ (np.cross(-o, model['J'] @ o) + np.sum(tau, axis=1) + np.sum(Q, axis=1)) # row sum of torques
-    
+
         # # stash the flapping information for plotting
         # self.a1s = a1s
         # self.b1s = b1s
@@ -313,13 +401,13 @@ class MultiRotorMixer(FunctionBlock):
     .. table::
        :align: left
     
-       +--------+---------+---------+
-       | inputs | outputs |  states |
-       +--------+---------+---------+
-       | 4      | 1       | 0       |
-       +--------+---------+---------+
-       | float  |         |         | 
-       +--------+---------+---------+
+    +--------+------------+---------+
+    | inputs | outputs    |  states |
+    +--------+------------+---------+
+    | 4      | 1          | 0       |
+    +--------+------------+---------+
+    | float  | ndarray(4) |         | 
+    +--------+------------+---------+
     """
  
     nin = 4
@@ -327,19 +415,24 @@ class MultiRotorMixer(FunctionBlock):
     inlabels = ('𝛕r', '𝛕p', '𝛕y', 'T')
     outlabels = ('ω',)
 
-    def __init__(self, maxw=1000, minw=5, **kwargs):
+    def __init__(self, model=None, wmax=1000, wmin=5, **blockargs):
         """
-        Create a block that displays/animates a multi-rotor flying vehicle.
+        Create a speed mixer block for a multi-rotor flying vehicle.
 
+        :param model: A dictionary of vehicle geometric and inertial properties
+        :type model: dict
         :param maxw: maximum rotor speed in rad/s, defaults to 1000
         :type maxw: float
         :param minw: minimum rotor speed in rad/s, defaults to 5
         :type minw: float
-        :param ``**kwargs``: common Block options
+        :param blockargs: |BlockOptions|
+        :type blockargs: dict
         :return: a MULTIROTORMIXER block
         :rtype: MultiRotorMixer instance
 
-
+        This block converts airframe moments and total thrust into a 1D
+        array of rotor speeds which can be input to the MULTIROTOR block.
+    
         **Block ports**
         
             :input 𝛕r: roll torque
@@ -349,37 +442,66 @@ class MultiRotorMixer(FunctionBlock):
 
             :output ω: 1D array of rotor speeds
 
-        Derived from Simulink model by Pauline Pounds 2004
+        **Model parameters**
+
+        The model is a dict with the following key/value pairs.
+
+        ===========   ==========================================
+        key           description
+        ===========   ==========================================
+        ``nrotors``   Number of rotors (even integer)      
+        ``h``         Height of rotors above CoG
+        ``d``         Length of flyer arms
+        ``r``         Rotor radius
+        ===========   ==========================================
+
+        .. note::
+            - Based on MATLAB code developed by Pauline Pounds 2004.
+
+        :seealso: :class:`MultiRotor` :class:`MultiRotorPlot`
         """
-        super().__init__(inputs=inputs, **kwargs)
+        if model is None:
+            raise ValueError('no model provided')
+
+        super().__init__(**blockargs)
         self.type = 'multirotormixer'
-        self.minw = minw
-        self.maxw = maxw
+        self.model = model
+        self.nrotors = model['nrotors']
+        self.minw = wmin**2
+        self.maxw = wmax**2
+        self.theta = np.arange(self.nrotors) / self.nrotors * 2 * np.pi
+        
+        # build the Nx4 mixer matrix
+        M = []
+        s = []
+        for i in range(self.nrotors):
+            # roll and pitch coupling
+            column = np.r_[
+                -sin(self.theta[i]) * model['d'] * model['b'], 
+                cos(self.theta[i]) * model['d'] * model['b'],
+                model['k'] if (i % 2) == 0 else -model['k'] ,
+                -model['b']
+            ]
+            s.append(1 if (i % 2) == 0 else -1)
+            M.append(column)
+        self.M = np.array(M).T
+        self.Minv = np.linalg.inv(self.M)
+        self.signs = np.array(s)
 
     def output(self, t):
-        w = np.zeros((self.nrotors,))
         tau = self.inputs
-        for i in self.nrotors:
-            # roll and pitch coupling
-            w[i] += -tau[0] * sin(self.theta[i]) + tau[1] * cos(self.theta[i])
 
-            # yaw coupling
-            sign = 1 if i % 1 == 0 else -1
-            w[i] += sign * tau[2]
-
-            # overall thrust
-            w[i] += tau[3] / self.nrotors
+        # mix airframe force/torque to rotor thrusts
+        w = self.Minv @ tau
 
         # clip the rotor speeds to the range [minw, maxw]
         w = np.clip(w, self.minw, self.maxw)
 
-        # convert to thrust
-        w = np.sqrt(w) / self.model['b']
+        # convert required thrust to rotor speed
+        w = np.sqrt(w)
 
-        # negate alterate rotors to indicate counter-rotation
-        for i in self.nrotors:
-            if i % 1 == 0:
-                w[i] = -w[i]
+        # flip the signs of alternating rotors
+        w = self.signs * w
 
         return [w]
 
@@ -393,13 +515,13 @@ class MultiRotorPlot(GraphicsBlock):
     .. table::
        :align: left
     
-       +--------+---------+---------+
-       | inputs | outputs |  states |
-       +--------+---------+---------+
-       | 1      | 0       | 0       |
-       +--------+---------+---------+
-       | dict   |         |         | 
-       +--------+---------+---------+
+    +--------+---------+---------+
+    | inputs | outputs |  states |
+    +--------+---------+---------+
+    | 1      | 0       | 0       |
+    +--------+---------+---------+
+    | dict   |         |         | 
+    +--------+---------+---------+
     """
  
     nin = 1
@@ -426,34 +548,30 @@ class MultiRotorPlot(GraphicsBlock):
     # 5 Pitch angle in rad
     # 6 Roll angle in rad
 
+    nin = 1
+    nout = 0
+    inlabels = ('x',)
      
-    def __init__(self, model, *inputs, scale=[-2, 2, -2, 2, 10], flapscale=1, projection='ortho', **kwargs):
+    def __init__(self, model, scale=[-2, 2, -2, 2, 10], flapscale=1, projection='ortho', **blockargs):
         """
         Create a block that displays/animates a multi-rotor flying vehicle.
 
         :param model: A dictionary of vehicle geometric and inertial properties
         :type model: dict
-        :param ``*inputs``: Optional incoming connections
-        :type ``*inputs``: Block or Plug
         :param scale: dimensions of workspace: xmin, xmax, ymin, ymax, zmin, zmax, defaults to [-2,2,-2,2,10]
         :type scale: array_like, optional
         :param flapscale: exagerate flapping angle by this factor, defaults to 1
         :type flapscale: float
         :param projection: 3D projection, one of: 'ortho' [default], 'perspective'
         :type projection: str
-        :param ``**kwargs``: common Block options
+        :param blockargs: |BlockOptions|
+        :type blockargs: dict
         :return: a MULTIROTORPLOT block
         :rtype: MultiRotorPlot instance
 
-
-        **Block ports**
-        
-            :input y: a dictionary signal that includes the item:
-                
-                - ``x`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
-                - ``X`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
-                - ``a1s``
-                - ``b1s``
+        Animate a multi-rotor flying vehicle using Matplotlib graphics.  The
+        rotors are shown as circles and their orientation includes rotor
+        flapping which can be exagerated by ``flapscale``.
 
         .. figure:: ../../figs/multirotorplot.png
            :width: 500px
@@ -461,9 +579,36 @@ class MultiRotorPlot(GraphicsBlock):
 
            Example of quad-rotor display.
 
-        Written by Pauline Pounds 2004
+        **Block ports**
+        
+            :input x: a dictionary signal that includes the item:
+                
+                - ``x`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
+                - ``a1s`` rotor flap angle
+                - ``b1s`` rotor flap angle
+
+        **Model parameters**
+
+        The model is a dict with the following key/value pairs.
+
+        ===========   ==========================================
+        key           description
+        ===========   ==========================================
+        ``nrotors``   Number of rotors (even integer)      
+        ``h``         Height of rotors above CoG
+        ``d``         Length of flyer arms
+        ``r``         Rotor radius
+        ===========   ==========================================
+
+        .. note::
+            - Based on MATLAB code developed by Pauline Pounds 2004.
+
+        :seealso: :class:`MultiRotor` :class:`MultiRotorMixer`
         """
-        super().__init__(nin=1, inputs=inputs, **kwargs)
+        if model is None:
+            raise ValueError('no model provided')
+
+        super().__init__(nin=1, **blockargs)
         self.type = 'quadrotorplot'
         self.model = model
         self.scale = scale
@@ -488,7 +633,7 @@ class MultiRotorPlot(GraphicsBlock):
             self.D[:,i] = np.r_[ quad['d'] * cos(theta), quad['d'] * sin(theta), quad['h']]
         
         #draw ground
-        self.fig = plt.figure()
+        self.fig = self.create_figure(state)
         # no axes in the figure, create a 3D axes
         self.ax = self.fig.add_subplot(111, projection='3d', proj_type=self.projection)
 
@@ -501,7 +646,6 @@ class MultiRotorPlot(GraphicsBlock):
             fontsize=10, family='monospace', verticalalignment='top',
             bbox=dict(boxstyle='round', facecolor='white', edgecolor='black'))
 
-        
         # TODO allow user to set maximum height of plot volume
         self.ax.set_xlim(self.scale[0], self.scale[1])
         self.ax.set_ylim(self.scale[2], self.scale[3])
@@ -529,7 +673,11 @@ class MultiRotorPlot(GraphicsBlock):
             
         self.a1s = np.zeros((self.nrotors,))
         self.b1s = np.zeros((self.nrotors,))
+            
+        plt.draw()
+        plt.show(block=False)
 
+        super().start()
 
     def step(self, state):
 
@@ -616,4 +764,67 @@ class MultiRotorPlot(GraphicsBlock):
 
         super().step(state=state)
 
+    def done(self, block=False, **kwargs):
+        if self.bd.options.graphics:
+            plt.show(block=block)
+            
+            super().done()
+
+if __name__ == "__main__":
+
+    from bdsim.blocks.quad_model import quadrotor
+
+    # m = MultiRotorMixer(model=quadrotor)
+    # print(m.M)
+    # print(m.Minv)
+    # # print(m.Minv @ [0, 0, 0, -40])
+    # m.inputs = [0, 0, 0, -40]
+    # print(m.output(0.0))
+    # m.inputs = [0, 0, 0, -50]
+    # print(m.output(0.0))
+
+    # m.inputs = [0, 0, 0.1, -40]
+    # print(m.output(0.0))
+
+    # m.inputs = [1, 0, 0, -40]
+    # print(m.output(0.0))
+
+    # m.inputs = [0, 1, 0, -40]
+    # print(m.output(0.0))
+
+    m = MultiRotor(model=quadrotor)
+
+
+    def show(w):
+        print()
+        print(w[0]**2 + w[2]**2 - w[1]**2 - w[3]**2)
+        print(w)
+
+        m._x = np.r_[0.0, 0, -4, 0, 0, 0,    0, 0, 0, 0, 0, 0]
+
+        m.inputs = [np.r_[w]]
+        dx = m.deriv()
+
+        print('zdd', dx[8])
+        print('wd', dx[9:12])
+
+        m._x = dx
+        x = m.output()[0]['X']
+        print('zd', x[8])
+        print('ypr_dot', x[9:12])
+
+    show([800.0, -800, 800, -800])
+
+    # tau_y pitch
+    z = np.sqrt((900**2 + 700**2) /2)
+    show([900.0, -z, 700, -z])
+    show([700.0, -z, 900, -z])
+
+    # tau_x roll
+    show([z, -900, z, -700])
+    show([z, -700, z, -900])
+
+
+    # tau_z roll
+    show([900, -800, 900, -800])
 

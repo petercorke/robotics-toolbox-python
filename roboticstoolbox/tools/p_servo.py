@@ -3,9 +3,12 @@
 import numpy as np
 from spatialmath import SE3, base
 import math
+from typing import Union
+
+ArrayLike = Union[list, np.ndarray, tuple, set]
 
 
-def _angle_axis(T, Td):
+def angle_axis(T, Td):
     e = np.empty(6)
     e[:3] = Td[:3, -1] - T[:3, -1]
     R = Td[:3, :3] @ T[:3, :3].T
@@ -28,7 +31,9 @@ def _angle_axis(T, Td):
     return e
 
 
-def p_servo(wTe, wTep, gain=1.0, threshold=0.1, method="rpy"):
+def p_servo(
+    wTe, wTep, gain: Union[float, ArrayLike] = 1.0, threshold=0.1, method="rpy"
+):
     """
     Position-based servoing.
 
@@ -76,7 +81,7 @@ def p_servo(wTe, wTep, gain=1.0, threshold=0.1, method="rpy"):
         # Angular error
         e[3:] = base.tr2rpy(eTep, unit="rad", order="zyx", check=False)
     else:
-        e = _angle_axis(wTe, wTep)
+        e = angle_axis(wTe, wTep)
 
     if base.isscalar(gain):
         k = gain * np.eye(6)

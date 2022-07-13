@@ -1,0 +1,4 @@
+# The base Ridgeback configuration has only the
+# optional SICK LMS111 front laser.
+
+RIDGEBACK_FRONT_SICK_LASER=1

@@ -44,8 +44,11 @@ class px150(ERobot):
             urdf_filepath=urdf_filepath,
         )
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0]))
-        self.addconfiguration("qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4, 0]))
+        self.qr = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4, 0])
+        self.qz = np.zeros(7)
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

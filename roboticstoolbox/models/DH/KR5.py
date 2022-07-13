@@ -7,6 +7,7 @@
 
 from roboticstoolbox import DHRobot, RevoluteDH
 from math import pi
+import numpy as np
 
 
 class KR5(DHRobot):
@@ -46,34 +47,28 @@ class KR5(DHRobot):
 
         # Updated values form ARTE git. Old values left as comments
 
-        L1 = RevoluteDH(a=0.18, d=0.4,
-                        alpha=-pi/2,  # alpha=pi / 2,
-                        qlim=[-155 * deg, 155 * deg]
-                        )
-        L2 = RevoluteDH(a=0.6, d=0,  # d=0.135,
-                        alpha=0,  # alpha=pi,
-                        qlim=[-180 * deg, 65 * deg]
-                        )
-        L3 = RevoluteDH(a=0.12,
-                        d=0,  # d=0.135,
-                        alpha=pi/2,  # alpha=-pi / 2,
-                        qlim=[-15 * deg, 158 * deg]
-                        )
-        L4 = RevoluteDH(a=0.0,
-                        d=-0.62,  # d=0.62,
-                        alpha=-pi/2,  # alpha=pi / 2,
-                        qlim=[-350 * deg, 350 * deg]
-                        )
-        L5 = RevoluteDH(a=0.0,
-                        d=0.0,
-                        alpha=pi/2,  # alpha=-pi / 2,
-                        qlim=[-130 * deg, 130 * deg]
-                        )
-        L6 = RevoluteDH(a=0,
-                        d=-0.115,
-                        alpha=pi,
-                        qlim=[-350 * deg, 350 * deg]
-                        )
+        L1 = RevoluteDH(
+            a=0.18, d=0.4, alpha=-pi / 2, qlim=[-155 * deg, 155 * deg]  # alpha=pi / 2,
+        )
+        L2 = RevoluteDH(
+            a=0.6, d=0, alpha=0, qlim=[-180 * deg, 65 * deg]  # d=0.135,  # alpha=pi,
+        )
+        L3 = RevoluteDH(
+            a=0.12,
+            d=0,  # d=0.135,
+            alpha=pi / 2,  # alpha=-pi / 2,
+            qlim=[-15 * deg, 158 * deg],
+        )
+        L4 = RevoluteDH(
+            a=0.0,
+            d=-0.62,  # d=0.62,
+            alpha=-pi / 2,  # alpha=pi / 2,
+            qlim=[-350 * deg, 350 * deg],
+        )
+        L5 = RevoluteDH(
+            a=0.0, d=0.0, alpha=pi / 2, qlim=[-130 * deg, 130 * deg]  # alpha=-pi / 2,
+        )
+        L6 = RevoluteDH(a=0, d=-0.115, alpha=pi, qlim=[-350 * deg, 350 * deg])
 
         L = [L1, L2, L3, L4, L5, L6]
 
@@ -81,19 +76,28 @@ class KR5(DHRobot):
         super().__init__(
             L,
             # meshdir="KUKA/KR5_arc",
-            name='KR5',
-            manufacturer='KUKA',
-            meshdir="meshes/KUKA/KR5_arc")
+            name="KR5",
+            manufacturer="KUKA",
+            meshdir="meshes/KUKA/KR5_arc",
+        )
 
-        self.addconfiguration("qz", [0, 0, 0, 0, 0, 0])
-        self.addconfiguration(
-          "qk1", [pi / 4, pi / 3, pi / 4, pi / 6, pi / 4, pi / 6])
-        self.addconfiguration(
-          "qk2", [pi / 4, pi / 3, pi / 6, pi / 3, pi / 4, pi / 6])
-        self.addconfiguration(
-          "qk3", [pi / 6, pi / 3, pi / 6, pi / 3, pi / 6, pi / 3])
+        self.qr = np.array([pi / 4, pi / 3, pi / 4, pi / 6, pi / 4, pi / 6])
+        self.qz = np.zeros(6)
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
+
+        self.addconfiguration_attr(
+            "qk1", np.array([pi / 4, pi / 3, pi / 4, pi / 6, pi / 4, pi / 6])
+        )
+        self.addconfiguration_attr(
+            "qk2", np.array([pi / 4, pi / 3, pi / 6, pi / 3, pi / 4, pi / 6])
+        )
+        self.addconfiguration_attr(
+            "qk3", np.array([pi / 6, pi / 3, pi / 6, pi / 3, pi / 6, pi / 3])
+        )
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
     robot = KR5()
     print(robot)

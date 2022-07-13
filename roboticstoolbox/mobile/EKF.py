@@ -1,11 +1,7 @@
 """
 Python EKF Planner
-@Author: Kristian Gibson
-TODO: Comments + Sphynx Docs Structured Text
-TODO: Bug-fix, testing, change remaining matlab placeholders
-TODO: Replace vargin with parameters
-
-Not ready for use yet.
+@Author: Peter Corke, original MATLAB code and Python version
+@Author: Kristian Gibson, initial MATLAB port
 """
 from collections import namedtuple
 import numpy as np
@@ -19,13 +15,218 @@ from spatialmath.base.animate import Animate
 from spatialmath import base, SE2
 from roboticstoolbox.mobile import VehicleBase
 from roboticstoolbox.mobile.landmarkmap import LandmarkMap
-from roboticstoolbox.mobile.sensors import Sensor
+from roboticstoolbox.mobile.sensors import SensorBase
+
 
 class EKF:
-    def __init__(self, robot=None,  sensor=None, map=None, 
+
+    def __init__(self, robot,  sensor=None, map=None, 
             P0=None, x_est=None, joseph=True,
-            landmarks=None, animate=True, x0=[0, 0, 0],
-            verbose=False, history=True, dim=None):
+            animate=True, x0=[0, 0, 0],
+            verbose=False, history=True, workspace=None):
+        r"""
+        Extended Kalman filter
+
+        :param robot: robot motion model
+        :type robot: 2-tuple
+        :param sensor: vehicle mounted sensor model, defaults to None
+        :type sensor: 2-tuple, optional
+        :param map: landmark map, defaults to None
+        :type map: :class:`LandmarkMap`, optional
+        :param P0: initial covariance matrix, defaults to None
+        :type P0: ndarray(n,n), optional
+        :param x_est: initial state estimate, defaults to None
+        :type x_est: array_like(n), optional
+        :param joseph: use Joseph update of covariance, defaults to True
+        :type joseph: bool, optional
+        :param animate: show animation of vehicle motion, defaults to True
+        :type animate: bool, optional
+        :param x0: initial EKF state, defaults to [0, 0, 0]
+        :type x0: array_like(n), optional
+        :param verbose: display extra debug information, defaults to False
+        :type verbose: bool, optional
+        :param history: retain step-by-step history, defaults to True
+        :type history: bool, optional
+        :param workspace: dimension of workspace, see :func:`~spatialmath.base.graphics.expand_dims`
+        :type workspace: scalar, array_like(2), array_like(4)
+
+        This class solves several classical robotic estimation problems, which are
+        selected according to the arguments:
+
+        ======================    ======   ==========   ==========   =======   ======
+        Problem                   len(x)   ``robot``    ``sensor``   ``map``   ``P0``
+        ======================    ======   ==========   ==========   =======   ======
+        Dead reckoning            3        (veh,V)      None         None      P0
+        Map-based localization    3        (veh,V)      (smodel,W)   yes       P0
+        Map creation              2N       (veh,None)   (smodel,W)   None      None
+        SLAM                      3+2N     (veh,V)      (smodel,W)   None      P0
+        ======================    ======   ==========   ==========   =======   ======
+
+        where:
+
+        - ``veh`` models the robotic vehicle kinematics and odometry and is a :class:`VehicleBase` subclass
+        - ``V`` is the estimated odometry (process) noise covariance as an ndarray(3,3)
+        - ``smodel`` models the robot mounted sensor and is a :class:`SensorBase` subclass
+        - ``W`` is the estimated sensor (measurement) noise covariance as an ndarray(2,2)
+
+        The state vector has different lengths depending on the particular
+        estimation problem, see below.
+
+        At each iteration of the EKF:
+
+        -  invoke the step method of the ``robot``
+          - obtains the next control input from the driver agent, and apply it
+            as the vehicle control input
+          - the vehicle returns a noisy odometry estimate
+        - the state prediction is computed
+        - the true pose is used to determine a noisy sensor observation
+        - the state is corrected, new landmarks are added to the map
+
+        The working area of the robot is defined by ``workspace`` or inherited
+        from the landmark map attached to the ``sensor`` (see
+        :func:`~spatialmath.base.graphics.expand_dims`):
+
+        ==============  =======  =======
+        ``workspace``   x-range  y-range
+        ==============  =======  =======
+        A (scalar)      -A:A     -A:A
+        [A, B]           A:B      A:B
+        [A, B, C, D]     A:B      C:D
+        ==============  =======  =======
+
+        **Dead-reckoning localization**
+
+        The state :math:`\vec{x} = (x, y, \theta)` is the estimated vehicle
+        configuration.
+
+        Create a vehicle with odometry covariance ``V``, add a driver to it,
+        run the Kalman filter with estimated covariances ``V`` and initial
+        vehicle state covariance ``P0``::
+
+            V = np.diag([0.02, np.radians(0.5)]) ** 2;
+            robot = Bicycle(covar=V)
+            robot.control = RandomPath(workspace=10)
+
+            x_sdev = [0.05, 0.05, np.radians(0.5)]
+            P0 = np.diag(x_sdev) ** 2
+            ekf = EKF(robot=(robot, V), P0=P0)
+
+            ekf.run(T=20)  # run the simulation for 20 seconds
+
+            robot.plot_xy(color="b")  # plot the true vehicle path
+            ekf.plot_xy(color="r")    # overlay the estimated path
+            ekf.plot_ellipse(filled=True, facecolor="g", alpha=0.3)  # overlay uncertainty ellipses
+
+            # plot the covariance against time
+            t = ekf.get_t();
+            pn = ekf.get_Pnorm()
+            plt.plot(t, pn);
+
+        **Map-based vehicle localization**
+
+        The state :math:`\vec{x} = (x, y, \theta)` is the estimated vehicle
+        configuration.
+
+        Create a vehicle with odometry covariance ``V``, add a driver to it,
+        create a map with 20 point landmarks, create a sensor that uses the map
+        and vehicle state to estimate landmark range and bearing with covariance
+        ``W``, the Kalman filter with estimated covariances ``V`` and ``W`` and
+        initial vehicle state covariance ``P0``::
+
+            V = np.diag([0.02, np.radians(0.5)]) ** 2;
+            robot = Bicycle(covar=V)
+            robot.control = RandomPath(workspace=10)
+
+            map = LandmarkMap(nlandmarks=20, workspace=10)
+
+            W = np.diag([0.1, np.radians(1)]) ** 2
+            sensor = RangeBearingSensor(robot=robot, map=map, covar=W, angle=[-np.pi/2, np.pi/2], range=4, animate=True)
+
+            x_sdev = [0.05, 0.05, np.radians(0.5)]
+            P0 = np.diag(x_sdev) ** 2
+            ekf = EKF(robot=(robot, V), P0=P0, map=map, sensor=(sensor, W))
+
+            ekf.run(T=20)  # run the simulation for 20 seconds
+
+            map.plot()  #  plot the map
+            robot.plot_xy(color="b")  # plot the true vehicle path
+            ekf.plot_xy(color="r")    # overlay the estimated path
+            ekf.plot_ellipse()  # overlay uncertainty ellipses
+
+            # plot the covariance against time
+            t = ekf.get_t();
+            pn = ekf.get_Pnorm()
+            plt.plot(t, pn);
+
+        **Vehicle-based map making**
+
+        The state :math:`\vec{x} = (x_0, y_0, \dots, x_{N-1}, y_{N-1})` is the
+        estimated landmark positions where :math:`N` is the number of landmarks.
+        The state vector is initially empty, and is extended by 2 elements every
+        time a new landmark is observed.
+
+        Create a vehicle with perfect odometry (no covariance), add a driver to it,
+        create a sensor that uses the map and vehicle state to estimate landmark range 
+        and bearing with covariance ``W``, the Kalman filter with estimated sensor 
+        covariance ``W``, then run the filter for N time steps::
+
+            robot = Bicycle()
+            robot.add_driver(RandomPath(20, 2))
+
+            map = LandmarkMap(nlandmarks=20, workspace=10, seed=0)
+
+            W = np.diag([0.1, np.radians(1)]) ** 2
+            sensor = RangeBearingSensor(robot, map, W)
+
+            ekf = EKF(robot=(robot, None), sensor=(sensor, W))
+
+            ekf.run(T=20)  # run the simulation for 20 seconds
+
+            map.plot()  #  plot the map
+            robot.plot_xy(color="b")  # plot the true vehicle path
+
+        **Simultaneous localization and mapping (SLAM)**
+
+        The state :math:`\vec{x} = (x, y, \theta, x_0, y_0, \dots, x_{N-1},
+        y_{N-1})` is the estimated vehicle configuration followed by the
+        estimated landmark positions where :math:`N` is the number of landmarks.
+        The state vector is initially of length 3, and is extended by 2 elements
+        every time a new landmark is observed.
+
+        Create a vehicle with odometry covariance ``V``, add a driver to it,
+        create a map with 20 point landmarks, create a sensor that uses the map
+        and vehicle state to estimate landmark range and bearing with covariance
+        ``W``, the Kalman filter with estimated covariances ``V`` and ``W`` and
+        initial state covariance ``P0``, then run the filter to estimate the
+        vehicle state at each time step and the map::
+
+            V = np.diag([0.02, np.radians(0.5)]) ** 2;
+            robot = Bicycle(covar=V)
+            robot.control = RandomPath(workspace=10)
+
+            map = LandmarkMap(nlandmarks=20, workspace=10)
+
+            W = np.diag([0.1, np.radians(1)]) ** 2
+            sensor = RangeBearingSensor(robot=robot, map=map, covar=W, angle=[-np.pi/2, np.pi/2], range=4, animate=True)
+            
+            ekf = EKF(robot=(robot, V), P0=P0, sensor=(sensor, W))
+
+            ekf.run(T=20)  # run the simulation for 20 seconds
+
+            map.plot(); # plot true map
+            ekf.plot_map(); # plot estimated landmark position
+
+            robot.plot_xy(); # plot true path
+            ekf.plot_xy(); # plot estimated robot path
+            ekf.plot_ellipse(); # plot estimated covariance
+
+            # plot the covariance against time
+            t = ekf.get_t();
+            pn = ekf.get_Pnorm()
+            plt.plot(t, pn);
+
+        :seealso: :meth:`run`
+        """
 
         if robot is not None:
             if not isinstance(robot, tuple) or len(robot) != 2 \
@@ -36,7 +237,7 @@ class EKF:
 
         if sensor is not None:
             if not isinstance(sensor, tuple) or len(sensor) != 2 \
-                or not isinstance(sensor[0], Sensor):
+                or not isinstance(sensor[0], SensorBase):
                     raise TypeError('sensor must be tuple (sensor, W_est)')
             self._sensor = sensor[0]  # reference to the sensor
             self._W_est = sensor[1]  # estimate of sensor covariance W
@@ -63,7 +264,7 @@ class EKF:
         self._x0 = x0  # initial vehicle state
 
         self._x_est = x_est           #  estimated state
-        self._landmarks = landmarks           #  ekf_map state
+        self._landmarks = None   #  ekf_map state
         
         self._est_vehicle = False
         self._est_ekf_map = False
@@ -84,11 +285,12 @@ class EKF:
         self._keep_history = history     #  keep history
         self._htuple = namedtuple("EKFlog", "t xest odo P innov S K lm z")
 
-        if dim is None:
-            # TODO get world size from landmark map, else
-            # TODO unpack this value from len 1,2,4
-            pass
-        self._dim = dim  # robot workspace dimensions for animation
+        if workspace is not None:
+            self._dim = base.expand_dims(dim)
+        elif self.sensor is not None:
+            self._dim = self.sensor.map.workspace
+        else:
+            self._dim = self._robot.workspace
 
         # self.robot.init()
 
@@ -123,7 +325,7 @@ class EKF:
         # if np.any(sensor) and not isinstance(sensor, 'Sensor'):
         #     raise ValueError('expecting Sensor object')
 
-        self.init()
+        self._init()
 
         self.xxdata = ([], [])
 
@@ -132,7 +334,7 @@ class EKF:
 
         def indent(s, n=2):
             spaces = ' ' * n
-            return s.replace('\n', '\n' + spaces)
+            return s.replace('\n', '\n' + spaces) 
 
         estimating = []
         if self._est_vehicle is not None:
@@ -144,73 +346,137 @@ class EKF:
         if self.robot is not None:
             s += indent("\nrobot: "  + str(self.robot))
         if self.V_est is not None:
-            s += indent('\nV_est:  ' + np.array2string(self.V_est.ravel(), precision=3))
+            s += indent('\nV_est:  ' + base.array2str(self.V_est))
 
         if self.sensor is not None:
             s += indent("\nsensor: " + str(self.sensor))
         if self.W_est is not None:
-            s += indent('\nW_est:  ' + np.array2string(self.W_est.ravel(), precision=3))
+            s += indent('\nW_est:  ' + base.array2str(self.W_est))
 
         return s
     
+    def __repr__(self):
+        return str(self)
+
     @property
     def x_est(self):
+        """
+        Get EKF state
+
+        :return: state vector
+        :rtype: ndarray(n)
+
+        Returns the value of the estimated state vector at the end of
+        simulation. The dimensions depend on the problem being solved.
+        """
         return self._x_est
     
     @property
     def P_est(self):
+        """
+        Get EKF covariance
+
+        :return: covariance matrix
+        :rtype: ndarray(n,n)
+
+        Returns the value of the estimated covariance matrix at the end of
+        simulation. The dimensions depend on the problem being solved.
+        """
         return self._P_est
 
     @property
     def P0(self):
+        """
+        Get initial EKF covariance
+
+        :return: covariance matrix
+        :rtype: ndarray(n,n)
+
+        Returns the value of the covariance matrix passed to the constructor.
+        """
         return self._P0
     
     @property
-    def landmarks(self):
-        return self._landmarks
-    
-    @property
     def V_est(self):
+        """
+        Get estimated odometry covariance
+
+        :return: odometry covariance
+        :rtype: ndarray(2,2)
+
+        Returns the value of the estimated odometry covariance matrix passed to
+        the constructor
+        """
         return self._V_est
 
     @property
     def W_est(self):
+        """
+        Get estimated sensor covariance
+
+        :return: sensor covariance
+        :rtype: ndarray(2,2)
+
+        Returns the value of the estimated sensor covariance matrix passed to
+        the constructor
+        """
         return self._W_est
     
     @property
     def robot(self):
+        """
+        Get robot object
+
+        :return: robot used in simulation
+        :rtype: :class:`VehicleBase` subclass
+        """
         return self._robot
     
     @property
     def sensor(self):
+        """
+        Get sensor object
+
+        :return: sensor used in simulation
+        :rtype: :class:`SensorBase` subclass
+        """
         return self._sensor
-    
+
     @property
-    def est_vehicle(self):
-        return self._est_vehicle
-    
-    @property
-    def est_ekf_map(self):
-        return self._est_ekf_map
-    
-    @property
-    def joseph(self):
-        return self._joseph
+    def map(self):
+        """
+        Get map object
+
+        :return: map used in simulation
+        :rtype: :class:`LandmarkMap` subclass
+        """
+        return self._map
     
     @property
     def verbose(self):
+        """
+        Get verbosity state
+
+        :return: verbosity
+        :rtype: bool
+        """
         return self._verbose
     
     @property
-    def p0(self):
-        return self._p0
-    
-    @property
-    def ekf_map(self):
-        return self._ekf_map
-    
-    @property
     def history(self):
+        """
+        Get EKF simulation history
+
+        :return: simulation history
+        :rtype: list of namedtuples
+
+        At each simulation timestep a namedtuple of is appended to the history
+        list.  It contains, for that time step, estimated state and covariance,
+        and sensor observation.
+
+        :seealso: :meth:`get_t` :meth:`get_xyt` :meth:`get_map` :meth:`get_P` 
+            :meth:`get_Pnorm` 
+        """
         return self._history
     
     @property
@@ -221,27 +487,107 @@ class EKF:
         :return: workspace bounds [xmin, xmax, ymin, ymax]
         :rtype: ndarray(4)
 
-        Returns the bounds of the workspace as specified by constructor
+        Returns the bounds of the workspace as specified by the constructor
         option ``workspace``
         """
         return self._workspace
+
     
-    def landmark(self, lm_id):
+    @property
+    def landmarks(self):
+        """
+        Get landmark information
+
+        :return: landmark information
+        :rtype: dict
+
+        The dictionary is indexed by the landmark id and gives a 3-tuple:
+
+        - order in which landmark was seen
+        - number of times seen
+        
+        The order in which the landmark was first seen.  The first observed
+        landmark has order 0 and so on.
+
+        :seealso: :meth:`landmark`
+        """
+        return self._landmarks
+
+    def landmark(self, id):
         """
         Landmark information
 
-        :param lm: landmark index
-        :type lm: int
-        :return: number of times seen, order in which it was first seen, index in the state vector
-        :rtype: int, int, int
-        """
-        if lm_id in self._landmarks:
-            l = self._landmarks[lm_id]
-            return l[1], l[0] // 2, l[0]
-        else:
-            raise ValueError(f"unknown landmark {lm_id}")
+        :param id: landmark index
+        :type id: int
+        :return: order in which it was first seen, number of times seen
+        :rtype: int, int
 
-    def init(self):
+        The first observed landmark has order 0 and so on.
+
+        :seealso: :meth:`landmarks` :meth:`landmark_index` :meth:`landmark_mindex`
+        """
+        try:
+            l = self._landmarks[id]
+            return l[0], l[1]
+        except KeyError:
+            raise ValueError(f"unknown landmark {id}") from None
+
+    def landmark_index(self, id):
+        """
+        Landmark index in complete state vector
+
+        :param id: landmark index
+        :type id: int
+        :return: index in the state vector
+        :rtype: int
+
+        The return value ``j`` is the index of the x-coordinate of the landmark
+        in the EKF state vector, and ``j+1`` is the index of the y-coordinate.
+
+        :seealso: :meth:`landmark`
+        """
+        try:
+            jx = self._landmarks[id][0] * 2
+            if self._est_vehicle:
+                jx += 3
+            return jx
+        except KeyError:
+            raise ValueError(f"unknown landmark {id}") from None
+
+    def landmark_mindex(self, id):
+        """
+        Landmark index in map state vector
+
+        :param id: landmark index
+        :type id: int
+        :return: index in the state vector
+        :rtype: int
+
+        The return value ``j`` is the index of the x-coordinate of the landmark
+        in the map vector, and ``j+1`` is the index of the y-coordinate.
+
+        :seealso: :meth:`landmark`
+        """
+        try:
+            return self._landmarks[id][0] * 2
+        except KeyError:
+            raise ValueError(f"unknown landmark {id}") from None
+
+    def landmark_x(self, id):
+        """
+        Landmark position
+
+        :param id: landmark index
+        :type id: int
+        :return: landmark position :math:`(x,y)`
+        :rtype: ndarray(2)
+
+        Returns the landmark position from the current state vector.
+        """
+        jx = self.landmark_index(id)
+        return self._x_est[jx: jx+2]
+
+    def _init(self):
         #EKF.init Reset the filter
         #
         # E.init() resets the filter state and clears landmarks and history.
@@ -269,8 +615,33 @@ class EKF:
 
             # np.full((2, len(self.sensor.map)), -1, dtype=int)
 
-    def run(self, T, animate=False, movie=np.array([])):
-        self.init()
+    def run(self, T, animate=False, movie=None):
+        """
+        Run the EKF simulation
+
+        :param T: maximum simulation time in seconds
+        :type T: float
+        :param animate: animate motion of vehicle, defaults to False
+        :type animate: bool, optional
+        :param movie: name of movie file to create, defaults to None
+        :type movie: str, optional
+
+        Simulates the motion of a vehicle (under the control of a driving agent)
+        and the EKF estimator.  The steps are:
+
+        - initialize the filter, vehicle and vehicle driver agent, sensor
+        - for each time step:
+
+            - step the vehicle and its driver agent, obtain odometry
+            - take a sensor reading
+            - execute the EKF
+            - save information as a namedtuple to the history list for later display
+
+        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks` 
+            :meth:`get_xyt` :meth:`get_t` :meth:`get_map` :meth:`get_P` :meth:`get_Pnorm`
+            :meth:`plot_xy` :meth:`plot_ellipse` :meth:`plot_error` :meth:`plot_map`
+        """
+        self._init()
         if animate:
             if self.sensor is not None:
                 self.sensor.map.plot()
@@ -294,14 +665,20 @@ class EKF:
         for k in range(round(T / self.robot.dt)):
             if animate:
                 self.robot.plot()
-            self.step()
+            self._step()
         #     anim.add()
 
         # anim.close()
 
 
     # TODO: Make the following methods private.
-    def step(self, z_pred=None):
+    def _step(self, z_pred=None):
+        """
+        Execute one timestep of the simulation
+
+        :param z_pred: _description_, defaults to None
+        :type z_pred: _type_, optional
+        """
 
         # move the robot
         odo = self.robot.step()
@@ -400,11 +777,11 @@ class EKF:
 
             if self._est_ekf_map:
                 # the ekf_map is estimated MM or SLAM case
-                if self.isseenbefore(lm_id):
+                if self._isseenbefore(lm_id):
                     # landmark is previously seen
                     
                     # get previous estimate of its state
-                    jx = self.landmark_index(lm_id)
+                    jx = self.landmark_mindex(lm_id)
                     xf = xm_pred[jx: jx+2]
 
                     # compute Jacobian for this particular landmark
@@ -428,21 +805,21 @@ class EKF:
                         Hxv = self.sensor.Hx(xv_pred, xf)
                         Hx = np.block([Hxv, Hx])
 
-                    self.landmark_increment(lm_id)  # update the count
+                    self._landmark_increment(lm_id)  # update the count
                     if self._verbose:
-                        print(f"landmark {lm_id} seen {self.landmark_count(lm_id)} times, state_idx={self.landmark_index(lm_id)}")
+                        print(f"landmark {lm_id} seen {self._landmark_count(lm_id)} times, state_idx={self.landmark_index(lm_id)}")
                     doUpdatePhase = True
 
                 else:
                     # new landmark, seen for the first time
 
                     # extend the state vector and covariance
-                    x_pred, P_pred = self.extend_map(P_pred, xv_pred, xm_pred, z, lm_id)
+                    x_pred, P_pred = self._extend_map(P_pred, xv_pred, xm_pred, z, lm_id)
                     # if lm_id == 17:
                     #     print(P_pred)
                     #     # print(x_pred[-2:], self._sensor._map.landmark(17), base.norm(x_pred[-2:] - self._sensor._map.landmark(17)))
 
-                    self.landmark_add(lm_id)
+                    self._landmark_add(lm_id)
                     if self._verbose:
                         print(f"landmark {lm_id} seen for first time, state_idx={self.landmark_index(lm_id)}")
                     doUpdatePhase = False
@@ -517,37 +894,30 @@ class EKF:
             )
             self._history.append(hist)
 
-    def isseenbefore(self, lm_id):
+    ## landmark management
 
-        # _landmarks[0, id] is the index in state vector
+    def _isseenbefore(self, lm_id):
+
+        # _landmarks[0, id] is the order in which seen
         # _landmarks[1, id] is the occurence count
 
         return lm_id in self._landmarks
 
-    def landmark_increment(self, lm_id):
+    def _landmark_increment(self, lm_id):
         self._landmarks[lm_id][1] += 1  # update the count
 
-    def landmark_count(self, lm_id):
+    def _landmark_count(self, lm_id):
         return self._landmarks[lm_id][1]
 
-    def landmark_add(self, lm_id):
-        self._landmarks[lm_id] = [len(self._landmarks) * 2, 1]
+    def _landmark_add(self, lm_id):
+        self._landmarks[lm_id] = [len(self._landmarks) , 1]
     
-    def landmark_index(self, lm_id):
-        return self._landmarks[lm_id][0]
-
-    def landmark_x(self, lm_id):
-        jx = self._landmarks[lm_id][0]
-        if self._est_vehicle:
-            jx += 3
-        return self._x_est[jx: jx+2]
-
-    def extend_map(self, P, xv, xm, z, lm_id):
+    def _extend_map(self, P, xv, xm, z, lm_id):
             # this is a new landmark, we haven't seen it before
             # estimate position of landmark in the world based on 
             # noisy sensor reading and current vehicle pose
 
-        M = None
+        # M = None
 
         # estimate its position based on observation and vehicle state
         xf = self.sensor.g(xv, z)
@@ -585,93 +955,110 @@ class EKF:
 
         return x_ext, P_ext
 
-    def get_xy(self):
-        """[summary]
 
-        :return: [description]
-        :rtype: [type]
+    def get_t(self):
+        """
+        Get time from simulation
 
-                %EKF.plot_xy Get vehicle position
-        %
-        % P = E.get_xy() is the estimated vehicle pose trajectory
-        % as a matrix (Nx3) where each row is x, y, theta.
-        %
-        % See also EKF.plot_xy, EKF.plot_error, EKF.plot_ellipse, EKF.plot_P.
+        :return: simulation time vector
+        :rtype: ndarray(n)
+
+        Return simulation time vector, starts at zero.  The timestep is an
+        attribute of the ``robot`` object.
+
+        :seealso: :meth:`run` :meth:`history`
+        """
+        return np.array([h.t for h in self._history])
+
+    def get_xyt(self):
+        r"""
+        Get estimated vehicle trajectory
+
+        :return: vehicle trajectory where each row is configuration :math:`(x, y, \theta)`
+        :rtype: ndarray(n,3)
+
+        :seealso: :meth:`plot_xy` :meth:`run` :meth:`history`
         """
         if self._est_vehicle:
-            xyt = np.array([h.xest[:2] for h in self._history])
+            xyt = np.array([h.xest[:3] for h in self._history])
         else:
             xyt = None
         return xyt
 
     def plot_xy(self, *args, block=False, **kwargs):
-        """            %EKF.plot_xy Plot vehicle position
-            %
-            % E.plot_xy() overlay the current plot with the estimated vehicle path in
-            % the xy-plane.
-            %
-            % E.plot_xy(LS) as above but the optional line style arguments
-            % LS are passed to plot.
-            %
-            % See also EKF.get_xy, EKF.plot_error, EKF.plot_ellipse, EKF.plot_P.
+        """
+        Plot estimated vehicle position
 
-
-        :param block: [description], defaults to False
+        :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`
+        :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`
+        :param block: hold plot until figure is closed, defaults to False
         :type block: bool, optional
+
+        Plot the estimated vehicle path in the xy-plane.
+
+        :seealso: :meth:`get_xyt` :meth:`plot_error` :meth:`plot_ellipse` :meth:`plot_P`
+            :meth:`run` :meth:`history`
         """
         if args is None and 'color' not in kwargs:
             kwargs['color'] = 'r'
-        xyt = self.get_xy()
+        xyt = self.get_xyt()
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
         # plt.show(block=block)
 
     def plot_ellipse(self, confidence=0.95, N=10, **kwargs):
         """
-        %EKF.plot_ellipse Plot vehicle covariance as an ellipse
-        %
-        % E.plot_ellipse() overlay the current plot with the estimated
-        % vehicle position covariance ellipses for 20 points along the
-        % path.
-        %
-        % E.plot_ellipse(LS) as above but pass line style arguments
-        % LS to plot_ellipse.
-        %
-        % Options::
-        % 'interval',I        Plot an ellipse every I steps (default 20)
-        % 'confidence',C      Confidence interval (default 0.95)
-        %
-        % See also plot_ellipse.
+        Plot uncertainty ellipses
+
+        :param confidence: ellipse confidence interval, defaults to 0.95
+        :type confidence: float, optional
+        :param N: number of ellipses to plot, defaults to 10
+        :type N: int, optional
+        :param kwargs: arguments passed to :meth:`spatialmath.base.graphics.plot_ellipse`
+
+        Plot ``N`` uncertainty ellipses spaced evenly along the trajectory.
+
+        :seealso: :meth:`get_P` :meth:`run` :meth:`history`
         """
         nhist = len(self._history)
+
+        if "label" in kwargs:
+            label = kwargs["label"]
+            del kwargs["label"]
+        else:
+            label = f"{confidence*100:.3g}% confidence"
         
         for k in np.linspace(0, nhist-1, N):
             k = round(k)
             h = self._history[k]
-            base.plot_ellipse(h.P[:2, :2], centre=h.xest[:2], confidence=confidence, inverted=True, **kwargs)
+            if k == 0:
+                base.plot_ellipse(h.P[:2, :2], centre=h.xest[:2], confidence=confidence, label=label, inverted=True, **kwargs)
+            else:
+                base.plot_ellipse(h.P[:2, :2], centre=h.xest[:2], confidence=confidence, inverted=True, **kwargs)
 
-    def plot_error(self, bgcolor='r', confidence=0.95, **kwargs):
+
+    def plot_error(self, bgcolor='r', confidence=0.95, ax=None, **kwargs):
+        r"""
+        Plot error with uncertainty bounds
+
+        :param bgcolor: background color, defaults to 'r'
+        :type bgcolor: str, optional
+        :param confidence: confidence interval, defaults to 0.95
+        :type confidence: float, optional
+
+        Plot the error between actual and estimated vehicle 
+        path :math:`(x, y, \theta)`` versus time as three stacked plots.
+        Heading error is wrapped into the range :math:`[-\pi,\pi)`
+
+
+        Behind each line draw a shaded polygon ``bgcolor`` showing the specified 
+        ``confidence`` bounds based on the covariance at each time step.
+        Ideally the lines should be within the shaded polygon ``confidence``
+        of the time.
+
+        .. note:: Observations will decrease the uncertainty while periods of dead-reckoning increase it.
+
+        :seealso: :meth:`get_P` :meth:`run` :meth:`history`
         """
-        %EKF.plot_error Plot vehicle position
-        %
-        % E.plot_error(OPTIONS) plot the error between actual and estimated vehicle 
-        % path (x, y, theta) versus time.  Heading error is wrapped into the range [-pi,pi)
-        %
-        % Options::
-        % 'bound',S    Display the confidence bounds (default 0.95).
-        % 'color',C    Display the bounds using color C
-        % LS           Use MATLAB linestyle LS for the plots
-        %
-        % Notes::
-        % - The bounds show the instantaneous standard deviation associated
-        %   with the state.  Observations tend to decrease the uncertainty
-        %   while periods of dead-reckoning increase it.
-        % - Set bound to zero to not draw confidence bounds.
-        % - Ideally the error should lie "mostly" within the +/-3sigma
-        %   bounds.
-        %
-        % See also EKF.plot_xy, EKF.plot_ellipse, EKF.plot_P.  
-        """          
-
         error = []
         bounds = [] 
         ppf = chi2.ppf(confidence, df=2)
@@ -691,7 +1078,10 @@ class EKF:
         bounds = np.array(bounds)
         t = self.get_t()
 
-        fig, axes = plt.subplots(3)
+        if ax is None:
+            fig, axes = plt.subplots(3)
+        else:
+            axes = ax[:3]
         labels = ["x", "y", r"$\theta$"]
 
         for k, ax in enumerate(axes):
@@ -732,7 +1122,18 @@ class EKF:
         # xlabel('Time step')
         # ylabel('\theta error')
 
-    def get_ekf_map(self):
+    def get_map(self):
+        """
+        Get estimated map
+
+        :return: landmark coordinates :math:`(x, y)`
+        :rtype: ndarray(n,2)
+
+        Landmarks are returned in the order they were first observed.
+
+        :seealso: :meth:`landmarks`  :meth:`run` :meth:`history`
+
+        """
         xy = []
         for lm_id, (jx, n) in self._landmarks.items():
             #  jx is an index into the *landmark* part of the state
@@ -745,23 +1146,20 @@ class EKF:
         return np.array(xy)
 
     def plot_map(self, marker=None, ellipse=None, confidence = 0.95):
-        """        %EKF.plot_map Plot landmarks
-        %
-        % E.plot_map(OPTIONS) overlay the current plot with the estimated landmark 
-        % position (a +-marker) and a covariance ellipses.
-        %
-        % E.plot_map(LS, OPTIONS) as above but pass line style arguments
-        % LS to plot_ellipse.
-        %
-        % Options::
-        % 'confidence',C   Draw ellipse for confidence value C (default 0.95)
-        %
-        % See also EKF.get_map, EKF.plot_ellipse.
-
-        % TODO:  some option to plot map evolution, layered ellipses
         """
-        
+        Plot estimated landmarks
 
+        :param marker: plot marker for landmark, arguments passed to :meth:`~matplotlib.axes.Axes.plot`, defaults to "r+"
+        :type marker: dict, optional
+        :param ellipse: arguments passed to :meth:`~spatialmath.base.graphics.plot_ellipse`, defaults to None
+        :type ellipse: dict, optional
+        :param confidence: ellipse confidence interval, defaults to 0.95
+        :type confidence: float, optional
+
+        Plot a marker  and covariance ellipses for each estimated landmark.
+
+        :seealso: :meth:`get_map` :meth:`run` :meth:`history`
+        """
         if marker is None:
             marker = {
                 'marker': '+',
@@ -784,46 +1182,104 @@ class EKF:
         if ellipse is not None:
             for i in range(xm.shape[0]):
                 Pi = self.P_est[i: i+2, i: i+2]
+                # put ellipse in the legend only once
                 if i == 0:
-                    base.plot_ellipse(Pi, centre=xm[i, :], confidence=confidence, inverted=True, label='confidence', **ellipse)
+                    base.plot_ellipse(Pi, centre=xm[i, :], confidence=confidence,
+                        inverted=True, label=f"{confidence*100:.3g}% confidence", **ellipse)
                 else:
                     base.plot_ellipse(Pi, centre=xm[i, :], confidence=confidence, inverted=True, **ellipse)
         # plot_ellipse( P * chi2inv_rtb(opt.confidence, 2), xf, args{:});
 
-
     def get_P(self, k=None):
+        """
+        Get covariance matrices from simulation
+
+        :param k: timestep, defaults to None
+        :type k: int, optional
+        :return: covariance matrix
+        :rtype: ndarray(n,n) or list of ndarray(n,n)
+
+        If ``k`` is given return covariance from simulation timestep ``k``, else
+        return a list of all covariance matrices.
+
+        :seealso: :meth:`get_Pnorm` :meth:`run` :meth:`history`
+        """
         if k is not None:
             return self._history[k].P
         else:
             return [h.P for h in self._history]
 
     def get_Pnorm(self, k=None):
+        """
+        Get covariance norm from simulation
+
+        :param k: timestep, defaults to None
+        :type k: int, optional
+        :return: covariance matrix norm
+        :rtype: float or ndarray(n)
+
+        If ``k`` is given return covariance norm from simulation timestep ``k``, else
+        return all covariance norms as a 1D NumPy array.
+
+        :seealso: :meth:`get_P` :meth:`run` :meth:`history`
+        """
         if k is not None:
             return np.sqrt(np.linalg.det(self._history[k].P))
         else:
             p = [np.sqrt(np.linalg.det(h.P)) for h in self._history]
             return np.array(p)
 
-    def get_t(self):
-        return np.array([h.t for h in self._history])
 
-    def show_P(self, P):
+    def disp_P(self, P, colorbar=False):
+        """
+        Display covariance matrix
+
+        :param P: covariance matrix
+        :type P: ndarray(n,n)
+        :param colorbar: add a colorbar
+        :type: bool or dict
+
+        Plot the elements of the covariance matrix as an image. If ``colorbar``
+        is True add a color bar, if `colorbar` is a dict add a color bar with
+        these options passed to colorbar.
+
+        .. note:: A log scale is used.
+
+        :seealso: :meth:`~matplotlib.axes.Axes.imshow` :func:`matplotlib.pyplot.colorbar`
+        """
 
         z = np.log10(abs(P))
         mn = min(z[~np.isinf(z)])
         z[np.isinf(z)] = mn
-
-        plt.imshow(z, cmap='Reds')
-        plt.colorbar(label='log covariance')
         plt.xlabel('State')
         plt.ylabel('State')
 
-    def transform(self, map):
+        plt.imshow(z, cmap='Reds')
+        if colorbar is True:
+            plt.colorbar(label='log covariance')
+        elif isinstance(colorbar, dict):
+            plt.colorbar(**colorbar)
+
+    def get_transform(self, map):
+        """
+        Transformation from estimated map to true map frame
+
+        :param map: known landmark positions
+        :type map: :class:`LandmarkMap`
+        :return: transform from ``map`` to estimated map frame
+        :rtype: SE2 instance
+
+        Uses a least squares technique to find the transform between the
+        landmark is world frame and the estimated landmarks in the SLAM
+        reference frame.
+
+        :seealso: :func:`~spatialmath.base.transforms2d.points2tr2`
+        """
         p = []
         q = []
 
         for lm_id in self._landmarks.keys():
-            p.append(map.landmark(lm_id))
+            p.append(map[lm_id])
             q.append(self.landmark_x(lm_id))
 
         p = np.array(p)
@@ -834,189 +1290,198 @@ class EKF:
 
 if __name__ == "__main__":
 
-    from roboticstoolbox import Bicycle
-
-    ### RVC2: Chapter 6
-
-
-    ##  6.1 Dead reckoning
-
-    ## 6.1.1 Modeling the vehicle
-    V = np.diag(np.r_[0.02, 0.5*pi/180] ** 2);
-
-    veh = Bicycle(covar=V)
-
-    odo = veh.step(1, 0.3)
-
-    print(veh.x)
-
-    veh.f([0, 0, 0], odo)
-
-    # veh.add_driver( RandomPath(10) )
-
-    # veh.run()
-
-    ###  6.1.2  Estimating pose
-    # veh.Fx( [0,0,0], [0.5, 0.1] )
-
-    P0 = np.diag(np.r_[0.005, 0.005, 0.001]**2);
-
-    ekf = EKF(veh, V, P0);
-
-    ekf.run(1000);
-
-    veh.plot_xy()
-
-    ekf.plot_xy('r')
-
-    P700 = ekf.history(700).P
-
-    sqrt(P700(1,1))
-
-    ekf.plot_ellipse('g')
-
-    # %%  6.2 Map-based localization
-    # randinit
-    # map = LandmarkMap(20, 10)
-
-    # map.plot()
-
-    # W = diag([0.1, 1*pi/180].^2);
-
-    # sensor = RangeBearingSensor(veh, map, 'covar', W)
+    from roboticstoolbox import *
+    robot=Bicycle()
+    robot.control = RandomPath(workspace=10)
+    P0=np.diag([1,1,1])
+    V=np.diag([1,1])
+    ekf = EKF(robot=(robot, V), P0=P0)
+    print(ekf)
 
 
-    # [z,i] = sensor.reading()
+    # from roboticstoolbox import Bicycle
 
-    # map.landmark(17)
+    # ### RVC2: Chapter 6
 
-    # randinit
-    # map = LandmarkMap(20);
-    # veh = Bicycle('covar', V);
-    # veh.add_driver( RandomPath(map.dim) );
-    # sensor = RangeBearingSensor(veh, map, 'covar', W, 'angle', ...
-    # [-pi/2 pi/2], 'range', 4, 'animate');
-    # ekf = EKF(veh, V, P0, sensor, W, map);
 
-    # ekf.run(1000);
-    # map.plot()
-    # veh.plot_xy();
-    # ekf.plot_xy('r');
-    # ekf.plot_ellipse('k')
+    # ##  6.1 Dead reckoning
 
-    # %%  6.3  Creating a map
-    # randinit
-    # map = LandmarkMap(20);
-    # veh = Bicycle(); % error free vehicle
-    # veh.add_driver( RandomPath(map.dim) );
-    # W = diag([0.1, 1*pi/180].^2);
-    # sensor = RangeBearingSensor(veh, map, 'covar', W);
-    # ekf = EKF(veh, [], [], sensor, W, []);
+    # ## 6.1.1 Modeling the vehicle
+    # V = np.diag(np.r_[0.02, 0.5*pi/180] ** 2);
+
+    # veh = Bicycle(covar=V)
+
+    # odo = veh.step(1, 0.3)
+
+    # print(veh.x)
+
+    # veh.f([0, 0, 0], odo)
+
+    # # veh.add_driver( RandomPath(10) )
+
+    # # veh.run()
+
+    # ###  6.1.2  Estimating pose
+    # # veh.Fx( [0,0,0], [0.5, 0.1] )
+
+    # P0 = np.diag(np.r_[0.005, 0.005, 0.001]**2);
+
+    # ekf = EKF(veh, V, P0);
 
     # ekf.run(1000);
 
-    # map.plot();
-    # ekf.plot_map('g');
-    # veh.plot_xy('b');
+    # veh.plot_xy()
+
+    # ekf.plot_xy('r')
+
+    # P700 = ekf.history(700).P
+
+    # sqrt(P700(1,1))
+
+    # ekf.plot_ellipse('g')
+
+    # #  6.2 Map-based localization
+    # # randinit
+    # # map = LandmarkMap(20, 10)
+
+    # # map.plot()
+
+    # # W = diag([0.1, 1*pi/180].^2);
+
+    # # sensor = RangeBearingSensor(veh, map, 'covar', W)
 
 
-    # ekf.landmarks(:,6)
+    # # [z,i] = sensor.reading()
 
-    # ekf.x_est(19:20)'
+    # # map.landmark(17)
 
-    # ekf.P_est(19:20,19:20)
+    # # randinit
+    # # map = LandmarkMap(20);
+    # # veh = Bicycle('covar', V);
+    # # veh.add_driver( RandomPath(map.dim) );
+    # # sensor = RangeBearingSensor(veh, map, 'covar', W, 'angle', ...
+    # # [-pi/2 pi/2], 'range', 4, 'animate');
+    # # ekf = EKF(veh, V, P0, sensor, W, map);
 
-    # %%  6.4  EKF SLAM
-    # randinit
-    # P0 = diag([.01, .01, 0.005].^2);
-    # map = LandmarkMap(20);
-    # veh = Bicycle('covar', V);
-    # veh.add_driver( RandomPath(map.dim) );
-    # sensor = RangeBearingSensor(veh, map, 'covar', W);
-    # ekf = EKF(veh, V, P0, sensor, W, []);
+    # # ekf.run(1000);
+    # # map.plot()
+    # # veh.plot_xy();
+    # # ekf.plot_xy('r');
+    # # ekf.plot_ellipse('k')
 
-    # ekf.run(1000);
+    # #  6.3  Creating a map
+    # # randinit
+    # # map = LandmarkMap(20);
+    # # veh = Bicycle(); error free vehicle
+    # # veh.add_driver( RandomPath(map.dim) );
+    # # W = diag([0.1, 1*pi/180].^2);
+    # # sensor = RangeBearingSensor(veh, map, 'covar', W);
+    # # ekf = EKF(veh, [], [], sensor, W, []);
 
-    # map.plot();
-    # ekf.plot_map('g');
-    # ekf.plot_xy('r');
-    # veh.plot_xy('b');
+    # # ekf.run(1000);
 
-    # %%  6.6 Pose-graph SLAM
-    # syms x_i y_i theta_i x_j y_j theta_j x_m y_m theta_m assume real
-    # xi_e = inv( SE2(x_m, y_m, theta_m) ) * inv( SE2(x_i, y_i, theta_i) ) * SE2(x_j, y_j, theta_j);
-    # fk = simplify(xi_e.xyt);
-
-    # jacobian ( fk, [x_i y_i theta_i] );
-    # Ai = simplify (ans)
-
-    # pg = PoseGraph('pg1.g2o')
-
-    # clf
-    # pg.plot()
-
-    # pg.optimize('animate')
-
-    # pg = PoseGraph('killian-small.toro');
-
-    # pg.plot()
-
-    # pg.optimize()
-
-    # %% 6.7  Particle filter
-    # randinit
-    # map = LandmarkMap(20);
-    # W = diag([0.1, 1*pi/180].^2);
-    # veh = Bicycle('covar', V);
-    # veh.add_driver( RandomPath(10) );
-
-    # V = diag([0.005, 0.5*pi/180].^2);
-    # sensor = RangeBearingSensor(veh, map, 'covar', W);
-
-    # Q = diag([0.1, 0.1, 1*pi/180]).^2;
-
-    # L = diag([0.1 0.1]);
-
-    # pf = ParticleFilter(veh, sensor, Q, L, 1000);
-
-    # pf.run(1000);
-
-    # map.plot();
-    # veh.plot_xy('b');
-
-    # clf
-    # pf.plot_xy('r');
-
-    # clf
-    # plot(pf.std(1:100,:))
-
-    # clf
-    # pf.plot_pdf()
+    # # map.plot();
+    # # ekf.plot_map('g');
+    # # veh.plot_xy('b');
 
 
-    # %% 6.8  Application: Scanning laser rangefinder
+    # # ekf.landmarks(:,6)
 
-    # %% Laser odometry
-    # pg = PoseGraph('killian.g2o', 'laser');
+    # # ekf.x_est(19:20)'
 
-    # [r, theta] = pg.scan(2580);
-    # about r theta
+    # # ekf.P_est(19:20,19:20)
 
-    # clf
-    # polar(theta, r)
+    # #  6.4  EKF SLAM
+    # # randinit
+    # # P0 = diag([.01, .01, 0.005].^2);
+    # # map = LandmarkMap(20);
+    # # veh = Bicycle('covar', V);
+    # # veh.add_driver( RandomPath(map.dim) );
+    # # sensor = RangeBearingSensor(veh, map, 'covar', W);
+    # # ekf = EKF(veh, V, P0, sensor, W, []);
 
-    # [x,y] = pol2cart (theta, r);
-    # plot (x, y, '.')
+    # # ekf.run(1000);
 
-    # p2580 = pg.scanxy(2580);
-    # p2581 = pg.scanxy(2581);
-    # about p2580
+    # # map.plot();
+    # # ekf.plot_map('g');
+    # # ekf.plot_xy('r');
+    # # veh.plot_xy('b');
 
-    # T = icp( p2581, p2580, 'verbose' , 'T0', transl2(0.5, 0), 'distthresh', 3)
+    # #  6.6 Pose-graph SLAM
+    # # syms x_i y_i theta_i x_j y_j theta_j x_m y_m theta_m assume real
+    # # xi_e = inv( SE2(x_m, y_m, theta_m) ) * inv( SE2(x_i, y_i, theta_i) ) * SE2(x_j, y_j, theta_j);
+    # # fk = simplify(xi_e.xyt);
 
-    # pg.time(2581)-pg.time(2580)
+    # # jacobian ( fk, [x_i y_i theta_i] );
+    # # Ai = simplify (ans)
+
+    # # pg = PoseGraph('pg1.g2o')
+
+    # # clf
+    # # pg.plot()
+
+    # # pg.optimize('animate')
+
+    # # pg = PoseGraph('killian-small.toro');
+
+    # # pg.plot()
+
+    # # pg.optimize()
+
+    # # 6.7  Particle filter
+    # # randinit
+    # # map = LandmarkMap(20);
+    # # W = diag([0.1, 1*pi/180].^2);
+    # # veh = Bicycle('covar', V);
+    # # veh.add_driver( RandomPath(10) );
+
+    # # V = diag([0.005, 0.5*pi/180].^2);
+    # # sensor = RangeBearingSensor(veh, map, 'covar', W);
+
+    # # Q = diag([0.1, 0.1, 1*pi/180]).^2;
+
+    # # L = diag([0.1 0.1]);
+
+    # # pf = ParticleFilter(veh, sensor, Q, L, 1000);
+
+    # # pf.run(1000);
+
+    # # map.plot();
+    # # veh.plot_xy('b');
+
+    # # clf
+    # # pf.plot_xy('r');
+
+    # # clf
+    # # plot(pf.std(1:100,:))
+
+    # # clf
+    # # pf.plot_pdf()
 
 
-    # %% Laser-based map building
-    # map = pg.scanmap();
-    # pg.plot_occgrid(map)
+    # # 6.8  Application: Scanning laser rangefinder
+
+    # # Laser odometry
+    # # pg = PoseGraph('killian.g2o', 'laser');
+
+    # # [r, theta] = pg.scan(2580);
+    # # about r theta
+
+    # # clf
+    # # polar(theta, r)
+
+    # # [x,y] = pol2cart (theta, r);
+    # # plot (x, y, '.')
+
+    # # p2580 = pg.scanxy(2580);
+    # # p2581 = pg.scanxy(2581);
+    # # about p2580
+
+    # # T = icp( p2581, p2580, 'verbose' , 'T0', transl2(0.5, 0), 'distthresh', 3)
+
+    # # pg.time(2581)-pg.time(2580)
+
+
+    # # Laser-based map building
+    # # map = pg.scanmap();
+    # # pg.plot_occgrid(map)

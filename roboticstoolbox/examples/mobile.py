@@ -7,24 +7,24 @@
 
 ## simple automata
 
-from scipy.io import loadmat
-from roboticstoolbox import Bug2, DXform
+# from scipy.io import loadmat
+# from roboticstoolbox import Bug2, DXform
 
-vars = loadmat("/Users/corkep/code/robotics-toolbox-python/data/house.mat", squeeze_me=True, struct_as_record=False)
-house = vars['house']
-place = vars['place']
+# vars = loadmat("/Users/corkep/code/robotics-toolbox-python/data/house.mat", squeeze_me=True, struct_as_record=False)
+# house = vars['house']
+# place = vars['place']
 # bug = Bug2(house)
 # p = bug.query(place.br3, place.kitchen, animate=True)
 
-vars = loadmat("/Users/corkep/code/robotics-toolbox-python/data/map1.mat", squeeze_me=True, struct_as_record=False)
-map = vars['map']
-bug = Bug2(map)
+# vars = loadmat("/Users/corkep/code/robotics-toolbox-python/data/map1.mat", squeeze_me=True, struct_as_record=False)
+# map = vars['map']
+# bug = Bug2(map)
 # # bug.plot()
 # p = bug.query([20, 10], [50, 35], animate=True)
 # print(p)
 # p = bug.query(place.br3, place.kitchen)
 # about(p)
-# p = bug.query([], place.kitchen) 
+# p = bug.query([], place.kitchen)
 
 # bug = Bug2(house), inflate=7)
 # p = bug.query(place.br3, place.kitchen, animate=False)
@@ -38,15 +38,15 @@ bug = Bug2(map)
 
 ## map based planning
 
-dx = DXform(house)
-dx.plan(place.kitchen)
+# dx = DXform(house)
+# dx.plan(place.kitchen)
 
-dx.plot()
+# dx.plot()
 
-p = dx.query(place.br3) #, animate=True)
-print(p)
+# p = dx.query(place.br3) #, animate=True)
+# print(p)
 
-dx.plot(path=p, block=True)
+# dx.plot(path=p, block=True)
 
 # p = dx.query(place.br3)
 

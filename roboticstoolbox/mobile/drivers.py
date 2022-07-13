@@ -1,7 +1,7 @@
 """
 Python Vehicle
-@Author: Kristian Gibson
-@Author: Peter Corke
+@Author: Peter Corke, original MATLAB code and Python version
+@Author: Kristian Gibson, initial MATLAB port
 """
 from abc import ABC, abstractmethod
 import warnings
@@ -17,75 +17,69 @@ from spatialmath import SE2, base
 import roboticstoolbox as rtb
 
 
-class VehicleDriver(ABC):
+class VehicleDriverBase(ABC):
+    """
+    Abstract Vehicle driver class
+
+    Abtract class that can drive a mobile robot.
+
+    :seealso: :class:`RandomPath`
+    """
 
     @abstractmethod
     def demand(self):
+        """
+        Compute speed and heading
+
+        :return: speed and steering for :class:`VehicleBase`
+
+        When an instance of a :class:`VehicleDriverBase` class is attached as 
+        the control for an instance of a :class:`VehicleBase` class, this method
+        is called at each time step to provide the control input.
+
+        Has access to the vehicle and its state through the :meth:`vehicle`
+        property.
+        """
         pass
 
     @abstractmethod
     def init(self):
+        """
+        Initialize driving agent
+
+        Called at the start of a simulation run.  Used to initialize state
+        including random number generator state.
+        """
         pass
 
-    @abstractmethod
+    @property
     def vehicle(self):
-        pass    
+        """
+        Set/get the vehicle under control
 
+        :getter: return :class:`VehicleBase` instance
+        :setter: set :class:`VehicleBase` instance
+
+        .. note:: The setter is invoked by ``vehicle.control = driver``
+        """
+        return self._veh
+
+    @vehicle.setter
+    def vehicle(self, v):
+
+        self._veh = v
+
+    def __repr__(self):
+        return str(self)
 # ========================================================================= #
 
-class RandomPath(VehicleDriver):
-    """
-        RandomPath Vehicle driver class
-
-    Create a "driver" object capable of steering a Vehicle subclass object through random 
-    waypoints within a rectangular region and at constant speed.
-
-    The driver object is connected to a Vehicle object by the latter's
-    add_driver() method.  The driver's demand() method is invoked on every
-    call to the Vehicle's step() method.
-
-    Methods::
-    init       reset the random number generator
-    demand     speed and steer angle to next waypoint
-    display    display the state and parameters in human readable form
-    char       convert to string
-    plot      
-    Properties::
-    goal          current goal/waypoint coordinate
-    veh           the Vehicle object being controlled
-    dim           dimensions of the work space (2x1) [m]
-    speed         speed of travel [m/s]
-    dthresh       proximity to waypoint at which next is chosen [m]
-
-    Example::
-
-    veh = Bicycle(V);
-    veh.add_driver( RandomPath(20, 2) );
-
-    Notes::
-    - It is possible in some cases for the vehicle to move outside the desired
-    region, for instance if moving to a waypoint near the edge, the limited
-    turning circle may cause the vehicle to temporarily move outside.
-    - The vehicle chooses a new waypoint when it is closer than property
-    closeenough to the current waypoint.
-    - Uses its own random number stream so as to not influence the performance
-    of other randomized algorithms such as path planning.
-
-    Reference::
-
-    Robotics, Vision & Control, Chap 6,
-    Peter Corke,
-    Springer 2011
-
-    See also Vehicle, Bicycle, Unicycle.
-
-    """
+class RandomPath(VehicleDriverBase):
 
     def __init__(self, workspace, speed=1, dthresh=0.05, seed=0, headinggain=0.3, goalmarkerstyle=None):
         """
         Driving agent for random path
 
-        :param workspace: dimension of workspace, see spatialmath.plotvol2
+        :param workspace: dimension of workspace, see :func:`spatialmath.base.exand_dims`
         :type workspace: scalar, array_like(2), array_like(4)
         :param speed: forward speed, defaults to 1
         :type speed: float, optional
@@ -100,22 +94,34 @@ class RandomPath(VehicleDriver):
         The driver is connected to the vehicle by::
 
             Vehicle(control=driver)
-            
+        
+        or::
+
             veh = Vehicle()
             veh.control = driver
         
         The waypoints are positioned inside a rectangular region defined by
-        the vehicle that is controlled.
-          - D scalar; X: -D to +D, Y: -D to +D
-              - D (1x2); X: -D(1) to +D(1), Y: -D(2) to +D(2)
-        %     - D (1x4); X: D(1) to D(2), Y: D(3) to D(4)
-        
-        % Options::
-        % 'speed',S      Speed along path (default 1m/s).
-        % 'dthresh',D    Distance from goal at which next goal is chosen.
-        %
-        % See also Vehicle.
-        :seealso: :func:`spatialmath.plotvol2`
+        the vehicle that is specified by  (see ``plotvol2``):
+
+        ==============  =======  =======
+        ``workspace``   x-range  y-range
+        ==============  =======  =======
+        A (scalar)      -A:A     -A:A
+        [A, B]           A:B      A:B
+        [A, B, C, D]     A:B      C:D
+        ==============  =======  =======
+
+
+        .. note::
+            - It is possible in some cases for the vehicle to move outside the desired
+              region, for instance if moving to a waypoint near the edge, the limited
+              turning circle may cause the vehicle to temporarily move outside.
+            - The vehicle chooses a new waypoint when it is closer than ``dthresh``
+              to the current waypoint.
+            - Uses its own random number generator so as to not influence the performance
+              of other randomized algorithms such as path planning.
+
+        :seealso: :class:`Bicycle` :class:`Unicycle` :func:`~spatialmath.base.graphics.plotvol2`
         """
         
         # TODO options to specify region, maybe accept a Map object?
@@ -163,29 +169,6 @@ class RandomPath(VehicleDriver):
         s += f"  current goal={self._goal}"
         return s
 
-
-    @property
-    def random(self):
-        """
-        Get private random number generator
-
-        :return: NumPy random number generator
-        :rtype: Generator
-
-        Has methods including:
-            - ``integers(low, high, size, endpoint)``
-            - ``random(size)``
-            - ``uniform``
-            - ``normal(mean, std, size)``
-            - ``multivariate_normal(mean, covar, size)``
-
-        The generator is initialized with the seed provided at constructor
-        time every time ``init`` is called.
-
-        :seealso: :meth:`init`
-        """
-        return self._random
-
     @property
     def workspace(self):
         """
@@ -199,34 +182,18 @@ class RandomPath(VehicleDriver):
         """
         return self._workspace
 
-    @property
-    def vehicle(self):
-        return self._veh
-
-    @vehicle.setter
-    def vehicle(self, v):
-        """
-        Connect to the vehicle under control
-
-        :param v: [description]
-        :type v: [type]
-        """
-        self._veh = v
-
     def init(self, ax=None):
         """
         Initialize random path driving agent
-        
-        %RandomPath.init Reset random number generator
-        %
-        % R.init() resets the random number generator used to create the waypoints.
-        % This enables the sequence of random waypoints to be repeated.
-        %
-        % Notes::
-        % - Called by Vehicle.run.
-        %
-        % See also RANDSTREAM.
+
+        :param ax: axes in which to draw via points, defaults to None
+        :type ax: Axes, optional
+
+        Called at the start of a simulation run.  Ensures that the 
+        random number generated is reseeded to ensure that 
+        the sequence of random waypoints is repeatable.
         """
+
         if self._seed is not None:
             self._random = np.random.default_rng(self._seed)
             
@@ -273,10 +240,10 @@ class RandomPath(VehicleDriver):
         
         # choose a uniform random goal within inner 80% of driving area
         while True:
-            r = self.random.uniform(0.1, 0.9)
+            r = self._random.uniform(0.1, 0.9)
             gx = self._workspace[0:2] @ np.r_[r, 1-r]
 
-            r = self.random.uniform(0.1, 0.9)
+            r = self._random.uniform(0.1, 0.9)
             gy = self._workspace[2:4] @ np.r_[r, 1-r]
 
             self._goal = np.r_[gx, gy]
@@ -295,7 +262,7 @@ class RandomPath(VehicleDriver):
 
 # ========================================================================= #
 
-class PurePursuit(VehicleDriver):
+class PurePursuit(VehicleDriverBase):
 
     def __init__(self, speed=1, radius=1):
         pass

@@ -1,41 +1,52 @@
 /**
  * \file fknm.h
- * \author Peter Corke
  * \author Jesse Haviland
- * \brief Definitions for c file
  *
  */
 
-#ifndef _fknm_h_
-#define _fknm_h_
+#ifndef _FKNM_H_
+#define _FKNM_H_
 
-#include <math.h>
+#include <Python.h>
 #include <numpy/arrayobject.h>
-// #include "vmath.h"
 
-#define TRUE 1
-#define FALSE 0
-
-typedef struct Link Link;
-
-struct Link
+#ifdef __cplusplus
+extern "C"
 {
-    /**********************************************************
-     *************** kinematic parameters *********************
-     **********************************************************/
-    int isjoint;
-    int isflip;
-    int jindex;
-    int axis;
-    int n_shapes;
-    npy_float64 *A;  /* link static transform */
-    npy_float64 *fk; /* link world transform */
-    void (*op)(npy_float64 *data, double eta);
-    Link *parent;
-    npy_float64 **shape_base; /* link visual and collision geometries */
-    npy_float64 **shape_wT;   /* link visual and collision geometries */
-    npy_float64 **shape_sT;   /* link visual and collision geometries */
-    npy_float64 **shape_sq;   /* link visual and collision geometries */
-};
+#endif /* __cplusplus */
+
+    // forward defines
+    static PyObject *IK_GN(PyObject *self, PyObject *args);
+    static PyObject *IK_NR(PyObject *self, PyObject *args);
+    static PyObject *IK_LM_Chan(PyObject *self, PyObject *args);
+    static PyObject *IK_LM_Wampler(PyObject *self, PyObject *args);
+    static PyObject *IK_LM_Sugihara(PyObject *self, PyObject *args);
+
+    static PyObject *Robot_link_T(PyObject *self, PyObject *args);
+
+    static PyObject *ETS_hessian0(PyObject *self, PyObject *args);
+    static PyObject *ETS_hessiane(PyObject *self, PyObject *args);
+    static PyObject *ETS_jacob0(PyObject *self, PyObject *args);
+    static PyObject *ETS_jacobe(PyObject *self, PyObject *args);
+    static PyObject *ETS_fkine(PyObject *self, PyObject *args);
+    static PyObject *ETS_init(PyObject *self, PyObject *args);
+
+    static PyObject *ET_init(PyObject *self, PyObject *args);
+    static PyObject *ET_update(PyObject *self, PyObject *args);
+    static PyObject *ET_T(PyObject *self, PyObject *args);
+
+    static PyObject *r2q(PyObject *self, PyObject *args);
+    int _check_array_type(PyObject *toCheck);
+
+    void rx(npy_float64 *data, double eta);
+    void ry(npy_float64 *data, double eta);
+    void rz(npy_float64 *data, double eta);
+    void tx(npy_float64 *data, double eta);
+    void ty(npy_float64 *data, double eta);
+    void tz(npy_float64 *data, double eta);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* __cplusplus */
 
 #endif

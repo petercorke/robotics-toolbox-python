@@ -1,24 +1,12 @@
-"""
+# ======================================================================== #
 
-Dubins path planner sample code
+# The following code is modified from Python Robotics
+# https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning
+# Dubins planning
+# Author: Atsushi Sakai
+# Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
 
-author Atsushi Sakai(@Atsushi_twi)
-
-The MIT License (MIT)
-
-Copyright (c) 2016 - 2021 Atsushi Sakai
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-"""
 import math
 from collections import namedtuple
 from roboticstoolbox.mobile import PlannerBase
@@ -27,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from spatialmath import *
 from spatialmath import base
+
 
 def left_straight_left(alpha, beta, d):
     sa = math.sin(alpha)
@@ -87,6 +76,7 @@ def left_straight_right(alpha, beta, d):
 
     return t, p, q, mode
 
+
 def right_straight_left(alpha, beta, d):
     sa = math.sin(alpha)
     sb = math.sin(beta)
@@ -119,7 +109,9 @@ def right_left_right(alpha, beta, d):
         return None, None, None, mode
 
     p = base.wrap_0_2pi(2 * math.pi - math.acos(tmp_rlr))
-    t = base.wrap_0_2pi(alpha - math.atan2(ca - cb, d - sa + sb) + base.wrap_0_2pi(p / 2.0))
+    t = base.wrap_0_2pi(
+        alpha - math.atan2(ca - cb, d - sa + sb) + base.wrap_0_2pi(p / 2.0)
+    )
     q = base.wrap_0_2pi(alpha - beta - t + base.wrap_0_2pi(p))
     return t, p, q, mode
 
@@ -132,7 +124,7 @@ def left_right_left(alpha, beta, d):
     c_ab = math.cos(alpha - beta)
 
     mode = ["L", "R", "L"]
-    tmp_lrl = (6.0 - d * d + 2.0 * c_ab + 2.0 * d * (- sa + sb)) / 8.0
+    tmp_lrl = (6.0 - d * d + 2.0 * c_ab + 2.0 * d * (-sa + sb)) / 8.0
     if abs(tmp_lrl) > 1:
         return None, None, None, mode
     p = base.wrap_0_2pi(2 * math.pi - math.acos(tmp_lrl))
@@ -142,20 +134,24 @@ def left_right_left(alpha, beta, d):
     return t, p, q, mode
 
 
-def dubins_path_planning_from_origin(end_x, end_y, end_yaw, curvature,
-                                     step_size):
+def dubins_path_planning_from_origin(end_x, end_y, end_yaw, curvature, step_size):
     dx = end_x
     dy = end_y
     D = math.hypot(dx, dy)
     d = D * curvature
 
     theta = base.wrap_0_2pi(math.atan2(dy, dx))
-    alpha = base.wrap_0_2pi(- theta)
+    alpha = base.wrap_0_2pi(-theta)
     beta = base.wrap_0_2pi(end_yaw - theta)
 
-    planners = [left_straight_left, right_straight_right, left_straight_right,
-                right_straight_left, right_left_right,
-                left_right_left]
+    planners = [
+        left_straight_left,
+        right_straight_right,
+        left_straight_right,
+        right_straight_left,
+        right_left_right,
+        left_right_left,
+    ]
 
     best_cost = float("inf")
     bt, bp, bq, best_mode = None, None, None, None
@@ -165,20 +161,32 @@ def dubins_path_planning_from_origin(end_x, end_y, end_yaw, curvature,
         if t is None:
             continue
 
-        cost = (abs(t) + abs(p) + abs(q))
+        cost = abs(t) + abs(p) + abs(q)
         if best_cost > cost:
             bt, bp, bq, best_mode = t, p, q, mode
             best_cost = cost
     lengths = [bt, bp, bq]
 
     x_list, y_list, yaw_list, directions = generate_local_course(
-        sum(lengths), lengths, best_mode, curvature, step_size)
+        sum(lengths), lengths, best_mode, curvature, step_size
+    )
 
     return x_list, y_list, yaw_list, best_mode, best_cost, lengths
 
 
-def interpolate(ind, length, mode, max_curvature, origin_x, origin_y,
-                origin_yaw, path_x, path_y, path_yaw, directions):
+def interpolate(
+    ind,
+    length,
+    mode,
+    max_curvature,
+    origin_x,
+    origin_y,
+    origin_yaw,
+    path_x,
+    path_y,
+    path_yaw,
+    directions,
+):
     if mode == "S":
         path_x[ind] = origin_x + length / max_curvature * math.cos(origin_yaw)
         path_y[ind] = origin_y + length / max_curvature * math.sin(origin_yaw)
@@ -208,8 +216,7 @@ def interpolate(ind, length, mode, max_curvature, origin_x, origin_y,
     return path_x, path_y, path_yaw, directions
 
 
-def generate_local_course(total_length, lengths, mode, max_curvature,
-                          step_size):
+def generate_local_course(total_length, lengths, mode, max_curvature, step_size):
     n_point = math.trunc(total_length / step_size) + len(lengths) + 4
 
     path_x = [0.0 for _ in range(n_point)]
@@ -232,28 +239,47 @@ def generate_local_course(total_length, lengths, mode, max_curvature,
             d = -step_size
 
         # set origin state
-        origin_x, origin_y, origin_yaw = \
-            path_x[index], path_y[index], path_yaw[index]
+        origin_x, origin_y, origin_yaw = path_x[index], path_y[index], path_yaw[index]
 
         index -= 1
         if i >= 1 and (lengths[i - 1] * lengths[i]) > 0:
-            pd = - d - ll
+            pd = -d - ll
         else:
             pd = d - ll
 
         while abs(pd) <= abs(l):
             index += 1
             path_x, path_y, path_yaw, directions = interpolate(
-                index, pd, m, max_curvature, origin_x, origin_y, origin_yaw,
-                path_x, path_y, path_yaw, directions)
+                index,
+                pd,
+                m,
+                max_curvature,
+                origin_x,
+                origin_y,
+                origin_yaw,
+                path_x,
+                path_y,
+                path_yaw,
+                directions,
+            )
             pd += d
 
         ll = l - pd - d  # calc remain length
 
         index += 1
         path_x, path_y, path_yaw, directions = interpolate(
-            index, l, m, max_curvature, origin_x, origin_y, origin_yaw,
-            path_x, path_y, path_yaw, directions)
+            index,
+            l,
+            m,
+            max_curvature,
+            origin_x,
+            origin_y,
+            origin_yaw,
+            path_x,
+            path_y,
+            path_yaw,
+            directions,
+        )
 
     if len(path_x) <= 1:
         return [], [], [], []
@@ -266,6 +292,7 @@ def generate_local_course(total_length, lengths, mode, max_curvature,
         directions.pop()
 
     return path_x, path_y, path_yaw, directions
+
 
 def path_planning(start, goal, curvature, step_size=0.1):
     """
@@ -292,7 +319,8 @@ def path_planning(start, goal, curvature, step_size=0.1):
     le_yaw = g_yaw - s_yaw
 
     lp_x, lp_y, lp_yaw, mode, length, lengths = dubins_path_planning_from_origin(
-        le_xy[0], le_xy[1], le_yaw, curvature, step_size)
+        le_xy[0], le_xy[1], le_yaw, curvature, step_size
+    )
 
     rot = base.rot2(-s_yaw)
     converted_xy = np.stack([lp_x, lp_y]).T @ rot
@@ -303,7 +331,11 @@ def path_planning(start, goal, curvature, step_size=0.1):
     path = np.c_[x_list, y_list, yaw_list]
     return path, length, mode, lengths
 
-# ============================================================================
+
+# ====================== RTB wrapper ============================= #
+
+# Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
 class DubinsPlanner(PlannerBase):
     r"""
     Dubins path planner
@@ -318,7 +350,7 @@ class DubinsPlanner(PlannerBase):
     ==================   ========================
     Feature              Capability
     ==================   ========================
-    Plan                 Configuration space
+    Plan                 :math:`\SE{2}`
     Obstacle avoidance   No
     Curvature            Discontinuous
     Motion               Forwards only
@@ -326,15 +358,28 @@ class DubinsPlanner(PlannerBase):
 
     Creates a planner that finds the path between two configurations in the
     plane using forward motion only.  The path comprises upto 3 segments that are
-    straight lines or arcs with :math:`\pm` ``curvature``.
+    straight lines, or arcs with curvature of :math:`\pm` ``curvature``.
 
-    :reference: On Curves of Minimal Length with a Constraint on Average 
-        Curvature, and with Prescribed Initial and Terminal Positions and 
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import DubinsPlanner
+        >>> from math import pi
+        >>> dubins = DubinsPlanner(curvature=1.0)
+        >>> path, status = dubins.query(start=(0, 0, pi/2), goal=(1, 0, pi/2))
+        >>> print(path[:5,:])
+        >>> print(status)
+
+    :reference: On Curves of Minimal Length with a Constraint on Average
+        Curvature, and with Prescribed Initial and Terminal Positions and
         Tangents,  Dubins, L.E. (July 1957), American Journal of Mathematics.
         79(3): 497–516.
-    :author: Atsushi Sakai `PythonRobotics <https://github.com/AtsushiSakai/PythonRobotics>`_
-    :seealso: :class:`Planner`
+
+    :thanks: based on Dubins path planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
+    :seealso: :class:`ReedsSheppPlanner` :class:`PlannerBase`
     """
+
     def __init__(self, curvature=1, stepsize=0.1, **kwargs):
 
         super().__init__(ndims=3, **kwargs)
@@ -342,11 +387,14 @@ class DubinsPlanner(PlannerBase):
         self._stepsize = stepsize
 
     def __str__(self):
-        s = super().__str__() + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
+        s = (
+            super().__str__()
+            + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
+        )
 
     def query(self, start, goal, **kwargs):
         r"""
-        Find a Dubins path
+        Find a path between two configurations
 
         :param start: start configuration :math:`(x, y, \theta)`
         :type start: array_like(3), optional
@@ -354,6 +402,8 @@ class DubinsPlanner(PlannerBase):
         :type goal: array_like(3), optional
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
+
+        The path comprises points equally spaced at a distance of ``stepsize``.
 
         The returned status value has elements:
 
@@ -364,30 +414,35 @@ class DubinsPlanner(PlannerBase):
         |             | a single letter code: either "L", "R" or "S" for    |
         |             | left turn, right turn or straight line respectively.|
         +-------------+-----------------------------------------------------+
+        | ``length``  | total path length                                   |
+        +-------------+-----------------------------------------------------+
         |``lengths``  | the length of each path segment. The sign of the    |
-        |             |length indicates the direction of travel.            |
+        |             | length indicates the direction of travel.           |
         +-------------+-----------------------------------------------------+
 
-        :seealso: :meth:`Planner.query`
         """
         super().query(start=start, goal=goal, next=False, **kwargs)
 
         path, length, mode, lengths = path_planning(
-            start=self.start, goal=self.goal,
-            curvature=self._curvature, step_size=self._stepsize)
+            start=self.start,
+            goal=self.goal,
+            curvature=self._curvature,
+            step_size=self._stepsize,
+        )
 
-        status = namedtuple('DubinsStatus', ['segments', 'length', 'seglengths'])
-        
+        status = namedtuple("DubinsStatus", ["segments", "length", "seglengths"])
+
         return path, status(mode, sum(lengths), lengths)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     from math import pi
 
-    start = (1, 1, pi/4)
-    goal = (-3, -3, -pi/4)
+    # start = (1, 1, pi/4)
+    # goal = (-3, -3, -pi/4)
 
-    start = (0, 0, pi/2)
-    goal = (1, 0, pi/2)
+    start = (0, 0, pi / 2)
+    goal = (1, 0, pi / 2)
 
     dubins = DubinsPlanner(curvature=1.0)
     path, status = dubins.query(start, goal)

@@ -1,0 +1,3 @@
+# The empty Ridgeback configuration has no accessories at all,
+# thus nothing is in here.  This is default on the actual robot,
+# whereas the simulation defaults to base.

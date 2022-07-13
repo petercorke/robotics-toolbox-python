@@ -73,20 +73,20 @@ class LatticeEdge(Edge):
 
 
 class LatticePlanner(PlannerBase):
-    """
+    r"""
     Lattice planner
 
     :param costs: cost for straight, left-turn, right-turn, defaults to :math:`(1, \pi/2, \pi/2)`
     :type costs: array_like(3), optional
     :param root: configuration of root node, defaults to (0,0,0)
     :type root: array_like(3), optional
-    :param kwargs: arguments passed to ``Planner`` constructor
+    :param kwargs: arguments passed to ``PlannerBase`` constructor
 
     ==================   ========================
     Feature              Capability
     ==================   ========================
-    Plan                 Configuration space
-    Obstacle avoidance   Yes
+    Plan                 :math:`\SE{2}`
+    Obstacle avoidance   Yes, occupancy grid
     Curvature            Discontinuous
     Motion               Forwards only
     ==================   ========================
@@ -94,17 +94,40 @@ class LatticePlanner(PlannerBase):
     The lattice planner incrementally builds a graph from the root vertex, at
     each iteration adding three edges to the graph:
 
-    - straight ahead 'S'
-    - turn left 'L'
-    - turn right 'R'
+    =====   ================
+    code    direction
+    =====   ================
+    'S'     straight ahead
+    'L'     turn left
+    'R'     turn right
+    =====   ================
 
     If the configuration is already in the graph, the edge connects to that
-    existing vertex.
+    existing vertex.  The vertex is named after the sequence of moves required
+    to reach it from the root.  This means, that any configuration, ie.
+    :math:`(x, y, \theta)` can be reached by multiple paths and potentially have
+    multiple names.  The first name assigned to a vertex is permanent and is not
+    overriden.
 
     If an occupancy grid exists and the configuration is an obstacle, then
     the vertex is not added.
 
-    ``costs`` changes the weighting for path costs at query time.
+    The path through the lattice is found using A* graph search, and ``costs``
+    changes the weighting for path costs at query time.
+
+    Example:
+
+    .. runblock:: pycon
+
+        >>> from roboticstoolbox import LatticePlanner
+        >>> import numpy as np
+        >>> lattice = LatticePlanner();
+        >>> lattice.plan(iterations=6)
+        >>> path, status = lattice.query(start=(0, 0, 0), goal=(1, 2, np.pi/2))
+        >>> print(path.T)
+        >>> print(status)
+
+    :seealso: :meth:`plan` :meth:`query` :class:`PlannerBase`
     """
 
     def __init__(self, costs=None, root=(0,0,0), **kwargs):
@@ -128,13 +151,13 @@ class LatticePlanner(PlannerBase):
     def __str__(self):
         s = super().__str__() + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
 
-    def icoord(self, xyt):
+    def _icoord(self, xyt):
         ix = int(round(xyt[0]))
         iy = int(round(xyt[1]))
         it = int(round(xyt[2]*2/np.pi))
         return f"({ix:d},{iy:d},{it:d})"
 
-    def plan(self, iterations=None, verbose=False):
+    def plan(self, iterations=None, verbose=False, summary=False):
         """
         Create a lattice plan
 
@@ -145,6 +168,8 @@ class LatticePlanner(PlannerBase):
 
         If an occupancy grid exists the if ``iterations`` is None the area of the
         grid will be completely filled.
+
+        :seealso: :meth:`query`
         """
         if iterations is None and self.occgrid is None:
             raise ValueError('iterations must be finite if no occupancy grid is specified')
@@ -170,7 +195,7 @@ class LatticePlanner(PlannerBase):
                     # theta is guaranteed to be in range [-pi, pi)
 
                     if verbose:
-                        print('  MOVE', move, self.icoord(xyt))
+                        print('  MOVE', move, self._icoord(xyt))
 
                     if self.isoccupied(xyt[:2]):
                         if verbose:
@@ -215,15 +240,17 @@ class LatticePlanner(PlannerBase):
                 print(f"iteration {iteration}, frontier length {len(frontier)}")
             elif iteration >= iterations:
                 break
+        if summary:
+            print(f"{self.graph.n} vertices and {self.graph.ne} edges created")
             
-    def query(self, qs, qg):
-        """
+    def query(self, start, goal):
+        r"""
         Find a path through the lattice
 
-        :param qs: initial configuration
-        :type qs: array_like(3)
-        :param qg: goal configuration
-        :type qg: array_like(3)
+        :param start: start configuration :math:`(x, y, \theta)`
+        :type start: array_like(3), optional
+        :param goal: goal configuration :math:`(x, y, \theta)`
+        :type goal: array_like(3), optional
         :return: path and status
         :rtype: ndarray(N,3), namedtuple
 
@@ -238,20 +265,23 @@ class LatticePlanner(PlannerBase):
         |             | a single letter code: either "L", "R" or "S" for    |
         |             | left turn, right turn or straight line respectively.|
         +-------------+-----------------------------------------------------+
-        |``edges ``   | successive edges of the graph ``LatticeEdge`` type  |
+        |``edges``    | successive edges of the graph ``LatticeEdge`` type  |
         +-------------+-----------------------------------------------------+
 
-        :seealso: :meth:`Planner.query`
+        :seealso: :meth:`plan`
         """
 
-        vs, ds = self.graph.closest(qs)
+        vs, ds = self.graph.closest(start)
         if ds > 0.001:
             raise ValueError('start configuration is not in the lattice')
-        vg, dg = self.graph.closest(qg)
+        vg, dg = self.graph.closest(goal)
         if dg > 0.001:
             raise ValueError('goal configuration is not in the lattice')
 
-        path, cost, _ = self.graph.path_Astar(vs, vg, verbose=False)
+        try:
+            path, cost, _ = self.graph.path_Astar(vs, vg, verbose=False)
+        except TypeError:
+            raise RuntimeError('no path found') from None
 
         status = namedtuple('LatticeStatus', ['cost', 'segments', 'edges'])
 
@@ -272,10 +302,10 @@ class LatticePlanner(PlannerBase):
             # 3D plot
             for k, vertex in enumerate(self.graph):
                 # for every node
-                if k == 0:
-                    plt.plot(vertex.coord[0], vertex.coord[1], vertex.coord[2], 'k>', markersize=10)
-                else:
-                    plt.plot(vertex.coord[0], vertex.coord[1], vertex.coord[2], 'bo')
+                # if k == 0:
+                #     plt.plot(vertex.coord[0], vertex.coord[1], vertex.coord[2], 'k>', markersize=10)
+                # else:
+                plt.plot(vertex.coord[0], vertex.coord[1], vertex.coord[2], 'bo')
 
             for edge in self.graph.edges():
                 edge.plot(color='k', **kwargs)
@@ -295,10 +325,10 @@ class LatticePlanner(PlannerBase):
             # 2D plot
             for k, vertex in enumerate(self.graph):
                 # for every node
-                if k == 0:
-                    plt.plot(vertex.coord[0], vertex.coord[1], 'k>', markersize=10)
-                else:
-                    plt.plot(vertex.coord[0], vertex.coord[1], 'bo')
+                # if k == 0:
+                #     plt.plot(vertex.coord[0], vertex.coord[1], 'k>', markersize=10)
+                # else:
+                plt.plot(vertex.coord[0], vertex.coord[1], 'bo')
 
             for edge in self.graph.edges():
                 edge.plot(color='k')
@@ -319,16 +349,21 @@ class LatticePlanner(PlannerBase):
 
 if __name__ == "__main__":
 
-    og = BinaryOccupancyGrid(workspace=[-5, 5, -5, 5], value=False)
-    og.set([3, 3, -2, 3], True)
+    lattice = LatticePlanner()
+    lattice.plan(iterations=6)
+    path = lattice.query(start=(0, 0, np.pi/2), goal=(1, 1, 0))
+    print(path)
 
-    lattice = LatticePlanner(occgrid=og)
+    # og = BinaryOccupancyGrid(workspace=[-5, 5, -5, 5], value=False)
+    # og.set([3, 3, -2, 3], True)
 
-    lattice.plan(iterations=10)
-    print(lattice.graph)
+    # lattice = LatticePlanner(occgrid=og)
 
-    qs = (0, 0, np.pi/2)
-    qg = (1, 0, np.pi/2)
+    # lattice.plan(iterations=10)
+    # print(lattice.graph)
+
+    # qs = (0, 0, np.pi/2)
+    # qg = (1, 0, np.pi/2)
 
     # print('qs')
     # vs, d = lattice.graph.closest(qs)
@@ -348,15 +383,15 @@ if __name__ == "__main__":
     # print(vs.neighbours())
     # print()
 
-    path, status = lattice.query(qs, qg)
+    # path, status = lattice.query(qs, qg)
 
-    print(path)
-    print(status)
+    # print(path)
+    # print(status)
 
 
-    lattice.plot(path=path)
+    # lattice.plot(path=path)
 
-    plt.show(block=True)
+    # plt.show(block=True)
 
     # ax = plt.gca()
     # ax.set_aspect('equal')

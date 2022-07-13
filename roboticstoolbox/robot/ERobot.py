@@ -8,19 +8,33 @@ from os.path import splitext
 import tempfile
 import subprocess
 import webbrowser
-import numpy as np
+from numpy import (
+    array,
+    ndarray,
+    isnan,
+    zeros,
+    eye,
+    expand_dims,
+    empty,
+    concatenate,
+    cross,
+    arccos,
+    dot,
+)
+from numpy.linalg import norm as npnorm, inv
 from spatialmath import SE3, SE2
-from spatialmath.base.argcheck import getvector, verifymatrix, getmatrix, islistof
-
-from roboticstoolbox.robot.ELink import ELink, ELink2, BaseELink
+from spatialgeometry import Cylinder
+from spatialmath.base.argcheck import getvector, islistof
+from roboticstoolbox.robot.Link import Link, Link2, BaseLink
 from roboticstoolbox.robot.ETS import ETS, ETS2
+from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.DHRobot import DHRobot
 from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
 from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.tools.data import rtb_path_to_datafile
-
+from roboticstoolbox.tools.params import rtb_get_param
 from pathlib import PurePosixPath
 from ansitable import ANSITable, Column
 from spatialmath import (
@@ -29,8 +43,11 @@ from spatialmath import (
     SpatialInertia,
     SpatialForce,
 )
+from functools import lru_cache
+from typing import Union, overload, Dict, List, Tuple, Optional
+from copy import deepcopy
 
-import fknm
+ArrayLike = Union[list, ndarray, tuple, set]
 
 
 class BaseERobot(Robot):
@@ -62,18 +79,18 @@ class BaseERobot(Robot):
         >>> print(robot)
     The ETS is partitioned such that a new link frame is created **after** every
     joint variable.
-    From list of ELinks
+    From list of Links
     -------------------
     Example:
     .. runblock:: pycon
         >>> from roboticstoolbox import ETS, ERobot
-        >>> link1 = ELink(ETS.rz(), name='link1')
-        >>> link2 = ELink(ETS.ry(), name='link2', parent=link1)
-        >>> link3 = ELink(ETS.tz(1) * ETS.ry(), name='link3', parent=link2)
-        >>> link4 = ELink(ETS.tz(1), name='ee', parent=link3)
+        >>> link1 = Link(ETS.rz(), name='link1')
+        >>> link2 = Link(ETS.ry(), name='link2', parent=link1)
+        >>> link3 = Link(ETS.tz(1) * ETS.ry(), name='link3', parent=link2)
+        >>> link4 = Link(ETS.tz(1), name='ee', parent=link3)
         >>> robot = ERobot([link1, link2, link3, link4])
         >>> print(robot)
-    A number of ``ELink`` objects are created, each has a transform with
+    A number of ``Link`` objects are created, each has a transform with
     respect to the previous frame, and all except the first link have a parent.
     The implicit parent of the first link is the base.
     The parent also can be specified as a string, and its name is mapped to the
@@ -84,10 +101,10 @@ class BaseERobot(Robot):
     .. runblock:: pycon
         >>> from roboticstoolbox import ETS, ERobot
         >>> robot = ERobot([
-        >>>     ELink(ETS.rz(), name='link1'),
-        >>>     ELink(ETS.ry(), name='link2'),
-        >>>     ELink(ETS.tz(1) * ETS.ry(), name='link3'),
-        >>>     ELink(ETS.tz(1), name='ee')
+        >>>     Link(ETS.rz(), name='link1'),
+        >>>     Link(ETS.ry(), name='link2'),
+        >>>     Link(ETS.tz(1) * ETS.ry(), name='link3'),
+        >>>     Link(ETS.tz(1), name='ee')
         >>>             ])
         >>> print(robot)
     Branched robots
@@ -95,11 +112,11 @@ class BaseERobot(Robot):
     Example:
     .. runblock:: pycon
         >>> robot = ERobot([
-        >>>    ELink(ETS.rz(), name='link1'),
-        >>>    ELink(ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(), name='link2', parent='link1'),
-        >>>    ELink(ETS.tx(1), name='ee_1', parent='link2'),
-        >>>    ELink(ETS.tx(1) * ETS.ty(0.5) * ETS.rz(), name='link3', parent='link1'),
-        >>>    ELink(ETS.tx(1), name='ee_2', parent='link3')
+        >>>    Link(ETS.rz(), name='link1'),
+        >>>    Link(ETS.tx(1) * ETS.ty(-0.5) * ETS.rz(), name='link2', parent='link1'),
+        >>>    Link(ETS.tx(1), name='ee_1', parent='link2'),
+        >>>    Link(ETS.tx(1) * ETS.ty(0.5) * ETS.rz(), name='link3', parent='link1'),
+        >>>    Link(ETS.tx(1), name='ee_2', parent='link3')
         >>>             ])
         >>> print(robot)
     :references:
@@ -107,25 +124,24 @@ class BaseERobot(Robot):
           J. Haviland and P. Corke
     """  # noqa E501
 
-    def __init__(
-        self, links, base_link=None, gripper_links=None, checkjindex=True, **kwargs
-    ):
+    def __init__(self, links, gripper_links=None, checkjindex=True, **kwargs):
+        self._path_cache_fknm = {}
+        self._path_cache = {}
+        self._eye_fknm = eye(4)
 
-        self._ets = []
         self._linkdict = {}
         self._n = 0
         self._ee_links = []
-        self._base_link = None
 
         # Ordered links, we reorder the input elinks to be in depth first
         # search order
         orlinks = []
 
-        # check all the incoming ELink objects
+        # check all the incoming Link objects
         n = 0
         for k, link in enumerate(links):
             # if link has no name, give it one
-            if link.name is None:
+            if link.name is None or link.name == "":
                 link.name = f"link-{k}"
             link.number = k + 1
 
@@ -140,11 +156,8 @@ class BaseERobot(Robot):
         # resolve parents given by name, within the context of
         # this set of links
         for link in links:
-            if isinstance(link.parent, str):
-                link._parent = self._linkdict[link.parent]
-                # Update the fast kinematics object
-                if isinstance(self, ERobot):
-                    link._init_fknm()
+            if link.parent is None and link.parent_name is not None:
+                link._parent = self._linkdict[link.parent_name]
 
         if all([link.parent is None for link in links]):
             # no parent links were given, assume they are sequential
@@ -157,39 +170,52 @@ class BaseERobot(Robot):
         for link in links:
             # is this a base link?
             if link._parent is None:
-                if self._base_link is not None:
-                    raise ValueError("Multiple base links")
+                try:
+                    if self._base_link is not None:
+                        raise ValueError("Multiple base links")
+                except AttributeError:
+                    pass
+
                 self._base_link = link
             else:
                 # no, update children of this link's parent
                 link._parent._children.append(link)
 
+        if self.base_link is None:  # Pragma: nocover
+            raise ValueError(
+                "Invalid link configuration provided, must have a base link"
+            )
+
+        # Scene node, set links between the links
+        for link in links:
+            if link.parent is not None:
+                link.scene_parent = link.parent
+
         # Set up the gripper, make a list containing the root of all
         # grippers
         if gripper_links is not None:
-            if isinstance(gripper_links, ELink):
+            if isinstance(gripper_links, Link):
                 gripper_links = [gripper_links]
         else:
             gripper_links = []
 
         # An empty list to hold all grippers
-        self.grippers = []
+        self._grippers = []
 
         # Make a gripper object for each gripper
         for link in gripper_links:
             g_links = self.dfs_links(link)
-            # for g in g_links:
-            #     print(g)
 
             # Remove gripper links from the robot
             for g_link in g_links:
+                # print(g_link)
                 links.remove(g_link)
 
             # Save the gripper object
-            self.grippers.append(Gripper(g_links))
+            self._grippers.append(Gripper(g_links, name=link.name))
 
         # Subtract the n of the grippers from the n of the robot
-        for gripper in self.grippers:
+        for gripper in self._grippers:
             self._n -= gripper.n
 
         # Set the ee links
@@ -203,10 +229,10 @@ class BaseERobot(Robot):
         else:
             for link in gripper_links:
                 # use the passed in value
-                self.ee_links.append(link.parent)
+                self.ee_links.append(link.parent)  # type: ignore
 
         # assign the joint indices
-        if all([link.jindex is None for link in links]):
+        if all([link.jindex is None or link.ets._auto_jindex for link in links]):
             # no joints have an index
             jindex = [0]  # "mutable integer" hack
 
@@ -236,20 +262,13 @@ class BaseERobot(Robot):
                     raise ValueError(f"joints {jset} were not assigned")
             orlinks = links
         else:
-            # must be a mixture of ELinks with/without jindex
+            # must be a mixture of Links with/without jindex
             raise ValueError("all links must have a jindex, or none have a jindex")
 
-        self._nbranches = sum([link.nchildren == 0 for link in links])
-
-        # Current joint angles of the robot
-        # TODO should go to Robot class?
-        self.q = np.zeros(self.n)
-        self.qd = np.zeros(self.n)
-        self.qdd = np.zeros(self.n)
-        self.control_type = "v"
+        # self._nbranches = sum([link.nchildren == 0 for link in links])
 
         # Set up qlim
-        qlim = np.zeros((2, self.n))
+        qlim = zeros((2, self.n))
         j = 0
 
         for i in range(len(orlinks)):
@@ -258,13 +277,24 @@ class BaseERobot(Robot):
                 j += 1
         self._qlim = qlim
 
+        self._valid_qlim = False
         for i in range(self.n):
-            if np.any(qlim[:, i] != 0) and not np.any(np.isnan(qlim[:, i])):
+            if any(qlim[:, i] != 0) and not any(isnan(qlim[:, i])):
                 self._valid_qlim = True
 
+        # Initialise Robot object
         super().__init__(orlinks, **kwargs)
 
-    def __str__(self):
+        # Fix number of links for gripper links
+        self._nlinks = len(links)
+
+        for gripper in self.grippers:
+            self._nlinks += len(gripper.links)
+
+        # SceneNode, set a reference to the first link
+        self.scene_children = [self.links[0]]  # type: ignore
+
+    def __str__(self) -> str:
         """
         Pretty prints the ETS Model of the robot.
         :return: Pretty print of the robot model
@@ -276,49 +306,57 @@ class BaseERobot(Robot):
             - The robot base frame is denoted as ``BASE`` and is equal to the
               robot's ``base`` attribute.
         """
+        unicode = rtb_get_param("unicode")
+        border = "thin" if unicode else "ascii"
+
         table = ANSITable(
-            Column("id", headalign="^", colalign=">"),
+            Column("link", headalign="^", colalign=">"),
             Column("link", headalign="^", colalign="<"),
             Column("joint", headalign="^", colalign=">"),
             Column("parent", headalign="^", colalign="<"),
-            Column("ETS", headalign="^", colalign="<"),
-            border="thin",
+            Column("ETS: parent to link", headalign="^", colalign="<"),
+            border=border,
         )
-        for link in self:
+
+        for k, link in enumerate(self.links):
             color = "" if link.isjoint else "<<blue>>"
             ee = "@" if link in self.ee_links else ""
-            ets = link.ets()
+            ets = link.ets
             if link.parent is None:
                 parent_name = "BASE"
             else:
                 parent_name = link.parent.name
-            s = ets.__str__(f"q{link._jindex}")
-            if len(s) > 0:
-                s = " \u2295 " + s
+            s = ets.__str__(f"q{link.jindex}")
+            # if len(s) > 0:
+            #     op = " \u2295 " if unicode else " * "  # \oplus
+            #     s = op + s
 
             if link.isjoint:
-                # if link._joint_name is not None:
-                #     jname = link._joint_name
-                # else:
-                #     jname = link.jindex
                 jname = link.jindex
             else:
                 jname = ""
             table.row(
-                link.number,
+                # link.jindex,
+                k,
                 color + ee + link.name,
                 jname,
                 parent_name,
-                f"{{{link.name}}} = {{{parent_name}}}{s}",
+                f"{s}",
             )
-        if isinstance(self, ERobot):
-            classname = "ERobot"
-        elif isinstance(self, ERobot2):
+
+        if isinstance(self, ERobot2):
             classname = "ERobot2"
+        else:
+            classname = "ERobot"
+
         s = f"{classname}: {self.name}"
         if self.manufacturer is not None and len(self.manufacturer) > 0:
             s += f" (by {self.manufacturer})"
         s += f", {self.n} joints ({self.structure})"
+        if len(self.grippers) > 0:
+            s += (
+                f", {len(self.grippers)} gripper{'s' if len(self.grippers) > 1 else ''}"
+            )
         if self.nbranches > 1:
             s += f", {self.nbranches} branches"
         if self._hasdynamics:
@@ -330,44 +368,81 @@ class BaseERobot(Robot):
         s += "\n"
 
         s += str(table)
-        s += self.configurations_str()
+        s += self.configurations_str(border=border)
 
         return s
 
-    def hierarchy(self):
+    @overload
+    def __getitem__(self: "ERobot", i: Union[int, str]) -> Link:
+        ...
+
+    @overload
+    def __getitem__(self: "ERobot", i: slice) -> List[Link]:
+        ...
+
+    @overload
+    def __getitem__(self: "ERobot2", i: Union[int, str]) -> Link2:
+        ...
+
+    @overload
+    def __getitem__(self: "ERobot2", i: slice) -> List[Link2]:
+        ...
+
+    def __getitem__(self, i):
         """
-        Pretty print the robot link hierachy
-        :return: Pretty print of the robot model
-        :rtype: str
-        Example:
+        Get link
+
+        :param i: link number or name
+        :type i: int, slice or str
+        :return: i'th link or named link
+        :rtype: Link
+
+        This also supports iterating over each link in the robot object,
+        from the base to the tool.
+
         .. runblock:: pycon
+
             >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.URDF.Panda()
-            >>> robot.hierarchy()
+            >>> robot = rtb.models.Panda()
+            >>> print(robot[1]) # print the 2nd link
+            >>> print([link.a for link in robot])  # print all the a_j values
+
+        .. note:: ``ERobot`` supports link lookup by name,
+            eg. ``robot['link1']``
         """
+        if isinstance(i, str):
+            try:
+                return self.link_dict[i]
+            except KeyError:
+                raise KeyError(f"link {i} not in link dictionary")
+            except AttributeError:
+                raise AttributeError(f"robot has no link dictionary")
+        else:
+            return self._links[i]
 
-        # link = self.base_link
+    # --------------------------------------------------------------------- #
 
-        def recurse(link, indent=0):
-            print(" " * indent * 2, link.name)
-            for child in link.children:
-                recurse(child, indent + 1)
+    @overload
+    def links(self: "ERobot") -> List[Link]:
+        ...
 
-        recurse(self.base_link)
+    @overload
+    def links(self: "ERobot2") -> List[Link2]:
+        ...
 
-    # @property
-    # def qlim(self):
-    #     return self._qlim
+    @property
+    def links(self) -> List[Link]:
+        """
+        Robot links
 
-    # @property
-    # def valid_qlim(self):
-
-    #     return self._valid_qlim
+        :return: A list of link objects
+        """
+        return self._links
 
     # --------------------------------------------------------------------- #
 
     @property
-    def n(self):
+    def n(self) -> int:
         """
         Number of joints
         :return: number of variable joint in the robot's kinematic tree
@@ -379,7 +454,18 @@ class BaseERobot(Robot):
     # --------------------------------------------------------------------- #
 
     @property
-    def nbranches(self):
+    def grippers(self) -> List[Gripper]:
+        """
+        Grippers attached to the robot
+
+        :return: A list of grippers
+
+        """
+        return self._grippers
+
+    # --------------------------------------------------------------------- #
+    @property
+    def nbranches(self) -> int:
         """
         Number of branches
 
@@ -399,62 +485,85 @@ class BaseERobot(Robot):
 
         :seealso: :func:`n`, :func:`nlinks`
         """
-        return self._nbranches
+        # return self._nbranches
+        return sum([link.nchildren == 0 for link in self.links]) + len(self.grippers)
 
     # --------------------------------------------------------------------- #
 
+    @overload
+    def elinks(self: "ERobot") -> List[Link]:
+        ...
+
+    @overload
+    def elinks(self: "ERobot2") -> List[Link2]:
+        ...
+
     @property
-    def elinks(self):
-        # return self._linkdict
+    def elinks(self) -> List[Link]:
         return self._links
 
     # --------------------------------------------------------------------- #
 
+    @overload
+    def link_dict(self: "ERobot") -> Dict[str, Link]:
+        ...
+
+    @overload
+    def link_dict(self: "ERobot2") -> Dict[str, Link2]:
+        ...
+
     @property
-    def link_dict(self):
+    def link_dict(self) -> Dict[str, Link]:
         return self._linkdict
 
     # --------------------------------------------------------------------- #
 
+    @overload
+    def base_link(self: "ERobot") -> Link:
+        ...
+
+    @overload
+    def base_link(self: "ERobot2") -> Link2:
+        ...
+
     @property
-    def base_link(self):
+    def base_link(self) -> Link:
         return self._base_link
 
     @base_link.setter
     def base_link(self, link):
-        if isinstance(link, ELink):
+        if isinstance(link, Link):
             self._base_link = link
         else:
-            # self._base_link = self.links[link]
-            raise TypeError("Must be an ELink")
-        # self._reset_fk_path()
+            raise TypeError("Must be a Link")
 
     # --------------------------------------------------------------------- #
-    # TODO  get configuration string
+
+    @overload
+    def ee_links(self: "ERobot2") -> List[Link2]:
+        ...
+
+    @overload
+    def ee_links(self: "ERobot") -> List[Link]:
+        ...
 
     @property
-    def ee_links(self):
+    def ee_links(self) -> List[Link]:
         return self._ee_links
 
-    # def add_ee(self, link):
-    #     if isinstance(link, ELink):
-    #         self._ee_link.append(link)
-    #     else:
-    #         raise ValueError('must be an ELink')
-    #     self._reset_fk_path()
-
     @ee_links.setter
-    def ee_links(self, link):
-        if isinstance(link, ELink):
+    def ee_links(self, link: Union[List[Link], Link]):
+        if isinstance(link, Link):
             self._ee_links = [link]
-        elif isinstance(link, list) and all([isinstance(x, ELink) for x in link]):
+        elif isinstance(link, list) and all([isinstance(x, Link) for x in link]):
             self._ee_links = link
         else:
-            raise TypeError("expecting an ELink or list of ELinks")
-        # self._reset_fk_path()
+            raise TypeError("expecting a Link or list of Links")
+
+    # --------------------------------------------------------------------- #
 
     @property
-    def reach(self):
+    def reach(self) -> float:
         r"""
         Reach of the robot
         :return: Maximum reach of the robot
@@ -474,7 +583,7 @@ class BaseERobot(Robot):
             for link in self.ee_links:
                 d = 0
                 while True:
-                    for et in link.ets():
+                    for et in link.ets:
                         if et.istranslation:
                             if et.isjoint:
                                 # the length of a prismatic joint depends on the
@@ -488,7 +597,7 @@ class BaseERobot(Robot):
                             else:
                                 d += abs(et.eta)
                     link = link.parent
-                    if link is None:
+                    if link is None or isinstance(link, str):
                         d_all.append(d)
                         break
 
@@ -497,60 +606,39 @@ class BaseERobot(Robot):
 
     # --------------------------------------------------------------------- #
 
-    # @property
-    # def ets(self):
-    #     return self._ets
-
-    # --------------------------------------------------------------------- #
-
-    # @property
-    # def M(self):
-    #     return self._M
-
-    # --------------------------------------------------------------------- #
-
-    # @property
-    # def q_idx(self):
-    #     return self._q_idx
-
-    # --------------------------------------------------------------------- #
-
-    def ets(self, start=None, end=None, explored=None, path=None):
+    def hierarchy(self):
         """
-        ERobot to ETS
-
-        :param start: start of path, defaults to ``base_link``
-        :type start: ELink or str, optional
-        :param end: end of path, defaults to end-effector
-        :type end: ELink or str, optional
-        :raises ValueError: a link does not belong to this ERobot
-        :raises TypeError: a bad link argument
-        :return: elementary transform sequence
-        :rtype: ETS instance
-
-
-        - ``robot.ets()`` is an ETS representing the kinematics from base to
-          end-effector.
-        - ``robot.ets(end=link)`` is an ETS representing the kinematics from
-          base to the link ``link`` specified as an ELink reference or a name.
-        - ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
-          from link ``l1`` to link ``l2``.
-
+        Pretty print the robot link hierachy
+        :return: Pretty print of the robot model
+        :rtype: str
+        Example:
         .. runblock:: pycon
             >>> import roboticstoolbox as rtb
-            >>> panda = rtb.models.ETS.Panda()
-            >>> panda.ets()
+            >>> robot = rtb.models.URDF.Panda()
+            >>> robot.hierarchy()
         """
+
+        def recurse(link, indent=0):
+            print(" " * indent * 2, link.name)
+            for child in link.child:
+                recurse(child, indent + 1)
+
+        recurse(self.base_link)
+
+    # --------------------------------------------------------------------- #
+
+    def _find_ets(self, start, end, explored, path) -> Union[ETS, None]:
+        """
+        Privade method which will recursively find the ETS of a path
+        see ets()
+        """
+
         link = self._getlink(start, self.base_link)
-        if end is None and len(self.ee_links) > 1:
-            raise ValueError("ambiguous, specify which end-effector is required")
         end = self._getlink(end, self.ee_links[0])
 
-        if explored is None:
-            explored = set()
         toplevel = path is None
-
         explored.add(link)
+
         if link == end:
             return path
 
@@ -559,12 +647,14 @@ class BaseERobot(Robot):
 
         # visit child nodes below start
         if toplevel:
-            path = link.ets()
-        for child in link.children:
-            if child not in explored:
-                p = self.ets(child, end, explored, path * child.ets())
-                if p is not None:
-                    return p
+            path = link.ets
+
+        if link.children is not None:
+            for child in link.children:
+                if child not in explored:
+                    p = self._find_ets(child, end, explored, path * child.ets)
+                    if p is not None:
+                        return p
 
         # we didn't find the node below, keep going up a level, and recursing
         # down again
@@ -574,16 +664,108 @@ class BaseERobot(Robot):
             parent = link.parent  # go up one level toward the root
             if parent not in explored:
                 if path is None:
-                    p = self.ets(parent, end, explored, link.ets().inv())
+                    p = self._find_ets(parent, end, explored, link.ets.inv())
                 else:
-                    p = self.ets(parent, end, explored, path * link.ets().inv())
+                    p = self._find_ets(parent, end, explored, path * link.ets.inv())
                 if p is not None:
                     return p
-        return None
+
+    def _gripper_ets(self, gripper: Gripper) -> ETS:
+        """
+        Privade method which will find the ETS of a gripper
+        """
+        # return gripper.links[0].ets * ET.SE3(gripper.tool)
+        return ETS(ET.SE3(gripper.tool))
+
+    @lru_cache(maxsize=32)
+    def ets(
+        self,
+        start: Union[Link, Gripper, str, None] = None,
+        end: Union[Link, Gripper, str, None] = None,
+    ) -> ETS:
+        """
+        ERobot to ETS
+
+        :param start: start of path, defaults to ``base_link``
+        :type start: Link or str, optional
+        :param end: end of path, defaults to end-effector
+        :type end: Link or str, optional
+        :raises ValueError: a link does not belong to this ERobot
+        :raises TypeError: a bad link argument
+        :return: elementary transform sequence
+        :rtype: ETS instance
+
+
+        - ``robot.ets()`` is an ETS representing the kinematics from base to
+          end-effector.
+        - ``robot.ets(end=link)`` is an ETS representing the kinematics from
+          base to the link ``link`` specified as a Link reference or a name.
+        - ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
+          from link ``l1`` to link ``l2``.
+
+        .. runblock:: pycon
+            >>> import roboticstoolbox as rtb
+            >>> panda = rtb.models.ETS.Panda()
+            >>> panda.ets()
+        """
+
+        # ets to stand and end incase of grippers
+        ets_init = None
+        ets_end = None
+
+        if isinstance(start, Gripper):
+            ets_init = self._gripper_ets(start).inv()
+            link = start.links[0].parent
+            if link is None:  # pragma: nocover
+                raise ValueError("Invalid robot link configuration")
+        else:
+            link = self._getlink(start, self.base_link)
+
+        if end is None:
+            if len(self.grippers) > 1:
+                end_link = self.grippers[0].links[0]
+                ets_end = self._gripper_ets(self.grippers[0])
+                print("multiple grippers present, ambiguous, using self.grippers[0]")
+            elif len(self.grippers) == 1:
+                end_link = self.grippers[0].links[0]
+                ets_end = self._gripper_ets(self.grippers[0])
+            elif len(self.grippers) > 1:
+                end_link = self._getlink(end, self.ee_links[0])
+                print(
+                    "multiple end-effectors present, ambiguous, using self.ee_links[0]"
+                )
+            else:
+                end_link = self._getlink(end, self.ee_links[0])
+        else:
+            if isinstance(end, Gripper):
+                ets_end = self._gripper_ets(end)
+                end_link = end.links[0].parent  # type: ignore
+                if end_link is None:  # pragma: nocover
+                    raise ValueError("Invalid robot link configuration")
+            else:
+                end_link = self._getlink(end, self.ee_links[0])
+
+        explored = set()
+
+        if link is end_link:
+            ets = link.ets
+        else:
+            ets = self._find_ets(link, end_link, explored, path=None)
+
+        if ets is None:
+            raise ValueError("Could not find the requested ETS in this robot")
+
+        if ets_init is not None:
+            ets = ets_init * ets
+
+        if ets_end is not None:
+            ets = ets * ets_end
+
+        return ets
 
     # --------------------------------------------------------------------- #
 
-    def segments(self):
+    def segments(self) -> List[List[Union[Link, None]]]:
         """
         Segments of branched robot
 
@@ -611,7 +793,7 @@ class BaseERobot(Robot):
               segments
         """
 
-        def recurse(link):
+        def recurse(link: Link):
 
             segs = [link.parent]
             while True:
@@ -619,21 +801,21 @@ class BaseERobot(Robot):
                 if link.nchildren == 0:
                     return [segs]
                 elif link.nchildren == 1:
-                    link = link.children[0]
+                    link = link.children[0]  # type: ignore
                     continue
                 elif link.nchildren > 1:
                     segs = [segs]
 
-                    for child in link.children:
+                    for child in link.children:  # type: ignore
                         segs.extend(recurse(child))
 
                     return segs
 
-        return recurse(self.links[0])
+        return recurse(self.links[0])  # type: ignore
 
     # --------------------------------------------------------------------- #
 
-    def fkine_all(self, q, old=None):
+    def fkine_all(self, q):
         """
         Compute the pose of every link frame
 
@@ -653,7 +835,12 @@ class BaseERobot(Robot):
               Sequence, J. Haviland and P. Corke
         """
         q = getvector(q)
-        Tbase = self.base  # add base, also sets the type
+
+        if isinstance(self, ERobot):
+            Tbase = SE3(self.base)  # add base, also sets the type
+        else:
+            Tbase = SE2(self.base)  # add base, also sets the type
+
         linkframes = Tbase.__class__.Alloc(self.nlinks + 1)
         linkframes[0] = Tbase
 
@@ -661,7 +848,11 @@ class BaseERobot(Robot):
             # if joint??
             T = Tparent
             while True:
-                T *= link.A(q[link.jindex])
+                if isinstance(self, ERobot):
+                    T *= SE3(link.A(q[link.jindex]))
+                else:
+                    T *= SE2(link.A(q[link.jindex]))
+
                 Tall[link.number] = T
 
                 if link.nchildren == 0:
@@ -730,10 +921,10 @@ class BaseERobot(Robot):
 
         # open the PDF file in browser (hopefully portable), then cleanup
         webbrowser.open(f"file://{pdffile.name}")
-        # time.sleep(1)
-        # os.remove(pdffile.name)
 
-    def dotfile(self, filename, etsbox=False, jtype=False, static=True):
+    # --------------------------------------------------------------------- #
+
+    def dotfile(self, filename, etsbox=False, ets="full", jtype=False, static=True):
         """
         Write a link transform graph as a GraphViz dot file
         :param file: Name of file to write to
@@ -798,7 +989,7 @@ graph [rankdir=LR];
                 file.write(
                     "  {}_ets [shape=box, style=rounded, "
                     'label="{}"{}];\n'.format(
-                        link.name, link.ets().__str__(q=f"q{link.jindex}"), node_options
+                        link.name, link.ets.__str__(q=f"q{link.jindex}"), node_options
                     )
                 )
                 file.write("  {} -> {}_ets;\n".format(parent, link.name))
@@ -809,11 +1000,20 @@ graph [rankdir=LR];
                 # put the ets fragment as an edge label
                 if not link.isjoint and static:
                     edge_options += 'fontcolor="blue"'
+                if ets == "full":
+                    estr = link.ets.__str__(q=f"q{link.jindex}")
+                elif ets == "brief":
+                    if link.jindex is None:
+                        estr = ""
+                    else:
+                        estr = f"...q{link.jindex}"
+                else:
+                    return
                 file.write(
                     '  {} -> {} [label="{}", {}];\n'.format(
                         parent,
                         link.name,
-                        link.ets().__str__(q=f"q{link.jindex}"),
+                        estr,
                         edge_options,
                     )
                 )
@@ -846,16 +1046,18 @@ graph [rankdir=LR];
         if isinstance(filename, str):
             file.close()  # noqa
 
+    # --------------------------------------------------------------------- #
+
     def dfs_links(self, start, func=None):
         """
         Visit all links from start in depth-first order and will apply
         func to each visited link
         :param start: the link to start at
-        :type start: ELink
+        :type start: Link
         :param func: An optional function to apply to each link as it is found
         :type func: function
         :returns: A list of links
-        :rtype: list of ELink
+        :rtype: list of Link
         """
         visited = []
 
@@ -872,19 +1074,23 @@ graph [rankdir=LR];
 
         return visited
 
-    def _get_limit_links(self, end=None, start=None):
+    def _get_limit_links(
+        self,
+        end: Union[Gripper, Link, str, None] = None,
+        start: Union[Gripper, Link, str, None] = None,
+    ) -> Tuple[Link, Union[Link, Gripper], Union[None, SE3]]:
         """
         Get and validate an end-effector, and a base link
         :param end: end-effector or gripper to compute forward kinematics to
-        :type end: str or ELink or Gripper, optional
+        :type end: str or Link or Gripper, optional
         :param start: name or reference to a base link, defaults to None
-        :type start: str or ELink, optional
+        :type start: str or Link, optional
         :raises ValueError: link not known or ambiguous
         :raises ValueError: [description]
         :raises TypeError: unknown type provided
         :return: end-effector link, base link, and tool transform of gripper
             if applicable
-        :rtype: ELink, Elink, SE3 or None
+        :rtype: Link, Elink, SE3 or None
         Helper method to find or validate an end-effector and base link.
         """
 
@@ -895,19 +1101,24 @@ graph [rankdir=LR];
         tool = None
         if end is None:
 
-            if len(self.grippers) > 0:
-                end = self.grippers[0].links[0]
+            if len(self.grippers) > 1:
+                end_ret = self.grippers[0].links[0]
                 tool = self.grippers[0].tool
                 if len(self.grippers) > 1:
                     # Warn user: more than one gripper
                     print("More than one gripper present, using robot.grippers[0]")
+            elif len(self.grippers) == 1:
+                end_ret = self.grippers[0].links[0]
+                tool = self.grippers[0].tool
 
             # no grippers, use ee link if just one
-            elif len(self.ee_links) > 0:
-                end = self.ee_links[0]
+            elif len(self.ee_links) > 1:
+                end_ret = self.ee_links[0]
                 if len(self.ee_links) > 1:
                     # Warn user: more than one EE
                     print("More than one end-effector present, using robot.ee_links[0]")
+            else:
+                end_ret = self.ee_links[0]
 
             # Cache result
             self._cache_end = end
@@ -918,36 +1129,44 @@ graph [rankdir=LR];
             for gripper in self.grippers:
                 if end == gripper or end == gripper.name:
                     tool = gripper.tool
-                    end = gripper.links[0]
+                    # end_ret = gripper.links[0]
 
             # otherwise check for end in the links
-            end = self._getlink(end)
+            end_ret = self._getlink(end)
 
         if start is None:
-            start = self.base_link
+            start_ret = self.base_link
+
             # Cache result
             self._cache_start = start
         else:
             # start effector is specified
-            start = self._getlink(start)
+            start_ret = self._getlink(start)
 
-        return end, start, tool
+        return end_ret, start_ret, tool
 
-    def _getlink(self, link, default=None):
+    def _getlink(
+        self,
+        link: Union[Link, Gripper, str, None],
+        default: Union[Link, Gripper, str, None] = None,
+    ) -> Link:
         """
-        Validate reference to ELink
+        Validate reference to Link
+
         :param link: link
-        :type link: ELink or str
+
         :raises ValueError: link does not belong to this ERobot
         :raises TypeError: bad argument
+
         :return: link reference
-        :rtype: ELink
-        ``robot._getlink(link)`` is a validated reference to an ELink within
+
+        ``robot._getlink(link)`` is a validated reference to a Link within
         the ERobot ``robot``.  If ``link`` is:
-        -  an ``ELink`` reference it is validated as belonging to
+
+        -  an ``Link`` reference it is validated as belonging to
           ``robot``.
         - a string, then it looked up in the robot's link name dictionary, and
-          an ELink reference returned.
+          a Link reference returned.
         """
         if link is None:
             link = default
@@ -958,7 +1177,7 @@ graph [rankdir=LR];
 
             raise ValueError(f"no link named {link}")
 
-        elif isinstance(link, BaseELink):
+        elif isinstance(link, BaseLink):
             if link in self.links:
                 return link
             else:
@@ -967,6 +1186,13 @@ graph [rankdir=LR];
                         return link
 
                 raise ValueError("link not in robot links")
+        elif isinstance(link, Gripper):
+            for gripper in self.grippers:
+                if link is gripper:
+                    return gripper.links[0]
+
+            raise ValueError("Gripper not in robot")
+
         else:
             raise TypeError("unknown argument")
 
@@ -977,56 +1203,101 @@ graph [rankdir=LR];
 class ERobot(BaseERobot):
     def __init__(self, arg, urdf_string=None, urdf_filepath=None, **kwargs):
 
-        self._urdf_string = urdf_string
-        self._urdf_filepath = urdf_filepath
-
-        if isinstance(arg, DHRobot):
-            # we're passed a DHRobot object
-            # TODO handle dynamic parameters if given
-            arg = arg.ets()
-
-        if isinstance(arg, ETS):
-            # we're passed an ETS string
-            links = []
-            # chop it up into segments, a link frame after every joint
-            parent = None
-            for j, ets_j in enumerate(arg.split()):
-                elink = ELink(ets_j, parent=parent, name=f"link{j:d}")
-                if (
-                    elink.qlim is None
-                    and elink.v is not None
-                    and elink.v.qlim is not None
-                ):
-                    elink.qlim = elink.v.qlim
-                parent = elink
-                links.append(elink)
-
-        elif islistof(arg, ELink):
-            links = arg
-
-        elif isinstance(arg, ERobot):
+        if isinstance(arg, ERobot):
             # We're passed an ERobot, clone it
             # We need to preserve the parent link as we copy
-            links = []
 
-            def dfs(node, node_copy):
-                for child in node.children:
-                    child_copy = child.copy(node_copy)
-                    links.append(child_copy)
-                    dfs(child, child_copy)
+            # Copy each link within the robot
+            links = [deepcopy(link) for link in arg.links]
+            gripper_links = []
 
-            link0 = arg.links[0]
-            links.append(arg.links[0].copy())
-            dfs(link0, links[0])
+            for gripper in arg.grippers:
+                glinks = []
+                for link in gripper.links:
+                    glinks.append(deepcopy(link))
+
+                gripper_links.append(glinks[0])
+                links = links + glinks
+
+            # print(links[9] is gripper_links[0])
+            # print(gripper_links)
+
+            # Sever parent connection, but save the string
+            # The constructor will piece this together for us
+            for link in links:
+                link._children = []
+                if link.parent is not None:
+                    link._parent_name = link.parent.name
+                    link._parent = None
+
+            # gripper_parents = []
+
+            # # Make a list of old gripper links
+            # for gripper in arg.grippers:
+            #     gripper_parents.append(gripper.links[0].name)
+
+            # gripper_links = []
+
+            # def dfs(node, node_copy):
+            #     for child in node.children:
+            #         child_copy = child.copy(node_copy)
+            #         links.append(child_copy)
+
+            #         # If this link was a gripper link, add to the list
+            #         if child_copy.name in gripper_parents:
+            #             gripper_links.append(child_copy)
+
+            #         dfs(child, child_copy)
+
+            # link0 = arg.links[0]
+            # links.append(arg.links[0].copy())
+            # dfs(link0, links[0])
+
+            # print(gripper_links[0].jindex)
+
+            super().__init__(links, gripper_links=gripper_links, **kwargs)
+
+            for i, gripper in enumerate(self.grippers):
+                gripper.tool = arg.grippers[i].tool.copy()
+
+            # if arg.qdlim is not None:
+            #     self.qdlim = arg.qdlim
+
+            self._urdf_string = arg.urdf_string
+            self._urdf_filepath = arg.urdf_filepath
 
         else:
-            raise TypeError("constructor argument must be ETS or list of ELink")
+            self._urdf_string = urdf_string
+            self._urdf_filepath = urdf_filepath
 
-        super().__init__(links, **kwargs)
+            if isinstance(arg, DHRobot):
+                # we're passed a DHRobot object
+                # TODO handle dynamic parameters if given
+                arg = arg.ets
 
-        # Cached paths through links
-        # TODO Add listners on setters to reset cache
-        self._reset_cache()
+            if isinstance(arg, ETS):
+                # we're passed an ETS string
+                links = []
+                # chop it up into segments, a link frame after every joint
+                parent = None
+                for j, ets_j in enumerate(arg.split()):
+                    elink = Link(ETS(ets_j), parent=parent, name=f"link{j:d}")
+                    if (
+                        elink.qlim is None
+                        and elink.v is not None
+                        and elink.v.qlim is not None
+                    ):
+                        elink.qlim = elink.v.qlim
+                    parent = elink
+                    links.append(elink)
+
+            elif islistof(arg, Link):
+                links = arg
+
+            else:
+                raise TypeError("constructor argument must be ETS or list of Link")
+
+            super().__init__(links, **kwargs)
 
     @classmethod
     def URDF(cls, file_path, gripper=None):
@@ -1057,7 +1328,7 @@ class ERobot(BaseERobot):
                 raise TypeError("bad argument passed as gripper")
 
         links, name, urdf_string, urdf_filepath = ERobot.URDF_read(file_path)
-
+        print(cls)
         return cls(
             links,
             name=name,
@@ -1076,50 +1347,9 @@ class ERobot(BaseERobot):
 
     # --------------------------------------------------------------------- #
 
-    def _reset_cache(self):
-        self._path_cache = {}
-        self._path_cache_fknm = {}
-        self._cache_end = None
-        self._cache_start = None
-        self._cache_end_tool = None
-        self._eye_fknm = np.eye(4)
-
-        self._cache_links_fknm = []
-
-        self._cache_grippers = []
-
-        for link in self.elinks:
-            self._cache_links_fknm.append(link._fknm)
-
-        for gripper in self.grippers:
-            cache = []
-            for link in gripper.links:
-                cache.append(link._fknm)
-            self._cache_grippers.append(cache)
-
-        self._cache_m = len(self._cache_links_fknm)
-
-    # def dfs_path(self, l1, l2):
-    #     path = []
-    #     visited = [l1]
-
-    #     def vis_children(link):
-    #         visited.append(link)
-
-    #         for li in link.child:
-    #             if li not in visited:
-
-    #                 if li == l2 or vis_children(li):
-    #                     path.append(li)
-    #                     return True
-    #     vis_children(l1)
-    #     path.append(l1)
-    #     path.reverse()
-    #     return path
-
     def _to_dict(self, robot_alpha=1.0, collision_alpha=0.0):
 
-        self._set_link_fk(self.q)
+        # self._set_link_fk(self.q)
 
         ob = []
 
@@ -1146,6 +1376,9 @@ class ERobot(BaseERobot):
                     for gi in link.collision:
                         gi.set_alpha(collision_alpha)
                         ob.append(gi.to_dict())
+
+        # for o in ob:
+        #     print(o)
 
         return ob
 
@@ -1174,59 +1407,35 @@ class ERobot(BaseERobot):
 
         return ob
 
-    def _set_link_fk(self, q):
-        """
-        robot._set_link_fk(q) evaluates fkine for each link within a
-        robot and stores that pose in a private variable within the link.
-
-        This method is not for general use.
-
-        :param q: The joint angles/configuration of the robot
-        :type q: float ndarray(n)
-
-        .. note::
-
-            - The robot's base transform, if present, are incorporated
-              into the result.
-
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-
-        """
-
-        if self._base is None:
-            base = self._eye_fknm
-        else:
-            base = self._base.A
-
-        fknm.fkine_all(self._cache_m, self._cache_links_fknm, q, base)
-
-        for i in range(len(self._cache_grippers)):
-            fknm.fkine_all(
-                len(self._cache_grippers[i]),
-                self._cache_grippers[i],
-                self.grippers[i].q,
-                base,
-            )
-
     # --------------------------------------------------------------------- #
 
     @staticmethod
-    def URDF_read(file_path, tld=None):
+    def URDF_read(file_path, tld=None, xacro_tld=None):
         """
-        Read a URDF file as ELinks
+        Read a URDF file as Links
         :param file_path: File path relative to the xacro folder
         :type file_path: str, in Posix file path fprmat
-        :param tld: top-level directory, defaults to None
+        :param tld: A custom top-level directory which holds the xacro data,
+            defaults to None
         :type tld: str, optional
+        :param xacro_tld: A custom top-level within the xacro data,
+            defaults to None
+        :type xacro_tld: str, optional
         :return: Links and robot name
-        :rtype: tuple(ELink list, str)
+        :rtype: tuple(Link list, str)
         File should be specified relative to ``RTBDATA/URDF/xacro``
+
+        .. note:: If ``tld`` is not supplied, filepath pointing to xacro data should
+            be directly under ``RTBDATA/URDF/xacro`` OR under ``./xacro`` relative
+            to the model file calling this method. If ``tld`` is supplied, then
+            ```file_path``` needs to be relative to ``tld``
         """
 
         # get the path to the class that defines the robot
-        base_path = rtb_path_to_datafile("xacro")
+        if tld is None:
+            base_path = rtb_path_to_datafile("xacro")
+        else:
+            base_path = PurePosixPath(tld)
         # print("*** urdf_to_ets_args: ", classpath)
         # add on relative path to get to the URDF or xacro file
         # base_path = PurePath(classpath).parent.parent / 'URDF' / 'xacro'
@@ -1235,145 +1444,23 @@ class ERobot(BaseERobot):
 
         if ext == ".xacro":
             # it's a xacro file, preprocess it
-            if tld is not None:
-                tld = base_path / PurePosixPath(tld)
-            urdf_string = xacro.main(file_path, tld)
+            if xacro_tld is not None:
+                xacro_tld = base_path / PurePosixPath(xacro_tld)
+            urdf_string = xacro.main(file_path, xacro_tld)
             try:
-                urdf = URDF.loadstr(urdf_string, file_path)
+                urdf = URDF.loadstr(urdf_string, file_path, base_path)
             except BaseException as e:
                 print("error parsing URDF file", file_path)
                 raise e
         else:  # pragma nocover
             urdf_string = open(file_path).read()
-            urdf = URDF.loadstr(urdf_string, file_path)
+            urdf = URDF.loadstr(urdf_string, file_path, base_path)
 
         return urdf.elinks, urdf.name, urdf_string, file_path
 
     # --------------------------------------------------------------------- #
 
-    def fkine(
-        self,
-        q,
-        unit="rad",
-        end=None,
-        start=None,
-        tool=None,
-        include_base=True,
-        fast=False,
-    ):
-        """
-        Forward kinematics
-        :param q: Joint coordinates
-        :type q: ndarray(n) or ndarray(m,n)
-        :param end: end-effector or gripper to compute forward kinematics to
-        :type end: str or ELink or Gripper
-        :param start: the link to compute forward kinematics from
-        :type start: str or ELink
-        :param tool: tool transform, optional
-        :type tool: SE3
-        :return: The transformation matrix representing the pose of the
-            end-effector
-        :rtype: SE3 instance
-        - ``T = robot.fkine(q)`` evaluates forward kinematics for the robot at
-          joint configuration ``q``.
-        **Trajectory operation**:
-        If ``q`` has multiple rows (mxn), it is considered a trajectory and the
-        result is an ``SE3`` instance with ``m`` values.
-        .. note::
-            - For a robot with a single end-effector there is no need to
-              specify ``end``
-            - For a robot with multiple end-effectors, the ``end`` must
-              be specified.
-            - The robot's base tool transform, if set, is incorporated
-              into the result.
-            - A tool transform, if provided, is incorporated into the result.
-            - Works from the end-effector link to the base
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        """
-
-        if start is not None:
-            include_base = False
-
-        # Use c extension to calculate fkine
-        if fast:
-            path, _, etool = self.get_path(end, start, _fknm=True)
-            m = len(path)
-
-            if tool is None:
-                tool = self._eye_fknm
-
-            T = np.empty((4, 4))
-            fknm.fkine(m, path, q, etool, tool, T)
-
-            if self._base is not None and start is None and include_base == True:
-                return self.base.A @ T
-            else:
-                return T
-
-        # Otherwise use Python method
-        # we work with NumPy arrays not SE2/3 classes for speed
-        q = getmatrix(q, (None, self.n))
-
-        end, start, etool = self._get_limit_links(end, start)
-
-        if etool is not None and tool is not None:
-            tool = (etool * tool).A
-        elif etool is not None:
-            tool = etool.A
-        elif tool is not None:
-            tool = tool.A
-
-        if tool is None and self._tool is not None:
-            tool = self._tool.A
-
-        T = SE3.Empty()
-
-        for k, qk in enumerate(q):
-            if unit == "deg":
-                qk = self.toradians(qk)
-            link = end  # start with last link
-
-            # add tool if provided
-            A = link.A(qk[link.jindex], fast=True)
-            if A is None:
-                Tk = tool
-            else:
-                if tool is None:
-                    Tk = A
-                elif A is not None:
-                    Tk = A @ tool
-
-            # add remaining links, back toward the base
-            while True:
-                link = link.parent
-
-                if link is None:
-                    break
-
-                A = link.A(qk[link.jindex], fast=True)
-
-                if A is not None:
-                    Tk = A @ Tk
-
-                if link is start:
-                    break
-
-            # add base transform if it is set
-            if (
-                self._base is not None
-                and start == self.base_link
-                and include_base == True
-            ):
-                Tk = self.base.A @ Tk
-
-            # cast to pose class and append
-            T.append(T.__class__(Tk, check=False))
-
-        return T
-
-    def get_path(self, end=None, start=None, _fknm=False):
+    def get_path(self, end=None, start=None):
         """
         Find a path from start to end. The end must come after
         the start (ie end must be further away from the base link
@@ -1382,9 +1469,9 @@ class ERobot(BaseERobot):
         method is a work in progress while an approach which generalises
         to all applications is designed.
         :param end: end-effector or gripper to compute forward kinematics to
-        :type end: str or ELink or Gripper, optional
+        :type end: str or Link or Gripper, optional
         :param start: name or reference to a base link, defaults to None
-        :type start: str or ELink, optional
+        :type start: str or Link, optional
         :raises ValueError: link not known or ambiguous
         :return: the path from start to end
         :rtype: list of Link
@@ -1392,20 +1479,17 @@ class ERobot(BaseERobot):
         path = []
         n = 0
 
-        end, start, tool = self._get_limit_links(end, start)
+        end, start, tool = self._get_limit_links(end=end, start=start)
 
         # This is way faster than doing if x in y method
         try:
-            if _fknm:
-                return self._path_cache_fknm[start.name][end.name]
-            else:
-                return self._path_cache[start.name][end.name]
+            return self._path_cache[start.name][end.name]
         except KeyError:
             pass
 
         if start.name not in self._path_cache:
             self._path_cache[start.name] = {}
-            self._path_cache_fknm[start.name] = {}
+            # self._path_cache_fknm[start.name] = {}
 
         link = end
 
@@ -1424,473 +1508,175 @@ class ERobot(BaseERobot):
                 n += 1
 
         path.reverse()
-        path_fknm = [x._fknm for x in path]
+        # path_fknm = [x._fknm for x in path]
 
         if tool is None:
             tool = SE3()
 
         self._path_cache[start.name][end.name] = (path, n, tool)
-        self._path_cache_fknm[start.name][end.name] = (path_fknm, n, tool.A)
+        # self._path_cache_fknm[start.name][end.name] = (path_fknm, n, tool.A)
 
-        if _fknm:
-            return path_fknm, n, tool.A
-        else:
-            return path, n, tool
+        return path, n, tool
+
+    def fkine(
+        self,
+        q: ArrayLike,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
+        include_base: bool = True,
+    ) -> SE3:
+        """
+        Forward kinematics
+
+        :param q: Joint coordinates
+        :type q: ArrayLike
+        :param end: end-effector or gripper to compute forward kinematics to
+        :param start: the link to compute forward kinematics from
+        :param tool: tool transform, optional
+
+        :return: The transformation matrix representing the pose of the
+            end-effector
+
+        - ``T = robot.fkine(q)`` evaluates forward kinematics for the robot at
+          joint configuration ``q``.
+        **Trajectory operation**:
+
+        If ``q`` has multiple rows (mxn), it is considered a trajectory and the
+        result is an ``SE3`` instance with ``m`` values.
+        .. note::
+            - For a robot with a single end-effector there is no need to
+              specify ``end``
+            - For a robot with multiple end-effectors, the ``end`` must
+              be specified.
+            - The robot's base tool transform, if set, is incorporated
+              into the result.
+            - A tool transform, if provided, is incorporated into the result.
+            - Works from the end-effector link to the base
+
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        """
+        return SE3(
+            self.ets(start, end).fkine(
+                q, base=self._T, tool=tool, include_base=include_base
+            ),
+            check=False,
+        )
 
     def jacob0(
         self,
-        q,
-        end=None,
-        start=None,
-        tool=None,
-        T=None,
-        half=None,
-        analytical=None,
-        fast=False,
-    ):
+        q: ArrayLike,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
+    ) -> ndarray:
         r"""
         Manipulator geometric Jacobian in the base frame
+
         :param q: Joint coordinate vector
-        :type q: ndarray(n)
+        :type q: ArrayLike
         :param end: the particular link or gripper whose velocity the Jacobian
             describes, defaults to the end-effector if only one is present
-        :type end: str or ELink or Gripper
         :param start: the link considered as the base frame, defaults to the robots's base frame
-        :type start: str or ELink
         :param tool: a static tool transformation matrix to apply to the
             end of end, defaults to None
-        :type tool: SE3, optional
-        :param T: The transformation matrix of the reference point which the
-            Jacobian represents with respect to the base frame. Use this to
-            avoid caluclating forward kinematics to save time, defaults
-            to None
-        :type T: SE3, optional
-        :param half: return half Jacobian: 'trans' or 'rot'
-        :type half: str
-        :param analytical: return analytical Jacobian instead of geometric Jacobian (default)
-        :type analytical: str
+
         :return J: Manipulator Jacobian in the base frame
-        :rtype: ndarray(6,n)
+
         - ``robot.jacobo(q)`` is the manipulator Jacobian matrix which maps
           joint  velocity to end-effector spatial velocity expressed in the
           end-effector frame.
+
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
-        ``analytical`` can be one of:
-            =============  ==================================
-            Value          Rotational representation
-            =============  ==================================
-            ``'rpy-xyz'``  RPY angular rates in XYZ order
-            ``'rpy-zyx'``  RPY angular rates in XYZ order
-            ``'eul'``      Euler angular rates in ZYZ order
-            ``'exp'``      exponential coordinate rates
-            =============  ==================================
+
         Example:
         .. runblock:: pycon
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.ETS.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
+
         .. warning:: This is the geometric Jacobian as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a
             velocity twist as per the text by Lynch & Park.
+
         .. warning:: ``start`` and ``end`` must be on the same branch,
             with ``start`` closest to the base.
         """  # noqa
+        return self.ets(start, end).jacob0(q, tool=tool)
 
-        # Use c extension
-        if fast:
-            path, n, etool = self.get_path(end, start, _fknm=True)
-            if tool is None:
-                tool = self._eye_fknm
-            J = np.empty((6, n))
-            fknm.jacob0(len(path), n, path, q, etool, tool, J)
-            return J
-
-        # Otherwise use Python
-        if tool is None:
-            tool = SE3()
-
-        path, n, _ = self.get_path(end, start)
-
-        q = getvector(q, self.n)
-
-        if T is None:
-            T = self.fkine(q, end=end, start=start, include_base=False) * tool
-
-        T = T.A
-        U = np.eye(4)
-        j = 0
-        J = np.zeros((6, n))
-        zero = np.array([0, 0, 0])
-
-        for link in path:
-
-            if link.isjoint:
-                U = U @ link.A(q[link.jindex], fast=True)
-
-                if link == end:
-                    U = U @ tool.A
-
-                Tu = np.linalg.inv(U) @ T
-                n = U[:3, 0]
-                o = U[:3, 1]
-                a = U[:3, 2]
-                x = Tu[0, 3]
-                y = Tu[1, 3]
-                z = Tu[2, 3]
-
-                if link.v.axis == "Rz":
-                    J[:3, j] = (o * x) - (n * y)
-                    J[3:, j] = a
-
-                elif link.v.axis == "Ry":
-                    J[:3, j] = (n * z) - (a * x)
-                    J[3:, j] = o
-
-                elif link.v.axis == "Rx":
-                    J[:3, j] = (a * y) - (o * z)
-                    J[3:, j] = n
-
-                elif link.v.axis == "tx":
-                    J[:3, j] = n
-                    J[3:, j] = zero
-
-                elif link.v.axis == "ty":
-                    J[:3, j] = o
-                    J[3:, j] = zero
-
-                elif link.v.axis == "tz":
-                    J[:3, j] = a
-                    J[3:, j] = zero
-
-                j += 1
-            else:
-                A = link.A(fast=True)
-                if A is not None:
-                    U = U @ A
-
-        # compute rotational transform if analytical Jacobian required
-        if analytical is not None and half != "trans":
-
-            if analytical == "rpy/xyz":
-                rpy = tr2rpy(T, order="xyz")
-                A = rpy2jac(rpy, order="xyz")
-            elif analytical == "rpy/zyx":
-                rpy = tr2rpy(T, order="zyx")
-                A = rpy2jac(rpy, order="zyx")
-            elif analytical == "eul":
-                eul = tr2eul(T)
-                A = eul2jac(eul)
-            elif analytical == "exp":
-                # TODO: move to SMTB.base, Horner form with skew(v)
-                (theta, v) = trlog(t2r(T))
-                A = (
-                    np.eye(3, 3)
-                    - (1 - math.cos(theta)) / theta * skew(v)
-                    + (theta - math.sin(theta)) / theta * skew(v) ** 2
-                )
-            else:
-                raise ValueError("bad analyical value specified")
-
-            J = block_diag(np.eye(3, 3), np.linalg.inv(A)) @ J
-
-        # TODO optimize computation above if half matrix is returned
-
-        # return top or bottom half if asked
-        if half is not None:
-            if half == "trans":
-                J = J[:3, :]
-            elif half == "rot":
-                J = J[3:, :]
-            else:
-                raise ValueError("bad half specified")
-
-        return J
-
-    def jacobe_new(self, q, end=None, start=None, tool=None, T=None, fast=False):
-
-        # # Use c extension
-        # if fast:
-        #     path, n, etool = self.get_path(end, start, _fknm=True)
-        #     if tool is None:
-        #         tool = self._eye_fknm
-        #     J = np.empty((6, n))
-        #     fknm.jacob0(len(path), n, path, q, etool, tool, J)
-        #     return J
-
-        # Otherwise use Python
-        if tool is None:
-            tool = SE3()
-
-        path, n, _ = self.get_path(end, start)
-
-        q = getvector(q, self.n)
-
-        j = n - 1
-        J = np.zeros((6, n))
-        zero = np.array([0, 0, 0])
-
-        U = tool.A
-
-        for link in reversed(path):
-
-            if link.isjoint:
-
-                n = U[0, :3]
-                o = U[1, :3]
-                a = U[2, :3]
-
-                x = U[0, 3]
-                y = U[1, 3]
-                z = U[2, 3]
-
-                if link.v.axis == "Rz":
-                    J[:3, j] = (o * x) - (n * y)
-                    J[3:, j] = a
-
-                elif link.v.axis == "Ry":
-                    J[:3, j] = (n * z) - (a * x)
-                    J[3:, j] = o
-
-                elif link.v.axis == "Rx":
-                    J[:3, j] = (a * y) - (o * z)
-                    J[3:, j] = n
-
-                elif link.v.axis == "tx":
-                    J[:3, j] = n
-                    J[3:, j] = zero
-
-                elif link.v.axis == "ty":
-                    J[:3, j] = o
-                    J[3:, j] = zero
-
-                elif link.v.axis == "tz":
-                    J[:3, j] = a
-                    J[3:, j] = zero
-
-                U = link.A(q[link.jindex], fast=True) @ U
-                j -= 1
-            else:
-                A = link.A(fast=True)
-                if A is not None:
-                    U = A @ U
-
-        return J
-
-    def jacobe(self, q, end=None, start=None, tool=None, T=None, fast=False):
+    def jacobe(
+        self,
+        q: ArrayLike,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
+    ) -> ndarray:
         r"""
         Manipulator geometric Jacobian in the end-effector frame
+
         :param q: Joint coordinate vector
-        :type q: ndarray(n)
+        :type q: ArrayLike
         :param end: the particular link or Gripper whose velocity the Jacobian
             describes, defaults to the end-effector if only one is present
-        :type end: str or ELink or Gripper
         :param start: the link considered as the base frame, defaults to the robots's base frame
-        :type start: str or ELink
         :param tool: a static tool transformation matrix to apply to the
             end of end, defaults to None
-        :type tool: SE3, optional
-        :param T: The transformation matrix of the reference point which the
-            Jacobian represents with respect to the base frame.
-        :type T: SE3, optional
+
         :return J: Manipulator Jacobian in the end-effector frame
-        :rtype: ndarray(6,n)
+
         - ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
           joint  velocity to end-effector spatial velocity expressed in the
           end-effector frame.
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+
         Example:
         .. runblock:: pycon
             >>> import roboticstoolbox as rtb
             >>> puma = rtb.models.ETS.Puma560()
             >>> puma.jacobe([0, 0, 0, 0, 0, 0])
+
         .. warning:: This is the **geometric Jacobian** as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a
             velocity twist as per the text by Lynch & Park.
+
         .. warning:: ``start`` and ``end`` must be on the same branch,
             with ``start`` closest to the base.
-        .. note:: ``T`` can be passed in to save the cost of computing forward
-            kinematics which is needed to transform velocity from end-effector
-            frame to world frame.
         """  # noqa
+        return self.ets(start, end).jacobe(q, tool=tool)
 
-        if fast:
-            path, n, etool = self.get_path(end, start, _fknm=True)
-            if tool is None:
-                tool = self._eye_fknm
-            J = np.empty((6, n))
-            fknm.jacobe(len(path), n, path, q, etool, tool, J)
-            return J
-
-        q = getvector(q, self.n)
-
-        if tool is None:
-            tool = SE3()
-
-        end, start, _ = self._get_limit_links(end, start)
-
-        if T is None:
-            T = self.base.inv() * self.fkine(q, end=end, start=start) * tool
-
-        J0 = self.jacob0(q, end, start, tool, T)
-        Je = self.jacobev(q, end, start, tool, T) @ J0
-        return Je
-
-    def partial_fkine0(self, q, n, J0=None, end=None, start=None):
-        end, start, _ = self._get_limit_links(end, start)
-
-        def cross(a, b):
-            x = a[1] * b[2] - a[2] * b[1]
-            y = a[2] * b[0] - a[0] * b[2]
-            z = a[0] * b[1] - a[1] * b[0]
-            return np.array([x, y, z])
-
-        _, nl, _ = self.get_path(end, start)
-
-        J = self.jacob0(q, end=end, start=start)
-        H = self.hessian0(q, J, end, start)
-
-        d = [J, H]
-        size = [6, nl, nl]
-        count = np.array([0, 0])
-        c = 2
-
-        def add_indices(indices, c):
-            total = len(indices * 2)
-            new_indices = []
-
-            for i in range(total):
-                j = i // 2
-                new_indices.append([])
-                new_indices[i].append(indices[j][0].copy())
-                new_indices[i].append(indices[j][1].copy())
-
-                # if even number
-                if i % 2 == 0:
-                    new_indices[i][0].append(c)
-                # if odd number
-                else:
-                    new_indices[i][1].append(c)
-
-            return new_indices
-
-        def add_pdi(pdi):
-            total = len(pdi * 2)
-            new_pdi = []
-
-            for i in range(total):
-                j = i // 2
-                new_pdi.append([])
-                new_pdi[i].append(pdi[j][0])
-                new_pdi[i].append(pdi[j][1])
-
-                # if even number
-                if i % 2 == 0:
-                    new_pdi[i][0] += 1
-                # if odd number
-                else:
-                    new_pdi[i][1] += 1
-
-            return new_pdi
-
-        # these are the indices used for the hessian
-        indices = [[[1], [0]]]
-
-        # the are the pd indices used in the corss prods
-        pdi = [[0, 0]]
-
-        while len(d) != n:
-            size.append(nl)
-            count = np.r_[count, 0]
-            indices = add_indices(indices, c)
-            pdi = add_pdi(pdi)
-            c += 1
-
-            pd = np.zeros(size)
-
-            for i in range(nl ** c):
-
-                rot = np.zeros(3)
-                trn = np.zeros(3)
-
-                for j in range(len(indices)):
-                    pdr0 = d[pdi[j][0]]
-                    pdr1 = d[pdi[j][1]]
-
-                    idx0 = count[indices[j][0]]
-                    idx1 = count[indices[j][1]]
-
-                    rot += cross(pdr0[(slice(3, 6), *idx0)], pdr1[(slice(3, 6), *idx1)])
-
-                    trn += cross(pdr0[(slice(3, 6), *idx0)], pdr1[(slice(0, 3), *idx1)])
-
-                pd[(slice(0, 3), *count)] = trn
-                pd[(slice(3, 6), *count)] = rot
-
-                count[0] += 1
-                for j in range(len(count)):
-                    if count[j] == nl:
-                        count[j] = 0
-                        if j != len(count) - 1:
-                            count[j + 1] += 1
-
-            d.append(pd)
-
-        return d[-1]
-
-    # def third(self, q=None, J0=None, end=None, start=None):
-    #     end, start = self._get_limit_links(end, start)
-    #     path, n = self.get_path(end, start)
-
-    #     def cross(a, b):
-    #         x = a[1] * b[2] - a[2] * b[1]
-    #         y = a[2] * b[0] - a[0] * b[2]
-    #         z = a[0] * b[1] - a[1] * b[0]
-    #         return np.array([x, y, z])
-
-    #     if J0 is None:
-    #         q = getvector(q, n)
-    #         J0 = self.jacob0(q, end=end)
-    #     else:
-    #         verifymatrix(J0, (6, n))
-
-    #     H0 = self.hessian0(q, J0, end, start)
-
-    #     L = np.zeros((6, n, n, n))
-
-    #     for l in range(n):
-    #         for k in range(n):
-    #             for j in range(n):
-
-    #                 L[:3, j, k, l] = cross(H0[3:, k, l], J0[:3, j]) + \
-    #                     cross(J0[3:, k], H0[:3, j, l])
-
-    #                 L[3:, j, k, l] = cross(H0[3:, k, l], J0[3:, j]) + \
-    #                     cross(J0[3:, k], H0[3:, j, l])
-
-    #     return L
-
-    def hessian0(self, q=None, J0=None, end=None, start=None):
+    def hessian0(
+        self,
+        q: Union[ArrayLike, None] = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        J0: Union[ndarray, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
+    ) -> ndarray:
         r"""
         Manipulator Hessian
+
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
         function calulcates this based on the ETS of the robot. One of J0 or q
         is required. Supply J0 if already calculated to save computation time
+
         :param q: The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: float ndarray(n)
-        :param J0: The manipulator Jacobian in the 0 frame
-        :type J0: float ndarray(6,n)
+        :type q: ArrayLike
         :param end: the final link/Gripper which the Hessian represents
-        :type end: str or ELink or Gripper
         :param start: the first link which the Hessian represents
-        :type start: str or ELink
+        :param J0: The manipulator Jacobian in the 0 frame
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        
         :return: The manipulator Hessian in 0 frame
-        :rtype: float ndarray(6,n,n)
+        
         This method computes the manipulator Hessian in the base frame.  If
         we take the time derivative of the differential kinematic relationship
         .. math::
@@ -1901,6 +1687,7 @@ class ERobot(BaseERobot):
             \dmat{J} = \mat{H} \dvec{q}
         and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
         Hessian tensor.
+
         The elements of the Hessian are
         .. math::
             \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
@@ -1909,112 +1696,97 @@ class ERobot(BaseERobot):
         Similarly, we can write
         .. math::
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
+        
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        """
+        return self.ets(start, end).hessian0(q, J0=J0, tool=tool)
+
+    def hessiane(
+        self,
+        q: Union[ArrayLike, None] = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        Je: Union[ndarray, None] = None,
+        tool: Union[ndarray, SE3, None] = None,
+    ) -> ndarray:
+        r"""
+        Manipulator Hessian
+
+        The manipulator Hessian tensor maps joint acceleration to end-effector
+        spatial acceleration, expressed in the ee frame. This
+        function calulcates this based on the ETS of the robot. One of Je or q
+        is required. Supply Je if already calculated to save computation time
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: ArrayLike
+        :param end: the final link/Gripper which the Hessian represents
+        :param start: the first link which the Hessian represents
+        :param Je: The manipulator Jacobian in the ee frame
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        
+        :return: The manipulator Hessian in ee frame
+        
+        This method computes the manipulator Hessian in the ee frame.  If
+        we take the time derivative of the differential kinematic relationship
+        .. math::
+            \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
+            \alpha &= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}
+        where
+        .. math::
+            \dmat{J} = \mat{H} \dvec{q}
+        and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
+        Hessian tensor.
+
+        The elements of the Hessian are
+        .. math::
+            \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
+        where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
+        of the spatial velocity vector.
+        Similarly, we can write
+        .. math::
+            \mat{J}_{i,j} = \frac{d u_i}{d q_j}
+        
+        :references:
+            - Kinematic Derivatives using the Elementary Transform
+              Sequence, J. Haviland and P. Corke
+        """
+        return self.ets(start, end).hessiane(q, Je=Je, tool=tool)
+
+    def partial_fkine0(
+        self,
+        q: ArrayLike,
+        n: int = 3,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+    ):
+        r"""
+        Manipulator Forward Kinematics nth Partial Derivative
+
+        The manipulator Hessian tensor maps joint acceleration to end-effector
+        spatial acceleration, expressed in the ee frame. This
+        function calulcates this based on the ETS of the robot. One of Je or q
+        is required. Supply Je if already calculated to save computation time
+
+        :param q: The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        :type q: ArrayLike
+        :param end: the final link/Gripper which the Hessian represents
+        :param start: the first link which the Hessian represents
+        :param tool: a static tool transformation matrix to apply to the
+            end of end, defaults to None
+
+        :return: The nth Partial Derivative of the forward kinematics
+
         :references:
             - Kinematic Derivatives using the Elementary Transform
               Sequence, J. Haviland and P. Corke
         """
 
-        end, start, _ = self._get_limit_links(end, start)
-        path, n, _ = self.get_path(end, start)
-
-        def cross(a, b):
-            x = a[1] * b[2] - a[2] * b[1]
-            y = a[2] * b[0] - a[0] * b[2]
-            z = a[0] * b[1] - a[1] * b[0]
-            return np.array([x, y, z])
-
-        if J0 is None:
-            q = getvector(q, n)
-            J0 = self.jacob0(q, end=end, start=start)
-        else:
-            verifymatrix(J0, (6, n))
-
-        H = np.zeros((6, n, n))
-
-        for j in range(n):
-            for i in range(j, n):
-
-                H[:3, i, j] = cross(J0[3:, j], J0[:3, i])
-                H[3:, i, j] = cross(J0[3:, j], J0[3:, i])
-
-                if i != j:
-                    H[:3, j, i] = H[:3, i, j]
-
-        return H
-
-    def jacobev(self, q, end=None, start=None, tool=None, T=None):
-        """
-        Jv = jacobev(q) is the spatial velocity Jacobian, at joint
-        configuration q, which relates the velocity in the base frame to the
-        velocity in the end-effector frame.
-        :param q: Joint coordinate vector
-        :type q: ndarray(n)
-        :param end: the final link or Gripper which the Jacobian represents
-        :type end: str or ELink or Gripper
-        :param start: the first link which the Jacobian represents
-        :type start: str or ELink
-        :param tool: a static tool transformation matrix to apply to the
-            end of end, defaults to None
-        :type tool: SE3, optional
-        :param T: The transformation matrix of the reference point which the
-            Jacobian represents with respect to the base frame. Use this to
-            avoid caluclating forward kinematics to save time, defaults
-            to None
-        :type T: SE3, optional
-        :returns J: The velocity Jacobian in ee frame
-        :rtype J: float ndarray(6,6)
-        """
-
-        end, start, _ = self._get_limit_links(end, start)
-
-        if T is None:
-            T = self.base.inv() * self.fkine(q, end=end, start=start)
-            if tool is not None:
-                T *= tool
-        R = (T.R).T
-
-        Jv = np.zeros((6, 6))
-        Jv[:3, :3] = R
-        Jv[3:, 3:] = R
-
-        return Jv
-
-    def jacob0v(self, q, end=None, start=None, tool=None, T=None):
-        """
-        Jv = jacob0v(q) is the spatial velocity Jacobian, at joint
-        configuration q, which relates the velocity in the end-effector frame
-        to velocity in the base frame
-        :param q: Joint coordinate vector
-        :type q: ndarray(n)
-        :param end: the final link or Gripper which the Jacobian represents
-        :type end: str or ELink or Gripper
-        :param start: the first link which the Jacobian represents
-        :type start: str or ELink
-        :param tool: a static tool transformation matrix to apply to the
-            end of end, defaults to None
-        :type tool: SE3, optional
-        :param T: The transformation matrix of the reference point which the
-            Jacobian represents with respect to the base frame. Use this to
-            avoid caluclating forward kinematics to save time, defaults
-            to None
-        :type T: SE3, optional
-        :returns J: The velocity Jacobian in 0 frame
-        :rtype J: float ndarray(6,6)
-        """
-
-        end, start, _ = self._get_limit_links(end, start)
-
-        if T is None:
-            T = self.base.inv() * self.fkine(q, end=end, start=start)
-            if tool is not None:
-                T *= tool
-        R = T.R
-
-        Jv = np.zeros((6, 6))
-        Jv[:3, :3] = R
-        Jv[3:, 3:] = R
-
-        return Jv
+        return self.ets(start, end).partial_fkine0(q, n=n)
 
     def link_collision_damper(
         self,
@@ -2031,6 +1803,116 @@ class ERobot(BaseERobot):
         Formulates an inequality contraint which, when optimised for will
         make it impossible for the robot to run into a collision. Requires
         See examples/neo.py for use case
+        :param ds: The minimum distance in which a joint is allowed to
+            approach the collision object shape
+        :type ds: float
+        :param di: The influence distance in which the velocity
+            damper becomes active
+        :type di: float
+        :param xi: The gain for the velocity damper
+        :type xi: float
+        :param from_link: The first link to consider, defaults to the base
+            link
+        :type from_link: Link
+        :param to_link: The last link to consider, will consider all links
+            between from_link and to_link in the robot, defaults to the
+            end-effector link
+        :type to_link: Link
+        :returns: Ain, Bin as the inequality contraints for an omptimisor
+        :rtype: ndarray(6), ndarray(6)
+        """
+
+        end, start, _ = self._get_limit_links(start=start, end=end)
+
+        links, n, _ = self.get_path(start=start, end=end)
+
+        # if q is None:
+        #     q = copy(self.q)
+        # else:
+        #     q = getvector(q, n)
+
+        j = 0
+        Ain = None
+        bin = None
+
+        def indiv_calculation(link, link_col, q):
+            d, wTlp, wTcp = link_col.closest_point(shape, di)
+
+            if d is not None:
+                lpTcp = -wTlp + wTcp
+
+                norm = lpTcp / d
+                norm_h = expand_dims(concatenate((norm, [0, 0, 0])), axis=0)
+
+                # tool = (self.fkine(q, end=link).inv() * SE3(wTlp)).A[:3, 3]
+
+                # Je = self.jacob0(q, end=link, tool=tool)
+                # Je[:3, :] = self._T[:3, :3] @ Je[:3, :]
+
+                # n_dim = Je.shape[1]
+                # dp = norm_h @ shape.v
+                # l_Ain = zeros((1, self.n))
+
+                Je = self.jacobe(q, start=self.base_link, end=link, tool=link_col.T)
+                n_dim = Je.shape[1]
+                dp = norm_h @ shape.v
+                l_Ain = zeros((1, n))
+
+                l_Ain[0, :n_dim] = norm_h @ Je
+                l_bin = (xi * (d - ds) / (di - ds)) + dp
+            else:
+                l_Ain = None
+                l_bin = None
+
+            return l_Ain, l_bin
+
+        for link in links:
+            if link.isjoint:
+                j += 1
+
+            if collision_list is None:
+                col_list = link.collision
+            else:
+                col_list = collision_list[j - 1]
+
+            for link_col in col_list:
+                l_Ain, l_bin = indiv_calculation(link, link_col, q)
+
+                if l_Ain is not None and l_bin is not None:
+                    if Ain is None:
+                        Ain = l_Ain
+                    else:
+                        Ain = concatenate((Ain, l_Ain))
+
+                    if bin is None:
+                        bin = array(l_bin)
+                    else:
+                        bin = concatenate((bin, l_bin))
+
+        return Ain, bin
+
+    def vision_collision_damper(
+        self,
+        shape,
+        camera=None,
+        camera_n=0,
+        q=None,
+        di=0.3,
+        ds=0.05,
+        xi=1.0,
+        end=None,
+        start=None,
+        collision_list=None,
+    ):
+        """
+        Formulates an inequality contraint which, when optimised for will
+        make it impossible for the robot to run into a line of sight.
+        See examples/fetch_vision.py for use case
+        :param camera: The camera link, either as a robotic link or SE3
+            pose
+        :type camera: ERobot or SE3
+        :param camera_n: Degrees of freedom of the camera link
+        :type camera_n: int
         :param ds: The minimum distance in which a joint is allowed to
             approach the collision object shape
         :type ds: float
@@ -2058,37 +1940,80 @@ class ERobot(BaseERobot):
 
         links, n, _ = self.get_path(start=start, end=end)
 
-        # if q is None:
-        #     q = np.copy(self.q)
-        # else:
-        #     q = getvector(q, n)
-
         j = 0
         Ain = None
         bin = None
 
+        def rotation_between_vectors(a, b):
+            a = a / npnorm(a)
+            b = b / npnorm(b)
+
+            angle = arccos(dot(a, b))
+            axis = cross(a, b)
+
+            return SE3.AngleAxis(angle, axis)
+
+        if isinstance(camera, ERobot):
+            wTcp = camera.fkine(camera.q).A[:3, 3]
+        elif isinstance(camera, SE3):
+            wTcp = camera.t
+
+        wTtp = shape.T[:3, -1]
+
+        # Create line of sight object
+        los_mid = SE3((wTcp + wTtp) / 2)
+        los_orientation = rotation_between_vectors(array([0.0, 0.0, 1.0]), wTcp - wTtp)
+
+        los = Cylinder(
+            radius=0.001,
+            length=npnorm(wTcp - wTtp),
+            base=(los_mid * los_orientation),
+        )
+
         def indiv_calculation(link, link_col, q):
-            d, wTlp, wTcp = link_col.closest_point(shape, di)
+            d, wTlp, wTvp = link_col.closest_point(los, di)
 
             if d is not None:
-                lpTcp = -wTlp + wTcp
+                lpTvp = -wTlp + wTvp
 
-                norm = lpTcp / d
-                norm_h = np.expand_dims(np.r_[norm, 0, 0, 0], axis=0)
+                norm = lpTvp / d
+                norm_h = expand_dims(concatenate((norm, [0, 0, 0])), axis=0)
 
-                Je = self.jacobe(
-                    q, start=self.base_link, end=link, tool=link_col.base.A, fast=True
-                )
+                tool = SE3((inv(self.fkine(q, end=link).A) @ SE3(wTlp).A)[:3, 3])
+
+                Je = self.jacob0(q, end=link, tool=tool.A)
+                Je[:3, :] = self._T[:3, :3] @ Je[:3, :]
                 n_dim = Je.shape[1]
-                dp = norm_h @ shape.v
-                l_Ain = np.zeros((1, n))
+
+                if isinstance(camera, ERobot):
+                    Jv = camera.jacob0(camera.q)
+                    Jv[:3, :] = self._T[:3, :3] @ Jv[:3, :]
+
+                    Jv *= npnorm(wTvp - shape.T[:3, -1]) / los.length
+
+                    dpc = norm_h @ Jv
+                    dpc = concatenate(
+                        (
+                            dpc[0, :-camera_n],
+                            zeros(self.n - (camera.n - camera_n)),
+                            dpc[0, -camera_n:],
+                        )
+                    )
+                else:
+                    dpc = zeros((1, self.n + camera_n))
+
+                dpt = norm_h @ shape.v
+                dpt *= npnorm(wTvp - wTcp) / los.length
+
+                l_Ain = zeros((1, self.n + camera_n))
                 l_Ain[0, :n_dim] = norm_h @ Je
-                l_bin = (xi * (d - ds) / (di - ds)) + dp
+                l_Ain -= dpc
+                l_bin = (xi * (d - ds) / (di - ds)) + dpt
             else:
                 l_Ain = None
                 l_bin = None
 
-            return l_Ain, l_bin, d, wTcp
+            return l_Ain, l_bin
 
         for link in links:
             if link.isjoint:
@@ -2100,25 +2025,25 @@ class ERobot(BaseERobot):
                 col_list = collision_list[j - 1]
 
             for link_col in col_list:
-                l_Ain, l_bin, d, wTcp = indiv_calculation(link, link_col, q)
+                l_Ain, l_bin = indiv_calculation(link, link_col, q)
 
                 if l_Ain is not None and l_bin is not None:
                     if Ain is None:
                         Ain = l_Ain
                     else:
-                        Ain = np.r_[Ain, l_Ain]
+                        Ain = concatenate((Ain, l_Ain))
 
                     if bin is None:
-                        bin = np.array(l_bin)
+                        bin = array(l_bin)
                     else:
-                        bin = np.r_[bin, l_bin]
+                        bin = concatenate((bin, l_bin))
 
         return Ain, bin
 
     # inverse dynamics (recursive Newton-Euler) using spatial vector notation
-    def rne(robot, q, qd, qdd, symbolic=False, gravity=None):
+    def rne(self, q, qd, qdd, symbolic=False, gravity=None):
 
-        n = robot.n
+        n = self.n
 
         # allocate intermediate variables
         Xup = SE3.Alloc(n)
@@ -2128,26 +2053,45 @@ class ERobot(BaseERobot):
         a = SpatialAcceleration.Alloc(n)
         f = SpatialForce.Alloc(n)
         I = SpatialInertia.Alloc(n)  # noqa
-        s = [None for i in range(n)]  # joint motion subspace
+        s = []  # joint motion subspace
+
         if symbolic:
-            Q = np.empty((n,), dtype="O")  # joint torque/force
+            Q = empty((n,), dtype="O")  # joint torque/force
         else:
-            Q = np.empty((n,))  # joint torque/force
+            Q = empty((n,))  # joint torque/force
+
+        # TODO Should the dynamic parameters of static links preceding joint be
+        # somehow merged with the joint?
+
+        # A temp variable to handle static joints
+        Ts = SE3()
+
+        # A counter through joints
+        j = 0
 
         # initialize intermediate variables
-        for j, link in enumerate(robot):
-            I[j] = SpatialInertia(m=link.m, r=link.r)
-            if symbolic and link.Ts is None:
-                Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
+        for link in self.links:
+            if link.isjoint:
+                I[j] = SpatialInertia(m=link.m, r=link.r)
+                if symbolic and link.Ts is None:
+                    Xtree[j] = SE3(eye(4, dtype="O"), check=False)
+                else:
+                    Xtree[j] = Ts * SE3(link.Ts, check=False)
+
+                if link.v is not None:
+                    s.append(link.v.s)
+
+                # Increment the joint counter
+                j += 1
+
+                # Reset the Ts tracker
+                Ts = SE3()
             else:
-                Xtree[j] = SE3(link.Ts, check=False)
-            if link.v is not None:
-                s[j] = link.v.s
-            else:
-                s[j] = None
+                # TODO Keep track of inertia and transform???
+                Ts *= SE3(link.Ts, check=False)
 
         if gravity is None:
-            a_grav = -SpatialAcceleration(robot.gravity)
+            a_grav = -SpatialAcceleration(self.gravity)
         else:
             a_grav = -SpatialAcceleration(gravity)
 
@@ -2156,13 +2100,13 @@ class ERobot(BaseERobot):
             vJ = SpatialVelocity(s[j] * qd[j])
 
             # transform from parent(j) to j
-            Xup[j] = robot[j].A(q[j]).inv()
+            Xup[j] = SE3(self.links[j].A(q[j])).inv()
 
-            if robot[j].parent is None:
+            if self.links[j].parent is None:
                 v[j] = vJ
                 a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qdd[j])
             else:
-                jp = robot[j].parent.jindex
+                jp = self.links[j].parent.jindex  # type: ignore
                 v[j] = Xup[j] * v[jp] + vJ
                 a[j] = Xup[j] * a[jp] + SpatialAcceleration(s[j] * qdd[j]) + v[j] @ vJ
 
@@ -2171,14 +2115,564 @@ class ERobot(BaseERobot):
         # backward recursion
         for j in reversed(range(0, n)):
 
-            # next line could be np.dot(), but fails for symbolic arguments
-            Q[j] = np.sum(f[j].A * s[j])
+            # next line could be dot(), but fails for symbolic arguments
+            Q[j] = sum(f[j].A * s[j])
 
-            if robot[j].parent is not None:
-                jp = robot[j].parent.jindex
+            if self.links[j].parent is not None:
+                jp = self.links[j].parent.jindex  # type: ignore
                 f[jp] = f[jp] + Xup[j] * f[j]
 
         return Q
+
+    # --------------------------------------------------------------------- #
+
+    def ik_lm_chan(
+        self,
+        Tep: Union[ndarray, SE3],
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        q0: Union[ndarray, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        reject_jl: bool = True,
+        we: Union[ndarray, None] = None,
+        λ: float = 1.0,
+    ) -> Tuple[ndarray, int, int, int, float]:
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan's Method)
+
+        :param Tep: The desired end-effector pose or pose trajectory
+        :param end: the particular link or gripper to compute the pose of
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param q0: initial joint configuration (default to random valid joint
+            configuration contrained by the joint limits of the robot)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param reject_jl: constrain the solution to being within the joint limits of
+            the robot (reject solution with invalid joint configurations and perfrom
+            another search up to the slimit)
+        :param we: a mask vector which weights the end-effector error priority.
+            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
+            respectively
+        :param λ: value of lambda for the damping matrix Wn
+
+        :return: inverse kinematic solution
+        :rtype: tuple (q, success, iterations, searches, residual)
+
+        ``sol = ets.ik_lm_chan(Tep)`` are the joint coordinates (n) corresponding
+        to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
+        This method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a tuple with elements:
+
+        ============    ==========  ===============================================
+        Element         Type        Description
+        ============    ==========  ===============================================
+        ``q``           ndarray(n)  joint coordinates in units of radians or metres
+        ``success``     int         whether a solution was found
+        ``iterations``  int         total number of iterations
+        ``searches``    int         total number of searches
+        ``residual``    float       final value of cost function
+        ============    ==========  ===============================================
+
+        If ``success == 0`` the ``q`` values will be valid numbers, but the
+        solution will be in error.  The amount of error is indicated by
+        the ``residual``.
+
+        **Joint Limits**:
+
+        ``sol = robot.ikine_LM(T, slimit=100)`` which is the deafualt for this method.
+        The solver will initialise a solution attempt with a random valid q0 and
+        perform a maximum of ilimit steps within this attempt. If a solution is not
+        found, this process is repeated up to slimit times.
+
+        **Global search**:
+
+        ``sol = robot.ikine_LM(T, reject_jl=True)`` is the deafualt for this method.
+        By setting reject_jl to True, the solver will discard any solution which
+        violates the defined joint limits of the robot. The solver will then
+        re-initialise with a new random q0 and repeat the process up to slimit times.
+        Note that finding a solution with valid joint coordinates takes longer than
+        without.
+
+        **Underactuated robots:**
+
+        For the case where the manipulator has fewer than 6 DOF the
+        solution space has more dimensions than can be spanned by the
+        manipulator joint coordinates.
+
+        In this case we specify the ``we`` option where the ``we`` vector
+        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+        will be ignored in reaching a solution.  The we vector has six
+        elements that correspond to translation in X, Y and Z, and rotation
+        about X, Y and Z respectively. The value can be 0 (for ignore)
+        or above to assign a priority relative to other Cartesian DoF. The number
+        of non-zero elements must equal the number of manipulator DOF.
+
+        For example when using a 3 DOF manipulator tool orientation might
+        be unimportant, in which case use the option ``we=[1, 1, 1, 0, 0, 0]``.
+
+
+
+        .. note::
+
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - Implements a Levenberg-Marquadt variable-damping solver.
+            - The tolerance is computed on the norm of the error between
+                current and desired tool pose.  This norm is computed from
+                distances and angles without any kind of weighting.
+            - The inverse kinematic solution is generally not unique, and
+                depends on the initial guess ``q0``.
+
+        :references:
+            TODO
+
+        :seealso:
+            TODO
+        """
+
+        return self.ets(start, end).ik_lm_chan(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+
+    def ik_lm_wampler(
+        self,
+        Tep: Union[ndarray, SE3],
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        q0: Union[ndarray, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        reject_jl: bool = True,
+        we: Union[ndarray, None] = None,
+        λ: float = 1.0,
+    ) -> Tuple[ndarray, int, int, int, float]:
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization (Wamplers's Method)
+
+        :param Tep: The desired end-effector pose or pose trajectory
+        :param end: the particular link or gripper to compute the pose of
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param q0: initial joint configuration (default to random valid joint
+            configuration contrained by the joint limits of the robot)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param reject_jl: constrain the solution to being within the joint limits of
+            the robot (reject solution with invalid joint configurations and perfrom
+            another search up to the slimit)
+        :param we: a mask vector which weights the end-effector error priority.
+            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
+            respectively
+        :param λ: value of lambda for the damping matrix Wn
+
+        :return: inverse kinematic solution
+        :rtype: tuple (q, success, iterations, searches, residual)
+
+        ``sol = ets.ik_lm_chan(Tep)`` are the joint coordinates (n) corresponding
+        to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
+        This method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a tuple with elements:
+
+        ============    ==========  ===============================================
+        Element         Type        Description
+        ============    ==========  ===============================================
+        ``q``           ndarray(n)  joint coordinates in units of radians or metres
+        ``success``     int         whether a solution was found
+        ``iterations``  int         total number of iterations
+        ``searches``    int         total number of searches
+        ``residual``    float       final value of cost function
+        ============    ==========  ===============================================
+
+        If ``success == 0`` the ``q`` values will be valid numbers, but the
+        solution will be in error.  The amount of error is indicated by
+        the ``residual``.
+
+        **Joint Limits**:
+
+        ``sol = robot.ikine_LM(T, slimit=100)`` which is the deafualt for this method.
+        The solver will initialise a solution attempt with a random valid q0 and
+        perform a maximum of ilimit steps within this attempt. If a solution is not
+        found, this process is repeated up to slimit times.
+
+        **Global search**:
+
+        ``sol = robot.ikine_LM(T, reject_jl=True)`` is the deafualt for this method.
+        By setting reject_jl to True, the solver will discard any solution which
+        violates the defined joint limits of the robot. The solver will then
+        re-initialise with a new random q0 and repeat the process up to slimit times.
+        Note that finding a solution with valid joint coordinates takes longer than
+        without.
+
+        **Underactuated robots:**
+
+        For the case where the manipulator has fewer than 6 DOF the
+        solution space has more dimensions than can be spanned by the
+        manipulator joint coordinates.
+
+        In this case we specify the ``we`` option where the ``we`` vector
+        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+        will be ignored in reaching a solution.  The we vector has six
+        elements that correspond to translation in X, Y and Z, and rotation
+        about X, Y and Z respectively. The value can be 0 (for ignore)
+        or above to assign a priority relative to other Cartesian DoF. The number
+        of non-zero elements must equal the number of manipulator DOF.
+
+        For example when using a 3 DOF manipulator tool orientation might
+        be unimportant, in which case use the option ``we=[1, 1, 1, 0, 0, 0]``.
+
+
+
+        .. note::
+
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - Implements a Levenberg-Marquadt variable-damping solver.
+            - The tolerance is computed on the norm of the error between
+                current and desired tool pose.  This norm is computed from
+                distances and angles without any kind of weighting.
+            - The inverse kinematic solution is generally not unique, and
+                depends on the initial guess ``q0``.
+
+        :references:
+            TODO
+
+        :seealso:
+            TODO
+        """
+
+        return self.ets(start, end).ik_lm_wampler(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+
+    def ik_lm_sugihara(
+        self,
+        Tep: Union[ndarray, SE3],
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        q0: Union[ndarray, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        reject_jl: bool = True,
+        we: Union[ndarray, None] = None,
+        λ: float = 1.0,
+    ) -> Tuple[ndarray, int, int, int, float]:
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization (Sugihara's Method)
+
+        :param Tep: The desired end-effector pose or pose trajectory
+        :param end: the particular link or gripper to compute the pose of
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param q0: initial joint configuration (default to random valid joint
+            configuration contrained by the joint limits of the robot)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param reject_jl: constrain the solution to being within the joint limits of
+            the robot (reject solution with invalid joint configurations and perfrom
+            another search up to the slimit)
+        :param we: a mask vector which weights the end-effector error priority.
+            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
+            respectively
+        :param λ: value of lambda for the damping matrix Wn
+
+        :return: inverse kinematic solution
+        :rtype: tuple (q, success, iterations, searches, residual)
+
+        ``sol = ets.ik_lm_chan(Tep)`` are the joint coordinates (n) corresponding
+        to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
+        This method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a tuple with elements:
+
+        ============    ==========  ===============================================
+        Element         Type        Description
+        ============    ==========  ===============================================
+        ``q``           ndarray(n)  joint coordinates in units of radians or metres
+        ``success``     int         whether a solution was found
+        ``iterations``  int         total number of iterations
+        ``searches``    int         total number of searches
+        ``residual``    float       final value of cost function
+        ============    ==========  ===============================================
+
+        If ``success == 0`` the ``q`` values will be valid numbers, but the
+        solution will be in error.  The amount of error is indicated by
+        the ``residual``.
+
+        **Joint Limits**:
+
+        ``sol = robot.ikine_LM(T, slimit=100)`` which is the deafualt for this method.
+        The solver will initialise a solution attempt with a random valid q0 and
+        perform a maximum of ilimit steps within this attempt. If a solution is not
+        found, this process is repeated up to slimit times.
+
+        **Global search**:
+
+        ``sol = robot.ikine_LM(T, reject_jl=True)`` is the deafualt for this method.
+        By setting reject_jl to True, the solver will discard any solution which
+        violates the defined joint limits of the robot. The solver will then
+        re-initialise with a new random q0 and repeat the process up to slimit times.
+        Note that finding a solution with valid joint coordinates takes longer than
+        without.
+
+        **Underactuated robots:**
+
+        For the case where the manipulator has fewer than 6 DOF the
+        solution space has more dimensions than can be spanned by the
+        manipulator joint coordinates.
+
+        In this case we specify the ``we`` option where the ``we`` vector
+        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+        will be ignored in reaching a solution.  The we vector has six
+        elements that correspond to translation in X, Y and Z, and rotation
+        about X, Y and Z respectively. The value can be 0 (for ignore)
+        or above to assign a priority relative to other Cartesian DoF. The number
+        of non-zero elements must equal the number of manipulator DOF.
+
+        For example when using a 3 DOF manipulator tool orientation might
+        be unimportant, in which case use the option ``we=[1, 1, 1, 0, 0, 0]``.
+
+
+
+        .. note::
+
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - Implements a Levenberg-Marquadt variable-damping solver.
+            - The tolerance is computed on the norm of the error between
+                current and desired tool pose.  This norm is computed from
+                distances and angles without any kind of weighting.
+            - The inverse kinematic solution is generally not unique, and
+                depends on the initial guess ``q0``.
+
+        :references:
+            TODO
+
+        :seealso:
+            TODO
+        """
+
+        return self.ets(start, end).ik_lm_sugihara(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+
+    def ik_nr(
+        self,
+        Tep: Union[ndarray, SE3],
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        q0: Union[ndarray, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        reject_jl: bool = True,
+        we: Union[ndarray, None] = None,
+        use_pinv: int = True,
+        pinv_damping: float = 0.0,
+    ) -> Tuple[ndarray, int, int, int, float]:
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization (Newton-Raphson Method)
+
+        :param Tep: The desired end-effector pose or pose trajectory
+        :param end: the particular link or gripper to compute the pose of
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param q0: initial joint configuration (default to random valid joint
+            configuration contrained by the joint limits of the robot)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param reject_jl: constrain the solution to being within the joint limits of
+            the robot (reject solution with invalid joint configurations and perfrom
+            another search up to the slimit)
+        :param we: a mask vector which weights the end-effector error priority.
+            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
+            respectively
+        :param λ: value of lambda for the damping matrix Wn
+
+        :return: inverse kinematic solution
+        :rtype: tuple (q, success, iterations, searches, residual)
+
+        ``sol = ets.ik_lm_chan(Tep)`` are the joint coordinates (n) corresponding
+        to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
+        This method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a tuple with elements:
+
+        ============    ==========  ===============================================
+        Element         Type        Description
+        ============    ==========  ===============================================
+        ``q``           ndarray(n)  joint coordinates in units of radians or metres
+        ``success``     int         whether a solution was found
+        ``iterations``  int         total number of iterations
+        ``searches``    int         total number of searches
+        ``residual``    float       final value of cost function
+        ============    ==========  ===============================================
+
+        If ``success == 0`` the ``q`` values will be valid numbers, but the
+        solution will be in error.  The amount of error is indicated by
+        the ``residual``.
+
+        **Joint Limits**:
+
+        ``sol = robot.ikine_LM(T, slimit=100)`` which is the deafualt for this method.
+        The solver will initialise a solution attempt with a random valid q0 and
+        perform a maximum of ilimit steps within this attempt. If a solution is not
+        found, this process is repeated up to slimit times.
+
+        **Global search**:
+
+        ``sol = robot.ikine_LM(T, reject_jl=True)`` is the deafualt for this method.
+        By setting reject_jl to True, the solver will discard any solution which
+        violates the defined joint limits of the robot. The solver will then
+        re-initialise with a new random q0 and repeat the process up to slimit times.
+        Note that finding a solution with valid joint coordinates takes longer than
+        without.
+
+        **Underactuated robots:**
+
+        For the case where the manipulator has fewer than 6 DOF the
+        solution space has more dimensions than can be spanned by the
+        manipulator joint coordinates.
+
+        In this case we specify the ``we`` option where the ``we`` vector
+        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+        will be ignored in reaching a solution.  The we vector has six
+        elements that correspond to translation in X, Y and Z, and rotation
+        about X, Y and Z respectively. The value can be 0 (for ignore)
+        or above to assign a priority relative to other Cartesian DoF. The number
+        of non-zero elements must equal the number of manipulator DOF.
+
+        For example when using a 3 DOF manipulator tool orientation might
+        be unimportant, in which case use the option ``we=[1, 1, 1, 0, 0, 0]``.
+
+
+
+        .. note::
+
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - Implements a Levenberg-Marquadt variable-damping solver.
+            - The tolerance is computed on the norm of the error between
+                current and desired tool pose.  This norm is computed from
+                distances and angles without any kind of weighting.
+            - The inverse kinematic solution is generally not unique, and
+                depends on the initial guess ``q0``.
+
+        :references:
+            TODO
+
+        :seealso:
+            TODO
+        """
+
+        return self.ets(start, end).ik_nr(Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping)
+
+    def ik_gn(
+        self,
+        Tep: Union[ndarray, SE3],
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        q0: Union[ndarray, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        reject_jl: bool = True,
+        we: Union[ndarray, None] = None,
+        use_pinv: int = True,
+        pinv_damping: float = 0.0,
+    ) -> Tuple[ndarray, int, int, int, float]:
+        """
+        Numerical inverse kinematics by Levenberg-Marquadt optimization (Gauss-NewtonMethod)
+
+        :param Tep: The desired end-effector pose or pose trajectory
+        :param end: the particular link or gripper to compute the pose of
+        :param start: the link considered as the base frame, defaults to the robots's base frame
+        :param q0: initial joint configuration (default to random valid joint
+            configuration contrained by the joint limits of the robot)
+        :param ilimit: maximum number of iterations per search
+        :param slimit: maximum number of search attempts
+        :param tol: final error tolerance
+        :param reject_jl: constrain the solution to being within the joint limits of
+            the robot (reject solution with invalid joint configurations and perfrom
+            another search up to the slimit)
+        :param we: a mask vector which weights the end-effector error priority.
+            Corresponds to translation in X, Y and Z and rotation about X, Y and Z
+            respectively
+        :param λ: value of lambda for the damping matrix Wn
+
+        :return: inverse kinematic solution
+        :rtype: tuple (q, success, iterations, searches, residual)
+
+        ``sol = ets.ik_lm_chan(Tep)`` are the joint coordinates (n) corresponding
+        to the robot end-effector pose ``Tep`` which is an ``SE3`` or ``ndarray`` object.
+        This method can be used for robots with any number of degrees of freedom.
+        The return value ``sol`` is a tuple with elements:
+
+        ============    ==========  ===============================================
+        Element         Type        Description
+        ============    ==========  ===============================================
+        ``q``           ndarray(n)  joint coordinates in units of radians or metres
+        ``success``     int         whether a solution was found
+        ``iterations``  int         total number of iterations
+        ``searches``    int         total number of searches
+        ``residual``    float       final value of cost function
+        ============    ==========  ===============================================
+
+        If ``success == 0`` the ``q`` values will be valid numbers, but the
+        solution will be in error.  The amount of error is indicated by
+        the ``residual``.
+
+        **Joint Limits**:
+
+        ``sol = robot.ikine_LM(T, slimit=100)`` which is the deafualt for this method.
+        The solver will initialise a solution attempt with a random valid q0 and
+        perform a maximum of ilimit steps within this attempt. If a solution is not
+        found, this process is repeated up to slimit times.
+
+        **Global search**:
+
+        ``sol = robot.ikine_LM(T, reject_jl=True)`` is the deafualt for this method.
+        By setting reject_jl to True, the solver will discard any solution which
+        violates the defined joint limits of the robot. The solver will then
+        re-initialise with a new random q0 and repeat the process up to slimit times.
+        Note that finding a solution with valid joint coordinates takes longer than
+        without.
+
+        **Underactuated robots:**
+
+        For the case where the manipulator has fewer than 6 DOF the
+        solution space has more dimensions than can be spanned by the
+        manipulator joint coordinates.
+
+        In this case we specify the ``we`` option where the ``we`` vector
+        (6) specifies the Cartesian DOF (in the wrist coordinate frame) that
+        will be ignored in reaching a solution.  The we vector has six
+        elements that correspond to translation in X, Y and Z, and rotation
+        about X, Y and Z respectively. The value can be 0 (for ignore)
+        or above to assign a priority relative to other Cartesian DoF. The number
+        of non-zero elements must equal the number of manipulator DOF.
+
+        For example when using a 3 DOF manipulator tool orientation might
+        be unimportant, in which case use the option ``we=[1, 1, 1, 0, 0, 0]``.
+
+
+
+        .. note::
+
+            - See `Toolbox kinematics wiki page
+                <https://github.com/petercorke/robotics-toolbox-python/wiki/Kinematics>`_
+            - Implements a Levenberg-Marquadt variable-damping solver.
+            - The tolerance is computed on the norm of the error between
+                current and desired tool pose.  This norm is computed from
+                distances and angles without any kind of weighting.
+            - The inverse kinematic solution is generally not unique, and
+                depends on the initial guess ``q0``.
+
+        :references:
+            TODO
+
+        :seealso:
+            TODO
+        """
+
+        return self.ets(start, end).ik_gn(Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping)
+
 
 
 # =========================================================================== #
@@ -2193,7 +2687,7 @@ class ERobot2(BaseERobot):
             # chop it up into segments, a link frame after every joint
             parent = None
             for j, ets_j in enumerate(arg.split()):
-                elink = ELink2(ets_j, parent=parent, name=f"link{j:d}")
+                elink = Link2(ETS2(ets_j), parent=parent, name=f"link{j:d}")
                 parent = elink
                 if (
                     elink.qlim is None
@@ -2203,25 +2697,61 @@ class ERobot2(BaseERobot):
                     elink.qlim = elink.v.qlim
                 links.append(elink)
 
-        elif islistof(arg, ELink2):
+        elif islistof(arg, Link2):
             links = arg
         else:
-            raise TypeError("constructor argument must be ETS2 or list of ELink2")
+            raise TypeError("constructor argument must be ETS2 or list of Link2")
 
         super().__init__(links, **kwargs)
 
         # should just set it to None
         self.base = SE2()  # override superclass
 
-    def jacob0(self, q):
-        return self.ets().jacob0(q)
+    @property
+    def base(self) -> SE2:
+        """
+        Get/set robot base transform (Robot superclass)
 
-    def jacobe(self, q):
-        return self.ets().jacobe(q)
+        - ``robot.base`` is the robot base transform
 
-    def fkine(self, q, unit="rad", end=None, start=None):
+        :return: robot tool transform
+        :rtype: SE2 instance
 
-        return self.ets(start, end).eval(q, unit=unit)
+        - ``robot.base = ...`` checks and sets the robot base transform
+
+        .. note:: The private attribute ``_base`` will be None in the case of
+            no base transform, but this property will return ``SE3()`` which
+            is an identity matrix.
+        """
+        if self._base is None:
+            self._base = SE2()
+
+        # return a copy, otherwise somebody with
+        # reference to the base can change it
+        return self._base.copy()
+
+    @base.setter
+    def base(self, T):
+        if T is None:
+            self._base = T
+        elif isinstance(self, ERobot2):
+            # 2D robot
+            if isinstance(T, SE2):
+                self._base = T
+            elif SE2.isvalid(T):
+                self._tool = SE2(T, check=True)
+        else:
+            raise ValueError("base must be set to None (no tool) or SE2")
+
+    def jacob0(self, q, start=None, end=None):
+        return self.ets(start, end).jacob0(q)
+
+    def jacobe(self, q, start=None, end=None):
+        return self.ets(start, end).jacobe(q)
+
+    def fkine(self, q, end=None, start=None):
+
+        return self.ets(start, end).fkine(q)
 
 
 # --------------------------------------------------------------------- #
@@ -2288,7 +2818,7 @@ class ERobot2(BaseERobot):
 #     """
 
 #     if q is None:
-#         q = np.zeros((self.n,))
+#         q = zeros((self.n,))
 #     else:
 #         q = getvector(q, self.n)
 
@@ -2307,7 +2837,7 @@ class ERobot2(BaseERobot):
 #     env._add_teach_panel(self, q)
 
 #     if limits is None:
-#         limits = np.r_[-1, 1, -1, 1] * self.reach * 1.5
+#         limits = r_[-1, 1, -1, 1] * self.reach * 1.5
 #         env.ax.set_xlim([limits[0], limits[1]])
 #         env.ax.set_ylim([limits[2], limits[3]])
 
@@ -2328,9 +2858,9 @@ class ERobot2(BaseERobot):
 
 if __name__ == "__main__":  # pragma nocover
 
-    e1 = ELink(ETS.rz(), jindex=0)
-    e2 = ELink(ETS.rz(), jindex=1, parent=e1)
-    e3 = ELink(ETS.rz(), jindex=2, parent=e2)
-    e4 = ELink(ETS.rz(), jindex=5, parent=e3)
+    e1 = Link(ETS(ET.Rz()), jindex=0)
+    e2 = Link(ETS(ET.Rz()), jindex=1, parent=e1)
+    e3 = Link(ETS(ET.Rz()), jindex=2, parent=e2)
+    e4 = Link(ETS(ET.Rz()), jindex=5, parent=e3)
 
     ERobot([e1, e2, e3, e4])

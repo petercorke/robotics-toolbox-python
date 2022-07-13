@@ -5,7 +5,6 @@
 
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
-from spatialmath import SE3
 
 
 class Sawyer(DHRobot):
@@ -41,43 +40,47 @@ class Sawyer(DHRobot):
 
         if symbolic:
             import spatialmath.base.symbolic as sym
-            zero = sym.zero()
+
+            # zero = sym.zero()
             pi = sym.pi()
         else:
             from math import pi
-            zero = 0.0
 
-        deg = pi / 180
+            # zero = 0.0
+
+        # deg = pi / 180
         mm = 1e-3
-        
+
         # kinematic parameters
         a = np.r_[81, 0, 0, 0, 0, 0, 0] * mm
         d = np.r_[317, 192.5, 400, 168.5, 400, 136.3, 133.75] * mm
-        alpha = [-pi/2, -pi/2, -pi/2, -pi/2, -pi/2, -pi/2, 0]
+        alpha = [-pi / 2, -pi / 2, -pi / 2, -pi / 2, -pi / 2, -pi / 2, 0]
 
         links = []
 
         for j in range(6):
-            link = RevoluteDH(
-                d=d[j],
-                a=a[j],
-                alpha=alpha[j]
-            )
+            link = RevoluteDH(d=d[j], a=a[j], alpha=alpha[j])
             links.append(link)
-    
+
         super().__init__(
             links,
             name="Sawyer",
             manufacturer="Rethink Robotics",
-            keywords=('redundant', 'symbolic',),
-            symbolic=symbolic
+            keywords=(
+                "redundant",
+                "symbolic",
+            ),
+            symbolic=symbolic,
         )
-    
-        # zero angles
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
+
+        self.qr = np.zeros(6)
+        self.qz = np.zeros(6)
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
-if __name__ == '__main__':    # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     sawyer = Sawyer(symbolic=False)
     print(sawyer)

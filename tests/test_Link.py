@@ -58,11 +58,9 @@ class TestDHLink(unittest.TestCase):
         nt.assert_array_almost_equal(l2.I, I2)
 
     def test_A(self):
-        l0 = rp.DHLink(sigma=0)
-        l1 = rp.DHLink(sigma=1)
-        l2 = rp.DHLink(sigma=0, mdh=0)
-        l3 = rp.DHLink(sigma=1, mdh=1)
-        l4 = rp.DHLink(flip=True)
+        l0 = rp.RevoluteMDH()
+        l1 = rp.PrismaticMDH()
+        l2 = rp.RevoluteMDH(flip=True)
 
         T0 = sm.SE3(
             np.array([[-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
@@ -75,11 +73,9 @@ class TestDHLink(unittest.TestCase):
         nt.assert_array_almost_equal(l0.A(np.pi).A, T0.A)
         nt.assert_array_almost_equal(l1.A(np.pi).A, T1.A)
         nt.assert_array_almost_equal(l2.A(np.pi).A, T0.A)
-        nt.assert_array_almost_equal(l3.A(np.pi).A, T1.A)
-        nt.assert_array_almost_equal(l4.A(np.pi).A, T0.A)
 
     def test_friction(self):
-        l0 = rp.RevoluteDH(d=2, Tc=[2, -1], B=3, G=2)
+        l0 = rp.RevoluteMDH(d=2, Tc=[2, -1], B=3, G=2)
 
         tau = -124
         tau2 = 122
@@ -106,15 +102,6 @@ class TestDHLink(unittest.TestCase):
         nt.assert_array_almost_equal(n2.B, l0.B)
         nt.assert_array_almost_equal(n2.Tc, l0.Tc)
 
-    def test_sigma(self):
-        l0 = rp.DHLink(sigma=0)
-        l1 = rp.DHLink(sigma=1)
-
-        self.assertEqual(l0.isrevolute, True)
-        self.assertEqual(l0.isprismatic, False)
-        self.assertEqual(l1.isrevolute, False)
-        self.assertEqual(l1.isprismatic, True)
-
     def test_add(self):
         l0 = rp.DHLink()
         l1 = rp.DHLink()
@@ -130,14 +117,14 @@ class TestDHLink(unittest.TestCase):
         self.assertEqual(l0.Jm, 0.0)
 
     def test_str(self):
-        l0 = rp.PrismaticDH()
-        l1 = rp.RevoluteDH()
+        l0 = rp.PrismaticMDH()
+        l1 = rp.RevoluteMDH()
 
         s0 = l0.__str__()
         s1 = l1.__str__()
 
-        self.assertEqual(s0, "PrismaticDH:  θ=0.0,  d=q,  a=0.0,  ⍺=0.0")
-        self.assertEqual(s1, "RevoluteDH:   θ=q,  d=0.0,  a=0.0,  ⍺=0.0")
+        self.assertEqual(s0, "PrismaticMDH:  θ=0.0,  d=q,  a=0.0,  ⍺=0.0")
+        self.assertEqual(s1, "RevoluteMDH:   θ=q,  d=0.0,  a=0.0,  ⍺=0.0")
 
     def test_dyn(self):
         puma = rp.models.DH.Puma560()
@@ -161,44 +148,41 @@ qlim  =      -2.8 to      2.8""",
         puma.links[0].dyn(indent=2)
 
     def test_revolute(self):
-        l0 = rp.RevoluteDH()
+        l0 = rp.RevoluteMDH()
 
         self.assertEqual(l0.sigma, 0)
-        with self.assertRaises(ValueError):
-            l0.theta = 1
 
     def test_prismatic(self):
-        l0 = rp.PrismaticDH()
+        l0 = rp.PrismaticMDH()
 
         self.assertEqual(l0.sigma, 1)
-        with self.assertRaises(ValueError):
-            l0.d = 1
 
-    def test_setB(self):
-        l0 = rp.PrismaticDH()
+    # def test_setB(self):
+    #     l0 = rp.PrismaticDH()
 
-        with self.assertRaises(TypeError):
-            l0.B = [1, 2]
+    #     with self.assertRaises(TypeError):
+    #         l0.B = [1, 2]
 
     def test_robot(self):
-        l0 = rp.RevoluteDH()
+        l0 = rp.RevoluteMDH()
         r = rp.DHRobot([l0])
 
         self.assertIs(l0._robot, r)
 
     def test_copy(self):
 
-        l0 = rp.RevoluteDH()
+        l0 = rp.RevoluteMDH()
         r = rp.DHRobot([l0])
         l1 = l0.copy()
         l0.m = 4
         l0.r[1] = 5
+
         self.assertEqual(l1.m, 0)
         self.assertEqual(l1.r[1], 0)
         self.assertIs(l0._robot, r)
         self.assertIs(l1._robot, r)
 
-    def test_I(self):  # noqa
+    def test_I_new(self):  # noqa
         r = rp.models.DH.Puma560()
 
         with self.assertRaises(ValueError):
@@ -215,7 +199,7 @@ qlim  =      -2.8 to      2.8""",
             r.links[1].I = np.zeros(8)  # noqa
 
     def test_qlim_none(self):
-        l0 = rp.RevoluteDH()
+        l0 = rp.RevoluteMDH()
         self.assertFalse(l0.islimit(0.1))
 
 
