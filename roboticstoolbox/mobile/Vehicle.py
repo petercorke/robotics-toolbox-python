@@ -1069,15 +1069,14 @@ class Unicycle(VehicleBase):
         """
         super().__init__(**kwargs)
         self._w = W
+        self._steer_max = steer_max
 
     def __str__(self):
 
-        s = super().__str__()
-        s += f"\n  W={self._w}, steer_max={self._steer_max}, vel_max={self._vel_max}, accel_max={self.accel_max}"
-        return s
+        return f"{super().__str__()}\n  W={self._w}, steer_max={self._steer_max}, vel_max={self._speed_max}, accel_max={self.accel_max}"
 
 
-    def deriv(self, t, x, u):
+    def deriv(self, x, u):
         r"""
         Time derivative of state
 
@@ -1109,7 +1108,7 @@ class Unicycle(VehicleBase):
         return np.r_[
                 v * cos(theta), 
                 v * sin(theta), 
-                vdiff / self.w
+                vdiff / self._w
                     ]
 
     def u_limited(self, u):
