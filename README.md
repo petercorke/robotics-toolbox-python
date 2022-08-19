@@ -323,7 +323,7 @@ J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for
 
 ## Toolbox ICRA Paper and Citation Info
 
-Check out our ICRA 2021 paper on [IEEE Xplore](https://ieeexplore.ieee.org/document/9561366) or get the PDF from [Peter's website](https://bit.ly/icra_rtb).
+Check out our ICRA 2021 paper on [IEEE Xplore](https://ieeexplore.ieee.org/document/9561366) or get the PDF from [Peter's website](https://bit.ly/3ChcyNp).
 
 If the toolbox helped you in your research, please cite
 
