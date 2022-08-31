@@ -1853,12 +1853,12 @@ class ERobot(BaseERobot):
                 # dp = norm_h @ shape.v
                 # l_Ain = zeros((1, self.n))
 
-                Je = self.jacobe(q, start=self.base_link, end=link, tool=link_col.T)
+                Je = self.jacobe(q, start=start, end=link, tool=link_col.T)
                 n_dim = Je.shape[1]
                 dp = norm_h @ shape.v
                 l_Ain = zeros((1, n))
 
-                l_Ain[0, :n_dim] = norm_h @ Je
+                l_Ain[0, :n_dim] = 1 * norm_h @ Je
                 l_bin = (xi * (d - ds) / (di - ds)) + dp
             else:
                 l_Ain = None
@@ -2233,7 +2233,9 @@ class ERobot(BaseERobot):
             TODO
         """
 
-        return self.ets(start, end).ik_lm_chan(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+        return self.ets(start, end).ik_lm_chan(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
+        )
 
     def ik_lm_wampler(
         self,
@@ -2342,7 +2344,9 @@ class ERobot(BaseERobot):
             TODO
         """
 
-        return self.ets(start, end).ik_lm_wampler(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+        return self.ets(start, end).ik_lm_wampler(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
+        )
 
     def ik_lm_sugihara(
         self,
@@ -2451,7 +2455,9 @@ class ERobot(BaseERobot):
             TODO
         """
 
-        return self.ets(start, end).ik_lm_sugihara(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+        return self.ets(start, end).ik_lm_sugihara(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
+        )
 
     def ik_nr(
         self,
@@ -2561,7 +2567,9 @@ class ERobot(BaseERobot):
             TODO
         """
 
-        return self.ets(start, end).ik_nr(Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping)
+        return self.ets(start, end).ik_nr(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
+        )
 
     def ik_gn(
         self,
@@ -2671,8 +2679,9 @@ class ERobot(BaseERobot):
             TODO
         """
 
-        return self.ets(start, end).ik_gn(Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping)
-
+        return self.ets(start, end).ik_gn(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
+        )
 
 
 # =========================================================================== #
