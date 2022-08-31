@@ -1330,8 +1330,7 @@ class ETS(BaseETS):
         Calculates the manipulability Jacobian. This measure relates the rate
         of change of the manipulability to the joint velocities of the robot.
 
-        :param q: The joint angles/configuration of the robot (Optional,
-            if not supplied will use the stored q values).
+        :param q: The joint angles/configuration of the robot
 
         :return: The manipulability Jacobian
         :rtype: float ndarray(n)
