@@ -30,6 +30,8 @@ class PR2(ERobot):
         self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)
 
+        self.qdlim = 2.0 * np.ones(31)
+
 
 if __name__ == "__main__":  # pragma nocover
 
