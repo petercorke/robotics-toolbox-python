@@ -984,6 +984,15 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         """  # noqa
         # n = len(q)
 
+        # J = r.jacob0(q)
+
+        # H = r.hessian0(q)
+
+        # ev = J @ qd
+        # ew = ev[3:]
+
+        # Γd = sm.smb.rotvelxform(T.R, inverse=True, representation=rep) @ ew
+
         if representation is None:
 
             if J0 is None:
@@ -1300,7 +1309,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         j = 0
         for link in self:
             if link.isrevolute:
-                if link.qlim is None:
+                if link.qlim is None or np.any(np.isnan(link.qlim)):
                     v = np.r_[-np.pi, np.pi]
                 else:
                     v = link.qlim
