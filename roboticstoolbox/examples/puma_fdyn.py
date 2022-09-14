@@ -7,7 +7,7 @@ p560 = rtb.models.DH.Puma560()
 p560 = p560.nofriction()
 
 # print the kinematic & dynamic parameters
-#p560.printdyn()
+# p560.printdyn() not working
 
 # simulate motion over 5s with zero torque input
 d = p560.fdyn(5, p560.qr, dt=0.05)
