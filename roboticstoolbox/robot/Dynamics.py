@@ -1036,7 +1036,7 @@ class DynamicsMixin:
             if Mx is None:
                 Mx = self.inertia_x(q[0, :], Ji=Ji)
             if Jd is None:
-                Jd = self.jacob_dot(q[0, :], qd[0, :], J0=Ja)
+                Jd = self.jacob0_dot(q[0, :], qd[0, :], J0=Ja)
             return Ji.T @ (C - Mx @ Jd) @ Ji
         else:
             # trajectory case
@@ -1053,7 +1053,7 @@ class DynamicsMixin:
 
                 C = self.coriolis(qk, qdk)
                 Mx = self.inertia_x(qk, Ji=Ji)
-                Jd = self.jacob_dot(qk, qdk, J0=J)
+                Jd = self.jacob0_dot(qk, qdk, J0=J)
 
                 Ct[k, :, :] = Ji.T @ (C - Mx @ Jd) @ Ji
 
@@ -1262,7 +1262,7 @@ class DynamicsMixin:
 
             # need Jacobian dot
             qdk = Ji @ xdk
-            Jd = self.jacob_dot(qk, qdk, J0=J)
+            Jd = self.jacob0_dot(qk, qdk, J0=J)
 
             xdd[k, :] = T @ (Jd @ qdk + J @ qdd)
 
