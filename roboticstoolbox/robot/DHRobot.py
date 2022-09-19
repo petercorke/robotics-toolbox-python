@@ -4,6 +4,7 @@
 """
 
 from collections import namedtuple
+from email import message
 from roboticstoolbox.tools.data import rtb_path_to_datafile
 import warnings
 import copy
@@ -34,10 +35,11 @@ from roboticstoolbox import rtb_get_param
 from frne import init, frne, delete
 from numpy import any
 from typing import Union, Tuple
+from roboticstoolbox.robot.IK import IKSolution
 
 ArrayLike = Union[list, np.ndarray, tuple, set]
 
-iksol = namedtuple("IKsolution", "q, success, reason")
+# iksol = namedtuple("IKsolution", "q, success, reason")
 
 
 class DHRobot(Robot):
@@ -1835,21 +1837,22 @@ class DHRobot(Robot):
                 # Remove the link offset angles
                 theta = theta - self.offset
 
-                solution = iksol(theta, True, "")
+                # solution = iksol(theta, True, "")
+                solution = IKSolution(q=theta, success=True)
 
             else:
                 # ikfunc can return None or a str reason
                 if theta is None:
-                    solution = iksol(None, False, "")
+                    solution = IKSolution(q=None, success=False)
                 else:
-                    solution = iksol(None, False, theta)
+                    solution = IKSolution(q=None, success=False, reason=theta)
 
             solutions.append(solution)
 
         if len(T) == 1:
             return solutions[0]
         else:
-            return iksol(
+            return IKSolution(
                 np.vstack([sol.q for sol in solutions]),
                 np.array([sol.success for sol in solutions]),
                 [sol.reason for sol in solutions],
