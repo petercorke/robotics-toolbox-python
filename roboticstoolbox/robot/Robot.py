@@ -17,7 +17,6 @@ from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.IK import IKMixin
 from typing import Union, Dict, Tuple
 from spatialgeometry import Shape
 from fknm import Robot_link_T
@@ -48,7 +47,7 @@ ArrayLike = Union[list, np.ndarray, tuple, set]
 # ikine functions need: fkine, jacobe, qlim methods from subclass
 
 
-class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
+class Robot(SceneNode, ABC, DynamicsMixin):
 
     _color = True
 
