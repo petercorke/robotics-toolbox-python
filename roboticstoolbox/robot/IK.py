@@ -90,11 +90,6 @@ class IKSolver(ABC):
         mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
         problems: Total number of IK problems within the experiment
         joint_limits: Reject solutions with joint limit violations
-
-        λΣ: The gain for joint limit avoidance. Setting to 0.0 will remove this completely from the solution
-        λm: The gain for maximisation. Setting to 0.0 will remove this completely from the solution
-        ps: The minimum angle/distance (in radians or metres) in which the joint is allowed to approach to its limit
-        pi: The influence angle/distance (in radians or metres) in null space motion becomes active
         """
 
         # Solver parameters
@@ -131,12 +126,12 @@ class IKSolver(ABC):
         """
 
         if q0 is None:
-            q0 = ets.random_q(self.slimit)
+            q0 = self.random_q(ets, self.slimit)
         elif not isinstance(q0, np.ndarray):
             q0 = np.array(q0)
 
         if q0.ndim == 1:
-            q0_new = ets.random_q(self.slimit)
+            q0_new = self.random_q(ets, self.slimit)
             q0_new[0] = q0
             q0 = q0_new
 
@@ -144,14 +139,19 @@ class IKSolver(ABC):
         i = 0
         total_i = 0
 
+        # Error flags
+        found_with_limits = False
+        linalg_error = 0
+
         # Initialise variables
         E = 0.0
         q = q0[0]
 
         for search in range(self.slimit):
             q = q0[search].copy()
+            i = 0
 
-            while i <= self.ilimit:
+            while i < self.ilimit:
                 i += 1
 
                 # Attempt a step
@@ -160,6 +160,7 @@ class IKSolver(ABC):
 
                 except np.linalg.LinAlgError:
                     # Abandon search and try again
+                    linalg_error += 1
                     break
 
                 # Check if we have arrived
@@ -175,6 +176,7 @@ class IKSolver(ABC):
 
                     if not jl_valid and self.joint_limits:
                         # Abandon search and try again
+                        found_with_limits = True
                         break
                     else:
                         return IKSolution(
@@ -185,17 +187,16 @@ class IKSolver(ABC):
                             residual=E,
                             reason="Success",
                         )
-
             total_i += i
-            i = 0
 
         # If we make it here, then we have failed
-        reason = "ilimit and slimit reached"
+        reason = "iteration and search limit reached"
 
-        if E < self.tol:
+        if linalg_error:
+            reason += f", {linalg_error} np.LinAlgError encountered"
+
+        if found_with_limits:
             reason += ", solution found but violates joint limits"
-        else:
-            reason += ", no solution found"
 
         return IKSolution(
             q=q,
@@ -356,6 +357,12 @@ def calc_qnull(
         qnull = null_space @ qnull_grad
 
     return qnull.flatten()
+
+
+# λΣ: The gain for joint limit avoidance. Setting to 0.0 will remove this completely from the solution
+# λm: The gain for maximisation. Setting to 0.0 will remove this completely from the solution
+# ps: The minimum angle/distance (in radians or metres) in which the joint is allowed to approach to its limit
+# pi: The influence angle/distance (in radians or metres) in null space motion becomes active
 
 
 class IK_NR(IKSolver):
