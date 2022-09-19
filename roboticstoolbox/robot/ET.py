@@ -21,7 +21,7 @@ from copy import deepcopy
 from fknm import ET_T, ET_init, ET_update
 from spatialmath.base import getvector
 from spatialmath import SE3, SE2
-from typing import Optional, Callable, Union, TYPE_CHECKING, Type, NewType
+from typing import Optional, Callable, Union, TYPE_CHECKING
 
 ArrayLike = Union[list, ndarray, tuple, set]
 
