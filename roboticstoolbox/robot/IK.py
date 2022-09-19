@@ -80,6 +80,7 @@ class IKSolver(ABC):
         tol: float = 1e-6,
         mask: Union[ArrayLike, None] = None,
         joint_limits: bool = True,
+        seed: Union[int, None] = None,
     ):
         """
         name: The name of the IK algorithm
@@ -101,6 +102,9 @@ class IKSolver(ABC):
         self.slimit = slimit
         self.ilimit = ilimit
         self.tol = tol
+
+        # Random number generator
+        self._private_random = np.random.default_rng(seed=seed)
 
         if mask is None:
             mask = np.ones(6)
@@ -143,7 +147,6 @@ class IKSolver(ABC):
         # Initialise variables
         E = 0.0
         q = q0[0]
-        jl_valid = False
 
         for search in range(self.slimit):
             q = q0[search].copy()
@@ -253,6 +256,33 @@ class IKSolver(ABC):
 
         """
         pass
+
+    def random_q(self, ets: "rtb.ETS", i: int = 1) -> np.ndarray:
+        """
+        Generate a random valid joint configuration
+
+        :param i: number of configurations to generate
+
+        Generates a random q vector within the joint limits defined by
+        `self.qlim`.
+        """
+
+        if i == 1:
+            q = np.zeros(ets.n)
+
+            for i in range(ets.n):
+                q[i] = self._private_random.uniform(ets.qlim[0, i], ets.qlim[1, i])
+
+        else:
+            q = np.zeros((i, ets.n))
+
+            for j in range(i):
+                for i in range(ets.n):
+                    q[j, i] = self._private_random.uniform(
+                        ets.qlim[0, i], ets.qlim[1, i]
+                    )
+
+        return q
 
 
 def null_Σ(ets: "rtb.ETS", q: np.ndarray, ps: float, pi: Optional[np.ndarray]):
