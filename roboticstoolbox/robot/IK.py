@@ -52,18 +52,32 @@ class IKSolution:
     :param reason: The reason the IK problem failed if applicable
     """
 
-    q: np.ndarray
+    q: Union[np.ndarray, None]
     success: bool
-    iterations: int
-    searches: int
-    residual: float
-    reason: str
+    iterations: int = 0
+    searches: int = 0
+    residual: float = 0.0
+    reason: str = ""
 
     def __str__(self):
-        if self.success:
-            return f"IKSolution: q={np.round(self.q, 4)}, success=True, iterations={self.iterations}, searches={self.searches}, residual={self.residual}"
+
+        if self.q is not None:
+            q_str = np.round(self.q, 4)
         else:
-            return f"IKSolution: q={np.round(self.q, 4)}, success=False, reason={self.reason}, iterations={self.iterations}, searches={self.searches}, residual={np.round(self.residual, 4)}"
+            q_str = None
+
+        if self.iterations == 0 and self.searches == 0:
+            # Check for analytic
+            if self.success:
+                return f"IKSolution: q={q_str}, success=True"
+            else:
+                return f"IKSolution: q={q_str}, success=False, reason={self.reason}"
+        else:
+            # Otherwise it is a numeric solution
+            if self.success:
+                return f"IKSolution: q={q_str}, success=True, iterations={self.iterations}, searches={self.searches}, residual={self.residual}"
+            else:
+                return f"IKSolution: q={q_str}, success=False, reason={self.reason}, iterations={self.iterations}, searches={self.searches}, residual={np.round(self.residual, 4)}"
 
 
 class IKSolver(ABC):
