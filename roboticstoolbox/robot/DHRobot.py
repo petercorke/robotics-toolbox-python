@@ -2439,8 +2439,9 @@ class DHRobot(Robot):
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        joint_limits: bool = True,
+        joint_limits: bool = False,
         mask: Union[ArrayLike, None] = None,
+        seed: Union[int, None] = None,
     ):
         return self.ets().ikine_LM(
             Tep=Tep,
@@ -2450,6 +2451,7 @@ class DHRobot(Robot):
             tol=tol,
             joint_limits=joint_limits,
             mask=mask,
+            seed=seed,
         )
 
 

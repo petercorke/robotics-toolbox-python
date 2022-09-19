@@ -2239,15 +2239,17 @@ class ETS(BaseETS):
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        joint_limits: bool = True,
+        joint_limits: bool = False,
         mask: Union[ArrayLike, None] = None,
+        seed: Union[int, None] = None,
     ):
-        solver = IK_NR(
+        solver = IK_LM(
             ilimit=ilimit,
             slimit=slimit,
             tol=tol,
             joint_limits=joint_limits,
             mask=mask,
+            seed=seed,
         )
 
         if isinstance(Tep, SE3):
