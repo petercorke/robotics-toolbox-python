@@ -1,6 +1,7 @@
 # Robotics Toolbox for Python
 
-[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/py_collection.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/py_collection.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+[![Powered by Spatial Maths](https://raw.githubusercontent.com/petercorke/spatialmath-python/master/.github/svg/sm_powered.min.svg)](https://github.com/petercorke/spatialmath-python)
 [![QUT Centre for Robotics Open Source](https://github.com/qcr/qcr.github.io/raw/master/misc/badge.svg)](https://qcr.github.io)
 
 [![PyPI version](https://badge.fury.io/py/roboticstoolbox-python.svg)](https://badge.fury.io/py/roboticstoolbox-python)
@@ -322,7 +323,7 @@ J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for
 
 ## Toolbox ICRA Paper and Citation Info
 
-Check out our ICRA 2021 paper on [IEEE Xplore](https://ieeexplore.ieee.org/document/9561366) or get the PDF from [Peter's website](https://bit.ly/icra_rtb).
+Check out our ICRA 2021 paper on [IEEE Xplore](https://ieeexplore.ieee.org/document/9561366) or get the PDF from [Peter's website](https://bit.ly/3ChcyNp).
 
 If the toolbox helped you in your research, please cite
 
@@ -339,7 +340,7 @@ If the toolbox helped you in your research, please cite
 
 <br>
 
-<a id='6'></a>
+<a id='7'></a>
 
 ## Using the Toolbox in your Open Source Code?
 
@@ -347,22 +348,22 @@ If you are using the Toolbox in your open source code, feel free to add our badg
 
 For the powered by robotics toolbox badge
 
-[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+[![Powered by the Robotics Toolbox](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 
 copy the following
 
 ```
-[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+[![Powered by the Robotics Toolbox](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 ```
 
 For the powered by python robotics badge
 
-[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/pr_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+[![Powered by Python Robotics](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/pr_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 
 copy the following
 
 ```
-[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/pr_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+[![Powered by Python Robotics](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/master/.github/svg/pr_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
 ```
 
 <br>

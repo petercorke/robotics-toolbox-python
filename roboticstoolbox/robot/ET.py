@@ -21,18 +21,16 @@ from copy import deepcopy
 from fknm import ET_T, ET_init, ET_update
 from spatialmath.base import getvector
 from spatialmath import SE3, SE2
-from typing import Optional, Callable, Union
+from typing import Optional, Callable, Union, TYPE_CHECKING
 
 ArrayLike = Union[list, ndarray, tuple, set]
 
-try:  # pragma: no cover
+if TYPE_CHECKING:
     import sympy
 
-    # Sym = sympy.Expr
     Sym = sympy.core.symbol.Symbol
-
-except ImportError:  # pragma: no cover
-    Sym = float
+else:
+    Sym = None
 
 
 class BaseET:

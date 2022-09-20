@@ -5,6 +5,7 @@
 @author: Peter Corke
 """
 
+from abc import ABC, abstractmethod
 from collections import UserList
 from numpy import (
     pi,
@@ -37,6 +38,7 @@ from spatialmath.base import (
     simplify,
 )
 from roboticstoolbox import rtb_get_param
+from roboticstoolbox.robot.IK import IK_LM, IK_NR
 
 from collections import UserList
 from spatialmath.base import issymbol, getmatrix
@@ -47,11 +49,11 @@ from fknm import (
     ETS_jacobe,
     ETS_hessian0,
     ETS_hessiane,
-    IK_NR,
-    IK_GN,
-    IK_LM_Chan,
-    IK_LM_Wampler,
-    IK_LM_Sugihara,
+    IK_NR_c,
+    IK_GN_c,
+    IK_LM_Chan_c,
+    IK_LM_Wampler_c,
+    IK_LM_Sugihara_c,
 )
 from copy import deepcopy
 from roboticstoolbox import rtb_get_param
@@ -71,6 +73,12 @@ if version_info >= (3, 9):
     c_property = cached_property
 else:
     c_property = property
+
+
+# class AbstractETS(ABC):
+#     @abstractmethod
+#     def jacobm(self) -> ndarray:
+#         pass
 
 
 class BaseETS(UserList):
@@ -1773,7 +1781,7 @@ class ETS(BaseETS):
             TODO
         """
 
-        return IK_LM_Chan(self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+        return IK_LM_Chan_c(self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
 
     def ik_lm_wampler(
         self,
@@ -1878,7 +1886,9 @@ class ETS(BaseETS):
             TODO
         """
 
-        return IK_LM_Wampler(self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+        return IK_LM_Wampler_c(
+            self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
+        )
 
     def ik_lm_sugihara(
         self,
@@ -1983,7 +1993,7 @@ class ETS(BaseETS):
             TODO
         """
 
-        return IK_LM_Sugihara(
+        return IK_LM_Sugihara_c(
             self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
         )
 
@@ -2091,7 +2101,7 @@ class ETS(BaseETS):
             TODO
         """
 
-        return IK_NR(
+        return IK_NR_c(
             self._fknm,
             Tep,
             q0,
@@ -2208,7 +2218,7 @@ class ETS(BaseETS):
             TODO
         """
 
-        return IK_GN(
+        return IK_GN_c(
             self._fknm,
             Tep,
             q0,
@@ -2220,6 +2230,31 @@ class ETS(BaseETS):
             use_pinv,
             pinv_damping,
         )
+
+    def ikine_LM(
+        self,
+        Tep: Union[ndarray, SE3],
+        q0: Union[ArrayLike, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        joint_limits: bool = False,
+        mask: Union[ArrayLike, None] = None,
+        seed: Union[int, None] = None,
+    ):
+        solver = IK_LM(
+            ilimit=ilimit,
+            slimit=slimit,
+            tol=tol,
+            joint_limits=joint_limits,
+            mask=mask,
+            seed=seed,
+        )
+
+        if isinstance(Tep, SE3):
+            Tep = Tep.A
+
+        return solver.solve(ets=self, Tep=Tep, q0=q0)
 
 
 class ETS2(BaseETS):

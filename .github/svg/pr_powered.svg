@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="173" height="20" viewBox="0 0 173 20">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="173" height="20"
+    viewBox="0 0 173 20">
 
     <clipPath id="r">
         <rect width="173" height="20" rx="3" fill="#fff" />
@@ -7,7 +8,6 @@
     <g clip-path="url(#r)">
         <rect width="76" height="20" fill="#555" />
         <rect x="76" width="106" height="20" fill="#86c440" />
-        <rect width="173" height="20" fill="url(#s)" />
     </g>
 
     <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif"

@@ -20,24 +20,24 @@
 #include <iostream>
 
 static PyMethodDef fknmMethods[] = {
-    {"IK_GN",
-     (PyCFunction)IK_GN,
+    {"IK_GN_c",
+     (PyCFunction)IK_GN_c,
      METH_VARARGS,
      "Link"},
-    {"IK_NR",
-     (PyCFunction)IK_NR,
+    {"IK_NR_c",
+     (PyCFunction)IK_NR_c,
      METH_VARARGS,
      "Link"},
-    {"IK_LM_Chan",
-     (PyCFunction)IK_LM_Chan,
+    {"IK_LM_Chan_c",
+     (PyCFunction)IK_LM_Chan_c,
      METH_VARARGS,
      "Link"},
-    {"IK_LM_Wampler",
-     (PyCFunction)IK_LM_Wampler,
+    {"IK_LM_Wampler_c",
+     (PyCFunction)IK_LM_Wampler_c,
      METH_VARARGS,
      "Link"},
-    {"IK_LM_Sugihara",
-     (PyCFunction)IK_LM_Sugihara,
+    {"IK_LM_Sugihara_c",
+     (PyCFunction)IK_LM_Sugihara_c,
      METH_VARARGS,
      "Link"},
     {"Robot_link_T",
@@ -104,7 +104,7 @@ PyMODINIT_FUNC PyInit_fknm(void)
 extern "C"
 {
 
-    static PyObject *IK_GN(PyObject *self, PyObject *args)
+    static PyObject *IK_GN_c(PyObject *self, PyObject *args)
     {
         ETS *ets;
         npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
@@ -219,7 +219,7 @@ extern "C"
         return py_tup;
     }
 
-    static PyObject *IK_NR(PyObject *self, PyObject *args)
+    static PyObject *IK_NR_c(PyObject *self, PyObject *args)
     {
         ETS *ets;
         npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
@@ -334,7 +334,7 @@ extern "C"
         return py_tup;
     }
 
-    static PyObject *IK_LM_Chan(PyObject *self, PyObject *args)
+    static PyObject *IK_LM_Chan_c(PyObject *self, PyObject *args)
     {
         ETS *ets;
         npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
@@ -451,7 +451,7 @@ extern "C"
         return py_tup;
     }
 
-    static PyObject *IK_LM_Wampler(PyObject *self, PyObject *args)
+    static PyObject *IK_LM_Wampler_c(PyObject *self, PyObject *args)
     {
         ETS *ets;
         npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
@@ -568,7 +568,7 @@ extern "C"
         return py_tup;
     }
 
-    static PyObject *IK_LM_Sugihara(PyObject *self, PyObject *args)
+    static PyObject *IK_LM_Sugihara_c(PyObject *self, PyObject *args)
     {
         ETS *ets;
         npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
