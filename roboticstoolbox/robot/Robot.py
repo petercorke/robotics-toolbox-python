@@ -989,29 +989,30 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
             H = self.hessian0(q, J0=J0)
 
         else:
-            # # determine analytic rotation
-            # T = self.fkine(q).A
-            # gamma = smb.r2x(smb.t2r(T), representation=representation)
+            # determine analytic rotation
+            T = self.fkine(q).A
+            gamma = smb.r2x(smb.t2r(T), representation=representation)
 
-            # # get transformation angular velocity to analytic velocity
-            # Ai = smb.rotvelxform(
-            #     gamma, representation=representation, inverse=True, full=True
-            # )
+            # get transformation angular velocity to analytic velocity
+            Ai = smb.rotvelxform(
+                gamma, representation=representation, inverse=True, full=True
+            )
 
-            # # get analytic rate from joint rates
-            # omega = J0[3:, :] @ qd
-            # gamma_dot = Ai[3:, 3:] @ omega
-            # Ai_dot = smb.rotvelxform_inv_dot(gamma, gamma_dot, full=True)
-            # Ai_dot = sp.linalg.block_diag(np.zeros((3, 3)), Ai_dot)
+            # get analytic rate from joint rates
+            omega = J0[3:, :] @ qd
+            gamma_dot = Ai[3:, 3:] @ omega
+            Ai_dot = smb.rotvelxform_inv_dot(gamma, gamma_dot, full=True)
+            Ai_dot = sp.linalg.block_diag(np.zeros((3, 3)), Ai_dot)
 
-            # Jd = Ai_dot @ J0 + Ai @ Jd
+            Jd = Ai_dot @ J0 + Ai @ Jd
 
             # not actually sure this can be written in closed form
 
-            H = smb.numhess(
-                lambda q: self.jacob0_analytical(q, representation=representation), q
-            )
-            # Jd = Ai @ Jd
+            # H = smb.numhess(
+            #     lambda q: self.jacob0_analytical(q, representation=representation), q
+            # )
+            Jd = Ai @ Jd
+            return Jd
 
         return np.tensordot(H, qd, (0, 0))
 
