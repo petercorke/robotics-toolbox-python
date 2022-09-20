@@ -1,11 +1,12 @@
 # Robotics Toolbox for Python
 
+[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/py_collection.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+[![QUT Centre for Robotics Open Source](https://github.com/qcr/qcr.github.io/raw/master/misc/badge.svg)](https://qcr.github.io)
+
 [![PyPI version](https://badge.fury.io/py/roboticstoolbox-python.svg)](https://badge.fury.io/py/roboticstoolbox-python)
 [![Anaconda version](https://anaconda.org/conda-forge/roboticstoolbox-python/badges/version.svg)](https://anaconda.org/conda-forge/roboticstoolbox-python)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks)
-[![QUT Centre for Robotics Open Source](https://github.com/qcr/qcr.github.io/raw/master/misc/badge.svg)](https://qcr.github.io)
 
 [![Build Status](https://github.com/petercorke/robotics-toolbox-python/workflows/build/badge.svg?branch=master)](https://github.com/petercorke/robotics-toolbox-python/actions?query=workflow%3Abuild)
 [![Coverage](https://codecov.io/gh/petercorke/robotics-toolbox-python/branch/master/graph/badge.svg)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
@@ -21,11 +22,29 @@ A Python implementation of the <a href="https://github.com/petercorke/robotics-t
 <ul>
 <li><a href="https://github.com/petercorke/robotics-toolbox-python">GitHub repository </a></li>
 <li><a href="https://petercorke.github.io/robotics-toolbox-python">Documentation</a></li>
+<li><a href="#6">ICRA Paper</a></li>
 <li><a href="https://github.com/petercorke/robotics-toolbox-python/wiki">Wiki (examples and details)</a></li>
 </ul>
 </td>
 </tr>
 </table>
+
+<!-- <br> -->
+
+## Contents
+
+- [Synopsis](#1)
+- [Getting going](#2)
+- [Tutorials](#3)
+- [Code Examples](#4)
+- [Toolbox Research Applications](#5)
+- [Toolbox ICRA Paper and Citation Info](#6)
+- [Using the Toolbox in your Open Source Code?](#7)
+- [Common Issues and Solutions](#8)
+
+<br>
+
+<a id='1'></a>
 
 ## Synopsis
 
@@ -41,7 +60,11 @@ form, import a URDF file, or use over 30 supplied models for well-known
 contemporary robots from Franka-Emika, Kinova, Universal Robotics, Rethink as
 well as classical robots such as the Puma 560 and the Stanford arm.
 
-The toolbox will also support mobile robots with functions for robot motion models
+The Toolbox contains fast implementations of kinematic operations. The forward
+kinematics and the manipulator Jacobian can be computed in less than 1 microsecond
+while numerical inverse kinematics can be solved in as little as 4 microseconds.
+
+The toolbox also supports mobile robots with functions for robot motion models
 (unicycle, bicycle), path planning algorithms (bug, distance transform, D\*,
 PRM), kinodynamic planning (lattice, RRT), localization (EKF, particle filter),
 map building (EKF) and simultaneous localization and mapping (EKF).
@@ -59,138 +82,11 @@ The Toolbox provides:
 The Toolbox leverages the [Spatial Maths Toolbox for Python](https://github.com/petercorke/spatialmath-python) to
 provide support for data types such as SO(n) and SE(n) matrices, quaternions, twists and spatial vectors.
 
-## Code Example
+<br>
 
-We will load a model of the Franka-Emika Panda robot defined classically using
-modified (Craig's convention) Denavit-Hartenberg notation
+<a id='2'></a>
 
-```python
-import roboticstoolbox as rtb
-robot = rtb.models.DH.Panda()
-print(robot)
-
-	Panda (by Franka Emika): 7 axes (RRRRRRR), modified DH parameters
-	┏━━━━━━━━┳━━━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┓
-	┃ aⱼ₋₁   ┃  ⍺ⱼ₋₁  ┃ θⱼ  ┃  dⱼ   ┃   q⁻    ┃   q⁺   ┃
-	┣━━━━━━━━╋━━━━━━━━╋━━━━━╋━━━━━━━╋━━━━━━━━━╋━━━━━━━━┫
-	┃    0.0 ┃   0.0° ┃  q1 ┃ 0.333 ┃ -166.0° ┃ 166.0° ┃
-	┃    0.0 ┃ -90.0° ┃  q2 ┃   0.0 ┃ -101.0° ┃ 101.0° ┃
-	┃    0.0 ┃  90.0° ┃  q3 ┃ 0.316 ┃ -166.0° ┃ 166.0° ┃
-	┃ 0.0825 ┃  90.0° ┃  q4 ┃   0.0 ┃ -176.0° ┃  -4.0° ┃
-	┃-0.0825 ┃ -90.0° ┃  q5 ┃ 0.384 ┃ -166.0° ┃ 166.0° ┃
-	┃    0.0 ┃  90.0° ┃  q6 ┃   0.0 ┃   -1.0° ┃ 215.0° ┃
-	┃  0.088 ┃  90.0° ┃  q7 ┃ 0.107 ┃ -166.0° ┃ 166.0° ┃
-	┗━━━━━━━━┻━━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━━━━━┻━━━━━━━━┛
-
-	┌─────┬───────────────────────────────────────┐
-	│tool │ t = 0, 0, 0.1; rpy/xyz = -45°, 0°, 0° │
-	└─────┴───────────────────────────────────────┘
-
-	┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐
-	│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │
-	├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤
-	│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │
-	│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │
-	└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘
-
-T = robot.fkine(robot.qz)  # forward kinematics
-print(T)
-
-	   0.707107    0.707107    0           0.088
-	   0.707107   -0.707107    0           0
-	   0           0          -1           0.823
-	   0           0           0           1
-```
-
-(Python prompts are not shown to make it easy to copy+paste the code, console output is indented)
-
-We can solve inverse kinematics very easily. We first choose an SE(3) pose
-defined in terms of position and orientation (end-effector z-axis down (A=-Z) and finger
-orientation parallel to y-axis (O=+Y)).
-
-```python
-from spatialmath import SE3
-
-T = SE3(0.7, 0.2, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-sol = robot.ikine_LM(T)         # solve IK
-print(sol)
-	IKsolution(q=array([  0.2134,    1.867,  -0.2264,   0.4825,   0.2198,    1.396,   -2.037]), success=True, reason=None, iterations=12, residual=1.4517646473808178e-11)
-
-q_pickup = sol.q
-print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
-
-	Out[35]:
-		-1            9.43001e-14  2.43909e-12  0.7
-		 9.43759e-14  1            7.2574e-13   0.2
-		-2.43913e-12  7.2575e-13  -1            0.1
-		 0            0            0            1
-```
-
-Note that because this robot is redundant we don't have any control over the arm configuration apart from end-effector pose, ie. we can't control the elbow height.
-
-We can animate a path from the upright `qz` configuration to this pickup configuration
-
-```python
-qt = rtb.jtraj(robot.qz, q_pickup, 50)
-robot.plot(qt.q, movie='panda1.gif')
-```
-
-![Panda trajectory animation](./docs/figs/panda1.gif)
-
-which uses the default matplotlib backend. Grey arrows show the joint axes and the colored frame shows the end-effector pose.
-
-Let's now load a URDF model of the same robot. The kinematic representation is no longer
-based on Denavit-Hartenberg parameters, it is now a rigid-body tree.
-
-```python
-robot = rtb.models.URDF.Panda()  # load URDF version of the Panda
-print(robot)    # display the model
-
-	panda (by Franka Emika): 7 axes (RRRRRRR), ETS model
-	┌───┬──────────────┬─────────────┬──────────────┬──────────────────────────────────────────────────────────────────────────────┐
-	│id │     link     │   parent    │    joint     │                                     ETS                                      │
-	├───┼──────────────┼─────────────┼──────────────┼──────────────────────────────────────────────────────────────────────────────┤
-	│ 0 │  panda_link0 │         _O_ │              │ {panda_link0} = {_O_}                                                        │
-	│ 1 │  panda_link1 │ panda_link0 │ panda_joint1 │ {panda_link1} = {panda_link0}  * tz(0.333) * Rz(q0)                          │
-	│ 2 │  panda_link2 │ panda_link1 │ panda_joint2 │ {panda_link2} = {panda_link1}  * Rx(-90°) * Rz(q1)                           │
-	│ 3 │  panda_link3 │ panda_link2 │ panda_joint3 │ {panda_link3} = {panda_link2}  * ty(-0.316) * Rx(90°) * Rz(q2)               │
-	│ 4 │  panda_link4 │ panda_link3 │ panda_joint4 │ {panda_link4} = {panda_link3}  * tx(0.0825) * Rx(90°) * Rz(q3)               │
-	│ 5 │  panda_link5 │ panda_link4 │ panda_joint5 │ {panda_link5} = {panda_link4}  * tx(-0.0825) * ty(0.384) * Rx(-90°) * Rz(q4) │
-	│ 6 │  panda_link6 │ panda_link5 │ panda_joint6 │ {panda_link6} = {panda_link5}  * Rx(90°) * Rz(q5)                            │
-	│ 7 │  panda_link7 │ panda_link6 │ panda_joint7 │ {panda_link7} = {panda_link6}  * tx(0.088) * Rx(90°) * Rz(q6)                │
-	│ 8 │ @panda_link8 │ panda_link7 │ panda_joint8 │ {panda_link8} = {panda_link7}  * tz(0.107)                                   │
-	└───┴──────────────┴─────────────┴──────────────┴──────────────────────────────────────────────────────────────────────────────┘
-
-	┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐
-	│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │
-	├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤
-	│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │
-	│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │
-	└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘
-```
-
-The symbol `@` indicates the link as an end-effector, a leaf node in the rigid-body
-tree.
-
-We can instantiate our robot inside a browser-based 3d-simulation environment.
-
-```python
-from roboticstoolbox.backends.Swift import Swift  # instantiate 3D browser-based visualizer
-backend = Swift()
-backend.launch()            # activate it
-backend.add(robot)          # add robot to the 3D scene
-for qk in qt.q:             # for each joint configuration on trajectory
-      robot.q = qk          # update the robot state
-      backend.step()        # update visualization
-```
-
-<p align="center">
- <img src="./docs/figs/panda2.gif">
-</p>
-
-# Getting going
-
-## Installing
+## Getting going
 
 You will need Python >= 3.6
 
@@ -204,7 +100,6 @@ pip3 install roboticstoolbox-python
 
 Available options are:
 
-- `vpython` install [VPython](https://vpython.org) backend
 - `collision` install collision checking with [pybullet](https://pybullet.org)
 
 Put the options in a comma separated list like
@@ -226,30 +121,166 @@ cd robotics-toolbox-python
 pip3 install -e .
 ```
 
-## Run some examples
+<br>
 
-The [`notebooks`](https://github.com/petercorke/robotics-toolbox-python/tree/master/notebooks) folder contains some tutorial Jupyter notebooks which you can browse on GitHub.
+<a id='3'></a>
 
-Or you can run them, and experiment with them, at [mybinder.org](https://mybinder.org/v2/gh/petercorke/robotics-toolbox-python/master?filepath=notebooks).
+## Tutorials
+
+<table style="border:0px">
+<tr style="border:0px">
+<td style="border:0px"><a href="https://bit.ly/3ak5GDi"><img src="https://github.com/jhavl/dkt/raw/main/img/article1.png" width="400"></a></td>
+<td style="border:0px"><a href="https://bit.ly/3ak5GDi"><img src="https://github.com/jhavl/dkt/raw/main/img/article2.png" width="400"></a></td>
+<td style="border:0px">
+Do you want to learn about manipulator kinematics, differential kinematics, inverse-kinematics and motion control? Have a look at our
+<a href="https://bit.ly/3ak5GDi">tutorial</a>.
+This tutorial comes with two articles to cover the theory and 12 Jupyter Notebooks providing full code implementations and examples. Most of the Notebooks are also Google Colab compatible allowing them to run online.
+</td>
+</tr>
+</table>
+
+<br>
+
+<a id='4'></a>
+
+## Code Examples
+
+We will load a model of the Franka-Emika Panda robot defined by a URDF file
+
+```python
+import roboticstoolbox as rtb
+robot = rtb.models.Panda()
+print(robot)
+
+	ERobot: panda (by Franka Emika), 7 joints (RRRRRRR), 1 gripper, geometry, collision
+	┌─────┬──────────────┬───────┬─────────────┬────────────────────────────────────────────────┐
+	│link │     link     │ joint │   parent    │              ETS: parent to link               │
+	├─────┼──────────────┼───────┼─────────────┼────────────────────────────────────────────────┤
+	│   0 │ panda_link0  │       │ BASE        │                                                │
+	│   1 │ panda_link1  │     0 │ panda_link0 │ SE3(0, 0, 0.333) ⊕ Rz(q0)                      │
+	│   2 │ panda_link2  │     1 │ panda_link1 │ SE3(-90°, -0°, 0°) ⊕ Rz(q1)                    │
+	│   3 │ panda_link3  │     2 │ panda_link2 │ SE3(0, -0.316, 0; 90°, -0°, 0°) ⊕ Rz(q2)       │
+	│   4 │ panda_link4  │     3 │ panda_link3 │ SE3(0.0825, 0, 0; 90°, -0°, 0°) ⊕ Rz(q3)       │
+	│   5 │ panda_link5  │     4 │ panda_link4 │ SE3(-0.0825, 0.384, 0; -90°, -0°, 0°) ⊕ Rz(q4) │
+	│   6 │ panda_link6  │     5 │ panda_link5 │ SE3(90°, -0°, 0°) ⊕ Rz(q5)                     │
+	│   7 │ panda_link7  │     6 │ panda_link6 │ SE3(0.088, 0, 0; 90°, -0°, 0°) ⊕ Rz(q6)        │
+	│   8 │ @panda_link8 │       │ panda_link7 │ SE3(0, 0, 0.107)                               │
+	└─────┴──────────────┴───────┴─────────────┴────────────────────────────────────────────────┘
+
+	┌─────┬─────┬────────┬─────┬───────┬─────┬───────┬──────┐
+	│name │ q0  │ q1     │ q2  │ q3    │ q4  │ q5    │ q6   │
+	├─────┼─────┼────────┼─────┼───────┼─────┼───────┼──────┤
+	│  qr │  0° │ -17.2° │  0° │ -126° │  0° │  115° │  45° │
+	│  qz │  0° │  0°    │  0° │  0°   │  0° │  0°   │  0°  │
+	└─────┴─────┴────────┴─────┴───────┴─────┴───────┴──────┘
+```
+
+The symbol `@` indicates the link as an end-effector, a leaf node in the rigid-body
+tree (Python prompts are not shown to make it easy to copy+paste the code, console output is indented).
+We will compute the forward kinematics next
+
+```
+Te = robot.fkine(robot.qr)  # forward kinematics
+print(Te)
+
+	0.995     0         0.09983   0.484
+	0        -1         0         0
+	0.09983   0        -0.995     0.4126
+	0         0         0         1
+```
+
+We can solve inverse kinematics very easily. We first choose an SE(3) pose
+defined in terms of position and orientation (end-effector z-axis down (A=-Z) and finger
+orientation parallel to y-axis (O=+Y)).
+
+```python
+from spatialmath import SE3
+
+Tep = SE3.Trans(0.6, -0.3, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
+sol = robot.ik_lm_chan(Tep)         # solve IK
+print(sol)
+
+	(array([ 0.20592815,  0.86609481, -0.79473206, -1.68254794,  0.74872915,
+			2.21764746, -0.10255606]), 1, 114, 7, 2.890164057230228e-07)
+
+q_pickup = sol[0]
+print(robot.fkine(q_pickup))    # FK shows that desired end-effector pose was achieved
+
+	 1         -8.913e-05  -0.0003334  0.5996
+	-8.929e-05 -1          -0.0004912 -0.2998
+	-0.0003334  0.0004912  -1          0.1001
+	 0          0           0          1
+```
+
+We can animate a path from the ready pose `qr` configuration to this pickup configuration
+
+```python
+qt = rtb.jtraj(robot.qr, q_pickup, 50)
+robot.plot(qt.q, backend='pyplot', movie='panda1.gif')
+```
+
+<p align="center">
+	<img src="./docs/figs/panda1.gif">
+</p>
+
+where we have specified the matplotlib `pyplot` backend. Blue arrows show the joint axes and the coloured frame shows the end-effector pose.
+
+We can also plot the trajectory in the Swift simulator (a browser-based 3d-simulation environment built to work with the Toolbox)
+
+```python
+robot.plot(qt.q)
+```
+
+<p align="center">
+	<img src="./docs/figs/panda2.gif">
+</p>
+
+We can also experiment with velocity controllers in Swift. Here is a resolved-rate motion control example
+
+```python
+import swift
+import roboticstoolbox as rp
+import spatialmath as sm
+import numpy as np
+
+env = swift.Swift()
+env.launch(realtime=True)
+
+panda = rp.models.Panda()
+panda.q = panda.qr
+
+Tep = panda.fkine(panda.q) * sm.SE3.Trans(0.2, 0.2, 0.45)
+
+arrived = False
+env.add(panda)
+
+dt = 0.05
+
+while not arrived:
+
+    v, arrived = rp.p_servo(panda.fkine(panda.q), Tep, 1)
+    panda.qd = np.linalg.pinv(panda.jacobe(panda.q)) @ v
+    env.step(dt)
+
+# Uncomment to stop the browser tab from closing
+# env.hold()
+```
+
+<p align="center">
+	<img src="./docs/figs/panda3.gif">
+</p>
+
+### Run some examples
+
+The [`notebooks`](https://github.com/petercorke/robotics-toolbox-python/tree/master/notebooks) folder contains some tutorial Jupyter notebooks which you can browse on GitHub. Additionally, have a look in the [`examples`](https://github.com/petercorke/robotics-toolbox-python/tree/master/roboticstoolbox/examples) folder for many ready to run examples.
+
+<br>
+
+<a id='5'></a>
 
 ## Toolbox Research Applications
 
 The toolbox is incredibly useful for developing and prototyping algorithms for research, thanks to the exhaustive set of well documented and mature robotic functions exposed through clean and painless APIs. Additionally, the ease at which a user can visualize their algorithm supports a rapid prototyping paradigm.
-
-Check out our ICRA 2021 paper on [IEEE Xplore](https://ieeexplore.ieee.org/document/9561366) or get the PDF from [Peter's website](https://petercorke.com/download/31/python-tools/1296/python_toolbox_icra_2020-5.pdf).
-
-If the toolbox helped you in your research, please cite 
-
-```
-@inproceedings{rtb,
-  title={Not your grandmother’s toolbox--the Robotics Toolbox reinvented for Python},
-  author={Corke, Peter and Haviland, Jesse},
-  booktitle={2021 IEEE International Conference on Robotics and Automation (ICRA)},
-  pages={11357--11363},
-  year={2021},
-  organization={IEEE}
-}
-```
 
 ### Publication List
 
@@ -285,6 +316,59 @@ J. Haviland and P. Corke, "**NEO: A Novel Expeditious Optimisation Algorithm for
 
 <br>
 
-## Common Issues
+<br>
+
+<a id='6'></a>
+
+## Toolbox ICRA Paper and Citation Info
+
+Check out our ICRA 2021 paper on [IEEE Xplore](https://ieeexplore.ieee.org/document/9561366) or get the PDF from [Peter's website](https://bit.ly/icra_rtb).
+
+If the toolbox helped you in your research, please cite
+
+```
+@inproceedings{rtb,
+  title={Not your grandmother’s toolbox--the Robotics Toolbox reinvented for Python},
+  author={Corke, Peter and Haviland, Jesse},
+  booktitle={2021 IEEE International Conference on Robotics and Automation (ICRA)},
+  pages={11357--11363},
+  year={2021},
+  organization={IEEE}
+}
+```
+
+<br>
+
+<a id='6'></a>
+
+## Using the Toolbox in your Open Source Code?
+
+If you are using the Toolbox in your open source code, feel free to add our badge to your readme!
+
+For the powered by robotics toolbox badge
+
+[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+
+copy the following
+
+```
+[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/rtb_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+```
+
+For the powered by python robotics badge
+
+[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/pr_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+
+copy the following
+
+```
+[![A Python Robotics Package](https://raw.githubusercontent.com/petercorke/robotics-toolbox-python/future/.github/svg/pr_powered.min.svg)](https://github.com/petercorke/robotics-toolbox-python)
+```
+
+<br>
+
+<a id='8'></a>
+
+## Common Issues and Solutions
 
 See the common issues with fixes [here](https://github.com/petercorke/robotics-toolbox-python/wiki/Common-Issues).

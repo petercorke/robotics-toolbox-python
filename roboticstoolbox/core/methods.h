@@ -17,7 +17,8 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-    void _ETS_IK(PyObject *ets, int n, double *q, double *Tep, double *ret);
+    int _check_lim(ETS *ets, MapVectorX q);
+    void _angle_axis(MapMatrix4dc Te, Matrix4dc Tep, MapVectorX e);
     void _ETS_hessian(int n, MapMatrixJc &J, MapMatrixHr &H);
     void _ETS_jacob0(ETS *ets, double *q, double *tool, MapMatrixJc &eJ);
     void _ETS_jacobe(ETS *ets, double *q, double *tool, MapMatrixJc &eJ);

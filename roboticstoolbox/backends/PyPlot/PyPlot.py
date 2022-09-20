@@ -20,7 +20,7 @@ _pil = None
 try:
     import matplotlib
     import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
+    # from mpl_toolkits.mplot3d import Axes3D
     from matplotlib.widgets import Slider
 
     matplotlib.rcParams["pdf.fonttype"] = 42

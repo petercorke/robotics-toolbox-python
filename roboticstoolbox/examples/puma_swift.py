@@ -5,7 +5,6 @@
 
 import swift
 import roboticstoolbox as rp
-import spatialmath as sm
 import numpy as np
 
 env = swift.Swift()
@@ -14,7 +13,7 @@ env.launch(realtime=True)
 # Create a puma in the default zero pose
 puma = rp.models.Puma560()
 puma.q = puma.qz
-env.add(puma, show_robot=True, show_collision=False)
+env.add(puma, robot_alpha=True, collision_alpha=False)
 
 dt = 0.05
 interp_time = 5

@@ -9,7 +9,6 @@ import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
 import qpsolvers as qp
-import cProfile
 
 # Launch the simulator Swift
 env = swift.Swift()
@@ -25,16 +24,16 @@ panda.q = panda.qr
 n = 7
 
 # Make two obstacles with velocities
-s0 = sg.Sphere(radius=0.05, base=sm.SE3(0.52, 0.4, 0.3))
+s0 = sg.Sphere(radius=0.05, pose=sm.SE3(0.52, 0.4, 0.3))
 s0.v = [0, -0.2, 0, 0, 0, 0]
 
-s1 = sg.Sphere(radius=0.05, base=sm.SE3(0.1, 0.35, 0.65))
+s1 = sg.Sphere(radius=0.05, pose=sm.SE3(0.1, 0.35, 0.65))
 s1.v = [0, -0.2, 0, 0, 0, 0]
 
 collisions = [s0, s1]
 
 # Make a target
-target = sg.Sphere(radius=0.02, base=sm.SE3(0.6, -0.2, 0.0))
+target = sg.Sphere(radius=0.02, pose=sm.SE3(0.6, -0.2, 0.0))
 
 # Add the Panda and shapes to the simulator
 env.add(panda)
@@ -44,7 +43,7 @@ env.add(target)
 
 # Set the desired end-effector pose to the location of target
 Tep = panda.fkine(panda.q)
-Tep.A[:3, 3] = target.base.t
+Tep.A[:3, 3] = target.T[:3, -1]
 # Tep.A[2, 3] += 0.1
 
 

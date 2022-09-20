@@ -5,7 +5,6 @@
 
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
-from spatialmath import SE3
 
 
 class Sawyer(DHRobot):
@@ -42,14 +41,14 @@ class Sawyer(DHRobot):
         if symbolic:
             import spatialmath.base.symbolic as sym
 
-            zero = sym.zero()
+            # zero = sym.zero()
             pi = sym.pi()
         else:
             from math import pi
 
-            zero = 0.0
+            # zero = 0.0
 
-        deg = pi / 180
+        # deg = pi / 180
         mm = 1e-3
 
         # kinematic parameters

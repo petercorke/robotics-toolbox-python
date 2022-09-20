@@ -15,12 +15,12 @@ from roboticstoolbox.robot.PoERobot import (
     PoEPrismatic
 )
 from roboticstoolbox.robot.ERobot import ERobot, ERobot2
-from roboticstoolbox.robot.FastRobot import FastRobot
+# from roboticstoolbox.robot.FastRobot import FastRobot
 
 from roboticstoolbox.robot.ELink import ELink, ELink2
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.Gripper import Gripper
-from roboticstoolbox.robot.KinematicCache import KinematicCache
+# from roboticstoolbox.robot.KinematicCache import KinematicCache
 from roboticstoolbox.robot.ET import ET, ET2
 
 __all__ = [
@@ -40,11 +40,11 @@ __all__ = [
     "Link2",
     "ERobot",
     "ERobot2",
-    "FastRobot",
+    # "FastRobot",
     "ETS",
     "ETS2",
     "Gripper",
-    "KinematicCache",
+    # "KinematicCache",
     "PoERobot",
     "PoELink",
     "PoEPrismatic",

@@ -3,16 +3,16 @@ Python Bug Planner
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
-from numpy import disp
-from scipy import integrate
+# from numpy import disp
+# from scipy import integrate
 
-from spatialmath.pose2d import SE2
+# from spatialmath.pose2d import SE2
 from spatialmath import base
 from spatialmath.base.animate import *
 from scipy.ndimage import *
-from matplotlib import cm
+# from matplotlib import cm
 import matplotlib.pyplot as plt
-from matplotlib import animation
+# from matplotlib import animation
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
 
 class Bug2(PlannerBase):

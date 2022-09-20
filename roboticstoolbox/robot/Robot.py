@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod, abstractproperty
 from copy import deepcopy
 import numpy as np
 import roboticstoolbox as rtb
-from spatialmath import SE3, SE2
+from spatialmath import SE3
 from spatialmath.base.argcheck import (
     isvector,
     getvector,
@@ -18,17 +18,19 @@ from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.IK import IKMixin
-from typing import Optional, Union, overload, Dict, Tuple
+from typing import Union, Dict, Tuple
 from spatialgeometry import Shape
 from fknm import Robot_link_T
 from functools import lru_cache
 from spatialgeometry import SceneNode
 from roboticstoolbox.robot.Link import BaseLink, Link
-from numpy import all, eye, isin
+
+# from numpy import all, eye, isin
 from roboticstoolbox.robot.Gripper import Gripper
 from numpy import ndarray
 from warnings import warn
-import scipy as sp
+
+# import scipy as sp
 
 try:
     from matplotlib import colors
@@ -980,7 +982,16 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
         :seealso: :func:`jacob0`, :func:`hessian0`
         """  # noqa
-        n = len(q)
+        # n = len(q)
+
+        # J = r.jacob0(q)
+
+        # H = r.hessian0(q)
+
+        # ev = J @ qd
+        # ew = ev[3:]
+
+        # Γd = sm.smb.rotvelxform(T.R, inverse=True, representation=rep) @ ew
 
         if representation is None:
 
@@ -1299,7 +1310,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
         j = 0
         for link in self:
             if link.isrevolute:
-                if link.qlim is None:
+                if link.qlim is None or np.any(np.isnan(link.qlim)):
                     v = np.r_[-np.pi, np.pi]
                 else:
                     v = link.qlim
@@ -1341,7 +1352,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
     # --------------------------------------------------------------------- #
 
     @property
-    def qd(self):
+    def qd(self) -> ndarray:
         """
         Get/set robot joint velocity (Robot superclass)
 
@@ -1358,7 +1369,7 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
     @qd.setter
     def qd(self, qd_new):
-        self._qd = getvector(qd_new, self.n)
+        self._qd = np.array(getvector(qd_new, self.n))
 
     # --------------------------------------------------------------------- #
 
@@ -2200,11 +2211,12 @@ class Robot(SceneNode, ABC, DynamicsMixin, IKMixin):
 
 if __name__ == "__main__":
 
-    import roboticstoolbox as rtb
-
-    puma = rtb.models.DH.Puma560()
-    a = puma.copy()
     pass
+
+    # import roboticstoolbox as rtb
+
+    # puma = rtb.models.DH.Puma560()
+    # a = puma.copy()
 
     # from roboticstoolbox import ET2 as ET
 

@@ -1,7 +1,7 @@
 import numpy as np
-from math import sin, cos, atan2, tan, sqrt, pi
+from math import sin, cos, pi
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import time
 from spatialmath import base, SE3
 

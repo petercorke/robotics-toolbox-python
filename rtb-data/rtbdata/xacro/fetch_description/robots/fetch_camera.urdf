@@ -1,0 +1,144 @@
+<robot name="fetch">
+
+  <link name="base0">
+  </link>
+  <link name="base1">
+  </link>
+  <link name="base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0036 0.0 0.0014" />
+      <mass value="70.1294" />
+      <inertia ixx="1.225" ixy="0.0099" ixz="0.0062" iyy="1.2853" iyz="-0.0034" izz="0.987" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="package://fetch_description/meshes/base_link.dae" />
+      </geometry>
+      <material name="">
+        <color rgba="0.356 0.361 0.376 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="package://fetch_description/meshes/base_link_collision.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_joint1" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base0"/>
+    <child link="base1"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="87" lower="-999999" upper="999999" velocity="4.0"/>
+  </joint>
+  <joint name="base_joint2" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base1"/>
+    <child link="base_link"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="87" lower="-999999" upper="999999" velocity="4.0"/>
+  </joint>
+	
+
+  <link name="torso_lift_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0013 -0.0009 0.2935" />
+      <mass value="10.7796" />
+      <inertia ixx="0.3354" ixy="0.0" ixz="-0.0162" iyy="0.3354" iyz="-0.0006" izz="0.0954" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="package://fetch_description/meshes/torso_lift_link.dae" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="package://fetch_description/meshes/torso_lift_link_collision.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="torso_lift_joint" type="prismatic">
+    <origin rpy="-6.123E-17 0 0" xyz="-0.086875 0 0.37743" />
+    <parent link="base_link" />
+    <child link="torso_lift_link" />
+    <axis xyz="0 0 1" />
+    <limit effort="450.0" lower="0" upper="0.38615" velocity="0.1" />
+  <dynamics damping="100.0" /></joint>
+
+  <link name="head_pan_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0321 0.0161 0.0390" />
+      <mass value="2.2556" />
+      <inertia ixx="0.0129" ixy="0.0002" ixz="0.0007" iyy="0.0095" iyz="-0.0" izz="0.0184" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="package://fetch_description/meshes/head_pan_link.dae" />
+      </geometry>
+      <material name="">
+        <color rgba="0.356 0.361 0.376 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="package://fetch_description/meshes/head_pan_link_collision.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="head_pan_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0.053125 0 0.603001417713939" />
+    <parent link="torso_lift_link" />
+    <child link="head_pan_link" />
+    <axis xyz="0 0 1" />
+  <limit effort="0.32" lower="-1.57" upper="1.57" velocity="1.57" /></joint>
+
+  <link name="head_tilt_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0081 0.0025 0.0113" />
+      <mass value="0.9087" />
+      <inertia ixx="0.0061" ixy="-0.0" ixz="0.0002" iyy="0.0014" iyz="-0.0001" izz="0.0061" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="package://fetch_description/meshes/head_tilt_link.dae" />
+      </geometry>
+      <material name="">
+        <color rgba="0.086 0.506 0.767 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="package://fetch_description/meshes/head_tilt_link_collision.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="head_tilt_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0.14253 0 0.057999" />
+    <parent link="head_pan_link" />
+    <child link="head_tilt_link" />
+    <axis xyz="0 1 0" />
+    <limit effort="0.68" lower="-0.76" upper="1.45" velocity="1.57" />
+  </joint>
+
+  <link name="head_camera_link" />
+  <joint name="head_camera_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.055 0 0.0225" />
+    <parent link="head_tilt_link" />
+    <child link="head_camera_link" />
+  </joint>
+
+
+
+</robot>

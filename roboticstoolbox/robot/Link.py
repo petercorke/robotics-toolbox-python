@@ -1,13 +1,13 @@
 from copy import copy as ccopy, deepcopy
 from abc import ABC
-from multiprocessing.sharedctypes import Value
+# from multiprocessing.sharedctypes import Value
 import numpy as np
 from functools import wraps
 from spatialmath.base import getvector, isscalar, isvector, ismatrix
 from spatialmath import SE3, SE2
 from ansitable import ANSITable, Column
 from spatialgeometry import Shape, SceneNode, SceneGroup
-from typing import List, Union, Type, Tuple, overload
+from typing import List, Union, Tuple, overload
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.ET import ET, ET2
@@ -298,7 +298,7 @@ class BaseLink(SceneNode, ABC):
         s = self.__class__.__name__ + "("
         if self.name is not None:
             s += f'"{self.name}"'
-        
+
         ets = self.ets
         if len(ets) > 0:
             s += f", {ets}"
@@ -380,8 +380,8 @@ class BaseLink(SceneNode, ABC):
         Tc = deepcopy(self.Tc)
         G = deepcopy(self.G)
         qlim = deepcopy(self.qlim)
-        geometry = [shape.copy() for shape in self._geometry]
-        collision = [shape.copy() for shape in self._collision]
+        geometry = [deepcopy(shape) for shape in self._geometry]
+        collision = [deepcopy(shape) for shape in self._collision]
 
         cls = self.__class__
         result = cls(
@@ -1138,7 +1138,7 @@ class BaseLink(SceneNode, ABC):
                     s = ", ".join([fmt.format(v) for v in val])
                 except TypeError:
                     # handle symbolic case
-                    s = ", ".join([str(v) for v in val])                    
+                    s = ", ".join([str(v) for v in val])
             else:
                 try:
                     s = fmt.format(val)
@@ -1158,8 +1158,6 @@ class BaseLink(SceneNode, ABC):
         format(dyn, fmt, self.G)
 
         return dyn
-
-
 
     def _params(self, name=True):  # pragma nocover
         def format_param(
@@ -1187,11 +1185,14 @@ class BaseLink(SceneNode, ABC):
                 #         flat = v.flatten()
                 #         v = np.r_[[flat[k] for k in indices]]
                 #     s = f"{name}=[" + ", ".join([f"{x:.3g}" for x in v]) + "]"
-                    if indices is not None:
-                        v = v.ravel()[indices]
-                    s = f"{name}=" + np.array2string(v, separator=', ', 
-                            suppress_small=True, 
-                            formatter={'float': lambda x: f"{x:.3g}"})
+                if indices is not None:
+                    v = v.ravel()[indices]
+                s = f"{name}=" + np.array2string(
+                    v,
+                    separator=", ",
+                    suppress_small=True,
+                    formatter={"float": lambda x: f"{x:.3g}"},
+                )
             if s is not None:
                 l.append(s)
 
@@ -1380,7 +1381,6 @@ class Link(BaseLink):
             if jindex is not None:
                 self._ets[-1].jindex = jindex
                 self._ets._auto_jindex = False
-
 
     # @property
     # def ets(self: "Link") -> "ETS":

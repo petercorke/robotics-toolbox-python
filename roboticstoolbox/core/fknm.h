@@ -16,17 +16,25 @@ extern "C"
 #endif /* __cplusplus */
 
     // forward defines
-    static PyObject *IK(PyObject *self, PyObject *args);
+    static PyObject *IK_GN(PyObject *self, PyObject *args);
+    static PyObject *IK_NR(PyObject *self, PyObject *args);
+    static PyObject *IK_LM_Chan(PyObject *self, PyObject *args);
+    static PyObject *IK_LM_Wampler(PyObject *self, PyObject *args);
+    static PyObject *IK_LM_Sugihara(PyObject *self, PyObject *args);
+
     static PyObject *Robot_link_T(PyObject *self, PyObject *args);
+
     static PyObject *ETS_hessian0(PyObject *self, PyObject *args);
     static PyObject *ETS_hessiane(PyObject *self, PyObject *args);
     static PyObject *ETS_jacob0(PyObject *self, PyObject *args);
     static PyObject *ETS_jacobe(PyObject *self, PyObject *args);
     static PyObject *ETS_fkine(PyObject *self, PyObject *args);
     static PyObject *ETS_init(PyObject *self, PyObject *args);
+
     static PyObject *ET_init(PyObject *self, PyObject *args);
     static PyObject *ET_update(PyObject *self, PyObject *args);
     static PyObject *ET_T(PyObject *self, PyObject *args);
+
     static PyObject *r2q(PyObject *self, PyObject *args);
     int _check_array_type(PyObject *toCheck);
 

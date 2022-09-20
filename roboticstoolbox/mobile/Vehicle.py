@@ -5,13 +5,13 @@ Python Vehicle
 """
 from abc import ABC, abstractmethod
 import warnings
-from math import pi, sin, cos, tan, atan2
+from math import pi, sin, cos, tan
 import numpy as np
-from scipy import integrate, linalg, interpolate
+from scipy import interpolate
 
 import matplotlib.pyplot as plt
-from matplotlib import patches
-import matplotlib.transforms as mtransforms
+# from matplotlib import patches
+# import matplotlib.transforms as mtransforms
 
 from spatialmath import SE2, base
 from roboticstoolbox.mobile.drivers import VehicleDriverBase

@@ -26,8 +26,8 @@ class Planar_Y(ERobot):
 
     def __init__(self):
 
-        deg = np.pi / 180
-        mm = 1e-3
+        # deg = np.pi / 180
+        # mm = 1e-3
         tool_offset = 1
 
         # trunk of the tree

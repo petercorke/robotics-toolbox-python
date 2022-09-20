@@ -6,7 +6,6 @@
 # from math import pi
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
-from spatialmath import SE3
 
 
 class Hyper3d(DHRobot):
@@ -52,12 +51,12 @@ class Hyper3d(DHRobot):
         if symbolic:
             import spatialmath.base.symbolic as sym
 
-            zero = sym.zero()
+            # zero = sym.zero()
             pi = sym.pi()
         else:
             from math import pi
 
-            zero = 0.0
+            # zero = 0.0
 
         if a is None:
             a = 1 / N

@@ -917,7 +917,7 @@ class EKF:
             # estimate position of landmark in the world based on 
             # noisy sensor reading and current vehicle pose
 
-        M = None
+        # M = None
 
         # estimate its position based on observation and vehicle state
         xf = self.sensor.g(xv, z)
