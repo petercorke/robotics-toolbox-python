@@ -1,5 +1,6 @@
 from roboticstoolbox.models.URDF.Panda import Panda
 from roboticstoolbox.models.URDF.Frankie import Frankie
+from roboticstoolbox.models.URDF.FrankieOmni import FrankieOmni
 from roboticstoolbox.models.URDF.UR3 import UR3
 from roboticstoolbox.models.URDF.UR5 import UR5
 from roboticstoolbox.models.URDF.UR10 import UR10
@@ -18,26 +19,35 @@ from roboticstoolbox.models.URDF.PR2 import PR2
 from roboticstoolbox.models.URDF.LBR import LBR
 from roboticstoolbox.models.URDF.KinovaGen3 import KinovaGen3
 from roboticstoolbox.models.URDF.YuMi import YuMi
+from roboticstoolbox.models.URDF.Fetch import Fetch
+from roboticstoolbox.models.URDF.FetchCamera import FetchCamera
+from roboticstoolbox.models.URDF.Valkyrie import Valkyrie
+from roboticstoolbox.models.URDF.AL5D import AL5D
 
 __all__ = [
-    'Panda',
-    'Frankie',
-    'UR3',
-    'UR5',
-    'UR10',
-    'Puma560',
-    'px100',
-    'px150',
-    'rx150',
-    'rx200',
-    'vx300',
-    'vx300s',
-    'wx200',
-    'wx250',
-    'wx250s',
-    'Mico',
-    'PR2',
-    'LBR',
-    'KinovaGen3',
-    'YuMi'
+    "Panda",
+    "Frankie",
+    "FrankieOmni",
+    "UR3",
+    "UR5",
+    "UR10",
+    "Puma560",
+    "px100",
+    "px150",
+    "rx150",
+    "rx200",
+    "vx300",
+    "vx300s",
+    "wx200",
+    "wx250",
+    "wx250s",
+    "Mico",
+    "PR2",
+    "LBR",
+    "KinovaGen3",
+    "YuMi",
+    "Fetch",
+    "FetchCamera",
+    "Valkyrie",
+    "AL5D",
 ]

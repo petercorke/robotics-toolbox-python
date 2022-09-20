@@ -1,4 +1,4 @@
-from roboticstoolbox import ETS
+from roboticstoolbox import ETS, ET
 import re
 import sympy
 import numpy as np
@@ -9,7 +9,7 @@ deg = base.pi() / sympy.Integer('180')
 
 # PROGRESS
 # subs2z does a bad thing in first phase, 2 subs it shouldnt make
-class DHFactor(ETS):
+class DHFactor(ET):
 
     def __init__(self, axis=None, eta=None, **kwargs):
 
@@ -44,16 +44,17 @@ class DHFactor(ETS):
                 j = None
 
             if axis == 'Rx':
-                e = DHFactor.rx(eta, j=j)
+                e = DHFactor.Rx(eta, j=j)
             elif axis == 'Ry':
-                e = DHFactor.ry(eta, j=j)
+                e = DHFactor.Ry(eta, j=j)
             elif axis == 'Rz':
-                e = DHFactor.rz(eta, j=j)
+                e = DHFactor.Rz(eta, j=j)
             elif axis == 'Tx':
                 e = DHFactor.tx(eta, j=j)
             elif axis == 'Ty':
                 e = DHFactor.ty(eta, j=j)
-            elif axis == 'Tz':
+            # elif axis == 'Tz':
+            else:
                 e = DHFactor.tz(eta, j=j)
 
             ets *= e

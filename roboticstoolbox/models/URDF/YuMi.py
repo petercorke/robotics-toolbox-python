@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
+from roboticstoolbox.robot.Link import Link
 import numpy as np
 from roboticstoolbox.robot.ERobot import ERobot
+import spatialmath as sm
 
 
 class YuMi(ERobot):
@@ -32,14 +34,74 @@ class YuMi(ERobot):
 
     def __init__(self):
 
-        links, name = self.URDF_read("yumi_description/urdf/yumi.urdf")
-
-        super().__init__(
-            links, name=name, manufacturer="ABB", gripper_links=[links[20]]
+        links, name, urdf_string, urdf_filepath = self.URDF_read(
+            "yumi_description/urdf/yumi.urdf"
         )
 
-        self.addconfiguration("qz", np.zeros((14,)))
-        self.addconfiguration("qr", np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4]))
+        # We wish to add an intermediate link between gripper_r_base and
+        # @gripper_r_finger_r/l
+        # This is because gripper_r_base contains a revolute joint which is
+        # a part of the core kinematic chain and not the gripper.
+        # So we wish for gripper_r_base to be part of the robot and
+        # @gripper_r_finger_r/l to be in the gripper underneath a parent Link
+
+        gripper_r_base = links[16]
+        gripper_l_base = links[19]
+
+        # Find the finger links
+        r_gripper_links = [link for link in links if link.parent == gripper_r_base]
+        l_gripper_links = [link for link in links if link.parent == gripper_l_base]
+
+        # New intermediate links
+        r_gripper = Link(name="r_gripper", parent=gripper_l_base)
+        l_gripper = Link(name="l_gripper", parent=gripper_r_base)
+        links.append(r_gripper)
+        links.append(l_gripper)
+
+        # Set the finger link parent to be the new gripper base link
+        for g_link in r_gripper_links:
+            g_link._parent = r_gripper
+
+        for g_link in l_gripper_links:
+            g_link._parent = l_gripper
+
+        super().__init__(
+            links,
+            name=name,
+            manufacturer="ABB",
+            gripper_links=[r_gripper, l_gripper],
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
+        )
+
+        # Set the default tool transform for the end-effectors
+        self.grippers[0].tool = sm.SE3.Tz(0.13)
+        self.grippers[1].tool = sm.SE3.Tz(0.13)
+
+        self.qr = np.array(
+            [
+                0,
+                -0.3,
+                0,
+                -2.2,
+                0,
+                2.0,
+                np.pi / 4,
+                0,
+                -0.3,
+                0,
+                -2.2,
+                0,
+                2.0,
+                np.pi / 4,
+            ]
+        )
+        self.qz = np.zeros(14)
+        self.q1 = np.array([0, -0.4, 0, 0, 0, 0, 0, 0, -0.4, 0, 0, 0, 0, 0])
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
+        self.addconfiguration("q1", self.q1)
 
 
 if __name__ == "__main__":  # pragma nocover

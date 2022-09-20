@@ -10,7 +10,6 @@ import unittest
 
 
 class TestRobot(unittest.TestCase):
-
     def test_init(self):
         l0 = rp.PrismaticDH()
         l1 = rp.RevoluteDH()
@@ -39,13 +38,13 @@ class TestRobot(unittest.TestCase):
         r = rp.models.DH.Puma560()
         r.linkcolormap()
 
-        r.linkcolormap(['r', 'r', 'r', 'r', 'r', 'r'])
+        r.linkcolormap(["r", "r", "r", "r", "r", "r"])
 
-    def test_tool_error(self):
-        r = rp.models.DH.Puma560()
+    # def test_tool_error(self):
+    #     r = rp.models.DH.Puma560()
 
-        with self.assertRaises(ValueError):
-            r.tool = 2
+    #     with self.assertRaises(ValueError):
+    #         r.tool = 2
 
     def test_links(self):
 
@@ -74,19 +73,19 @@ class TestRobot(unittest.TestCase):
         sol3 = panda.ikine_LM(T, q0=[0, 1.4, 0, 1, 0, 0.5, 1])
 
         self.assertTrue(sol1.success)
-        self.assertAlmostEqual(np.linalg.norm(
-            T - panda.fkine(sol1.q)), 0, places=4)
+        self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol1.q)), 0, places=4)
 
         self.assertTrue(sol2.success[0])
-        self.assertAlmostEqual(np.linalg.norm(
-            T - panda.fkine(sol2.q[0, :])), 0, places=4)
+        self.assertAlmostEqual(
+            np.linalg.norm(T - panda.fkine(sol2.q[0, :])), 0, places=4
+        )
         self.assertTrue(sol2.success[0])
-        self.assertAlmostEqual(np.linalg.norm(
-            T - panda.fkine(sol2.q[1, :])), 0, places=4)
+        self.assertAlmostEqual(
+            np.linalg.norm(T - panda.fkine(sol2.q[1, :])), 0, places=4
+        )
 
         self.assertTrue(sol3.success)
-        self.assertAlmostEqual(np.linalg.norm(
-            T - panda.fkine(sol3.q)), 0, places=4)
+        self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol3.q)), 0, places=4)
 
         with self.assertRaises(ValueError):
             panda.ikine_LM(T, q0=[1, 2])
@@ -103,18 +102,18 @@ class TestRobot(unittest.TestCase):
         sol = r.ikine_LM(T, mask=[1, 1, 0, 0, 0, 0])
 
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(
-            T.t[:2] - r.fkine(sol.q).t[:2]), 0, places=4)
+        self.assertAlmostEqual(
+            np.linalg.norm(T.t[:2] - r.fkine(sol.q).t[:2]), 0, places=4
+        )
 
         # test initial condition search, drop iteration limit so it has to do
         # some searching
-        sol = r.ikine_LM(
-            T, mask=[1, 1, 0, 0, 0, 0],
-            ilimit=8, search=True)
+        sol = r.ikine_LM(T, mask=[1, 1, 0, 0, 0, 0], ilimit=8, search=True)
 
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(
-            T.t[:2] - r.fkine(sol.q).t[:2]), 0, places=4)
+        self.assertAlmostEqual(
+            np.linalg.norm(T.t[:2] - r.fkine(sol.q).t[:2]), 0, places=4
+        )
 
     def test_ikine_LM_transpose(self):
         # need to test this on a robot with squarish Jacobian, choose Puma
@@ -141,17 +140,19 @@ class TestRobot(unittest.TestCase):
         sol2 = panda.ikine_min(Tt, qlim=True)
 
         self.assertTrue(sol1.success)
-        self.assertAlmostEqual(np.linalg.norm(
-            T - panda.fkine(sol1.q)), 0, places=4)
+        self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol1.q)), 0, places=4)
         nt.assert_array_almost_equal(
-            T.A - panda.fkine(sol1.q).A, np.zeros((4, 4)), decimal=4)
+            T.A - panda.fkine(sol1.q).A, np.zeros((4, 4)), decimal=4
+        )
 
         self.assertTrue(sol2[0].success)
         nt.assert_array_almost_equal(
-            T.A - panda.fkine(sol2[0].q).A, np.zeros((4, 4)), decimal=4)
+            T.A - panda.fkine(sol2[0].q).A, np.zeros((4, 4)), decimal=4
+        )
         self.assertTrue(sol2[1].success)
         nt.assert_array_almost_equal(
-            T.A - panda.fkine(sol2[1].q).A, np.zeros((4, 4)), decimal=4)
+            T.A - panda.fkine(sol2[1].q).A, np.zeros((4, 4)), decimal=4
+        )
 
     def test_ikine_unc(self):
         puma = rp.models.DH.Puma560()
@@ -165,18 +166,22 @@ class TestRobot(unittest.TestCase):
 
         self.assertTrue(sol1[0].success)
         nt.assert_array_almost_equal(
-            T.A - puma.fkine(sol1[0].q).A, np.zeros((4, 4)), decimal=4)
+            T.A - puma.fkine(sol1[0].q).A, np.zeros((4, 4)), decimal=4
+        )
         self.assertTrue(sol1[1].success)
         nt.assert_array_almost_equal(
-            T.A - puma.fkine(sol1[1].q).A, np.zeros((4, 4)), decimal=4)
+            T.A - puma.fkine(sol1[1].q).A, np.zeros((4, 4)), decimal=4
+        )
 
         self.assertTrue(sol2.success)
         nt.assert_array_almost_equal(
-            T.A - puma.fkine(sol2.q).A, np.zeros((4, 4)), decimal=4)
+            T.A - puma.fkine(sol2.q).A, np.zeros((4, 4)), decimal=4
+        )
 
         self.assertTrue(sol3.success)
         nt.assert_array_almost_equal(
-            T.A - puma.fkine(sol3.q).A, np.zeros((4, 4)), decimal=4)
+            T.A - puma.fkine(sol3.q).A, np.zeros((4, 4)), decimal=4
+        )
 
     # def test_plot_swift(self):
     #     r = rp.models.Panda()
@@ -185,7 +190,7 @@ class TestRobot(unittest.TestCase):
     #     env.close()
 
 
-if __name__ == '__main__':  # pragma nocover
+if __name__ == "__main__":  # pragma nocover
     unittest.main()
     # pytest.main(['tests/test_SerialLink.py'])
 

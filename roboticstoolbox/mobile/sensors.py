@@ -5,7 +5,7 @@ from math import pi, sin, cos
 import matplotlib.pyplot as plt
 from spatialmath import base
 import roboticstoolbox as rtb
-
+from collections.abc import Iterable
 
 """
 Sensor Sensor superclass
@@ -31,22 +31,22 @@ See also RangeBearingSensor, EKF, Vehicle, Landmarkself.
 
 """
 
-class Sensor(ABC):
+class SensorBase(ABC):
     # TODO, pose option, wrt vehicle
 
-        # robot
-        # map
-        
-        # verbose
-        
-        # ls
-        # animate     # animate sensor measurements
-        # interval    # measurement return subsample factor
-        # fail
-        # delay
+    # robot
+    # map
+    
+    # verbose
+    
+    # ls
+    # animate     # animate sensor measurements
+    # interval    # measurement return subsample factor
+    # fail
+    # delay
         
 
-    def __init__(self, robot, map, every=1, fail=[], animate=False, delay=0.1, verbose=False):
+    def __init__(self, robot, map, every=1, fail=[], animate=False, delay=0.1, seed=0, verbose=False):
         """Sensor.Sensor Sensor object constructor
         %
         # S = Sensor(VEHICLE, MAP, OPTIONS) is a sensor mounted on a vehicle
@@ -68,19 +68,29 @@ class Sensor(ABC):
         self._every = every
         self._fail =  fail
         
-        self._count = 1
         self._verbose = verbose
 
         self.delay = 0.1
 
         self._animate = animate
 
-        self._rand = np.random.default_rng()
+        self._seed = seed
+        self.init()
 
+    def init(self):
+        """
+        Initialize sensor (superclass)
+
+        - reseed the random number generator
+        - reset the counter for handling the ``every`` and ``fail`` options
+        """
+        if self._seed is not None:
+            self._random = np.random.default_rng(self._seed)
+        self._count = 0
 
     def __str__(self):
         """
-        Convert sensor parameters to a string
+        Convert sensor parameters to a string (superclass)
         %
         # s = self.char() is a string showing sensor parameters in
         # a compact human readable format.
@@ -89,31 +99,77 @@ class Sensor(ABC):
         s += "  " + str(self.map)
         return s
 
+    def __repr__(self):
+        return str(self)
+
     @property
     def robot(self):
+        """
+        Robot associated with sensor (superclass)
+
+        :return: robot
+        :rtype: :class:`VehicleBase` subclass
+        """
         return self._robot
 
     @property
     def map(self):
+        """
+        Landmark map associated with sensor (superclass)
+
+        :return: robot
+        :rtype: :class:`LandmarkMap`
+        """
         return self._map
 
     @property
-    def sensor(self):
-        return self._sensor
+    def random(self):
+        """
+        Get private random number generator (superclass)
+
+        :return: NumPy random number generator
+        :rtype: :class:`numpy.random.Generator`
+
+        Has methods including:
+
+            - :meth:`integers(low, high, size, endpoint) <numpy.random.Generator.integers>`
+            - :meth:`random(size) <numpy.random.Generator.random>`
+            - :meth:`uniform(low, high, size) <numpy.random.Generator.uniform>`
+            - :meth:`normal(mean, std, size) <numpy.random.Generator.normal>`
+            - :meth:`multivariate_normal(mean, covar, size) <numpy.random.Generator.multivariate_normal>`
+
+        The generator is initialized with the seed provided at constructor
+        time every time :meth:`init` is called.
+
+        :seealso: :meth:`init`
+        """
+        return self._random
 
     @property
     def verbose(self):
-        return self._verbose
-    
-    def plot(s, jf):
-        """Sensor.plot Plot sensor reading
-        %
-        # self.plot(J) draws a line from the robot to the J'th map feature.
-        %
-        # Notes::
-        # - The line is drawn using the linestyle given by the property ls
-        # - There is a delay given by the property delay
         """
+        Get verbosity state
+
+        :return: verbosity
+        :rtype: bool
+        """
+        return self._verbose
+
+    def plot(self, id):
+        """
+        Plot sensor observation
+
+        :param id: landmark id
+        :type id: int
+
+        Draws a line from the robot to landmark ``id``.
+        
+        .. note::
+            - The line is drawn using the ``line_style`` given at constructor time
+
+        """
+        pass
+
         # if isempty(self.ls)
         #     return
         # end
@@ -126,71 +182,23 @@ class Sensor(ABC):
         
         # # there is a sensor line animate it
         
-        # if jf == 0
+        # if lm_id == 0
         #     set(h, 'Visible', 'off')
         # else
-        #     xi = self.self.map(:,jf)
+        #     xi = self.self.map(:,lm_id)
         #     set(h, 'Visible', 'on', 'XData', [self.robot.x[0], xi[0]], 'YData', [self.robot.x[1], xi[1]])
         # end
         # pause(self.delay)
 
         # drawnow
-        pass
 
-
-
-"""RangeBearingSensor Range and bearing sensor class
-
-A concrete subclass of the Sensor class that implements a range and bearing
-angle sensor that provides robot-centric measurements of landmark points in 
-the world. To enable this it holds a references to a map of the world (LandmarkMap object)
-and a robot (Vehicle subclass object) that moves in SE[1].
-
-The sensor observes landmarks within its angular field of view between
-the minimum and maximum range.
-
-Methods::
-
-reading   range/bearing observation of random landmark
-h         range/bearing observation of specific landmark
-Hx        Jacobian matrix with respect to vehicle pose dh/dx 
-Hp        Jacobian matrix with respect to landmark position dh/dp 
-Hw        Jacobian matrix with respect to noise dh/dw
--
-g         feature position given vehicle pose and observation
-Gx        Jacobian matrix with respect to vehicle pose dg/dx 
-Gz        Jacobian matrix with respect to observation dg/dz
-
-Properties (read/write)::
-W            measurement covariance matrix (2x2)
-interval     valid measurements returned every interval'th call to reading()
-landmarklog  time history of observed landmarks
-
-Reference::
-
-  Robotics, Vision & Control, Chap 6,
-  Peter Corke,
-  Springer 2011
-
-See also Sensor, Vehicle, LandmarkMap, EKF."""
 
 # ======================================================================== #
 
-class RangeBearingSensor(Sensor):
-
-    # properties
-    #     W           # measurment covariance
-    #     r_range     # range limits
-    #     theta_range # angle limits
-
-    #     randstream  # random stream just for Sensors
-        
-    #     landmarklog  # time history of observed landmarks        
-    # end
-
-    # properties (SetAccess = private)
-    #     count       # number of reading()s
-    # end
+# visibility function, for one id, or return list of visible
+# covar can be 2x2 or (2,)
+# .W property
+class RangeBearingSensor(SensorBase):
 
 
     def __init__(self, robot, map, 
@@ -199,35 +207,55 @@ class RangeBearingSensor(Sensor):
             covar=None, 
             range=None,
             angle=None,
+            plot=False,
+            seed=0,
             **kwargs):
-        """RangeBearingSensor.RangeBearingSensor Range and bearing sensor constructor
-        %
-        # S = RangeBearingSensor(VEHICLE, MAP, OPTIONS) is an object
-        # representing a range and bearing angle sensor mounted on the Vehicle
-        # subclass object VEHICLE and observing an environment of known landmarks
-        # represented by the LandmarkMap object self.  The sensor covariance is W
-        # (2x2) representing range and bearing covariance.
-        %
-        # The sensor has specified angular field of view and minimum and maximum
-        # range.
-        %
-        # Options::
-        # 'covar',W               covariance matrix (2x2)
-        # 'range',xmax            maximum range of sensor
-        # 'range',[xmin xmax]     minimum and maximum range of sensor
-        # 'angle',TH              angular field of view, from -TH to +TH
-        # 'angle',[THMIN THMAX]   detection for angles betwen THMIN
-        #                         and THMAX
-        # 'skip',K                return a valid reading on every K'th call
-        # 'fail',[TMIN TMAX]      sensor simulates failure between 
-        #                         timesteps TMIN and TMAX
-        # 'animate'               animate sensor readings
-        %
-        # See also options for Sensor constructor.
-        %
-        # See also RangeBearingSensor.reading, Sensor.Sensor, Vehicle, LandmarkMap, EKF.
-        """
 
+        r"""
+        Range and bearing angke sensor
+
+        :param robot: model of robot carrying the sensor
+        :type robot: :class:`VehicleBase` subclass
+        :param map: map of landmarks
+        :type map: :class:`LandmarkMap` instance
+        :param polygon: polygon style for sensing region, see :class:`~spatialmath.base.graphics.plot_polygon`, defaults to None
+        :type polygon: dict, optional
+        :param covar: covariance matrix for sensor readings, defaults to None
+        :type covar: ndarray(2,2), optional
+        :param range: maximum range :math:`r_{max}` or range span :math:`[r_{min}, r_{max}]`, defaults to None
+        :type range: float or array_like(2), optional
+        :param angle: angular field of view, from :math:`[-\theta, \theta]` defaults to None
+        :type angle: float, optional
+        :param plot: [description], defaults to False
+        :type plot: bool, optional
+        :param seed: random number seed, defaults to 0
+        :type seed: int, optional
+        :param kwargs: arguments passed to :class:`SensorBase`
+
+        Sensor object that returns the range and bearing angle :math:`(r,
+        \beta)` to a point landmark from a robot-mounted sensor.  The sensor
+        measurements are corrupted with zero-mean Gaussian noise with covariance
+        ``covar``.
+
+        The sensor can have a maximum range, or a minimum and maximum range. The
+        sensor can also have a restricted angular field of view.
+
+        The sensing region can be displayed by setting the polygon parameter
+        which can show an outline or a filled polygon.  This is updated every
+        time :meth:`reading` is called, based on the current configuration of
+        the ``robot``.
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import Bicycle, LandmarkMap, RangeBearingSensor
+            >>> from math import pi
+            >>> robot = Bicycle()
+            >>> map = LandmarkMap(20)
+            >>> sensor = RangeBearingSensor(robot, map, range=(0.5, 20), angle=pi/4)
+            >>> print(sensor)
+
+        :seealso: :class:`~roboticstoolbox.mobile.LandmarkMap` :class:`~roboticstoolbox.mobile.EKF`
+        """
 
         # call the superclass constructor
         super().__init__(robot, map, **kwargs)
@@ -236,59 +264,114 @@ class RangeBearingSensor(Sensor):
         self._poly_style = poly_style
 
         if covar is None:
-            self._covar = np.zeros((2,2))
+            self._W = np.zeros((2,2))
+        elif base.isvector(covar, 2):
+            self._W = np.diag(covar)
+        elif base.ismatrix(covar, (2, 2)):
+            self._W = covar
         else:
-            self._covar = covar
-        self._W = self._covar
-
+            raise ValueError('bad value for covar, must have shape (2,) or (2,2)')
+        
         if range is None:
             self._r_range = None
-        elif len(range) == 1:
+        elif isinstance(range, Iterable):
+            self._r_range = base.getvector(range, 2)
+        else:
             self._r_range = [0, range]
-        elif len(range) == 2:
-            self._r_range = range
 
         if angle is None:
             self._theta_range = None
-        elif len(angle) == 1:
+        elif isinstance(angle, Iterable):
+            self._theta_range = base.getvector(angle, 2)
+        else:
             self._theta_range = [-angle, angle]
-        elif len(angle) == 2:
-            self._theta_range = angle
 
+        self._animate = plot
         self._landmarklog = []
 
+        self._random = np.random.default_rng(seed)
+        
+    def __str__(self):
+        s = super().__str__()
+        s += f"\n  W = {base.array2str(self._W)}\n"
+
+        s += f"  sampled every {self._every} samples\n"
+        if self._r_range is not None:
+            s += f"  range: ({self._r_range[0]}: {self._r_range[1]})\n"
+        if self._theta_range is not None:
+            s += f"  angle: ({self._theta_range[0]:.3g}: {self._theta_range[1]:.3g})\n"
+        return s.rstrip()
 
     def init(self):
-        self._landmarklog = []
-        self._count = 1
-    
-    def selectFeature(self):
-        return self.randstream.randi(self._sensor.nlandmarks)
+        """
+        Initialize sensor
 
+        - reseed the random number generator
+        - reset the counter for handling the ``every`` and ``fail`` options
+        - reset the landmark log
+        - initalize plots
+
+        :seealso: :meth:`SensorBase.init`
+        """
+        super().init()
+        self._landmarklog = []
+
+        if self._animate:
+            self.map.plot()
+
+    @property
+    def W(self):
+        """
+        Get sensor covariance
+
+        :return: sensor covariance
+        :rtype: ndarray(2,2)
+
+        Returns the value of the sensor covariance matrix passed to
+        the constructor.
+        """
+        return self._covar
+    
 
     def reading(self):
-        """
+        r"""
         Choose landmark and return observation
-        %
-        # [Z,K] = self.reading() is an observation of a random visible landmark where
-        # Z=[R,THETA] is the range and bearing with additive Gaussian noise of
-        # covariance W (property W). K is the index of the map feature that was
-        # observed.
-        %
-        # The landmark is chosen randomly from the set of all visible landmarks,
-        # those within the angular field of view and range limitself.  If no valid
-        # measurement, ie. no features within range, interval subsampling enabled
-        # or simulated failure the return is Z=[] and K=0.
-        %
-        # Notes::
-        # - Noise with covariance W (property W) is added to each row of Z.
-        # - If 'animate' option set then show a line from the vehicle to the
-        #   landmark
-        # - If 'animate' option set and the angular and distance limits are set
-        #   then display that region as a shaded polygon.
-        # - Implements sensor failure and subsampling if specified to constructor.
-        %
-        # See also RangeBearingSensor.h.
+
+        :return: range and bearing angle to a landmark, and landmark id
+        :rtype: ndarray(2), int
+
+        Returns an observation of a random visible landmark (range, bearing) and
+        the ``id`` of that landmark. The landmark is chosen randomly from the
+        set of all visible landmarks, those within the angular field of view and
+        range limit.
+        
+        If constructor argument ``every`` is set then only return a valid
+        reading on every ``every`` calls.
+
+        If constructor argument ``fail`` is set then do not return a reading
+        during that specified time interval.
+
+        If no valid reading is available then return (None, None)
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import Bicycle, LandmarkMap, RangeBearingSensor
+            >>> from math import pi
+            >>> robot = Bicycle()
+            >>> map = LandmarkMap(20)
+            >>> sensor = RangeBearingSensor(robot, map, range=(0.5, 20), angle=pi/4)
+            >>> print(sensor.reading())
+    
+        .. note::
+
+            - Noise with covariance ``W`` (set by constructor) is added to the
+              reading
+            - If ``animate`` option is set then show a line from the vehicle to
+              the landmark
+                - If ``animate`` option set and the angular and distance limits
+                  are set then display the sensor field of view as a polygon.
+
+        :seealso: :meth:`h`
         """
         
         # TODO probably should return K=0 to indicated invalid
@@ -298,15 +381,17 @@ class RangeBearingSensor(Sensor):
 
         # check conditions for NOT returning a value
         z = []
-        jf = 0
+        lm_id = -1
         # sample interval
         if self._count % self._every != 0:
+            self._landmarklog.append(lm_id)
             return (None, None)
 
         # simulated failure, fail is a list of 2-tuples giving (start,end) times
         # for a sensor failure
         if self._fail is not None:
             if any([start <= self._count < end for start, end in self._fail]):
+                self._landmarklog.append(lm_id)
                 return (None, None)
         
         # create a polygon to indicate the active sensing area based on range+angle limits
@@ -330,12 +415,55 @@ class RangeBearingSensor(Sensor):
         #     else
         #         hg = get(h, 'Parent')
         #         plot_poly(h, self.robot.x)
+        
+        zk = self.visible()
+        if len(zk) > 1:
+            # more than 1 visible landmark, pick a random one
+            i = self._random.integers(len(zk))
+            z = zk[i][0]
+            lm_id = zk[i][1]
+            if self.verbose:
+                print(f"Sensor:: feature {lm_id}: ({z[0]}, {z[1]})")
+        elif len(zk) == 1:
+            # just 1 visible landmark
+            z = zk[0][0]
+            lm_id = zk[0][1]
+            if self.verbose:
+                print(f"Sensor:: feature {lm_id}: ({z[0]}, {z[1]})")
+        else:
+            if self.verbose:
+                print('Sensor:: no features\n')
+            self._landmarklog.append(lm_id)
+            return (None, None)
 
+        # compute the range and bearing from robot to feature
+        # z = self.h(self.robot.x, lm_id)  
+        
+        if self._animate:
+            self.plot(lm_id)
+        
+        # add the reading to the landmark log
+        self._landmarklog.append(lm_id)
 
-        # if range and bearing angle limits are in place look for
-        # any landmarks that match criteria
+        # add noise with covariance W
+        z += self._random.multivariate_normal((0, 0), self._W)
+    
+        return z, lm_id
 
-        # get range/bearing to all landmarks, one per row
+    def visible(self):
+        """
+        List of all visible landmarks
+
+        :return: list of visible landmarks
+        :rtype: list of int
+
+        Return a list of the id of all landmarks that are visible, that is, it
+        lies with the sensing range and field of view of the sensor at the
+        robot's current configuration.
+
+        :seealso: :meth:`isvisible` :meth:`h`
+        """
+        # get range/bearing to all landmarks
         z = self.h(self.robot.x)
         zk = [(z, k) for k, z in enumerate(z)]
         # a list of tuples, each tuple is ((range, bearing), k)
@@ -346,204 +474,283 @@ class RangeBearingSensor(Sensor):
         if self._theta_range is not None:
             # find all within angular range as well
             zk = filter(lambda zk: self._theta_range[0] <= zk[0][1] <= self._theta_range[1], zk)
-            
-        if len(zk) > 1:
-            # more than 1 in range, pick a random one
-            i = self._rand.integers(len(zk))
-            z = zk[i][0]
-            jf = zk[i][1]
-            if self.verbose:
-                print(f"Sensor:: feature {jf}: ({z[0]}, {z[1]})")
-        else:
-            if self.verbose:
-                print('Sensor:: no features\n')
-            return (None, None)
-
-        # compute the range and bearing from robot to feature
-        # z = self.h(self.robot.x, jf)  
         
-        if self._animate:
-            self.plot(jf)
-        
-        # add the reading to the landmark log
-        self._landmarklog.append(jf)
-    
-        return z
+        return list(zk)
 
-
-    def h(self, xv, jf=None):
+    def isvisible(self, id):
         """
-        Landmark range and bearing
-        %
-        # Z = self.h(X, K) is a sensor observation (1x2), range and bearing, from vehicle at 
-        # pose X (1x3) to the K'th landmark.
-        %
-        # Z = self.h(X, P) as above but compute range and bearing to a landmark at coordinate P.
-        %
-        # Z = self.h(X) as above but computes range and bearing to all
-        # map featureself.  Z has one row per landmark.
-        %
-        # Notes::
-        # - Noise with covariance W (propertyW) is added to each row of Z.
-        # - Supports vectorized operation where XV (Nx3) and Z (Nx2).
-        # - The landmark is assumed visible, field of view and range liits are not
-        #   applied.
-        %
-        # See also RangeBearingSensor.reading, RangeBearingSensor.Hx, RangeBearingSensor.Hw, RangeBearingSensor.Hp.
+        Test if landmark is visible
+
+        :param id: landmark id
+        :type id: int
+        :return: visibility
+        :rtype: bool
+
+        The landmark ``id`` is visible if it lies with the sensing range and
+        field of view of the sensor at the robot's current configuration.
+
+        :seealso: :meth:`visible` :meth:`h`
+        """
+        z = self.h(self.robot.x, id)
+        
+        return ((self._r_range is None) or self._r_range[0] <= z[0] <= self._r_range[1]) and \
+        ((self._theta_range is None) or self._theta_range[0] <= z[1] <= self._theta_range[1])
+
+
+    def h(self, x, landmark=None):
+        r"""
+        Landmark observation function
+
+        :param x: vehicle state :math:`(x, y, \theta)`
+        :type x: array_like(3), array_like(N,3)
+        :param landmark: landmark id or position, defaults to None
+        :type landmark: int or array_like(2), optional
+        :return: range and bearing angle to landmark math:`(r,\beta)`
+        :rtype: ndarray(2) or ndarray(N,2)
+
+        Return the range and bearing to a landmark:
+
+        - ``.h(x)`` is range and bearing to all landmarks, one row per landmark
+        - ``.h(x, id)`` is range and bearing to landmark ``id``
+        - ``.h(x, p)`` is range and bearing to landmark with coordinates ``p``
+        
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import Bicycle, LandmarkMap, RangeBearingSensor
+            >>> from math import pi
+            >>> robot = Bicycle()
+            >>> map = LandmarkMap(20)
+            >>> sensor = RangeBearingSensor(robot, map, range=(0.5, 20), angle=pi/4)
+            >>> z = sensor.h((1, 2, pi/2), 3)
+            >>> print(z)
+
+        .. note::
+            - Noise with covariance (property ``W``) is added to each row of ``z``.
+            - Performs fast vectorized operation where ``x`` is an ndarray(n,3).
+            - The landmark is assumed to be visible, field of view and range limits are not
+              applied.
+
+        :seealso: :meth:`reading` :meth:`Hx` :meth:`Hw` :meth:`Hp`
         """
         # get the landmarks, one per row
-        if jf is None:
-            # self.h(XV)   all landmarks
-            dx = self.map.x - xv[0]
-            dy = self.map.y - xv[1]
-        elif base.isinteger(jf):
-            # self.h(XV, JF)
-            xlm = self.map.landmark(jf)
-            dx = xlm[0] - xv[0]
-            dy = xlm[1] - xv[1]
+
+        if isinstance(x, np.ndarray) and x.ndim == 2:
+            # x is Nx3 set of vehicle states, do vectorized form
+            # used by particle filter
+            x, y, t = x.T
         else:
+            x, y, t = x
+
+        if landmark is None:
+            # self.h(XV)   all landmarks
+            dx = self.map.landmarks[0, :] - x
+            dy = self.map.landmarks[1, :] - y
+        elif base.isinteger(landmark):
+            # landmark id
+            # self.h(XV, JF)
+            xlm = self.map[landmark]
+            dx = xlm[0] - x
+            dy = xlm[1] - y
+        else:
+            # landmark position
             # self.h(XV, XF)
-            xlm = base.getvector(jf, 2)
-            dx = xlm[0] - xv[0]
-            dy = xlm[1] - xv[1]
+            xlm = base.getvector(landmark, 2)
+            dx = xlm[0] - x
+            dy = xlm[1] - y
 
         # compute range and bearing (Vectorized code)
 
         z = np.c_[
                 np.sqrt(dx**2 + dy**2), 
-                base.angdiff(np.arctan2(dy, dx), xv[2]) 
+                base.angdiff(np.arctan2(dy, dx), t) 
             ]  # range & bearing as columns
-
-        # add noise with covariance W
-        z += self._rand.normal(size=z.shape) @ sp.linalg.sqrtm(self._W)
 
         if z.shape[0] == 1:
             return z[0]
         else:
             return z
 
-    def Hx(self, xv, jf):
-        """
+    def Hx(self, x, landmark):
+        r"""
         Jacobian dh/dx
-        %
-        # J = self.Hx(X, K) returns the Jacobian dh/dx (2x3) at the vehicle
-        # state X (3x1) for map landmark K.
-        %
-        # J = self.Hx(X, P) as above but for a landmark at coordinate P.
-        %
-        # See also RangeBearingSensor.h.
+
+        :param x: vehicle state :math:`(x, y, \theta)`
+        :type x: array_like(3)
+        :param arg: landmark id or coordinate
+        :type arg: int or array_like(2)
+        :return: Jacobian matrix
+        :rtype: ndarray(2,3)
+
+        Compute the Jacobian of the observation function with respect to vehicle
+        configuration :math:`\partial h/\partial x`
+
+        - ``sensor.Hx(q, id)`` is Jacobian for landmark ``id``
+        - ``sensor.h(q, p)`` is Jacobian for landmark with coordinates ``p``
+        
+        :seealso: :meth:`h` :meth:`Hp` :meth:`Hw`
         """
-        if base.isinteger(jf):
+
+        if base.isinteger(landmark):
             # landmark index provided
-            xf = self.sensor.landmark(jf)
+            xf = self.map[landmark]
         else:
             # assume it is a coordinate
-            xf = base.getvector(jf, 2)
+            xf = base.getvector(landmark, 2)
 
-        Delta = xf - xv[0:2]
+        Delta = xf - x[:2]
         r = base.norm(Delta)
+        # fmt: off
         return np.array([
             [-Delta[0] / r,    -Delta[1] / r,      0],
             [ Delta[1] / r**2, -Delta[0] / r**2,  -1],
                 ])
+        # fmt: on
 
-    def Hp(self, xv, jf):
-        """
+    def Hp(self, x, landmark):
+        r"""
         Jacobian dh/dp
-        %
-        # J = self.Hp(X, K) is the Jacobian dh/dp (2x2) at the vehicle
-        # state X (3x1) for map landmark K.
-        %
-        # J = self.Hp(X, P) as above but for a landmark at coordinate P (1x2).
-        %
-        # See also RangeBearingSensor.h.
+
+        :param x: vehicle state :math:`(x, y, \theta)`
+        :type x: array_like(3)
+        :param arg: landmark id or coordinate
+        :type arg: int or array_like(2)
+        :return: Jacobian matrix
+        :rtype: ndarray(2,2)
+
+        Compute the Jacobian of the observation function with respect
+        to landmark position :math:`\partial h/\partial p`
+
+        - ``sensor.Hp(x, id)`` is Jacobian for landmark ``id``
+        - ``sensor.Hp(x, p)`` is Jacobian for landmark with coordinates ``p``
+        
+        :seealso: :meth:`h` :meth:`Hx` :meth:`Hw`
         """
-        if base.isinteger(jf):
-            xf = self.map.landmark(jf)
+        if base.isinteger(landmark):
+            xf = self.map.landmark(landmark)
         else:
-            xf = jf
+            xf = landmark
+        x = base.getvector(x, 3)
 
-        Delta = xf - xv[0:2]
+        Delta = xf - x[:2]
         r = base.norm(Delta)
+        # fmt: off
         return np.array([
-            [ Delta([0]) / r,      Delta([1]) / r],
-            [-Delta([1]) / r**2,    Delta([0]) / r**2],
+            [ Delta[0] / r,      Delta[1] / r],
+            [-Delta[1] / r**2,   Delta[0] / r**2],
             ])
+        # fmt: on
 
-    def Hw(self, xv, jf):
-        """
+    def Hw(self, x, landmark):
+        r"""
         Jacobian dh/dw
-        %
-        # J = self.Hw(X, K) is the Jacobian dh/dw (2x2) at the vehicle
-        # state X (3x1) for map landmark K.
-        %
-        # See also RangeBearingSensor.h.
+
+        :param x: vehicle state :math:`(x, y, \theta)`
+        :type x: array_like(3)
+        :param arg: landmark id or coordinate
+        :type arg: int or array_like(2)
+        :return: Jacobian matrix
+        :rtype: ndarray(2,2)
+
+        Compute the Jacobian of the observation function with respect
+        to sensor noise :math:`\partial h/\partial w`
+
+        - ``sensor.Hw(x, id)`` is Jacobian for landmark ``id``
+        - ``sensor.Hw(x, p)`` is Jacobian for landmark with coordinates ``p``
+
+        .. note:: ``x`` and ``landmark`` are not used to compute this.
+        
+        :seealso: :meth:`h` :meth:`Hx` :meth:`Hp`
         """
         return np.eye(2)
 
-    def g(self, xv, z):
+    def g(self, x, z):
+        r"""
+        Landmark position from sensor observation
+
+        :param x: vehicle state :math:`(x, y, \theta)`
+        :type x: array_like(3)
+        :param z: landmark observation :math:`(r, \beta)`
+        :type z: array_like(2)
+        :return: landmark position :math:`(x, y)`
+        :rtype: ndarray(2)
+
+        Compute the world coordinate  of a landmark given
+        the observation ``z`` from a vehicle state with ``x``.
+
+        :seealso: :meth:`h` :meth:`Gx` :meth:`Gz`
         """
-        Compute landmark location
-        %
-        # P = self.g(X, Z) is the world coordinate (2x1) of a feature given
-        # the observation Z (1x2) from a vehicle state with X (3x1).
-        %
-        # See also RangeBearingSensor.Gx, RangeBearingSensor.Gz.
-        """
+
+
         range = z[0]
-        bearing = z[1] + xv[2]  # bearing angle in vehicle frame
+        bearing = z[1] + x[2]  # bearing angle in vehicle frame
 
+        # fmt: off
         return np.r_[
-            xv[0] + range * cos(bearing),
-            xv[1] + range * sin(bearing)
+            x[0] + range * cos(bearing),
+            x[1] + range * sin(bearing)
                 ]
+        # fmt: on
 
-    def Gx(self, xv, z):
-        """RangeBearingSensor.Gxv Jacobian dg/dx
-        %
-        # J = self.Gx(X, Z) is the Jacobian dg/dx (2x3) at the vehicle state X (3x1) for
-        # sensor observation Z (2x1).
-        %
-        # See also RangeBearingSensor.g.
+    def Gx(self, x, z):
+        r"""
+        Jacobian dg/dx
+
+        :param x: vehicle state :math:`(x, y, \theta)`
+        :type x: array_like(3)
+        :param z: landmark observation :math:`(r, \beta)`
+        :type z: array_like(2)
+        :return: Jacobian matrix
+        :rtype: ndarray(2,3)
+
+        Compute the Jacobian of the landmark position function with respect
+        to landmark position :math:`\partial g/\partial x`
+
+        :seealso: :meth:`g`
         """
-        theta = xv[2]
-        r = z[0]
-        bearing = z[1]
+        theta = x[2]
+        r, bearing = z
 
+        # fmt: off
         return np.array([
             [1,   0,   -r*sin(theta + bearing)],
             [0,   1,    r*cos(theta + bearing)],
                 ])
+        # fmt: on
 
-    def Gz(self, xv, z):
-        """
+    def Gz(self, x, z):
+        r"""
         Jacobian dg/dz
-        %
-        # J = self.Gz(X, Z) is the Jacobian dg/dz (2x2) at the vehicle state X (3x1) for
-        # sensor observation Z (2x1).
-        %
-        # See also RangeBearingSensor.g.
+
+        :param x: vehicle state :math:`(x, y, \theta)`
+        :type x: array_like(3)
+        :param z: landmark observation :math:`(r, \beta)`
+        :type z: array_like(2)
+        :return: Jacobian matrix
+        :rtype: ndarray(2,2)
+
+        Compute the Jacobian of the landmark position function with respect
+        to sensor observation :math:`\partial g/\partial z`
+
+        :seealso: :meth:`g`
         """
-        theta = xv[2]
-        r = z[0]
-        bearing = z[1]
+        theta = x[2]
+        r, bearing = z
+        # fmt: off
         return np.array([
-            [cos(theta + bearing),   -r*sin(theta + bearing)],
-            [sin(theta + bearing),    r*cos(theta + bearing)],
+            [cos(theta + bearing),   -r * sin(theta + bearing)],
+            [sin(theta + bearing),    r * cos(theta + bearing)],
             ])
-
-    def __str__(self):
-        s = super().__str__()
-        s += f"\n  W = {self._W.tolist()}\n"
-
-        s += f"  sampled every {self._every} samples\n"
-        if self._r_range is not None:
-            s += f"  range: {self._r_range[0]} to {self._r_range[0]}\n"
-        if self._theta_range is not None:
-            s += f"  angle: {self._theta_range[0]} to {self._theta_range[0]}\n"
-        return s.rstrip()
+        # fmt: on
 
 if __name__ == "__main__":
     
-    pass
+    from roboticstoolbox import Bicycle, LandmarkMap, RangeBearingSensor
+    from math import pi
+    robot = Bicycle()
+    map = LandmarkMap(20)
+    sensor = RangeBearingSensor(robot, map, range=(0.5, 20), angle=pi/4)
+    print(sensor.reading())
+    print(sensor.visible())
+    print(sensor.isvisible(3))
+    print(sensor.isvisible(4))
     

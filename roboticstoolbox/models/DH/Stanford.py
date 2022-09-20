@@ -46,13 +46,13 @@ class Stanford(DHRobot):
 
     def __init__(self):
 
-        deg = pi/180
+        deg = pi / 180
         inch = 0.0254
 
         L0 = RevoluteDH(
-            d=0.412,      # link length (Dennavit-Hartenberg notation)
-            a=0,          # link offset (Dennavit-Hartenberg notation)
-            alpha=-pi/2,  # link twist (Dennavit-Hartenberg notation)
+            d=0.412,  # link length (Dennavit-Hartenberg notation)
+            a=0,  # link offset (Dennavit-Hartenberg notation)
+            alpha=-pi / 2,  # link twist (Dennavit-Hartenberg notation)
             # inertia tensor of link with respect to
             # center of mass I = [L_xx, L_yy, L_zz,
             # L_xy, L_yz, L_xz]
@@ -60,45 +60,71 @@ class Stanford(DHRobot):
             # distance of ith origin to center of mass [x,y,z]
             # in link reference frame
             r=[0, 0.0175, -0.1105],
-            m=9.29,       # mass of link
-            Jm=0.953,     # actuator inertia
-            G=1,          # gear ratio
-            qlim=[-170*deg, 170*deg])    # minimum and maximum joint angle
+            m=9.29,  # mass of link
+            Jm=0.953,  # actuator inertia
+            G=1,  # gear ratio
+            qlim=[-170 * deg, 170 * deg],
+        )  # minimum and maximum joint angle
 
         L1 = RevoluteDH(
-            d=0.154, a=0., alpha=pi/2,
+            d=0.154,
+            a=0.0,
+            alpha=pi / 2,
             I=[0.108, 0.018, 0.100, 0, 0, 0],
-            r=[0, -1.054,  0],
-            m=5.01, Jm=2.193, G=1,
-            qlim=[-170*deg, 170*deg])
+            r=[0, -1.054, 0],
+            m=5.01,
+            Jm=2.193,
+            G=1,
+            qlim=[-170 * deg, 170 * deg],
+        )
 
         L2 = PrismaticDH(
-            theta=-pi/2, a=0.0203, alpha=0,
+            theta=-pi / 2,
+            a=0.0203,
+            alpha=0,
             I=[2.51, 2.51, 0.006, 0, 0, 0],
             r=[0, 0, -6.447],
-            m=4.25, Jm=0.782, G=1,
-            qlim=[12*inch, (12+38)*inch])
+            m=4.25,
+            Jm=0.782,
+            G=1,
+            qlim=[12 * inch, (12 + 38) * inch],
+        )
 
         L3 = RevoluteDH(
-            d=0, a=0, alpha=-pi/2,
+            d=0,
+            a=0,
+            alpha=-pi / 2,
             I=[0.002, 0.001, 0.001, 0, 0, 0],
             r=[0, 0.092, -0.054],
-            m=1.08, Jm=0.106, G=1,
-            qlim=[-170*deg, 170*deg])
+            m=1.08,
+            Jm=0.106,
+            G=1,
+            qlim=[-170 * deg, 170 * deg],
+        )
 
         L4 = RevoluteDH(
-            d=0, a=0, alpha=pi/2,
+            d=0,
+            a=0,
+            alpha=pi / 2,
             I=[0.003, 0.0004, 0, 0, 0, 0],
-            r=[0, 0.566, 0.003], m=0.630,
-            Jm=0.097, G=1,
-            qlim=[-90*deg, 90*deg])
+            r=[0, 0.566, 0.003],
+            m=0.630,
+            Jm=0.097,
+            G=1,
+            qlim=[-90 * deg, 90 * deg],
+        )
 
         L5 = RevoluteDH(
-            d=0, a=0, alpha=0,
+            d=0,
+            a=0,
+            alpha=0,
             I=[0.013, 0.013, 0.0003, 0, 0, 0],
-            r=[0, 0, 1.554], m=0.51, Jm=0.020,
+            r=[0, 0, 1.554],
+            m=0.51,
+            Jm=0.020,
             G=1,
-            qlim=[-170*deg, 170*deg])
+            qlim=[-170 * deg, 170 * deg],
+        )
 
         L = [L0, L1, L2, L3, L4, L5]
 
@@ -106,13 +132,17 @@ class Stanford(DHRobot):
             L,
             name="Stanford arm",
             manufacturer="Victor Scheinman",
-            keywords=('dynamics',))
+            keywords=("dynamics",),
+        )
 
-        # zero angles, L shaped pose
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0]))
+        self.qr = np.zeros(6)
+        self.qz = np.zeros(6)
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
-if __name__ == '__main__':  # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     stanford = Stanford()
     print(stanford)

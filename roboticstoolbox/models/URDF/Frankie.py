@@ -32,12 +32,17 @@ class Frankie(ERobot):
 
     def __init__(self):
 
-        links, name = self.URDF_read(
+        links, name, urdf_string, urdf_filepath = self.URDF_read(
             "franka_description/robots/frankie_arm_hand.urdf.xacro"
         )
 
         super().__init__(
-            links, name=name, manufacturer="Franka Emika", gripper_links=links[11]
+            links,
+            name=name,
+            manufacturer="Franka Emika",
+            gripper_links=links[12],
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
         )
 
         self.grippers[0].tool = SE3(0, 0, 0.1034)
@@ -46,11 +51,11 @@ class Frankie(ERobot):
             [4.0, 4.0, 2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0]
         )
 
-        self.addconfiguration("qz", np.array([0, 0, 0, 0, 0, 0, 0, 0, 0]))
+        self.qr = np.array([0, 0, 0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        self.qz = np.zeros(9)
 
-        self.addconfiguration(
-            "qr", np.array([0, 0, 0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
-        )
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
 if __name__ == "__main__":  # pragma nocover

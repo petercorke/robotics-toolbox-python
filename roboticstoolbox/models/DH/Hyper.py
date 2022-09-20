@@ -7,7 +7,6 @@
 # from math import pi
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
-from spatialmath import SE3
 
 
 class Hyper(DHRobot):
@@ -23,7 +22,7 @@ class Hyper(DHRobot):
 
     - ``Hyper()`` is an object which describes the kinematics of a serial link
       manipulator with 10 joints which moves in the xy-plane, using standard DH
-      conventions. At zero angles it forms a straight line along the x-axis. 
+      conventions. At zero angles it forms a straight line along the x-axis.
 
     - ``Hyper(N)`` as above, but models a robot with ``N`` joints.
 
@@ -37,11 +36,11 @@ class Hyper(DHRobot):
 
     - qz, zero joint angle configuration
 
-    :References: 
-    
+    :References:
+
       - "A divide and conquer articulated-body algorithm for parallel O(log(n))
       calculation of rigid body dynamics, Part 2",
-      Int. J. Robotics Research, 18(9), pp 876-892. 
+      Int. J. Robotics Research, 18(9), pp 876-892.
 
     :seealso: :func:`Coil`, :func:`Ball`
 
@@ -52,10 +51,12 @@ class Hyper(DHRobot):
 
         if symbolic:
             import spatialmath.base.symbolic as sym
+
             zero = sym.zero()
             pi = sym.pi()
         else:
             from math import pi
+
             zero = 0.0
 
         if a is None:
@@ -66,18 +67,19 @@ class Hyper(DHRobot):
             links.append(RevoluteDH(a=a, alpha=zero))
 
         super().__init__(
-            links,
-            name="Hyper" + str(N),
-            keywords=('symbolic',),
-            symbolic=symbolic
+            links, name="Hyper" + str(N), keywords=("symbolic",), symbolic=symbolic
         )
 
-        # zero angles, straight
-        self.addconfiguration("qz", np.zeros((N,)))
+        self.qr = np.array(N)
+        self.qz = np.zeros(N)
 
-if __name__ == '__main__':    # pragma nocover
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
+
+
+if __name__ == "__main__":  # pragma nocover
 
     hyper = Hyper(N=10, symbolic=False)
     print(hyper)
 
-    #print(hyper.fkine(hyper.qz))
+    # print(hyper.fkine(hyper.qz))

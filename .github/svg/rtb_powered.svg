@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="185" height="20" role="img"
+    aria-label="powered by robotics toolbox">
+    <title>powered by robotics toolbox</title>
+
+    <clipPath id="r">
+        <rect width="185" height="20" rx="3" fill="#fff" />
+    </clipPath>
+
+    <g clip-path="url(#r)">
+        <rect width="76" height="20" fill="#555" />
+        <rect x="76" width="109" height="20" fill="#86c440" />
+    </g>
+
+    <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif"
+        text-rendering="geometricPrecision" font-size="110">
+        <text x="385" y="140" transform="scale(.1)" fill="#fff" textLength="630">powered by</text>
+        <text x="1220" y="140" transform="scale(.1)" fill="#222" textLength="830">robotics toolbox</text>
+    </g>
+
+    <g fill="#fff">
+        <path fill="none" stroke="#222" stroke-linecap="round" stroke-width="1.6px" transform="translate(-14.5 0)"
+            d="M192.32,5.94l-3.77-2-2,1-1.88,1,2,4.71" />
+        <path fill="none" stroke="#222" stroke-linecap="round" stroke-width="1.6px" stroke-linejoin="round"
+            transform="translate(-14.5 0)" d="M186.67,10.78h3.14l1,1.75h-4.58l-.89,1.75h6.36l.9,1.75h-8.16" />
+        <path fill="#222" transform="translate(-14.5 0)"
+            d="M193.18,8.48a2.09,2.09,0,0,0,.59-1.5,1.79,1.79,0,0,0-1.61-1.9A1.74,1.74,0,0,0,190.6,7a2.14,2.14,0,0,0,.59,1.47l.7-1.32a.36.36,0,0,1,.65,0Z" />
+    </g>
+
+
+</svg>

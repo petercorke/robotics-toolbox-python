@@ -9,17 +9,15 @@ import numpy.testing as nt
 
 
 class TestModels(unittest.TestCase):
-
     def test_list(self):
         rp.models.list()
-        rp.models.list('UR', 6)
-        rp.models.list(mtype='DH')
+        rp.models.list("UR", 6)
+        rp.models.list(type="DH")
 
     def test_puma(self):
         puma = rp.models.DH.Puma560()
         puma.qr
         puma.qz
-        puma.qs
         puma.qn
         puma = rp.models.DH.Puma560(symbolic=True)
 
@@ -27,8 +25,6 @@ class TestModels(unittest.TestCase):
         puma = rp.models.Puma560()
         puma.qr
         puma.qz
-        puma.qs
-        puma.qn
 
     def test_frankie(self):
         frankie = rp.models.ETS.Frankie()
@@ -108,7 +104,6 @@ class TestModels(unittest.TestCase):
     def test_ball(self):
         r = rp.models.DH.Ball()
         r.qz
-        r.q1
 
     def test_stanford(self):
         r = rp.models.DH.Stanford()
@@ -125,8 +120,6 @@ class TestModels(unittest.TestCase):
     def test_orion5(self):
         r = rp.models.DH.Orion5()
         r.qz
-        r.qv
-        r.qh
 
     def test_lwr4(self):
         r = rp.models.DH.LWR4()
@@ -147,6 +140,7 @@ class TestModels(unittest.TestCase):
     def test_pr2(self):
         rp.models.PR2()
 
-if __name__ == '__main__':  # pragma nocover
+
+if __name__ == "__main__":  # pragma nocover
     unittest.main()
     # pytest.main(['tests/test_SerialLink.py'])

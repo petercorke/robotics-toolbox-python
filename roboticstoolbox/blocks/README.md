@@ -6,9 +6,6 @@ diagram simulation package.
 If you are familiar with Robotics Toolbox for MATLAB, this is somewhat like
 the `roblocks` library.
 
-To access these blocks from `bdsim` you need to put this folder onto your
-`BDSIMPATH` environment variable.
-
 # Example
 
 This is Figure 8.5 from the book [Robotics, Vision & Control, 2nd edition](https://petercorke.com/rvc/home/)

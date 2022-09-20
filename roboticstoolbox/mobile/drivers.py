@@ -1,7 +1,7 @@
 """
 Python Vehicle
-@Author: Kristian Gibson
-@Author: Peter Corke
+@Author: Peter Corke, original MATLAB code and Python version
+@Author: Kristian Gibson, initial MATLAB port
 """
 from abc import ABC, abstractmethod
 import warnings
@@ -17,76 +17,70 @@ from spatialmath import SE2, base
 import roboticstoolbox as rtb
 
 
-class VehicleDriver(ABC):
+class VehicleDriverBase(ABC):
+    """
+    Abstract Vehicle driver class
+
+    Abtract class that can drive a mobile robot.
+
+    :seealso: :class:`RandomPath`
+    """
 
     @abstractmethod
     def demand(self):
+        """
+        Compute speed and heading
+
+        :return: speed and steering for :class:`VehicleBase`
+
+        When an instance of a :class:`VehicleDriverBase` class is attached as 
+        the control for an instance of a :class:`VehicleBase` class, this method
+        is called at each time step to provide the control input.
+
+        Has access to the vehicle and its state through the :meth:`vehicle`
+        property.
+        """
         pass
 
     @abstractmethod
     def init(self):
+        """
+        Initialize driving agent
+
+        Called at the start of a simulation run.  Used to initialize state
+        including random number generator state.
+        """
         pass
 
-    @abstractmethod
+    @property
     def vehicle(self):
-        pass    
+        """
+        Set/get the vehicle under control
 
+        :getter: return :class:`VehicleBase` instance
+        :setter: set :class:`VehicleBase` instance
+
+        .. note:: The setter is invoked by ``vehicle.control = driver``
+        """
+        return self._veh
+
+    @vehicle.setter
+    def vehicle(self, v):
+
+        self._veh = v
+
+    def __repr__(self):
+        return str(self)
 # ========================================================================= #
 
-class RandomPath(VehicleDriver):
-    """
-        RandomPath Vehicle driver class
+class RandomPath(VehicleDriverBase):
 
-    Create a "driver" object capable of steering a Vehicle subclass object through random 
-    waypoints within a rectangular region and at constant speed.
-
-    The driver object is connected to a Vehicle object by the latter's
-    add_driver() method.  The driver's demand() method is invoked on every
-    call to the Vehicle's step() method.
-
-    Methods::
-    init       reset the random number generator
-    demand     speed and steer angle to next waypoint
-    display    display the state and parameters in human readable form
-    char       convert to string
-    plot      
-    Properties::
-    goal          current goal/waypoint coordinate
-    veh           the Vehicle object being controlled
-    dim           dimensions of the work space (2x1) [m]
-    speed         speed of travel [m/s]
-    dthresh       proximity to waypoint at which next is chosen [m]
-
-    Example::
-
-    veh = Bicycle(V);
-    veh.add_driver( RandomPath(20, 2) );
-
-    Notes::
-    - It is possible in some cases for the vehicle to move outside the desired
-    region, for instance if moving to a waypoint near the edge, the limited
-    turning circle may cause the vehicle to temporarily move outside.
-    - The vehicle chooses a new waypoint when it is closer than property
-    closeenough to the current waypoint.
-    - Uses its own random number stream so as to not influence the performance
-    of other randomized algorithms such as path planning.
-
-    Reference::
-
-    Robotics, Vision & Control, Chap 6,
-    Peter Corke,
-    Springer 2011
-
-    See also Vehicle, Bicycle, Unicycle.
-
-    """
-
-    def __init__(self, dim, speed=1, dthresh=0.05, seed=None, headinggain=1, goalmarkerstyle=None):
+    def __init__(self, workspace, speed=1, dthresh=0.05, seed=0, headinggain=0.3, goalmarkerstyle=None):
         """
         Driving agent for random path
 
-        :param dim: dimension of workspace, see spatialmath.plotvol2
-        :type dim: scalar, array_like(2), array_like(4)
+        :param workspace: dimension of workspace, see :func:`spatialmath.base.exand_dims`
+        :type workspace: scalar, array_like(2), array_like(4)
         :param speed: forward speed, defaults to 1
         :type speed: float, optional
         :param dthresh: distance threshold, defaults to 0.05
@@ -100,49 +94,66 @@ class RandomPath(VehicleDriver):
         The driver is connected to the vehicle by::
 
             Vehicle(control=driver)
-            
+        
+        or::
+
             veh = Vehicle()
             veh.control = driver
         
         The waypoints are positioned inside a rectangular region defined by
-        the vehicle that is controlled.
-          - D scalar; X: -D to +D, Y: -D to +D
-              - D (1x2); X: -D(1) to +D(1), Y: -D(2) to +D(2)
-        %     - D (1x4); X: D(1) to D(2), Y: D(3) to D(4)
-        
-        % Options::
-        % 'speed',S      Speed along path (default 1m/s).
-        % 'dthresh',D    Distance from goal at which next goal is chosen.
-        %
-        % See also Vehicle.
-        :seealso: :func:`spatialmath.plotvol2`
+        the vehicle that is specified by  (see ``plotvol2``):
+
+        ==============  =======  =======
+        ``workspace``   x-range  y-range
+        ==============  =======  =======
+        A (scalar)      -A:A     -A:A
+        [A, B]           A:B      A:B
+        [A, B, C, D]     A:B      C:D
+        ==============  =======  =======
+
+
+        .. note::
+            - It is possible in some cases for the vehicle to move outside the desired
+              region, for instance if moving to a waypoint near the edge, the limited
+              turning circle may cause the vehicle to temporarily move outside.
+            - The vehicle chooses a new waypoint when it is closer than ``dthresh``
+              to the current waypoint.
+            - Uses its own random number generator so as to not influence the performance
+              of other randomized algorithms such as path planning.
+
+        :seealso: :class:`Bicycle` :class:`Unicycle` :func:`~spatialmath.base.graphics.plotvol2`
         """
         
         # TODO options to specify region, maybe accept a Map object?
         
+        if hasattr(workspace, 'workspace'):
+            # workspace can be defined by an object with a workspace attribute
+            self._workspace = base.expand_dims(workspace.workspace)
+        else:
+            self._workspace = base.expand_dims(workspace)
 
-        self._dim = base.expand_dims(dim)
-        
         self._speed = speed
-        self._dthresh = dthresh * np.diff(self._dim[0:2])
+        self._dthresh = dthresh * np.diff(self._workspace[0:2])
         self._goal_marker = None
         if goalmarkerstyle is None:
             self._goal_marker_style = {
                 'marker': 'D',
                 'markersize': 6, 
                 'color': 'r',
+                'linestyle': 'None',
                 }
         else:
             self._goal_marker_style = goalmarkerstyle
         self._headinggain = headinggain
         
         self._d_prev = np.inf
-        self._rand = np.random.default_rng(seed)
+        self._random = np.random.default_rng(seed)
+        self._seed = seed
         self.verbose = True
         self._goal = None
         self._dthresh = dthresh * max(
-                self._dim[1] - self._dim[0], 
-                self._dim[3] - self._dim[2]
+                self._workspace[1] - self._workspace[0], 
+                self._workspace[3] - self._workspace[2]
                                     )
 
         self._veh = None
@@ -154,43 +165,43 @@ class RandomPath(VehicleDriver):
         % a compact human readable format. """
 
         s = 'RandomPath driver object\n'
-        s += f"  X {self._dim[0]} : {self._dim[1]}; Y {self._dim[0]} : {self._dim[1]}, dthresh={self._dthresh}\n"
+        s += f"  X {self._workspace[0]} : {self._workspace[1]}; Y {self._workspace[0]} : {self._workspace[1]}, dthresh={self._dthresh}\n"
         s += f"  current goal={self._goal}"
         return s
 
     @property
-    def vehicle(self):
-        return self._veh
-
-    @vehicle.setter
-    def vehicle(self, v):
+    def workspace(self):
         """
-        Connect to the vehicle under control
+        Size of robot driving workspace
 
-        :param v: [description]
-        :type v: [type]
+        :return: workspace bounds [xmin, xmax, ymin, ymax]
+        :rtype: ndarray(4)
+
+        Returns the bounds of the workspace as specified by constructor
+        option ``workspace``
         """
-        self._veh = v
+        return self._workspace
 
     def init(self, ax=None):
         """
         Initialize random path driving agent
-        
-        %RandomPath.init Reset random number generator
-        %
-        % R.init() resets the random number generator used to create the waypoints.
-        % This enables the sequence of random waypoints to be repeated.
-        %
-        % Notes::
-        % - Called by Vehicle.run.
-        %
-        % See also RANDSTREAM.
+
+        :param ax: axes in which to draw via points, defaults to None
+        :type ax: Axes, optional
+
+        Called at the start of a simulation run.  Ensures that the 
+        random number generated is reseeded to ensure that 
+        the sequence of random waypoints is repeatable.
         """
+
+        if self._seed is not None:
+            self._random = np.random.default_rng(self._seed)
+            
         self._goal = None
         # delete(driver.h_goal);   % delete the goal
         # driver.h_goal = [];
         if ax is not None:
-            self._goal_marker = plt.plot(np.nan, np.nan, **self._goal_marker_style)[0]
+            self._goal_marker = plt.plot(np.nan, np.nan, **self._goal_marker_style, label='random waypoint')[0]
 
     def demand(self):
         """
@@ -207,11 +218,11 @@ class RandomPath(VehicleDriver):
 
         # if nearly at goal point, choose the next one
         d = np.linalg.norm(self._veh._x[0:2] - self._goal)
-        if d < self._dthresh:
+        if d < self._dthresh or abs(d - self._d_prev) < 1e-3:
             self._new_goal()
         # elif d > 2 * self._d_prev:
         #     self.choose_goal()
-        # self._d_prev = d
+        self._d_prev = d
 
         speed = self._speed
 
@@ -229,11 +240,11 @@ class RandomPath(VehicleDriver):
         
         # choose a uniform random goal within inner 80% of driving area
         while True:
-            r = self._rand.uniform(0.1, 0.9)
-            gx = self._dim[0:2] @ np.r_[r, 1-r]
+            r = self._random.uniform(0.1, 0.9)
+            gx = self._workspace[0:2] @ np.r_[r, 1-r]
 
-            r = self._rand.uniform(0.1, 0.9)
-            gy = self._dim[2:4] @ np.r_[r, 1-r]
+            r = self._random.uniform(0.1, 0.9)
+            gy = self._workspace[2:4] @ np.r_[r, 1-r]
 
             self._goal = np.r_[gx, gy]
 
@@ -251,7 +262,7 @@ class RandomPath(VehicleDriver):
 
 # ========================================================================= #
 
-class PurePursuit(VehicleDriver):
+class PurePursuit(VehicleDriverBase):
 
     def __init__(self, speed=1, radius=1):
         pass

@@ -3,24 +3,57 @@
 import numpy as np
 from spatialmath import SE3, base
 import math
+from typing import Union
+
+ArrayLike = Union[list, np.ndarray, tuple, set]
 
 
-def p_servo(wTe, wTep, gain=2, threshold=0.1):
-    '''
+def angle_axis(T, Td):
+    e = np.empty(6)
+    e[:3] = Td[:3, -1] - T[:3, -1]
+    R = Td[:3, :3] @ T[:3, :3].T
+    li = np.array([R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]])
+
+    if base.iszerovec(li):
+        # diagonal matrix case
+        if np.trace(R) > 0:
+            # (1,1,1) case
+            a = np.zeros((3,))
+        else:
+            a = np.pi / 2 * (np.diag(R) + 1)
+    else:
+        # non-diagonal matrix case
+        ln = base.norm(li)
+        a = math.atan2(ln, np.trace(R) - 1) * li / ln
+
+    e[3:] = a
+
+    return e
+
+
+def p_servo(
+    wTe, wTep, gain: Union[float, ArrayLike] = 1.0, threshold=0.1, method="rpy"
+):
+    """
     Position-based servoing.
 
     Returns the end-effector velocity which will cause the robot to approach
     the desired pose.
 
     :param wTe: The current pose of the end-effecor in the base frame.
-    :type wTe: SE3
+    :type wTe: SE3 or ndarray
     :param wTep: The desired pose of the end-effecor in the base frame.
-    :type wTep: SE3
-    :param gain: The gain for the controller
-    :type gain: float
+    :type wTep: SE3 or ndarray
+    :param gain: The gain for the controller. Can be vector corresponding to each
+        axis, or scalar corresponding to all axes.
+    :type gain: float, or array-like
     :param threshold: The threshold or tolerance of the final error between
         the robot's pose and desired pose
     :type threshold: float
+    :param method: The method used to calculate the error. Default is 'rpy' -
+        error in the end-effector frame. 'angle-axis' - error in the base frame
+        using angle-axis method.
+    :type method: string: 'rpy' or 'angle-axis'
 
     :returns v: The velocity of the end-effecotr which will casue the robot
         to approach wTep
@@ -29,52 +62,33 @@ def p_servo(wTe, wTep, gain=2, threshold=0.1):
         pose
     :rtype arrived: bool
 
-    '''
+    """
 
-    if not isinstance(wTe, SE3):
-        wTe = SE3(wTe)
+    if isinstance(wTe, SE3):
+        wTe = wTe.A
 
-    if not isinstance(wTep, SE3):
-        wTep = SE3(wTep)
+    if isinstance(wTep, SE3):
+        wTep = wTep.A
 
-    # Pose difference
-    eTep = wTe.inv() * wTep
+    if method == "rpy":
+        # Pose difference
+        eTep = np.linalg.inv(wTe) @ wTep
+        e = np.empty(6)
 
-    # Translational velocity error
-    ev = eTep.t
+        # Translational error
+        e[:3] = eTep[:3, -1]
 
-    # Angular velocity error
-    ew = eTep.rpy('rad')
-
-    # Form error vector
-    e = np.r_[ev, ew]
-
-    # Desired end-effector velocity
-    v = gain * e
-
-    if np.sum(np.abs(e)) < threshold:
-        arrived = True
+        # Angular error
+        e[3:] = base.tr2rpy(eTep, unit="rad", order="zyx", check=False)
     else:
-        arrived = False
+        e = angle_axis(wTe, wTep)
+
+    if base.isscalar(gain):
+        k = gain * np.eye(6)
+    else:
+        k = np.diag(gain)
+
+    v = k @ e
+    arrived = True if np.sum(np.abs(e)) < threshold else False
 
     return v, arrived
-
-
-# def _angle_axis(T, Td):
-#     d = base.transl(Td) - base.transl(T)
-#     R = base.t2r(Td) @ base.t2r(T).T
-#     li = np.r_[R[2, 1] - R[1, 2], R[0, 2] - R[2, 0], R[1, 0] - R[0, 1]]
-
-#     if base.iszerovec(li):
-#         # diagonal matrix case
-#         if np.trace(R) > 0:
-#             # (1,1,1) case
-#             a = np.zeros((3,))
-#         else:
-#             a = np.pi / 2 * (np.diag(R) + 1)
-#     else:
-#         # non-diagonal matrix case
-#         ln = base.norm(li)
-#         a = math.atan2(ln, np.trace(R) - 1) * li / ln
-
-#     return np.r_[d, a]

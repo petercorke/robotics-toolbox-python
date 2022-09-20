@@ -29,23 +29,26 @@ class UR10(ERobot):
 
     def __init__(self):
 
-        links, name = self.URDF_read(
+        links, name, urdf_string, urdf_filepath = self.URDF_read(
             "ur_description/urdf/ur10_joint_limited_robot.urdf.xacro"
         )
 
         super().__init__(
-                links,
-                name=name.upper(),
-                manufacturer='Universal Robotics'
-            )
+            links,
+            name=name.upper(),
+            manufacturer="Universal Robotics",
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
+        )
 
-        self.addconfiguration(
-            "qz", np.array([0, 0, 0, 0, 0, 0]))
-        self.addconfiguration(
-            "qr", np.array([np.pi, 0, 0, 0, np.pi/2, 0]))
+        self.qr = np.array([np.pi, 0, 0, 0, np.pi / 2, 0])
+        self.qz = np.zeros(6)
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     robot = UR10()
     print(robot)

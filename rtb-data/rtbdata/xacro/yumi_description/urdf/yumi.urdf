@@ -56,14 +56,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/body.stl"/>
       </geometry>
-      <material name="Light_Grey"/>
+      <material name="Light_Grey">
+        <color rgba="0.8 0.8 0.8 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/body.stl"/>
       </geometry>
-      <material name="Light_Grey"/>
+      <material name="Light_Grey">
+        <color rgba="0.8 0.8 0.8 1.0"/>
+      </material>
     </collision>
   </link>
   <!--///////////////////////////////////// RIGHT ARM ////////////////////////////////  -->
@@ -87,14 +91,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_1.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_1.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between link_1_r and link_2_r -->
@@ -117,14 +125,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_2.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_2.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between link_2_r and link_3_r -->
@@ -147,14 +159,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_3.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_3.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between link_3_r and link_4_r -->
@@ -177,14 +193,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_4.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_4.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between link_4_r and link_5_r -->
@@ -207,14 +227,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_5.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_5.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between link_5_r and link_6_r -->
@@ -237,14 +261,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_6.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_6.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between link_6_r and link_7_r -->
@@ -267,14 +295,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_7.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_7.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!--///////////////////////////////////// LEFT ARM ////////////////////////////////  -->
@@ -298,14 +330,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_1.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_1.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between link_1_l and link_2_l -->
@@ -328,14 +364,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_2.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_2.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between link_2_l and link_3_l -->
@@ -358,14 +398,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_3.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_3.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between link_3_l and link_4_l -->
@@ -388,14 +432,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_4.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_4.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between link_4_l and link_5_l -->
@@ -418,14 +466,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_5.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_5.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between link_5_l and link_6_l -->
@@ -448,14 +500,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_6.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_6.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between link_6_l and link_7_l -->
@@ -478,14 +534,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/link_7.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/coarse/link_7.stl"/>
       </geometry>
-      <material name="Grey"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- Gazebo reference frame -->
@@ -651,14 +711,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/gripper/base.stl"/>
       </geometry>
-      <material name="Light_Grey"/>
+      <material name="Light_Grey">
+        <color rgba="0.8 0.8 0.8 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/gripper/coarse/base.stl"/>
       </geometry>
-      <material name="Light_Grey"/>
+      <material name="Light_Grey">
+        <color rgba="0.8 0.8 0.8 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between base and right finger -->
@@ -681,14 +745,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/gripper/finger.stl"/>
       </geometry>
-      <material name="Blue"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/gripper/coarse/finger.stl"/>
       </geometry>
-      <material name="Blue"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between base and left finger -->
@@ -712,14 +780,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/gripper/finger.stl"/>
       </geometry>
-      <material name="Blue"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/gripper/coarse/finger.stl"/>
       </geometry>
-      <material name="Blue"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- Plugin for the mimic o/c joint - AFAIK, that shouldn't be necessary any more starting with Gazebo 3.0 -->
@@ -763,14 +835,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/gripper/base.stl"/>
       </geometry>
-      <material name="Light_Grey"/>
+      <material name="Light_Grey">
+        <color rgba="0.8 0.8 0.8 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/gripper/coarse/base.stl"/>
       </geometry>
-      <material name="Light_Grey"/>
+      <material name="Light_Grey">
+        <color rgba="0.8 0.8 0.8 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between base and right finger -->
@@ -793,14 +869,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/gripper/finger.stl"/>
       </geometry>
-      <material name="Blue"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/gripper/coarse/finger.stl"/>
       </geometry>
-      <material name="Blue"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- joint between base and left finger -->
@@ -824,14 +904,18 @@
       <geometry>
         <mesh filename="package://yumi_description/meshes/gripper/finger.stl"/>
       </geometry>
-      <material name="Blue"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://yumi_description/meshes/gripper/coarse/finger.stl"/>
       </geometry>
-      <material name="Blue"/>
+      <material name="Grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
     </collision>
   </link>
   <!-- Plugin for the mimic o/c joint - AFAIK, that shouldn't be necessary any more starting with Gazebo 3.0 -->

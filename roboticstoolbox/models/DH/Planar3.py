@@ -5,6 +5,7 @@
 """
 
 from roboticstoolbox import DHRobot, RevoluteDH
+import numpy as np
 
 
 class Planar3(DHRobot):
@@ -34,17 +35,18 @@ class Planar3(DHRobot):
 
     def __init__(self):
 
-        L = [
-                RevoluteDH(a=1),
-                RevoluteDH(a=1),
-                RevoluteDH(a=1)
-            ]
+        L = [RevoluteDH(a=1), RevoluteDH(a=1), RevoluteDH(a=1)]
 
-        super().__init__(L, name='Planar 3 link', keywords=('planar',))
-        self.addconfiguration("qz", [0, 0, 0])
+        super().__init__(L, name="Planar 3 link", keywords=("planar",))
+
+        self.qr = np.zeros(3)
+        self.qz = np.zeros(3)
+
+        self.addconfiguration("qr", self.qr)
+        self.addconfiguration("qz", self.qz)
 
 
-if __name__ == '__main__':   # pragma nocover
+if __name__ == "__main__":  # pragma nocover
 
     robot = Planar3()
     print(robot)

@@ -84,7 +84,7 @@ class RobotPlot:
 
         if not self.drawn:
             self.init()
-            return
+            # return
 
         ## Update the robot links
 
@@ -103,7 +103,7 @@ class RobotPlot:
 
             self.links[i].set_xdata(points[:, 0])
             self.links[i].set_ydata(points[:, 1])
-            self.links[0].set_3d_properties(points[:, 2])
+            self.links[i].set_3d_properties(points[:, 2])
 
             # Update the shadow of the robot links
             if self.shadow:
@@ -182,10 +182,12 @@ class RobotPlot:
         self.drawn = True
 
         if self.env.limits is None:
-            limits = np.r_[-1, 1, -1, 1, -1, 1] * self.robot.reach * 1.5
-            self.ax.set_xlim3d([limits[0], limits[1]])
-            self.ax.set_ylim3d([limits[2], limits[3]])
-            self.ax.set_zlim3d([limits[4], limits[5]])
+            limits = np.r_[-1, 1, -1, 1, -1, 1] * self.robot.reach
+            # TODO: need to select between full autoscaling, user set bounds,
+            #   bounds from robot.reach.  Currently only 2 options
+            # self.ax.set_xlim3d([limits[0], limits[1]])
+            # self.ax.set_ylim3d([limits[2], limits[3]])
+            # self.ax.set_zlim3d([limits[4], limits[5]])
 
         self.segments = self.robot.segments()
 

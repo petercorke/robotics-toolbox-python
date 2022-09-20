@@ -1,12 +1,14 @@
 from typing import Type
 from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.tools import rtb_get_param
 from roboticstoolbox.robot.ERobot import ERobot2
 from ansitable import ANSITable, Column
+import inspect
 
 # import importlib
 
 
-def list(keywords=None, dof=None, mtype=None):
+def list(keywords=None, dof=None, type=None, border="thin"):
     """
     Display all robot models in summary form
 
@@ -14,11 +16,13 @@ def list(keywords=None, dof=None, mtype=None):
     :type keywords: tuple of str, optional
     :param dof: number of DoF to filter on, defaults to None
     :type dof: int, optional
+    :param type: model type "DH", "ETS", "URDF", defaults to all types
+    :type type: str, optional
 
     - ``list()`` displays a list of all models provided by the Toolbox.  It
       lists the name, manufacturer, model type, number of DoF, and keywords.
 
-    - ``list(mtype=MT)`` as above, but only displays models of type ``MT``
+    - ``list(type=MT)`` as above, but only displays models of type ``MT``
       where ``MT`` is one of "DH", "ETS" or "URDF".
 
     - ``list(keywords=KW)`` as above, but only displays models that have a
@@ -33,12 +37,15 @@ def list(keywords=None, dof=None, mtype=None):
       ``KW`` and have ``N`` degrees of freedom.
     """
 
-    import roboticstoolbox.models as m
+    import roboticstoolbox.models as models
 
     # module = importlib.import_module(
     #   '.' + os.path.splitext(file)[0], package='bdsim.blocks')
 
-    def make_table(border):
+    unicode = rtb_get_param("unicode")
+    if not unicode:
+        border = "ascii"
+    def make_table(border=None):
         table = ANSITable(
             Column("class", headalign="^", colalign="<"),
             Column("name", headalign="^", colalign="<"),
@@ -53,14 +60,15 @@ def list(keywords=None, dof=None, mtype=None):
             border=border,
         )
 
-        if mtype is not None:
-            categories = [mtype]
+        if type is not None:
+            categories = [type]
         else:
             categories = ["DH", "URDF", "ETS"]
         for category in categories:
-            group = m.__dict__[category]
+            # get all classes in this category
+            group = models.__dict__[category]
             for cls in group.__dict__.values():
-                if isinstance(cls, type) and issubclass(cls, Robot):
+                if inspect.isclass(cls) and issubclass(cls, Robot):
                     # we found a BaseRobot subclass, instantiate it
                     try:
                         robot = cls()
@@ -100,11 +108,11 @@ def list(keywords=None, dof=None, mtype=None):
 
         table.print()
 
-    # make_table(border='')
+    make_table(border=border)
 
 
 if __name__ == "__main__":  # pragma nocover
-    list()
-    list(keywords=("dynamics",))
+    list(border='ascii')
+    list(keywords=("dynamics",), border='thin')
     list(dof=6)
     list(keywords=("dynamics",), dof=6)

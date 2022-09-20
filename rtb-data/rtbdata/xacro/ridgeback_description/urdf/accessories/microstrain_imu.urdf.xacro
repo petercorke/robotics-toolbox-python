@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="microstrain_imu" params="prefix mount_link *joint_pose">
+
+  <link name="${prefix}_imu_link" >
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <!-- Origin of this mesh is the focal point of the LIDAR. -->
+        <mesh filename="package://ridgeback_description/meshes/3dm-gxX.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+      <material name="dark_grey" />
+    </visual>
+  </link>
+
+  <joint name="${prefix}_imu_joint" type="fixed">
+    <xacro:insert_block name="joint_pose" />
+    <parent link="${mount_link}" />
+    <child link="${prefix}_imu_link" />
+  </joint>
+
+  <gazebo>
+    <plugin name="${prefix}_imu_controller" filename="libhector_gazebo_ros_imu.so">
+      <robotNamespace>/</robotNamespace>
+      <updateRate>50.0</updateRate>
+      <bodyName>${prefix}_imu_link</bodyName>
+      <topicName>${prefix}_imu/data</topicName>
+      <accelDrift>0.005 0.005 0.005</accelDrift>
+      <accelGaussianNoise>0.005 0.005 0.005</accelGaussianNoise>
+      <rateDrift>0.005 0.005 0.005 </rateDrift>
+      <rateGaussianNoise>0.005 0.005 0.005 </rateGaussianNoise>
+      <headingDrift>0.005</headingDrift>
+      <headingGaussianNoise>0.005</headingGaussianNoise>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="${prefix}_imu_link">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  </xacro:macro>
+</robot>
