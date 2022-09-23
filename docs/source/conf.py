@@ -22,7 +22,7 @@ sys.path.append(os.path.abspath("exts"))
 # -- Project information -----------------------------------------------------
 
 project = "Robotics Toolbox for Python"
-copyright = "2020, Jesse Haviland and Peter Corke"
+copyright = "2022, Jesse Haviland and Peter Corke"
 author = "Jesse Haviland and Peter Corke"
 
 # print(__file__)
@@ -45,10 +45,12 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
     "sphinx.ext.inheritance_diagram",
-    "sphinx_autorun",
     "blockname",
     "sphinx.ext.intersphinx",
-    "sphinx_autodoc_typehints"
+    "sphinx.ext.napoleon",
+    "sphinx_autodoc_typehints",
+    # "scanpydoc.elegant_typehints",
+    "sphinx_autorun",
 ]
 
 autosummary_generate = True
@@ -88,7 +90,7 @@ html_theme_options = {
     "display_version": True,
     "prev_next_buttons_location": "both",
     "analytics_id": "G-11Q6WJM565",
-    "style_external_links": True,
+    "style_external_links": False,
 }
 html_logo = "../figs/RobToolBox_RoundLogoB.png"
 html_last_updated_fmt = "%d-%b-%Y"
@@ -162,9 +164,45 @@ mathjax_config = {
     }
 }
 intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
     "numpy": ("http://docs.scipy.org/doc/numpy/", None),
     "scipy": ("http://docs.scipy.org/doc/scipy/reference/", None),
     "matplotlib": ("http://matplotlib.sourceforge.net/", None),
 }
 
-# 'python': ('http://docs.python.org/2', None),
+
+# -------- Options Typehints ------------------------------------------------------------
+
+# Show typehints with param description, not in the signature line
+# autodoc_typehints = "description"
+
+#  Suppress the leading module names of the typehints
+# (ex. io.StringIO -> StringIO)
+# autodoc_typehints_format = "short"
+
+#  Types are documented for all parameters and return values, whether
+# they are documented or not.
+# autodoc_typehints_description_target = "all"
+
+# autodoc_type_aliases = {"rtb.ETS": "ETS", "ArrayLike": "ArrayLike"}
+
+# Convert the type definitions in the docstrings as references
+# napoleon_preprocess_types = True
+
+# A mapping to translate type names to other names or references
+# We need to do thing for types declared with strings
+# napoleon_type_aliases = {
+#     "rtb.ETS": "roboticstoolbox.robot.ETS.ETS",
+# }
+
+# typehints_use_rtype = False
+# typehints_defaults = "comma"
+
+# -------- Options Napoleon -------------------------------------------------------------
+
+# Include special members (like __membername__) with docstrings in
+# the documentation
+napoleon_include_special_with_doc = True
+
+
+# napoleon_custom_sections = [(".. runblock", "runblock:: pycon")]
