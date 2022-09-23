@@ -8,4 +8,4 @@ Manipulator arms
    arm_models
    arm_backend
    arm_trajectory
-   arm_ik
+   IK/arm_ik
