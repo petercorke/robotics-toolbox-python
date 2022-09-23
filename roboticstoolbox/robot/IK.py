@@ -3,11 +3,13 @@
 @author Jesse Haviland
 """
 
+# from __future__ import annotations
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import Tuple, Union
 import roboticstoolbox as rtb
 from dataclasses import dataclass
+from spatialmath import SE3
 
 ArrayLike = Union[list, np.ndarray, tuple, set]
 
@@ -17,13 +19,21 @@ class IKSolution:
     """
     A dataclass for representing an IK solution
 
-    :param q: The joint coordinates of the solution (ndarray). Note that these
+    Attributes
+    ----------
+    q
+        The joint coordinates of the solution (ndarray). Note that these
         will not be valid if failed to find a solution
-    :param success: True if a valid solution was found
-    :param iterations: How many iterations were performed
-    :param searches: How many searches were performed
-    :param residual: The final error value from the cost function
-    :param reason: The reason the IK problem failed if applicable
+    success
+        True if a valid solution was found
+    iterations
+        How many iterations were performed
+    searches
+        How many searches were performed
+    residual
+        The final error value from the cost function
+    reason
+        The reason the IK problem failed if applicable
     """
 
     q: Union[np.ndarray, None]
@@ -56,8 +66,41 @@ class IKSolution:
 
 class IKSolver(ABC):
     """
-    An abstract super class which provides basic functionality to perform numerical inverse
-    kinematics (IK). Superclasses can inherit this class and implement the `solve` method.
+    An abstract super class for numerical inverse kinematics (IK)
+
+    This class provides basic functionality to perform numerical IK. Superclasses
+    can inherit this class and implement the `solve` method and redefine any other
+    methods necessary.
+
+    Parameters
+    ----------
+    name
+        The name of the IK algorithm
+    ilimit
+        How many iterations are allowed within a search before a new search
+        is started
+    slimit
+        How many searches are allowed before being deemed unsuccessful
+    tol
+        Maximum allowed residual error E
+    mask
+        A 6 vector which assigns weights to Cartesian degrees-of-freedom
+        error priority
+    joint_limits
+        Reject solutions with joint limit violations
+    seed
+        A seed for the private RNG used to generate random joint coordinate
+        vectors
+
+    See Also
+    --------
+    roboticstoolbox.robot.IK.IK_NR
+        Implements this class using the Newton-Raphson method
+    roboticstoolbox.robot.IK.IK_GN
+        Implements this class using the Gauss-Newton method
+    roboticstoolbox.robot.IK.IK_LM
+        Implements this class using the Levemberg-Marquadt method
+
     """
 
     def __init__(
@@ -70,15 +113,6 @@ class IKSolver(ABC):
         joint_limits: bool = True,
         seed: Union[int, None] = None,
     ):
-        """
-        :param name: The name of the IK algorithm
-        :param ilimit: How many iterations are allowed within a search before a new search is started
-        :param slimit: How many searches are allowed before being deemed unsuccessful
-        :param tol: Maximum allowed residual error E
-        :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
-        :param joint_limits: Reject solutions with joint limit violations
-        :param seed: A seed for the private RNG used to generate random joint coordinate vectors
-        """
 
         # Solver parameters
         self.name = name
@@ -96,32 +130,58 @@ class IKSolver(ABC):
         self.joint_limits = joint_limits
 
     def solve(
-        self, ets: "rtb.ETS", Tep: np.ndarray, q0: Union[ArrayLike, None]
+        self,
+        ets: "rtb.ETS",
+        Tep: Union[SE3, np.ndarray],
+        q0: Union[ArrayLike, None] = None,
     ) -> IKSolution:
         """
+        Solves the IK problem
+
         This method will attempt to solve the IK problem and obtain joint coordinates
         which result the the end-effector pose `Tep`.
 
-        :return: An IKSolution dataclass:
-            :param q: The joint coordinates of the solution (ndarray). Note that these
-                will not be valid if failed to find a solution
-            :param success: True if a valid solution was found
-            :param iterations: How many iterations were performed
-            :param searches: How many searches were performed
-            :param residual: The final error value from the cost function
-            :param jl_valid: True if q is inbounds of the robots joint limits
-            :param reason: The reason the IK problem failed if applicable
+        Parameters
+        ----------
+        ets
+            The ETS representing the manipulators kinematics
+        Tep
+            The desired end-effector pose
+        q
+            The current joint coordinate vector
+
+        Returns
+        -------
+        q
+            The joint coordinates of the solution (ndarray). Note that these
+            will not be valid if failed to find a solution
+        success
+            True if a valid solution was found
+        iterations
+            How many iterations were performed
+        searches
+            How many searches were performed
+        residual
+            The final error value from the cost function
+        jl_valid
+            True if q is inbounds of the robots joint limits
+        reason
+            The reason the IK problem failed if applicable
+
         """
 
         if q0 is None:
-            q0 = self.random_q(ets, self.slimit)
+            q0 = self._random_q(ets, self.slimit)
         elif not isinstance(q0, np.ndarray):
             q0 = np.array(q0)
 
         if q0.ndim == 1:
-            q0_new = self.random_q(ets, self.slimit)
+            q0_new = self._random_q(ets, self.slimit)
             q0_new[0] = q0
             q0 = q0_new
+
+        if isinstance(Tep, SE3):
+            Tep = Tep.A
 
         # Iteration count
         i = 0
@@ -160,7 +220,7 @@ class IKSolver(ABC):
                     q = (q + np.pi) % (2 * np.pi) - np.pi
 
                     # Check if we have violated joint limits
-                    jl_valid = self.check_jl(ets, q)
+                    jl_valid = self._check_jl(ets, q)
 
                     if not jl_valid and self.joint_limits:
                         # Abandon search and try again
@@ -197,66 +257,81 @@ class IKSolver(ABC):
 
     def error(self, Te: np.ndarray, Tep: np.ndarray) -> Tuple[np.ndarray, float]:
         """
+        Calculates the error between Te and Tep
+
         Calculates the engle axis error between current end-effector pose Te and
         the desired end-effector pose Tep. Also calulates the quadratic error E
         which is weighted by the diagonal matrix We.
 
-        :return: a tuple:
-        e: angle-axis error (ndarray in R^6)
-        E: The quadratic error weighted by We
+        Parameters
+        ----------
+        Te
+            The current end-effector pose
+        Tep
+            The desired end-effector pose
+
+        Returns
+        -------
+        e
+            angle-axis error (6 vector)
+        E
+            The quadratic error weighted by We
+
         """
         e = rtb.angle_axis(Te, Tep)
         E = 0.5 * e @ self.We @ e
 
         return e, E
 
-    def check_jl(self, ets: "rtb.ETS", q: np.ndarray) -> bool:
-        """
-        Checks if the joints are within their respective limits
-
-        :param ets: the ETS
-        :param q: the current joint coordinate vector
-
-        :return: True if joints within feasible limits otherwise False
-        """
-
-        # Loop through the joints in the ETS
-        for i in range(ets.n):
-
-            # Get the corresponding joint limits
-            ql0 = ets.qlim[0, i]
-            ql1 = ets.qlim[1, i]
-
-            # Check if q exceeds the limits
-            if q[i] < ql0 or q[i] > ql1:
-                return False
-
-        # If we make it here, all the joints are fine
-        return True
-
     @abstractmethod
     def step(
         self, ets: "rtb.ETS", Tep: np.ndarray, q: np.ndarray
     ) -> Tuple[float, np.ndarray]:
         """
-        Superclasses will implement this method to perform a step of the implemented
-        IK algorithm
+        Abstract step method
 
-        :return: A tuple containing
-            :param E: The new error value
-            :param q: The new joint coordinate vector
+        Superclasses will implement this method to perform a step of the
+        implemented IK algorithm
+
+        Parameters
+        ----------
+        ets
+            The ETS representing the manipulators kinematics
+        Tep
+            The desired end-effector pose
+        q
+            The current joint coordinate vector
+
+        Returns
+        -------
+        E
+            The new error value
+        q
+            The new joint coordinate vector
 
         """
         pass
 
-    def random_q(self, ets: "rtb.ETS", i: int = 1) -> np.ndarray:
+    def _random_q(self, ets: "rtb.ETS", i: int = 1) -> np.ndarray:
         """
         Generate a random valid joint configuration using a private RNG
 
-        :param i: number of configurations to generate
-
         Generates a random q vector within the joint limits defined by
         `self.qlim`.
+
+        Parameters
+        ----------
+        ets
+            The ETS representing the manipulators kinematics
+        i
+            number of configurations to generate
+
+        Returns
+        -------
+        q
+            An `i x n` ndarray of random valid joint configurations, where n
+            is the number of joints in the `ets`
+
         """
 
         if i == 1:
@@ -275,6 +350,37 @@ class IKSolver(ABC):
                     )
 
         return q
+
+    def _check_jl(self, ets: "rtb.ETS", q: np.ndarray) -> bool:
+        """
+        Checks if the joints are within their respective limits
+
+        Parameters
+        ----------
+        ets
+            the ETS
+        q
+            the current joint coordinate vector
+
+        Returns
+        -------
+        True if joints within feasible limits otherwise False
+
+        """
+
+        # Loop through the joints in the ETS
+        for i in range(ets.n):
+
+            # Get the corresponding joint limits
+            ql0 = ets.qlim[0, i]
+            ql1 = ets.qlim[1, i]
+
+            # Check if q exceeds the limits
+            if q[i] < ql0 or q[i] > ql1:
+                return False
+
+        # If we make it here, all the joints are fine
+        return True
 
 
 def _null_Σ(ets: "rtb.ETS", q: np.ndarray, ps: float, pi: Union[np.ndarray, float]):
@@ -351,17 +457,91 @@ def _calc_qnull(
 
 class IK_NR(IKSolver):
     """
+    Newton-Raphson Numerical Inverse Kinematics Solver
+
     A class which provides functionality to perform numerical inverse kinematics (IK)
-    using the Newton-Raphson method.
+    using the Newton-Raphson method. See `step` method for mathematical description.
 
-    .. note::
+    Note
+    ----
+    When using this class with redundant robots (>6 DoF), `pinv` must be set to `True`
 
-        - When using the NR method, the initial joint coordinates $q_0$, should correspond to
-            a non-singular manipulator pose, since it uses the manipulator Jacobian. When the
-            the problem is solvable, it converges very quickly. However, this method frequently
-            fails to converge on the goal.
-        - This class supports null-space motion to assist with maximising manipulability and
-            avoiding joint limits. These are enabled by setting kq and km to non-zero values.
+    Parameters
+    ----------
+    name
+        The name of the IK algorithm
+    ilimit
+        How many iterations are allowed within a search before a new search
+        is started
+    slimit
+        How many searches are allowed before being deemed unsuccessful
+    tol
+        Maximum allowed residual error E
+    mask
+        A 6 vector which assigns weights to Cartesian degrees-of-freedom
+        error priority
+    joint_limits
+        Reject solutions with joint limit violations
+    seed
+        A seed for the private RNG used to generate random joint coordinate
+        vectors
+    pinv
+        If True, will use the psuedoinverse in the `step` method instead of
+        the normal inverse
+    kq
+        The gain for joint limit avoidance. Setting to 0.0 will remove this
+        completely from the solution
+    km
+        The gain for maximisation. Setting to 0.0 will remove this completely
+        from the solution
+    ps
+        The minimum angle/distance (in radians or metres) in which the joint is
+        allowed to approach to its limit
+    pi
+        The influence angle/distance (in radians or metres) in null space motion
+        becomes active
+
+    Notes
+    -----
+    When using the NR method, the initial joint coordinates :math:`q_0`, should correspond
+    to a non-singular manipulator pose, since it uses the manipulator Jacobian. When the
+    the problem is solvable, it converges very quickly. However, this method frequently
+    fails to converge on the goal.
+
+    This class supports null-space motion to assist with maximising manipulability and
+    avoiding joint limits. These are enabled by setting kq and km to non-zero values.
+
+    References
+    ----------
+    .. [1] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part I:
+           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+    .. [2] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part II:
+           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+    Examples
+    --------
+    The following example gets the `ets` of a `panda` robot object, instantiates
+    the IK_NR solver class using default parameters, makes a goal pose `Tep`,
+    and then solves for the joint coordinates which result in the pose `Tep`
+    using the `solve` method.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> solver = rtb.IK_NR(pinv=True)
+        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        >>> solver.solve(panda, Tep)
+
+    See Also
+    --------
+    roboticstoolbox.robot.IK.IKSolver
+        An abstract super class for numerical IK solvers
+    roboticstoolbox.robot.IK.IK_GN
+        Implements this class using the Gauss-Newton method
+    roboticstoolbox.robot.IK.IK_LM
+        Implements this class using the Levemberg-Marquadt method
+
     """
 
     def __init__(
@@ -373,35 +553,13 @@ class IK_NR(IKSolver):
         mask: Union[ArrayLike, None] = None,
         joint_limits: bool = True,
         seed: Union[int, None] = None,
-        pinv=False,
+        pinv: bool = False,
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
         pi: Union[np.ndarray, float] = 0.3,
         **kwargs,
     ):
-        """
-        :param name: The name of the IK algorithm
-        :param ilimit: How many iterations are allowed within a search before a new search
-            is started
-        :param slimit: How many searches are allowed before being deemed unsuccessful
-        :param tol: Maximum allowed residual error E
-        :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom
-            error priority
-        :param joint_limits: Reject solutions with joint limit violations
-        :param seed: A seed for the private RNG used to generate random joint coordinate
-            vectors
-        :param pinv: If True, will use the psuedoinverse in the `step` method instead of
-            the normal inverse
-        :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
-            completely from the solution
-        :param km: The gain for maximisation. Setting to 0.0 will remove this completely
-            from the solution
-        :param ps: The minimum angle/distance (in radians or metres) in which the joint is
-            allowed to approach to its limit
-        :param pi: The influence angle/distance (in radians or metres) in null space motion
-            becomes active
-        """
 
         super().__init__(
             name=name,
@@ -428,19 +586,31 @@ class IK_NR(IKSolver):
         if self.km > 0.0:
             self.name += " Jm"
 
-    def step(self, ets: "rtb.ETS", Tep: np.ndarray, q: np.ndarray):
+    def step(
+        self, ets: "rtb.ETS", Tep: np.ndarray, q: np.ndarray
+    ) -> Tuple[float, np.ndarray]:
         r"""
         Performs a single iteration of the Newton-Raphson optimisation method
 
-        The Newton-Raphson (NR) method seeks to minimise the error E by iterating upon the following
-
         .. math::
-            \bf{q}_{k+1} = \bf{q}_k + {^0\bf{J}(\bf{q}_k)}^{-1} \bf{e}_k.
 
+            \bf{q}_{k+1} = \bf{q}_k + {^0\bf{J}(\bf{q}_k)}^{-1} \bf{e}_k
 
-        :return: A tuple containing
-            :param E: The new error value
-            :param q: The new joint coordinate vector
+        Parameters
+        ----------
+        ets
+            The ETS representing the manipulators kinematics
+        Tep
+            The desired end-effector pose
+        q
+            The current joint coordinate vector
+
+        Returns
+        -------
+        E
+            The new error value
+        q
+            The new joint coordinate vector
 
         """
 
@@ -463,6 +633,91 @@ class IK_NR(IKSolver):
 
 
 class IK_LM(IKSolver):
+    """
+    Levemberg-Marquadt Numerical Inverse Kinematics Solver
+
+    A class which provides functionality to perform numerical inverse kinematics (IK)
+    using the Levemberg-Marquadt method. See `step` method for mathematical description.
+
+    Parameters
+    ----------
+    name
+        The name of the IK algorithm
+    ilimit
+        How many iterations are allowed within a search before a new search
+        is started
+    slimit
+        How many searches are allowed before being deemed unsuccessful
+    tol
+        Maximum allowed residual error E
+    mask
+        A 6 vector which assigns weights to Cartesian degrees-of-freedom
+        error priority
+    joint_limits
+        Reject solutions with joint limit violations
+    seed
+        A seed for the private RNG used to generate random joint coordinate
+        vectors
+    k
+        Sets the gain value for the damping matrix Wn in the `step` method. See
+        notes
+    method
+        One of "chan", "sugihara" or "wampler". Defines which method is used
+        to calculate the damping matrix Wn in the `step` method
+    kq
+        The gain for joint limit avoidance. Setting to 0.0 will remove this
+        completely from the solution
+    km
+        The gain for maximisation. Setting to 0.0 will remove this completely
+        from the solution
+    ps
+        The minimum angle/distance (in radians or metres) in which the joint is
+        allowed to approach to its limit
+    pi
+        The influence angle/distance (in radians or metres) in null space motion
+        becomes active
+
+    Notes
+    -----
+    When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+    to a non-singular manipulator pose, since it uses the manipulator Jacobian.
+
+    This class supports null-space motion to assist with maximising manipulability and
+    avoiding joint limits. These are enabled by setting kq and km to non-zero values.
+
+    References
+    ----------
+    .. [1] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part I:
+           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+    .. [2] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part II:
+           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+    Examples
+    --------
+    The following example gets the `ets` of a `panda` robot object, instantiates
+    the IK_LM solver class using default parameters, makes a goal pose `Tep`,
+    and then solves for the joint coordinates which result in the pose `Tep`
+    using the `solve` method.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> solver = rtb.IK_LM()
+        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        >>> solver.solve(panda, Tep)
+
+    See Also
+    --------
+    roboticstoolbox.robot.IK.IKSolver
+        An abstract super class for numerical IK solvers
+    roboticstoolbox.robot.IK.IK_NR
+        Implements this class using the Newton-Raphson method
+    roboticstoolbox.robot.IK.IK_GN
+        Implements this class using the Gauss-Newton method
+
+    """
+
     def __init__(
         self,
         name: str = "IK Solver",
@@ -472,7 +727,7 @@ class IK_LM(IKSolver):
         mask: Union[ArrayLike, None] = None,
         joint_limits: bool = True,
         seed: Union[int, None] = None,
-        k=1.0,
+        k: float = 1.0,
         method="chan",
         kq: float = 0.0,
         km: float = 0.0,
@@ -480,31 +735,6 @@ class IK_LM(IKSolver):
         pi: Union[np.ndarray, float] = 0.3,
         **kwargs,
     ):
-        """
-        :param name: The name of the IK algorithm
-        :param ilimit: How many iterations are allowed within a search before a new search
-            is started
-        :param slimit: How many searches are allowed before being deemed unsuccessful
-        :param tol: Maximum allowed residual error E
-        :param mask: A 6 vector which assigns weights to Cartesian degrees-of-freedom error
-            priority
-        :param joint_limits: Reject solutions with joint limit violations
-        :param seed: A seed for the private RNG used to generate random joint coordinate
-            vectors
-        :param k: Sets the gain value for the damping matrix Wn in the `step` method. See
-            notes
-        :param method: One of "chan", "sugihara" or "wampler". Defines which method is used
-            to calculate the damping matrix Wn in the `step` method
-        :param kq: The gain for joint limit avoidance. Setting to 0.0 will remove this
-            completely from the solution
-        :param km: The gain for maximisation. Setting to 0.0 will remove this completely
-            from the solution
-        :param ps: The minimum angle/distance (in radians or metres) in which the joint is
-            allowed to approach to its limit
-        :param pi: The influence angle/distance (in radians or metres) in null space motion
-            becomes active
-        """
-
         super().__init__(
             name=name,
             ilimit=ilimit,
@@ -542,8 +772,11 @@ class IK_LM(IKSolver):
 
     def step(self, ets: "rtb.ETS", Tep: np.ndarray, q: np.ndarray):
         r"""
-        Performs a single iteration of the Levenberg-Marquadt optimisation method according
-        to the chosed method
+        Performs a single iteration of the Levenberg-Marquadt optimisation
+        
+        The operation is defined by the choice of `method` when instantiating the class.
+
+        The next step is deined as
 
         .. math::
             \bf{q}_{k+1} 
@@ -573,7 +806,7 @@ class IK_LM(IKSolver):
 
         .. math::
             \bf{W}_n
-            &=
+            =
             λ E_k \bf{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
@@ -585,7 +818,7 @@ class IK_LM(IKSolver):
 
         .. math::
             \bf{W}_n
-            &=
+            =
             E_k \bf{1}_n + \text{diag}(\hat{\bf{w}}_n)
 
         where :math:`\hat{\bf{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
@@ -596,9 +829,21 @@ class IK_LM(IKSolver):
 
         Wampler proposed :math:`\bf{w_n}` to be a constant. This is set through the `k` kwarg.
 
-        :return: A tuple containing
-            :param E: The new error value
-            :param q: The new joint coordinate vector
+        Parameters
+        ----------
+        ets
+            The ETS representing the manipulators kinematics
+        Tep
+            The desired end-effector pose
+        q
+            The current joint coordinate vector
+
+        Returns
+        -------
+        E
+            The new error value
+        q
+            The new joint coordinate vector
 
         """
         Te = ets.eval(q)
@@ -625,3 +870,207 @@ class IK_LM(IKSolver):
         q += np.linalg.inv(J.T @ self.We @ J + Wn) @ g + qnull
 
         return E, q
+
+
+class IK_GN(IKSolver):
+    """
+    Gauss-Newton Numerical Inverse Kinematics Solver
+
+    A class which provides functionality to perform numerical inverse kinematics (IK)
+    using the Gauss-Newton method. See `step` method for mathematical description.
+
+    Note
+    ----
+    When using this class with redundant robots (>6 DoF), `pinv` must be set to `True`
+
+    Parameters
+    ----------
+    name
+        The name of the IK algorithm
+    ilimit
+        How many iterations are allowed within a search before a new search
+        is started
+    slimit
+        How many searches are allowed before being deemed unsuccessful
+    tol
+        Maximum allowed residual error E
+    mask
+        A 6 vector which assigns weights to Cartesian degrees-of-freedom
+        error priority
+    joint_limits
+        Reject solutions with joint limit violations
+    seed
+        A seed for the private RNG used to generate random joint coordinate
+        vectors
+    pinv
+        If True, will use the psuedoinverse in the `step` method instead of
+        the normal inverse
+    kq
+        The gain for joint limit avoidance. Setting to 0.0 will remove this
+        completely from the solution
+    km
+        The gain for maximisation. Setting to 0.0 will remove this completely
+        from the solution
+    ps
+        The minimum angle/distance (in radians or metres) in which the joint is
+        allowed to approach to its limit
+    pi
+        The influence angle/distance (in radians or metres) in null space motion
+        becomes active
+
+    Notes
+    -----
+    When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+    to a non-singular manipulator pose, since it uses the manipulator Jacobian. When the
+    the problem is solvable, it converges very quickly. However, this method frequently
+    fails to converge on the goal.
+
+    This class supports null-space motion to assist with maximising manipulability and
+    avoiding joint limits. These are enabled by setting kq and km to non-zero values.
+
+    References
+    ----------
+    .. [1] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part I:
+           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+    .. [2] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part II:
+           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+    Examples
+    --------
+    The following example gets the `ets` of a `panda` robot object, instantiates
+    the `IK_GN` solver class using default parameters, makes a goal pose `Tep`,
+    and then solves for the joint coordinates which result in the pose `Tep`
+    using the `solve` method.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> solver = rtb.IK_GN(pinv=True)
+        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        >>> solver.solve(panda, Tep)
+
+    See Also
+    --------
+    roboticstoolbox.robot.IK.IKSolver
+        An abstract super class for numerical IK solvers
+    roboticstoolbox.robot.IK.IK_NR
+        Implements this class using the Newton-Raphson method
+    roboticstoolbox.robot.IK.IK_LM
+        Implements this class using the Levemberg-Marquadt method
+
+    """
+
+    def __init__(
+        self,
+        name: str = "IK Solver",
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        mask: Union[ArrayLike, None] = None,
+        joint_limits: bool = True,
+        seed: Union[int, None] = None,
+        pinv: bool = False,
+        kq: float = 0.0,
+        km: float = 0.0,
+        ps: float = 0.0,
+        pi: Union[np.ndarray, float] = 0.3,
+        **kwargs,
+    ):
+
+        super().__init__(
+            name=name,
+            ilimit=ilimit,
+            slimit=slimit,
+            tol=tol,
+            mask=mask,
+            joint_limits=joint_limits,
+            seed=seed,
+            **kwargs,
+        )
+
+        self.pinv = pinv
+        self.kq = kq
+        self.km = km
+        self.ps = ps
+        self.pi = pi
+
+        self.name = f"GN (pinv={pinv})"
+
+        if self.kq > 0.0:
+            self.name += " Σ"
+
+        if self.km > 0.0:
+            self.name += " Jm"
+
+    def step(
+        self, ets: "rtb.ETS", Tep: np.ndarray, q: np.ndarray
+    ) -> Tuple[float, np.ndarray]:
+        r"""
+        Performs a single iteration of the Gauss-Newton optimisation method
+
+        The next step is defined as
+
+        .. math::
+
+            \bf{q}_{k+1} &= \bf{q}_k +
+            \left(
+            {\bf{J}(\bf{q}_k)}^\top
+            \bf{W}_e \
+            {\bf{J}(\bf{q}_k)}
+            \right)^{-1}
+            \bf{g}_k \\
+            \bf{g}_k &=
+            {\bf{J}(\bf{q}_k)}^\top
+            \bf{W}_e
+            \bf{e}_k
+
+        where :math:`\bf{J} = {^0\bf{J}}` is the base-frame manipulator Jacobian. If
+        :math:`\bf{J}(\bf{q}_k)` is non-singular, and :math:`\bf{W}_e = \bf{1}_n`, then
+        the above provides the pseudoinverse solution. However, if :math:`\bf{J}(\bf{q}_k)`
+        is singular, the above can not be computed and the GN solution is infeasible.
+
+        Parameters
+        ----------
+        ets
+            The ETS representing the manipulators kinematics
+        Tep
+            The desired end-effector pose
+        q
+            The current joint coordinate vector
+
+        Returns
+        -------
+        E
+            The new error value
+        q
+            The new joint coordinate vector
+
+        """
+
+        Te = ets.eval(q)
+        e, E = self.error(Te, Tep)
+
+        J = ets.jacob0(q)
+
+        # Null-space motion
+        qnull = _calc_qnull(
+            ets=ets, q=q, J=J, λΣ=self.kq, λm=self.km, ps=self.ps, pi=self.pi
+        )
+
+        if self.pinv:
+            q += np.linalg.pinv(J) @ e + qnull
+        else:
+            q += np.linalg.inv(J) @ e + qnull
+
+        return E, q
+
+
+# | Element    | Type    | Description                                                                                                     |
+# |------------|---------|-----------------------------------------------------------------------------------------------------------------|
+# | q          | ndarray | The joint coordinates of the solution (ndarray). Note that these will not be valid if failed to find a solution |
+# | success    | bool    | True if a valid solution was found                                                                              |
+# | iterations | int     | How many iterations were performed                                                                              |
+# | searches   | int     | How many searches were performed                                                                                |
+# | residual   | float   | The final error value from the cost function                                                                    |
+# | reason     | str     | The reason the IK problem failed if applicable                                                                  |
