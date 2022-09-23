@@ -16,7 +16,7 @@ from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.ET import ET, ET2
 
-from roboticstoolbox.robot.IK import IKSolution, IKSolver, IK_LM, IK_NR
+from roboticstoolbox.robot.IK import IKSolution, IKSolver, IK_LM, IK_NR, IK_GN
 
 __all__ = [
     "Robot",
@@ -48,4 +48,5 @@ __all__ = [
     "IKSolver",
     "IK_LM",
     "IK_NR",
+    "IK_GN",
 ]
