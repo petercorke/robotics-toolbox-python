@@ -7,6 +7,7 @@ Inverse Kinematics
    iksolver
    iksolution
    ik_lm
+   ik_qp
    ik_gn
    ik_nr
    
