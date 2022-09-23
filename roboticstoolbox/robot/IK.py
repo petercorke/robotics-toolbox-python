@@ -11,6 +11,14 @@ import roboticstoolbox as rtb
 from dataclasses import dataclass
 from spatialmath import SE3
 
+try:
+    import qpsolvers as qp
+
+    _qp = True
+except ImportError:  # pragma nocover
+    _qp = False
+
+
 ArrayLike = Union[list, np.ndarray, tuple, set]
 
 
@@ -100,6 +108,8 @@ class IKSolver(ABC):
         Implements this class using the Gauss-Newton method
     roboticstoolbox.robot.IK.IK_LM
         Implements this class using the Levemberg-Marquadt method
+    roboticstoolbox.robot.IK.IK_QP
+        Implements this class using a quadratic programming approach
 
     """
 
@@ -541,6 +551,8 @@ class IK_NR(IKSolver):
         Implements this class using the Gauss-Newton method
     roboticstoolbox.robot.IK.IK_LM
         Implements this class using the Levemberg-Marquadt method
+    roboticstoolbox.robot.IK.IK_QP
+        Implements this class using a quadratic programming approach
 
     """
 
@@ -715,6 +727,8 @@ class IK_LM(IKSolver):
         Implements this class using the Newton-Raphson method
     roboticstoolbox.robot.IK.IK_GN
         Implements this class using the Gauss-Newton method
+    roboticstoolbox.robot.IK.IK_QP
+        Implements this class using a quadratic programming approach
 
     """
 
@@ -922,8 +936,7 @@ class IK_GN(IKSolver):
     -----
     When using the this method, the initial joint coordinates :math:`q_0`, should correspond
     to a non-singular manipulator pose, since it uses the manipulator Jacobian. When the
-    the problem is solvable, it converges very quickly. However, this method frequently
-    fails to converge on the goal.
+    the problem is solvable, it converges very quickly.
 
     This class supports null-space motion to assist with maximising manipulability and
     avoiding joint limits. These are enabled by setting kq and km to non-zero values.
@@ -958,6 +971,9 @@ class IK_GN(IKSolver):
         Implements this class using the Newton-Raphson method
     roboticstoolbox.robot.IK.IK_LM
         Implements this class using the Levemberg-Marquadt method
+    roboticstoolbox.robot.IK.IK_QP
+        Implements this class using a quadratic programming approach
+
 
     """
 
@@ -1062,6 +1078,292 @@ class IK_GN(IKSolver):
             q += np.linalg.pinv(J) @ e + qnull
         else:
             q += np.linalg.inv(J) @ e + qnull
+
+        return E, q
+
+
+class IK_QP(IKSolver):
+    """
+    Quadratic Progamming Numerical Inverse Kinematics Solver
+
+    A class which provides functionality to perform numerical inverse kinematics (IK)
+    using a quadratic progamming approach. See `step` method for mathematical
+    description.
+
+    Parameters
+    ----------
+    name
+        The name of the IK algorithm
+    ilimit
+        How many iterations are allowed within a search before a new search
+        is started
+    slimit
+        How many searches are allowed before being deemed unsuccessful
+    tol
+        Maximum allowed residual error E
+    mask
+        A 6 vector which assigns weights to Cartesian degrees-of-freedom
+        error priority
+    joint_limits
+        Reject solutions with joint limit violations
+    seed
+        A seed for the private RNG used to generate random joint coordinate
+        vectors
+    kj
+        A gain for joint velocity norm minimisation
+    ks
+        A gain which adjusts the cost of slack (intentional error)
+    kq
+        The gain for joint limit avoidance. Setting to 0.0 will remove this
+        completely from the solution
+    km
+        The gain for maximisation. Setting to 0.0 will remove this completely
+        from the solution
+    ps
+        The minimum angle/distance (in radians or metres) in which the joint is
+        allowed to approach to its limit
+    pi
+        The influence angle/distance (in radians or metres) in null space motion
+        becomes active
+
+    Raises
+    ------
+    ImportError
+        If the package `qpsolvers` is not installed
+
+    Notes
+    -----
+    When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+    to a non-singular manipulator pose, since it uses the manipulator Jacobian. When the
+    the problem is solvable, it converges very quickly.
+
+    References
+    ----------
+    .. [1] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part II:
+           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+    Examples
+    --------
+    The following example gets the `ets` of a `panda` robot object, instantiates
+    the `IK_QP` solver class using default parameters, makes a goal pose `Tep`,
+    and then solves for the joint coordinates which result in the pose `Tep`
+    using the `solve` method.
+
+    .. runblock:: pycon
+
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> solver = rtb.IK_QP()
+        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        >>> solver.solve(panda, Tep)
+
+    See Also
+    --------
+    roboticstoolbox.robot.IK.IKSolver
+        An abstract super class for numerical IK solvers
+    roboticstoolbox.robot.IK.IK_NR
+        Implements this class using the Newton-Raphson method
+    roboticstoolbox.robot.IK.IK_GN
+        Implements this class using the Gauss-Newton method
+    roboticstoolbox.robot.IK.IK_LM
+        Implements this class using the Levemberg-Marquadt method
+
+    """
+
+    def __init__(
+        self,
+        name: str = "IK Solver",
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        mask: Union[ArrayLike, None] = None,
+        joint_limits: bool = True,
+        seed: Union[int, None] = None,
+        pinv: bool = False,
+        kj=1.0,
+        ks=1.0,
+        kq: float = 0.0,
+        km: float = 0.0,
+        ps: float = 0.0,
+        pi: Union[np.ndarray, float] = 0.3,
+        **kwargs,
+    ):
+
+        if not _qp:
+            raise ImportError(
+                "the package qpsolvers is required for this class. \nInstall using 'pip install qpsolvers'"
+            )
+
+        super().__init__(
+            name=name,
+            ilimit=ilimit,
+            slimit=slimit,
+            tol=tol,
+            mask=mask,
+            joint_limits=joint_limits,
+            seed=seed,
+            **kwargs,
+        )
+
+        self.kj = kj
+        self.ks = ks
+        self.kq = kq
+        self.km = km
+        self.ps = ps
+        self.pi = pi
+
+        self.name = f"QP (pinv={pinv})"
+
+        if self.kq > 0.0:
+            self.name += " Σ"
+
+        if self.km > 0.0:
+            self.name += " Jm"
+
+    def step(
+        self, ets: "rtb.ETS", Tep: np.ndarray, q: np.ndarray
+    ) -> Tuple[float, np.ndarray]:
+        r"""
+        Performs a single iteration of the Gauss-Newton optimisation method
+
+        The next step is defined as
+
+        .. math::
+
+            \bf{q}_{k+1} = \bf{q}_{k} + \dot{\bf{q}}.
+
+        where the QP is defined as
+
+        .. math::
+
+            \min_x \quad f_o(\bf{x}) &= \frac{1}{2} \bf{x}^\top \mathcal{Q} \bf{x}+ \mathcal{C}^\top \bf{x}, \\ 
+            \text{subject to} \quad \mathcal{J} \bf{x} &= \bf{\nu},  \\
+            \mathcal{A} \bf{x} &\leq \mathcal{B},  \\
+            \bf{x}^- &\leq \bf{x} \leq \bf{x}^+ 
+
+        with
+
+        .. math::
+
+            \bf{x} &= 
+            \begin{pmatrix}
+                \dot{\bf{q}} \\ \bf{\delta}
+            \end{pmatrix} \in \mathbb{R}^{(n+6)}  \\
+            \mathcal{Q} &=
+            \begin{pmatrix}
+                \lambda_q \bf{1}_{n} & \mathbf{0}_{6 \times 6} \\ \mathbf{0}_{n \times n} & \lambda_\delta \bf{1}_{6}
+            \end{pmatrix} \in \mathbb{R}^{(n+6) \times (n+6)} \\
+            \mathcal{J} &=
+            \begin{pmatrix}
+                \bf{J}(\bf{q}) & \bf{1}_{6}
+            \end{pmatrix} \in \mathbb{R}^{6 \times (n+6)} \\
+            \mathcal{C} &= 
+            \begin{pmatrix}
+                \bf{J}_m \\ \bf{0}_{6 \times 1}
+            \end{pmatrix} \in \mathbb{R}^{(n + 6)} \\
+            \mathcal{A} &= 
+            \begin{pmatrix}
+                \bf{1}_{n \times n + 6} \\
+            \end{pmatrix} \in \mathbb{R}^{(l + n) \times (n + 6)} \\
+            \mathcal{B} &= 
+            \eta
+            \begin{pmatrix}
+                \frac{\rho_0 - \rho_s}
+                        {\rho_i - \rho_s} \\
+                \vdots \\
+                \frac{\rho_n - \rho_s}
+                        {\rho_i - \rho_s} 
+            \end{pmatrix} \in \mathbb{R}^{n} \\
+            \bf{x}^{-, +} &= 
+            \begin{pmatrix}
+                \dot{\bf{q}}^{-, +} \\
+                \bf{\delta}^{-, +}
+            \end{pmatrix} \in \mathbb{R}^{(n+6)},
+
+        where :math:`\bf{\delta} \in \mathbb{R}^6` is the slack vector,
+        :math:`\lambda_\delta \in \mathbb{R}^+` is a gain term which adjusts the
+        cost of the norm of the slack vector in the optimiser,
+        :math:`\dot{\bf{q}}^{-,+}` are the minimum and maximum joint velocities, and 
+        :math:`\dot{\bf{\delta}}^{-,+}` are the minimum and maximum slack velocities.
+
+        Parameters
+        ----------
+        ets
+            The ETS representing the manipulators kinematics
+        Tep
+            The desired end-effector pose
+        q
+            The current joint coordinate vector
+
+        Returns
+        -------
+        E
+            The new error value
+        q
+            The new joint coordinate vector
+
+        """
+
+        Te = ets.eval(q)
+        e, E = self.error(Te, Tep)
+        J = ets.jacob0(q)
+
+        if isinstance(self.pi, float):
+            self.pi = self.pi * np.ones(ets.n)
+
+        # Quadratic component of objective function
+        Q = np.eye(ets.n + 6)
+
+        # Joint velocity component of Q
+        Q[: ets.n, : ets.n] *= self.kj
+
+        # Slack component of Q
+        Q[ets.n :, ets.n :] = self.ks * (1 / np.sum(np.abs(e))) * np.eye(6)
+
+        # The equality contraints
+        Aeq = np.concatenate((J, np.eye(6)), axis=1)
+        beq = e.reshape((6,))
+
+        # The inequality constraints for joint limit avoidance
+        if self.kq > 0.0:
+            Ain = np.zeros((ets.n + 6, ets.n + 6))
+            bin = np.zeros(ets.n + 6)
+
+            # Form the joint limit velocity damper
+            Ain_l = np.zeros((ets.n, ets.n))
+            Bin_l = np.zeros(ets.n)
+
+            for i in range(ets.n):
+                ql0 = ets.qlim[0, i]
+                ql1 = ets.qlim[1, i]
+
+                if ql1 - q[i] <= self.pi[i]:
+                    Bin_l[i] = ((ql1 - q[i]) - self.ps) / (self.pi[i] - self.ps)
+                    Ain_l[i, i] = 1
+
+                if q[i] - ql0 <= self.pi[i]:
+                    Bin_l[i] = -(((ql0 - q[i]) + self.ps) / (self.pi[i] - self.ps))
+                    Ain_l[i, i] = -1
+
+            Ain[: ets.n, : ets.n] = Ain_l
+            bin[: ets.n] = (1.0 / self.kq) * Bin_l
+        else:
+            Ain = None
+            bin = None
+
+        # Manipulability maximisation
+        if self.km > 0.0:
+            Jm = ets.jacobm(q).reshape((ets.n,))
+            c = np.concatenate(((1.0 / self.km) * -Jm, np.zeros(6)))
+        else:
+            c = np.zeros(ets.n + 6)
+
+        xd = qp.solve_qp(Q, c, Ain, bin, Aeq, beq, lb=None, ub=None, solver="quadprog")
+
+        if xd is None:
+            raise np.linalg.LinAlgError("QP Unsolvable")
+
+        q += xd[: ets.n]
 
         return E, q
 
