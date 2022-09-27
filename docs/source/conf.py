@@ -195,7 +195,11 @@ intersphinx_mapping = {
 #     "rtb.ETS": "roboticstoolbox.robot.ETS.ETS",
 # }
 
+# napoleon_preprocess_types = True
+
 # typehints_use_rtype = False
+# napoleon_use_rtype = False
+
 # typehints_defaults = "comma"
 
 # -------- Options Napoleon -------------------------------------------------------------
