@@ -22,6 +22,7 @@ from roboticstoolbox.tools.data import (
 )
 from roboticstoolbox.tools.plot import xplot
 from roboticstoolbox.tools.params import rtb_set_param, rtb_get_param
+from roboticstoolbox.tools.types import ArrayLike
 
 __all__ = [
     "null",
@@ -46,4 +47,5 @@ __all__ = [
     "rtb_path_to_datafile",
     "rtb_set_param",
     "rtb_get_param",
+    "ArrayLike",
 ]
