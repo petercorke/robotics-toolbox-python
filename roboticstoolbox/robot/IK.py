@@ -3,13 +3,13 @@
 @author Jesse Haviland
 """
 
-# from __future__ import annotations
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import Tuple, Union
 import roboticstoolbox as rtb
 from dataclasses import dataclass
 from spatialmath import SE3
+from roboticstoolbox.tools.types import ArrayLike
 
 try:
     import qpsolvers as qp
@@ -17,9 +17,6 @@ try:
     _qp = True
 except ImportError:  # pragma nocover
     _qp = False
-
-
-ArrayLike = Union[list, np.ndarray, tuple, set]
 
 
 @dataclass
@@ -472,6 +469,9 @@ class IK_NR(IKSolver):
     A class which provides functionality to perform numerical inverse kinematics (IK)
     using the Newton-Raphson method. See `step` method for mathematical description.
 
+    .. versionchanged:: X.Y.Z
+        Description of change
+
     Note
     ----
     When using this class with redundant robots (>6 DoF), `pinv` must be set to `True`
@@ -523,10 +523,10 @@ class IK_NR(IKSolver):
 
     References
     ----------
-    .. [1] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part I:
-           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
-    .. [2] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part II:
-           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+    - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+      Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+    - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+      Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
     Examples
     --------
@@ -699,10 +699,10 @@ class IK_LM(IKSolver):
 
     References
     ----------
-    .. [1] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part I:
-           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
-    .. [2] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part II:
-           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+    - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+      Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+    - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+      Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
     Examples
     --------
@@ -943,10 +943,10 @@ class IK_GN(IKSolver):
 
     References
     ----------
-    .. [1] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part I:
-           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
-    .. [2] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part II:
-           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+    - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+      Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+    - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+      Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
     Examples
     --------
@@ -1139,8 +1139,8 @@ class IK_QP(IKSolver):
 
     References
     ----------
-    .. [1] J. Haviland, Jesse, and P. Corke. "Manipulator Differential Kinematics Part II:
-           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+    - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+      Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
     Examples
     --------
@@ -1376,3 +1376,6 @@ class IK_QP(IKSolver):
 # | searches   | int     | How many searches were performed                                                                                |
 # | residual   | float   | The final error value from the cost function                                                                    |
 # | reason     | str     | The reason the IK problem failed if applicable                                                                  |
+
+
+IK_NR()
