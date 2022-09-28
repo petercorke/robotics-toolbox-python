@@ -167,6 +167,8 @@ intersphinx_mapping = {
 # the documentation
 napoleon_include_special_with_doc = True
 
+napoleon_custom_sections = ["Synopsis"]
+
 # -------- Options AutoSummary ----------------------------------------------------------
 
 # autodoc_default_flags = ["members"]
