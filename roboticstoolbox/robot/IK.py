@@ -104,13 +104,13 @@ class IKSolver(ABC):
 
     See Also
     --------
-    roboticstoolbox.robot.IK.IK_NR
+    IK_NR
         Implements this class using the Newton-Raphson method
-    roboticstoolbox.robot.IK.IK_GN
+    IK_GN
         Implements this class using the Gauss-Newton method
-    roboticstoolbox.robot.IK.IK_LM
+    IK_LM
         Implements this class using the Levemberg-Marquadt method
-    roboticstoolbox.robot.IK.IK_QP
+    IK_QP
         Implements this class using a quadratic programming approach
 
 
@@ -163,8 +163,8 @@ class IKSolver(ABC):
             The ETS representing the manipulators kinematics
         Tep
             The desired end-effector pose
-        q
-            The current joint coordinate vector
+        q0
+            The initial joint coordinate vector
 
         Returns
         -------
@@ -272,12 +272,18 @@ class IKSolver(ABC):
         )
 
     def error(self, Te: np.ndarray, Tep: np.ndarray) -> Tuple[np.ndarray, float]:
-        """
+        r"""
         Calculates the error between Te and Tep
 
         Calculates the engle axis error between current end-effector pose Te and
         the desired end-effector pose Tep. Also calulates the quadratic error E
         which is weighted by the diagonal matrix We.
+
+        .. math::
+
+            E = \frac{1}{2} \vec{e}^{\top} \mat{W}_e \vec{e}
+
+        where :math:`\vec{e} \in \mathbb{R}^6` is the angle-axis error.
 
         Parameters
         ----------
@@ -555,14 +561,14 @@ class IK_NR(IKSolver):
 
     See Also
     --------
-    roboticstoolbox.robot.IK.IKSolver
+    IKSolver
         An abstract super class for numerical IK solvers
-    roboticstoolbox.robot.IK.IK_GN
-        Implements this class using the Gauss-Newton method
-    roboticstoolbox.robot.IK.IK_LM
-        Implements this class using the Levemberg-Marquadt method
-    roboticstoolbox.robot.IK.IK_QP
-        Implements this class using a quadratic programming approach
+    IK_GN
+        Implements this IKSolver using the Gauss-Newton method
+    IK_LM
+        Implements this IKSolver using the Levemberg-Marquadt method
+    IK_QP
+        Implements this IKSolver using a quadratic programming approach
 
 
     .. versionchanged:: 1.0.3
@@ -739,14 +745,14 @@ class IK_LM(IKSolver):
 
     See Also
     --------
-    roboticstoolbox.robot.IK.IKSolver
+    IKSolver
         An abstract super class for numerical IK solvers
-    roboticstoolbox.robot.IK.IK_NR
-        Implements this class using the Newton-Raphson method
-    roboticstoolbox.robot.IK.IK_GN
-        Implements this class using the Gauss-Newton method
-    roboticstoolbox.robot.IK.IK_QP
-        Implements this class using a quadratic programming approach
+    IK_NR
+        Implements IKSolver class using the Newton-Raphson method
+    IK_GN
+        Implements IKSolver class using the Gauss-Newton method
+    IK_QP
+        Implements IKSolver class using a quadratic programming approach
 
 
     .. versionchanged:: 1.0.3
@@ -991,14 +997,14 @@ class IK_GN(IKSolver):
 
     See Also
     --------
-    roboticstoolbox.robot.IK.IKSolver
+    IKSolver
         An abstract super class for numerical IK solvers
-    roboticstoolbox.robot.IK.IK_NR
-        Implements this class using the Newton-Raphson method
-    roboticstoolbox.robot.IK.IK_LM
-        Implements this class using the Levemberg-Marquadt method
-    roboticstoolbox.robot.IK.IK_QP
-        Implements this class using a quadratic programming approach
+    IK_NR
+        Implements IKSolver using the Newton-Raphson method
+    IK_LM
+        Implements IKSolver using the Levemberg-Marquadt method
+    IK_QP
+        Implements IKSolver using a quadratic programming approach
 
 
     .. versionchanged:: 1.0.3
@@ -1192,14 +1198,14 @@ class IK_QP(IKSolver):
 
     See Also
     --------
-    roboticstoolbox.robot.IK.IKSolver
+    IKSolver
         An abstract super class for numerical IK solvers
-    roboticstoolbox.robot.IK.IK_NR
-        Implements this class using the Newton-Raphson method
-    roboticstoolbox.robot.IK.IK_GN
-        Implements this class using the Gauss-Newton method
-    roboticstoolbox.robot.IK.IK_LM
-        Implements this class using the Levemberg-Marquadt method
+    IK_NR
+        Implements IKSolver class using the Newton-Raphson method
+    IK_GN
+        Implements IKSolver class using the Gauss-Newton method
+    IK_LM
+        Implements IKSolver class using the Levemberg-Marquadt method
 
 
     .. versionchanged:: 1.0.3
