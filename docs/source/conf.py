@@ -39,6 +39,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
     "sphinx.ext.inheritance_diagram",
+    "sphinx.ext.autosummary",
     "blockname",
     "sphinx.ext.intersphinx",
     "format_example",
@@ -83,7 +84,9 @@ html_theme_options = {
     "prev_next_buttons_location": "None",
     "analytics_id": "G-11Q6WJM565",
     "style_external_links": False,
+    "navigation_depth": 5,
 }
+
 html_logo = "../figs/RobToolBox_RoundLogoB.png"
 html_last_updated_fmt = "%d-%b-%Y"
 html_show_sourcelink = False
@@ -163,3 +166,8 @@ intersphinx_mapping = {
 # Include special members (like __membername__) with docstrings in
 # the documentation
 napoleon_include_special_with_doc = True
+
+# -------- Options AutoSummary ----------------------------------------------------------
+
+# autodoc_default_flags = ["members"]
+autosummary_generate = True
