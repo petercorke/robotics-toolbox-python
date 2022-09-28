@@ -8,4 +8,4 @@ Robot Arms
    arm_models
    .. arm_backend
    arm_trajectory
-   IK/arm_ik
+   IK/ik
