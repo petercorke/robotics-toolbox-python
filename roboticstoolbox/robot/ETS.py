@@ -2324,7 +2324,7 @@ class ETS(BaseETS):
         non-singular and positive definite. The performance of the LM method largely depends
         on the choice of :math:`\mat{W}_n`.
 
-        **Chan's Method**
+        *Chan's Method*
 
         Chan proposed
 
@@ -2337,7 +2337,7 @@ class ETS(BaseETS):
         where λ is a constant which reportedly does not have much influence on performance.
         Use the kwarg `k` to adjust the weighting term λ.
 
-        **Sugihara's Method**
+        *Sugihara's Method*
 
         Sugihara proposed
 
@@ -2351,7 +2351,7 @@ class ETS(BaseETS):
         and :math:`l` is the length of a typical link within the manipulator. We provide the
         variable `k` as a kwarg to adjust the value of :math:`w_n`.
 
-        **Wampler's Method**
+        *Wampler's Method*
 
         Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
 
