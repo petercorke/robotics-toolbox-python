@@ -39,6 +39,11 @@ class IKSolution:
         The final error value from the cost function
     reason
         The reason the IK problem failed if applicable
+
+
+    .. versionchanged:: 1.0.3
+        Added IKSolution dataclass to replace the IKsolution named tuple
+
     """
 
     q: Union[np.ndarray, None]
@@ -107,6 +112,10 @@ class IKSolver(ABC):
         Implements this class using the Levemberg-Marquadt method
     roboticstoolbox.robot.IK.IK_QP
         Implements this class using a quadratic programming approach
+
+
+    .. versionchanged:: 1.0.3
+        Added the abstract super class IKSolver
 
     """
 
@@ -309,6 +318,11 @@ class IKSolver(ABC):
         q
             The current joint coordinate vector
 
+        Raises
+        ------
+        np.LinAlgError
+            If a step is impossible due to a linear algebra error
+
         Returns
         -------
         E
@@ -324,7 +338,7 @@ class IKSolver(ABC):
         Generate a random valid joint configuration using a private RNG
 
         Generates a random q vector within the joint limits defined by
-        `self.qlim`.
+        `ets.qlim`.
 
         Parameters
         ----------
@@ -469,9 +483,6 @@ class IK_NR(IKSolver):
     A class which provides functionality to perform numerical inverse kinematics (IK)
     using the Newton-Raphson method. See `step` method for mathematical description.
 
-    .. versionchanged:: X.Y.Z
-        Description of change
-
     Note
     ----
     When using this class with redundant robots (>6 DoF), `pinv` must be set to `True`
@@ -511,6 +522,20 @@ class IK_NR(IKSolver):
         The influence angle/distance (in radians or metres) in null space motion
         becomes active
 
+    Examples
+    --------
+    The following example gets the `ets` of a `panda` robot object, instantiates
+    the IK_NR solver class using default parameters, makes a goal pose `Tep`,
+    and then solves for the joint coordinates which result in the pose `Tep`
+    using the `solve` method.
+
+    .. runblock:: pycon
+    >>> import roboticstoolbox as rtb
+    >>> panda = rtb.models.Panda().ets()
+    >>> solver = rtb.IK_NR(pinv=True)
+    >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+    >>> solver.solve(panda, Tep)
+
     Notes
     -----
     When using the NR method, the initial joint coordinates :math:`q_0`, should correspond
@@ -528,21 +553,6 @@ class IK_NR(IKSolver):
     - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
       Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-    Examples
-    --------
-    The following example gets the `ets` of a `panda` robot object, instantiates
-    the IK_NR solver class using default parameters, makes a goal pose `Tep`,
-    and then solves for the joint coordinates which result in the pose `Tep`
-    using the `solve` method.
-
-    .. runblock:: pycon
-
-        >>> import roboticstoolbox as rtb
-        >>> panda = rtb.models.Panda().ets()
-        >>> solver = rtb.IK_NR(pinv=True)
-        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
-        >>> solver.solve(panda, Tep)
-
     See Also
     --------
     roboticstoolbox.robot.IK.IKSolver
@@ -553,6 +563,10 @@ class IK_NR(IKSolver):
         Implements this class using the Levemberg-Marquadt method
     roboticstoolbox.robot.IK.IK_QP
         Implements this class using a quadratic programming approach
+
+
+    .. versionchanged:: 1.0.3
+        Added the Newton-Raphson IK solver class
 
     """
 
@@ -616,6 +630,11 @@ class IK_NR(IKSolver):
             The desired end-effector pose
         q
             The current joint coordinate vector
+
+        Raises
+        ------
+        np.LinAlgError
+            If a step is impossible due to a linear algebra error
 
         Returns
         -------
@@ -689,6 +708,20 @@ class IK_LM(IKSolver):
         The influence angle/distance (in radians or metres) in null space motion
         becomes active
 
+    Examples
+    --------
+    The following example gets the `ets` of a `panda` robot object, instantiates
+    the IK_LM solver class using default parameters, makes a goal pose `Tep`,
+    and then solves for the joint coordinates which result in the pose `Tep`
+    using the `solve` method.
+
+    .. runblock:: pycon
+    >>> import roboticstoolbox as rtb
+    >>> panda = rtb.models.Panda().ets()
+    >>> solver = rtb.IK_LM()
+    >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+    >>> solver.solve(panda, Tep)
+
     Notes
     -----
     When using the this method, the initial joint coordinates :math:`q_0`, should correspond
@@ -704,21 +737,6 @@ class IK_LM(IKSolver):
     - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
       Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-    Examples
-    --------
-    The following example gets the `ets` of a `panda` robot object, instantiates
-    the IK_LM solver class using default parameters, makes a goal pose `Tep`,
-    and then solves for the joint coordinates which result in the pose `Tep`
-    using the `solve` method.
-
-    .. runblock:: pycon
-
-        >>> import roboticstoolbox as rtb
-        >>> panda = rtb.models.Panda().ets()
-        >>> solver = rtb.IK_LM()
-        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
-        >>> solver.solve(panda, Tep)
-
     See Also
     --------
     roboticstoolbox.robot.IK.IKSolver
@@ -729,6 +747,10 @@ class IK_LM(IKSolver):
         Implements this class using the Gauss-Newton method
     roboticstoolbox.robot.IK.IK_QP
         Implements this class using a quadratic programming approach
+
+
+    .. versionchanged:: 1.0.3
+        Added the Levemberg-Marquadt IK solver class
 
     """
 
@@ -852,6 +874,11 @@ class IK_LM(IKSolver):
         q
             The current joint coordinate vector
 
+        Raises
+        ------
+        np.LinAlgError
+            If a step is impossible due to a linear algebra error
+
         Returns
         -------
         E
@@ -932,6 +959,20 @@ class IK_GN(IKSolver):
         The influence angle/distance (in radians or metres) in null space motion
         becomes active
 
+    Examples
+    --------
+    The following example gets the `ets` of a `panda` robot object, instantiates
+    the `IK_GN` solver class using default parameters, makes a goal pose `Tep`,
+    and then solves for the joint coordinates which result in the pose `Tep`
+    using the `solve` method.
+
+    .. runblock:: pycon
+    >>> import roboticstoolbox as rtb
+    >>> panda = rtb.models.Panda().ets()
+    >>> solver = rtb.IK_GN(pinv=True)
+    >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+    >>> solver.solve(panda, Tep)
+
     Notes
     -----
     When using the this method, the initial joint coordinates :math:`q_0`, should correspond
@@ -948,21 +989,6 @@ class IK_GN(IKSolver):
     - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
       Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-    Examples
-    --------
-    The following example gets the `ets` of a `panda` robot object, instantiates
-    the `IK_GN` solver class using default parameters, makes a goal pose `Tep`,
-    and then solves for the joint coordinates which result in the pose `Tep`
-    using the `solve` method.
-
-    .. runblock:: pycon
-
-        >>> import roboticstoolbox as rtb
-        >>> panda = rtb.models.Panda().ets()
-        >>> solver = rtb.IK_GN(pinv=True)
-        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
-        >>> solver.solve(panda, Tep)
-
     See Also
     --------
     roboticstoolbox.robot.IK.IKSolver
@@ -974,6 +1000,9 @@ class IK_GN(IKSolver):
     roboticstoolbox.robot.IK.IK_QP
         Implements this class using a quadratic programming approach
 
+
+    .. versionchanged:: 1.0.3
+        Added the Gauss-Newton IK solver class
 
     """
 
@@ -1055,6 +1084,11 @@ class IK_GN(IKSolver):
         q
             The current joint coordinate vector
 
+        Raises
+        ------
+        np.LinAlgError
+            If a step is impossible due to a linear algebra error
+
         Returns
         -------
         E
@@ -1131,6 +1165,20 @@ class IK_QP(IKSolver):
     ImportError
         If the package `qpsolvers` is not installed
 
+    Examples
+    --------
+    The following example gets the `ets` of a `panda` robot object, instantiates
+    the `IK_QP` solver class using default parameters, makes a goal pose `Tep`,
+    and then solves for the joint coordinates which result in the pose `Tep`
+    using the `solve` method.
+
+    .. runblock:: pycon
+    >>> import roboticstoolbox as rtb
+    >>> panda = rtb.models.Panda().ets()
+    >>> solver = rtb.IK_QP()
+    >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+    >>> solver.solve(panda, Tep)
+
     Notes
     -----
     When using the this method, the initial joint coordinates :math:`q_0`, should correspond
@@ -1142,21 +1190,6 @@ class IK_QP(IKSolver):
     - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
       Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-    Examples
-    --------
-    The following example gets the `ets` of a `panda` robot object, instantiates
-    the `IK_QP` solver class using default parameters, makes a goal pose `Tep`,
-    and then solves for the joint coordinates which result in the pose `Tep`
-    using the `solve` method.
-
-    .. runblock:: pycon
-
-        >>> import roboticstoolbox as rtb
-        >>> panda = rtb.models.Panda().ets()
-        >>> solver = rtb.IK_QP()
-        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
-        >>> solver.solve(panda, Tep)
-
     See Also
     --------
     roboticstoolbox.robot.IK.IKSolver
@@ -1167,6 +1200,10 @@ class IK_QP(IKSolver):
         Implements this class using the Gauss-Newton method
     roboticstoolbox.robot.IK.IK_LM
         Implements this class using the Levemberg-Marquadt method
+
+
+    .. versionchanged:: 1.0.3
+        Added the Quadratic Programming IK solver class
 
     """
 
@@ -1295,6 +1332,11 @@ class IK_QP(IKSolver):
         q
             The current joint coordinate vector
 
+        Raises
+        ------
+        np.LinAlgError
+            If a step is impossible due to a linear algebra error
+
         Returns
         -------
         E
@@ -1378,4 +1420,4 @@ class IK_QP(IKSolver):
 # | reason     | str     | The reason the IK problem failed if applicable                                                                  |
 
 
-IK_NR()
+# IK_NR()
