@@ -2692,10 +2692,171 @@ class ERobot(BaseERobot):
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        joint_limits: bool = False,
         mask: Union[ArrayLike, None] = None,
+        joint_limits: bool = True,
         seed: Union[int, None] = None,
+        k: float = 1.0,
+        method="chan",
+        kq: float = 0.0,
+        km: float = 0.0,
+        ps: float = 0.0,
+        pi: Union[ndarray, float] = 0.3,
+        **kwargs,
     ):
+        r"""
+        Levemberg-Marquadt Numerical Inverse Kinematics Solver
+
+        A method which provides functionality to perform numerical inverse kinematics (IK)
+        using the Levemberg-Marquadt method.
+
+        Parameters
+        ----------
+        Tep
+            The desired end-effector pose
+        end
+            the link considered as the end-effector
+        start
+            the link considered as the base frame, defaults to the robots's base frame
+        q0
+            The initial joint coordinate vector
+        ilimit
+            How many iterations are allowed within a search before a new search
+            is started
+        slimit
+            How many searches are allowed before being deemed unsuccessful
+        tol
+            Maximum allowed residual error E
+        mask
+            A 6 vector which assigns weights to Cartesian degrees-of-freedom
+            error priority
+        joint_limits
+            Reject solutions with joint limit violations
+        seed
+            A seed for the private RNG used to generate random joint coordinate
+            vectors
+        k
+            Sets the gain value for the damping matrix Wn in the next iteration. See
+            synopsis
+        method
+            One of "chan", "sugihara" or "wampler". Defines which method is used
+            to calculate the damping matrix Wn in the ``step`` method
+        kq
+            The gain for joint limit avoidance. Setting to 0.0 will remove this
+            completely from the solution
+        km
+            The gain for maximisation. Setting to 0.0 will remove this completely
+            from the solution
+        ps
+            The minimum angle/distance (in radians or metres) in which the joint is
+            allowed to approach to its limit
+        pi
+            The influence angle/distance (in radians or metres) in null space motion
+            becomes active
+
+        Synopsis
+        --------
+        The operation is defined by the choice of the ``method`` kwarg. 
+
+        The step is deined as
+
+        .. math::
+
+            \vec{q}_{k+1} 
+            &= 
+            \vec{q}_k +
+            \left(
+                \mat{A}_k
+            \right)^{-1}
+            \bf{g}_k \\
+            %
+            \mat{A}_k
+            &=
+            {\mat{J}(\vec{q}_k)}^\top
+            \mat{W}_e \
+            {\mat{J}(\vec{q}_k)}
+            +
+            \mat{W}_n
+
+        where :math:`\mat{W}_n = \text{diag}(\vec{w_n})(\vec{w_n} \in \mathbb{R}^n_{>0})` is a
+        diagonal damping matrix. The damping matrix ensures that :math:`\mat{A}_k` is
+        non-singular and positive definite. The performance of the LM method largely depends
+        on the choice of :math:`\mat{W}_n`.
+
+        **Chan's Method**
+
+        Chan proposed
+
+        .. math::
+
+            \mat{W}_n
+            =
+            λ E_k \mat{1}_n
+
+        where λ is a constant which reportedly does not have much influence on performance.
+        Use the kwarg `k` to adjust the weighting term λ.
+
+        **Sugihara's Method**
+
+        Sugihara proposed
+
+        .. math::
+
+            \mat{W}_n
+            =
+            E_k \mat{1}_n + \text{diag}(\hat{\vec{w}}_n)
+
+        where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
+        and :math:`l` is the length of a typical link within the manipulator. We provide the
+        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+
+        **Wampler's Method**
+
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+
+        Examples
+        --------
+        The following example makes a ``panda`` robot object, makes a goal
+        pose ``Tep``, and then solves for the joint coordinates which result in the pose
+        ``Tep`` using the `ikine_LM` method.
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda()
+        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        >>> panda.ikine_LM(Tep)
+
+        Notes
+        -----
+        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+        to a non-singular manipulator pose, since it uses the manipulator Jacobian.
+
+        This class supports null-space motion to assist with maximising manipulability and
+        avoiding joint limits. These are enabled by setting kq and km to non-zero values.
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        See Also
+        --------
+        :py:class:`~roboticstoolbox.robot.IK.IK_LM`
+            An IK Solver class which implements the Levemberg Marquadt optimisation technique
+        ikine_NR
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`Robot` class
+        ikine_GN
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`Robot` class
+        ikine_QP
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`Robot` class
+
+
+        .. versionchanged:: 1.0.3
+            Added the Levemberg-Marquadt IK solver method on the `Robot` class
+
+        """
+
         return self.ets(start, end).ikine_LM(
             Tep=Tep,
             q0=q0,
@@ -2705,6 +2866,13 @@ class ERobot(BaseERobot):
             joint_limits=joint_limits,
             mask=mask,
             seed=seed,
+            k=k,
+            method=method,
+            kq=kq,
+            km=km,
+            ps=ps,
+            pi=pi,
+            **kwargs,
         )
 
 
