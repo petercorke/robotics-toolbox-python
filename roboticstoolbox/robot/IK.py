@@ -257,7 +257,7 @@ class IKSolver(ABC):
         reason = "iteration and search limit reached"
 
         if linalg_error:
-            reason += f", {linalg_error} np.LinAlgError encountered"
+            reason += f", {linalg_error} numpy.LinAlgError encountered"
 
         if found_with_limits:
             reason += ", solution found but violates joint limits"
@@ -320,7 +320,7 @@ class IKSolver(ABC):
 
         Raises
         ------
-        np.LinAlgError
+        numpy.LinAlgError
             If a step is impossible due to a linear algebra error
 
         Returns
@@ -620,7 +620,7 @@ class IK_NR(IKSolver):
 
         .. math::
 
-            \bf{q}_{k+1} = \bf{q}_k + {^0\bf{J}(\bf{q}_k)}^{-1} \bf{e}_k
+            \vec{q}_{k+1} = \vec{q}_k + {^0\mat{J}(\vec{q}_k)}^{-1} \vec{e}_k
 
         Parameters
         ----------
@@ -633,7 +633,7 @@ class IK_NR(IKSolver):
 
         Raises
         ------
-        np.LinAlgError
+        numpy.LinAlgError
             If a step is impossible due to a linear algebra error
 
         Returns
@@ -815,35 +815,35 @@ class IK_LM(IKSolver):
         The next step is deined as
 
         .. math::
-            \bf{q}_{k+1} 
+            \vec{q}_{k+1} 
             &= 
-            \bf{q}_k +
+            \vec{q}_k +
             \left(
-                \bf{A}_k
+                \mat{A}_k
             \right)^{-1}
             \bf{g}_k \\
             %
-            \bf{A}_k
+            \mat{A}_k
             &=
-            {\bf{J}(\bf{q}_k)}^\top
-            \bf{W}_e \
-            {\bf{J}(\bf{q}_k)}
+            {\mat{J}(\vec{q}_k)}^\top
+            \mat{W}_e \
+            {\mat{J}(\vec{q}_k)}
             +
-            \bf{W}_n
+            \mat{W}_n
 
-        where :math:`\bf{W}_n = \text{diag}(\bf{w_n})(\bf{w_n} \in \mathbb{R}^n_{>0})` is a
-        diagonal damping matrix. The damping matrix ensures that :math:`\bf{A}_k` is
+        where :math:`\mat{W}_n = \text{diag}(\vec{w_n})(\vec{w_n} \in \mathbb{R}^n_{>0})` is a
+        diagonal damping matrix. The damping matrix ensures that :math:`\mat{A}_k` is
         non-singular and positive definite. The performance of the LM method largely depends
-        on the choice of :math:`\bf{W}_n`.
+        on the choice of :math:`\mat{W}_n`.
 
         **Chan's Method**
 
         Chan proposed
 
         .. math::
-            \bf{W}_n
+            \mat{W}_n
             =
-            λ E_k \bf{1}_n
+            λ E_k \mat{1}_n
 
         where λ is a constant which reportedly does not have much influence on performance.
         Use the kwarg `k` to adjust the weighting term λ.
@@ -853,17 +853,17 @@ class IK_LM(IKSolver):
         Sugihara proposed
 
         .. math::
-            \bf{W}_n
+            \mat{W}_n
             =
-            E_k \bf{1}_n + \text{diag}(\hat{\bf{w}}_n)
+            E_k \mat{1}_n + \text{diag}(\hat{\vec{w}}_n)
 
-        where :math:`\hat{\bf{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
+        where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
         and :math:`l` is the length of a typical link within the manipulator. We provide the
         variable `k` as a kwarg to adjust the value of :math:`w_n`.
 
         **Wampler's Method**
 
-        Wampler proposed :math:`\bf{w_n}` to be a constant. This is set through the `k` kwarg.
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
 
         Parameters
         ----------
@@ -876,7 +876,7 @@ class IK_LM(IKSolver):
 
         Raises
         ------
-        np.LinAlgError
+        numpy.LinAlgError
             If a step is impossible due to a linear algebra error
 
         Returns
@@ -1058,21 +1058,21 @@ class IK_GN(IKSolver):
 
         .. math::
 
-            \bf{q}_{k+1} &= \bf{q}_k +
+            \vec{q}_{k+1} &= \vec{q}_k +
             \left(
-            {\bf{J}(\bf{q}_k)}^\top
-            \bf{W}_e \
-            {\bf{J}(\bf{q}_k)}
+            {\mat{J}(\vec{q}_k)}^\top
+            \mat{W}_e \
+            {\mat{J}(\vec{q}_k)}
             \right)^{-1}
             \bf{g}_k \\
             \bf{g}_k &=
-            {\bf{J}(\bf{q}_k)}^\top
-            \bf{W}_e
-            \bf{e}_k
+            {\mat{J}(\vec{q}_k)}^\top
+            \mat{W}_e
+            \vec{e}_k
 
-        where :math:`\bf{J} = {^0\bf{J}}` is the base-frame manipulator Jacobian. If
-        :math:`\bf{J}(\bf{q}_k)` is non-singular, and :math:`\bf{W}_e = \bf{1}_n`, then
-        the above provides the pseudoinverse solution. However, if :math:`\bf{J}(\bf{q}_k)`
+        where :math:`\mat{J} = {^0\mat{J}}` is the base-frame manipulator Jacobian. If
+        :math:`\mat{J}(\vec{q}_k)` is non-singular, and :math:`\mat{W}_e = \mat{1}_n`, then
+        the above provides the pseudoinverse solution. However, if :math:`\mat{J}(\vec{q}_k)`
         is singular, the above can not be computed and the GN solution is infeasible.
 
         Parameters
@@ -1086,7 +1086,7 @@ class IK_GN(IKSolver):
 
         Raises
         ------
-        np.LinAlgError
+        numpy.LinAlgError
             If a step is impossible due to a linear algebra error
 
         Returns
@@ -1267,40 +1267,40 @@ class IK_QP(IKSolver):
 
         .. math::
 
-            \bf{q}_{k+1} = \bf{q}_{k} + \dot{\bf{q}}.
+            \vec{q}_{k+1} = \vec{q}_{k} + \dot{\vec{q}}.
 
         where the QP is defined as
 
         .. math::
 
-            \min_x \quad f_o(\bf{x}) &= \frac{1}{2} \bf{x}^\top \mathcal{Q} \bf{x}+ \mathcal{C}^\top \bf{x}, \\ 
-            \text{subject to} \quad \mathcal{J} \bf{x} &= \bf{\nu},  \\
-            \mathcal{A} \bf{x} &\leq \mathcal{B},  \\
-            \bf{x}^- &\leq \bf{x} \leq \bf{x}^+ 
+            \min_x \quad f_o(\vec{x}) &= \frac{1}{2} \vec{x}^\top \mathcal{Q} \vec{x}+ \mathcal{C}^\top \vec{x}, \\ 
+            \text{subject to} \quad \mathcal{J} \vec{x} &= \vec{\nu},  \\
+            \mathcal{A} \vec{x} &\leq \mathcal{B},  \\
+            \vec{x}^- &\leq \vec{x} \leq \vec{x}^+ 
 
         with
 
         .. math::
 
-            \bf{x} &= 
+            \vec{x} &= 
             \begin{pmatrix}
-                \dot{\bf{q}} \\ \bf{\delta}
+                \dvec{q} \\ \vec{\delta}
             \end{pmatrix} \in \mathbb{R}^{(n+6)}  \\
             \mathcal{Q} &=
             \begin{pmatrix}
-                \lambda_q \bf{1}_{n} & \mathbf{0}_{6 \times 6} \\ \mathbf{0}_{n \times n} & \lambda_\delta \bf{1}_{6}
+                \lambda_q \mat{1}_{n} & \mathbf{0}_{6 \times 6} \\ \mathbf{0}_{n \times n} & \lambda_\delta \mat{1}_{6}
             \end{pmatrix} \in \mathbb{R}^{(n+6) \times (n+6)} \\
             \mathcal{J} &=
             \begin{pmatrix}
-                \bf{J}(\bf{q}) & \bf{1}_{6}
+                \mat{J}(\vec{q}) & \mat{1}_{6}
             \end{pmatrix} \in \mathbb{R}^{6 \times (n+6)} \\
             \mathcal{C} &= 
             \begin{pmatrix}
-                \bf{J}_m \\ \bf{0}_{6 \times 1}
+                \mat{J}_m \\ \bf{0}_{6 \times 1}
             \end{pmatrix} \in \mathbb{R}^{(n + 6)} \\
             \mathcal{A} &= 
             \begin{pmatrix}
-                \bf{1}_{n \times n + 6} \\
+                \mat{1}_{n \times n + 6} \\
             \end{pmatrix} \in \mathbb{R}^{(l + n) \times (n + 6)} \\
             \mathcal{B} &= 
             \eta
@@ -1311,17 +1311,17 @@ class IK_QP(IKSolver):
                 \frac{\rho_n - \rho_s}
                         {\rho_i - \rho_s} 
             \end{pmatrix} \in \mathbb{R}^{n} \\
-            \bf{x}^{-, +} &= 
+            \vec{x}^{-, +} &= 
             \begin{pmatrix}
-                \dot{\bf{q}}^{-, +} \\
-                \bf{\delta}^{-, +}
+                \dvec{q}^{-, +} \\
+                \vec{\delta}^{-, +}
             \end{pmatrix} \in \mathbb{R}^{(n+6)},
 
-        where :math:`\bf{\delta} \in \mathbb{R}^6` is the slack vector,
+        where :math:`\vec{\delta} \in \mathbb{R}^6` is the slack vector,
         :math:`\lambda_\delta \in \mathbb{R}^+` is a gain term which adjusts the
         cost of the norm of the slack vector in the optimiser,
-        :math:`\dot{\bf{q}}^{-,+}` are the minimum and maximum joint velocities, and 
-        :math:`\dot{\bf{\delta}}^{-,+}` are the minimum and maximum slack velocities.
+        :math:`\dvec{q}^{-,+}` are the minimum and maximum joint velocities, and 
+        :math:`\dvec{\delta}^{-,+}` are the minimum and maximum slack velocities.
 
         Parameters
         ----------
@@ -1334,7 +1334,7 @@ class IK_QP(IKSolver):
 
         Raises
         ------
-        np.LinAlgError
+        numpy.LinAlgError
             If a step is impossible due to a linear algebra error
 
         Returns
