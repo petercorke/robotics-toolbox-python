@@ -24,7 +24,7 @@ author = "Jesse Haviland and Peter Corke"
 # Parse version number out of setup.py
 with open("../../setup.py", encoding="utf-8") as f:
     setup_py = f.read()
-    m = re.search("version='([0-9\.]*)',", setup_py, re.MULTILINE)
+    m = re.search(r"version='([0-9\.]*)',", setup_py, re.MULTILINE)
 
 # -------- General configuration --------------------------------------------------------
 
@@ -112,9 +112,9 @@ latex_elements = {
 
 # Use RVC book notation for maths
 # see https://stackoverflow.com/questions/9728292/creating-latex-math-macros-within-sphinx
-mathjax_config = {
-    "TeX": {
-        "Macros": {
+mathjax3_config = {
+    "tex": {
+        "macros": {
             # RVC Math notation
             #  - not possible to do the if/then/else approach
             #  - subset only
