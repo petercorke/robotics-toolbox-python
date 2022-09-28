@@ -1,7 +1,4 @@
-IKSolution - IK Solution
+IKSolution - as IK Solution dataclass
 ------------------------
 
 .. autoclass:: roboticstoolbox.robot.IK.IKSolution
-   :members:
-   :show-inheritance:
-   :member-order: bysource

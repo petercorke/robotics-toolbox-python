@@ -1,7 +1,25 @@
 IK_NR - Newton-Raphson Numerical IK
 -----------------------------------
 
-.. autoclass:: roboticstoolbox.robot.IK.IK_NR
-   :members: step, solve, error
+.. currentmodule:: roboticstoolbox.robot.IK
+
+.. autoclass:: IK_NR
    :show-inheritance:
-   :member-order: bysource
+
+
+.. rubric:: Methods
+
+.. autosummary::
+   :toctree: stubs
+
+   ~IK_NR.step
+   ~IK_NR.solve
+   ~IK_NR.error
+
+.. rubric:: Private Methods
+
+.. autosummary::
+   :toctree: stubs
+   
+   ~IK_NR._random_q
+   ~IK_NR._check_jl

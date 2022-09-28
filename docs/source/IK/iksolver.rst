@@ -1,7 +1,25 @@
-IKSolver - IK Solver Abstract Super Class
+IKSolver - IK Solver Abstract Base Class
 -----------------------------------------
 
-.. autoclass:: roboticstoolbox.robot.IK.IKSolver
-   :members: step, solve, error, _random_q, _check_jl
+.. currentmodule:: roboticstoolbox.robot.IK
+
+.. autoclass:: IKSolver
    :show-inheritance:
-   :member-order: bysource
+
+
+.. rubric:: Methods
+
+.. autosummary::
+   :toctree: stubs
+
+   ~IKSolver.step
+   ~IKSolver.solve
+   ~IKSolver.error
+
+.. rubric:: Private Methods
+
+.. autosummary::
+   :toctree: stubs
+
+   ~IKSolver._random_q
+   ~IKSolver._check_jl
