@@ -46,7 +46,7 @@ class IKSolution:
 
     """
 
-    q: Union[np.ndarray, None]
+    q: np.ndarray
     success: bool
     iterations: int = 0
     searches: int = 0
@@ -193,6 +193,7 @@ class IKSolver(ABC):
 
         if q0.ndim == 1:
             q0_new = self._random_q(ets, self.slimit)
+
             q0_new[0] = q0
             q0 = q0_new
 
@@ -337,7 +338,7 @@ class IKSolver(ABC):
             The new joint coordinate vector
 
         """
-        pass
+        pass  # pragma: nocover
 
     def _random_q(self, ets: "rtb.ETS", i: int = 1) -> np.ndarray:
         """
@@ -362,10 +363,10 @@ class IKSolver(ABC):
         """
 
         if i == 1:
-            q = np.zeros(ets.n)
+            q = np.zeros((1, ets.n))
 
             for i in range(ets.n):
-                q[i] = self._private_random.uniform(ets.qlim[0, i], ets.qlim[1, i])
+                q[0, i] = self._private_random.uniform(ets.qlim[0, i], ets.qlim[1, i])
 
         else:
             q = np.zeros((i, ets.n))
