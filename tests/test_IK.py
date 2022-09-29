@@ -11,6 +11,7 @@ from spatialmath import SE3
 from spatialmath.base import tr2jac
 import unittest
 import sympy
+import pytest
 
 
 class TestIK(unittest.TestCase):
@@ -152,6 +153,7 @@ class TestIK(unittest.TestCase):
 
         self.assertEqual(sol.success, False)
 
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
     def test_IK_NR8(self):
 
         tol = 1e-6
@@ -161,7 +163,12 @@ class TestIK(unittest.TestCase):
         Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
         solver = rtb.IK_NR(
-            joint_limits=True, seed=0, pinv=True, tol=tol, kq=1.0, km=1.0
+            joint_limits=True,
+            seed=0,
+            pinv=True,
+            tol=tol,
+            kq=0.01,
+            km=1.0,
         )
 
         sol = solver.solve(panda, Tep)
@@ -174,6 +181,7 @@ class TestIK(unittest.TestCase):
 
         self.assertGreater(tol, E)
 
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
     def test_IK_LM1(self):
 
         tol = 1e-6
@@ -239,6 +247,134 @@ class TestIK(unittest.TestCase):
         _, E = solver.error(Tep, Tq)
 
         self.assertGreater(tol, E)
+
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    def test_IK_GN1(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_GN(
+            pinv=True, joint_limits=True, seed=0, tol=tol, kq=1.0, km=1.0
+        )
+
+        sol = solver.solve(panda, Tep)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_IK_GN2(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_GN(pinv=True, joint_limits=True, seed=0, tol=tol)
+
+        sol = solver.solve(panda, Tep)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_IK_GN3(self):
+
+        tol = 1e-6
+
+        ur5 = rtb.models.UR5().ets()
+
+        Tep = ur5.eval([0, -0.3, 0, -2.2, 0, 2.0])
+
+        solver = rtb.IK_GN(pinv=False, joint_limits=True, seed=0, tol=tol)
+
+        sol = solver.solve(ur5, Tep)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = ur5.eval(sol.q)
+
+        _, E = solver.error(Tep, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_IK_QP1(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_QP(joint_limits=True, seed=0, tol=tol, kq=2.0, km=100.0)
+
+        sol = solver.solve(panda, Tep)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_IK_QP2(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_QP(joint_limits=True, seed=0, tol=tol)
+
+        sol = solver.solve(panda, Tep)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_IK_QP3(self):
+
+        tol = 1e-6
+
+        q0 = [0, 0, 0, 0, 0, 0, 0.0]
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_QP(
+            joint_limits=True,
+            seed=0,
+            tol=tol,
+            kq=1000.0,
+            pi=4.0,
+            ps=2.0,
+            kj=10000.0,
+            slimit=1,
+        )
+
+        sol = solver.solve(panda, Tep, q0=q0)
+
+        self.assertEqual(sol.success, False)
 
 
 if __name__ == "__main__":
