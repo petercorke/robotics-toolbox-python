@@ -174,6 +174,72 @@ class TestIK(unittest.TestCase):
 
         self.assertGreater(tol, E)
 
+    def test_IK_LM1(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_LM(
+            method="chan", joint_limits=True, seed=0, tol=tol, kq=0.1, km=0.1
+        )
+
+        sol = solver.solve(panda, Tep)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_IK_LM2(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_LM(
+            method="sugihara", k=0.0001, joint_limits=True, seed=0, tol=tol
+        )
+
+        sol = solver.solve(panda, Tep)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_IK_LM3(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_LM(
+            method="wampler", k=0.001, joint_limits=True, seed=0, tol=tol
+        )
+
+        sol = solver.solve(panda, Tep)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep, Tq)
+
+        self.assertGreater(tol, E)
+
 
 if __name__ == "__main__":
 
