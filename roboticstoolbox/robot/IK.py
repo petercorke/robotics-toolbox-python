@@ -1223,7 +1223,7 @@ class IK_QP(IKSolver):
         mask: Union[ArrayLike, None] = None,
         joint_limits: bool = True,
         seed: Union[int, None] = None,
-        kj=1.0,
+        kj=0.01,
         ks=1.0,
         kq: float = 0.0,
         km: float = 0.0,
@@ -1232,7 +1232,7 @@ class IK_QP(IKSolver):
         **kwargs,
     ):
 
-        if not _qp:
+        if not _qp:  # pragma: nocover
             raise ImportError(
                 "the package qpsolvers is required for this class. \nInstall using 'pip install qpsolvers'"
             )
@@ -1408,22 +1408,9 @@ class IK_QP(IKSolver):
 
         xd = qp.solve_qp(Q, c, Ain, bin, Aeq, beq, lb=None, ub=None, solver="quadprog")
 
-        if xd is None:
+        if xd is None:  # pragma: nocover
             raise np.linalg.LinAlgError("QP Unsolvable")
 
         q += xd[: ets.n]
 
         return E, q
-
-
-# | Element    | Type    | Description                                                                                                     |
-# |------------|---------|-----------------------------------------------------------------------------------------------------------------|
-# | q          | ndarray | The joint coordinates of the solution (ndarray). Note that these will not be valid if failed to find a solution |
-# | success    | bool    | True if a valid solution was found                                                                              |
-# | iterations | int     | How many iterations were performed                                                                              |
-# | searches   | int     | How many searches were performed                                                                                |
-# | residual   | float   | The final error value from the cost function                                                                    |
-# | reason     | str     | The reason the IK problem failed if applicable                                                                  |
-
-
-# IK_NR()
