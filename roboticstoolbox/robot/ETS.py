@@ -2372,6 +2372,10 @@ class ETS(BaseETS):
 
         Notes
         -----
+        The value for the ``k`` kwarg will depend on the ``method`` chosen and the arm you are
+        using. Use the following as a rough guide ``chan, k = 1.0 - 0.01``,
+        ``wampler, k = 0.01 - 0.0001``, and ``sugihara, k = 0.1 - 0.0001``
+        
         When using the this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
@@ -2441,7 +2445,7 @@ class ETS(BaseETS):
         **kwargs,
     ):
         r"""
-        Levemberg-Marquadt Numerical Inverse Kinematics Solver
+        Newton-Raphson Numerical Inverse Kinematics Solver
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Newton-Raphson method.
@@ -2580,7 +2584,7 @@ class ETS(BaseETS):
         **kwargs,
     ):
         r"""
-        Levemberg-Marquadt Numerical Inverse Kinematics Solver
+        Gauss-Newton Numerical Inverse Kinematics Solver
 
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Gauss-Newton method.
@@ -2735,7 +2739,7 @@ class ETS(BaseETS):
         **kwargs,
     ):
         r"""
-        Levemberg-Marquadt Numerical Inverse Kinematics Solver
+        Quadratic Programming Numerical Inverse Kinematics Solver
 
         A method that provides functionality to perform numerical inverse kinematics
         (IK) using a quadratic progamming approach.

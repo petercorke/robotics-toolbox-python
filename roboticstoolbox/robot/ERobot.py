@@ -2830,6 +2830,10 @@ class ERobot(BaseERobot):
 
         Notes
         -----
+        The value for the ``k`` kwarg will depend on the ``method`` chosen and the arm you are
+        using. Use the following as a rough guide ``chan, k = 1.0 - 0.01``,
+        ``wampler, k = 0.01 - 0.0001``, and ``sugihara, k = 0.1 - 0.0001``
+
         When using the this method, the initial joint coordinates :math:`q_0`, should correspond
         to a non-singular manipulator pose, since it uses the manipulator Jacobian.
 
