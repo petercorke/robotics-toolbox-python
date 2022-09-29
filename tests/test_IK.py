@@ -376,6 +376,166 @@ class TestIK(unittest.TestCase):
 
         self.assertEqual(sol.success, False)
 
+    def test_ets_ikine_NR1(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_NR()
+
+        sol = panda.ikine_NR(Tep, pinv=True, tol=tol)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_ets_ikine_NR2(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_NR()
+
+        sol = panda.ikine_NR(Tep, pinv=True, tol=tol)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep.A, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_ets_ikine_LM1(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_LM()
+
+        sol = panda.ikine_LM(Tep, tol=tol)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_ets_ikine_LM2(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_LM()
+
+        sol = panda.ikine_LM(Tep, tol=tol)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep.A, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_ets_ikine_GN1(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_GN()
+
+        sol = panda.ikine_GN(Tep, pinv=True, tol=tol)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_ets_ikine_GN2(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_GN()
+
+        sol = panda.ikine_GN(Tep, pinv=True, tol=tol)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep.A, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_ets_ikine_QP1(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_QP()
+
+        sol = panda.ikine_QP(Tep, tol=tol)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep, Tq)
+
+        self.assertGreater(tol, E)
+
+    def test_ets_ikine_QP2(self):
+
+        tol = 1e-6
+
+        panda = rtb.models.Panda().ets()
+
+        Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+
+        solver = rtb.IK_QP()
+
+        sol = panda.ikine_QP(Tep, tol=tol)
+
+        self.assertEqual(sol.success, True)
+
+        Tq = panda.eval(sol.q)
+
+        _, E = solver.error(Tep.A, Tq)
+
+        self.assertGreater(tol, E)
+
 
 if __name__ == "__main__":
 
