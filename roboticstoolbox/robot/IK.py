@@ -928,7 +928,7 @@ class IK_GN(IKSolver):
 
     Note
     ----
-    When using this class with redundant robots (>6 DoF), `pinv` must be set to `True`
+    When using this class with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
 
     Parameters
     ----------
@@ -967,9 +967,9 @@ class IK_GN(IKSolver):
 
     Examples
     --------
-    The following example gets the `ets` of a `panda` robot object, instantiates
-    the `IK_GN` solver class using default parameters, makes a goal pose `Tep`,
-    and then solves for the joint coordinates which result in the pose `Tep`
+    The following example gets the ``ets`` of a ``panda`` robot object, instantiates
+    the `IK_GN` solver class using default parameters, makes a goal pose ``Tep``,
+    and then solves for the joint coordinates which result in the pose ``Tep``
     using the `solve` method.
 
     .. runblock:: pycon
@@ -1169,13 +1169,13 @@ class IK_QP(IKSolver):
     Raises
     ------
     ImportError
-        If the package `qpsolvers` is not installed
+        If the package ``qpsolvers`` is not installed
 
     Examples
     --------
-    The following example gets the `ets` of a `panda` robot object, instantiates
-    the `IK_QP` solver class using default parameters, makes a goal pose `Tep`,
-    and then solves for the joint coordinates which result in the pose `Tep`
+    The following example gets the ``ets`` of a ``panda`` robot object, instantiates
+    the `IK_QP` solver class using default parameters, makes a goal pose ``Tep``,
+    and then solves for the joint coordinates which result in the pose ``Tep``
     using the `solve` method.
 
     .. runblock:: pycon
@@ -1222,7 +1222,6 @@ class IK_QP(IKSolver):
         mask: Union[ArrayLike, None] = None,
         joint_limits: bool = True,
         seed: Union[int, None] = None,
-        pinv: bool = False,
         kj=1.0,
         ks=1.0,
         kq: float = 0.0,
@@ -1255,7 +1254,7 @@ class IK_QP(IKSolver):
         self.ps = ps
         self.pi = pi
 
-        self.name = f"QP (pinv={pinv})"
+        self.name = f"QP)"
 
         if self.kq > 0.0:
             self.name += " Σ"
