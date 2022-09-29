@@ -1,3 +1,5 @@
+.. _IK:
+
 
 Inverse Kinematics
 ==================
