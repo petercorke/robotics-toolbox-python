@@ -42,7 +42,7 @@ The ``slimit`` specifies how many searches are allowed before the problem is dee
 
 .. math::
 
-   E = \frac{1}{2} \vec{e}^{\top} \mat{W}_e \vec{e}
+    E = \frac{1}{2} \vec{e}^{\top} \mat{W}_e \vec{e}
 
 where :math:`\vec{e} \in \mathbb{R}^6` is the angle-axis error, and :math:`\mat{W}_e` assigns weights to Cartesian degrees-of-freedom
 
@@ -88,50 +88,50 @@ The C++ solvers can be identified as methods which start with ``ik_``.
 .. rubric:: ETS C++ IK Methods
 
 .. autosummary::
-   :toctree: stubs
-   
-   ~roboticstoolbox.robot.ETS.ETS.ik_lm_chan
-   ~roboticstoolbox.robot.ETS.ETS.ik_lm_sugihara
-   ~roboticstoolbox.robot.ETS.ETS.ik_lm_wampler
-   ~roboticstoolbox.robot.ETS.ETS.ik_gn
-   ~roboticstoolbox.robot.ETS.ETS.ik_nr
+    :toctree: stubs
+    
+    ~roboticstoolbox.robot.ETS.ETS.ik_lm_chan
+    ~roboticstoolbox.robot.ETS.ETS.ik_lm_sugihara
+    ~roboticstoolbox.robot.ETS.ETS.ik_lm_wampler
+    ~roboticstoolbox.robot.ETS.ETS.ik_gn
+    ~roboticstoolbox.robot.ETS.ETS.ik_nr
 
 .. rubric:: Robot C++ IK Methods
 
 .. autosummary::
-   :toctree: stubs
+    :toctree: stubs
 
-   ~roboticstoolbox.robot.ERobot.ERobot.ik_lm_chan
-   ~roboticstoolbox.robot.ERobot.ERobot.ik_lm_sugihara
-   ~roboticstoolbox.robot.ERobot.ERobot.ik_lm_wampler
-   ~roboticstoolbox.robot.ERobot.ERobot.ik_gn
-   ~roboticstoolbox.robot.ERobot.ERobot.ik_nr
+    ~roboticstoolbox.robot.ERobot.ERobot.ik_lm_chan
+    ~roboticstoolbox.robot.ERobot.ERobot.ik_lm_sugihara
+    ~roboticstoolbox.robot.ERobot.ERobot.ik_lm_wampler
+    ~roboticstoolbox.robot.ERobot.ERobot.ik_gn
+    ~roboticstoolbox.robot.ERobot.ERobot.ik_nr
 
 In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and one of the fast IK solvers available within the :py:class:`~roboticstoolbox.robot.Robot.Robot` class.
 
 .. runblock:: pycon
 
-   >>> import roboticstoolbox as rtb
-   >>> # Make a Panda robot
-   >>> panda = rtb.models.Panda()
-   >>> # Make a goal pose
-   >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
-   >>> # Solve the IK problem
-   >>> panda.ik_lm_chan(Tep)
+    >>> import roboticstoolbox as rtb
+    >>> # Make a Panda robot
+    >>> panda = rtb.models.Panda()
+    >>> # Make a goal pose
+    >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+    >>> # Solve the IK problem
+    >>> panda.ik_lm_chan(Tep)
 
 In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and and then get the :py:class:`~roboticstoolbox.robot.ETS.ETS` representation. Subsequently, we use one of the fast IK solvers available within the :py:class:`~roboticstoolbox.robot.ETS.ETS` class.
 
 .. runblock:: pycon
 
-   >>> import roboticstoolbox as rtb
-   >>> # Make a Panda robot
-   >>> panda = rtb.models.Panda()
-   >>> # Get the ETS
-   >>> ets = panda.ets()
-   >>> # Make a goal pose
-   >>> Tep = ets.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
-   >>> # Solve the IK problem
-   >>> ets.ik_lm_chan(Tep)
+    >>> import roboticstoolbox as rtb
+    >>> # Make a Panda robot
+    >>> panda = rtb.models.Panda()
+    >>> # Get the ETS
+    >>> ets = panda.ets()
+    >>> # Make a goal pose
+    >>> Tep = ets.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+    >>> # Solve the IK problem
+    >>> ets.ik_lm_chan(Tep)
 
 
 
@@ -145,18 +145,18 @@ These solvers are Python classes which extend the abstract base class :py:class:
 .. rubric:: The Abstract Base Class 
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   iksolver
+    iksolver
 
 The :py:class:`~roboticstoolbox.robot.IK.IKSolver` provides basic functionality for performing numerical IK. Superclasses can inherit this class and must implement the :py:meth:`~roboticstoolbox.robot.IK.IKSolver.solve` method. Additionally a superclass redefine any other methods necessary such as :py:meth:`~roboticstoolbox.robot.IK.IKSolver.error` to provide a custom error function.
 
 .. rubric:: The Solution DataClass
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   iksolution
+    iksolution
 
 The :py:class:`~roboticstoolbox.robot.IK.IKSolution` is a :py:class:`dataclasses.dataclass` instance with the following members.
 
@@ -176,12 +176,12 @@ Element          Type        Description
 These solvers can be identified as a :py:class:`Class` starting with ``IK_``.
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   ik_lm
-   ik_qp
-   ik_gn
-   ik_nr
+    ik_lm
+    ik_qp
+    ik_gn
+    ik_nr
 
 .. rubric:: Example 
 
@@ -189,41 +189,52 @@ In the following example, we create an IK Solver class and pass an :py:class:`~r
 
 .. runblock:: pycon
 
-   >>> import roboticstoolbox as rtb
-   >>> # Make a Panda robot
-   >>> panda = rtb.models.Panda()
-   >>> # Get the ETS of the Panda
-   >>> ets = panda.ets()
-   >>> # Make an IK solver
-   >>> solver = rtb.IK_LM()
-   >>> # Make a goal pose
-   >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
-   >>> # Solve the IK problem
-   >>> solver.solve(ets, Tep)
+    >>> import roboticstoolbox as rtb
+    >>> # Make a Panda robot
+    >>> panda = rtb.models.Panda()
+    >>> # Get the ETS of the Panda
+    >>> ets = panda.ets()
+    >>> # Make an IK solver
+    >>> solver = rtb.IK_LM()
+    >>> # Make a goal pose
+    >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+    >>> # Solve the IK problem
+    >>> solver.solve(ets, Tep)
+
+
+
+.. IK Solvers Available with an ETS
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Additionally, these :py:class:`Class` based solvers have been implemented as methods within the :py:class:`~roboticstoolbox.robot.ETS.ETS` and :py:class:`~roboticstoolbox.robot.Robot.Robot` classes. The method names start with ``ikine_``.
 
+
+.. toctree:
+   :caption: IK Solvers from an ETS
+
+
 .. rubric:: ETS Python IK Methods
 
+
 .. autosummary::
-   :toctree: stubs
-   
-   ~roboticstoolbox.robot.ETS.ETS.ikine_LM
-   ~roboticstoolbox.robot.ETS.ETS.ikine_QP
-   ~roboticstoolbox.robot.ETS.ETS.ikine_GN
-   ~roboticstoolbox.robot.ETS.ETS.ikine_NR
+    :toctree: stubs
+    
+    ~roboticstoolbox.robot.ETS.ETS.ikine_LM
+    ~roboticstoolbox.robot.ETS.ETS.ikine_QP
+    ~roboticstoolbox.robot.ETS.ETS.ikine_GN
+    ~roboticstoolbox.robot.ETS.ETS.ikine_NR
 
 
 .. rubric:: Robot Python IK Methods
 
 .. autosummary::
-   :toctree: stubs
-   
-   ~roboticstoolbox.robot.ERobot.ERobot.ikine_LM
+    :toctree: stubs
+    
+    ~roboticstoolbox.robot.ERobot.ERobot.ikine_LM
 
 
-   .. ~roboticstoolbox.robot.ERobot.ERobot.ikine_GN
-   .. ~roboticstoolbox.robot.ERobot.ERobot.ikine_NR
+    .. ~roboticstoolbox.robot.ERobot.ERobot.ikine_GN
+    .. ~roboticstoolbox.robot.ERobot.ERobot.ikine_NR
 
 
 .. rubric:: Example 
@@ -232,24 +243,24 @@ In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Pa
 
 .. runblock:: pycon
 
-   >>> import roboticstoolbox as rtb
-   >>> # Make a Panda robot
-   >>> panda = rtb.models.Panda()
-   >>> # Make a goal pose
-   >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
-   >>> # Solve the IK problem
-   >>> panda.ikine_LM(Tep)
+    >>> import roboticstoolbox as rtb
+    >>> # Make a Panda robot
+    >>> panda = rtb.models.Panda()
+    >>> # Make a goal pose
+    >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+    >>> # Solve the IK problem
+    >>> panda.ikine_LM(Tep)
 
 In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and and then get the :py:class:`~roboticstoolbox.robot.ETS.ETS` representation. Subsequently, we use one of the IK solvers available within the :py:class:`~roboticstoolbox.robot.ETS.ETS` class.
 
 .. runblock:: pycon
 
-   >>> import roboticstoolbox as rtb
-   >>> # Make a Panda robot
-   >>> panda = rtb.models.Panda()
-   >>> # Get the ETS
-   >>> ets = panda.ets()
-   >>> # Make a goal pose
-   >>> Tep = ets.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
-   >>> # Solve the IK problem
-   >>> ets.ikine_LM(Tep)
+    >>> import roboticstoolbox as rtb
+    >>> # Make a Panda robot
+    >>> panda = rtb.models.Panda()
+    >>> # Get the ETS
+    >>> ets = panda.ets()
+    >>> # Make a goal pose
+    >>> Tep = ets.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+    >>> # Solve the IK problem
+    >>> ets.ikine_LM(Tep)
