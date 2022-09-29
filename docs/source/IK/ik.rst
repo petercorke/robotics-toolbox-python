@@ -209,10 +209,10 @@ Additionally, these :py:class:`Class` based solvers have been implemented as met
    :toctree: stubs
    
    ~roboticstoolbox.robot.ETS.ETS.ikine_LM
+   ~roboticstoolbox.robot.ETS.ETS.ikine_QP
+   ~roboticstoolbox.robot.ETS.ETS.ikine_GN
+   ~roboticstoolbox.robot.ETS.ETS.ikine_NR
 
-
-   .. ~roboticstoolbox.robot.ETS.ETS.ikine_GN
-   .. ~roboticstoolbox.robot.ETS.ETS.ikine_NR
 
 .. rubric:: Robot Python IK Methods
 
