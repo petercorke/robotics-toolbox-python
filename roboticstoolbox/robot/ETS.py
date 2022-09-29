@@ -38,7 +38,7 @@ from spatialmath.base import (
     simplify,
 )
 from roboticstoolbox import rtb_get_param
-from roboticstoolbox.robot.IK import IK_LM, IK_NR
+from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR
 
 from collections import UserList
 from spatialmath.base import issymbol, getmatrix
@@ -2534,11 +2534,161 @@ class ETS(BaseETS):
 
 
         .. versionchanged:: 1.0.3
-            Added the Levemberg-Marquadt IK solver method on the `ETS` class
+            Added the Newton-Raphson IK solver method on the `ETS` class
 
         """
 
         solver = IK_NR(
+            ilimit=ilimit,
+            slimit=slimit,
+            tol=tol,
+            joint_limits=joint_limits,
+            mask=mask,
+            seed=seed,
+            pinv=pinv,
+            kq=kq,
+            km=km,
+            ps=ps,
+            pi=pi,
+            **kwargs,
+        )
+
+        if isinstance(Tep, SE3):
+            Tep = Tep.A
+
+        return solver.solve(ets=self, Tep=Tep, q0=q0)
+
+    def ikine_GN(
+        self,
+        Tep: Union[ndarray, SE3],
+        q0: Union[ArrayLike, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        mask: Union[ArrayLike, None] = None,
+        joint_limits: bool = True,
+        seed: Union[int, None] = None,
+        pinv: bool = False,
+        kq: float = 0.0,
+        km: float = 0.0,
+        ps: float = 0.0,
+        pi: Union[ndarray, float] = 0.3,
+        **kwargs,
+    ):
+        r"""
+        Levemberg-Marquadt Numerical Inverse Kinematics Solver
+
+        A method which provides functionality to perform numerical inverse kinematics (IK)
+        using the Gauss-Newton method.
+
+        See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
+        **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
+
+        Parameters
+        ----------
+        Tep
+            The desired end-effector pose
+        q0
+            The initial joint coordinate vector
+        ilimit
+            How many iterations are allowed within a search before a new search
+            is started
+        slimit
+            How many searches are allowed before being deemed unsuccessful
+        tol
+            Maximum allowed residual error E
+        mask
+            A 6 vector which assigns weights to Cartesian degrees-of-freedom
+            error priority
+        joint_limits
+            Reject solutions with joint limit violations
+        seed
+            A seed for the private RNG used to generate random joint coordinate
+            vectors
+        pinv
+            If True, will use the psuedoinverse in the `step` method instead of
+            the normal inverse
+        kq
+            The gain for joint limit avoidance. Setting to 0.0 will remove this
+            completely from the solution
+        km
+            The gain for maximisation. Setting to 0.0 will remove this completely
+            from the solution
+        ps
+            The minimum angle/distance (in radians or metres) in which the joint is
+            allowed to approach to its limit
+        pi
+            The influence angle/distance (in radians or metres) in null space motion
+            becomes active
+
+        Synopsis
+        --------
+        Each iteration uses the Gauss-Newton optimisation method
+
+        .. math::
+
+            \vec{q}_{k+1} &= \vec{q}_k +
+            \left(
+            {\mat{J}(\vec{q}_k)}^\top
+            \mat{W}_e \
+            {\mat{J}(\vec{q}_k)}
+            \right)^{-1}
+            \bf{g}_k \\
+            \bf{g}_k &=
+            {\mat{J}(\vec{q}_k)}^\top
+            \mat{W}_e
+            \vec{e}_k
+
+        where :math:`\mat{J} = {^0\mat{J}}` is the base-frame manipulator Jacobian. If
+        :math:`\mat{J}(\vec{q}_k)` is non-singular, and :math:`\mat{W}_e = \mat{1}_n`, then
+        the above provides the pseudoinverse solution. However, if :math:`\mat{J}(\vec{q}_k)`
+        is singular, the above can not be computed and the GN solution is infeasible.
+
+        Examples
+        --------
+        The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
+        pose ``Tep``, and then solves for the joint coordinates which result in the pose
+        ``Tep`` using the `ikine_GN` method.
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        >>> panda.ikine_GN(Tep)
+
+        Notes
+        -----
+        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+        to a non-singular manipulator pose, since it uses the manipulator Jacobian.
+
+        This class supports null-space motion to assist with maximising manipulability and
+        avoiding joint limits. These are enabled by setting kq and km to non-zero values.
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        See Also
+        --------
+        :py:class:`~roboticstoolbox.robot.IK.IK_NR`
+            An IK Solver class which implements the Newton-Raphson optimisation technique
+        ikine_LM
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
+        ikine_NR
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`ETS` class
+        ikine_QP
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`ETS` class
+
+
+        .. versionchanged:: 1.0.3
+            Added the Gauss-Newton IK solver method on the `ETS` class
+
+        """
+
+        solver = IK_GN(
             ilimit=ilimit,
             slimit=slimit,
             tol=tol,
