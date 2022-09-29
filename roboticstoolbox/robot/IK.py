@@ -530,10 +530,10 @@ class IK_NR(IKSolver):
 
     Examples
     --------
-    The following example gets the `ets` of a `panda` robot object, instantiates
-    the IK_NR solver class using default parameters, makes a goal pose `Tep`,
-    and then solves for the joint coordinates which result in the pose `Tep`
-    using the `solve` method.
+    The following example gets the ``ets`` of a ``panda`` robot object, instantiates
+    the IK_NR solver class using default parameters, makes a goal pose ``Tep``,
+    and then solves for the joint coordinates which result in the pose ``Tep``
+    using the ``solve`` method.
 
     .. runblock:: pycon
     >>> import roboticstoolbox as rtb
@@ -564,11 +564,11 @@ class IK_NR(IKSolver):
     IKSolver
         An abstract super class for numerical IK solvers
     IK_GN
-        Implements this IKSolver using the Gauss-Newton method
+        Implements the IKSolver class using the Gauss-Newton method
     IK_LM
-        Implements this IKSolver using the Levemberg-Marquadt method
+        Implements the IKSolver class using the Levemberg-Marquadt method
     IK_QP
-        Implements this IKSolver using a quadratic programming approach
+        Implements the IKSolver class using a quadratic programming approach
 
 
     .. versionchanged:: 1.0.3
@@ -674,7 +674,7 @@ class IK_LM(IKSolver):
     Levemberg-Marquadt Numerical Inverse Kinematics Solver
 
     A class which provides functionality to perform numerical inverse kinematics (IK)
-    using the Levemberg-Marquadt method. See `step` method for mathematical description.
+    using the Levemberg-Marquadt method. See ``step`` method for mathematical description.
 
     Parameters
     ----------
@@ -696,11 +696,11 @@ class IK_LM(IKSolver):
         A seed for the private RNG used to generate random joint coordinate
         vectors
     k
-        Sets the gain value for the damping matrix Wn in the `step` method. See
+        Sets the gain value for the damping matrix Wn in the ``step`` method. See
         notes
     method
         One of "chan", "sugihara" or "wampler". Defines which method is used
-        to calculate the damping matrix Wn in the `step` method
+        to calculate the damping matrix Wn in the ``step`` method
     kq
         The gain for joint limit avoidance. Setting to 0.0 will remove this
         completely from the solution
@@ -716,9 +716,9 @@ class IK_LM(IKSolver):
 
     Examples
     --------
-    The following example gets the `ets` of a `panda` robot object, instantiates
-    the IK_LM solver class using default parameters, makes a goal pose `Tep`,
-    and then solves for the joint coordinates which result in the pose `Tep`
+    The following example gets the ``ets`` of a ``panda`` robot object, instantiates
+    the IK_LM solver class using default parameters, makes a goal pose ``Tep``,
+    and then solves for the joint coordinates which result in the pose ``Tep``
     using the `solve` method.
 
     .. runblock:: pycon
@@ -748,11 +748,11 @@ class IK_LM(IKSolver):
     IKSolver
         An abstract super class for numerical IK solvers
     IK_NR
-        Implements IKSolver class using the Newton-Raphson method
+        Implements the IKSolver class using the Newton-Raphson method
     IK_GN
-        Implements IKSolver class using the Gauss-Newton method
+        Implements the IKSolver class using the Gauss-Newton method
     IK_QP
-        Implements IKSolver class using a quadratic programming approach
+        Implements the IKSolver class using a quadratic programming approach
 
 
     .. versionchanged:: 1.0.3
