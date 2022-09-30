@@ -36,7 +36,10 @@ class IKSolution:
     def __str__(self):
 
         if self.q is not None:
-            q_str = np.round(self.q, 4)
+            q_str = np.array2string(self.q,
+                    separator=', ',
+                    formatter={'float': lambda x: '{:.4g}'.format(0 if abs(x) < 1e-6 else x)}
+                    )  # np.round(self.q, 4)
         else:
             q_str = None
 
@@ -49,9 +52,9 @@ class IKSolution:
         else:
             # Otherwise it is a numeric solution
             if self.success:
-                return f"IKSolution: q={q_str}, success=True, iterations={self.iterations}, searches={self.searches}, residual={self.residual}"
+                return f"IKSolution: q={q_str}, success=True, iterations={self.iterations}, searches={self.searches}, residual={self.residual:.3g}"
             else:
-                return f"IKSolution: q={q_str}, success=False, reason={self.reason}, iterations={self.iterations}, searches={self.searches}, residual={np.round(self.residual, 4)}"
+                return f"IKSolution: q={q_str}, success=False, reason={self.reason}, iterations={self.iterations}, searches={self.searches}, residual={np.round(self.residual, 4):.3g}"
 
 
 class IKSolver(ABC):
