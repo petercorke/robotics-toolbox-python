@@ -18,6 +18,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
@@ -48,7 +49,35 @@
 <li class="toctree-l1 current"><a class="reference internal" href="arm.html">Manipulator arms</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="arm_models.html">Manipulator models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_backend.html">Backends</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Trajectories</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Trajectories</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory"><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.__init__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.__str__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.__repr__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__repr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.__len__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__len__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.q"><code class="docutils literal notranslate"><span class="pre">Trajectory.q</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.qd"><code class="docutils literal notranslate"><span class="pre">Trajectory.qd</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.qdd"><code class="docutils literal notranslate"><span class="pre">Trajectory.qdd</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.naxes"><code class="docutils literal notranslate"><span class="pre">Trajectory.naxes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.plot"><code class="docutils literal notranslate"><span class="pre">Trajectory.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.qplot"><code class="docutils literal notranslate"><span class="pre">Trajectory.qplot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.__dict__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__dict__</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.__module__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__module__</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.__weakref__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__weakref__</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.quintic"><code class="docutils literal notranslate"><span class="pre">quintic()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.quintic_func"><code class="docutils literal notranslate"><span class="pre">quintic_func()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.lspb"><code class="docutils literal notranslate"><span class="pre">lspb()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal"><code class="docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal_func"><code class="docutils literal notranslate"><span class="pre">trapezoidal_func()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.jtraj"><code class="docutils literal notranslate"><span class="pre">jtraj()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.mtraj"><code class="docutils literal notranslate"><span class="pre">mtraj()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.ctraj"><code class="docutils literal notranslate"><span class="pre">ctraj()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.cmstraj"><code class="docutils literal notranslate"><span class="pre">cmstraj()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.mstraj"><code class="docutils literal notranslate"><span class="pre">mstraj()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
@@ -699,7 +728,7 @@ maximum speed.</p></li>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 20-Sep-2022.
+      <span class="lastupdated">Last updated on 30-Sep-2022.
       </span></p>
   </div>
 

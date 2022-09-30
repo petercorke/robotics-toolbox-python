@@ -18,6 +18,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
@@ -50,7 +51,29 @@
 <li class="toctree-l2"><a class="reference internal" href="mobile_vehicle.html">Mobile robot kinematic models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mobile_vehicle_animation.html">Mobile robot animations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mobile_drivers.html">Mobile robot drivers</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Reactive navigation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Reactive navigation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2"><code class="docutils literal notranslate"><span class="pre">Bug2</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.m_line"><code class="docutils literal notranslate"><span class="pre">Bug2.m_line</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.run"><code class="docutils literal notranslate"><span class="pre">Bug2.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.plot_m_line"><code class="docutils literal notranslate"><span class="pre">Bug2.plot_m_line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.goal"><code class="docutils literal notranslate"><span class="pre">Bug2.goal</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.isoccupied"><code class="docutils literal notranslate"><span class="pre">Bug2.isoccupied()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.message"><code class="docutils literal notranslate"><span class="pre">Bug2.message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.occgrid"><code class="docutils literal notranslate"><span class="pre">Bug2.occgrid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.plot"><code class="docutils literal notranslate"><span class="pre">Bug2.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.plot_bg"><code class="docutils literal notranslate"><span class="pre">Bug2.plot_bg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.progress_end"><code class="docutils literal notranslate"><span class="pre">Bug2.progress_end()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.progress_next"><code class="docutils literal notranslate"><span class="pre">Bug2.progress_next()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.progress_start"><code class="docutils literal notranslate"><span class="pre">Bug2.progress_start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.random"><code class="docutils literal notranslate"><span class="pre">Bug2.random</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.random_init"><code class="docutils literal notranslate"><span class="pre">Bug2.random_init()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.start"><code class="docutils literal notranslate"><span class="pre">Bug2.start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.validate_endpoint"><code class="docutils literal notranslate"><span class="pre">Bug2.validate_endpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.verbose"><code class="docutils literal notranslate"><span class="pre">Bug2.verbose</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="mobile_planner.html">Mobile robot path planning</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mobile_SLAM.html">Localization and Mapping</a></li>
 </ul>
@@ -601,7 +624,7 @@ message channel.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 20-Sep-2022.
+      <span class="lastupdated">Last updated on 30-Sep-2022.
       </span></p>
   </div>
 

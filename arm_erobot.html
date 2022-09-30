@@ -18,6 +18,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
@@ -359,7 +360,7 @@ from link <code class="docutils literal notranslate"><span class="pre">l1</span>
 <dd class="field-odd"><p>Segment list</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>list of lists of Link</p>
+<dd class="field-even"><p>list of lists of <a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" title="roboticstoolbox.robot.Link.Link">Link</a></p>
 </dd>
 </dl>
 <p>For a single-chain robot with structure:</p>
@@ -944,7 +945,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">    ainv = _umath_linalg.inv(a, signature=signature, extobj=extobj)</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.13/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
 <span class="go">    raise LinAlgError(&quot;Singular matrix&quot;)</span>
 <span class="go">numpy.linalg.LinAlgError: Singular matrix</span>
 </pre></div>
@@ -1887,7 +1888,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">    ainv = _umath_linalg.inv(a, signature=signature, extobj=extobj)</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.13/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
 <span class="go">    raise LinAlgError(&quot;Singular matrix&quot;)</span>
 <span class="go">numpy.linalg.LinAlgError: Singular matrix</span>
 </pre></div>
@@ -3936,7 +3937,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">    ainv = _umath_linalg.inv(a, signature=signature, extobj=extobj)</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.13/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
 <span class="go">    raise LinAlgError(&quot;Singular matrix&quot;)</span>
 <span class="go">numpy.linalg.LinAlgError: Singular matrix</span>
 </pre></div>
@@ -5099,7 +5100,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">    ainv = _umath_linalg.inv(a, signature=signature, extobj=extobj)</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.13/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
 <span class="go">    raise LinAlgError(&quot;Singular matrix&quot;)</span>
 <span class="go">numpy.linalg.LinAlgError: Singular matrix</span>
 </pre></div>
@@ -6380,7 +6381,7 @@ are not included.  <code class="docutils literal notranslate"><span class="pre">
 <dd class="field-odd"><p>Segment list</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>list of lists of Link</p>
+<dd class="field-even"><p>list of lists of <a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" title="roboticstoolbox.robot.Link.Link">Link</a></p>
 </dd>
 </dl>
 <p>For a single-chain robot with structure:</p>
@@ -7718,7 +7719,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">    ainv = _umath_linalg.inv(a, signature=signature, extobj=extobj)</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.13/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
 <span class="go">    raise LinAlgError(&quot;Singular matrix&quot;)</span>
 <span class="go">numpy.linalg.LinAlgError: Singular matrix</span>
 </pre></div>
@@ -8821,7 +8822,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">    ainv = _umath_linalg.inv(a, signature=signature, extobj=extobj)</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.13/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
 <span class="go">    raise LinAlgError(&quot;Singular matrix&quot;)</span>
 <span class="go">numpy.linalg.LinAlgError: Singular matrix</span>
 </pre></div>
@@ -10102,7 +10103,7 @@ are not included.  <code class="docutils literal notranslate"><span class="pre">
 <dd class="field-odd"><p>Segment list</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>list of lists of Link</p>
+<dd class="field-even"><p>list of lists of <a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Link.Link" title="roboticstoolbox.robot.Link.Link">Link</a></p>
 </dd>
 </dl>
 <p>For a single-chain robot with structure:</p>
@@ -12026,9 +12027,9 @@ based on <a class="reference external" href="https://frankaemika.github.io/docs/
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>et_list</strong> (<em>list of etb.robot.et</em>) – List of elementary transforms which represent the robot
+<li><p><strong>et_list</strong> (<em>list</em><em> of </em><em>etb.robot.et</em>) – List of elementary transforms which represent the robot
 kinematics</p></li>
-<li><p><strong>q_idx</strong> (<em>list of int</em>) – List of indexes within the ets_list which correspond to
+<li><p><strong>q_idx</strong> (<em>list</em><em> of </em><em>int</em>) – List of indexes within the ets_list which correspond to
 joints</p></li>
 <li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the robot</p></li>
 <li><p><strong>manufacturer</strong> (<em>str</em><em>, </em><em>optional</em>) – Manufacturer of the robot</p></li>
@@ -13400,7 +13401,7 @@ characteristics.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 20-Sep-2022.
+      <span class="lastupdated">Last updated on 30-Sep-2022.
       </span></p>
   </div>
 
