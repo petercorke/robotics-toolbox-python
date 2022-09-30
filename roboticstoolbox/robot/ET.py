@@ -22,14 +22,13 @@ from fknm import ET_T, ET_init, ET_update
 from spatialmath.base import getvector
 from spatialmath import SE3, SE2
 from typing import Optional, Callable, Union, TYPE_CHECKING
+from roboticstoolbox.tools.types import ArrayLike
 
-ArrayLike = Union[list, ndarray, tuple, set]
-
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: nocover
     import sympy
 
     Sym = sympy.core.symbol.Symbol
-else:
+else:  # pragma: nocover
     Sym = None
 
 
@@ -206,7 +205,7 @@ class BaseET:
             [In [1]: e
             Out [1]: tx(1)
         """
-        p.text(str(self))
+        p.text(str(self))  # pragma: nocover
 
     def __deepcopy__(self, memo):
         cls = self.__class__
