@@ -62,8 +62,7 @@ from spatialmath.base import getvector
 from spatialmath import SE3
 from typing import Union, overload, List, Set, Tuple
 from sys import version_info
-
-ArrayLike = Union[list, ndarray, tuple, set]
+from roboticstoolbox.tools.types import ArrayLike
 
 py_ver = version_info
 
