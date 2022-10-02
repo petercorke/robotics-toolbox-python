@@ -1,4 +1,4 @@
-from roboticstoolbox.robot.Robot import Robot
+from roboticstoolbox.robot.Robot import BaseRobot, Robot
 from roboticstoolbox.robot.Link import Link, Link2
 from roboticstoolbox.robot.DHRobot import SerialLink, DHRobot
 from roboticstoolbox.robot.DHLink import (
@@ -28,6 +28,7 @@ __all__ = [
     "PrismaticDH",
     "RevoluteMDH",
     "PrismaticMDH",
+    "BaseRobot",
     "ERobot",
     "ELink",
     "ELink2",
