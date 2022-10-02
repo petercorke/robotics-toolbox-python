@@ -1,5 +1,6 @@
 from copy import copy as ccopy, deepcopy
 from abc import ABC
+
 # from multiprocessing.sharedctypes import Value
 import numpy as np
 from functools import wraps
@@ -458,7 +459,7 @@ class BaseLink(SceneNode, ABC):
     # -------------------------------------------------------------------------- #
 
     @property
-    def robot(self) -> Union["rtb.Robot", None]:
+    def robot(self) -> Union["rtb.BaseRobot", None]:
         """
         Get forward reference to the robot which owns this link
 
@@ -467,7 +468,7 @@ class BaseLink(SceneNode, ABC):
         return self._robot
 
     @robot.setter
-    def robot(self, robot_ref: "rtb.Robot"):
+    def robot(self, robot_ref: "rtb.BaseRobot"):
         """
         Set the forward reference to the robot which owns this link
         """
@@ -1501,27 +1502,27 @@ class Link2(BaseLink):
             return SE2(self._Ts, check=False)
 
 
-if __name__ == "__main__":  # pragma nocover
+# if __name__ == "__main__":  # pragma nocover
 
-    import sympy
-    from roboticstoolbox import *
+#     import sympy
+#     from roboticstoolbox import *
 
-    a1, a2, r1, r2, m1, m2, g = sympy.symbols("a1 a2 r1 r2 m1 m2 g")
-    link1 = Link(ET.Ry(flip=True), m=m1, r=[r1, 0, 0], name="link0")
-    link2 = Link(ET.tx(a1) * ET.Ry(flip=True), m=m2, r=[r2, 0, 0], name="link1")
-    print(link1)
-    robot = ERobot([link1, link2])
-    print(robot)
-    robot.dynamics()
+#     a1, a2, r1, r2, m1, m2, g = sympy.symbols("a1 a2 r1 r2 m1 m2 g")
+#     link1 = Link(ET.Ry(flip=True), m=m1, r=[r1, 0, 0], name="link0")
+#     link2 = Link(ET.tx(a1) * ET.Ry(flip=True), m=m2, r=[r2, 0, 0], name="link1")
+#     print(link1)
+#     robot = ERobot([link1, link2])
+#     print(robot)
+#     robot.dynamics()
 
-    # a = Link(name='bob')
-    # print(a)
-    # print(repr(a))
+# a = Link(name='bob')
+# print(a)
+# print(repr(a))
 
-    # a = Link(name='bob', parent='foo')
-    # print(a)
-    # print(repr(a))
+# a = Link(name='bob', parent='foo')
+# print(a)
+# print(repr(a))
 
-    # a = rtb.models.URDF.UR5()
-    # print(a[3])
-    # print(repr(a[3]))
+# a = rtb.models.URDF.UR5()
+# print(a[3])
+# print(repr(a[3]))
