@@ -17,7 +17,7 @@ from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.ETS import ETS
-from typing import List, Set, Union, Dict, Tuple
+from typing import Any, Callable, List, Set, Union, Dict, Tuple
 from spatialgeometry import Shape
 from fknm import Robot_link_T
 from functools import lru_cache
@@ -48,6 +48,7 @@ class BaseRobot(SceneNode, ABC):
     def __init__(
         self,
         links: List[BaseLink],
+        gripper_links: Union[List[BaseLink], None] = None,
         name: str = "",
         manufacturer: str = "",
         comment: str = "",
@@ -55,12 +56,26 @@ class BaseRobot(SceneNode, ABC):
         tool=Union[np.ndarray, SE3, None],
         gravity: ArrayLike = [0, 0, -9.81],
         keywords: Union[List[str], Tuple[str]] = [],
-        symbolic=False,
-        configs=None,
+        symbolic: bool = False,
+        configs: Union[Dict[str, ndarray], None] = None,
+        check_jindex: bool = True,
     ):
 
         # Initialise the scene node
         SceneNode.__init__(self)
+
+        # Lets sort out links now
+        self._linkdict = {}
+
+        # Sort links and set self.link, self.n, self.base_link,
+        # self.ee_links
+        self._sort_links(links, gripper_links, check_jindex)
+
+        # Fix number of links for gripper links
+        self._nlinks = len(links)
+
+        for gripper in self.grippers:
+            self._nlinks += len(gripper.links)
 
         # Set the pose of the robot in the world frame
         # in the scenenode object to a numpy array
@@ -97,7 +112,7 @@ class BaseRobot(SceneNode, ABC):
         self._hascollision = False
 
         # Time to checkout the links for geometry information
-        for link in links:
+        for link in self.links:
             if not isinstance(link, BaseLink):
                 raise TypeError("links should all be Link subclass")
 
@@ -115,9 +130,6 @@ class BaseRobot(SceneNode, ABC):
                 if len(link.geometry) > 0:
                     self._hasgeometry = True
 
-        self._links = links
-        self._nlinks = len(links)
-
         # Current joint configuraiton, velocity, acceleration
         self.q = np.zeros(self.n)
         self.qd = np.zeros(self.n)
@@ -134,14 +146,203 @@ class BaseRobot(SceneNode, ABC):
         # A flag for watching dynamics properties
         self._dynchanged = False
 
+        # Set up qlim
+        qlim = np.zeros((2, self.n))
+        j = 0
+
+        for i in range(len(self.links)):
+            if self.links[i].isjoint:
+                qlim[:, j] = self.links[i].qlim
+                j += 1
+        self._qlim = qlim
+
+        self._valid_qlim = False
+        for i in range(self.n):
+            if any(qlim[:, i] != 0) and not any(np.isnan(qlim[:, i])):
+                self._valid_qlim = True
+
+        # SceneNode, set a reference to the first link
+        self.scene_children = [self.links[0]]  # type: ignore
+
+    def _sort_links(
+        self,
+        links: List[BaseLink],
+        gripper_links: Union[List[BaseLink], None],
+        check_jindex: bool,
+    ):
+        """
+        This method does several things for setting up the links of a robot
+
+        - Gives each link a unique name if it doesn't have one
+        - Assigns each link a parent if it doesn't have one
+        - Finds and sets the base link
+        - Finds and sets the ee links
+        - sets the jindices
+        - sets n
+
+        """
+
+        # The ordered links
+        orlinks = []
+
+        # The end-effector links
+        self._ee_links = []
+
+        # Check all the incoming Link objects
+        n = 0
+
+        # Make sure each link has a name
+        # ------------------------------
+        for k, link in enumerate(links):
+
+            # If link has no name, give it one
+            if link.name is None or link.name == "":
+                link.name = f"link-{k}"
+
+            # link.number = k + 1
+
+            # Put it in the link dictionary, check for duplicates
+            if link.name in self._linkdict:
+                raise ValueError(f"link name {link.name} is not unique")
+
+            self._linkdict[link.name] = link
+
+            if link.isjoint:
+                n += 1
+
+        # Resolve parents given by name, within the context of
+        # this set of links
+        # ----------------------------------------------------
+        for link in links:
+            if link.parent is None and link.parent_name is not None:
+                link._parent = self._linkdict[link.parent_name]
+
+        if all([link.parent is None for link in links]):
+
+            # No parent links were given, assume they are sequential
+            for i in range(len(links) - 1):
+                links[i + 1]._parent = links[i]
+
+        # Set the base link
+        # -----------------
+        for link in links:
+            # Is this a base link?
+            if link._parent is None:
+                try:
+                    if self._base_link is not None:
+                        raise ValueError("Multiple base links")
+                except AttributeError:
+                    pass
+
+                self._base_link = link
+            else:
+                # No, update children of this link's parent
+                link._parent._children.append(link)
+
+        if self.base_link is None:  # Pragma: nocover
+            raise ValueError(
+                "Invalid link configuration provided, must have a base link"
+            )
+
+        # Scene node, set links between the links
+        # ---------------------------------------
+        for link in links:
+            if link.parent is not None:
+                link.scene_parent = link.parent
+
+        # Set up the gripper, make a list containing the root of all
+        # grippers
+        # ----------------------------------------------------------
+        if gripper_links is not None:
+            if isinstance(gripper_links, Link):
+                gripper_links = [gripper_links]
+        else:
+            gripper_links = []
+
+        # An empty list to hold all grippers
+        self._grippers = []
+
+        # Make a gripper object for each gripper
+        for link in gripper_links:
+            g_links = self.dfs_links(link)
+
+            # Remove gripper links from the robot
+            for g_link in g_links:
+                # print(g_link)
+                links.remove(g_link)
+
+            # Save the gripper object
+            self._grippers.append(Gripper(g_links, name=link.name))
+
+        # Subtract the n of the grippers from the n of the robot
+        for gripper in self._grippers:
+            n -= gripper.n
+
+        # Set the ee links
+        # ----------------
+        self.ee_links = []
+
+        if len(gripper_links) == 0:
+            for link in links:
+                # Is this a leaf node? and do we not have any grippers
+                if link.children is None or len(link.children) == 0:
+                    # No children, must be an end-effector
+                    self.ee_links.append(link)
+        else:
+            for link in gripper_links:
+                # Use the passed in value
+                self.ee_links.append(link.parent)
+
+        # Assign the joint indices and sort the links
+        # -------------------------------------------
+        if all([link.jindex is None or link.ets._auto_jindex for link in links]):
+
+            # No joints have an index
+            jindex = [0]  # "mutable integer" hack
+
+            def visit_link(link, jindex):
+                # if it's a joint, assign it a jindex and increment it
+                if link.isjoint and link in links:
+                    link.jindex = jindex[0]
+                    jindex[0] += 1
+
+                if link in links:
+                    orlinks.append(link)
+
+            # visit all links in DFS order
+            self.dfs_links(self.base_link, lambda link: visit_link(link, jindex))
+
+        elif all([link.jindex is not None for link in links if link.isjoint]):
+            # Jindex set on all, check they are unique and contiguous
+            if check_jindex:
+                jset = set(range(self._n))
+                for link in links:
+                    if link.isjoint and link.jindex not in jset:
+                        raise ValueError(
+                            f"joint index {link.jindex} was " "repeated or out of range"
+                        )
+                    jset -= set([link.jindex])
+                if len(jset) > 0:  # pragma nocover  # is impossible
+                    raise ValueError(f"joints {jset} were not assigned")
+            orlinks = links
+        else:
+            # must be a mixture of Links with/without jindex
+            raise ValueError("all links must have a jindex, or none have a jindex")
+
+        # Set n
+        # -----
+        self._n = n
+
+        # Set links
+        # ---------
+        self._links = orlinks
+
     # --------------------------------------------------------------------- #
     # --------- Properties ------------------------------------------------ #
     # --------------------------------------------------------------------- #
 
-    # --------------------------------------------------------------------- #
-
     @property
-    def links(self):
+    def links(self) -> List[BaseLink]:
         """
         Robot links
 
@@ -160,6 +361,36 @@ class BaseRobot(SceneNode, ABC):
         """
 
         return self._links
+
+    @property
+    def grippers(self) -> List[Gripper]:
+        """
+        Grippers attached to the robot
+
+        Returns
+        -------
+        grippers
+            A list of grippers
+
+        """
+
+        return self._grippers
+
+    @property
+    def base_link(self) -> BaseLink:
+        """
+        Get the robot base link
+
+        - ``robot.base_link`` is the robot base link
+
+        Returns
+        -------
+        base_link
+            the first link in the robot tree
+
+        """
+
+        return self._base_link
 
     @property
     def n(self):
@@ -372,6 +603,11 @@ class BaseRobot(SceneNode, ABC):
 
         - ``robot.q`` is the robot joint configuration
         - ``robot.q = ...`` checks and sets the joint configuration
+
+        Parameters
+        ----------
+        q
+            the new robot joint configuration
 
         Returns
         -------
@@ -626,6 +862,47 @@ class BaseRobot(SceneNode, ABC):
         else:
             self._tool = T
 
+    @property
+    def base(self) -> SE3:
+        """
+        Get/set robot base transform
+
+        - ``robot.base`` is the robot base transform
+        - ``robot.base = ...`` checks and sets the robot base transform
+
+        Parameters
+        ----------
+        base
+            the new robot base transform
+
+        Returns
+        -------
+        base
+            the current robot base transform
+
+        """
+
+        # return a copy, otherwise somebody with
+        # reference to the base can change it
+
+        # This now returns the Scene Node transform
+        # self._T is a copy of SceneNode.__T
+        return SE3(self._T, check=False)
+
+    @base.setter
+    def base(self, T: Union[np.ndarray, SE3]):
+
+        if isinstance(self, rtb.Robot):
+            # All 3D robots
+            # Set the SceneNode T
+            if isinstance(T, SE3):
+                self._T = T.A
+            else:
+                self._T = T
+
+        else:
+            raise ValueError("base must be set to None (no tool), SE2, or SE3")
+
     # --------------------------------------------------------------------- #
 
     def todegrees(self, q) -> ndarray:
@@ -765,6 +1042,46 @@ class BaseRobot(SceneNode, ABC):
         """
 
         return self.prismaticjoints[j]
+
+    # --------------------------------------------------------------------- #
+
+    def dfs_links(
+        self, start: BaseLink, func: Union[None, Callable[[BaseLink], Any]] = None
+    ):
+        """
+        A link search method
+
+        Visit all links from start in depth-first order and will apply
+        func to each visited link
+
+        Parameters
+        ----------
+        start
+            The link to start at
+        func
+            An optional function to apply to each link as it is found
+
+        Returns
+        -------
+        links
+            A list of links
+
+        """
+
+        visited = []
+
+        def vis_children(link):
+            visited.append(link)
+            if func is not None:
+                func(link)
+
+            for li in link.children:
+                if li not in visited:
+                    vis_children(li)
+
+        vis_children(start)
+
+        return visited
 
     # --------------------------------------------------------------------- #
 
@@ -1513,40 +1830,6 @@ class Robot(SceneNode, ABC, DynamicsMixin):
         return self.ets(start, end).jacob0_analytical(
             q, tool=tool, representation=representation
         )
-
-    @property
-    def base(self) -> SE3:
-        """
-        Get/set robot base transform (Robot superclass)
-
-        - ``robot.base`` is the robot base transform
-
-        :return: robot tool transform
-
-        - ``robot.base = ...`` checks and sets the robot base transform
-
-        """
-
-        # return a copy, otherwise somebody with
-        # reference to the base can change it
-
-        # This now returns the Scene Node transform
-        # self._T is a copy of SceneNode.__T
-        return SE3(self._T, check=False)
-
-    @base.setter
-    def base(self, T: Union[np.ndarray, SE3]):
-
-        if isinstance(self, rtb.Robot):
-            # All 3D robots
-            # Set the SceneNode T
-            if isinstance(T, SE3):
-                self._T = T.A
-            else:
-                self._T = T
-
-        else:
-            raise ValueError("base must be set to None (no tool), SE2, or SE3")
 
     # --------------------------------------------------------------------- #
 
