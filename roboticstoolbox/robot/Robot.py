@@ -17,7 +17,7 @@ from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.ETS import ETS
-from typing import Union, Dict, Tuple
+from typing import List, Set, Union, Dict, Tuple
 from spatialgeometry import Shape
 from fknm import Robot_link_T
 from functools import lru_cache
@@ -43,7 +43,459 @@ _default_backend = None
 
 ArrayLike = Union[list, np.ndarray, tuple, set]
 
-# class BaseRobot(SceneNode, ABC):
+
+class BaseRobot(SceneNode, ABC):
+    def __init__(
+        self,
+        links: List[BaseLink],
+        name: str = "",
+        manufacturer: str = "",
+        comment: str = "",
+        base=Union[np.ndarray, SE3, None],
+        tool=Union[np.ndarray, SE3, None],
+        gravity: ArrayLike = [0, 0, -9.81],
+        keywords: Union[List[str], Tuple[str]] = [],
+        symbolic=False,
+        configs=None,
+    ):
+
+        # Initialise the scene node
+        SceneNode.__init__(self)
+
+        # Set the pose of the robot in the world frame
+        # in the scenenode object to a numpy array
+        if isinstance(base, SE3):
+            self._T = base.A
+        elif isinstance(base, np.ndarray):
+            self._T = base
+
+        # Set the robot tool transform
+        if isinstance(tool, SE3):
+            self._tool = tool.A
+        elif isinstance(tool, np.ndarray):
+            self._tool = tool
+        else:
+            self._tool = np.eye(4)
+
+        # Set the keywords
+        if keywords is not None and not isinstance(keywords, (tuple, list)):
+            raise TypeError("keywords must be a list or tuple")
+        else:
+            self._keywords = keywords
+
+        # Gravity is in the negative-z direction.
+        self._gravity = np.array(gravity)
+
+        # Basic arguments
+        self.name = name
+        self.manufacturer = manufacturer
+        self._comment = comment
+        self._symbolic = symbolic
+        self._reach = None
+        self._hasdynamics = False
+        self._hasgeometry = False
+        self._hascollision = False
+
+        # Time to checkout the links for geometry information
+        for link in links:
+            if not isinstance(link, BaseLink):
+                raise TypeError("links should all be Link subclass")
+
+            # Add link back to robot object
+            link._robot = self
+
+            if link.hasdynamics:
+                self._hasdynamics = True
+            if link.geometry:
+                self._hasgeometry = []
+            if link.collision:
+                self._hascollision = True
+
+            if isinstance(link, Link):
+                if len(link.geometry) > 0:
+                    self._hasgeometry = True
+
+        self._links = links
+        self._nlinks = len(links)
+
+        # Current joint configuraiton, velocity, acceleration
+        self.q = np.zeros(self.n)
+        self.qd = np.zeros(self.n)
+        self.qdd = np.zeros(self.n)
+
+        # The current control mode of the robot
+        self.control_mode = "v"
+
+        # Set up named configuration property
+        if configs is None:
+            configs = dict()
+        self._configs = configs
+
+        # A flag for watching dynamics properties
+        self._dynchanged = False
+
+    # --------------------------------------------------------------------- #
+    # --------- Properties ------------------------------------------------ #
+    # --------------------------------------------------------------------- #
+
+    @property
+    def tool(self) -> SE3:
+        """
+        Get/set robot tool transform
+
+        - ``robot.tool`` is the robot tool transform as an SE3 object
+        - ``robot._tool`` is the robot tool transform as a numpy array
+        - ``robot.tool = ...`` checks and sets the robot tool transform
+
+        Parameters
+        ----------
+        tool
+            the new robot tool transform (as an SE(3))
+
+        Returns
+        -------
+        tool
+            robot tool transform
+
+
+
+        """
+        return SE3(self._tool, check=False)
+
+    @tool.setter
+    def tool(self, T: Union[SE3, np.ndarray]):
+        if isinstance(T, SE3):
+            self._tool = T.A
+        else:
+            self._tool = T
+
+    @property
+    def n(self):
+        """
+        Number of joints
+
+        Returns
+        -------
+        n
+            Number of joints
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> robot.n
+
+        See Also
+        --------
+        :func:`nlinks`
+        :func:`nbranches`
+
+        """
+
+        return self._n
+
+    @property
+    def nlinks(self):
+        """
+        Number of links
+
+        The returned number is the total of both variable joints and
+        static links
+
+        Returns
+        -------
+        nlinks
+            Number of links
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> robot.nlinks
+
+        See Also
+        --------
+        :func:`n`
+        :func:`nbranches`
+
+        """
+
+        return self._nlinks
+
+    @property
+    def name(self):
+        """
+        Get/set robot name
+
+        - ``robot.name`` is the robot name
+        - ``robot.name = ...`` checks and sets therobot name
+
+        Returns
+        -------
+        name
+            robot name
+
+        """
+        return self._name
+
+    @name.setter
+    def name(self, name_new):
+        self._name = name_new
+
+    @property
+    def manufacturer(self):
+        """
+        Get/set robot manufacturer's name
+
+        - ``robot.manufacturer`` is the robot manufacturer's name
+        - ``robot.manufacturer = ...`` checks and sets the manufacturer's name
+
+        Returns
+        -------
+        manufacturer
+            robot manufacturer's name
+
+        """
+        return self._manufacturer
+
+    @manufacturer.setter
+    def manufacturer(self, manufacturer_new):
+        self._manufacturer = manufacturer_new
+
+    @property
+    def hasdynamics(self):
+        """
+        Robot has dynamic parameters
+
+        Returns
+        -------
+        hasdynamics
+            Robot has dynamic parameters
+
+        At least one link has associated dynamic parameters.
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> robot.hasdynamics:
+
+        """
+
+        return self._hasdynamics
+
+    @property
+    def hasgeometry(self):
+        """
+        Robot has geometry model
+
+        At least one link has associated mesh to describe its shape.
+
+        Returns
+        -------
+        hasgeometry
+            Robot has geometry model
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> robot.hasgeometry
+
+        See Also
+        --------
+        :func:`hascollision`
+
+        """
+
+        return self._hasgeometry
+
+    @property
+    def hascollision(self):
+        """
+        Robot has collision model
+
+        Returns
+        -------
+        hascollision
+            Robot has collision model
+
+        At least one link has associated collision model.
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> robot.hascollision
+
+        See Also
+        --------
+        :func:`hasgeometry`
+
+        """
+
+        return self._hascollision
+
+    @property
+    def default_backend(self):
+        """
+        Get default graphical backend
+
+        - ``robot.default_backend`` Get the default graphical backend, used when
+            no explicit backend is passed to ``Robot.plot``.
+        - ``robot.default_backend = ...`` Set the default graphical backend, used when
+            no explicit backend is passed to ``Robot.plot``.  The default set here will
+            be overridden if the particular ``Robot`` subclass cannot support it.
+
+        Returns
+        -------
+        default_backend
+            backend name
+
+
+        """
+        return _default_backend
+
+    @default_backend.setter
+    def default_backend(self, be):
+        _default_backend = be
+
+    # --------------------------------------------------------------------- #
+
+    @property
+    def q(self) -> ndarray:
+        """
+        Get/set robot joint configuration
+
+        - ``robot.q`` is the robot joint configuration
+        - ``robot.q = ...`` checks and sets the joint configuration
+
+        Returns
+        -------
+        q
+            robot joint configuration
+
+        """
+
+        return self._q
+
+    @q.setter
+    def q(self, q_new: ArrayLike):
+        self._q = np.array(getvector(q_new, self.n))
+
+    @property
+    def qd(self) -> ndarray:
+        """
+        Get/set robot joint velocity
+
+        - ``robot.qd`` is the robot joint velocity
+        - ``robot.qd = ...`` checks and sets the joint velocity
+
+        Returns
+        -------
+        qd
+            robot joint velocity
+
+        """
+
+        return self._qd
+
+    @qd.setter
+    def qd(self, qd_new: ArrayLike):
+        self._qd = np.array(getvector(qd_new, self.n))
+
+    @property
+    def qdd(self) -> ndarray:
+        """
+        Get/set robot joint acceleration
+
+        - ``robot.qdd`` is the robot joint acceleration
+        - ``robot.qdd = ...`` checks and sets the robot joint acceleration
+
+        Returns
+        -------
+        qdd
+            robot joint acceleration
+
+
+        """
+        return self._qdd
+
+    @qdd.setter
+    def qdd(self, qdd_new: ArrayLike):
+        self._qdd = np.array(getvector(qdd_new, self.n))
+
+    @property
+    def qlim(self) -> ndarray:
+        r"""
+        Joint limits
+
+        Limits are extracted from the link objects.  If joints limits are
+        not set for:
+
+        - a revolute joint [-𝜋. 𝜋] is returned
+        - a prismatic joint an exception is raised
+
+        Attributes
+        ----------
+        qlim
+            An array of joints limits (2, n)
+
+        Raises
+        ------
+        ValueError
+            unset limits for a prismatic joint
+
+        Returns
+        -------
+        qlim
+            Array of joint limit values
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> robot.qlim
+
+        """
+
+        limits = np.zeros((2, self.n))
+        j = 0
+
+        for link in self.links:
+
+            if link.isrevolute:
+                if link.qlim is None or np.any(np.isnan(link.qlim)):
+                    v = [-np.pi, np.pi]
+                else:
+                    v = link.qlim
+            elif link.isprismatic:
+                if link.qlim is None:
+                    raise ValueError("Undefined prismatic joint limit")
+                else:
+                    v = link.qlim
+            else:
+                # Fixed link
+                continue
+
+            limits[:, j] = v
+            j += 1
+
+        return limits
+
+    # --------------------------------------------------------------------- #
 
 
 class Robot(SceneNode, ABC, DynamicsMixin):
@@ -64,72 +516,7 @@ class Robot(SceneNode, ABC, DynamicsMixin):
         configs=None,
     ):
 
-        # Basic arguments
-        self.name = name
-        self.manufacturer = manufacturer
-        self.comment = comment
-        self.symbolic = symbolic
-        self._reach = None
-
-        # Initialise the scene node
-        SceneNode.__init__(self)
-
-        self._T = base.A
-        self.tool = tool
-
-        if keywords is not None and not isinstance(keywords, (tuple, list)):
-            raise TypeError("keywords must be a list or tuple")
-        else:
-            self.keywords = keywords
-
-        # Gravity is in the negative-z direction. This is the negative of the
-        # MATLAB Toolbox case (which was wrong).
-        if gravity is None:
-            gravity = np.array([0, 0, -9.81])
-        self.gravity = gravity
-
-        # validate the links, must be a list of Link subclass objects
-        if not isinstance(links, list):
-            raise TypeError("The links must be stored in a list.")
-
-        self._hasdynamics = False
-        self._hasgeometry = False
-        self._hascollision = False
-
-        for link in links:
-            if not isinstance(link, BaseLink):
-                raise TypeError("links should all be Link subclass")
-
-            # add link back to roboto
-            link._robot = self
-
-            if link.hasdynamics:
-                self._hasdynamics = True
-            if link.geometry:
-                self._hasgeometry = []
-            if link.collision:
-                self._hascollision = True
-
-            if isinstance(link, Link):
-                if len(link.geometry) > 0:
-                    self._hasgeometry = True
-
-        self._links = links
-        self._nlinks = len(links)
-
-        # Current joint configuraitons of the robot
-        self.q = np.zeros(self.n)
-        self.qd = np.zeros(self.n)
-        self.qdd = np.zeros(self.n)
-
-        self.control_mode = "v"
-
-        self._dynchanged = False
-
-        # Set up named configuration property
-        if configs is None:
-            configs = dict()
-        self._configs = configs
+        pass
 
     def copy(self):
         return deepcopy(self)
@@ -243,178 +630,47 @@ class Robot(SceneNode, ABC, DynamicsMixin):
             return getmatrix(q, (None, self.n))
 
     @property
-    def n(self):
-        """
-        Number of joints (Robot superclass)
-
-        :return: Number of joints
-        :rtype: int
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.n
-
-        :seealso: :func:`nlinks`, :func:`nbranches`
-        """
-        return self._n
-
-    @property
-    def nlinks(self):
-        """
-        Number of links (Robot superclass)
-
-        :return: Number of links
-        :rtype: int
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.nlinks
-
-        :seealso: :func:`n`, :func:`nbranches`
-        """
-        return self._nlinks
-
-    @property
     def configs(self) -> Dict[str, np.ndarray]:
         return self._configs
 
-    @abstractproperty
-    def nbranches(self):
-        """
-        Number of branches (Robot superclass)
+    # @abstractproperty
+    # def nbranches(self):
+    #     """
+    #     Number of branches (Robot superclass)
 
-        :return: Number of branches
-        :rtype: int
+    #     :return: Number of branches
+    #     :rtype: int
 
-        Example:
+    #     Example:
 
-        .. runblock:: pycon
+    #     .. runblock:: pycon
 
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.nbranches
+    #         >>> import roboticstoolbox as rtb
+    #         >>> robot = rtb.models.DH.Puma560()
+    #         >>> robot.nbranches
 
-        :seealso: :func:`n`, :func:`nlinks`
-        """
-        return self._n
+    #     :seealso: :func:`n`, :func:`nlinks`
+    #     """
+    #     return self._n
 
-    @property
-    def hasdynamics(self):
-        """
-        Robot has dynamic parameters (Robot superclass)
+    # @property
+    # def qrandom(self):
+    #     """
+    #     Return a random joint configuration
 
-        :return: Robot has dynamic parameters
-        :rtype: bool
+    #     :return: Random joint configuration :rtype: ndarray(n)
 
-        At least one link has associated dynamic parameters.
+    #     The value for each joint is uniform randomly distributed  between the
+    #     limits set for the robot.
 
-        Example:
+    #     .. note:: The joint limit for all joints must be set.
 
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.hasdynamics:
-        """
-        return self._hasdynamics
-
-    @property
-    def hasgeometry(self):
-        """
-        Robot has geometry model (Robot superclass)
-
-        :return: Robot has geometry model
-        :rtype: bool
-
-        At least one link has associated mesh to describe its shape.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.hasgeometry
-
-        :seealso: :func:`hascollision`
-        """
-        return self._hasgeometry
-
-    @property
-    def hascollision(self):
-        """
-        Robot has collision model (Robot superclass)
-
-        :return: Robot has collision model
-        :rtype: bool
-
-        At least one link has associated collision model.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.hascollision
-
-        :seealso: :func:`hasgeometry`
-        """
-        return self._hascollision
-
-    @property
-    def qrandom(self):
-        """
-        Return a random joint configuration
-
-        :return: Random joint configuration :rtype: ndarray(n)
-
-        The value for each joint is uniform randomly distributed  between the
-        limits set for the robot.
-
-        .. note:: The joint limit for all joints must be set.
-
-        :seealso: :func:`Robot.qlim`, :func:`Link.qlim`
-        """
-        qlim = self.qlim
-        if np.any(np.isnan(qlim)):
-            raise ValueError("some joint limits not defined")
-        return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
-
-    @property
-    def default_backend(self):
-        """
-        Get default graphical backend
-
-        :return: backend name
-        :rtype: str
-
-        Get the default graphical backend, used when no explicit backend is
-        passed to ``Robot.plot``.
-        """
-        return _default_backend
-
-    @default_backend.setter
-    def default_backend(self, be):
-        """
-        Set default graphical backend
-
-        :param be: backend name
-        :type be: str
-
-        Set the default graphical backend, used when no explicit backend is
-        passed to ``Robot.plot``.  The default set here will be overridden if
-        the particular ``Robot`` subclass cannot support it.
-        """
-        _default_backend = be
+    #     :seealso: :func:`Robot.qlim`, :func:`Link.qlim`
+    #     """
+    #     qlim = self.qlim
+    #     if np.any(np.isnan(qlim)):
+    #         raise ValueError("some joint limits not defined")
+    #     return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
 
     def addconfiguration_attr(self, name: str, q: ArrayLike, unit: str = "rad"):
         """
@@ -1149,46 +1405,6 @@ class Robot(SceneNode, ABC, DynamicsMixin):
     # --------------------------------------------------------------------- #
 
     @property
-    def name(self):
-        """
-        Get/set robot name (Robot superclass)
-
-        - ``robot.name`` is the robot name
-
-        :return: robot name
-        :rtype: str
-
-        - ``robot.name = ...`` checks and sets therobot name
-        """
-        return self._name
-
-    @name.setter
-    def name(self, name_new):
-        self._name = name_new
-
-    # --------------------------------------------------------------------- #
-
-    @property
-    def manufacturer(self):
-        """
-        Get/set robot manufacturer's name (Robot superclass)
-
-        - ``robot.manufacturer`` is the robot manufacturer's name
-
-        :return: robot manufacturer's name
-        :rtype: str
-
-        - ``robot.manufacturer = ...`` checks and sets the manufacturer's name
-        """
-        return self._manufacturer
-
-    @manufacturer.setter
-    def manufacturer(self, manufacturer_new):
-        self._manufacturer = manufacturer_new
-
-    # --------------------------------------------------------------------- #
-
-    @property
     def links(self):
         """
         Robot links (Robot superclass)
@@ -1239,140 +1455,6 @@ class Robot(SceneNode, ABC, DynamicsMixin):
 
         else:
             raise ValueError("base must be set to None (no tool), SE2, or SE3")
-
-    # --------------------------------------------------------------------- #
-
-    @property
-    def tool(self) -> SE3:
-        """
-        Get/set robot tool transform (Robot superclass)
-
-        - ``robot.tool`` is the robot tool transform
-
-        :return: robot tool transform
-
-        - ``robot.tool = ...`` checks and sets the robot tool transform
-
-        """
-        return SE3(self._tool, check=False)
-
-    @tool.setter
-    def tool(self, T: Union[SE3, np.ndarray]):
-        if isinstance(T, SE3):
-            self._tool = T.A
-        else:
-            self._tool = T
-
-    @property
-    def qlim(self):
-        r"""
-        Joint limits (Robot superclass)
-
-        :return: Array of joint limit values
-        :rtype: ndarray(2,n)
-        :exception ValueError: unset limits for a prismatic joint
-
-        Limits are extracted from the link objects.  If joints limits are
-        not set for:
-
-            - a revolute joint [-𝜋. 𝜋] is returned
-            - a prismatic joint an exception is raised
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.qlim
-        """
-        # TODO tidy up
-        limits = np.zeros((2, self.n))
-        j = 0
-        for link in self:
-            if link.isrevolute:
-                if link.qlim is None or np.any(np.isnan(link.qlim)):
-                    v = np.r_[-np.pi, np.pi]
-                else:
-                    v = link.qlim
-            elif link.isprismatic:
-                if link.qlim is None:
-                    raise ValueError("undefined prismatic joint limit")
-                else:
-                    v = link.qlim
-            else:
-                # fixed link
-                continue
-
-            limits[:, j] = v
-            j += 1
-        return limits
-
-    # --------------------------------------------------------------------- #
-
-    @property
-    def q(self):
-        """
-        Get/set robot joint configuration (Robot superclass)
-
-        - ``robot.q`` is the robot joint configuration
-
-        :return: robot joint configuration
-        :rtype: ndarray(n,)
-
-        - ``robot.q = ...`` checks and sets the joint configuration
-
-        .. note::  ???
-        """
-        return self._q
-
-    @q.setter
-    def q(self, q_new):
-        self._q = getvector(q_new, self.n)
-
-    # --------------------------------------------------------------------- #
-
-    @property
-    def qd(self) -> ndarray:
-        """
-        Get/set robot joint velocity (Robot superclass)
-
-        - ``robot.qd`` is the robot joint velocity
-
-        :return: robot joint velocity
-        :rtype: ndarray(n,)
-
-        - ``robot.qd = ...`` checks and sets the joint velocity
-
-        .. note::  ???
-        """
-        return self._qd
-
-    @qd.setter
-    def qd(self, qd_new):
-        self._qd = np.array(getvector(qd_new, self.n))
-
-    # --------------------------------------------------------------------- #
-
-    @property
-    def qdd(self):
-        """
-        Get/set robot joint acceleration (Robot superclass)
-
-        - ``robot.qdd`` is the robot joint acceleration
-
-        :return: robot joint acceleration
-        :rtype: ndarray(n,)
-
-        - ``robot.qdd = ...`` checks and sets the robot joint acceleration
-
-        .. note::  ???
-        """
-        return self._qdd
-
-    @qdd.setter
-    def qdd(self, qdd_new):
-        self._qdd = getvector(qdd_new, self.n)
 
     # --------------------------------------------------------------------- #
 
