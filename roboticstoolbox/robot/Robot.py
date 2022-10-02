@@ -138,36 +138,28 @@ class BaseRobot(SceneNode, ABC):
     # --------- Properties ------------------------------------------------ #
     # --------------------------------------------------------------------- #
 
+    # --------------------------------------------------------------------- #
+
     @property
-    def tool(self) -> SE3:
+    def links(self):
         """
-        Get/set robot tool transform
-
-        - ``robot.tool`` is the robot tool transform as an SE3 object
-        - ``robot._tool`` is the robot tool transform as a numpy array
-        - ``robot.tool = ...`` checks and sets the robot tool transform
-
-        Parameters
-        ----------
-        tool
-            the new robot tool transform (as an SE(3))
+        Robot links
 
         Returns
         -------
-        tool
-            robot tool transform
+        links
+            A list of link objects
 
-
+        Notes
+        -----
+        It is probably more concise to index the robot object rather
+        than the list of links, ie. the following are equivalent:
+        - ``robot.links[i]``
+        - ``robot[i]``
 
         """
-        return SE3(self._tool, check=False)
 
-    @tool.setter
-    def tool(self, T: Union[SE3, np.ndarray]):
-        if isinstance(T, SE3):
-            self._tool = T.A
-        else:
-            self._tool = T
+        return self._links
 
     @property
     def n(self):
@@ -181,7 +173,6 @@ class BaseRobot(SceneNode, ABC):
 
         Examples
         --------
-
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
         >>> robot = rtb.models.DH.Puma560()
@@ -225,6 +216,8 @@ class BaseRobot(SceneNode, ABC):
         """
 
         return self._nlinks
+
+    # --------------------------------------------------------------------- #
 
     @property
     def name(self):
@@ -463,7 +456,6 @@ class BaseRobot(SceneNode, ABC):
 
         Examples
         --------
-
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
         >>> robot = rtb.models.DH.Puma560()
@@ -494,6 +486,285 @@ class BaseRobot(SceneNode, ABC):
             j += 1
 
         return limits
+
+    @property
+    def structure(self) -> str:
+        """
+        Return the joint structure string
+
+        A string with one letter per joint: ``R`` for a revolute
+        joint, and ``P`` for a prismatic joint.
+
+        Returns
+        -------
+        structure
+            joint configuration string
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> puma = rtb.models.DH.Puma560()
+        >>> puma.structure
+        >>> stanford = rtb.models.DH.Stanford()
+        >>> stanford.structure
+
+        Notes
+        -----
+        Fixed joints, that maintain a constant link relative pose,
+        are not included.
+        ``len(self.structure) == self.n``.
+
+        """
+
+        structure = []
+
+        for link in self.links:
+            if link.isrevolute:
+                structure.append("R")
+            elif link.isprismatic:
+                structure.append("P")
+
+        return "".join(structure)
+
+    @property
+    def prismaticjoints(self) -> List[bool]:
+        """
+        Revolute joints as bool array
+
+        Returns
+        -------
+        prismaticjoints
+            array of joint type, True if prismatic
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> puma = rtb.models.DH.Puma560()
+        >>> puma.prismaticjoints()
+        >>> stanford = rtb.models.DH.Stanford()
+        >>> stanford.prismaticjoints()
+
+        Notes
+        -----
+        Fixed joints, that maintain a constant link relative pose,
+        are not included.
+
+        See Also
+        --------
+        :func:`Link.isprismatic`
+        :func:`revolutejoints`
+
+        """
+
+        return [link.isprismatic for link in self.links if link.isjoint]
+
+    @property
+    def revolutejoints(self) -> List[bool]:
+        """
+        Revolute joints as bool array
+
+        Returns
+        -------
+        revolutejoints
+            array of joint type, True if revolute
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> puma = rtb.models.DH.Puma560()
+        >>> puma.revolutejoints()
+        >>> stanford = rtb.models.DH.Stanford()
+        >>> stanford.revolutejoints()
+
+        Notes
+        -----
+        Fixed joints, that maintain a constant link relative pose,
+        are not included.
+
+        See Also
+        --------
+        :func:`Link.isrevolute`
+        :func:`prismaticjoints`
+
+        """
+
+        return [link.isrevolute for link in self.links if link.isjoint]
+
+    # --------------------------------------------------------------------- #
+
+    @property
+    def tool(self) -> SE3:
+        """
+        Get/set robot tool transform
+
+        - ``robot.tool`` is the robot tool transform as an SE3 object
+        - ``robot._tool`` is the robot tool transform as a numpy array
+        - ``robot.tool = ...`` checks and sets the robot tool transform
+
+        Parameters
+        ----------
+        tool
+            the new robot tool transform (as an SE(3))
+
+        Returns
+        -------
+        tool
+            robot tool transform
+
+
+
+        """
+        return SE3(self._tool, check=False)
+
+    @tool.setter
+    def tool(self, T: Union[SE3, np.ndarray]):
+        if isinstance(T, SE3):
+            self._tool = T.A
+        else:
+            self._tool = T
+
+    # --------------------------------------------------------------------- #
+
+    def todegrees(self, q) -> ndarray:
+        """
+        Convert joint angles to degrees
+
+        Parameters
+        ----------
+        q
+            The joint configuration of the robot
+
+        Returns
+        -------
+        q
+            a vector of joint coordinates in degrees and metres
+
+        ``robot.todegrees(q)`` converts joint coordinates ``q`` to degrees
+        taking into account whether elements of ``q`` correspond to revolute
+        or prismatic joints, ie. prismatic joint values are not converted.
+
+        If ``q`` is a matrix, with one column per joint, the conversion is
+        performed columnwise.
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> from math import pi
+        >>> stanford = rtb.models.DH.Stanford()
+        >>> stanford.todegrees([pi/4, pi/8, 2, -pi/4, pi/6, pi/3])
+
+        """
+
+        q = getmatrix(q, (None, self.n))
+
+        for j, revolute in enumerate(self.revolutejoints):
+            if revolute:
+                q[:, j] *= 180.0 / np.pi
+
+        if q.shape[0] == 1:
+            return q[0]
+        else:
+            return q
+
+    def toradians(self, q) -> ndarray:
+        """
+        Convert joint angles to radians
+
+        ``robot.toradians(q)`` converts joint coordinates ``q`` to radians
+        taking into account whether elements of ``q`` correspond to revolute
+        or prismatic joints, ie. prismatic joint values are not converted.
+
+        If ``q`` is a matrix, with one column per joint, the conversion is
+        performed columnwise.
+
+        Parameters
+        ----------
+        q
+            The joint configuration of the robot
+
+
+        Returns
+        -------
+        q
+            a vector of joint coordinates in radians and metres
+
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> stanford = rtb.models.DH.Stanford()
+        >>> stanford.toradians([10, 20, 2, 30, 40, 50])
+
+        """
+
+        q = getmatrix(q, (None, self.n))
+
+        for j, revolute in enumerate(self.revolutejoints):
+            if revolute:
+                q[:, j] *= np.pi / 180.0
+
+        if q.shape[0] == 1:
+            return q[0]
+        else:
+            return q
+
+    def isrevolute(self, j) -> bool:
+        """
+        Check if joint is revolute
+
+        Returns
+        -------
+        j
+            True if revolute
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> puma = rtb.models.DH.Puma560()
+        >>> puma.revolutejoints()
+        >>> stanford = rtb.models.DH.Stanford()
+        >>> stanford.isrevolute(1)
+
+        See Also
+        --------
+        :func:`Link.isrevolute`
+        :func:`revolutejoints`
+
+        """
+        return self.revolutejoints[j]
+
+    def isprismatic(self, j) -> bool:
+        """
+        Check if joint is prismatic
+
+        Returns
+        -------
+        j
+            True if prismatic
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> puma = rtb.models.DH.Puma560()
+        >>> puma.prismaticjoints()
+        >>> stanford = rtb.models.DH.Stanford()
+        >>> stanford.isprismatic(1)
+
+        See Also
+        --------
+        :func:`Link.isprismatic`
+        :func:`prismaticjoints`
+
+        """
+
+        return self.prismaticjoints[j]
 
     # --------------------------------------------------------------------- #
 
@@ -769,167 +1040,8 @@ class Robot(SceneNode, ABC, DynamicsMixin):
         else:  # pragma nocover
             return ""
 
-    @property
-    def structure(self):
-        """
-        Return the joint structure string
-
-        :return: joint configuration string
-        :rtype: str
-
-        A string with one letter per joint: ``R`` for a revolute
-        joint, and ``P`` for a prismatic joint.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.DH.Puma560()
-            >>> puma.structure
-            >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.structure
-
-        .. note:: Fixed joints, that maintain a constant link relative pose,
-            are not included.  ``len(self.structure) == self.n``.
-        """
-        structure = []
-        for link in self:
-            if link.isrevolute:
-                structure.append("R")
-            elif link.isprismatic:
-                structure.append("P")
-
-        return "".join(structure)
-
-    @property
-    def revolutejoints(self):
-        """
-        Revolute joints as bool array
-
-        :return: array of joint type, True if revolute
-        :rtype: bool(n)
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.DH.Puma560()
-            >>> puma.revolutejoints()
-            >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.revolutejoints()
-
-        .. note:: Fixed joints, that maintain a constant link relative pose,
-            are not included.  ``len(self.structure) == self.n``.
-
-        :seealso: :func:`Link.isrevolute`, :func:`prismaticjoints`
-        """
-        return [link.isrevolute for link in self if link.isjoint]
-
     # TODO not very efficient
     # TODO keep a mapping from joint to link
-    def isrevolute(self, j):
-        return self.revolutejoints[j]
-
-    def isprismatic(self, j):
-        return self.prismaticjoints[j]
-
-    @property
-    def prismaticjoints(self):
-        """
-        Revolute joints as bool array
-
-        :return: array of joint type, True if prismatic
-        :rtype: bool(n)
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.DH.Puma560()
-            >>> puma.prismaticjoints()
-            >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.prismaticjoints()
-
-        .. note:: Fixed joints, that maintain a constant link relative pose,
-            are not included.  ``len(self.structure) == self.n``.
-
-        :seealso: :func:`Link.isprismatic`, :func:`revolutejoints`
-        """
-        return [link.isprismatic for link in self if link.isjoint]
-
-    def todegrees(self, q):
-        """
-        Convert joint angles to degrees
-
-        :param q: The joint configuration of the robot
-        :type q: ndarray(n) or ndarray(m,n)
-        :return: a vector of joint coordinates in degrees and metres
-        :rtype: ndarray(n)  or ndarray(m,n)
-
-        ``robot.todegrees(q)`` converts joint coordinates ``q`` to degrees
-        taking into account whether elements of ``q`` correspond to revolute
-        or prismatic joints, ie. prismatic joint values are not converted.
-
-        If ``q`` is a matrix, with one column per joint, the conversion is
-        performed columnwise.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> from math import pi
-            >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.todegrees([pi/4, pi/8, 2, -pi/4, pi/6, pi/3])
-        """
-
-        q = getmatrix(q, (None, self.n))
-
-        for j, revolute in enumerate(self.revolutejoints):
-            if revolute:
-                q[:, j] *= 180.0 / np.pi
-        if q.shape[0] == 1:
-            return q[0]
-        else:
-            return q
-
-    def toradians(self, q):
-        """
-        Convert joint angles to radians
-
-        :param q: The joint configuration of the robot
-        :type q: ndarray(n)  or ndarray(m,n)
-        :return: a vector of joint coordinates in radians and metres
-        :rtype: ndarray(n)  or ndarray(m,n)
-
-        ``robot.toradians(q)`` converts joint coordinates ``q`` to radians
-        taking into account whether elements of ``q`` correspond to revolute
-        or prismatic joints, ie. prismatic joint values are not converted.
-
-        If ``q`` is a matrix, with one column per joint, the conversion is
-        performed columnwise.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> stanford = rtb.models.DH.Stanford()
-            >>> stanford.toradians([10, 20, 2, 30, 40, 50])
-        """
-
-        q = getmatrix(q, (None, self.n))
-
-        for j, revolute in enumerate(self.revolutejoints):
-            if revolute:
-                q[:, j] *= np.pi / 180.0
-        if q.shape[0] == 1:
-            return q[0]
-        else:
-            return q
 
     def linkcolormap(self, linkcolors="viridis"):
         """
@@ -1401,26 +1513,6 @@ class Robot(SceneNode, ABC, DynamicsMixin):
         return self.ets(start, end).jacob0_analytical(
             q, tool=tool, representation=representation
         )
-
-    # --------------------------------------------------------------------- #
-
-    @property
-    def links(self):
-        """
-        Robot links (Robot superclass)
-
-        :return: A list of link objects
-        :rtype: list of Link subclass instances
-
-        .. note:: It is probably more concise to index the robot object rather
-            than the list of links, ie. the following are equivalent::
-
-                robot.links[i]
-                robot[i]
-        """
-        return self._links
-
-    # --------------------------------------------------------------------- #
 
     @property
     def base(self) -> SE3:
