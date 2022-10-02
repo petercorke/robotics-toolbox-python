@@ -70,14 +70,8 @@ if version_info >= (3, 9):
     from functools import cached_property
 
     c_property = cached_property
-else:
+else:  # pragma: nocover
     c_property = property
-
-
-# class AbstractETS(ABC):
-#     @abstractmethod
-#     def jacobm(self) -> ndarray:
-#         pass
 
 
 class BaseETS(UserList):
@@ -164,7 +158,7 @@ class BaseETS(UserList):
 
             if et.isjoint:
                 if q is not None:
-                    if et.jindex is None:
+                    if et.jindex is None:  # pragma: nocover  this is no longer possible
                         _j = j
                     else:
                         _j = et.jindex
