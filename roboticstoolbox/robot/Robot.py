@@ -43,8 +43,7 @@ _default_backend = None
 
 ArrayLike = Union[list, np.ndarray, tuple, set]
 
-# TODO maybe this needs to be abstract
-# ikine functions need: fkine, jacobe, qlim methods from subclass
+# class BaseRobot(SceneNode, ABC):
 
 
 class Robot(SceneNode, ABC, DynamicsMixin):
@@ -65,6 +64,7 @@ class Robot(SceneNode, ABC, DynamicsMixin):
         configs=None,
     ):
 
+        # Basic arguments
         self.name = name
         self.manufacturer = manufacturer
         self.comment = comment
@@ -82,7 +82,7 @@ class Robot(SceneNode, ABC, DynamicsMixin):
         else:
             self.keywords = keywords
 
-        # gravity is in the negative-z direction.  This is the negative of the
+        # Gravity is in the negative-z direction. This is the negative of the
         # MATLAB Toolbox case (which was wrong).
         if gravity is None:
             gravity = np.array([0, 0, -9.81])
@@ -117,7 +117,7 @@ class Robot(SceneNode, ABC, DynamicsMixin):
         self._links = links
         self._nlinks = len(links)
 
-        # Current joint angles of the robot
+        # Current joint configuraitons of the robot
         self.q = np.zeros(self.n)
         self.qd = np.zeros(self.n)
         self.qdd = np.zeros(self.n)
@@ -212,24 +212,6 @@ class Robot(SceneNode, ABC, DynamicsMixin):
             eg. ``robot['link1']``
         """
         return self._links[i]
-
-    # URDF Parser Attempt
-    # @staticmethod
-    # def _get_stl_file_paths_and_scales(urdf_path):
-    #     data = [[], [], []]  # [ [filenames] , [scales] , [origins] ]
-    #
-    #     name, ext = splitext(urdf_path)
-    #
-    #     if ext == '.xacro':
-    #         urdf_string = xacro.main(urdf_path)
-    #         urdf = URDF.loadstr(urdf_string, urdf_path)
-    #
-    #         for link in urdf.links:
-    #             data[0].append(link.visuals[0].geometry.mesh.filename)
-    #             data[1].append(link.visuals[0].geometry.mesh.scale)
-    #             data[2].append(SE3(link.visuals[0].origin))
-    #
-    #     return data
 
     def dynchanged(self, what=None):
         """
