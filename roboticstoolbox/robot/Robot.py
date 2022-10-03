@@ -18,7 +18,7 @@ from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.ETS import ETS
-from typing import Any, Callable, List, Set, Union, Dict, Tuple
+from typing import Any, Callable, Generic, List, Set, TypeVar, Union, Dict, Tuple, Type
 from spatialgeometry import Shape
 from fknm import Robot_link_T
 from functools import lru_cache
@@ -45,17 +45,19 @@ _default_backend = None
 
 ArrayLike = Union[list, np.ndarray, tuple, set]
 
+LinkType = TypeVar("LinkType", bound=BaseLink)
 
-class BaseRobot(SceneNode, ABC):
+
+class BaseRobot(SceneNode, ABC, Generic[LinkType]):
     def __init__(
         self,
-        links: List[BaseLink],
-        gripper_links: Union[BaseLink, List[BaseLink], None] = None,
+        links: List[LinkType],
+        gripper_links: Union[LinkType, List[LinkType], None] = None,
         name: str = "",
         manufacturer: str = "",
         comment: str = "",
-        base=Union[np.ndarray, SE3, None],
-        tool=Union[np.ndarray, SE3, None],
+        base: Union[np.ndarray, SE3, None] = None,
+        tool: Union[np.ndarray, SE3, None] = None,
         gravity: ArrayLike = [0, 0, -9.81],
         keywords: Union[List[str], Tuple[str]] = [],
         symbolic: bool = False,
@@ -168,8 +170,8 @@ class BaseRobot(SceneNode, ABC):
 
     def _sort_links(
         self,
-        links: List[BaseLink],
-        gripper_links: Union[BaseLink, List[BaseLink], None],
+        links: List[LinkType],
+        gripper_links: Union[LinkType, List[LinkType], None],
         check_jindex: bool,
     ):
         """
@@ -217,19 +219,24 @@ class BaseRobot(SceneNode, ABC):
         # ----------------------------------------------------
         for link in links:
             if link.parent is None and link.parent_name is not None:
-                link._parent = self._linkdict[link.parent_name]
+                link.parent = self._linkdict[link.parent_name]
 
         if all([link.parent is None for link in links]):
 
             # No parent links were given, assume they are sequential
             for i in range(len(links) - 1):
-                links[i + 1]._parent = links[i]
+                li = links[i]
+                links[i + 1].parent = links[i]
 
         # Set the base link
         # -----------------
         for link in links:
             # Is this a base link?
-            if link._parent is None:
+
+            if isinstance(link.parent, BaseLink):
+                # Update children of this link's parent
+                link.parent._children.append(link)
+            else:
                 try:
                     if self._base_link is not None:
                         raise ValueError("Multiple base links")
@@ -237,9 +244,6 @@ class BaseRobot(SceneNode, ABC):
                     pass
 
                 self._base_link = link
-            else:
-                # No, update children of this link's parent
-                link._parent._children.append(link)
 
         if self.base_link is None:  # Pragma: nocover
             raise ValueError(
@@ -249,23 +253,20 @@ class BaseRobot(SceneNode, ABC):
         # Scene node, set links between the links
         # ---------------------------------------
         for link in links:
-            if link.parent is not None:
+            if isinstance(link.parent, BaseLink):
                 link.scene_parent = link.parent
 
         # Set up the gripper, make a list containing the root of all
         # grippers
         # ----------------------------------------------------------
-        if gripper_links is not None:
-            if isinstance(gripper_links, Link):
-                gripper_links = [gripper_links]
-        else:
+        if gripper_links is None:
             gripper_links = []
+
+        if not isinstance(gripper_links, list):
+            gripper_links = [gripper_links]
 
         # An empty list to hold all grippers
         self._grippers = []
-
-        if isinstance(gripper_links, BaseLink):
-            gripper_links = [gripper_links]
 
         # Make a gripper object for each gripper
         for link in gripper_links:
@@ -347,7 +348,7 @@ class BaseRobot(SceneNode, ABC):
     # --------------------------------------------------------------------- #
 
     @property
-    def links(self) -> List[BaseLink]:
+    def links(self) -> List[LinkType]:
         """
         Robot links
 
@@ -382,7 +383,7 @@ class BaseRobot(SceneNode, ABC):
         return self._grippers
 
     @property
-    def base_link(self) -> BaseLink:
+    def base_link(self) -> LinkType:
         """
         Get the robot base link
 
@@ -1051,7 +1052,9 @@ class BaseRobot(SceneNode, ABC):
     # --------------------------------------------------------------------- #
 
     def dfs_links(
-        self, start: BaseLink, func: Union[None, Callable[[BaseLink], Any]] = None
+        self,
+        start: LinkType,
+        func: Union[None, Callable[[LinkType], Any]] = None,
     ):
         """
         A link search method
@@ -1113,19 +1116,19 @@ class BaseRobot(SceneNode, ABC):
     # --------------------------------------------------------------------- #
 
 
-class Robot(BaseRobot):
+class Robot(BaseRobot[Link]):
 
     _color = True
 
     def __init__(
         self,
         links: List[Link],
-        gripper_links: Union[BaseLink, List[BaseLink], None] = None,
+        gripper_links: Union[Link, List[Link], None] = None,
         name: str = "",
         manufacturer: str = "",
         comment: str = "",
-        base=Union[np.ndarray, SE3, None],
-        tool=Union[np.ndarray, SE3, None],
+        base: Union[np.ndarray, SE3, None] = None,
+        tool: Union[np.ndarray, SE3, None] = None,
         gravity: ArrayLike = [0, 0, -9.81],
         keywords: Union[List[str], Tuple[str]] = [],
         symbolic: bool = False,
@@ -1150,6 +1153,8 @@ class Robot(BaseRobot):
             configs=configs,
             check_jindex=check_jindex,
         )
+
+        self.links
 
     @staticmethod
     def URDF_read(
