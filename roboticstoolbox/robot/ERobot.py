@@ -137,162 +137,162 @@ class BaseERobot(Robot):
         # search order
         orlinks = []
 
-        # check all the incoming Link objects
-        n = 0
-        for k, link in enumerate(links):
-            # if link has no name, give it one
-            if link.name is None or link.name == "":
-                link.name = f"link-{k}"
-            link.number = k + 1
+        # # check all the incoming Link objects
+        # n = 0
+        # for k, link in enumerate(links):
+        #     # if link has no name, give it one
+        #     if link.name is None or link.name == "":
+        #         link.name = f"link-{k}"
+        #     link.number = k + 1
 
-            # put it in the link dictionary, check for duplicates
-            if link.name in self._linkdict:
-                raise ValueError(f"link name {link.name} is not unique")
-            self._linkdict[link.name] = link
+        #     # put it in the link dictionary, check for duplicates
+        #     if link.name in self._linkdict:
+        #         raise ValueError(f"link name {link.name} is not unique")
+        #     self._linkdict[link.name] = link
 
-            if link.isjoint:
-                n += 1
+        #     if link.isjoint:
+        #         n += 1
 
-        # resolve parents given by name, within the context of
-        # this set of links
-        for link in links:
-            if link.parent is None and link.parent_name is not None:
-                link._parent = self._linkdict[link.parent_name]
+        # # resolve parents given by name, within the context of
+        # # this set of links
+        # for link in links:
+        #     if link.parent is None and link.parent_name is not None:
+        #         link._parent = self._linkdict[link.parent_name]
 
-        if all([link.parent is None for link in links]):
-            # no parent links were given, assume they are sequential
-            for i in range(len(links) - 1):
-                links[i + 1]._parent = links[i]
+        # if all([link.parent is None for link in links]):
+        #     # no parent links were given, assume they are sequential
+        #     for i in range(len(links) - 1):
+        #         links[i + 1]._parent = links[i]
 
-        self._n = n
+        # self._n = n
 
-        # scan for base
-        for link in links:
-            # is this a base link?
-            if link._parent is None:
-                try:
-                    if self._base_link is not None:
-                        raise ValueError("Multiple base links")
-                except AttributeError:
-                    pass
+        # # scan for base
+        # for link in links:
+        #     # is this a base link?
+        #     if link._parent is None:
+        #         try:
+        #             if self._base_link is not None:
+        #                 raise ValueError("Multiple base links")
+        #         except AttributeError:
+        #             pass
 
-                self._base_link = link
-            else:
-                # no, update children of this link's parent
-                link._parent._children.append(link)
+        #         self._base_link = link
+        #     else:
+        #         # no, update children of this link's parent
+        #         link._parent._children.append(link)
 
-        if self.base_link is None:  # Pragma: nocover
-            raise ValueError(
-                "Invalid link configuration provided, must have a base link"
-            )
+        # if self.base_link is None:  # Pragma: nocover
+        #     raise ValueError(
+        #         "Invalid link configuration provided, must have a base link"
+        #     )
 
-        # Scene node, set links between the links
-        for link in links:
-            if link.parent is not None:
-                link.scene_parent = link.parent
+        # # Scene node, set links between the links
+        # for link in links:
+        #     if link.parent is not None:
+        #         link.scene_parent = link.parent
 
-        # Set up the gripper, make a list containing the root of all
-        # grippers
-        if gripper_links is not None:
-            if isinstance(gripper_links, Link):
-                gripper_links = [gripper_links]
-        else:
-            gripper_links = []
+        # # Set up the gripper, make a list containing the root of all
+        # # grippers
+        # if gripper_links is not None:
+        #     if isinstance(gripper_links, Link):
+        #         gripper_links = [gripper_links]
+        # else:
+        #     gripper_links = []
 
-        # An empty list to hold all grippers
-        self._grippers = []
+        # # An empty list to hold all grippers
+        # self._grippers = []
 
-        # Make a gripper object for each gripper
-        for link in gripper_links:
-            g_links = self.dfs_links(link)
+        # # Make a gripper object for each gripper
+        # for link in gripper_links:
+        #     g_links = self.dfs_links(link)
 
-            # Remove gripper links from the robot
-            for g_link in g_links:
-                # print(g_link)
-                links.remove(g_link)
+        #     # Remove gripper links from the robot
+        #     for g_link in g_links:
+        #         # print(g_link)
+        #         links.remove(g_link)
 
-            # Save the gripper object
-            self._grippers.append(Gripper(g_links, name=link.name))
+        #     # Save the gripper object
+        #     self._grippers.append(Gripper(g_links, name=link.name))
 
-        # Subtract the n of the grippers from the n of the robot
-        for gripper in self._grippers:
-            self._n -= gripper.n
+        # # Subtract the n of the grippers from the n of the robot
+        # for gripper in self._grippers:
+        #     self._n -= gripper.n
 
-        # Set the ee links
-        self.ee_links = []
-        if len(gripper_links) == 0:
-            for link in links:
-                # is this a leaf node? and do we not have any grippers
-                if len(link.children) == 0:
-                    # no children, must be an end-effector
-                    self.ee_links.append(link)
-        else:
-            for link in gripper_links:
-                # use the passed in value
-                self.ee_links.append(link.parent)  # type: ignore
+        # # Set the ee links
+        # self.ee_links = []
+        # if len(gripper_links) == 0:
+        #     for link in links:
+        #         # is this a leaf node? and do we not have any grippers
+        #         if len(link.children) == 0:
+        #             # no children, must be an end-effector
+        #             self.ee_links.append(link)
+        # else:
+        #     for link in gripper_links:
+        #         # use the passed in value
+        #         self.ee_links.append(link.parent)  # type: ignore
 
-        # assign the joint indices
-        if all([link.jindex is None or link.ets._auto_jindex for link in links]):
-            # no joints have an index
-            jindex = [0]  # "mutable integer" hack
+        # # assign the joint indices
+        # if all([link.jindex is None or link.ets._auto_jindex for link in links]):
+        #     # no joints have an index
+        #     jindex = [0]  # "mutable integer" hack
 
-            def visit_link(link, jindex):
-                # if it's a joint, assign it a jindex and increment it
-                if link.isjoint and link in links:
-                    link.jindex = jindex[0]
-                    jindex[0] += 1
+        #     def visit_link(link, jindex):
+        #         # if it's a joint, assign it a jindex and increment it
+        #         if link.isjoint and link in links:
+        #             link.jindex = jindex[0]
+        #             jindex[0] += 1
 
-                if link in links:
-                    orlinks.append(link)
+        #         if link in links:
+        #             orlinks.append(link)
 
-            # visit all links in DFS order
-            self.dfs_links(self.base_link, lambda link: visit_link(link, jindex))
+        #     # visit all links in DFS order
+        #     self.dfs_links(self.base_link, lambda link: visit_link(link, jindex))
 
-        elif all([link.jindex is not None for link in links if link.isjoint]):
-            # jindex set on all, check they are unique and contiguous
-            if checkjindex:
-                jset = set(range(self._n))
-                for link in links:
-                    if link.isjoint and link.jindex not in jset:
-                        raise ValueError(
-                            f"joint index {link.jindex} was " "repeated or out of range"
-                        )
-                    jset -= set([link.jindex])
-                if len(jset) > 0:  # pragma nocover  # is impossible
-                    raise ValueError(f"joints {jset} were not assigned")
-            orlinks = links
-        else:
-            # must be a mixture of Links with/without jindex
-            raise ValueError("all links must have a jindex, or none have a jindex")
+        # elif all([link.jindex is not None for link in links if link.isjoint]):
+        #     # jindex set on all, check they are unique and contiguous
+        #     if checkjindex:
+        #         jset = set(range(self._n))
+        #         for link in links:
+        #             if link.isjoint and link.jindex not in jset:
+        #                 raise ValueError(
+        #                     f"joint index {link.jindex} was " "repeated or out of range"
+        #                 )
+        #             jset -= set([link.jindex])
+        #         if len(jset) > 0:  # pragma nocover  # is impossible
+        #             raise ValueError(f"joints {jset} were not assigned")
+        #     orlinks = links
+        # else:
+        #     # must be a mixture of Links with/without jindex
+        #     raise ValueError("all links must have a jindex, or none have a jindex")
 
         # self._nbranches = sum([link.nchildren == 0 for link in links])
 
-        # Set up qlim
-        qlim = zeros((2, self.n))
-        j = 0
+        # # Set up qlim
+        # qlim = zeros((2, self.n))
+        # j = 0
 
-        for i in range(len(orlinks)):
-            if orlinks[i].isjoint:
-                qlim[:, j] = orlinks[i].qlim
-                j += 1
-        self._qlim = qlim
+        # for i in range(len(orlinks)):
+        #     if orlinks[i].isjoint:
+        #         qlim[:, j] = orlinks[i].qlim
+        #         j += 1
+        # self._qlim = qlim
 
-        self._valid_qlim = False
-        for i in range(self.n):
-            if any(qlim[:, i] != 0) and not any(isnan(qlim[:, i])):
-                self._valid_qlim = True
+        # self._valid_qlim = False
+        # for i in range(self.n):
+        #     if any(qlim[:, i] != 0) and not any(isnan(qlim[:, i])):
+        #         self._valid_qlim = True
 
         # Initialise Robot object
         super().__init__(orlinks, **kwargs)
 
-        # Fix number of links for gripper links
-        self._nlinks = len(links)
+        # # Fix number of links for gripper links
+        # self._nlinks = len(links)
 
-        for gripper in self.grippers:
-            self._nlinks += len(gripper.links)
+        # for gripper in self.grippers:
+        #     self._nlinks += len(gripper.links)
 
-        # SceneNode, set a reference to the first link
-        self.scene_children = [self.links[0]]  # type: ignore
+        # # SceneNode, set a reference to the first link
+        # self.scene_children = [self.links[0]]  # type: ignore
 
     def __str__(self) -> str:
         """
