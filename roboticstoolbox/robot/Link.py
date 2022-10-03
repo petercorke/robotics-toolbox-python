@@ -1,5 +1,6 @@
 from copy import copy as ccopy, deepcopy
 from abc import ABC
+from typing_extensions import Self
 
 # from multiprocessing.sharedctypes import Value
 import numpy as np
@@ -8,7 +9,7 @@ from spatialmath.base import getvector, isscalar, isvector, ismatrix
 from spatialmath import SE3, SE2
 from ansitable import ANSITable, Column
 from spatialgeometry import Shape, SceneNode, SceneGroup
-from typing import List, Union, Tuple, overload
+from typing import List, TypeVar, Union, Tuple, overload, Type
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.ET import ET, ET2
@@ -108,7 +109,7 @@ class BaseLink(SceneNode, ABC):
         self,
         ets: Union[ETS, ETS2, ET, ET2] = ETS(),
         name=None,
-        parent: Union["BaseLink", str, None] = None,
+        parent: Union[Self, str, None] = None,
         joint_name: Union[str, None] = None,
         m: Union[float, None] = None,
         r: Union[ArrayLike, None] = None,
@@ -182,12 +183,13 @@ class BaseLink(SceneNode, ABC):
 
         # Check parent argument
         if parent is not None:
-            if isinstance(parent, BaseLink):
-                self._parent = parent
-                self._parent_name = None
-            elif isinstance(parent, str):
-                self._parent = None
+            if isinstance(parent, str):
+                self.parent = None
                 self._parent_name = parent
+            elif isinstance(parent, BaseLink):
+                self.parent = parent
+                self._parent_name = None
+
             else:
                 raise TypeError("parent must be BaseLink subclass")
         else:
@@ -453,7 +455,7 @@ class BaseLink(SceneNode, ABC):
         return self._name
 
     @name.setter
-    def name(self, name):
+    def name(self, name: str):
         self._name = name
 
     # -------------------------------------------------------------------------- #
@@ -911,16 +913,16 @@ class BaseLink(SceneNode, ABC):
         """
         return self.v.isrotation if self.v else False
 
-    @overload
-    def parent(self: "Link") -> Union["Link", None]:
-        ...
+    # @overload
+    # def parent(self: "Link") -> Union["Link", None]:
+    #     ...
 
-    @overload
-    def parent(self: "Link2") -> Union["Link2", None]:
-        ...
+    # @overload
+    # def parent(self: "Link2") -> Union["Link2", None]:
+    #     ...
 
     @property
-    def parent(self):
+    def parent(self) -> Union[Self, None]:
         """
         Parent link
         :return: Link's parent
@@ -934,6 +936,20 @@ class BaseLink(SceneNode, ABC):
         """
         return self._parent
 
+    # @parent.setter
+    # @overload
+    # def parent(self: "Link", parent: "Link"):
+    #     ...
+
+    # @parent.setter
+    # @overload
+    # def parent(self: "Link2", parent: "Link2"):
+    #     ...
+
+    @parent.setter
+    def parent(self, parent: Union[Self, None]):
+        self._parent = parent
+
     @property
     def parent_name(self) -> Union[str, None]:
         """
@@ -941,8 +957,8 @@ class BaseLink(SceneNode, ABC):
 
         :return: Link's parent name
         """
-        if self._parent is not None:
-            return self._parent.name
+        if isinstance(self.parent, BaseLink):
+            return self.parent.name
         else:
             return self._parent_name
 
@@ -1202,7 +1218,7 @@ class BaseLink(SceneNode, ABC):
             format_param(self, l, "name")
         if self.parent_name is not None:
             l.append('parent="' + self.parent_name + '"')
-        elif self.parent is not None:
+        elif isinstance(self.parent, BaseLink):
             l.append('parent="' + self.parent.name + '"')
         format_param(self, l, "parent")
         format_param(self, l, "isflip", ignorevalue=False)
