@@ -18,7 +18,11 @@ from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.tools.types import ArrayLike
+
 from typing import Any, Callable, Generic, List, Set, TypeVar, Union, Dict, Tuple, Type
+from typing_extensions import Protocol
+
 from spatialgeometry import Shape
 from fknm import Robot_link_T
 from functools import lru_cache
@@ -43,12 +47,11 @@ except ImportError:  # pragma nocover
 
 _default_backend = None
 
-ArrayLike = Union[list, np.ndarray, tuple, set]
-
+# A generic type variable representing any subclass of BaseLink
 LinkType = TypeVar("LinkType", bound=BaseLink)
 
 
-class BaseRobot(SceneNode, ABC, Generic[LinkType]):
+class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     def __init__(
         self,
         links: List[LinkType],
@@ -103,12 +106,12 @@ class BaseRobot(SceneNode, ABC, Generic[LinkType]):
             self._keywords = keywords
 
         # Gravity is in the negative-z direction.
-        self._gravity = np.array(gravity)
+        self.gravity = np.array(gravity)
 
         # Basic arguments
         self.name = name
         self.manufacturer = manufacturer
-        self._comment = comment
+        self.comment = comment
         self._symbolic = symbolic
         self._reach = None
         self._hasdynamics = False
@@ -168,6 +171,10 @@ class BaseRobot(SceneNode, ABC, Generic[LinkType]):
         # SceneNode, set a reference to the first link
         self.scene_children = [self.links[0]]  # type: ignore
 
+    # --------------------------------------------------------------------- #
+    # --------- Private Methods ------------------------------------------- #
+    # --------------------------------------------------------------------- #
+
     def _sort_links(
         self,
         links: List[LinkType],
@@ -183,6 +190,7 @@ class BaseRobot(SceneNode, ABC, Generic[LinkType]):
         - Finds and sets the ee links
         - sets the jindices
         - sets n
+        - sets links
 
         """
 
@@ -321,7 +329,7 @@ class BaseRobot(SceneNode, ABC, Generic[LinkType]):
         elif all([link.jindex is not None for link in links if link.isjoint]):
             # Jindex set on all, check they are unique and contiguous
             if check_jindex:
-                jset = set(range(self._n))
+                jset = set(range(n))
                 for link in links:
                     if link.isjoint and link.jindex not in jset:
                         raise ValueError(
@@ -342,6 +350,76 @@ class BaseRobot(SceneNode, ABC, Generic[LinkType]):
         # Set links
         # ---------
         self._links = orlinks
+
+    def dynchanged(self, what: Union[str, None] = None):
+        """
+        Dynamic parameters have changed
+
+        Called from a property setter to inform the robot that the cache of
+        dynamic parameters is invalid.
+
+        See Also
+        --------
+        :func:`roboticstoolbox.Link._listen_dyn`
+
+        """
+
+        self._dynchanged = True
+        if what != "gravity":
+            self._hasdynamics = True
+
+    # --------------------------------------------------------------------- #
+    # --------- Magic Methods --------------------------------------------- #
+    # --------------------------------------------------------------------- #
+
+    def __iter__(self):
+        self._iter = 0
+        return self
+
+    def __next__(self) -> LinkType:
+        if self._iter < len(self.links):
+            link = self[self._iter]
+            self._iter += 1
+            return link
+        else:
+            raise StopIteration
+
+    def __getitem__(self, i: Union[int, str]) -> LinkType:
+        """
+        Get link
+
+        This also supports iterating over each link in the robot object,
+        from the base to the tool.
+
+        Parameters
+        ----------
+        i
+            link number or name
+
+        Returns
+        -------
+        link
+            i'th link or named link
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> print(robot[1]) # print the 2nd link
+        >>> print([link.a for link in robot])  # print all the a_j values
+
+        Notes
+        -----
+        ``Robot`` supports link lookup by name,
+            eg. ``robot['link1']``
+
+        """
+
+        if isinstance(i, int):
+            return self._links[i]
+        else:
+            return self._linkdict[i]
 
     # --------------------------------------------------------------------- #
     # --------- Properties ------------------------------------------------ #
@@ -462,12 +540,17 @@ class BaseRobot(SceneNode, ABC, Generic[LinkType]):
         Get/set robot name
 
         - ``robot.name`` is the robot name
-        - ``robot.name = ...`` checks and sets therobot name
+        - ``robot.name = ...`` checks and sets the robot name
+
+        Parameters
+        ----------
+        name
+            the new robot name
 
         Returns
         -------
         name
-            robot name
+            the current robot name
 
         """
         return self._name
@@ -475,6 +558,31 @@ class BaseRobot(SceneNode, ABC, Generic[LinkType]):
     @name.setter
     def name(self, name_new):
         self._name = name_new
+
+    @property
+    def comment(self):
+        """
+        Get/set robot comment
+
+        - ``robot.comment`` is the robot comment
+        - ``robot.comment = ...`` checks and sets the robot comment
+
+        Parameters
+        ----------
+        name
+            the new robot comment
+
+        Returns
+        -------
+        comment
+            robot comment
+
+        """
+        return self._comment
+
+    @comment.setter
+    def comment(self, comment_new):
+        self._comment = comment_new
 
     @property
     def manufacturer(self):
@@ -599,6 +707,40 @@ class BaseRobot(SceneNode, ABC, Generic[LinkType]):
     @default_backend.setter
     def default_backend(self, be):
         _default_backend = be
+
+    @property
+    def gravity(self) -> np.ndarray:
+        """
+        Get/set default gravitational acceleration (Robot superclass)
+
+        - ``robot.name`` is the default gravitational acceleration
+        - ``robot.name = ...`` checks and sets default gravitational
+            acceleration
+
+
+        Parameters
+        ----------
+        gravity
+            the new gravitational acceleration for this robot
+
+        Returns
+        -------
+        gravity
+            gravitational acceleration
+
+        Notes
+        -----
+        If the z-axis is upward, out of the Earth, this should be
+        a positive number.
+
+        """
+
+        return self._gravity
+
+    @gravity.setter
+    def gravity(self, gravity_new: ArrayLike):
+        self._gravity = np.array(getvector(gravity_new, 3))
+        self.dynchanged()
 
     # --------------------------------------------------------------------- #
 
@@ -834,6 +976,35 @@ class BaseRobot(SceneNode, ABC, Generic[LinkType]):
         """
 
         return [link.isrevolute for link in self.links if link.isjoint]
+
+    @property
+    def control_mode(self) -> str:
+        """
+        Get/set robot control mode
+
+        - ``robot.control_type`` is the robot control mode
+        - ``robot.control_type = ...`` checks and sets the robot control mode
+
+        Parameters
+        ----------
+        control_mode
+            the new robot control mode
+
+        Returns
+        -------
+        control_mode
+            the current robot control mode
+
+        """
+
+        return self._control_mode
+
+    @control_mode.setter
+    def control_mode(self, cn: str):
+        if cn == "p" or cn == "v" or cn == "a":
+            self._control_mode = cn
+        else:
+            raise ValueError("Control type must be one of 'p', 'v', or 'a'")
 
     # --------------------------------------------------------------------- #
 
@@ -1091,6 +1262,117 @@ class BaseRobot(SceneNode, ABC, Generic[LinkType]):
 
         return visited
 
+    def addconfiguration_attr(self, name: str, q: ArrayLike, unit: str = "rad"):
+        """
+        Add a named joint configuration as an attribute
+
+        Parameters
+        ----------
+        name
+            Name of the joint configuration
+        q
+            Joint configuration
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+        >>> robot.mypos
+        >>> robot.configs["mypos"]
+
+        Notes
+        -----
+        - Used in robot model init method to store the ``qr`` configuration
+        - Dynamically adding attributes to objects can cause issues with
+            Python type checking.
+        - Configuration is also added to the robot instance's dictionary of
+            named configurations.
+
+        See Also
+        --------
+        :meth:`addconfiguration`
+
+        """
+
+        v = getvector(q, self.n)
+        v = getunit(v, unit)
+        v = np.array(v)
+        self._configs[name] = v
+        setattr(self, name, v)
+
+    def addconfiguration(self, name: str, q: np.ndarray):
+        """
+        Add a named joint configuration
+
+        Add a named configuration to the robot instance's dictionary of named
+        configurations.
+
+        Parameters
+        ----------
+        name
+            Name of the joint configuration
+        q
+            Joint configuration
+
+
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+        >>> robot.configs["mypos"]
+
+        See Also
+        --------
+        :meth:`addconfiguration`
+
+        """
+
+        self._configs[name] = q
+
+    def configurations_str(self, border="thin"):
+        deg = 180 / np.pi
+
+        # TODO: factor this out of DHRobot
+        def angle(theta, fmt=None):
+
+            if fmt is not None:
+                try:
+                    return fmt.format(theta * deg) + "\u00b0"
+                except TypeError:
+                    pass
+
+            # pragma nocover
+            return str(theta * deg) + "\u00b0"
+
+        # show named configurations
+        if len(self._configs) > 0:
+            table = ANSITable(
+                Column("name", colalign=">"),
+                *[
+                    Column(f"q{j:d}", colalign="<", headalign="<")
+                    for j in range(self.n)
+                ],
+                border=border,
+            )
+
+            for name, q in self._configs.items():
+                qlist = []
+                for j, c in enumerate(self.structure):
+                    if c == "P":
+                        qlist.append(f"{q[j]: .3g}")
+                    else:
+                        qlist.append(angle(q[j], "{: .3g}"))
+                table.row(name, *qlist)
+
+            return "\n" + str(table)
+        else:  # pragma nocover
+            return ""
+
     # --------------------------------------------------------------------- #
     # Scene Graph section
     # --------------------------------------------------------------------- #
@@ -1122,7 +1404,7 @@ class Robot(BaseRobot[Link]):
 
     def __init__(
         self,
-        links: List[Link],
+        arg: Union[List[Link], ETS],
         gripper_links: Union[Link, List[Link], None] = None,
         name: str = "",
         manufacturer: str = "",
@@ -1137,6 +1419,27 @@ class Robot(BaseRobot[Link]):
         urdf_string: Union[str, None] = None,
         urdf_filepath: Union[Path, PurePosixPath, None] = None,
     ):
+
+        # Process links
+        if isinstance(arg, ETS):
+            # We're passed an ETS string
+            links = []
+            # chop it up into segments, a link frame after every joint
+            parent = None
+            for j, ets_j in enumerate(arg.split()):
+                elink = Link(ETS(ets_j), parent=parent, name=f"link{j:d}")
+                if (
+                    elink.qlim is None
+                    and elink.v is not None
+                    and elink.v.qlim is not None
+                ):
+                    elink.qlim = elink.v.qlim
+                parent = elink
+                links.append(elink)
+        elif smb.islistof(arg, Link):
+            links = arg
+        else:
+            raise TypeError("arg was invalid, must be List[Link], ETS, or Robot")
 
         # Initialise Base Robot object
         super().__init__(
@@ -1272,55 +1575,6 @@ class Robot(BaseRobot[Link]):
     # def __repr__(self):
     #     return str(self)
 
-    # def __iter__(self):
-    #     self._iter = 0
-    #     return self
-
-    # def __next__(self):
-    #     if self._iter < len(self.links):
-    #         link = self[self._iter]
-    #         self._iter += 1
-    #         return link
-    #     else:
-    #         raise StopIteration
-
-    # def __getitem__(self, i):
-    #     """
-    #     Get link (Robot superclass)
-
-    #     :param i: link number or name
-    #     :type i: int or str
-    #     :return: i'th link or named link
-    #     :rtype: Link subclass
-
-    #     This also supports iterating over each link in the robot object,
-    #     from the base to the tool.
-
-    #     .. runblock:: pycon
-
-    #         >>> import roboticstoolbox as rtb
-    #         >>> robot = rtb.models.DH.Puma560()
-    #         >>> print(robot[1]) # print the 2nd link
-    #         >>> print([link.a for link in robot])  # print all the a_j values
-
-    #     .. note:: ``ERobot`` supports link lookup by name,
-    #         eg. ``robot['link1']``
-    #     """
-    #     return self._links[i]
-
-    # def dynchanged(self, what=None):
-    #     """
-    #     Dynamic parameters have changed (Robot superclass)
-
-    #     Called from a property setter to inform the robot that the cache of
-    #     dynamic parameters is invalid.
-
-    #     :seealso: :func:`roboticstoolbox.Link._listen_dyn`
-    #     """
-    #     self._dynchanged = True
-    #     if what != "gravity":
-    #         self._hasdynamics = True
-
     # def _getq(self, q=None):
     #     """
     #     Get joint coordinates (Robot superclass)
@@ -1379,103 +1633,6 @@ class Robot(BaseRobot[Link]):
     #     if np.any(np.isnan(qlim)):
     #         raise ValueError("some joint limits not defined")
     #     return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
-
-    # def addconfiguration_attr(self, name: str, q: ArrayLike, unit: str = "rad"):
-    #     """
-    #     Add a named joint configuration as an attribute (Robot superclass)
-
-    #     :param name: Name of the joint configuration
-    #     :param q: Joint configuration
-    #     :type q: Arraylike
-
-    #     Example:
-
-    #     .. runblock:: pycon
-
-    #         >>> import roboticstoolbox as rtb
-    #         >>> robot = rtb.models.DH.Puma560()
-    #         >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
-    #         >>> robot.mypos
-    #         >>> robot.configs["mypos"]
-
-    #     .. note::
-    #         - Used in robot model init method to store the ``qr`` configuration
-    #         - Dynamically adding attributes to objects can cause issues with
-    #           Python type checking.
-    #         - Configuration is also added to the robot instance's dictionary of
-    #           named configurations.
-
-    #     :seealso: :meth:`addconfiguration`
-    #     """
-    #     v = getvector(q, self.n)
-    #     v = getunit(v, unit)
-    #     v = np.array(v)
-    #     self._configs[name] = v
-    #     setattr(self, name, v)
-
-    # def addconfiguration(self, name: str, q: np.ndarray):
-    #     """
-    #     Add a named joint configuration (Robot superclass)
-
-    #     :param name: Name of the joint configuration
-    #     :type name: str
-    #     :param q: Joint configuration
-    #     :type q: ndarray(n) or list
-
-    #     Add a named configuration to the robot instance's dictionary of named
-    #     configurations.
-
-    #     Example:
-
-    #     .. runblock:: pycon
-
-    #         >>> import roboticstoolbox as rtb
-    #         >>> robot = rtb.models.DH.Puma560()
-    #         >>> robot.addconfiguration_attr("mypos", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
-    #         >>> robot.configs["mypos"]
-
-    #     :seealso: :meth:`addconfiguration`
-    #     """
-    #     self._configs[name] = q
-
-    # def configurations_str(self, border="thin"):
-    #     deg = 180 / np.pi
-
-    #     # TODO: factor this out of DHRobot
-    #     def angle(theta, fmt=None):
-
-    #         if fmt is not None:
-    #             try:
-    #                 return fmt.format(theta * deg) + "\u00b0"
-    #             except TypeError:
-    #                 pass
-
-    #         # pragma nocover
-    #         return str(theta * deg) + "\u00b0"
-
-    #     # show named configurations
-    #     if len(self._configs) > 0:
-    #         table = ANSITable(
-    #             Column("name", colalign=">"),
-    #             *[
-    #                 Column(f"q{j:d}", colalign="<", headalign="<")
-    #                 for j in range(self.n)
-    #             ],
-    #             border=border,
-    #         )
-
-    #         for name, q in self._configs.items():
-    #             qlist = []
-    #             for j, c in enumerate(self.structure):
-    #                 if c == "P":
-    #                     qlist.append(f"{q[j]: .3g}")
-    #                 else:
-    #                     qlist.append(angle(q[j], "{: .3g}"))
-    #             table.row(name, *qlist)
-
-    #         return "\n" + str(table)
-    #     else:  # pragma nocover
-    #         return ""
 
     # def linkcolormap(self, linkcolors="viridis"):
     #     """
@@ -1948,29 +2105,6 @@ class Robot(BaseRobot[Link]):
     #     )
 
     # --------------------------------------------------------------------- #
-
-    # @property
-    # def control_mode(self):
-    #     """
-    #     Get/set robot control mode (Robot superclass)
-
-    #     - ``robot.control_type`` is the robot control mode
-
-    #     :return: robot control mode
-    #     :rtype: ndarray(n,)
-
-    #     - ``robot.control_type = ...`` checks and sets the robot control mode
-
-    #     .. note::  ???
-    #     """
-    #     return self._control_mode
-
-    # @control_mode.setter
-    # def control_mode(self, cn):
-    #     if cn == "p" or cn == "v" or cn == "a":
-    #         self._control_mode = cn
-    #     else:
-    #         raise ValueError("Control type must be one of 'p', 'v', or 'a'")
 
     # --------------------------------------------------------------------- #
 
