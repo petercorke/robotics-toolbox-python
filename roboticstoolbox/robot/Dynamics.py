@@ -11,11 +11,15 @@ so must be subclassed by ``DHRobot`` class.
 :todo: perhaps these should be abstract properties, methods of this calss
 """
 from collections import namedtuple
+from typing import Any, Callable, Dict, Union
+from typing_extensions import Self
 import numpy as np
 from spatialmath.base import getvector, verifymatrix, isscalar, getmatrix, t2r, rot2jac
 from scipy import integrate, interpolate
 from spatialmath.base import symbolic as sym
 from roboticstoolbox import rtb_get_param
+from roboticstoolbox.robot.RobotProto import RobotProto
+from roboticstoolbox.tools.types import ArrayLike
 
 from ansitable import ANSITable, Column
 import warnings
@@ -24,32 +28,7 @@ import warnings
 class DynamicsMixin:
 
     # --------------------------------------------------------------------- #
-
-    @property
-    def gravity(self):
-        """
-        Get/set default gravitational acceleration (Robot superclass)
-
-        - ``robot.name`` is the default gravitational acceleration
-
-        :return: robot name
-        :rtype: ndarray(3,)
-
-        - ``robot.name = ...`` checks and sets default gravitational
-          acceleration
-
-        .. note:: If the z-axis is upward, out of the Earth, this should be
-            a positive number.
-        """
-        return self._gravity
-
-    @gravity.setter
-    def gravity(self, gravity_new):
-        self._gravity = getvector(gravity_new, 3)
-        self.dynchanged()
-
-    # --------------------------------------------------------------------- #
-    def dynamics(self):
+    def dynamics(self: RobotProto):
         """
         Pretty print the dynamic parameters (Robot superclass)
 
@@ -78,11 +57,11 @@ class DynamicsMixin:
             border="thin" if unicode else "ascii",
         )
 
-        for j, link in enumerate(self):
+        for j, link in enumerate(self.links):
             table.row(link.name, *link._dyn2list())
         table.print()
 
-    def dynamics_list(self):
+    def dynamics_list(self: RobotProto):
         """
         Print dynamic parameters (Robot superclass)
 
@@ -95,7 +74,7 @@ class DynamicsMixin:
 
     # --------------------------------------------------------------------- #
 
-    def friction(self, qd):
+    def friction(self: RobotProto, qd):
         r"""
         Manipulator joint friction (Robot superclass)
 
@@ -144,7 +123,7 @@ class DynamicsMixin:
         :seealso: :func:`Robot.nofriction`, :func:`Link.friction`
         """
 
-        qd = getvector(qd, self.n)
+        qd = np.array(getvector(qd, self.n))
         tau = np.zeros(self.n)
 
         for i in range(self.n):
@@ -154,7 +133,7 @@ class DynamicsMixin:
 
     # --------------------------------------------------------------------- #
 
-    def nofriction(self, coulomb=True, viscous=False):
+    def nofriction(self: RobotProto, coulomb: bool = True, viscous: bool = False):
         """
         Remove manipulator joint friction (Robot superclass)
 
@@ -183,7 +162,7 @@ class DynamicsMixin:
         return nf
 
     def fdyn(
-        self,
+        self: RobotProto,
         T,
         q0,
         torque=None,
@@ -362,7 +341,13 @@ class DynamicsMixin:
         else:
             return namedtuple("fdyn", "t q qd")(tarray, xarray[:, :n], xarray[:, n:])
 
-    def _fdyn(self, t, x, torqfun, targs):
+    def _fdyn(
+        self: RobotProto,
+        t: float,
+        x: np.ndarray,
+        torqfun: Callable[[Any, float, np.ndarray, np.ndarray], np.ndarray],
+        targs: Dict,
+    ):
         """
         Private function called by fdyn
 
@@ -401,7 +386,7 @@ class DynamicsMixin:
 
         return np.r_[qd, qdd]
 
-    def accel(self, q, qd, torque, gravity=None):
+    def accel(self: RobotProto, q, qd, torque, gravity=None):
         r"""
         Compute acceleration due to applied torque
 
@@ -484,7 +469,13 @@ class DynamicsMixin:
         else:
             return qdd
 
-    def pay(self, W, q=None, J=None, frame=1):
+    def pay(
+        self: RobotProto,
+        W: ArrayLike,
+        q: Union[np.ndarray, None] = None,
+        J: Union[np.ndarray, None] = None,
+        frame: int = 1,
+    ):
         """
         tau = pay(W, J) Returns the generalised joint force/torques due to a
         payload wrench W applied to the end-effector. Where the manipulator
@@ -528,18 +519,21 @@ class DynamicsMixin:
         """
 
         try:
-            W = getvector(W, 6)
+            W = np.array(getvector(W, 6))
             trajn = 0
         except ValueError:
-            trajn = W.shape[0]
-            verifymatrix(W, (trajn, 6))
+            if isinstance(W, np.ndarray):
+                trajn = W.shape[0]
+                verifymatrix(W, (trajn, 6))
+            else:
+                raise ValueError("W is invalid")
 
         if trajn:
             # A trajectory
             if J is not None:
                 # Jacobian supplied
                 verifymatrix(J, (trajn, 6, self.n))
-            else:
+            elif q is not None:
                 # Use q instead
                 verifymatrix(q, (trajn, self.n))
                 J = np.zeros((trajn, 6, self.n))
@@ -548,6 +542,8 @@ class DynamicsMixin:
                         J[i, :, :] = self.jacobe(q[i, :])
                     else:
                         J[i, :, :] = self.jacob0(q[i, :])
+            else:
+                raise ValueError("q of J is needed for trajectory")
         else:
             # Single configuration
             if J is not None:
@@ -575,7 +571,7 @@ class DynamicsMixin:
 
         return tau
 
-    def payload(self, m, p=np.zeros(3)):
+    def payload(self: RobotProto, m, p=np.zeros(3)):
         """
         payload(m, p) adds payload mass adds a payload with point mass m at
         position p in the end-effector coordinate frame.
@@ -598,7 +594,7 @@ class DynamicsMixin:
         lastlink.m = m
         lastlink.r = p
 
-    def jointdynamics(self, q, qd=None):
+    def jointdynamics(self: RobotProto, q, qd=None):
         """
         Transfer function of joint actuator
 
@@ -642,14 +638,14 @@ class DynamicsMixin:
 
         return tf
 
-    def cinertia(self, q):
+    def cinertia(self: RobotProto, q):
         """
         Deprecated, use ``inertia_x``
 
         """
         warnings.warn("cinertia is deprecated, use inertia_x", DeprecationWarning)
 
-    def inertia(self, q):
+    def inertia(self: RobotProto, q):
         """
         Manipulator inertia matrix
 
@@ -705,7 +701,7 @@ class DynamicsMixin:
         else:
             return In
 
-    def coriolis(self, q, qd):
+    def coriolis(self: RobotProto, q, qd):
         r"""
         Coriolis and centripetal term
 
@@ -797,7 +793,7 @@ class DynamicsMixin:
         else:
             return C
 
-    def gravload(self, q=None, gravity=None):
+    def gravload(self: RobotProto, q=None, gravity=None):
         """
         Compute gravity load
 
@@ -851,7 +847,9 @@ class DynamicsMixin:
         else:
             return taug
 
-    def inertia_x(self, q=None, pinv=False, representation="rpy/xyz", Ji=None):
+    def inertia_x(
+        self: RobotProto, q=None, pinv=False, representation="rpy/xyz", Ji=None
+    ):
         r"""
         Operational space inertia matrix
 
@@ -939,7 +937,7 @@ class DynamicsMixin:
             return Mt
 
     def coriolis_x(
-        self,
+        self: RobotProto,
         q,
         qd,
         pinv=False,
@@ -1060,7 +1058,12 @@ class DynamicsMixin:
             return Ct
 
     def gravload_x(
-        self, q=None, gravity=None, pinv=False, representation="rpy/xyz", Ji=None
+        self: RobotProto,
+        q=None,
+        gravity=None,
+        pinv=False,
+        representation="rpy/xyz",
+        Ji=None,
     ):
         """
         Operational space gravity load
@@ -1162,7 +1165,13 @@ class DynamicsMixin:
             return taug
 
     def accel_x(
-        self, q, xd, wrench, gravity=None, pinv=False, representation="rpy/xyz"
+        self: RobotProto,
+        q,
+        xd,
+        wrench,
+        gravity=None,
+        pinv=False,
+        representation="rpy/xyz",
     ):
         r"""
         Operational space acceleration due to applied wrench
@@ -1271,7 +1280,7 @@ class DynamicsMixin:
         else:
             return xdd
 
-    def itorque(self, q, qdd):
+    def itorque(self: RobotProto, q, qdd):
         r"""
         Inertia torque
 
@@ -1323,7 +1332,13 @@ class DynamicsMixin:
         else:
             return taui
 
-    def paycap(self, w, tauR, frame=1, q=None):
+    def paycap(
+        self: RobotProto,
+        w: np.ndarray,
+        tauR: np.ndarray,
+        frame: int = 1,
+        q: Union[ArrayLike, None] = None,
+    ):
         """
         Static payload capacity of a robot
 
@@ -1365,10 +1380,12 @@ class DynamicsMixin:
 
         if q is None:
             q = self.q
+        else:
+            q = np.array(q)
 
         try:
-            q = getvector(q, self.n, "row")
-            w = getvector(w, 6, "row")
+            q = np.array(getvector(q, self.n, "row"))
+            w = np.array(getvector(w, 6, "row"))
         except ValueError:
             trajn = q.shape[1]
             verifymatrix(q, (trajn, self.n))
@@ -1412,7 +1429,7 @@ class DynamicsMixin:
         else:
             return wmax, joint
 
-    def perturb(self, p=0.1):
+    def perturb(self: RobotProto, p=0.1):
         """
         Perturb robot parameters
 
@@ -1492,21 +1509,21 @@ if __name__ == "__main__":  # pragma nocover
     # print(tau[0].coeff(qdd[0]))
     # print(tau[0].expand().coeff(qdd[0]))
 
-    q = puma.qz
-    # qd = puma.qz
-    # qdd = puma.qz
-    ones = np.ones((6,))
-    qd = ones
-    qdd = ones
+    # q = puma.qz
+    # # qd = puma.qz
+    # # qdd = puma.qz
+    # ones = np.ones((6,))
+    # qd = ones
+    # qdd = ones
 
-    print(puma.rne(q, qd, qdd))
-    print(puma.rne_python(q, qd, qdd, debug=False))
+    # print(puma.rne(q, qd, qdd))
+    # print(puma.rne_python(q, qd, qdd, debug=False))
 
-    print(puma.gravity)
-    print([link.isrevolute() for link in puma])
+    # print(puma.gravity)
+    # print([link.isrevolute() for link in puma])
 
     # NOT CONVINCED WE NEED THIS, AND IT'S ORPHAN CODE
-    # def gravjac(self, q, grav=None):
+    # def gravjac(self: RobotProto, q, grav=None):
     #     """
     #     Compute gravity load and Jacobian
 
@@ -1541,7 +1558,7 @@ if __name__ == "__main__":  # pragma nocover
     #     """
 
     #     # TODO use np.cross instead
-    #     def _cross3(self, a, b):
+    #     def _cross3(self: RobotProto, a, b):
     #         c = np.zeros(3)
     #         c[2] = a[0] * b[1] - a[1] * b[0]
     #         c[0] = a[1] * b[2] - a[2] * b[1]
