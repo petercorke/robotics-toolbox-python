@@ -297,7 +297,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         # Set the ee links
         # ----------------
-        self.ee_links = []
+        ee_links: List[LinkType] = []
 
         if len(gripper_links) == 0:
             for link in links:
@@ -308,7 +308,10 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         else:
             for link in gripper_links:
                 # Use the passed in value
-                self.ee_links.append(link.parent)
+                if link.parent is not None:
+                    self.ee_links.append(link.parent)
+
+        self.ee_links = ee_links
 
         # Assign the joint indices and sort the links
         # -------------------------------------------
