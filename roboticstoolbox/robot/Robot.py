@@ -18,6 +18,7 @@ from roboticstoolbox.backends.PyPlot import PyPlot
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.tools.types import ArrayLike
 
 from typing import Any, Callable, Generic, List, Set, TypeVar, Union, Dict, Tuple, Type
@@ -117,6 +118,8 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         self._hasdynamics = False
         self._hasgeometry = False
         self._hascollision = False
+        self._urdf_string = ""
+        self._urdf_filepath = ""
 
         # Time to checkout the links for geometry information
         for link in self.links:
@@ -447,6 +450,10 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         return self._links
 
     @property
+    def link_dict(self) -> Dict[str, LinkType]:
+        return self._linkdict
+
+    @property
     def grippers(self) -> List[Gripper]:
         """
         Grippers attached to the robot
@@ -475,6 +482,10 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         """
 
         return self._base_link
+
+    @property
+    def ee_links(self) -> List[LinkType]:
+        return self._ee_links
 
     @property
     def n(self):
@@ -531,6 +542,35 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         """
 
         return self._nlinks
+
+    @property
+    def nbranches(self) -> int:
+        """
+        Number of branches
+
+        Number of branches in this robot.  Computed as the number of links with
+        zero children
+
+        Returns
+        -------
+        nbranches
+            number of branches in the robot's kinematic tree
+
+        Examples
+        --------
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.ETS.Panda()
+        >>> robot.nbranches
+
+        See Also
+        --------
+        :func:`n`
+        :func:`nlinks`
+        """
+
+        return sum([link.nchildren == 0 for link in self.links]) + len(self.grippers)
 
     # --------------------------------------------------------------------- #
 
@@ -1009,6 +1049,16 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     # --------------------------------------------------------------------- #
 
     @property
+    def urdf_string(self) -> str:
+        return self._urdf_string
+
+    @property
+    def urdf_filepath(self) -> str:
+        return self._urdf_filepath
+
+    # --------------------------------------------------------------------- #
+
+    @property
     def tool(self) -> SE3:
         """
         Get/set robot tool transform
@@ -1079,6 +1129,217 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         else:
             raise ValueError("base must be set to None (no tool), SE2, or SE3")
+
+    # --------------------------------------------------------------------- #
+
+    def _getlink(
+        self,
+        link: Union[LinkType, Gripper, str, None],
+        default: Union[LinkType, Gripper, str, None] = None,
+    ) -> Union[LinkType, Link]:
+        """
+        Validate reference to Link
+
+        ``robot._getlink(link)`` is a validated reference to a Link within
+        the ERobot ``robot``.  If ``link`` is:
+
+        -  an ``Link`` reference it is validated as belonging to
+          ``robot``.
+        - a string, then it looked up in the robot's link name dictionary, and
+          a Link reference returned.
+
+        Parameters
+        ----------
+        link
+            link
+
+        Raises
+        ------
+        ValueError
+            link does not belong to this ERobot
+        TypeError
+            bad argument
+
+        Returns
+        -------
+        link
+            link reference
+
+        """
+
+        if link is None:
+            link = default
+
+        if isinstance(link, str):
+            if link in self.link_dict:
+                return self.link_dict[link]
+
+            raise ValueError(f"no link named {link}")
+
+        elif isinstance(link, BaseLink):
+            if link in self.links:
+                return link
+            else:
+                for gripper in self.grippers:
+                    if link in gripper.links:
+                        return link
+
+                raise ValueError("link not in robot links")
+        elif isinstance(link, Gripper):
+            for gripper in self.grippers:
+                if link is gripper:
+                    return gripper.links[0]
+
+            raise ValueError("Gripper not in robot")
+        else:
+            raise TypeError("unknown argument")
+
+    def _find_ets(self, start, end, explored, path) -> Union[ETS, None]:
+        """
+        Privade method which will recursively find the ETS of a path
+        see ets()
+        """
+
+        link = self._getlink(start, self.base_link)
+        end = self._getlink(end, self.ee_links[0])
+
+        toplevel = path is None
+        explored.add(link)
+
+        if link == end:
+            return path
+
+        # unlike regular DFS, the neighbours of the node are its children
+        # and its parent.
+
+        # visit child nodes below start
+        if toplevel:
+            path = link.ets
+
+        if link.children is not None:
+            for child in link.children:
+                if child not in explored:
+                    p = self._find_ets(child, end, explored, path * child.ets)
+                    if p is not None:
+                        return p
+
+        # we didn't find the node below, keep going up a level, and recursing
+        # down again
+        if toplevel:
+            path = None
+        if link.parent is not None:
+            parent = link.parent  # go up one level toward the root
+            if parent not in explored:
+                if path is None:
+                    p = self._find_ets(parent, end, explored, link.ets.inv())
+                else:
+                    p = self._find_ets(parent, end, explored, path * link.ets.inv())
+                if p is not None:
+                    return p
+
+    def _gripper_ets(self, gripper: Gripper) -> ETS:
+        """
+        Privade method which will find the ETS of a gripper
+
+        """
+
+        return ETS(ET.SE3(gripper.tool))
+
+    @lru_cache(maxsize=32)
+    def ets(
+        self,
+        start: Union[LinkType, Gripper, str, None] = None,
+        end: Union[LinkType, Gripper, str, None] = None,
+    ) -> ETS:
+        """
+        Robot to ETS
+
+        - ``robot.ets()`` is an ETS representing the kinematics from base to
+          end-effector.
+        - ``robot.ets(end=link)`` is an ETS representing the kinematics from
+          base to the link ``link`` specified as a Link reference or a name.
+        - ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
+          from link ``l1`` to link ``l2``.
+
+        Parameters
+        ----------
+        :param start: start of path, defaults to ``base_link``
+        :param end: end of path, defaults to end-effector
+
+        Raises
+        ------
+        ValueError
+            a link does not belong to this ERobot
+        TypeError
+            a bad link argument
+
+        Returns
+        -------
+        ets
+            elementary transform sequence
+
+        Examples
+        --------
+        .. runblock:: pycon
+            >>> import roboticstoolbox as rtb
+            >>> panda = rtb.models.ETS.Panda()
+            >>> panda.ets()
+
+        """
+
+        # ets to stand and end incase of grippers
+        ets_init = None
+        ets_end = None
+
+        if isinstance(start, Gripper):
+            ets_init = self._gripper_ets(start).inv()
+            link = start.links[0].parent
+            if link is None:  # pragma: nocover
+                raise ValueError("Invalid robot link configuration")
+        else:
+            link = self._getlink(start, self.base_link)
+
+        if end is None:
+            if len(self.grippers) > 1:
+                end_link = self.grippers[0].links[0]
+                ets_end = self._gripper_ets(self.grippers[0])
+                print("multiple grippers present, ambiguous, using self.grippers[0]")
+            elif len(self.grippers) == 1:
+                end_link = self.grippers[0].links[0]
+                ets_end = self._gripper_ets(self.grippers[0])
+            elif len(self.grippers) > 1:
+                end_link = self._getlink(end, self.ee_links[0])
+                print(
+                    "multiple end-effectors present, ambiguous, using self.ee_links[0]"
+                )
+            else:
+                end_link = self._getlink(end, self.ee_links[0])
+        else:
+            if isinstance(end, Gripper):
+                ets_end = self._gripper_ets(end)
+                end_link = end.links[0].parent  # type: ignore
+                if end_link is None:  # pragma: nocover
+                    raise ValueError("Invalid robot link configuration")
+            else:
+                end_link = self._getlink(end, self.ee_links[0])
+
+        explored = set()
+
+        if link is end_link:
+            ets = link.ets
+        else:
+            ets = self._find_ets(link, end_link, explored, path=None)
+
+        if ets is None:
+            raise ValueError("Could not find the requested ETS in this robot")
+
+        if ets_init is not None:
+            ets = ets_init * ets
+
+        if ets_end is not None:
+            ets = ets * ets_end
+
+        return ets
 
     # --------------------------------------------------------------------- #
 
