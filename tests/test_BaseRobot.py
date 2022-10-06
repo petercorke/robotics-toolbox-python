@@ -263,3 +263,8 @@ class TestBaseRobot(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             panda.control_mode = "z"
+
+    def test_manuf(self):
+        panda = rtb.models.ETS.Panda()
+
+        self.assertIsInstance(panda.manufacturer, str)
