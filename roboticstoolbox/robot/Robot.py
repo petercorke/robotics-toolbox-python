@@ -19,10 +19,22 @@ from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ET import ET
-from roboticstoolbox.tools.types import ArrayLike
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
-from typing import Any, Callable, Generic, List, Set, TypeVar, Union, Dict, Tuple, Type
-from typing_extensions import Protocol
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generic,
+    List,
+    TypeVar,
+    Union,
+    Dict,
+    Tuple,
+    overload,
+)
+
+# from typing_extensions import Protocol
 
 from spatialgeometry import Shape
 from fknm import Robot_link_T
@@ -37,6 +49,10 @@ from roboticstoolbox.tools.params import rtb_get_param
 from warnings import warn
 from pathlib import PurePosixPath, Path
 
+if TYPE_CHECKING:
+    from matplotlib.cm import Color
+else:
+    Color = None
 
 try:
     from matplotlib import colors
@@ -44,6 +60,7 @@ try:
 
     _mpl = True
 except ImportError:  # pragma nocover
+    cm = str
     pass
 
 _default_backend = None
@@ -60,12 +77,12 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         name: str = "",
         manufacturer: str = "",
         comment: str = "",
-        base: Union[np.ndarray, SE3, None] = None,
-        tool: Union[np.ndarray, SE3, None] = None,
+        base: Union[NDArray, SE3, None] = None,
+        tool: Union[NDArray, SE3, None] = None,
         gravity: ArrayLike = [0, 0, -9.81],
         keywords: Union[List[str], Tuple[str]] = [],
         symbolic: bool = False,
-        configs: Union[Dict[str, np.ndarray], None] = None,
+        configs: Union[Dict[str, NDArray], None] = None,
         check_jindex: bool = True,
     ):
 
@@ -73,7 +90,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         SceneNode.__init__(self)
 
         # Lets sort out links now
-        self._linkdict = {}
+        self._linkdict: Dict[str, LinkType] = {}
 
         # Sort links and set self.link, self.n, self.base_link,
         # self.ee_links
@@ -104,7 +121,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         if keywords is not None and not isinstance(keywords, (tuple, list)):
             raise TypeError("keywords must be a list or tuple")
         else:
-            self._keywords = keywords
+            self._keywords = list(keywords)
 
         # Gravity is in the negative-z direction.
         self.gravity = np.array(gravity)
@@ -198,13 +215,13 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         """
 
         # The ordered links
-        orlinks = []
+        orlinks: List[LinkType] = []
 
         # The end-effector links
-        self._ee_links = []
+        self._ee_links: List[LinkType] = []
 
         # Check all the incoming Link objects
-        n = 0
+        n: int = 0
 
         # Make sure each link has a name
         # ------------------------------
@@ -311,7 +328,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
                 if link.parent is not None:
                     self.ee_links.append(link.parent)
 
-        self.ee_links = ee_links
+        self._ee_links = ee_links
 
         # Assign the joint indices and sort the links
         # -------------------------------------------
@@ -491,7 +508,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         return self._ee_links
 
     @property
-    def n(self):
+    def n(self) -> int:
         """
         Number of joints
 
@@ -648,6 +665,18 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         self._manufacturer = manufacturer_new
 
     @property
+    def configs(self) -> Dict[str, NDArray]:
+        return self._configs
+
+    @property
+    def keywords(self) -> List[str]:
+        return self._keywords
+
+    @property
+    def symbolic(self) -> bool:
+        return self._symbolic
+
+    @property
     def hasdynamics(self):
         """
         Robot has dynamic parameters
@@ -752,7 +781,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         _default_backend = be
 
     @property
-    def gravity(self) -> np.ndarray:
+    def gravity(self) -> NDArray:
         """
         Get/set default gravitational acceleration (Robot superclass)
 
@@ -788,7 +817,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     # --------------------------------------------------------------------- #
 
     @property
-    def q(self) -> np.ndarray:
+    def q(self) -> NDArray:
         """
         Get/set robot joint configuration
 
@@ -814,7 +843,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         self._q = np.array(getvector(q_new, self.n))
 
     @property
-    def qd(self) -> np.ndarray:
+    def qd(self) -> NDArray:
         """
         Get/set robot joint velocity
 
@@ -835,7 +864,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         self._qd = np.array(getvector(qd_new, self.n))
 
     @property
-    def qdd(self) -> np.ndarray:
+    def qdd(self) -> NDArray:
         """
         Get/set robot joint acceleration
 
@@ -856,7 +885,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         self._qdd = np.array(getvector(qdd_new, self.n))
 
     @property
-    def qlim(self) -> np.ndarray:
+    def qlim(self) -> NDArray:
         r"""
         Joint limits
 
@@ -1086,7 +1115,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         return SE3(self._tool, check=False)
 
     @tool.setter
-    def tool(self, T: Union[SE3, np.ndarray]):
+    def tool(self, T: Union[SE3, NDArray]):
         if isinstance(T, SE3):
             self._tool = T.A
         else:
@@ -1120,7 +1149,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         return SE3(self._T, check=False)
 
     @base.setter
-    def base(self, T: Union[np.ndarray, SE3]):
+    def base(self, T: Union[NDArray, SE3]):
 
         if isinstance(self, rtb.Robot):
             # All 3D robots
@@ -1344,9 +1373,52 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         return ets
 
+    def copy(self):
+        return deepcopy(self)
+
+    def __deepcopy__(self, memo):
+
+        links = []
+
+        for link in self.links:
+            links.append(deepcopy(link))
+
+        name = deepcopy(self.name)
+        manufacturer = deepcopy(self.manufacturer)
+        comment = deepcopy(self.comment)
+        base = deepcopy(self.base)
+        tool = deepcopy(self.tool)
+        gravity = deepcopy(self.gravity)
+        keywords = deepcopy(self.keywords)
+        symbolic = deepcopy(self.symbolic)
+        configs = deepcopy(self.configs)
+
+        cls = self.__class__
+        result = cls(
+            links=links,
+            name=name,
+            manufacturer=manufacturer,
+            comment=comment,
+            base=base,
+            tool=tool,
+            gravity=gravity,
+            keywords=keywords,
+            symbolic=symbolic,
+            configs=configs,
+        )
+
+        # if a configuration was an attribute of original robot, make it an
+        # attribute of the deep copy
+        for config in configs:
+            if hasattr(self, config):
+                setattr(result, config, configs[config])
+
+        memo[id(self)] = result
+        return result
+
     # --------------------------------------------------------------------- #
 
-    def todegrees(self, q) -> np.ndarray:
+    def todegrees(self, q) -> NDArray:
         """
         Convert joint angles to degrees
 
@@ -1388,7 +1460,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         else:
             return q
 
-    def toradians(self, q) -> np.ndarray:
+    def toradians(self, q) -> NDArray:
         """
         Convert joint angles to radians
 
@@ -1566,7 +1638,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         self._configs[name] = v
         setattr(self, name, v)
 
-    def addconfiguration(self, name: str, q: np.ndarray):
+    def addconfiguration(self, name: str, q: NDArray):
         """
         Add a named joint configuration
 
@@ -1637,6 +1709,89 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         else:  # pragma nocover
             return ""
 
+    def random_q(self):
+        """
+        Return a random joint configuration
+
+        The value for each joint is uniform randomly distributed  between the
+        limits set for the robot.
+
+        Note
+        ----
+        The joint limit for all joints must be set.
+
+        Returns
+        -------
+        q
+            Random joint configuration :rtype: ndarray(n)
+
+        See Also
+        --------
+        :func:`Robot.qlim`
+        :func:`Link.qlim`
+
+        """
+
+        qlim = self.qlim
+        if np.any(np.isnan(qlim)):
+            raise ValueError("some joint limits not defined")
+        return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
+
+    def linkcolormap(self, linkcolors: Union[List[Any], str] = "viridis"):
+        """
+        Create a colormap for robot joints
+
+        - ``cm = robot.linkcolormap()`` is an n-element colormap that gives a
+          unique color for every link.  The RGBA colors for link ``j`` are
+          ``cm(j)``.
+        - ``cm = robot.linkcolormap(cmap)`` as above but ``cmap`` is the name
+          of a valid matplotlib colormap.  The default, example above, is the
+          ``viridis`` colormap.
+        - ``cm = robot.linkcolormap(list of colors)`` as above but a
+          colormap is created from a list of n color names given as strings,
+          tuples or hexstrings.
+
+        Parameters
+        ----------
+        linkcolors
+            list of colors or colormap, defaults to "viridis"
+
+        Returns
+        -------
+        color map
+            the color map
+
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> cm = robot.linkcolormap("inferno")
+        >>> print(cm(range(6))) # cm(i) is 3rd color in colormap
+        >>> cm = robot.linkcolormap(
+        >>>     ['red', 'g', (0,0.5,0), '#0f8040', 'yellow', 'cyan'])
+        >>> print(cm(range(6)))
+
+        Notes
+        -----
+        - Colormaps have 4-elements: red, green, blue, alpha (RGBA)
+        - Names of supported colors and colormaps are defined in the
+          matplotlib documentation.
+            - `Specifying colors
+            <https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py>`_
+            - `Colormaps
+            <https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py>`_
+
+        """
+
+        if isinstance(linkcolors, list) and len(linkcolors) == self.n:
+            # provided a list of color names
+            return colors.ListedColormap(linkcolors)  # type: ignore
+        else:
+            # assume it is a colormap name
+            return cm.get_cmap(linkcolors, 6)  # type: ignore
+
     # --------------------------------------------------------------------- #
     # Scene Graph section
     # --------------------------------------------------------------------- #
@@ -1673,12 +1828,12 @@ class Robot(BaseRobot[Link]):
         name: str = "",
         manufacturer: str = "",
         comment: str = "",
-        base: Union[np.ndarray, SE3, None] = None,
-        tool: Union[np.ndarray, SE3, None] = None,
+        base: Union[NDArray, SE3, None] = None,
+        tool: Union[NDArray, SE3, None] = None,
         gravity: ArrayLike = [0, 0, -9.81],
         keywords: Union[List[str], Tuple[str]] = [],
         symbolic: bool = False,
-        configs: Union[Dict[str, np.ndarray], None] = None,
+        configs: Union[Dict[str, NDArray], None] = None,
         check_jindex: bool = True,
         urdf_string: Union[str, None] = None,
         urdf_filepath: Union[Path, PurePosixPath, None] = None,
@@ -1793,48 +1948,448 @@ class Robot(BaseRobot[Link]):
 
         return urdf.elinks, urdf.name, urdf_string, file_path
 
-    # def copy(self):
-    #     return deepcopy(self)
+    def jtraj(
+        self,
+        T1: Union[NDArray, SE3],
+        T2: Union[NDArray, SE3],
+        t: Union[NDArray, int],
+        **kwargs,
+    ):
+        """
+        Joint-space trajectory between SE(3) poses
 
-    # def __deepcopy__(self, memo):
+        The initial and final poses are mapped to joint space using inverse
+        kinematics:
 
-    #     links = []
+        - if the object has an analytic solution ``ikine_a`` that will be used,
+        - otherwise the general numerical algorithm ``ikine_lm`` will be used.
 
-    #     for link in self.links:
-    #         links.append(deepcopy(link))
+        ``traj = obot.jtraj(T1, T2, t)`` is a trajectory object whose
+        attribute ``traj.q`` is a row-wise joint-space trajectory.
 
-    #     name = deepcopy(self.name)
-    #     manufacturer = deepcopy(self.manufacturer)
-    #     comment = deepcopy(self.comment)
-    #     base = deepcopy(self.base)
-    #     tool = deepcopy(self.tool)
-    #     gravity = deepcopy(self.gravity)
-    #     keywords = deepcopy(self.keywords)
-    #     symbolic = deepcopy(self.symbolic)
-    #     configs = deepcopy(self.configs)
+        Parameters
+        ----------
+        T1
+            initial end-effector pose
+        T2
+            final end-effector pose
+        t
+            time vector or number of steps
+        :type t: ndarray(m) or int
+        kwargs
+            arguments passed to the IK solver
 
-    #     cls = self.__class__
-    #     result = cls(
-    #         links=links,
-    #         name=name,
-    #         manufacturer=manufacturer,
-    #         comment=comment,
-    #         base=base,
-    #         tool=tool,
-    #         gravity=gravity,
-    #         keywords=keywords,
-    #         symbolic=symbolic,
-    #         configs=configs,
-    #     )
+        Returns
+        -------
+        trajectory
 
-    #     # if a configuration was an attribute of original robot, make it an
-    #     # attribute of the deep copy
-    #     for config in configs:
-    #         if hasattr(self, config):
-    #             setattr(result, config, configs[config])
+        """
 
-    #     memo[id(self)] = result
-    #     return result
+        if hasattr(self, "ikine_a"):
+            ik = self.ikine_a  # type: ignore
+        else:
+            ik = self.ikine_LM
+
+        q1 = ik(T1, **kwargs)
+        q2 = ik(T2, **kwargs)
+
+        return rtb.jtraj(q1.q, q2.q, t)
+
+    @overload
+    def manipulability(
+        self,
+        q: ArrayLike,
+        J: None,
+        method: str = "yoshikawa",
+        axes: str = "all",
+        **kwargs,
+    ) -> Union[float, NDArray]:
+        ...
+
+    @overload
+    def manipulability(
+        self,
+        q: None,
+        J: NDArray,
+        method: str = "yoshikawa",
+        axes: str = "all",
+        **kwargs,
+    ) -> Union[float, NDArray]:
+        ...
+
+    def manipulability(
+        self,
+        q=None,
+        J=None,
+        method="yoshikawa",
+        axes="all",
+        **kwargs,
+    ):
+        """
+        Manipulability measure
+
+        - ``manipulability(q)`` is the scalar manipulability index
+          for the robot at the joint configuration ``q``.  It indicates
+          dexterity, that is, how well conditioned the robot is for motion
+          with respect to the 6 degrees of Cartesian motion.  The values is
+          zero if the robot is at a singularity.
+
+        Parameters
+        ----------
+        q
+            Joint coordinates, one of J or q required
+        J
+            Jacobian in world frame if already computed, one of J or
+            q required
+        method
+            method to use, "yoshikawa" (default), "condition",
+            "minsingular"  or "asada"
+        axes
+            Task space axes to consider: "all" [default],
+            "trans", "rot" or "both"
+        kwargs
+            extra arguments to pass to ``jacob0``
+
+        Returns
+        -------
+        manipulability
+
+        Synopsis
+        --------
+
+        Various measures are supported:
+
+        +-------------------+-------------------------------------------------+
+        | Measure           |       Description                               |
+        +-------------------+-------------------------------------------------+
+        | ``"yoshikawa"``   | Volume of the velocity ellipsoid, *distance*    |
+        |                   | from singularity [Yoshikawa85]_                 |
+        +-------------------+-------------------------------------------------+
+        | ``"invcondition"``| Inverse condition number of Jacobian, isotropy  |
+        |                   | of the velocity ellipsoid [Klein87]_            |
+        +-------------------+-------------------------------------------------+
+        | ``"minsingular"`` | Minimum singular value of the Jacobian,         |
+        |                   | *distance*  from singularity [Klein87]_         |
+        +-------------------+-------------------------------------------------+
+        | ``"asada"``       | Isotropy of the task-space acceleration         |
+        |                   | ellipsoid which is a function of the Cartesian  |
+        |                   | inertia matrix which depends on the inertial    |
+        |                   | parameters [Asada83]_                           |
+        +-------------------+-------------------------------------------------+
+
+        **Trajectory operation**:
+
+        If ``q`` is a matrix (m,n) then the result (m,) is a vector of
+        manipulability indices for each joint configuration specified by a row
+        of ``q``.
+
+        Notes
+        -----
+        - Invokes the ``jacob0`` method of the robot if ``J`` is not passed
+        - The "all" option includes rotational and translational
+            dexterity, but this involves adding different units. It can be
+            more useful to look at the translational and rotational
+            manipulability separately.
+        - Examples in the RVC book (1st edition) can be replicated by
+            using the "all" option
+        - Asada's measure requires inertial a robot model with inertial
+            parameters.
+
+        References
+        ----------
+        .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T.,
+                The International Journal of Robotics Research.
+                1985;4(2):3-9. doi:10.1177/027836498500400201
+        .. [Asada83] A geometrical representation of manipulator dynamics and
+                its application to arm design, H. Asada,
+                Journal of Dynamic Systems, Measurement, and Control,
+                vol. 105, p. 131, 1983.
+        .. [Klein87] Dexterity Measures for the Design and Control of
+                Kinematically Redundant Manipulators. Klein CA, Blaho BE.
+                The International Journal of Robotics Research.
+                1987;6(2):72-83. doi:10.1177/027836498700600206
+        - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
+
+        """
+
+        axes_list: List[bool] = []
+
+        if isinstance(axes, list) and len(axes) == 6:
+            pass
+        elif axes == "all":
+            axes_list = [True, True, True, True, True, True]
+        elif axes.startswith("trans"):
+            axes_list = [True, True, True, False, False, False]
+        elif axes.startswith("rot"):
+            axes_list = [False, False, False, True, True, True]
+        elif axes == "both":
+            return (
+                self.manipulability(
+                    q, J, method, axes="trans", **kwargs
+                ),  # type:ignore
+                self.manipulability(q, J, method, axes="rot", **kwargs),  # type:ignore
+            )
+        else:
+            raise ValueError("axes must be all, trans, rot or both")
+
+        def yoshikawa(robot, J, q, axes_list, **kwargs):
+            J = J[axes_list, :]
+            if J.shape[0] == J.shape[1]:
+                # simplified case for square matrix
+                return abs(np.linalg.det(J))
+            else:
+                m2 = np.linalg.det(J @ J.T)
+                return np.sqrt(abs(m2))
+
+        def condition(robot, J, q, axes_list, **kwargs):
+            J = J[axes_list, :]
+            return 1 / np.linalg.cond(J)  # return 1/cond(J)
+
+        def minsingular(robot, J, q, axes_list, **kwargs):
+            J = J[axes_list, :]
+            s = np.linalg.svd(J, compute_uv=False)
+            return s[-1]  # return last/smallest singular value of J
+
+        def asada(robot, J, q, axes_list, **kwargs):
+            # dof = np.sum(axes_list)
+            if np.linalg.matrix_rank(J) < 6:
+                return 0
+            Ji = np.linalg.pinv(J)
+            Mx = Ji.T @ robot.inertia(q) @ Ji
+            d = np.where(axes_list)[0]
+            Mx = Mx[d]
+            Mx = Mx[:, d.tolist()]
+            e, _ = np.linalg.eig(Mx)
+            return np.min(e) / np.max(e)
+
+        # choose the handler function
+        if method == "yoshikawa":
+            mfunc = yoshikawa
+        elif method == "invcondition":
+            mfunc = condition
+        elif method == "minsingular":
+            mfunc = minsingular
+        elif method == "asada":
+            mfunc = asada
+        else:
+            raise ValueError("Invalid method chosen")
+
+        # Calculate manipulability based on supplied Jacobian
+        if J is not None:
+            w = [mfunc(self, J, q, axes_list)]
+
+        # Otherwise use the q vector/matrix
+        else:
+            q = np.array(getmatrix(q, (None, self.n)))
+            w = np.zeros(q.shape[0])
+
+            for k, qk in enumerate(q):
+                Jk = self.jacob0(qk, **kwargs)
+                w[k] = mfunc(self, Jk, qk, axes_list)
+
+        if len(w) == 1:
+            return w[0]
+        else:
+            return w
+
+    def ikine_LM(
+        self,
+        Tep: Union[NDArray, SE3],
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        q0: Union[ArrayLike, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        mask: Union[ArrayLike, None] = None,
+        joint_limits: bool = True,
+        seed: Union[int, None] = None,
+        k: float = 1.0,
+        method="chan",
+        kq: float = 0.0,
+        km: float = 0.0,
+        ps: float = 0.0,
+        pi: Union[NDArray, float] = 0.3,
+        **kwargs,
+    ):
+        r"""
+        Levenberg-Marquadt Numerical Inverse Kinematics Solver
+
+        A method which provides functionality to perform numerical inverse kinematics (IK)
+        using the Levemberg-Marquadt method.
+
+        See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a 
+        **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
+
+        Parameters
+        ----------
+        Tep
+            The desired end-effector pose
+        end
+            the link considered as the end-effector
+        start
+            the link considered as the base frame, defaults to the robots's base frame
+        q0
+            The initial joint coordinate vector
+        ilimit
+            How many iterations are allowed within a search before a new search
+            is started
+        slimit
+            How many searches are allowed before being deemed unsuccessful
+        tol
+            Maximum allowed residual error E
+        mask
+            A 6 vector which assigns weights to Cartesian degrees-of-freedom
+            error priority
+        joint_limits
+            Reject solutions with joint limit violations
+        seed
+            A seed for the private RNG used to generate random joint coordinate
+            vectors
+        k
+            Sets the gain value for the damping matrix Wn in the next iteration. See
+            synopsis
+        method
+            One of "chan", "sugihara" or "wampler". Defines which method is used
+            to calculate the damping matrix Wn in the ``step`` method
+        kq
+            The gain for joint limit avoidance. Setting to 0.0 will remove this
+            completely from the solution
+        km
+            The gain for maximisation. Setting to 0.0 will remove this completely
+            from the solution
+        ps
+            The minimum angle/distance (in radians or metres) in which the joint is
+            allowed to approach to its limit
+        pi
+            The influence angle/distance (in radians or metres) in null space motion
+            becomes active
+
+        Synopsis
+        --------
+        The operation is defined by the choice of the ``method`` kwarg. 
+
+        The step is deined as
+
+        .. math::
+
+            \vec{q}_{k+1} 
+            &= 
+            \vec{q}_k +
+            \left(
+                \mat{A}_k
+            \right)^{-1}
+            \bf{g}_k \\
+            %
+            \mat{A}_k
+            &=
+            {\mat{J}(\vec{q}_k)}^\top
+            \mat{W}_e \
+            {\mat{J}(\vec{q}_k)}
+            +
+            \mat{W}_n
+
+        where :math:`\mat{W}_n = \text{diag}(\vec{w_n})(\vec{w_n} \in \mathbb{R}^n_{>0})` is a
+        diagonal damping matrix. The damping matrix ensures that :math:`\mat{A}_k` is
+        non-singular and positive definite. The performance of the LM method largely depends
+        on the choice of :math:`\mat{W}_n`.
+
+        *Chan's Method*
+
+        Chan proposed
+
+        .. math::
+
+            \mat{W}_n
+            =
+            λ E_k \mat{1}_n
+
+        where λ is a constant which reportedly does not have much influence on performance.
+        Use the kwarg `k` to adjust the weighting term λ.
+
+        *Sugihara's Method*
+
+        Sugihara proposed
+
+        .. math::
+
+            \mat{W}_n
+            =
+            E_k \mat{1}_n + \text{diag}(\hat{\vec{w}}_n)
+
+        where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
+        and :math:`l` is the length of a typical link within the manipulator. We provide the
+        variable `k` as a kwarg to adjust the value of :math:`w_n`.
+
+        *Wampler's Method*
+
+        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
+
+        Examples
+        --------
+        The following example makes a ``panda`` robot object, makes a goal
+        pose ``Tep``, and then solves for the joint coordinates which result in the pose
+        ``Tep`` using the `ikine_LM` method.
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda()
+        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        >>> panda.ikine_LM(Tep)
+
+        Notes
+        -----
+        The value for the ``k`` kwarg will depend on the ``method`` chosen and the arm you are
+        using. Use the following as a rough guide ``chan, k = 1.0 - 0.01``,
+        ``wampler, k = 0.01 - 0.0001``, and ``sugihara, k = 0.1 - 0.0001``
+
+        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+        to a non-singular manipulator pose, since it uses the manipulator Jacobian.
+
+        This class supports null-space motion to assist with maximising manipulability and
+        avoiding joint limits. These are enabled by setting kq and km to non-zero values.
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        See Also
+        --------
+        :py:class:`~roboticstoolbox.robot.IK.IK_LM`
+            An IK Solver class which implements the Levemberg Marquadt optimisation technique
+        ikine_NR
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`Robot` class
+        ikine_GN
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`Robot` class
+        ikine_QP
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`Robot` class
+
+
+        .. versionchanged:: 1.0.3
+            Added the Levemberg-Marquadt IK solver method on the `Robot` class
+
+        """
+
+        return self.ets(start, end).ikine_LM(
+            Tep=Tep,
+            q0=q0,
+            ilimit=ilimit,
+            slimit=slimit,
+            tol=tol,
+            joint_limits=joint_limits,
+            mask=mask,
+            seed=seed,
+            k=k,
+            method=method,
+            kq=kq,
+            km=km,
+            ps=ps,
+            pi=pi,
+            **kwargs,
+        )
 
     # def __repr__(self):
     #     return str(self)
@@ -1854,288 +2409,6 @@ class Robot(BaseRobot[Link]):
     #         return getvector(q, self.n)
     #     else:
     #         return getmatrix(q, (None, self.n))
-
-    # @property
-    # def configs(self) -> Dict[str, np.ndarray]:
-    #     return self._configs
-
-    # @abstractproperty
-    # def nbranches(self):
-    #     """
-    #     Number of branches (Robot superclass)
-
-    #     :return: Number of branches
-    #     :rtype: int
-
-    #     Example:
-
-    #     .. runblock:: pycon
-
-    #         >>> import roboticstoolbox as rtb
-    #         >>> robot = rtb.models.DH.Puma560()
-    #         >>> robot.nbranches
-
-    #     :seealso: :func:`n`, :func:`nlinks`
-    #     """
-    #     return self._n
-
-    # @property
-    # def qrandom(self):
-    #     """
-    #     Return a random joint configuration
-
-    #     :return: Random joint configuration :rtype: ndarray(n)
-
-    #     The value for each joint is uniform randomly distributed  between the
-    #     limits set for the robot.
-
-    #     .. note:: The joint limit for all joints must be set.
-
-    #     :seealso: :func:`Robot.qlim`, :func:`Link.qlim`
-    #     """
-    #     qlim = self.qlim
-    #     if np.any(np.isnan(qlim)):
-    #         raise ValueError("some joint limits not defined")
-    #     return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
-
-    # def linkcolormap(self, linkcolors="viridis"):
-    #     """
-    #     Create a colormap for robot joints
-
-    #     :param linkcolors: list of colors or colormap, defaults to "viridis"
-    #     :type linkcolors: list or str, optional
-    #     :return: color map
-    #     :rtype: matplotlib.colors.ListedColormap
-
-    #     - ``cm = robot.linkcolormap()`` is an n-element colormap that gives a
-    #       unique color for every link.  The RGBA colors for link ``j`` are
-    #       ``cm(j)``.
-    #     - ``cm = robot.linkcolormap(cmap)`` as above but ``cmap`` is the name
-    #       of a valid matplotlib colormap.  The default, example above, is the
-    #       ``viridis`` colormap.
-    #     - ``cm = robot.linkcolormap(list of colors)`` as above but a
-    #       colormap is created from a list of n color names given as strings,
-    #       tuples or hexstrings.
-
-    #     .. runblock:: pycon
-
-    #         >>> import roboticstoolbox as rtb
-    #         >>> robot = rtb.models.DH.Puma560()
-    #         >>> cm = robot.linkcolormap("inferno")
-    #         >>> print(cm(range(6))) # cm(i) is 3rd color in colormap
-    #         >>> cm = robot.linkcolormap(
-    #         >>>     ['red', 'g', (0,0.5,0), '#0f8040', 'yellow', 'cyan'])
-    #         >>> print(cm(range(6)))
-
-    #     .. note::
-
-    #         - Colormaps have 4-elements: red, green, blue, alpha (RGBA)
-    #         - Names of supported colors and colormaps are defined in the
-    #           matplotlib documentation.
-
-    #             - `Specifying colors
-    #             <https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py>`_
-    #             - `Colormaps
-    #             <https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py>`_
-    #     """  # noqa
-
-    #     if isinstance(linkcolors, list) and len(linkcolors) == self.n:
-    #         # provided a list of color names
-    #         return colors.ListedColormap(linkcolors)
-    #     else:
-    #         # assume it is a colormap name
-    #         return cm.get_cmap(linkcolors, 6)
-
-    # def jtraj(self, T1, T2, t, **kwargs):
-    #     """
-    #     Joint-space trajectory between SE(3) poses
-
-    #     :param T1: initial end-effector pose
-    #     :type T1: SE3 instance
-    #     :param T2: final end-effector pose
-    #     :type T2: SE3 instance
-    #     :param t: time vector or number of steps
-    #     :type t: ndarray(m) or int
-    #     :param kwargs: arguments passed to the IK solver
-    #     :return: trajectory
-    #     :rtype: Trajectory instance
-
-    #     ``traj = obot.jtraj(T1, T2, t)`` is a trajectory object whose
-    #     attribute ``traj.q`` is a row-wise joint-space trajectory.
-
-    #     The initial and final poses are mapped to joint space using inverse
-    #     kinematics:
-
-    #     - if the object has an analytic solution ``ikine_a`` that will be used,
-    #     - otherwise the general numerical algorithm ``ikine_min`` will be used.
-
-    #     """
-
-    #     if hasattr(self, "ikine_a"):
-    #         ik = self.ikine_a
-    #     else:
-    #         ik = self.ikine_min
-
-    #     q1 = ik(T1, **kwargs)
-    #     q2 = ik(T2, **kwargs)
-
-    #     return rtb.jtraj(q1.q, q2.q, t)
-
-    # def manipulability(self, q=None, J=None, method="yoshikawa", axes="all", **kwargs):
-    #     """
-    #     Manipulability measure
-
-    #     :param q: Joint coordinates, one of J or q required
-    #     :type q: ndarray(n), or ndarray(m,n)
-    #     :param J: Jacobian in world frame if already computed, one of J or
-    #         q required
-    #     :type J: ndarray(6,n)
-    #     :param method: method to use, "yoshikawa" (default), "condition",
-    #         "minsingular"  or "asada"
-    #     :type method: str
-    #     :param axes: Task space axes to consider: "all" [default],
-    #         "trans", "rot" or "both"
-    #     :type axes: str
-    #     :param kwargs: extra arguments to pass to ``jacob0``
-    #     :return: manipulability
-    #     :rtype: float or ndarray(m)
-
-    #     - ``manipulability(q)`` is the scalar manipulability index
-    #       for the robot at the joint configuration ``q``.  It indicates
-    #       dexterity, that is, how well conditioned the robot is for motion
-    #       with respect to the 6 degrees of Cartesian motion.  The values is
-    #       zero if the robot is at a singularity.
-
-    #     Various measures are supported:
-
-    #     +-------------------+-------------------------------------------------+
-    #     | Measure           |       Description                               |
-    #     +-------------------+-------------------------------------------------+
-    #     | ``"yoshikawa"``   | Volume of the velocity ellipsoid, *distance*    |
-    #     |                   | from singularity [Yoshikawa85]_                 |
-    #     +-------------------+-------------------------------------------------+
-    #     | ``"invcondition"``| Inverse condition number of Jacobian, isotropy  |
-    #     |                   | of the velocity ellipsoid [Klein87]_            |
-    #     +-------------------+-------------------------------------------------+
-    #     | ``"minsingular"`` | Minimum singular value of the Jacobian,         |
-    #     |                   | *distance*  from singularity [Klein87]_         |
-    #     +-------------------+-------------------------------------------------+
-    #     | ``"asada"``       | Isotropy of the task-space acceleration         |
-    #     |                   | ellipsoid which is a function of the Cartesian  |
-    #     |                   | inertia matrix which depends on the inertial    |
-    #     |                   | parameters [Asada83]_                           |
-    #     +-------------------+-------------------------------------------------+
-
-    #     **Trajectory operation**:
-
-    #     If ``q`` is a matrix (m,n) then the result (m,) is a vector of
-    #     manipulability indices for each joint configuration specified by a row
-    #     of ``q``.
-
-    #     .. note::
-
-    #         - Invokes the ``jacob0`` method of the robot if ``J`` is not passed
-    #         - The "all" option includes rotational and translational
-    #           dexterity, but this involves adding different units. It can be
-    #           more useful to look at the translational and rotational
-    #           manipulability separately.
-    #         - Examples in the RVC book (1st edition) can be replicated by
-    #           using the "all" option
-    #         - Asada's measure requires inertial a robot model with inertial
-    #           parameters.
-
-    #     :references:
-
-    #     .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T.,
-    #             The International Journal of Robotics Research.
-    #             1985;4(2):3-9. doi:10.1177/027836498500400201
-    #     .. [Asada83] A geometrical representation of manipulator dynamics and
-    #             its application to arm design, H. Asada,
-    #             Journal of Dynamic Systems, Measurement, and Control,
-    #             vol. 105, p. 131, 1983.
-    #     .. [Klein87] Dexterity Measures for the Design and Control of
-    #             Kinematically Redundant Manipulators. Klein CA, Blaho BE.
-    #             The International Journal of Robotics Research.
-    #             1987;6(2):72-83. doi:10.1177/027836498700600206
-
-    #     - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
-
-    #     """
-    #     if isinstance(axes, list) and len(axes) == 6:
-    #         pass
-    #     elif axes == "all":
-    #         axes = [True, True, True, True, True, True]
-    #     elif axes.startswith("trans"):
-    #         axes = [True, True, True, False, False, False]
-    #     elif axes.startswith("rot"):
-    #         axes = [False, False, False, True, True, True]
-    #     elif axes == "both":
-    #         return (
-    #             self.manipulability(q, J, method, axes="trans", **kwargs),
-    #             self.manipulability(q, J, method, axes="rot", **kwargs),
-    #         )
-    #     else:
-    #         raise ValueError("axes must be all, trans, rot or both")
-
-    #     def yoshikawa(robot, J, q, axes, **kwargs):
-    #         J = J[axes, :]
-    #         if J.shape[0] == J.shape[1]:
-    #             # simplified case for square matrix
-    #             return abs(np.linalg.det(J))
-    #         else:
-    #             m2 = np.linalg.det(J @ J.T)
-    #             return np.sqrt(abs(m2))
-
-    #     def condition(robot, J, q, axes, **kwargs):
-    #         J = J[axes, :]
-    #         return 1 / np.linalg.cond(J)  # return 1/cond(J)
-
-    #     def minsingular(robot, J, q, axes, **kwargs):
-    #         J = J[axes, :]
-    #         s = np.linalg.svd(J, compute_uv=False)
-    #         return s[-1]  # return last/smallest singular value of J
-
-    #     def asada(robot, J, q, axes, **kwargs):
-    #         # dof = np.sum(axes)
-    #         if np.linalg.matrix_rank(J) < 6:
-    #             return 0
-    #         Ji = np.linalg.pinv(J)
-    #         Mx = Ji.T @ robot.inertia(q) @ Ji
-    #         d = np.where(axes)[0]
-    #         Mx = Mx[d]
-    #         Mx = Mx[:, d.tolist()]
-    #         e, _ = np.linalg.eig(Mx)
-    #         return np.min(e) / np.max(e)
-
-    #     # choose the handler function
-    #     if method == "yoshikawa":
-    #         mfunc = yoshikawa
-    #     elif method == "invcondition":
-    #         mfunc = condition
-    #     elif method == "minsingular":
-    #         mfunc = minsingular
-    #     elif method == "asada":
-    #         mfunc = asada
-    #     else:
-    #         raise ValueError("Invalid method chosen")
-
-    #     # Calculate manipulability based on supplied Jacobian
-    #     if J is not None:
-    #         w = [mfunc(self, J, q, axes)]
-
-    #     # Otherwise use the q vector/matrix
-    #     else:
-    #         q = getmatrix(q, (None, self.n))
-    #         w = np.zeros(q.shape[0])
-
-    #         for k, qk in enumerate(q):
-    #             Jk = self.jacob0(qk, **kwargs)
-    #             w[k] = mfunc(self, Jk, qk, axes)
-
-    #     if len(w) == 1:
-    #         return w[0]
-    #     else:
-    #         return w
 
     # def jacob0_dot(self, q=None, qd=None, J0=None, representation=None):
     #     r"""
@@ -3014,7 +3287,7 @@ class Robot(BaseRobot[Link]):
 
     # def closest_point(
     #     self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip: bool = False
-    # ) -> Tuple[Union[int, None], Union[np.ndarray, None], Union[np.ndarray, None],]:
+    # ) -> Tuple[Union[int, None], Union[NDArray, None], Union[NDArray, None],]:
     #     """
     #     closest_point(shape, inf_dist) returns the minimum euclidean
     #     distance between this robot and shape, provided it is less than
