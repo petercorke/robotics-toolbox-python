@@ -3,7 +3,9 @@
 @author Jesse Haviland
 """
 
-from typing import Tuple, Union, List, Tuple, Set
-from numpy import ndarray
+from typing import Tuple, Union, List, Set, Any
+from numpy import ndarray, dtype, float64
 
-ArrayLike = Union[ndarray, List, Tuple, Set]
+NDArray = ndarray[Any, dtype[float64]]
+
+ArrayLike = Union[NDArray, List[float], Tuple[float], Set[float]]
