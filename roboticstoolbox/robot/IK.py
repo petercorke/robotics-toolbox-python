@@ -224,7 +224,7 @@ class IKSolver(ABC):
 
                 # Attempt a step
                 try:
-                    E, q = self.step(ets, Tep, q)
+                    E, q[ets.jindices] = self.step(ets, Tep, q)
 
                 except np.linalg.LinAlgError:
                     # Abandon search and try again
