@@ -17,7 +17,7 @@ req = [
     "scipy",
     "matplotlib",
     "ansitable",
-    "swift-sim~=1.0.0",
+    # "swift-sim~=1.0.0",
     "rtb-data",
     "progress",
 ]
