@@ -8,4 +8,6 @@ from numpy import ndarray, dtype, float64
 
 NDArray = ndarray[Any, dtype[float64]]
 
-ArrayLike = Union[NDArray, List[float], Tuple[float], Set[float]]
+PyArrayLike = Union[List[float], Tuple[float], Set[float]]
+
+ArrayLike = Union[NDArray, PyArrayLike]
