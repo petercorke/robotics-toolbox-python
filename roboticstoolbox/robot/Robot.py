@@ -1793,6 +1793,83 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             # assume it is a colormap name
             return cm.get_cmap(linkcolors, 6)  # type: ignore
 
+    def hierarchy(self) -> None:
+        """
+        Pretty print the robot link hierachy
+
+        Returns
+        -------
+        Pretty print of the robot model
+
+        Examples
+        --------
+        Makes a robot and prints the heirachy
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.URDF.Panda()
+        >>> robot.hierarchy()
+
+        """
+
+        def recurse(link, indent=0):
+            print(" " * indent * 2, link.name)
+            for child in link.child:
+                recurse(child, indent + 1)
+
+        recurse(self.base_link)
+
+    def segments(self) -> List[List[Union[LinkType, None]]]:
+        """
+        Segments of branched robot
+
+        For a single-chain robot with structure::
+
+            L1 - L2 - L3
+
+        the return is ``[[None, L1, L2, L3]]``
+
+        For a robot with structure::
+
+            L1 - L2 +-  L3 - L4
+                    +- L5 - L6
+
+        the return is ``[[None, L1, L2], [L2, L3, L4], [L2, L5, L6]]``
+
+        Returns
+        -------
+        segments
+            Segment list
+
+        Notes
+        -----
+        - the length of the list is the number of segments in the robot
+        - the first segment always starts with ``None`` which represents
+            the base transform (since there is no base link)
+        - the last link of one segment is also the first link of subsequent
+            segments
+        """
+
+        def recurse(link: Link):
+
+            segs = [link.parent]
+            while True:
+                segs.append(link)
+                if link.nchildren == 0:
+                    return [segs]
+                elif link.nchildren == 1:
+                    link = link.children[0]  # type: ignore
+                    continue
+                elif link.nchildren > 1:
+                    segs = [segs]
+
+                    for child in link.children:  # type: ignore
+                        segs.extend(recurse(child))
+
+                    return segs
+
+        return recurse(self.links[0])  # type: ignore
+
     # --------------------------------------------------------------------- #
     # Scene Graph section
     # --------------------------------------------------------------------- #
@@ -1998,6 +2075,63 @@ class Robot(BaseRobot[Link]):
     # --------------------------------------------------------------------- #
     # --------- Kinematic Methods ----------------------------------------- #
     # --------------------------------------------------------------------- #
+
+    @property
+    def reach(self) -> float:
+        r"""
+        Reach of the robot
+
+        A conservative estimate of the reach of the robot. It is computed as
+        the sum of the translational ETs that define the link transform.
+
+        Note
+        ----
+        Computed on the first access. If kinematic parameters
+        subsequently change this will not be reflected.
+
+        Returns
+        -------
+        reach
+            Maximum reach of the robot
+
+        Notes
+        -----
+        - Probably an overestimate of reach
+        - Used by numerical inverse kinematics to scale translational
+          error.
+        - For a prismatic joint, uses ``qlim`` if it is set
+
+        """
+
+        # TODO
+        # This should be a start, end method and compute the reach based on the
+        # given ets. Then use an lru_cache to speed up return
+
+        if self._reach is None:
+            d_all = []
+            for link in self.ee_links:
+                d = 0
+                while True:
+                    for et in link.ets:
+                        if et.istranslation:
+                            if et.isjoint:
+                                # the length of a prismatic joint depends on the
+                                # joint limits.  They might be set in the ET
+                                # or in the Link depending on how the robot
+                                # was constructed
+                                if link.qlim is not None:
+                                    d += max(link.qlim)
+                                elif et.qlim is not None:
+                                    d += max(et.qlim)
+                            else:
+                                d += abs(et.eta)
+                    link = link.parent
+                    if link is None or isinstance(link, str):
+                        d_all.append(d)
+                        break
+
+            self._reach = max(d_all)
+        return self._reach
 
     @overload
     def manipulability(
