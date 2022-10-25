@@ -22,6 +22,7 @@ from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 from typing import (
+    IO,
     TYPE_CHECKING,
     Any,
     Callable,
@@ -1956,6 +1957,10 @@ class Robot(BaseRobot[Link]):
 
         self.links
 
+    # --------------------------------------------------------------------- #
+    # --------- URDF Methods ---------------------------------------------- #
+    # --------------------------------------------------------------------- #
+
     @staticmethod
     def URDF_read(
         file_path, tld=None, xacro_tld=None
@@ -2026,51 +2031,273 @@ class Robot(BaseRobot[Link]):
 
         return urdf.elinks, urdf.name, urdf_string, file_path
 
-    def jtraj(
-        self,
-        T1: Union[NDArray, SE3],
-        T2: Union[NDArray, SE3],
-        t: Union[NDArray, int],
-        **kwargs,
-    ):
+    @classmethod
+    def URDF(cls, file_path: str, gripper: Union[int, str, None] = None):
         """
-        Joint-space trajectory between SE(3) poses
-
-        The initial and final poses are mapped to joint space using inverse
-        kinematics:
-
-        - if the object has an analytic solution ``ikine_a`` that will be used,
-        - otherwise the general numerical algorithm ``ikine_lm`` will be used.
-
-        ``traj = obot.jtraj(T1, T2, t)`` is a trajectory object whose
-        attribute ``traj.q`` is a row-wise joint-space trajectory.
+        Construct a Robot object from URDF file
 
         Parameters
         ----------
-        T1
-            initial end-effector pose
-        T2
-            final end-effector pose
-        t
-            time vector or number of steps
-        kwargs
-            arguments passed to the IK solver
+        file_path
+            the path to the URDF
+        gripper
+            index or name of the gripper link(s)
 
         Returns
         -------
-        trajectory
+        If ``gripper`` is specified, links from that link outward are removed
+        from the rigid-body tree and folded into a ``Gripper`` object.
 
         """
 
-        if hasattr(self, "ikine_a"):
-            ik = self.ikine_a  # type: ignore
+        links, name, _, _ = Robot.URDF_read(file_path)
+
+        gripperLink: Union[Link, None] = None
+
+        if gripper is not None:
+            if isinstance(gripper, int):
+                gripperLink = links[gripper]
+            elif isinstance(gripper, str):
+                for link in links:
+                    if link.name == gripper:
+                        gripperLink = link
+                        break
+                else:
+                    raise ValueError(f"no link named {gripper}")
+            else:
+                raise TypeError("bad argument passed as gripper")
+
+        links, name, urdf_string, urdf_filepath = Robot.URDF_read(file_path)
+
+        return cls(
+            links,
+            name=name,
+            gripper_links=gripperLink,
+            urdf_string=urdf_string,
+            urdf_filepath=urdf_filepath,
+        )
+
+    @property
+    def urdf_string(self):
+        return self._urdf_string
+
+    @property
+    def urdf_filepath(self):
+        return self._urdf_filepath
+
+    # --------------------------------------------------------------------- #
+    # --------- Utility Methods ------------------------------------------- #
+    # --------------------------------------------------------------------- #
+
+    def showgraph(self, **kwargs):
+        """
+        Display a link transform graph in browser
+
+        ``robot.showgraph()`` displays a graph of the robot's link frames
+        and the ETS between them.  It uses GraphViz dot.
+
+        The nodes are:
+            - Base is shown as a grey square. This is the world frame origin,
+              but can be changed using the ``base`` attribute of the robot.
+            - Link frames are indicated by circles
+            - ETS transforms are indicated by rounded boxes
+
+        The edges are:
+            - an arrow if `jtype` is False or the joint is fixed
+            - an arrow with a round head if `jtype` is True and the joint is
+              revolute
+            - an arrow with a box head if `jtype` is True and the joint is
+              prismatic
+
+        Edge labels or nodes in blue have a fixed transformation to the
+        preceding link.
+
+        Parameters
+        ----------
+        etsbox
+            Put the link ETS in a box, otherwise an edge label
+        jtype
+            Arrowhead to node indicates revolute or prismatic type
+        static
+            Show static joints in blue and bold
+
+        Examples
+        --------
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.URDF.Panda()
+        >>> panda.showgraph()
+
+        .. image:: ../figs/panda-graph.svg
+            :width: 600
+
+        See Also
+        --------
+        :func:`dotfile`
+
+        """
+
+        # Lazy import
+        import tempfile
+        import subprocess
+        import webbrowser
+
+        # create the temporary dotfile
+        dotfile = tempfile.TemporaryFile(mode="w")
+        self.dotfile(dotfile, **kwargs)
+
+        # rewind the dot file, create PDF file in the filesystem, run dot
+        dotfile.seek(0)
+        pdffile = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+        subprocess.run("dot -Tpdf", shell=True, stdin=dotfile, stdout=pdffile)
+
+        # open the PDF file in browser (hopefully portable), then cleanup
+        webbrowser.open(f"file://{pdffile.name}")
+
+    def dotfile(
+        self,
+        filename: Union[str, IO[str]],
+        etsbox: bool = False,
+        ets: L["full", "brief"] = "full",
+        jtype: bool = False,
+        static: bool = True,
+    ):
+        """
+        Write a link transform graph as a GraphViz dot file
+
+        The file can be processed using dot:
+            % dot -Tpng -o out.png dotfile.dot
+
+        The nodes are:
+            - Base is shown as a grey square.  This is the world frame origin,
+              but can be changed using the ``base`` attribute of the robot.
+            - Link frames are indicated by circles
+            - ETS transforms are indicated by rounded boxes
+
+        The edges are:
+            - an arrow if `jtype` is False or the joint is fixed
+            - an arrow with a round head if `jtype` is True and the joint is
+              revolute
+            - an arrow with a box head if `jtype` is True and the joint is
+              prismatic
+
+        Edge labels or nodes in blue have a fixed transformation to the
+        preceding link.
+
+        Note
+        ----
+        If ``filename`` is a file object then the file will *not*
+            be closed after the GraphViz model is written.
+
+        Parameters
+        ----------
+        file
+            Name of file to write to
+        etsbox
+            Put the link ETS in a box, otherwise an edge label
+        ets
+            Display the full ets with "full" or a brief version with "brief"
+        jtype
+            Arrowhead to node indicates revolute or prismatic type
+        static
+            Show static joints in blue and bold
+
+        See Also
+        --------
+        :func:`showgraph`
+
+        """
+
+        if isinstance(filename, str):
+            file = open(filename, "w")
         else:
-            ik = self.ikine_LM
+            file = filename
 
-        q1 = ik(T1, **kwargs)
-        q2 = ik(T2, **kwargs)
+        header = r"""digraph G {
+graph [rankdir=LR];
+"""
 
-        return rtb.jtraj(q1.q, q2.q, t)
+        def draw_edge(link, etsbox, jtype, static):
+            # draw the edge
+            if jtype:
+                if link.isprismatic:
+                    edge_options = 'arrowhead="box", arrowtail="inv", dir="both"'
+                elif link.isrevolute:
+                    edge_options = 'arrowhead="dot", arrowtail="inv", dir="both"'
+                else:
+                    edge_options = 'arrowhead="normal"'
+            else:
+                edge_options = 'arrowhead="normal"'
+
+            if link.parent is None:
+                parent = "BASE"
+            else:
+                parent = link.parent.name
+
+            if etsbox:
+                # put the ets fragment in a box
+                if not link.isjoint and static:
+                    node_options = ', fontcolor="blue"'
+                else:
+                    node_options = ""
+                file.write(
+                    "  {}_ets [shape=box, style=rounded, "
+                    'label="{}"{}];\n'.format(
+                        link.name, link.ets.__str__(q=f"q{link.jindex}"), node_options
+                    )
+                )
+                file.write("  {} -> {}_ets;\n".format(parent, link.name))
+                file.write(
+                    "  {}_ets -> {} [{}];\n".format(link.name, link.name, edge_options)
+                )
+            else:
+                # put the ets fragment as an edge label
+                if not link.isjoint and static:
+                    edge_options += 'fontcolor="blue"'
+                if ets == "full":
+                    estr = link.ets.__str__(q=f"q{link.jindex}")
+                elif ets == "brief":
+                    if link.jindex is None:
+                        estr = ""
+                    else:
+                        estr = f"...q{link.jindex}"
+                else:
+                    return
+                file.write(
+                    '  {} -> {} [label="{}", {}];\n'.format(
+                        parent,
+                        link.name,
+                        estr,
+                        edge_options,
+                    )
+                )
+
+        file.write(header)
+
+        # add the base link
+        file.write("  BASE [shape=square, style=filled, fillcolor=gray]\n")
+
+        # add the links
+        for link in self:
+            # draw the link frame node (circle) or ee node (doublecircle)
+            if link in self.ee_links:
+                # end-effector
+                node_options = 'shape="doublecircle", color="blue", fontcolor="blue"'
+            else:
+                node_options = 'shape="circle"'
+
+            file.write("  {} [{}];\n".format(link.name, node_options))
+
+            draw_edge(link, etsbox, jtype, static)
+
+        for gripper in self.grippers:
+            for link in gripper.links:
+                file.write("  {} [shape=cds];\n".format(link.name))
+                draw_edge(link, etsbox, jtype, static)
+
+        file.write("}\n")
+
+        if isinstance(filename, str):
+            file.close()  # noqa
 
     # --------------------------------------------------------------------- #
     # --------- Kinematic Methods ----------------------------------------- #
@@ -2132,6 +2359,67 @@ class Robot(BaseRobot[Link]):
 
             self._reach = max(d_all)
         return self._reach
+
+    def fkine_all(self, q: ArrayLike) -> SE3:
+        """
+        Compute the pose of every link frame
+
+        ``T = robot.fkine_all(q)`` is  an SE3 instance with ``robot.nlinks +
+        1`` values:
+
+        - ``T[0]`` is the base transform
+        - ``T[i]`` is the pose of link whose ``number`` is ``i``
+
+        Parameters
+        ----------
+        q
+            The joint configuration
+
+        Returns
+        -------
+        fkine_all
+            Pose of all links
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+
+        """
+        q = getvector(q)
+
+        Tbase = SE3(self.base)  # add base, also sets the type
+
+        linkframes = Tbase.__class__.Alloc(self.nlinks + 1)
+        linkframes[0] = Tbase
+
+        def recurse(Tall, Tparent, q, link):
+            # if joint??
+            T = Tparent
+            while True:
+                T *= SE3(link.A(q[link.jindex]))
+
+                Tall[link.number] = T
+
+                if link.nchildren == 0:
+                    # no children
+                    return
+                elif link.nchildren == 1:
+                    # one child
+                    if link in self.ee_links:
+                        # this link is an end-effector, go no further
+                        return
+                    link = link.children[0]
+                    continue
+                else:
+                    # multiple children
+                    for child in link.children:
+                        recurse(Tall, T, q, child)
+                    return
+
+        recurse(linkframes, Tbase, q, self.links[0])
+
+        return linkframes
 
     @overload
     def manipulability(
@@ -2979,6 +3267,52 @@ class Robot(BaseRobot[Link]):
             pi=pi,
             **kwargs,
         )
+
+    def jtraj(
+        self,
+        T1: Union[NDArray, SE3],
+        T2: Union[NDArray, SE3],
+        t: Union[NDArray, int],
+        **kwargs,
+    ):
+        """
+        Joint-space trajectory between SE(3) poses
+
+        The initial and final poses are mapped to joint space using inverse
+        kinematics:
+
+        - if the object has an analytic solution ``ikine_a`` that will be used,
+        - otherwise the general numerical algorithm ``ikine_lm`` will be used.
+
+        ``traj = obot.jtraj(T1, T2, t)`` is a trajectory object whose
+        attribute ``traj.q`` is a row-wise joint-space trajectory.
+
+        Parameters
+        ----------
+        T1
+            initial end-effector pose
+        T2
+            final end-effector pose
+        t
+            time vector or number of steps
+        kwargs
+            arguments passed to the IK solver
+
+        Returns
+        -------
+        trajectory
+
+        """
+
+        if hasattr(self, "ikine_a"):
+            ik = self.ikine_a  # type: ignore
+        else:
+            ik = self.ikine_LM
+
+        q1 = ik(T1, **kwargs)
+        q2 = ik(T2, **kwargs)
+
+        return rtb.jtraj(q1.q, q2.q, t)
 
     # def __repr__(self):
     #     return str(self)
