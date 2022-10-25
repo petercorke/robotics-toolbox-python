@@ -1,5 +1,5 @@
 import numpy as np
-from roboticstoolbox.tools.types import ArrayLike
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 from typing import Any, Callable, Generic, List, Set, TypeVar, Union, Dict, Tuple, Type
 from typing_extensions import Protocol, Self
@@ -12,6 +12,10 @@ import roboticstoolbox as rtb
 
 
 class KinematicsProtocol(Protocol):
+    @property
+    def _T(self) -> NDArray:
+        ...
+
     def ets(
         self,
         start: Union[Link, Gripper, str, None] = None,

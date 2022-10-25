@@ -26,6 +26,460 @@ from typing import (
 class RobotKinematicsMixin:
 
     # --------------------------------------------------------------------- #
+    # --------- Kinematic Methods ----------------------------------------- #
+    # --------------------------------------------------------------------- #
+
+    def fkine(
+        self: KinematicsProtocol,
+        q: ArrayLike,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        tool: Union[NDArray, SE3, None] = None,
+        include_base: bool = True,
+    ) -> SE3:
+        """
+        Forward kinematics
+
+        ``T = robot.fkine(q)`` evaluates forward kinematics for the robot at
+        joint configuration ``q``.
+
+        **Trajectory operation**:
+        If ``q`` has multiple rows (mxn), it is considered a trajectory and the
+        result is an ``SE3`` instance with ``m`` values.
+
+        Attributes
+        ----------
+        q
+            Joint coordinates
+        end
+            end-effector or gripper to compute forward kinematics to
+        start
+            the link to compute forward kinematics from
+        tool
+            tool transform, optional
+
+        Returns
+        -------
+            The transformation matrix representing the pose of the
+            end-effector
+
+        Examples
+        --------
+        The following example makes a ``panda`` robot object, and solves for the
+        forward kinematics at the listed configuration.
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda()
+        >>> panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+
+        Notes
+        -----
+        - For a robot with a single end-effector there is no need to
+            specify ``end``
+        - For a robot with multiple end-effectors, the ``end`` must
+            be specified.
+        - The robot's base tool transform, if set, is incorporated
+            into the result.
+        - A tool transform, if provided, is incorporated into the result.
+        - Works from the end-effector link to the base
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+
+        """
+
+        return SE3(
+            self.ets(start, end).fkine(
+                q, base=self._T, tool=tool, include_base=include_base
+            ),
+            check=False,
+        )
+
+    def jacob0(
+        self: KinematicsProtocol,
+        q: ArrayLike,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
+        r"""
+        Manipulator geometric Jacobian in the ``start`` frame
+
+        ``robot.jacobo(q)`` is the manipulator Jacobian matrix which maps
+        joint  velocity to end-effector spatial velocity expressed in the
+        base frame.
+
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+
+        Parameters
+        ----------
+        q
+            Joint coordinate vector
+        end
+            the particular link or gripper whose velocity the Jacobian
+            describes, defaults to the end-effector if only one is present
+        start
+            the link considered as the base frame, defaults to the robots's base frame
+        tool
+            a static tool transformation matrix to apply to the
+            end of end, defaults to None
+
+        Returns
+        -------
+        J0
+            Manipulator Jacobian in the ``start`` frame
+
+        Examples
+        --------
+        The following example makes a ``Puma560`` robot object, and solves for the
+        base-frame Jacobian at the zero joint angle configuration
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> puma = rtb.models.Puma560()
+        >>> puma.jacob0([0, 0, 0, 0, 0, 0])
+
+        Notes
+        -----
+        - This is the geometric Jacobian as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a
+            velocity twist as per the text by Lynch & Park.
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+
+        """
+
+        return self.ets(start, end).jacob0(q, tool=tool)
+
+    def jacobe(
+        self: KinematicsProtocol,
+        q: ArrayLike,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
+        r"""
+        Manipulator geometric Jacobian in the end-effector frame
+
+        ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
+        joint  velocity to end-effector spatial velocity expressed in the
+        ``end`` frame.
+
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+
+        Parameters
+        ----------
+        q
+            Joint coordinate vector
+        end
+            the particular link or gripper whose velocity the Jacobian
+            describes, defaults to the end-effector if only one is present
+        start
+            the link considered as the base frame, defaults to the robots's base frame
+        tool
+            a static tool transformation matrix to apply to the
+            end of end, defaults to None
+
+        Returns
+        -------
+        Je
+            Manipulator Jacobian in the ``end`` frame
+
+        Examples
+        --------
+        The following example makes a ``Puma560`` robot object, and solves for the
+        end-effector frame Jacobian at the zero joint angle configuration
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> puma = rtb.models.Puma560()
+        >>> puma.jacobe([0, 0, 0, 0, 0, 0])
+
+        Notes
+        -----
+        - This is the geometric Jacobian as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a
+            velocity twist as per the text by Lynch & Park.
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+
+        """
+
+        return self.ets(start, end).jacobe(q, tool=tool)
+
+    @overload
+    def hessian0(
+        self: KinematicsProtocol,
+        q: ArrayLike = ...,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        J0: None = None,
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
+        ...
+
+    @overload
+    def hessian0(
+        self: KinematicsProtocol,
+        q: None = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        J0: NDArray = ...,
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
+        ...
+
+    def hessian0(
+        self: KinematicsProtocol,
+        q=None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        J0=None,
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
+        r"""
+        Manipulator Hessian
+
+        The manipulator Hessian tensor maps joint acceleration to end-effector
+        spatial acceleration, expressed in the ``start`` frame. This
+        function calulcates this based on the ETS of the robot. One of J0 or q
+        is required. Supply J0 if already calculated to save computation time
+
+        Parameters
+        ----------
+        q
+            The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        end
+            the final link/Gripper which the Hessian represents
+        start
+            the first link which the Hessian represents
+        J0
+            The manipulator Jacobian in the ``start`` frame
+        tool
+            a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        
+        Returns
+        -------
+        h0
+            The manipulator Hessian in the ``start`` frame
+        
+        Synopsis
+        --------
+        This method computes the manipulator Hessian in the ``start`` frame.  If
+        we take the time derivative of the differential kinematic relationship
+        .. math::
+            \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
+            \alpha &= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}
+        where
+        .. math::
+            \dmat{J} = \mat{H} \dvec{q}
+        and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
+        Hessian tensor.
+
+        The elements of the Hessian are
+        .. math::
+            \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
+        where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
+        of the spatial velocity vector.
+
+        Similarly, we can write
+        .. math::
+            \mat{J}_{i,j} = \frac{d u_i}{d q_j}
+        
+        Examples
+        --------
+        The following example makes a ``Panda`` robot object, and solves for the
+        base frame Hessian at the given joint angle configuration
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda()
+        >>> panda.hessian0([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        """
+
+        return self.ets(start, end).hessian0(q, J0=J0, tool=tool)
+
+    @overload
+    def hessiane(
+        self: KinematicsProtocol,
+        q: ArrayLike = ...,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        Je: None = None,
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
+        ...
+
+    @overload
+    def hessiane(
+        self: KinematicsProtocol,
+        q: None = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        Je: NDArray = ...,
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
+        ...
+
+    def hessiane(
+        self: KinematicsProtocol,
+        q=None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        Je=None,
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
+        r"""
+        Manipulator Hessian
+
+        The manipulator Hessian tensor maps joint acceleration to end-effector
+        spatial acceleration, expressed in the ``end`` coordinate frame. This
+        function calulcates this based on the ETS of the robot. One of J0 or q
+        is required. Supply J0 if already calculated to save computation time
+
+        Parameters
+        ----------
+        q
+            The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        end
+            the final link/Gripper which the Hessian represents
+        start
+            the first link which the Hessian represents
+        J0
+            The manipulator Jacobian in the ``end`` frame
+        tool
+            a static tool transformation matrix to apply to the
+            end of end, defaults to None
+        
+        Returns
+        -------
+        he
+            The manipulator Hessian in ``end`` frame
+        
+        Synopsis
+        --------
+        This method computes the manipulator Hessian in the ``end`` frame.  If
+        we take the time derivative of the differential kinematic relationship
+        .. math::
+            \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
+            \alpha &= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}
+        where
+        .. math::
+            \dmat{J} = \mat{H} \dvec{q}
+        and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
+        Hessian tensor.
+
+        The elements of the Hessian are
+        .. math::
+            \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
+        where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
+        of the spatial velocity vector.
+
+        Similarly, we can write
+        .. math::
+            \mat{J}_{i,j} = \frac{d u_i}{d q_j}
+        
+        Examples
+        --------
+        The following example makes a ``Panda`` robot object, and solves for the
+        end-effector frame Hessian at the given joint angle configuration
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda()
+        >>> panda.hessiane([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        """
+
+        return self.ets(start, end).hessiane(q, Je=Je, tool=tool)
+
+    def partial_fkine0(
+        self: KinematicsProtocol,
+        q: ArrayLike,
+        n: int = 3,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+    ):
+        r"""
+        Manipulator Forward Kinematics nth Partial Derivative
+
+        This method computes the nth derivative of the forward kinematics where ``n`` is
+        greater than or equal to 3. This is an extension of the differential kinematics
+        where the Jacobian is the first partial derivative and the Hessian is the
+        second.
+
+        Parameters
+        ----------
+        q
+            The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        end
+            the final link/Gripper which the Hessian represents
+        start
+            the first link which the Hessian represents
+        tool
+            a static tool transformation matrix to apply to the
+            end of end, defaults to None
+
+        Returns
+        -------
+        A
+            The nth Partial Derivative of the forward kinematics
+
+        Examples
+        --------
+        The following example makes a ``Panda`` robot object, and solves for the
+        base-effector frame 4th defivative of the forward kinematics at the given
+        joint angle configuration
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda()
+        >>> panda.partial_fkine0([0, -0.3, 0, -2.2, 0, 2, 0.7854], n=4)
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        """
+
+        return self.ets(start, end).partial_fkine0(q, n=n)
+
+    # --------------------------------------------------------------------- #
     # --------- IK Methods ------------------------------------------------ #
     # --------------------------------------------------------------------- #
 
