@@ -36,6 +36,8 @@ from typing import (
     Literal as L,
 )
 
+from roboticstoolbox.robot.RobotKinematics import RobotKinematicsMixin
+
 # from typing_extensions import Protocol
 
 from spatialgeometry import Shape
@@ -445,6 +447,88 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             return self._links[i]
         else:
             return self._linkdict[i]
+
+    def __str__(self) -> str:
+        """
+        Pretty prints the ETS Model of the robot.
+
+        Returns
+        -------
+        str
+            Pretty print of the robot model
+
+        Notes
+        -----
+        - Constant links are shown in blue.
+        - End-effector links are prefixed with an @
+        - Angles in degrees
+        - The robot base frame is denoted as ``BASE`` and is equal to the
+            robot's ``base`` attribute.
+
+        """
+
+        unicode = rtb_get_param("unicode")
+        border = "thin" if unicode else "ascii"
+
+        table = ANSITable(
+            Column("link", headalign="^", colalign=">"),
+            Column("link", headalign="^", colalign="<"),
+            Column("joint", headalign="^", colalign=">"),
+            Column("parent", headalign="^", colalign="<"),
+            Column("ETS: parent to link", headalign="^", colalign="<"),
+            border=border,
+        )
+
+        for k, link in enumerate(self.links):
+            color = "" if link.isjoint else "<<blue>>"
+            ee = "@" if link in self.ee_links else ""
+            ets = link.ets
+            if link.parent is None:
+                parent_name = "BASE"
+            else:
+                parent_name = link.parent.name
+            s = ets.__str__(f"q{link.jindex}")
+            # if len(s) > 0:
+            #     op = " \u2295 " if unicode else " * "  # \oplus
+            #     s = op + s
+
+            if link.isjoint:
+                jname = link.jindex
+            else:
+                jname = ""
+            table.row(
+                # link.jindex,
+                k,
+                color + ee + link.name,
+                jname,
+                parent_name,
+                f"{s}",
+            )
+
+        classname = "ERobot"
+
+        s = f"{classname}: {self.name}"
+        if self.manufacturer is not None and len(self.manufacturer) > 0:
+            s += f" (by {self.manufacturer})"
+        s += f", {self.n} joints ({self.structure})"
+        if len(self.grippers) > 0:
+            s += (
+                f", {len(self.grippers)} gripper{'s' if len(self.grippers) > 1 else ''}"
+            )
+        if self.nbranches > 1:
+            s += f", {self.nbranches} branches"
+        if self._hasdynamics:
+            s += ", dynamics"
+        if any([len(link.geometry) > 0 for link in self.links]):
+            s += ", geometry"
+        if any([len(link.collision) > 0 for link in self.links]):
+            s += ", collision"
+        s += "\n"
+
+        s += str(table)
+        s += self.configurations_str(border=border)
+
+        return s
 
     # --------------------------------------------------------------------- #
     # --------- Properties ------------------------------------------------ #
@@ -1896,7 +1980,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     # --------------------------------------------------------------------- #
 
 
-class Robot(BaseRobot[Link]):
+class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     _color = True
 
@@ -1956,6 +2040,68 @@ class Robot(BaseRobot[Link]):
         )
 
         self.links
+
+    # --------------------------------------------------------------------- #
+    # --------- Swift Methods --------------------------------------------- #
+    # --------------------------------------------------------------------- #
+
+    def _to_dict(self, robot_alpha=1.0, collision_alpha=0.0):
+
+        ob = []
+
+        for link in self.links:
+
+            if robot_alpha > 0:
+                for gi in link.geometry:
+                    gi.set_alpha(robot_alpha)
+                    ob.append(gi.to_dict())
+            if collision_alpha > 0:
+                for gi in link.collision:
+                    gi.set_alpha(collision_alpha)
+                    ob.append(gi.to_dict())
+
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+
+                if robot_alpha > 0:
+                    for gi in link.geometry:
+                        gi.set_alpha(robot_alpha)
+                        ob.append(gi.to_dict())
+                if collision_alpha > 0:
+                    for gi in link.collision:
+                        gi.set_alpha(collision_alpha)
+                        ob.append(gi.to_dict())
+
+        # for o in ob:
+        #     print(o)
+
+        return ob
+
+    def _fk_dict(self, robot_alpha=1.0, collision_alpha=0.0):
+        ob = []
+
+        # Do the robot
+        for link in self.links:
+
+            if robot_alpha > 0:
+                for gi in link.geometry:
+                    ob.append(gi.fk_dict())
+            if collision_alpha > 0:
+                for gi in link.collision:
+                    ob.append(gi.fk_dict())
+
+        # Do the grippers now
+        for gripper in self.grippers:
+            for link in gripper.links:
+                if robot_alpha > 0:
+                    for gi in link.geometry:
+                        ob.append(gi.fk_dict())
+                if collision_alpha > 0:
+                    for gi in link.collision:
+                        ob.append(gi.fk_dict())
+
+        return ob
 
     # --------------------------------------------------------------------- #
     # --------- URDF Methods ---------------------------------------------- #
@@ -3068,205 +3214,6 @@ graph [rankdir=LR];
         """
 
         return self.ets(start, end).partial_fkine0(q, n=n)
-
-    def ikine_LM(
-        self,
-        Tep: Union[NDArray, SE3],
-        end: Union[str, Link, Gripper, None] = None,
-        start: Union[str, Link, Gripper, None] = None,
-        q0: Union[ArrayLike, None] = None,
-        ilimit: int = 30,
-        slimit: int = 100,
-        tol: float = 1e-6,
-        mask: Union[ArrayLike, None] = None,
-        joint_limits: bool = True,
-        seed: Union[int, None] = None,
-        k: float = 1.0,
-        method="chan",
-        kq: float = 0.0,
-        km: float = 0.0,
-        ps: float = 0.0,
-        pi: Union[NDArray, float] = 0.3,
-        **kwargs,
-    ):
-        r"""
-        Levenberg-Marquadt Numerical Inverse Kinematics Solver
-
-        A method which provides functionality to perform numerical inverse kinematics (IK)
-        using the Levemberg-Marquadt method.
-
-        See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a 
-        **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
-
-        Parameters
-        ----------
-        Tep
-            The desired end-effector pose
-        end
-            the link considered as the end-effector
-        start
-            the link considered as the base frame, defaults to the robots's base frame
-        q0
-            The initial joint coordinate vector
-        ilimit
-            How many iterations are allowed within a search before a new search
-            is started
-        slimit
-            How many searches are allowed before being deemed unsuccessful
-        tol
-            Maximum allowed residual error E
-        mask
-            A 6 vector which assigns weights to Cartesian degrees-of-freedom
-            error priority
-        joint_limits
-            Reject solutions with joint limit violations
-        seed
-            A seed for the private RNG used to generate random joint coordinate
-            vectors
-        k
-            Sets the gain value for the damping matrix Wn in the next iteration. See
-            synopsis
-        method
-            One of "chan", "sugihara" or "wampler". Defines which method is used
-            to calculate the damping matrix Wn in the ``step`` method
-        kq
-            The gain for joint limit avoidance. Setting to 0.0 will remove this
-            completely from the solution
-        km
-            The gain for maximisation. Setting to 0.0 will remove this completely
-            from the solution
-        ps
-            The minimum angle/distance (in radians or metres) in which the joint is
-            allowed to approach to its limit
-        pi
-            The influence angle/distance (in radians or metres) in null space motion
-            becomes active
-
-        Synopsis
-        --------
-        The operation is defined by the choice of the ``method`` kwarg. 
-
-        The step is deined as
-
-        .. math::
-
-            \vec{q}_{k+1} 
-            &= 
-            \vec{q}_k +
-            \left(
-                \mat{A}_k
-            \right)^{-1}
-            \bf{g}_k \\
-            %
-            \mat{A}_k
-            &=
-            {\mat{J}(\vec{q}_k)}^\top
-            \mat{W}_e \
-            {\mat{J}(\vec{q}_k)}
-            +
-            \mat{W}_n
-
-        where :math:`\mat{W}_n = \text{diag}(\vec{w_n})(\vec{w_n} \in \mathbb{R}^n_{>0})` is a
-        diagonal damping matrix. The damping matrix ensures that :math:`\mat{A}_k` is
-        non-singular and positive definite. The performance of the LM method largely depends
-        on the choice of :math:`\mat{W}_n`.
-
-        *Chan's Method*
-
-        Chan proposed
-
-        .. math::
-
-            \mat{W}_n
-            =
-            λ E_k \mat{1}_n
-
-        where λ is a constant which reportedly does not have much influence on performance.
-        Use the kwarg `k` to adjust the weighting term λ.
-
-        *Sugihara's Method*
-
-        Sugihara proposed
-
-        .. math::
-
-            \mat{W}_n
-            =
-            E_k \mat{1}_n + \text{diag}(\hat{\vec{w}}_n)
-
-        where :math:`\hat{\vec{w}}_n \in \mathbb{R}^n`, :math:`\hat{w}_{n_i} = l^2 \sim 0.01 l^2`,
-        and :math:`l` is the length of a typical link within the manipulator. We provide the
-        variable `k` as a kwarg to adjust the value of :math:`w_n`.
-
-        *Wampler's Method*
-
-        Wampler proposed :math:`\vec{w_n}` to be a constant. This is set through the `k` kwarg.
-
-        Examples
-        --------
-        The following example makes a ``panda`` robot object, makes a goal
-        pose ``Tep``, and then solves for the joint coordinates which result in the pose
-        ``Tep`` using the `ikine_LM` method.
-
-        .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> panda = rtb.models.Panda()
-        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
-        >>> panda.ikine_LM(Tep)
-
-        Notes
-        -----
-        The value for the ``k`` kwarg will depend on the ``method`` chosen and the arm you are
-        using. Use the following as a rough guide ``chan, k = 1.0 - 0.01``,
-        ``wampler, k = 0.01 - 0.0001``, and ``sugihara, k = 0.1 - 0.0001``
-
-        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
-        to a non-singular manipulator pose, since it uses the manipulator Jacobian.
-
-        This class supports null-space motion to assist with maximising manipulability and
-        avoiding joint limits. These are enabled by setting kq and km to non-zero values.
-
-        References
-        ----------
-        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
-          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
-        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
-          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
-
-        See Also
-        --------
-        :py:class:`~roboticstoolbox.robot.IK.IK_LM`
-            An IK Solver class which implements the Levemberg Marquadt optimisation technique
-        ikine_NR
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`Robot` class
-        ikine_GN
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`Robot` class
-        ikine_QP
-            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`Robot` class
-
-
-        .. versionchanged:: 1.0.3
-            Added the Levemberg-Marquadt IK solver method on the `Robot` class
-
-        """
-
-        return self.ets(start, end).ikine_LM(
-            Tep=Tep,
-            q0=q0,
-            ilimit=ilimit,
-            slimit=slimit,
-            tol=tol,
-            joint_limits=joint_limits,
-            mask=mask,
-            seed=seed,
-            k=k,
-            method=method,
-            kq=kq,
-            km=km,
-            ps=ps,
-            pi=pi,
-            **kwargs,
-        )
 
     def jtraj(
         self,
