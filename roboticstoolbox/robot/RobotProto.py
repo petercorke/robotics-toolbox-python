@@ -4,10 +4,20 @@ from roboticstoolbox.tools.types import ArrayLike
 from typing import Any, Callable, Generic, List, Set, TypeVar, Union, Dict, Tuple, Type
 from typing_extensions import Protocol, Self
 
-from roboticstoolbox.robot.Link import BaseLink
+from roboticstoolbox.robot.Link import Link, BaseLink
 from roboticstoolbox.robot.Gripper import Gripper
+from roboticstoolbox.robot.ETS import ETS
 from spatialmath import SE3
 import roboticstoolbox as rtb
+
+
+class KinematicsProtocol(Protocol):
+    def ets(
+        self,
+        start: Union[Link, Gripper, str, None] = None,
+        end: Union[Link, Gripper, str, None] = None,
+    ) -> ETS:
+        ...
 
 
 class RobotProto(Protocol):
