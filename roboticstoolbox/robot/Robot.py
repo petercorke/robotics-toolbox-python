@@ -530,6 +530,9 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         return s
 
+    def __repr__(self) -> str:
+        return str(self)
+
     # --------------------------------------------------------------------- #
     # --------- Properties ------------------------------------------------ #
     # --------------------------------------------------------------------- #
@@ -2766,7 +2769,6 @@ graph [rankdir=LR];
         else:
             return w
 
-
     def jtraj(
         self,
         T1: Union[NDArray, SE3],
@@ -2813,140 +2815,192 @@ graph [rankdir=LR];
 
         return rtb.jtraj(q1.q, q2.q, t)
 
-    # def __repr__(self):
-    #     return str(self)
+    @overload
+    def jacob0_dot(
+        self,
+        q: ArrayLike,
+        qd: ArrayLike,
+        J0: None = None,
+        representation: Union[L["rpy/xyz", "rpy/zyx", "eul", "exp"], None] = None,
+    ) -> NDArray:
+        ...
 
-    # def _getq(self, q=None):
-    #     """
-    #     Get joint coordinates (Robot superclass)
+    @overload
+    def jacob0_dot(
+        self,
+        q: None,
+        qd: ArrayLike,
+        J0: NDArray = ...,
+        representation: Union[L["rpy/xyz", "rpy/zyx", "eul", "exp"], None] = None,
+    ) -> NDArray:
+        ...
 
-    #     :param q: passed value, defaults to None
-    #     :type q: array_like, optional
-    #     :return: passed or value from robot state
-    #     :rtype: ndarray(n,)
-    #     """
-    #     if q is None:
-    #         return self.q
-    #     elif isvector(q, self.n):
-    #         return getvector(q, self.n)
-    #     else:
-    #         return getmatrix(q, (None, self.n))
+    def jacob0_dot(
+        self,
+        q,
+        qd: ArrayLike,
+        J0=None,
+        representation: Union[L["rpy/xyz", "rpy/zyx", "eul", "exp"], None] = None,
+    ):
+        r"""
+        Derivative of Jacobian
 
-    # def jacob0_dot(self, q=None, qd=None, J0=None, representation=None):
+        ``robot.jacob_dot(q, qd)`` computes the rate of change of the
+        Jacobian elements
+
+        .. math::
+
+            \dmat{J} = \frac{d \mat{J}}{d \vec{q}} \frac{d \vec{q}}{dt}
+
+        where the first term is the rank-3 Hessian.
+
+        Parameters
+        ----------
+        q
+        The joint configuration of the robot
+        qd
+            The joint velocity of the robot
+        J0
+            Jacobian in {0} frame
+        representation
+            angular representation
+
+        Returns
+        -------
+        jdot
+            The derivative of the manipulator Jacobian
+
+        Synopsis
+        --------
+
+        If ``J0`` is already calculated for the joint
+        coordinates ``q`` it can be passed in to to save computation time.
+
+        It is computed as the mode-3 product of the Hessian tensor and the
+        velocity vector.
+
+        The derivative of an analytical Jacobian can be obtained by setting
+        ``representation`` as
+
+        |``representation``   |       Rotational representation     |
+        |---------------------|-------------------------------------|
+        |``'rpy/xyz'``        |   RPY angular rates in XYZ order    |
+        |``'rpy/zyx'``        |   RPY angular rates in XYZ order    |
+        |``'eul'``            |   Euler angular rates in ZYZ order  |
+        |``'exp'``            |   exponential coordinate rates      |
+
+
+        References
+        ----------
+        - Kinematic Derivatives using the Elementary Transform
+            Sequence, J. Haviland and P. Corke
+
+        See Also
+        --------
+        :func:`jacob0`
+        :func:`hessian0`
+
+        """
+
+        qd = np.array(qd)
+
+        if representation is None:
+
+            if J0 is None:
+                J0 = self.jacob0(q)
+            H = self.hessian0(q, J0=J0)
+
+        else:
+            # # determine analytic rotation
+            # T = self.fkine(q).A
+            # gamma = smb.r2x(smb.t2r(T), representation=representation)
+
+            # # get transformation angular velocity to analytic velocity
+            # Ai = smb.rotvelxform(
+            #     gamma, representation=representation, inverse=True, full=True
+            # )
+
+            # # get analytic rate from joint rates
+            # omega = J0[3:, :] @ qd
+            # gamma_dot = Ai[3:, 3:] @ omega
+            # Ai_dot = smb.rotvelxform_inv_dot(gamma, gamma_dot, full=True)
+            # Ai_dot = sp.linalg.block_diag(np.zeros((3, 3)), Ai_dot)
+
+            # Jd = Ai_dot @ J0 + Ai @ Jd
+
+            # not actually sure this can be written in closed form
+
+            H = smb.numhess(
+                lambda q: self.jacob0_analytical(q, representation=representation), q
+            )
+
+            # Jd = Ai @ Jd
+
+            # return Jd
+
+        return np.tensordot(H, qd, (0, 0))
+
+    # @overload
+    # def jacobm(
+    #     self,
+    #     q: ArrayLike = ...,
+    #     J: None = None,
+    #     H: None = None,
+    #     end: Union[str, Link, Gripper, None] = None,
+    #     start: Union[str, Link, Gripper, None] = None,
+    #     axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+    # ):
+    #     ...
+
+    # @overload
+    # def jacobm(
+    #     self,
+    #     q: None = None,
+    #     J: NDArray = ...,
+    #     H: NDArray = ...,
+    #     end: Union[str, Link, Gripper, None] = None,
+    #     start: Union[str, Link, Gripper, None] = None,
+    #     axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+    # ):
+    #     ...
+
+    # def jacobm(
+    #     self,
+    #     q=None,
+    #     J=None,
+    #     H=None,
+    #     end: Union[str, Link, Gripper, None] = None,
+    #     start: Union[str, Link, Gripper, None] = None,
+    #     axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+    # ):
     #     r"""
-    #     Derivative of Jacobian
+    #     The manipulability Jacobian
 
-    #     :param q: The joint configuration of the robot
-    #     :type q: float ndarray(n)
-    #     :param qd: The joint velocity of the robot
-    #     :type qd: ndarray(n)
-    #     :param J0: Jacobian in {0} frame
-    #     :type J0: ndarray(6,n)
-    #     :param representation: angular representation
-    #     :type representation: str
-    #     :return: The derivative of the manipulator Jacobian
-    #     :rtype:  ndarray(6,n)
+    #     This measure relates the rate of change of the manipulability to the
+    #     joint velocities of the robot. One of J or q is required. Supply J
+    #     and H if already calculated to save computation time
 
-    #     ``robot.jacob_dot(q, qd)`` computes the rate of change of the
-    #     Jacobian elements
-
-    #     .. math::
-
-    #         \dmat{J} = \frac{d \mat{J}}{d \vec{q}} \frac{d \vec{q}}{dt}
-
-    #     where the first term is the rank-3 Hessian.
-
-    #      If ``J0`` is already calculated for the joint
-    #     coordinates ``q`` it can be passed in to to save computation time.
-
-    #     It is computed as the mode-3 product of the Hessian tensor and the
-    #     velocity vector.
-
-    #     The derivative of an analytical Jacobian can be obtained by setting
-    #     ``representation`` as
-
-    #     ==================   ==================================
-    #     ``representation``          Rotational representation
-    #     ==================   ==================================
-    #     ``'rpy/xyz'``        RPY angular rates in XYZ order
-    #     ``'rpy/zyx'``        RPY angular rates in XYZ order
-    #     ``'eul'``            Euler angular rates in ZYZ order
-    #     ``'exp'``            exponential coordinate rates
-    #     ==================   ==================================
-
-    #     :references:
-    #         - Kinematic Derivatives using the Elementary Transform
-    #           Sequence, J. Haviland and P. Corke
-
-    #     :seealso: :func:`jacob0`, :func:`hessian0`
-    #     """  # noqa
-    #     # n = len(q)
-
-    #     # J = r.jacob0(q)
-
-    #     # H = r.hessian0(q)
-
-    #     # ev = J @ qd
-    #     # ew = ev[3:]
-
-    #     # Γd = sm.smb.rotvelxform(T.R, inverse=True, representation=rep) @ ew
-
-    #     if representation is None:
-
-    #         if J0 is None:
-    #             J0 = self.jacob0(q)
-    #         H = self.hessian0(q, J0=J0)
-
-    #     else:
-    #         # determine analytic rotation
-    #         T = self.fkine(q).A
-    #         gamma = smb.r2x(smb.t2r(T), representation=representation)
-
-    #         # get transformation angular velocity to analytic velocity
-    #         Ai = smb.rotvelxform(
-    #             gamma, representation=representation, inverse=True, full=True
-    #         )
-
-    #         # get analytic rate from joint rates
-    #         omega = J0[3:, :] @ qd
-    #         gamma_dot = Ai[3:, 3:] @ omega
-    #         Ai_dot = smb.rotvelxform_inv_dot(gamma, gamma_dot, full=True)
-    #         Ai_dot = sp.linalg.block_diag(np.zeros((3, 3)), Ai_dot)
-
-    #         Jd = Ai_dot @ J0 + Ai @ Jd
-
-    #         # not actually sure this can be written in closed form
-
-    #         # H = smb.numhess(
-    #         #     lambda q: self.jacob0_analytical(q, representation=representation), q
-    #         # )
-    #         Jd = Ai @ Jd
-    #         return Jd
-
-    #     return np.tensordot(H, qd, (0, 0))
-
-    # def jacobm(self, q=None, J=None, H=None, end=None, start=None, axes="all"):
-    #     r"""
-    #     Calculates the manipulability Jacobian. This measure relates the rate
-    #     of change of the manipulability to the joint velocities of the robot.
-    #     One of J or q is required. Supply J and H if already calculated to
-    #     save computation time
-
-    #     :param q: The joint angles/configuration of the robot (Optional,
+    #     Parameters
+    #     ----------
+    #     q
+    #         The joint angles/configuration of the robot (Optional,
     #         if not supplied will use the stored q values).
-    #     :type q: float ndarray(n)
-    #     :param J: The manipulator Jacobian in any frame
-    #     :type J: float ndarray(6,n)
-    #     :param H: The manipulator Hessian in any frame
-    #     :type H: float ndarray(6,n,n)
-    #     :param end: the final link or Gripper which the Hessian represents
-    #     :type end: str or ELink or Gripper
-    #     :param start: the first link which the Hessian represents
-    #     :type start: str or ELink
+    #     J
+    #         The manipulator Jacobian in any frame
+    #     H
+    #         The manipulator Hessian in any frame
+    #     end
+    #         the final link or Gripper which the Hessian represents
+    #     start
+    #         the first link which the Hessian represents
 
-    #     :return: The manipulability Jacobian
-    #     :rtype: float ndarray(n)
+    #     Returns
+    #     -------
+    #     jacobm
+    #         The manipulability Jacobian
 
+    #     Synopsis
+    #     --------
     #     Yoshikawa's manipulability measure
 
     #     .. math::
@@ -2959,13 +3013,14 @@ graph [rankdir=LR];
 
     #         \frac{\partial m(\vec{q})}{\partial \vec{q}}
 
-    #     :references:
-    #         - Kinematic Derivatives using the Elementary Transform
-    #           Sequence, J. Haviland and P. Corke
+    #     References
+    #     ----------
+    #     - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+    #       Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+
     #     """
 
     #     end, start, _ = self._get_limit_links(end, start)
-    #     # path, n, _ = self.get_path(end, start)
 
     #     if axes == "all":
     #         axes = [True, True, True, True, True, True]
@@ -3006,62 +3061,6 @@ graph [rankdir=LR];
     #         Jm[i, 0] = manipulability * np.transpose(c.flatten("F")) @ b.flatten("F")
 
     #     return Jm
-
-    # @abstractmethod
-    # def ets(self, *args, **kwargs) -> ETS:
-    #     pass
-
-    # def jacob0_analytical(
-    #     self,
-    #     q: ArrayLike,
-    #     representation: str = "rpy/xyz",
-    #     end: Union[str, Link, Gripper, None] = None,
-    #     start: Union[str, Link, Gripper, None] = None,
-    #     tool: Union[ndarray, SE3, None] = None,
-    # ):
-    #     r"""
-    #     Manipulator analytical Jacobian in the ``start`` frame
-
-    #     :param q: Joint coordinate vector
-    #     :type q: Arraylike
-    #     :param representation: angular representation
-    #     :type representation: str
-    #     :param end: the particular link or gripper whose velocity the Jacobian
-    #         describes, defaults to the base link
-    #     :param start: the link considered as the end-effector, defaults to the robots's end-effector
-    #     :param tool: a static tool transformation matrix to apply to the
-    #         end of end, defaults to None
-
-    #     :return J: Manipulator Jacobian in the ``start`` frame
-
-    #     - ``robot.jacob0_analytical(q)`` is the manipulator Jacobian matrix which maps
-    #       joint  velocity to end-effector spatial velocity expressed in the
-    #       ``start`` frame.
-
-    #     End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
-    #     is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
-
-    #     ==================   ==================================
-    #     ``representation``          Rotational representation
-    #     ==================   ==================================
-    #     ``'rpy/xyz'``        RPY angular rates in XYZ order
-    #     ``'rpy/zyx'``        RPY angular rates in XYZ order
-    #     ``'eul'``            Euler angular rates in ZYZ order
-    #     ``'exp'``            exponential coordinate rates
-    #     ==================   ==================================
-
-    #     Example:
-    #     .. runblock:: pycon
-    #         >>> import roboticstoolbox as rtb
-    #         >>> puma = rtb.models.ETS.Puma560()
-    #         >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
-
-    #     .. warning:: ``start`` and ``end`` must be on the same branch,
-    #         with ``start`` closest to the base.
-    #     """  # noqa
-    #     return self.ets(start, end).jacob0_analytical(
-    #         q, tool=tool, representation=representation
-    #     )
 
     # --------------------------------------------------------------------- #
 
