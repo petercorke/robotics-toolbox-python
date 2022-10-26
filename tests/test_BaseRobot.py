@@ -54,6 +54,15 @@ class TestBaseRobot(unittest.TestCase):
         with self.assertRaises(TypeError):
             Robot([1, 2], base=SE3.Rx(1.3))  # type: ignore
 
+    def test_init4(self):
+        ets = ETS(rtb.ET.Rz())
+        robot = Robot(
+            ets, name="myname", manufacturer="I made it", comment="other stuff"
+        )
+        self.assertEqual(robot.name, "myname")
+        self.assertEqual(robot.manufacturer, "I made it")
+        self.assertEqual(robot.comment, "other stuff")
+
     def test_init_ets(self):
 
         ets = (
