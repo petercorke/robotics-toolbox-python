@@ -7,23 +7,18 @@ from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.robot.Gripper import Gripper
 from spatialmath import SE3
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Generic,
-    List,
-    TypeVar,
-    Union,
-    Dict,
-    Tuple,
-    overload,
-    Literal as L,
-)
+from typing import Union, Tuple, overload, Literal as L
 
 
 class RobotKinematicsMixin:
+    """
+    The Robot Kinematics Mixin class
+
+    This class contains kinematic methods for the ``robot`` class. All
+    methods contained within this class have a full implementation within the
+    ``ETS`` class and are simply passed through to the ``ETS`` class.
+
+    """
 
     # --------------------------------------------------------------------- #
     # --------- Kinematic Methods ----------------------------------------- #
@@ -479,6 +474,69 @@ class RobotKinematicsMixin:
 
         return self.ets(start, end).partial_fkine0(q, n=n)
 
+    def jacob0_analytical(
+        self: KinematicsProtocol,
+        q: ArrayLike,
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] = "rpy/xyz",
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        tool: Union[NDArray, SE3, None] = None,
+    ):
+        r"""
+        Manipulator analytical Jacobian in the ``start`` frame
+
+        ``robot.jacob0_analytical(q)`` is the manipulator Jacobian matrix which maps
+        joint  velocity to end-effector spatial velocity expressed in the
+        ``start`` frame.
+
+        Parameters
+        ----------
+        q
+            Joint coordinate vector
+        representation
+            angular representation
+        end
+            the particular link or gripper whose velocity the Jacobian
+            describes, defaults to the base link
+        start
+            the link considered as the end-effector, defaults to the robots's end-effector
+        tool
+            a static tool transformation matrix to apply to the
+            end of end, defaults to None
+
+        Returns
+        -------
+        jacob0
+            Manipulator Jacobian in the ``start`` frame
+
+        Synopsis
+        --------
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+
+        |``representation``   |       Rotational representation     |
+        |---------------------|-------------------------------------|
+        |``'rpy/xyz'``        |   RPY angular rates in XYZ order    |
+        |``'rpy/zyx'``        |   RPY angular rates in XYZ order    |
+        |``'eul'``            |   Euler angular rates in ZYZ order  |
+        |``'exp'``            |   exponential coordinate rates      |
+
+        Examples
+        --------
+        Makes a robot object and computes the analytic Jacobian for the given
+        joint configuration
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> puma = rtb.models.ETS.Puma560()
+        >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
+
+        """
+
+        return self.ets(start, end).jacob0_analytical(
+            q, tool=tool, representation=representation
+        )
+
     # --------------------------------------------------------------------- #
     # --------- IK Methods ------------------------------------------------ #
     # --------------------------------------------------------------------- #
@@ -583,8 +641,6 @@ class RobotKinematicsMixin:
 
         For example when using a 3 DOF manipulator tool orientation might
         be unimportant, in which case use the option ``we=[1, 1, 1, 0, 0, 0]``.
-
-
 
         Notes
         -----
