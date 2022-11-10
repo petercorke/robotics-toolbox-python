@@ -172,7 +172,8 @@ class BaseERobot(Robot):
             if link._parent is None:
                 try:
                     if self._base_link is not None:
-                        raise ValueError("Multiple base links")
+                        if link != self._base_link:
+                            raise ValueError("Multiple base links")
                 except AttributeError:
                     pass
 
