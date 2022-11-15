@@ -63,6 +63,85 @@ class TestBaseRobot(unittest.TestCase):
         self.assertEqual(robot.manufacturer, "I made it")
         self.assertEqual(robot.comment, "other stuff")
 
+    def test_init5(self):
+
+        base = SE3.Trans(0, 0, 0.1).A
+        ets = ETS(rtb.ET.Rz())
+        robot = Robot(ets, base=base, tool=base)
+        nt.assert_almost_equal(robot.base.A, base)
+        nt.assert_almost_equal(robot.tool.A, base)
+
+    def test_init6(self):
+
+        base = SE3.Trans(0, 0, 0.1)
+        ets = ETS(rtb.ET.Rz())
+        robot = Robot(ets, base=base, tool=base)
+        nt.assert_almost_equal(robot.base.A, base.A)
+        nt.assert_almost_equal(robot.tool.A, base.A)
+
+    def test_init7(self):
+
+        keywords = 2
+        ets = ETS(rtb.ET.Rz())
+
+        with self.assertRaises(TypeError):
+            Robot(ets, keywords=keywords)  # type: ignore
+
+    def test_init8(self):
+
+        links = [2, 3, 4, 5]
+
+        with self.assertRaises(TypeError):
+            BaseRobot(links=links)  # type: ignore
+
+    def test_init9(self):
+
+        robot = rtb.models.Panda()
+        robot2 = rtb.models.PR2()
+
+        self.assertTrue(robot2._hasdynamics)
+        self.assertTrue(robot._hasgeometry)
+        self.assertTrue(robot._hascollision)
+
+    def test_init10(self):
+
+        links = [Link(name="link1"), Link(name="link1"), Link(name="link1")]
+
+        with self.assertRaises(ValueError):
+            Robot(links)
+
+    def test_init11(self):
+
+        l1 = Link(parent="l3")
+        l2 = Link(parent=l1)
+        l3 = Link(parent=l2, name="l3")
+
+        links = [l1, l2, l3]
+
+        with self.assertRaises(ValueError):
+            Robot(links)
+
+    def test_init12(self):
+
+        l1 = Link(jindex=1, ets=rtb.ET.Rz())
+        l2 = Link(jindex=2, parent=l1, ets=rtb.ET.Rz())
+        l3 = Link(parent=l2, ets=rtb.ET.Rz())
+
+        links = [l1, l2, l3]
+
+        with self.assertRaises(ValueError):
+            Robot(links)
+
+    def test_iter(self):
+        robot = rtb.models.Panda()
+        for link in robot:
+            self.assertIsInstance(link, Link)
+
+    def test_get(self):
+        panda = rtb.models.ETS.Panda()
+        self.assertIsInstance(panda[1], Link)
+        self.assertIsInstance(panda["link0"], Link)
+
     def test_init_ets(self):
 
         ets = (
@@ -277,6 +356,59 @@ class TestBaseRobot(unittest.TestCase):
         panda = rtb.models.ETS.Panda()
 
         self.assertIsInstance(panda.manufacturer, str)
+
+    def test_str(self):
+        panda = rtb.models.Panda()
+        pr2 = rtb.models.PR2()
+        self.assertIsInstance(str(panda), str)
+        self.assertIsInstance(str(pr2), str)
+        self.assertIsInstance(repr(panda), str)
+        self.assertIsInstance(repr(pr2), str)
+
+    def test_nlinks(self):
+        panda = rtb.models.Panda()
+        self.assertEqual(panda.nlinks, 12)
+
+    def test_configs(self):
+        panda = rtb.models.Panda()
+        configs = panda.configs
+
+        nt.assert_equal(configs["qr"], panda.qr)
+        nt.assert_equal(configs["qz"], panda.qz)
+
+    def test_keywords(self):
+        panda = Robot(
+            ETS([ET.Rz(qlim=[-1, 1]), ET.tz(qlim=[-1, 1]), ET.SE3(SE3.Trans(1, 2, 3))]),
+            keywords=["test"],
+        )
+        self.assertEqual(panda.keywords, ["test"])
+        self.assertFalse(panda.symbolic)
+        self.assertFalse(panda.hasdynamics)
+        self.assertFalse(panda.hasgeometry)
+        self.assertFalse(panda.hascollision)
+        self.assertEqual(panda.default_backend, None)
+        panda.default_backend = "Swift"
+
+        self.assertEqual(panda.qlim[0, 0], -1.0)
+
+    def test_qlim(self):
+        panda = Robot(ETS([ET.Rz(qlim=[-1, 1]), ET.tz()]), keywords=["test"])
+
+        with self.assertRaises(ValueError):
+            panda.qlim
+
+    def test_joint_types(self):
+        panda = Robot(
+            ETS([ET.Rz(qlim=[-1, 1]), ET.tz(qlim=[-1, 1]), ET.SE3(SE3.Trans(1, 2, 3))]),
+        )
+
+        self.assertTrue(panda.prismaticjoints[1])
+        self.assertTrue(panda.revolutejoints[0])
+
+    def test_urdf_string(self):
+        panda = rtb.models.Panda()
+        self.assertIsInstance(panda.urdf_string, str)
+        self.assertIsInstance(panda.urdf_filepath, str)
 
     # def test_yoshi(self):
     #     puma = rtb.models.Puma560()

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.ERobot import Robot
 import numpy as np
 
 
-class PR2(ERobot):
+class PR2(Robot):
     def __init__(self):
 
         links, name, urdf_string, urdf_filepath = self.URDF_read(

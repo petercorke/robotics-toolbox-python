@@ -54,7 +54,7 @@ from warnings import warn
 from pathlib import PurePosixPath, Path
 
 if TYPE_CHECKING:
-    from matplotlib.cm import Color
+    from matplotlib.cm import Color  # pragma: nocover
 else:
     Color = None
 
@@ -144,8 +144,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         # Time to checkout the links for geometry information
         for link in self.links:
-            if not isinstance(link, BaseLink):
-                raise TypeError("links should all be Link subclass")
 
             # Add link back to robot object
             link._robot = self
@@ -231,6 +229,9 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         # ------------------------------
         for k, link in enumerate(links):
 
+            if not isinstance(link, BaseLink):
+                raise TypeError("links should all be Link subclass")
+
             # If link has no name, give it one
             if link.name is None or link.name == "":
                 link.name = f"link-{k}"
@@ -277,7 +278,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
                 self._base_link = link
 
-        if self.base_link is None:  # Pragma: nocover
+        if not hasattr(self, "_base_link"):
             raise ValueError(
                 "Invalid link configuration provided, must have a base link"
             )
@@ -353,7 +354,13 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             # visit all links in DFS order
             self.dfs_links(self.base_link, lambda link: visit_link(link, jindex))
 
-        elif all([link.jindex is not None for link in links if link.isjoint]):
+        elif all(
+            [
+                link.jindex is not None and not link.ets._auto_jindex
+                for link in links
+                if link.isjoint
+            ]
+        ):
             # Jindex set on all, check they are unique and contiguous
             if check_jindex:
                 jset = set(range(n))
@@ -1025,7 +1032,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
                     v = link.qlim
             else:
                 # Fixed link
-                continue
+                continue  # pragma: nocover
 
             limits[:, j] = v
             j += 1
@@ -2225,14 +2232,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             urdf_string=urdf_string,
             urdf_filepath=urdf_filepath,
         )
-
-    @property
-    def urdf_string(self):
-        return self._urdf_string
-
-    @property
-    def urdf_filepath(self):
-        return self._urdf_filepath
 
     # --------------------------------------------------------------------- #
     # --------- Utility Methods ------------------------------------------- #
