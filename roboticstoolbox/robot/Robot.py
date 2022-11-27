@@ -3741,127 +3741,176 @@ graph [rankdir=LR];
         return env
 
     # --------------------------------------------------------------------- #
+    # --------- Plotting Methods ------------------------------------------ #
+    # --------------------------------------------------------------------- #
 
-    # def closest_point(
-    #     self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip: bool = False
-    # ) -> Tuple[Union[int, None], Union[NDArray, None], Union[NDArray, None],]:
-    #     """
-    #     closest_point(shape, inf_dist) returns the minimum euclidean
-    #     distance between this robot and shape, provided it is less than
-    #     inf_dist. It will also return the points on self and shape in the
-    #     world frame which connect the line of length distance between the
-    #     shapes. If the distance is negative then the shapes are collided.
+    def closest_point(
+        self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip: bool = False
+    ) -> Tuple[Union[int, None], Union[NDArray, None], Union[NDArray, None],]:
+        """
+        Find the closest point between robot and shape
 
-    #     :param shape: The shape to compare distance to
-    #     :param inf_dist: The minimum distance within which to consider
-    #         the shape
-    #     :param skip: Skip setting all shape transforms based on q, use this
-    #         option if using this method in conjuction with Swift to save time
+        ``closest_point(shape, inf_dist)`` returns the minimum euclidean
+        distance between this robot and shape, provided it is less than
+        inf_dist. It will also return the points on self and shape in the
+        world frame which connect the line of length distance between the
+        shapes. If the distance is negative then the shapes are collided.
 
-    #     :returns: d, p1, p2 where d is the distance between the shapes,
-    #         p1 and p2 are the points in the world frame on the respective
-    #         shapes. The points returned are [x, y, z].
-    #     """
+        Attributes
+        ----------
+        shape
+            The shape to compare distance to
+        inf_dist
+            The minimum distance within which to consider
+            the shape
+        skip
+            Skip setting all shape transforms based on q, use this
+            option if using this method in conjuction with Swift to save time
 
-    #     if not skip:
-    #         self._update_link_tf(q)
-    #         self._propogate_scene_tree()
-    #         shape._propogate_scene_tree()
+        Returns
+        -------
+        d
+            distance between the robot and shape
+        p1
+            [x, y, z] point on the robot (in the world frame)
+        p2
+            [x, y, z] point on the shape (in the world frame)
 
-    #     d = 10000
-    #     p1 = None
-    #     p2 = None
+        """
 
-    #     for link in self.links:
-    #         td, tp1, tp2 = link.closest_point(shape, inf_dist, skip=True)
+        if not skip:
+            self._update_link_tf(q)
+            self._propogate_scene_tree()
+            shape._propogate_scene_tree()
 
-    #         if td is not None and td < d:
-    #             d = td
-    #             p1 = tp1
-    #             p2 = tp2
+        d = 10000
+        p1 = None
+        p2 = None
 
-    #     if d == 10000:
-    #         d = None
+        for link in self.links:
+            td, tp1, tp2 = link.closest_point(shape, inf_dist, skip=True)
 
-    #     return d, p1, p2
+            if td is not None and td < d:
+                d = td
+                p1 = tp1
+                p2 = tp2
 
-    # def iscollided(self, q, shape, skip=False):
-    #     """
-    #     collided(shape) checks if this robot and shape have collided
-    #     :param shape: The shape to compare distance to
-    #     :type shape: Shape
-    #     :param skip: Skip setting all shape transforms based on q, use this
-    #         option if using this method in conjuction with Swift to save time
-    #     :type skip: boolean
-    #     :returns: True if shapes have collided
-    #     :rtype: bool
-    #     """
+        if d == 10000:
+            d = None
 
-    #     if not skip:
-    #         self._update_link_tf(q)
-    #         self._propogate_scene_tree()
-    #         shape._propogate_scene_tree()
+        return d, p1, p2
 
-    #     for link in self.links:
-    #         if link.iscollided(shape, skip=True):
-    #             return True
+    def iscollided(self, q, shape: Shape, skip: bool = False) -> bool:
+        """
+        Check if the robot is in collision with a shape
 
-    #     if isinstance(self, rtb.ERobot):
-    #         for gripper in self.grippers:
-    #             for link in gripper.links:
-    #                 if link.iscollided(shape, skip=True):
-    #                     return True
+        ``iscollided(shape)`` checks if this robot and shape have collided
 
-    #     return False
+        Attributes
+        ----------
+        shape
+            The shape to compare distance to
+        skip
+            Skip setting all shape transforms based on q, use this
+            option if using this method in conjuction with Swift to save time
 
-    # def collided(self, q, shape, skip=False):
-    #     """
-    #     collided(shape) checks if this robot and shape have collided
-    #     :param shape: The shape to compare distance to
-    #     :type shape: Shape
-    #     :param skip: Skip setting all shape transforms based on q, use this
-    #         option if using this method in conjuction with Swift to save time
-    #     :type skip: boolean
-    #     :returns: True if shapes have collided
-    #     :rtype: bool
-    #     """
-    #     warn("method collided is deprecated, use iscollided instead", FutureWarning)
-    #     return self.iscollided(q, shape, skip=skip)
+        Returns
+        -------
+        iscollided
+            True if shapes have collided
 
-    # def joint_velocity_damper(self, ps=0.05, pi=0.1, n=None, gain=1.0):
-    #     """
-    #     Formulates an inequality contraint which, when optimised for will
-    #     make it impossible for the robot to run into joint limits. Requires
-    #     the joint limits of the robot to be specified. See examples/mmc.py
-    #     for use case
+        """
 
-    #     :param ps: The minimum angle (in radians) in which the joint is
-    #         allowed to approach to its limit
-    #     :type ps: float
-    #     :param pi: The influence angle (in radians) in which the velocity
-    #         damper becomes active
-    #     :type pi: float
-    #     :param n: The number of joints to consider. Defaults to all joints
-    #     :type n: int
-    #     :param gain: The gain for the velocity damper
-    #     :type gain: float
+        if not skip:
+            self._update_link_tf(q)
+            self._propogate_scene_tree()
+            shape._propogate_scene_tree()
 
-    #     :returns: Ain, Bin as the inequality contraints for an optisator
-    #     :rtype: ndarray(6), ndarray(6)
-    #     """
+        for link in self.links:
+            if link.iscollided(shape, skip=True):
+                return True
 
-    #     if n is None:
-    #         n = self.n
+        if isinstance(self, rtb.ERobot):
+            for gripper in self.grippers:
+                for link in gripper.links:
+                    if link.iscollided(shape, skip=True):
+                        return True
 
-    #     Ain = np.zeros((n, n))
-    #     Bin = np.zeros(n)
+        return False
 
-    #     for i in range(n):
-    #         if self.q[i] - self.qlim[0, i] <= pi:
-    #             Bin[i] = -gain * (((self.qlim[0, i] - self.q[i]) + ps) / (pi - ps))
-    #             Ain[i, i] = -1
-    #         if self.qlim[1, i] - self.q[i] <= pi:
-    #             Bin[i] = gain * ((self.qlim[1, i] - self.q[i]) - ps) / (pi - ps)
-    #             Ain[i, i] = 1
+    def collided(self, q, shape: Shape, skip: bool = False) -> bool:
+        """
+        Check if the robot is in collision with a shape
 
-    #     return Ain, Bin
+        ``collided(shape)`` checks if this robot and shape have collided
+
+        Attributes
+        ----------
+        shape
+            The shape to compare distance to
+        skip
+            Skip setting all shape transforms based on q, use this
+            option if using this method in conjuction with Swift to save time
+
+        Returns
+        -------
+        collided
+            True if shapes have collided
+
+        """
+
+        warn("method collided is deprecated, use iscollided instead", FutureWarning)
+        return self.iscollided(q, shape, skip=skip)
+
+    def joint_velocity_damper(
+        self,
+        ps: float = 0.05,
+        pi: float = 0.1,
+        n: Union[int, None] = None,
+        gain: float = 1.0,
+    ) -> Tuple[NDArray, NDArray]:
+        """
+        Compute the joint velocity damper for QP motion control
+
+        Formulates an inequality contraint which, when optimised for will
+        make it impossible for the robot to run into joint limits. Requires
+        the joint limits of the robot to be specified. See examples/mmc.py
+        for use case
+
+        Attributes
+        ----------
+        ps
+            The minimum angle (in radians) in which the joint is
+            allowed to approach to its limit
+        pi
+            The influence angle (in radians) in which the velocity
+            damper becomes active
+        n
+            The number of joints to consider. Defaults to all joints
+        gain
+            The gain for the velocity damper
+
+        Returns
+        -------
+        Ain
+            A inequality contraint for an optisator
+        Bin
+            b inequality contraint for an optisator
+
+        """
+
+        if n is None:
+            n = self.n
+
+        Ain = np.zeros((n, n))
+        Bin = np.zeros(n)
+
+        for i in range(n):
+            if self.q[i] - self.qlim[0, i] <= pi:
+                Bin[i] = -gain * (((self.qlim[0, i] - self.q[i]) + ps) / (pi - ps))
+                Ain[i, i] = -1
+            if self.qlim[1, i] - self.q[i] <= pi:
+                Bin[i] = gain * ((self.qlim[1, i] - self.q[i]) - ps) / (pi - ps)
+                Ain[i, i] = 1
+
+        return Ain, Bin
