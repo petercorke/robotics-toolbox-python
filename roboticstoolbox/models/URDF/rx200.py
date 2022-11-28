@@ -24,7 +24,7 @@ class rx200(ERobot):
     - qr, vertical 'READY' configuration
 
     :reference:
-        - http://www.support.interbotix.com/html/specifications/rx200.html#
+        - https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/rx200.html
 
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke

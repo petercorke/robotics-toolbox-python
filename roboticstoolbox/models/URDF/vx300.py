@@ -24,7 +24,7 @@ class vx300(ERobot):
     - qr, vertical 'READY' configuration
 
     :reference:
-        - http://www.support.interbotix.com/html/specifications/vx300.html
+        - https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/vx300.html
 
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke
