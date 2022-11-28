@@ -2195,7 +2195,39 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     ):
 
         # Process links
-        if isinstance(arg, ETS):
+        if isinstance(arg, Robot):
+            # We're passed a Robot, clone it
+            # We need to preserve the parent link as we copy
+
+            # Copy each link within the robot
+            links = [deepcopy(link) for link in arg.links]
+            gripper_links = []
+
+            for gripper in arg.grippers:
+                glinks = []
+                for link in gripper.links:
+                    glinks.append(deepcopy(link))
+
+                gripper_links.append(glinks[0])
+                links = links + glinks
+
+            # Sever parent connection, but save the string
+            # The constructor will piece this together for us
+            for link in links:
+                link._children = []
+                if link.parent is not None:
+                    link._parent_name = link.parent.name
+                    link._parent = None
+
+            super().__init__(links, gripper_links=gripper_links)
+
+            for i, gripper in enumerate(self.grippers):
+                gripper.tool = arg.grippers[i].tool.copy()
+
+            self._urdf_string = arg.urdf_string
+            self._urdf_filepath = arg.urdf_filepath
+
+        elif isinstance(arg, ETS):
             # We're passed an ETS string
             links = []
             # chop it up into segments, a link frame after every joint
@@ -2210,8 +2242,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     elink.qlim = elink.v.qlim
                 parent = elink
                 links.append(elink)
+
         elif smb.islistof(arg, Link):
             links = arg
+
         else:
             raise TypeError("arg was invalid, must be List[Link], ETS, or Robot")
 
@@ -4213,7 +4247,7 @@ graph [rankdir=LR];
     def vision_collision_damper(
         self,
         shape: CollisionShape,
-        camera: Union[rtb.Robot, SE3, None] = None,
+        camera: Union["Robot", SE3, None] = None,
         camera_n: int = 0,
         q=None,
         di=0.3,
@@ -4278,7 +4312,7 @@ graph [rankdir=LR];
 
             return SE3.AngleAxis(angle, axis)
 
-        if isinstance(camera, rtb.Robot):
+        if isinstance(camera, rtb.BaseRobot):
             wTcp = camera.fkine(camera.q).A[:3, 3]
         elif isinstance(camera, SE3):
             wTcp = camera.t
