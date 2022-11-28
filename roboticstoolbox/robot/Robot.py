@@ -1,26 +1,10 @@
 # import sys
 from os.path import splitext
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC
 from copy import deepcopy
-import numpy as np
-import roboticstoolbox as rtb
-from spatialmath import SE3
-from spatialmath.base.argcheck import (
-    isvector,
-    getvector,
-    getmatrix,
-    getunit,
-    verifymatrix,
-)
-import spatialmath.base as smb
-from ansitable import ANSITable, Column
-from roboticstoolbox.backends.PyPlot import PyPlot
-from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
-from roboticstoolbox.robot.Dynamics import DynamicsMixin
-from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.ET import ET
-from roboticstoolbox.tools.types import ArrayLike, NDArray
-
+from warnings import warn
+from pathlib import PurePosixPath, Path
+from functools import lru_cache
 from typing import (
     IO,
     TYPE_CHECKING,
@@ -32,29 +16,52 @@ from typing import (
     Union,
     Dict,
     Tuple,
+    Set,
     overload,
     Literal as L,
 )
 
-from roboticstoolbox.robot.RobotKinematics import RobotKinematicsMixin
+import numpy as np
 
-# from typing_extensions import Protocol
+from spatialmath import SE3
+import spatialmath.base as smb
+from spatialmath.base.argcheck import (
+    isvector,
+    getvector,
+    getmatrix,
+    getunit,
+    verifymatrix,
+)
 
-from spatialgeometry import Shape
+from ansitable import ANSITable, Column
+from swift import Swift
+from spatialgeometry import Shape, CollisionShape, Cylinder, SceneNode
+
+from spatialmath import SE3
+import spatialmath.base as smb
+from spatialmath.base.argcheck import (
+    isvector,
+    getvector,
+    getmatrix,
+    getunit,
+    verifymatrix,
+)
+
 from fknm import Robot_link_T
-from functools import lru_cache
-from spatialgeometry import SceneNode
+import roboticstoolbox as rtb
+from roboticstoolbox.robot.RobotKinematics import RobotKinematicsMixin
+from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.Link import BaseLink, Link
+from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.tools import xacro
 from roboticstoolbox.tools import URDF
-from roboticstoolbox.robot.Gripper import Gripper
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.tools.data import rtb_path_to_datafile
 from roboticstoolbox.tools.params import rtb_get_param
-from swift import Swift  # pragma: nocover
-from roboticstoolbox.backends.PyPlot import PyPlot  # pragma: nocover
-from roboticstoolbox.backends.PyPlot import PyPlot2  # pragma: nocover
-from warnings import warn
-from pathlib import PurePosixPath, Path
+from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
+from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 
 if TYPE_CHECKING:
     from matplotlib.cm import Color  # pragma: nocover
@@ -1263,6 +1270,99 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
     # --------------------------------------------------------------------- #
 
+    @lru_cache(maxsize=32)
+    def get_path(
+        self,
+        end: Union[Gripper, LinkType, str, None] = None,
+        start: Union[Gripper, LinkType, str, None] = None,
+    ) -> Tuple[List[LinkType], int, SE3]:
+        """
+        Find a path from start to end
+
+        Parameters
+        ----------
+        end
+            end-effector or gripper to compute forward kinematics to
+        start
+            name or reference to a base link, defaults to None
+
+        Raises
+        ------
+        ValueError
+            link not known or ambiguous
+
+        Returns
+        -------
+        path
+            the path from start to end
+        n
+            the number of joints in the path
+        T
+            the tool transform present after end
+
+        """
+
+        def search(
+            start,
+            end,
+            explored: Set[Union[LinkType, Link]],
+            path: List[Union[LinkType, Link]],
+        ) -> Union[List[Union[LinkType, Link]], None]:
+
+            link = self._getlink(start, self.base_link)
+            end = self._getlink(end, self.ee_links[0])
+
+            toplevel = path is None
+            explored.add(link)
+
+            if link == end:
+                return path
+
+            # unlike regular DFS, the neighbours of the node are its children
+            # and its parent.
+
+            # visit child nodes below start
+            if toplevel:
+                path = [link]
+
+            if link.children is not None:
+                for child in link.children:
+                    if child not in explored:
+                        path.append(child)
+                        p = search(child, end, explored, path)
+                        if p is not None:
+                            return p
+
+            # We didn't find the node below, keep going up a level, and recursing
+            # down again
+            if toplevel:
+                path = []
+
+            if link.parent is not None:
+                parent = link.parent  # go up one level toward the root
+                if parent not in explored:
+                    if len(path) == 0:
+                        p = search(parent, end, explored, [link])
+                    else:
+                        path.append(link)
+                        p = search(parent, end, explored, path)
+
+                    if p is not None and len(p) > 0:
+                        return p
+
+        end, start, tool = self._get_limit_links(end=end, start=start)
+
+        path = search(start, end, set(), [])
+
+        if path is None or len(path) == 0:
+            raise ValueError("No path found")
+
+        if tool is None:
+            tool = SE3()
+
+        return path, len(path), tool  # type: ignore
+
+    @lru_cache(maxsize=32)
     def _getlink(
         self,
         link: Union[LinkType, Gripper, str, None],
@@ -1377,6 +1477,83 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         return ETS(ET.SE3(gripper.tool))
 
     @lru_cache(maxsize=32)
+    def _get_limit_links(
+        self,
+        end: Union[Gripper, LinkType, str, None] = None,
+        start: Union[Gripper, LinkType, str, None] = None,
+    ) -> Tuple[LinkType, LinkType, Union[None, SE3]]:
+        """
+        Get and validate an end-effector, and a base link
+
+        Helper method to find or validate an end-effector and base link
+
+        end
+            end-effector or gripper to compute forward kinematics to
+        start
+            name or reference to a base link, defaults to None
+
+        ValueError
+            link not known or ambiguous
+        ValueError
+            [description]
+        TypeError
+            unknown type provided
+
+        Returns
+        -------
+        end
+            end-effector link
+        start
+            base link
+        tool
+            tool transform of gripper if applicable
+
+        """
+
+        tool = None
+        if end is None:
+
+            if len(self.grippers) > 1:
+                end_ret = self.grippers[0].links[0]
+                tool = self.grippers[0].tool
+                if len(self.grippers) > 1:
+                    # Warn user: more than one gripper
+                    print("More than one gripper present, using robot.grippers[0]")
+            elif len(self.grippers) == 1:
+                end_ret = self.grippers[0].links[0]
+                tool = self.grippers[0].tool
+
+            # no grippers, use ee link if just one
+            elif len(self.ee_links) > 1:
+                end_ret = self.ee_links[0]
+                if len(self.ee_links) > 1:
+                    # Warn user: more than one EE
+                    print("More than one end-effector present, using robot.ee_links[0]")
+            else:
+                end_ret = self.ee_links[0]
+
+        else:
+            # Check if end corresponds to gripper
+            for gripper in self.grippers:
+                if end == gripper or end == gripper.name:
+                    tool = gripper.tool
+                    # end_ret = gripper.links[0]
+
+            # otherwise check for end in the links
+            end_ret = self._getlink(end)
+
+        if start is None:
+            start_ret = self.base_link
+
+            # Cache result
+            self._cache_start = start
+        else:
+            # start effector is specified
+            start_ret = self._getlink(start)
+
+        return end_ret, start_ret, tool  # type: ignore  because Gripper returns Link not LinkType
+
+    @lru_cache(maxsize=32)
     def ets(
         self,
         start: Union[LinkType, Gripper, str, None] = None,
@@ -1385,12 +1562,14 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         """
         Robot to ETS
 
-        - ``robot.ets()`` is an ETS representing the kinematics from base to
-          end-effector.
-        - ``robot.ets(end=link)`` is an ETS representing the kinematics from
-          base to the link ``link`` specified as a Link reference or a name.
-        - ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
-          from link ``l1`` to link ``l2``.
+        ``robot.ets()`` is an ETS representing the kinematics from base to
+        end-effector.
+
+        ``robot.ets(end=link)`` is an ETS representing the kinematics from
+        base to the link ``link`` specified as a Link reference or a name.
+
+        ``robot.ets(start=l1, end=l2)`` is an ETS representing the kinematics
+        from link ``l1`` to link ``l2``.
 
         Parameters
         ----------
@@ -1661,7 +1840,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         self,
         start: LinkType,
         func: Union[None, Callable[[LinkType], Any]] = None,
-    ):
+    ) -> List[LinkType]:
         """
         A link search method
 
@@ -3741,7 +3920,7 @@ graph [rankdir=LR];
         return env
 
     # --------------------------------------------------------------------- #
-    # --------- Plotting Methods ------------------------------------------ #
+    # --------- Collision Methods ----------------------------------------- #
     # --------------------------------------------------------------------- #
 
     def closest_point(
@@ -3862,6 +4041,10 @@ graph [rankdir=LR];
         warn("method collided is deprecated, use iscollided instead", FutureWarning)
         return self.iscollided(q, shape, skip=skip)
 
+    # --------------------------------------------------------------------- #
+    # --------- Constraint Methods ---------------------------------------- #
+    # --------------------------------------------------------------------- #
+
     def joint_velocity_damper(
         self,
         ps: float = 0.05,
@@ -3893,9 +4076,9 @@ graph [rankdir=LR];
         Returns
         -------
         Ain
-            A inequality contraint for an optisator
+            A (6,) vector inequality contraint for an optisator
         Bin
-            b inequality contraint for an optisator
+            b (6,) vector inequality contraint for an optisator
 
         """
 
@@ -3914,3 +4097,276 @@ graph [rankdir=LR];
                 Ain[i, i] = 1
 
         return Ain, Bin
+
+    def link_collision_damper(
+        self,
+        shape: CollisionShape,
+        q: ArrayLike,
+        di: float = 0.3,
+        ds: float = 0.05,
+        xi: float = 1.0,
+        end: Union[Link, None] = None,
+        start: Union[Link, None] = None,
+        collision_list: Union[List[Shape], None] = None,
+    ):
+        """
+        Compute a collision constrain for QP motion control
+
+        Formulates an inequality contraint which, when optimised for will
+        make it impossible for the robot to run into a collision. Requires
+        See examples/neo.py for use case
+
+        Attributes
+        ----------
+        ds
+            The minimum distance in which a joint is allowed to
+            approach the collision object shape
+        di
+            The influence distance in which the velocity
+            damper becomes active
+        xi
+            The gain for the velocity damper
+        end
+            The end link of the robot to consider
+        start
+            The start link of the robot to consider
+        collision_list
+            A list of shapes to consider for collision
+
+        Returns
+        -------
+        Ain
+            A (6,) vector inequality contraint for an optisator
+        Bin
+            b (6,) vector inequality contraint for an optisator
+
+        """
+
+        end, start, _ = self._get_limit_links(start=start, end=end)
+
+        links, n, _ = self.get_path(start=start, end=end)
+
+        q = np.array(q)
+        j = 0
+        Ain = None
+        bin = None
+
+        def indiv_calculation(link: Link, link_col: CollisionShape, q: NDArray):
+            d, wTlp, wTcp = link_col.closest_point(shape, di)
+
+            if d is not None and wTlp is not None and wTcp is not None:
+                lpTcp = -wTlp + wTcp
+
+                norm = lpTcp / d
+                norm_h = np.expand_dims(np.concatenate((norm, [0.0, 0.0, 0.0])), axis=0)  # type: ignore
+
+                # tool = (self.fkine(q, end=link).inv() * SE3(wTlp)).A[:3, 3]
+
+                # Je = self.jacob0(q, end=link, tool=tool)
+                # Je[:3, :] = self._T[:3, :3] @ Je[:3, :]
+
+                # n_dim = Je.shape[1]
+                # dp = norm_h @ shape.v
+                # l_Ain = zeros((1, self.n))
+
+                Je = self.jacobe(q, start=start, end=link, tool=link_col.T)
+                n_dim = Je.shape[1]
+                dp = norm_h @ shape.v
+                l_Ain = np.zeros((1, n))
+
+                l_Ain[0, :n_dim] = 1 * norm_h @ Je
+                l_bin = (xi * (d - ds) / (di - ds)) + dp
+            else:
+                l_Ain = None
+                l_bin = None
+
+            return l_Ain, l_bin
+
+        for link in links:
+            if link.isjoint:
+                j += 1
+
+            if collision_list is None:
+                col_list = link.collision
+
+                for c in col_list:
+                    pass
+            else:
+                col_list = [collision_list[j - 1]]
+
+            for link_col in col_list:
+                l_Ain, l_bin = indiv_calculation(link, link_col, q)  # type: ignore
+
+                if l_Ain is not None and l_bin is not None:
+                    if Ain is None:
+                        Ain = l_Ain
+                    else:
+                        Ain = np.concatenate((Ain, l_Ain))
+
+                    if bin is None:
+                        bin = np.array(l_bin)
+                    else:
+                        bin = np.concatenate((bin, l_bin))
+
+        return Ain, bin
+
+    def vision_collision_damper(
+        self,
+        shape: CollisionShape,
+        camera: Union[rtb.Robot, SE3, None] = None,
+        camera_n: int = 0,
+        q=None,
+        di=0.3,
+        ds=0.05,
+        xi=1.0,
+        end=None,
+        start=None,
+        collision_list=None,
+    ):
+        """
+        Compute a vision collision constrain for QP motion control
+
+        Formulates an inequality contraint which, when optimised for will
+        make it impossible for the robot to run into a line of sight.
+        See examples/fetch_vision.py for use case
+
+        Attributes
+        ----------
+        camera
+            The camera link, either as a robotic link or SE3
+            pose
+        camera_n
+            Degrees of freedom of the camera link
+        ds
+            The minimum distance in which a joint is allowed to
+            approach the collision object shape
+        di
+            The influence distance in which the velocity
+            damper becomes active
+        xi
+            The gain for the velocity damper
+        end
+            The end link of the robot to consider
+        start
+            The start link of the robot to consider
+        collision_list
+            A list of shapes to consider for collision
+
+        Returns
+        -------
+        Ain
+            A (6,) vector inequality contraint for an optisator
+        Bin
+            b (6,) vector inequality contraint for an optisator
+        """
+
+        end, start, _ = self._get_limit_links(start=start, end=end)
+
+        links, n, _ = self.get_path(start=start, end=end)
+
+        q = np.array(q)
+        j = 0
+        Ain = None
+        bin = None
+
+        def rotation_between_vectors(a, b):
+            a = a / np.linalg.norm(a)
+            b = b / np.linalg.norm(b)
+
+            angle = np.arccos(np.dot(a, b))
+            axis = np.cross(a, b)
+
+            return SE3.AngleAxis(angle, axis)
+
+        if isinstance(camera, rtb.Robot):
+            wTcp = camera.fkine(camera.q).A[:3, 3]
+        elif isinstance(camera, SE3):
+            wTcp = camera.t
+        else:
+            raise TypeError("Camera must be a robotic link or SE3 pose")
+
+        wTtp = shape.T[:3, -1]
+
+        # Create line of sight object
+        los_mid = SE3((wTcp + wTtp) / 2)
+        los_orientation = rotation_between_vectors(
+            np.array([0.0, 0.0, 1.0]), wTcp - wTtp  # type: ignore
+        )
+
+        los = Cylinder(
+            radius=0.001,
+            length=np.linalg.norm(wTcp - wTtp),  # type: ignore
+            base=(los_mid * los_orientation),
+        )
+
+        def indiv_calculation(link: Link, link_col: CollisionShape, q: NDArray):
+            d, wTlp, wTvp = link_col.closest_point(los, di)
+
+            if d is not None and wTlp is not None and wTvp is not None:
+                lpTvp = -wTlp + wTvp
+
+                norm = lpTvp / d
+                norm_h = np.expand_dims(np.concatenate((norm, [0.0, 0.0, 0.0])), axis=0)  # type: ignore
+
+                tool = SE3(
+                    (np.linalg.inv(self.fkine(q, end=link).A) @ SE3(wTlp).A)[:3, 3]
+                )
+
+                Je = self.jacob0(q, end=link, tool=tool.A)
+                Je[:3, :] = self._T[:3, :3] @ Je[:3, :]
+                n_dim = Je.shape[1]
+
+                if isinstance(camera, "Robot"):
+                    Jv = camera.jacob0(camera.q)
+                    Jv[:3, :] = self._T[:3, :3] @ Jv[:3, :]
+
+                    Jv *= np.linalg.norm(wTvp - shape.T[:3, -1]) / los.length  # type: ignore
+
+                    dpc = norm_h @ Jv
+                    dpc = np.concatenate(
+                        (
+                            dpc[0, :-camera_n],
+                            np.zeros(self.n - (camera.n - camera_n)),
+                            dpc[0, -camera_n:],
+                        )
+                    )
+                else:
+                    dpc = np.zeros((1, self.n + camera_n))
+
+                dpt = norm_h @ shape.v
+                dpt *= np.linalg.norm(wTvp - wTcp) / los.length  # type: ignore
+
+                l_Ain = np.zeros((1, self.n + camera_n))
+                l_Ain[0, :n_dim] = norm_h @ Je
+                l_Ain -= dpc
+                l_bin = (xi * (d - ds) / (di - ds)) + dpt
+            else:
+                l_Ain = None
+                l_bin = None
+
+            return l_Ain, l_bin
+
+        for link in links:
+            if link.isjoint:
+                j += 1
+
+            if collision_list is None:
+                col_list = link.collision
+            else:
+                col_list = collision_list[j - 1]
+
+            for link_col in col_list:
+                l_Ain, l_bin = indiv_calculation(link, link_col, q)
+
+                if l_Ain is not None and l_bin is not None:
+                    if Ain is None:
+                        Ain = l_Ain
+                    else:
+                        Ain = np.concatenate((Ain, l_Ain))
+
+                    if bin is None:
+                        bin = np.array(l_bin)
+                    else:
+                        bin = np.concatenate((bin, l_bin))
+
+        return Ain, bin
