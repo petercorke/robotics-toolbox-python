@@ -4,7 +4,7 @@ Created on Tue Apr 24 15:48:52 2020
 @author: Jesse Haviland
 """
 
-from roboticstoolbox import Robot, Robot2
+import roboticstoolbox as rtb
 
 
 class ERobot:
@@ -12,7 +12,7 @@ class ERobot:
 
         # warn("ERobot is deprecated, use iscollided instead", FutureWarning)
 
-        return Robot(*args, **kwargs)
+        return rtb.Robot(*args, **kwargs)
 
 
 # =========================================================================== #
@@ -23,4 +23,4 @@ class ERobot2:
 
         # warn("ERobot2 is deprecated, use iscollided instead", FutureWarning)
 
-        return Robot2(*args, **kwargs)
+        return rtb.Robot2(*args, **kwargs)
