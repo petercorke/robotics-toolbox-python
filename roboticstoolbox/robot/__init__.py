@@ -30,7 +30,6 @@ __all__ = [
     "RevoluteMDH",
     "PrismaticMDH",
     "BaseRobot",
-    "ERobot",
     "ELink",
     "ELink2",
     "Link",
