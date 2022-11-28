@@ -3,11 +3,11 @@
 import numpy as np
 from roboticstoolbox.robot.ET import ET2
 from roboticstoolbox.robot.ETS import ETS2
-from roboticstoolbox.robot.ERobot import ERobot2
+from roboticstoolbox.robot.Robot import Robot2
 from roboticstoolbox.robot.Link import Link2
 
 
-class Planar2(ERobot2):
+class Planar2(Robot2):
     """
     Create model of a branched planar manipulator::
 
