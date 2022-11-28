@@ -570,22 +570,22 @@ class BaseETS(UserList):
         return result
 
     def plot(self, *args, **kwargs):
-        from roboticstoolbox.robot.ERobot import ERobot, ERobot2
+        from roboticstoolbox.robot.Robot import Robot, Robot2
 
         if isinstance(self, ETS):
-            robot = ERobot(self)
+            robot = Robot(self)
         else:
-            robot = ERobot2(self)
+            robot = Robot2(self)
 
         robot.plot(*args, **kwargs)
 
     def teach(self, *args, **kwargs):
-        from roboticstoolbox.robot.ERobot import ERobot, ERobot2
+        from roboticstoolbox.robot.Robot import Robot, Robot2
 
         if isinstance(self, ETS):
-            robot = ERobot(self)
+            robot = Robot(self)
         else:
-            robot = ERobot2(self)
+            robot = Robot2(self)
 
         robot.teach(*args, **kwargs)
 
