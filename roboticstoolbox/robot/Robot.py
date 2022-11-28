@@ -23,7 +23,7 @@ from typing import (
 
 import numpy as np
 
-from spatialmath import SE3
+from spatialmath import SE3, SE2
 import spatialmath.base as smb
 from spatialmath.base.argcheck import (
     isvector,
@@ -57,8 +57,8 @@ from fknm import Robot_link_T
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.RobotKinematics import RobotKinematicsMixin
 from roboticstoolbox.robot.Gripper import Gripper
-from roboticstoolbox.robot.Link import BaseLink, Link
-from roboticstoolbox.robot.ETS import ETS
+from roboticstoolbox.robot.Link import BaseLink, Link, Link2
+from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.tools import xacro
@@ -87,6 +87,10 @@ _default_backend = None
 
 # A generic type variable representing any subclass of BaseLink
 LinkType = TypeVar("LinkType", bound=BaseLink)
+
+# ============================================================================================= #
+# ================= BaseRobot Class =========================================================== #
+# ============================================================================================= #
 
 
 class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
@@ -2178,6 +2182,11 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     # --------------------------------------------------------------------- #
 
 
+# ============================================================================================= #
+# ================= Robot Class =============================================================== #
+# ============================================================================================= #
+
+
 class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     _color = True
@@ -3161,127 +3170,128 @@ graph [rankdir=LR];
 
         return np.tensordot(H, qd, (0, 0))
 
-    # @overload
-    # def jacobm(
-    #     self,
-    #     q: ArrayLike = ...,
-    #     J: None = None,
-    #     H: None = None,
-    #     end: Union[str, Link, Gripper, None] = None,
-    #     start: Union[str, Link, Gripper, None] = None,
-    #     axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
-    # ):
-    #     ...
+    @overload
+    def jacobm(
+        self,
+        q: ArrayLike = ...,
+        J: None = None,
+        H: None = None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+    ) -> NDArray:
+        ...
 
-    # @overload
-    # def jacobm(
-    #     self,
-    #     q: None = None,
-    #     J: NDArray = ...,
-    #     H: NDArray = ...,
-    #     end: Union[str, Link, Gripper, None] = None,
-    #     start: Union[str, Link, Gripper, None] = None,
-    #     axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
-    # ):
-    #     ...
+    @overload
+    def jacobm(
+        self,
+        q: None = None,
+        J: NDArray = ...,
+        H: NDArray = ...,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+    ) -> NDArray:
+        ...
 
-    # def jacobm(
-    #     self,
-    #     q=None,
-    #     J=None,
-    #     H=None,
-    #     end: Union[str, Link, Gripper, None] = None,
-    #     start: Union[str, Link, Gripper, None] = None,
-    #     axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
-    # ):
-    #     r"""
-    #     The manipulability Jacobian
+    def jacobm(
+        self,
+        q=None,
+        J=None,
+        H=None,
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+    ) -> NDArray:
+        r"""
+        The manipulability Jacobian
 
-    #     This measure relates the rate of change of the manipulability to the
-    #     joint velocities of the robot. One of J or q is required. Supply J
-    #     and H if already calculated to save computation time
+        This measure relates the rate of change of the manipulability to the
+        joint velocities of the robot. One of J or q is required. Supply J
+        and H if already calculated to save computation time
 
-    #     Parameters
-    #     ----------
-    #     q
-    #         The joint angles/configuration of the robot (Optional,
-    #         if not supplied will use the stored q values).
-    #     J
-    #         The manipulator Jacobian in any frame
-    #     H
-    #         The manipulator Hessian in any frame
-    #     end
-    #         the final link or Gripper which the Hessian represents
-    #     start
-    #         the first link which the Hessian represents
+        Parameters
+        ----------
+        q
+            The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        J
+            The manipulator Jacobian in any frame
+        H
+            The manipulator Hessian in any frame
+        end
+            the final link or Gripper which the Hessian represents
+        start
+            the first link which the Hessian represents
 
-    #     Returns
-    #     -------
-    #     jacobm
-    #         The manipulability Jacobian
+        Returns
+        -------
+        jacobm
+            The manipulability Jacobian
 
-    #     Synopsis
-    #     --------
-    #     Yoshikawa's manipulability measure
+        Synopsis
+        --------
+        Yoshikawa's manipulability measure
 
-    #     .. math::
+        .. math::
 
-    #         m(\vec{q}) = \sqrt{\mat{J}(\vec{q}) \mat{J}(\vec{q})^T}
+            m(\vec{q}) = \sqrt{\mat{J}(\vec{q}) \mat{J}(\vec{q})^T}
 
-    #     This method returns its Jacobian with respect to configuration
+        This method returns its Jacobian with respect to configuration
 
-    #     .. math::
+        .. math::
 
-    #         \frac{\partial m(\vec{q})}{\partial \vec{q}}
+            \frac{\partial m(\vec{q})}{\partial \vec{q}}
 
-    #     References
-    #     ----------
-    #     - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
-    #       Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-    #     """
+        """
 
-    #     end, start, _ = self._get_limit_links(end, start)
+        end, start, _ = self._get_limit_links(end, start)
 
-    #     if axes == "all":
-    #         axes = [True, True, True, True, True, True]
-    #     elif axes.startswith("trans"):
-    #         axes = [True, True, True, False, False, False]
-    #     elif axes.startswith("rot"):
-    #         axes = [False, False, False, True, True, True]
-    #     else:
-    #         raise ValueError("axes must be all, trans or rot")
+        if not isinstance(axes, list):
+            if axes == "all":
+                axes = [True, True, True, True, True, True]
+            elif axes.startswith("trans"):
+                axes = [True, True, True, False, False, False]
+            elif axes.startswith("rot"):
+                axes = [False, False, False, True, True, True]
+            else:
+                raise ValueError("axes must be all, trans or rot")
 
-    #     if J is None:
-    #         if q is None:
-    #             q = np.copy(self.q)
-    #         else:
-    #             q = getvector(q, self.n)
+        if J is None:
+            if q is None:
+                q = np.copy(self.q)
+            else:
+                q = getvector(q, self.n)
 
-    #         J = self.jacob0(q, start=start, end=end)
-    #     else:
-    #         verifymatrix(J, (6, self.n))
+            J = self.jacob0(q, start=start, end=end)
+        else:
+            verifymatrix(J, (6, self.n))
 
-    #     n = J.shape[1]
+        n = J.shape[1]
 
-    #     if H is None:
-    #         H = self.hessian0(J0=J, start=start, end=end)
-    #     else:
-    #         verifymatrix(H, (6, self.n, self.n))
+        if H is None:
+            H = self.hessian0(J0=J, start=start, end=end)
+        else:
+            verifymatrix(H, (6, self.n, self.n))
 
-    #     manipulability = self.manipulability(q, J=J, start=start, end=end, axes=axes)
+        manipulability = self.manipulability(q, J=J, start=start, end=end, axes=axes)  # type: ignore
 
-    #     J = J[axes, :]
-    #     H = H[:, axes, :]
+        J = J[axes, :]  # type: ignore
+        H = H[:, axes, :]  # type: ignore
 
-    #     b = np.linalg.inv(J @ np.transpose(J))
-    #     Jm = np.zeros((n, 1))
+        b = np.linalg.inv(J @ np.transpose(J))
+        Jm = np.zeros((n, 1))
 
-    #     for i in range(n):
-    #         c = J @ np.transpose(H[i, :, :])
-    #         Jm[i, 0] = manipulability * np.transpose(c.flatten("F")) @ b.flatten("F")
+        for i in range(n):
+            c = J @ np.transpose(H[i, :, :])
+            Jm[i, 0] = manipulability * np.transpose(c.flatten("F")) @ b.flatten("F")
 
-    #     return Jm
+        return Jm
 
     # --------------------------------------------------------------------- #
     # --------- PyPlot Methods -------------------------------------------- #
@@ -4545,3 +4555,88 @@ graph [rankdir=LR];
                 f[jp] = f[jp] + Xup[j] * f[j]
 
         return Q
+
+
+# ============================================================================================= #
+# ================= Robot2 Class ============================================================== #
+# ============================================================================================= #
+
+
+class Robot2(BaseRobot[Link2]):
+    def __init__(self, arg, **kwargs):
+
+        if isinstance(arg, ETS2):
+            # we're passed an ETS string
+            links = []
+            # chop it up into segments, a link frame after every joint
+            parent = None
+            for j, ets_j in enumerate(arg.split()):
+                elink = Link2(ETS2(ets_j), parent=parent, name=f"link{j:d}")
+                parent = elink
+                if (
+                    elink.qlim is None
+                    and elink.v is not None
+                    and elink.v.qlim is not None
+                ):
+                    elink.qlim = elink.v.qlim
+                links.append(elink)
+
+        elif smb.islistof(arg, Link2):
+            links = arg
+
+        else:
+            raise TypeError("constructor argument must be ETS2 or list of Link2")
+
+        super().__init__(links, **kwargs)
+
+        # Should just set it to None
+        self.base = SE2()  # override superclass
+
+    @property
+    def base(self) -> SE2:
+        """
+        Get/set robot base transform (Robot superclass)
+
+        ``robot.base`` is the robot base transform
+
+        Returns
+        -------
+        base
+            robot tool transform
+
+        - ``robot.base = ...`` checks and sets the robot base transform
+
+        Notes
+        -----
+        - The private attribute ``_base`` will be None in the case of
+            no base transform, but this property will return ``SE3()`` which
+            is an identity matrix.
+        """
+        if self._base is None:
+            self._base = SE2()
+
+        # return a copy, otherwise somebody with
+        # reference to the base can change it
+        return self._base.copy()
+
+    @base.setter
+    def base(self, T):
+        if T is None:
+            self._base = T
+        elif isinstance(self, Robot2):
+            # 2D robot
+            if isinstance(T, SE2):
+                self._base = T
+            elif SE2.isvalid(T):
+                self._tool = SE2(T, check=True)
+        else:
+            raise ValueError("base must be set to None (no tool) or SE2")
+
+    def jacob0(self, q, start=None, end=None):
+        return self.ets(start, end).jacob0(q)
+
+    def jacobe(self, q, start=None, end=None):
+        return self.ets(start, end).jacobe(q)
+
+    def fkine(self, q, end=None, start=None):
+        return self.ets(start, end).fkine(q)
