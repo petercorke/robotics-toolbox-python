@@ -92,6 +92,7 @@ class DHRobot(Robot):
 
         for link in links:
             if isinstance(link, DHLink):
+
                 # got a link
                 all_links.append(link)
                 link.number = self._n + 1
@@ -115,9 +116,15 @@ class DHRobot(Robot):
             else:
                 raise TypeError("Input can be only DHLink or DHRobot")
 
+        for i, link in enumerate(all_links):
+            if i > 0:
+                link.parent = all_links[i - 1]
+            else:
+                link.parent = None
+
         super().__init__(all_links, **kwargs)
 
-        self.ee_links = [self.links[-1]]
+        self._ee_links = [self.links[-1]]
 
         # Check the DH convention
         self._mdh = self.links[0].mdh
@@ -722,7 +729,8 @@ class DHRobot(Robot):
             >>> robot.islimit([0, 0, -4, 4, 0, 0])
 
         """
-        q = self._getq(q)
+        if q is None:
+            q = self.q
 
         return [link.islimit(qk) for (link, qk) in zip(self, q)]
 
@@ -1037,7 +1045,9 @@ class DHRobot(Robot):
             - Joint offsets, if defined, are added to q before the forward
               kinematics are computed.
         """
-        q = self._getq(q)
+
+        if q is None:
+            q = self.q
 
         Tj = self.base.copy()
         Tall = Tj
