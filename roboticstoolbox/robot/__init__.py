@@ -1,4 +1,4 @@
-from roboticstoolbox.robot.Robot import BaseRobot, Robot
+from roboticstoolbox.robot.Robot import BaseRobot, Robot, Robot2
 from roboticstoolbox.robot.Link import Link, Link2
 from roboticstoolbox.robot.DHRobot import SerialLink, DHRobot
 from roboticstoolbox.robot.DHLink import (
@@ -20,6 +20,7 @@ from roboticstoolbox.robot.IK import IKSolution, IKSolver, IK_LM, IK_NR, IK_GN, 
 
 __all__ = [
     "Robot",
+    "Robot2",
     "SerialLink",
     "DHRobot",
     "Link",
