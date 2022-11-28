@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ERobot import Robot
+from roboticstoolbox.robot.Robot import Robot
 from math import pi
 
 

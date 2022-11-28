@@ -2,11 +2,11 @@
 
 from roboticstoolbox.robot.Link import Link
 import numpy as np
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Robot import Robot
 import spatialmath as sm
 
 
-class YuMi(ERobot):
+class YuMi(Robot):
     """
     Class that imports an ABB YuMi URDF model
 

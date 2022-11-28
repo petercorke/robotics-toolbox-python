@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from roboticstoolbox.robot.ERobot import Robot
+from roboticstoolbox.robot.Robot import Robot
 import numpy as np
 
 

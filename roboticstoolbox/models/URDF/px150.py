@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Robot import Robot
 
 
-class px150(ERobot):
+class px150(Robot):
     """
     Class that imports a PX150 URDF model
 
