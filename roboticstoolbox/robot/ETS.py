@@ -40,7 +40,7 @@ from roboticstoolbox import rtb_get_param
 
 from collections import UserList
 from spatialmath.base import issymbol, getmatrix
-from fknm import (
+from roboticstoolbox.fknm import (
     ETS_init,
     ETS_fkine,
     ETS_jacob0,

@@ -31,7 +31,7 @@ from ansitable import ANSITable, Column
 from scipy.linalg import block_diag
 from roboticstoolbox.robot.DHLink import _check_rne, DHLink
 from roboticstoolbox import rtb_get_param
-from frne import init, frne, delete
+from roboticstoolbox.frne import init, frne, delete
 from numpy import any
 from typing import Union, Tuple
 
@@ -2318,7 +2318,9 @@ class DHRobot(Robot):
             TODO
         """
 
-        return self.ets().ik_nr(Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping)
+        return self.ets().ik_nr(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
+        )
 
     def ik_gn(
         self,
@@ -2424,11 +2426,9 @@ class DHRobot(Robot):
             TODO
         """
 
-        return self.ets().ik_gn(Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping)
-
-
-
-
+        return self.ets().ik_gn(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
+        )
 
 
 class SerialLink(DHRobot):
