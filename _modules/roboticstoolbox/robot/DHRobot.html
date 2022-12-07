@@ -59,9 +59,9 @@
         <div class="rst-content style-external-links">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>roboticstoolbox.robot.DHRobot</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">roboticstoolbox.robot.DHRobot</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -104,7 +104,7 @@
 <span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">block_diag</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.DHLink</span> <span class="kn">import</span> <span class="n">_check_rne</span><span class="p">,</span> <span class="n">DHLink</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">rtb_get_param</span>
-<span class="kn">from</span> <span class="nn">frne</span> <span class="kn">import</span> <span class="n">init</span><span class="p">,</span> <span class="n">frne</span><span class="p">,</span> <span class="n">delete</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.frne</span> <span class="kn">import</span> <span class="n">init</span><span class="p">,</span> <span class="n">frne</span><span class="p">,</span> <span class="n">delete</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="nb">any</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
 
@@ -2391,7 +2391,9 @@
 <span class="sd">            TODO</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="n">ik_nr</span><span class="p">(</span><span class="n">Tep</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">ilimit</span><span class="p">,</span> <span class="n">slimit</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">reject_jl</span><span class="p">,</span> <span class="n">we</span><span class="p">,</span> <span class="n">use_pinv</span><span class="p">,</span> <span class="n">pinv_damping</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="n">ik_nr</span><span class="p">(</span>
+            <span class="n">Tep</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">ilimit</span><span class="p">,</span> <span class="n">slimit</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">reject_jl</span><span class="p">,</span> <span class="n">we</span><span class="p">,</span> <span class="n">use_pinv</span><span class="p">,</span> <span class="n">pinv_damping</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="DHRobot.ik_gn"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.ik_gn">[docs]</a>    <span class="k">def</span> <span class="nf">ik_gn</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -2497,11 +2499,9 @@
 <span class="sd">            TODO</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="n">ik_gn</span><span class="p">(</span><span class="n">Tep</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">ilimit</span><span class="p">,</span> <span class="n">slimit</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">reject_jl</span><span class="p">,</span> <span class="n">we</span><span class="p">,</span> <span class="n">use_pinv</span><span class="p">,</span> <span class="n">pinv_damping</span><span class="p">)</span></div></div>
-
-
-
-
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="n">ik_gn</span><span class="p">(</span>
+            <span class="n">Tep</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">ilimit</span><span class="p">,</span> <span class="n">slimit</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">reject_jl</span><span class="p">,</span> <span class="n">we</span><span class="p">,</span> <span class="n">use_pinv</span><span class="p">,</span> <span class="n">pinv_damping</span>
+        <span class="p">)</span></div></div>
 
 
 <span class="k">class</span> <span class="nc">SerialLink</span><span class="p">(</span><span class="n">DHRobot</span><span class="p">):</span>
@@ -2559,7 +2559,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 02-Oct-2022.
+      <span class="lastupdated">Last updated on 07-Dec-2022.
       </span></p>
   </div>
 

@@ -80,10 +80,10 @@
         <div class="rst-content style-external-links">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="arm.html">Manipulator arms</a> &raquo;</li>
-          <li><a href="arm_models.html">Manipulator models</a> &raquo;</li>
-      <li>ERobot models</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="arm.html">Manipulator arms</a></li>
+          <li class="breadcrumb-item"><a href="arm_models.html">Manipulator models</a></li>
+      <li class="breadcrumb-item active">ERobot models</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/arm_erobot.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -175,6 +175,8 @@ established.
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
 </pre></div>
 </div>
+<section id="branched-robots">
+<h3>Branched robots<a class="headerlink" href="#branched-robots" title="Permalink to this heading"></a></h3>
 <p>Example:
 .. runblock:: pycon</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">robot</span> <span class="o">=</span> <span class="n">ERobot</span><span class="p">([</span>
@@ -188,7 +190,7 @@ established.
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">References</dt>
+<dt class="field-odd">references</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p>Kinematic Derivatives using the Elementary Transform Sequence,
 J. Haviland and P. Corke</p></li>
@@ -945,7 +947,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">    ainv = _umath_linalg.inv(a, signature=signature, extobj=extobj)</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
 <span class="go">    raise LinAlgError(&quot;Singular matrix&quot;)</span>
 <span class="go">numpy.linalg.LinAlgError: Singular matrix</span>
 </pre></div>
@@ -1888,7 +1890,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">    ainv = _umath_linalg.inv(a, signature=signature, extobj=extobj)</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
 <span class="go">    raise LinAlgError(&quot;Singular matrix&quot;)</span>
 <span class="go">numpy.linalg.LinAlgError: Singular matrix</span>
 </pre></div>
@@ -2268,7 +2270,7 @@ kinematics:</p>
 <dd class="field-even"><p>color map</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="(in Matplotlib v3.6.0)">matplotlib.colors.ListedColormap</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="(in Matplotlib v3.6.2)">matplotlib.colors.ListedColormap</a></p>
 </dd>
 </dl>
 <ul class="simple">
@@ -3290,6 +3292,7 @@ end-effector position.</p></li>
 </div>
 </dd></dl>
 
+</section>
 </dd></dl>
 
 <dl class="py class">
@@ -3937,7 +3940,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">    ainv = _umath_linalg.inv(a, signature=signature, extobj=extobj)</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
 <span class="go">    raise LinAlgError(&quot;Singular matrix&quot;)</span>
 <span class="go">numpy.linalg.LinAlgError: Singular matrix</span>
 </pre></div>
@@ -5100,7 +5103,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">    ainv = _umath_linalg.inv(a, signature=signature, extobj=extobj)</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
 <span class="go">    raise LinAlgError(&quot;Singular matrix&quot;)</span>
 <span class="go">numpy.linalg.LinAlgError: Singular matrix</span>
 </pre></div>
@@ -5485,7 +5488,7 @@ kinematics:</p>
 <dd class="field-even"><p>color map</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="(in Matplotlib v3.6.0)">matplotlib.colors.ListedColormap</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="(in Matplotlib v3.6.2)">matplotlib.colors.ListedColormap</a></p>
 </dd>
 </dl>
 <ul class="simple">
@@ -7719,7 +7722,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">    ainv = _umath_linalg.inv(a, signature=signature, extobj=extobj)</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
 <span class="go">    raise LinAlgError(&quot;Singular matrix&quot;)</span>
 <span class="go">numpy.linalg.LinAlgError: Singular matrix</span>
 </pre></div>
@@ -8822,7 +8825,7 @@ than geometric, Jacobian. <code class="docutils literal notranslate"><span class
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">    ainv = _umath_linalg.inv(a, signature=signature, extobj=extobj)</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/numpy/linalg/linalg.py&quot;, line 88, in _raise_linalgerror_singular</span>
 <span class="go">    raise LinAlgError(&quot;Singular matrix&quot;)</span>
 <span class="go">numpy.linalg.LinAlgError: Singular matrix</span>
 </pre></div>
@@ -9207,7 +9210,7 @@ kinematics:</p>
 <dd class="field-even"><p>color map</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="(in Matplotlib v3.6.0)">matplotlib.colors.ListedColormap</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="(in Matplotlib v3.6.2)">matplotlib.colors.ListedColormap</a></p>
 </dd>
 </dl>
 <ul class="simple">
@@ -13401,7 +13404,7 @@ characteristics.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 02-Oct-2022.
+      <span class="lastupdated">Last updated on 07-Dec-2022.
       </span></p>
   </div>
 

@@ -99,9 +99,9 @@
         <div class="rst-content style-external-links">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="mobile.html">Mobile robots</a> &raquo;</li>
-      <li>Mobile robot path planning</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="mobile.html">Mobile robots</a></li>
+      <li class="breadcrumb-item active">Mobile robot path planning</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/mobile_planner.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -1127,7 +1127,7 @@ plane using omnidirectional motion.  The path comprises a set of way points.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">AttributeError: &#39;UVertex&#39; object has no attribute &#39;distance&#39;</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/PRMPlanner.py&quot;</span>, line <span class="m">260</span>, in <span class="n">query</span>
+  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/PRMPlanner.py&quot;</span>, line <span class="m">260</span>, in <span class="n">query</span>
     <span class="n">vstart</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">closest</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
 <span class="gr">AttributeError</span>: <span class="n">&#39;UGraph&#39; object has no attribute &#39;closest&#39;</span>
 <span class="gt">Traceback (most recent call last):</span>
@@ -1467,7 +1467,7 @@ the vertex is not added.</p>
 changes the weighting for path costs at query time.</p>
 <p>Example:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">  File &quot;&lt;input&gt;&quot;, line 1, in &lt;module&gt;</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.14/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/LatticePlanner.py&quot;, line 274, in query</span>
+<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/LatticePlanner.py&quot;, line 274, in query</span>
 <span class="go">    vs, ds = self.graph.closest(start)</span>
 <span class="go">AttributeError: &#39;LatticePlanner&#39; object has no attribute &#39;graph&#39;</span>
 <span class="gt">Traceback (most recent call last):</span>
@@ -3661,7 +3661,7 @@ stored occupancy grid.</p>
 <p>Successive calls to <code class="docutils literal notranslate"><span class="pre">inflate</span></code> will compound the inflation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.binary_dilation.html#scipy.ndimage.binary_dilation" title="(in SciPy v1.9.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.binary_dilation()</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.binary_dilation.html#scipy.ndimage.binary_dilation" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.binary_dilation()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -5155,7 +5155,7 @@ points given in world coordinates.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 02-Oct-2022.
+      <span class="lastupdated">Last updated on 07-Dec-2022.
       </span></p>
   </div>
 
