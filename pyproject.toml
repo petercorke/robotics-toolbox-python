@@ -79,10 +79,15 @@ docs = [
 
 [project.scripts]
 
-# rtbtool = "roboticstoolbox.bin.rtbtool"
 eigdemo = "roboticstoolbox.examples.eigdemo:main"
 tripleangledemo = "roboticstoolbox.examples.tripleangledemo:main"
 twistdemo = "roboticstoolbox.examples.twistdemo:main"
+
+
+
+# [project.entry-points]
+
+
 
 
 
