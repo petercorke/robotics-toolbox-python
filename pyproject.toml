@@ -1,0 +1,195 @@
+[project]
+
+name = "roboticstoolbox-python"
+
+description = "A Python library for robotics education and research"
+
+version = "1.0.3"
+
+authors = [
+    { name = "Jesse Haviland", email = "j.haviland@qut.edu.au" },
+    { name = "Peter Corke", email = "rvc@petercorke.com" },
+]
+
+dependencies = [
+    "numpy>=1.17.4",
+    "spatialmath-python~=1.0.0",
+    "spatialgeometry~=1.0.0",
+    "pgraph-python",
+    "scipy",
+    "matplotlib",
+    "ansitable",
+    "swift-sim~=1.0.0",
+    "rtb-data",
+    "progress",
+]
+
+license = {file = "LICENSE"}
+
+readme = "README.md"
+
+requires-python = ">=3.7"
+
+keywords = ["python", "robotics", "robotics-toolbox", "kinematics", "dynamics", "motion-planning", "trajectory-generation", "jacobian", "hessian", "control", "simulation", "robot-manipulator", "mobile-robot"]
+
+classifiers = [
+        "Development Status :: 5 - Production/Stable",
+        # Indicate who your project is intended for
+        "Intended Audience :: Developers",
+        # Pick your license as you wish (should match "license" above)
+        "License :: OSI Approved :: MIT License",
+        # Specify the Python versions you support here.
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+]
+
+
+[project.urls]
+homepage = "https://github.com/petercorke/robotics-toolbox-python"
+documentation = "https://petercorke.github.io/robotics-toolbox-python/"
+repository = "https://github.com/petercorke/robotics-toolbox-python"
+
+
+
+[project.optional-dependencies]
+
+collision = [
+    "pybullet"
+]
+
+dev = [
+    "black",
+    "pytest",
+    "pytest-cov",
+    "flake8",
+    "pyyaml",
+    "sympy",
+]
+
+docs = [
+    "sphinx",
+    "sphinx_rtd_theme",
+    "sphinx-autorun", 
+]
+
+
+
+[project.scripts]
+
+eigdemo = "roboticstoolbox.examples.eigdemo:main"
+tripleangledemo = "roboticstoolbox.examples.tripleangledemo:main"
+twistdemo = "roboticstoolbox.examples.twistdemo:main"
+
+
+
+# [project.entry-points]
+
+
+
+
+
+[build-system]
+
+requires = [
+    "setuptools",
+    "oldest-supported-numpy"
+]
+build-backend = "setuptools.build_meta"
+
+
+
+[tool.setuptools]
+
+packages = [
+    "roboticstoolbox",
+    "roboticstoolbox.backends",
+    "roboticstoolbox.backends.PyPlot",
+    "roboticstoolbox.backends.swift",
+    "roboticstoolbox.backends.VPython",
+    "roboticstoolbox.bin",
+    "roboticstoolbox.blocks",
+    "roboticstoolbox.examples",
+    "roboticstoolbox.robot",
+    "roboticstoolbox.mobile",
+    "roboticstoolbox.models",
+    "roboticstoolbox.models.DH",
+    "roboticstoolbox.models.ETS",
+    "roboticstoolbox.models.URDF",
+    "roboticstoolbox.tools",
+    "roboticstoolbox.tools.urdf",
+    "roboticstoolbox.tools.xacro",
+]
+
+
+
+[tool.black]
+
+line-length = 88
+target_version = ['py37']
+include = '\.pyi?$'
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | \.github
+    | _build
+    | buck-out
+    | build
+    | dist
+    | docs
+  )/
+)
+'''
+
+
+
+[tool.flake8]
+
+max-line-length = 88
+extend-ignore = 'E203'
+
+
+[tool.cibuildwheel]
+
+# Will cause the wheel to be installed with `pip install <wheel_file>[dev,collision]`
+# test-extras = ["dev", "collision"]
+# test-requires = "pytest"
+# test-command = "pytest {project}/tests"
+
+manylinux-x86_64-image = "manylinux2014"
+manylinux-aarch64-image = "manylinux2014"
+
+# Build CPython 3.7 - 3.11
+build = ["cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*"]
+
+# Disable building musllinux wheels on all platforms
+skip = ["pp*", "*musllinux*"]
+
+
+[tool.cibuildwheel.macos]
+
+# Build `x86_64` and `arm64` wheels on an Intel runner.
+# Note that the `arm64` wheel cannot be tested in this configuration.
+archs = ["x86_64", "arm64"]
+
+[tool.cibuildwheel.linux]
+
+# On an Linux Intel runner with qemu installed, build Intel and ARM wheels
+archs = ["x86_64", "aarch64"]
+
+[tool.cibuildwheel.windows]
+
+# On an Windows Intel runner build wheels
+archs = ["AMD64", "x86"]
+
+
+
