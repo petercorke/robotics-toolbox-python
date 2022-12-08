@@ -82,13 +82,7 @@ docs = [
 eigdemo = "roboticstoolbox.examples.eigdemo:main"
 tripleangledemo = "roboticstoolbox.examples.tripleangledemo:main"
 twistdemo = "roboticstoolbox.examples.twistdemo:main"
-
-
-
-# [project.entry-points]
-
-
-
+rtbtool = "roboticstoolbox.bin.rtbtool:main"
 
 
 [build-system]
@@ -112,6 +106,7 @@ packages = [
     "roboticstoolbox.bin",
     "roboticstoolbox.blocks",
     "roboticstoolbox.examples",
+    "roboticstoolbox.bin",
     "roboticstoolbox.robot",
     "roboticstoolbox.mobile",
     "roboticstoolbox.models",
