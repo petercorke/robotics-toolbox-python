@@ -2436,6 +2436,29 @@ class DHRobot(Robot):
         )
 
 
+    def ikine_LM(
+        self,
+        Tep: Union[np.ndarray, SE3],
+        q0: Union[ArrayLike, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        joint_limits: bool = False,
+        mask: Union[ArrayLike, None] = None,
+        seed: Union[int, None] = None,
+    ):
+        return self.ets().ikine_LM(
+            Tep=Tep,
+            q0=q0,
+            ilimit=ilimit,
+            slimit=slimit,
+            tol=tol,
+            joint_limits=joint_limits,
+            mask=mask,
+            seed=seed,
+        )
+
+
 class SerialLink(DHRobot):
     def __init__(self, *args, **kwargs):
         warnings.warn(
