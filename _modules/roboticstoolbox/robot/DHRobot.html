@@ -77,6 +77,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">email</span> <span class="kn">import</span> <span class="n">message</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.tools.data</span> <span class="kn">import</span> <span class="n">rtb_path_to_datafile</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">copy</span>
@@ -107,8 +108,11 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.frne</span> <span class="kn">import</span> <span class="n">init</span><span class="p">,</span> <span class="n">frne</span><span class="p">,</span> <span class="n">delete</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="nb">any</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.IK</span> <span class="kn">import</span> <span class="n">IKSolution</span>
 
-<span class="n">iksol</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;IKsolution&quot;</span><span class="p">,</span> <span class="s2">&quot;q, success, reason&quot;</span><span class="p">)</span>
+<span class="n">ArrayLike</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">]</span>
+
+<span class="c1"># iksol = namedtuple(&quot;IKsolution&quot;, &quot;q, success, reason&quot;)</span>
 
 
 <div class="viewcode-block" id="DHRobot"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot">[docs]</a><span class="k">class</span> <span class="nc">DHRobot</span><span class="p">(</span><span class="n">Robot</span><span class="p">):</span>
@@ -928,7 +932,7 @@
 
         <span class="k">return</span> <span class="n">tw</span><span class="p">,</span> <span class="n">T</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="DHRobot.ets"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.ets">[docs]</a>    <span class="k">def</span> <span class="nf">ets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="DHRobot.ets"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.ets">[docs]</a>    <span class="k">def</span> <span class="nf">ets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ETS</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Robot kinematics as an elemenary transform sequence</span>
 
@@ -1906,21 +1910,22 @@
                 <span class="c1"># Remove the link offset angles</span>
                 <span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
 
-                <span class="n">solution</span> <span class="o">=</span> <span class="n">iksol</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="c1"># solution = iksol(theta, True, &quot;&quot;)</span>
+                <span class="n">solution</span> <span class="o">=</span> <span class="n">IKSolution</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">success</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># ikfunc can return None or a str reason</span>
                 <span class="k">if</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">solution</span> <span class="o">=</span> <span class="n">iksol</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="n">solution</span> <span class="o">=</span> <span class="n">IKSolution</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">success</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">solution</span> <span class="o">=</span> <span class="n">iksol</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+                    <span class="n">solution</span> <span class="o">=</span> <span class="n">IKSolution</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">success</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="n">theta</span><span class="p">)</span>
 
             <span class="n">solutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">solutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">iksol</span><span class="p">(</span>
+            <span class="k">return</span> <span class="n">IKSolution</span><span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">sol</span><span class="o">.</span><span class="n">q</span> <span class="k">for</span> <span class="n">sol</span> <span class="ow">in</span> <span class="n">solutions</span><span class="p">]),</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sol</span><span class="o">.</span><span class="n">success</span> <span class="k">for</span> <span class="n">sol</span> <span class="ow">in</span> <span class="n">solutions</span><span class="p">]),</span>
                 <span class="p">[</span><span class="n">sol</span><span class="o">.</span><span class="n">reason</span> <span class="k">for</span> <span class="n">sol</span> <span class="ow">in</span> <span class="n">solutions</span><span class="p">],</span>
@@ -2501,6 +2506,29 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="n">ik_gn</span><span class="p">(</span>
             <span class="n">Tep</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">ilimit</span><span class="p">,</span> <span class="n">slimit</span><span class="p">,</span> <span class="n">tol</span><span class="p">,</span> <span class="n">reject_jl</span><span class="p">,</span> <span class="n">we</span><span class="p">,</span> <span class="n">use_pinv</span><span class="p">,</span> <span class="n">pinv_damping</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DHRobot.ikine_LM"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.ikine_LM">[docs]</a>    <span class="k">def</span> <span class="nf">ikine_LM</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Tep</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">],</span>
+        <span class="n">q0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ilimit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="n">slimit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+        <span class="n">joint_limits</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span>
+            <span class="n">Tep</span><span class="o">=</span><span class="n">Tep</span><span class="p">,</span>
+            <span class="n">q0</span><span class="o">=</span><span class="n">q0</span><span class="p">,</span>
+            <span class="n">ilimit</span><span class="o">=</span><span class="n">ilimit</span><span class="p">,</span>
+            <span class="n">slimit</span><span class="o">=</span><span class="n">slimit</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+            <span class="n">joint_limits</span><span class="o">=</span><span class="n">joint_limits</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
         <span class="p">)</span></div></div>
 
 
@@ -2559,7 +2587,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 07-Dec-2022.
+      <span class="lastupdated">Last updated on 09-Dec-2022.
       </span></p>
   </div>
 

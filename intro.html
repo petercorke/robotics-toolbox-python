@@ -441,7 +441,7 @@ specified using additional keyword arguments.</p>
 <span class="linenos">36</span>
 <span class="linenos">37</span><span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                          <span class="c1"># inverse kinematics</span>
 <span class="linenos">38</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
-<span class="linenos">39</span><span class="go">IKsolution(q=array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6]), success=True, reason=None, iterations=12, residual=8.513951146341011e-13)</span>
+<span class="linenos">39</span><span class="go">IKSolution: q=[0.1 0.2 0.3 0.4 0.5 0.6], success=True, iterations=8, searches=1, residual=6.234077159710132e-07</span>
 </pre></div>
 </div>
 <p>The Toolbox supports named joint configurations and these are shown in the table
@@ -485,7 +485,7 @@ Some provided robot models have an analytical solution coded, for example:</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>       <span class="c1"># instantiate robot model</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span><span class="o">.</span><span class="n">ikine_a</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">&quot;lun&quot;</span><span class="p">)</span>        <span class="c1"># analytic inverse kinematics</span>
-<span class="go">IKsolution(q=array([ 2.1012,  1.1163,  0.3   ,  0.9528, -1.6505, -0.986 ]), success=True, reason=&#39;&#39;)</span>
+<span class="go">IKSolution(q=array([ 2.1012,  1.1163,  0.3   ,  0.9528, -1.6505, -0.986 ]), success=True, iterations=0, searches=0, residual=0.0, reason=&#39;&#39;)</span>
 </pre></div>
 </div>
 <p>where we have specified a left-handed, elbow up and wrist no-flip configuration.</p>
@@ -634,19 +634,18 @@ function:</p>
 </div>
 <p>Straight line (Cartesian) paths can be generated in a similar way between
 two points specified by a pair of poses in <span class="math notranslate nohighlight">\(\SE{3}\)</span></p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="linenos"> 2</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">SE3</span>
-<span class="linenos"> 3</span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
-<span class="linenos"> 4</span><span class="gp">&gt;&gt;&gt; </span><span class="n">puma</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">DH</span><span class="o">.</span><span class="n">Puma560</span><span class="p">()</span>
-<span class="linenos"> 5</span><span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.010</span><span class="p">)</span>
-<span class="linenos"> 6</span><span class="gp">&gt;&gt;&gt; </span><span class="n">T0</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="linenos"> 7</span><span class="gp">&gt;&gt;&gt; </span><span class="n">T1</span> <span class="o">=</span> <span class="n">SE3</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
-<span class="linenos"> 8</span><span class="gp">&gt;&gt;&gt; </span><span class="n">Ts</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">trajectory</span><span class="o">.</span><span class="n">ctraj</span><span class="p">(</span><span class="n">T0</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
-<span class="linenos"> 9</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">Ts</span><span class="p">)</span>
-<span class="linenos">10</span><span class="go">200</span>
-<span class="linenos">11</span><span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">Ts</span><span class="p">)</span>       <span class="c1"># named tuple of arrays</span>
-<span class="linenos">12</span><span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">shape</span>
-<span class="linenos">13</span><span class="go">(200, 6)</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/robot/IK.py&quot;, line 173, in solve</span>
+<span class="linenos"> 2</span><span class="go">    E, q = self.step(ets, Tep, q)</span>
+<span class="linenos"> 3</span><span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/robot/IK.py&quot;, line 450, in step</span>
+<span class="linenos"> 4</span><span class="go">    e, E = self.error(Te, Tep)</span>
+<span class="linenos"> 5</span><span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/robot/IK.py&quot;, line 234, in error</span>
+<span class="linenos"> 6</span><span class="go">    e = rtb.angle_axis(Te, Tep)</span>
+<span class="linenos"> 7</span><span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/tools/p_servo.py&quot;, line 13, in angle_axis</span>
+<span class="linenos"> 8</span><span class="go">    e[:3] = Td[:3, -1] - T[:3, -1]</span>
+<span class="linenos"> 9</span><span class="go">TypeError: list indices must be integers or slices, not tuple</span>
+<span class="linenos">10</span><span class="gt">Traceback (most recent call last):</span>
+<span class="linenos">11</span>  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="linenos">12</span><span class="gr">NameError</span>: <span class="n">name &#39;sol&#39; is not defined</span>
 </pre></div>
 </div>
 <p>At line 9 we see that the resulting trajectory, <code class="docutils literal notranslate"><span class="pre">Ts</span></code>, is an <code class="docutils literal notranslate"><span class="pre">SE3</span></code> instance with 200 values.</p>
@@ -969,7 +968,7 @@ making and SLAM; and a minimalist block-diagram simulation tool <a class="refere
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 07-Dec-2022.
+      <span class="lastupdated">Last updated on 09-Dec-2022.
       </span></p>
   </div>
 

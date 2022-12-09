@@ -90,7 +90,6 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.backends.PyPlot.EllipsePlot</span> <span class="kn">import</span> <span class="n">EllipsePlot</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.Dynamics</span> <span class="kn">import</span> <span class="n">DynamicsMixin</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.robot.ETS</span> <span class="kn">import</span> <span class="n">ETS</span>
-<span class="kn">from</span> <span class="nn">roboticstoolbox.robot.IK</span> <span class="kn">import</span> <span class="n">IKMixin</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">spatialgeometry</span> <span class="kn">import</span> <span class="n">Shape</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.fknm</span> <span class="kn">import</span> <span class="n">Robot_link_T</span>
@@ -121,7 +120,7 @@
 <span class="c1"># ikine functions need: fkine, jacobe, qlim methods from subclass</span>
 
 
-<div class="viewcode-block" id="Robot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot">[docs]</a><span class="k">class</span> <span class="nc">Robot</span><span class="p">(</span><span class="n">SceneNode</span><span class="p">,</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">DynamicsMixin</span><span class="p">,</span> <span class="n">IKMixin</span><span class="p">):</span>
+<div class="viewcode-block" id="Robot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot">[docs]</a><span class="k">class</span> <span class="nc">Robot</span><span class="p">(</span><span class="n">SceneNode</span><span class="p">,</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">DynamicsMixin</span><span class="p">):</span>
 
     <span class="n">_color</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -2301,7 +2300,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 07-Dec-2022.
+      <span class="lastupdated">Last updated on 09-Dec-2022.
       </span></p>
   </div>
 
