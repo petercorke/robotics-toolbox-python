@@ -6,15 +6,14 @@ import numpy.testing as nt
 import numpy as np
 import roboticstoolbox as rtb
 import unittest
-from spatialmath import SE3
 
 
 class TestRobot(unittest.TestCase):
     def test_fkine(self):
         panda = rtb.models.ETS.Panda()
         q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
-        q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
-        q3 = np.expand_dims(q1, 0)
+        # q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
+        # q3 = np.expand_dims(q1, 0)
 
         ans = np.array(
             [

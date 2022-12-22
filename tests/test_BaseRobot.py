@@ -7,10 +7,9 @@ import numpy.testing as nt
 import numpy as np
 import roboticstoolbox as rtb
 from roboticstoolbox import Link, ETS, ET, Robot
-import spatialmath.base as sm
 from spatialmath import SE3
 import unittest
-from copy import copy, deepcopy
+from copy import deepcopy
 from swift import Swift
 
 from roboticstoolbox.robot.Robot import BaseRobot
@@ -45,8 +44,8 @@ class TestBaseRobot(unittest.TestCase):
 
     def test_init3(self):
         l0 = Link()
-        l1 = Link(parent=l0)
-        r = Robot([l0, l1], base=SE3.Rx(1.3))
+        # l1 = Link(parent=l0)
+        # r = Robot([l0, l1], base=SE3.Rx(1.3))
         # r.base_link = l1
 
         with self.assertRaises(TypeError):

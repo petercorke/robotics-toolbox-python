@@ -23,7 +23,6 @@ from typing import (
 
 import numpy as np
 
-from spatialmath import SE3, SE2
 import spatialmath.base as smb
 from spatialmath.base.argcheck import (
     getvector,
@@ -35,16 +34,11 @@ from spatialgeometry import Shape, CollisionShape, Cylinder
 
 from spatialmath import (
     SE3,
+    SE2,
     SpatialAcceleration,
     SpatialVelocity,
     SpatialInertia,
     SpatialForce,
-)
-import spatialmath.base as smb
-from spatialmath.base.argcheck import (
-    getvector,
-    getmatrix,
-    verifymatrix,
 )
 
 import roboticstoolbox as rtb
@@ -62,10 +56,9 @@ from roboticstoolbox.tools.data import rtb_path_to_datafile
 LinkType = TypeVar("LinkType", bound=BaseLink)
 
 
-
-# ============================================================================================= #
-# ================= Robot Class =============================================================== #
-# ============================================================================================= #
+# ==================================================================================== #
+# ================= Robot Class ====================================================== #
+# ==================================================================================== #
 
 
 class Robot(BaseRobot[Link], RobotKinematicsMixin):
@@ -1160,7 +1153,9 @@ graph [rankdir=LR];
         else:
             verifymatrix(H, (6, self.n, self.n))
 
-        manipulability = self.manipulability(q, J=J, start=start, end=end, axes=axes)  # type: ignore
+        manipulability = self.manipulability(
+            q, J=J, start=start, end=end, axes=axes  # type: ignore
+        )
 
         J = J[axes, :]  # type: ignore
         H = H[:, axes, :]  # type: ignore
@@ -1413,7 +1408,9 @@ graph [rankdir=LR];
                 lpTcp = -wTlp + wTcp
 
                 norm = lpTcp / d
-                norm_h = np.expand_dims(np.concatenate((norm, [0.0, 0.0, 0.0])), axis=0)  # type: ignore
+                norm_h = np.expand_dims(
+                    np.concatenate((norm, [0.0, 0.0, 0.0])), axis=0  # type: ignore
+                )
 
                 # tool = (self.fkine(q, end=link).inv() * SE3(wTlp)).A[:3, 3]
 
