@@ -102,7 +102,6 @@ packages = [
     "roboticstoolbox.backends",
     "roboticstoolbox.backends.PyPlot",
     "roboticstoolbox.backends.swift",
-    "roboticstoolbox.backends.VPython",
     "roboticstoolbox.bin",
     "roboticstoolbox.blocks",
     "roboticstoolbox.examples",
