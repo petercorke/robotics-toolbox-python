@@ -407,7 +407,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         subprocess.run("dot -Tpdf", shell=True, stdin=dotfile, stdout=pdffile)
 
         # open the PDF file in browser (hopefully portable), then cleanup
-        if display_graph:
+        if display_graph:  # pragma nocover
             webbrowser.open(f"file://{pdffile.name}")
         else:
             return pdffile.name
