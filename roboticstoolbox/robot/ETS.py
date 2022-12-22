@@ -5,7 +5,6 @@
 @author: Peter Corke
 """
 
-from abc import ABC, abstractmethod
 from collections import UserList
 from numpy import (
     pi,
