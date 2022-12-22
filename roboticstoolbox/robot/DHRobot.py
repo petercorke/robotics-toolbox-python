@@ -32,7 +32,7 @@ from ansitable import ANSITable, Column
 from scipy.linalg import block_diag
 from roboticstoolbox.robot.DHLink import _check_rne, DHLink
 from roboticstoolbox import rtb_get_param
-from frne import init, frne, delete
+from roboticstoolbox.frne import init, frne, delete
 from numpy import any
 from typing import Union, Tuple
 from roboticstoolbox.robot.IK import IKSolution
@@ -2444,6 +2444,7 @@ class DHRobot(Robot):
         return self.ets().ik_gn(
             Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
         )
+
 
     def ikine_LM(
         self,

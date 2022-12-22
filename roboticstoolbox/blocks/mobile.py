@@ -397,14 +397,14 @@ class VehiclePlot(GraphicsBlock):
         # update the path line
         self.xdata.append(xyt[0])
         self.ydata.append(xyt[1])
-        #plt.figure(self.fig.number)
+        # plt.figure(self.fig.number)
         if self.pathstyle is not None:
             self.line.set_data(self.xdata, self.ydata)
 
         # update the vehicle pose
         self.animation.update(xyt)
     
-        if self.scale == 'auto':
+        if isinstance(self.scale, str) and self.scale == 'auto':
             self.ax.relim()
             self.ax.autoscale_view()
         super().step(state=state)
