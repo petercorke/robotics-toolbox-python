@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+
+"""
+@author: Jesse Haviland
+@author: Peter Corke
+"""
+
 # import sys
 from os.path import splitext
 from copy import deepcopy

@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+
+"""
+@author: Jesse Haviland
+@author: Peter Corke
+"""
+
 # import sys
 from abc import ABC
 from copy import deepcopy
@@ -233,7 +240,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             if link.name is None or link.name == "":
                 link.name = f"link-{k}"
 
-            # link.number = k + 1
+            link.number = k + 1
 
             # Put it in the link dictionary, check for duplicates
             if link.name in self._linkdict:
@@ -2170,7 +2177,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         if backend is None:
             if isinstance(self, rtb.DHRobot):
                 default = "pyplot"
-            elif isinstance(self, rtb.ERobot2):
+            elif isinstance(self, rtb.Robot2):
                 default = "pyplot2"
             elif isinstance(self, rtb.Robot):
                 if self.hasgeometry:

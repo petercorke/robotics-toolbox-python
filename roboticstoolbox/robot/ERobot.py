@@ -1,26 +1,25 @@
 #!/usr/bin/env python3
 """
-Created on Tue Apr 24 15:48:52 2020
 @author: Jesse Haviland
 """
 
-import roboticstoolbox as rtb
+from roboticstoolbox.robot.Robot import Robot, Robot2
 
 
-class ERobot:
+class ERobot(Robot):
     def __init__(self, *args, **kwargs):
 
         # warn("ERobot is deprecated, use iscollided instead", FutureWarning)
 
-        return rtb.Robot(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 # =========================================================================== #
 
 
-class ERobot2:
+class ERobot2(Robot2):
     def __init__(self, *args, **kwargs):
 
         # warn("ERobot2 is deprecated, use iscollided instead", FutureWarning)
 
-        return rtb.Robot2(*args, **kwargs)
+        super().__init__(*args, **kwargs)

@@ -153,10 +153,10 @@ class TestERobot2(unittest.TestCase):
 
     def test_teach(self):
         robot = rtb.models.ETS.Planar2()
-        e = robot.teach(block=False, name=True)
+        e = robot.teach(robot.qz, block=False)
         e.close()
 
-        e = robot.teach(robot.qz, block=False, name=True)
+        e = robot.teach(robot.qz, block=False)
         e.close()
 
     def test_plot_with_vellipse(self):
