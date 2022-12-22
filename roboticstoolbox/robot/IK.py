@@ -1413,7 +1413,7 @@ class IK_QP(IKSolver):
         else:
             c = np.zeros(ets.n + 6)
 
-        xd = qp.solve_qp(Q, c, Ain, bin, Aeq, beq, lb=None, ub=None, solver="quadprog")
+        xd = qp.solve_qp(Q, c, Ain, bin, Aeq, beq, lb=None, ub=None, solver="cvxopt")
 
         if xd is None:  # pragma: nocover
             raise np.linalg.LinAlgError("QP Unsolvable")
