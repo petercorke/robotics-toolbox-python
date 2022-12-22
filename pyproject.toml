@@ -24,26 +24,40 @@ dependencies = [
     "progress",
 ]
 
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 
 readme = "README.md"
 
 requires-python = ">=3.7"
 
-keywords = ["python", "robotics", "robotics-toolbox", "kinematics", "dynamics", "motion-planning", "trajectory-generation", "jacobian", "hessian", "control", "simulation", "robot-manipulator", "mobile-robot"]
+keywords = [
+    "python",
+    "robotics",
+    "robotics-toolbox",
+    "kinematics",
+    "dynamics",
+    "motion-planning",
+    "trajectory-generation",
+    "jacobian",
+    "hessian",
+    "control",
+    "simulation",
+    "robot-manipulator",
+    "mobile-robot",
+]
 
 classifiers = [
-        "Development Status :: 5 - Production/Stable",
-        # Indicate who your project is intended for
-        "Intended Audience :: Developers",
-        # Pick your license as you wish (should match "license" above)
-        "License :: OSI Approved :: MIT License",
-        # Specify the Python versions you support here.
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
+    "Development Status :: 5 - Production/Stable",
+    # Indicate who your project is intended for
+    "Intended Audience :: Developers",
+    # Pick your license as you wish (should match "license" above)
+    "License :: OSI Approved :: MIT License",
+    # Specify the Python versions you support here.
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 
 
@@ -53,12 +67,9 @@ documentation = "https://petercorke.github.io/robotics-toolbox-python/"
 repository = "https://github.com/petercorke/robotics-toolbox-python"
 
 
-
 [project.optional-dependencies]
 
-collision = [
-    "pybullet"
-]
+collision = ["pybullet"]
 
 dev = [
     "black",
@@ -67,14 +78,11 @@ dev = [
     "flake8",
     "pyyaml",
     "sympy",
+    "qpsolvers",
+    "cvxopt",
 ]
 
-docs = [
-    "sphinx",
-    "sphinx_rtd_theme",
-    "sphinx-autorun", 
-]
-
+docs = ["sphinx", "sphinx_rtd_theme", "sphinx-autorun"]
 
 
 [project.scripts]
@@ -87,12 +95,8 @@ rtbtool = "roboticstoolbox.bin.rtbtool:main"
 
 [build-system]
 
-requires = [
-    "setuptools",
-    "oldest-supported-numpy"
-]
+requires = ["setuptools", "oldest-supported-numpy"]
 build-backend = "setuptools.build_meta"
-
 
 
 [tool.setuptools]
@@ -116,7 +120,6 @@ packages = [
     "roboticstoolbox.tools.urdf",
     "roboticstoolbox.tools.xacro",
 ]
-
 
 
 [tool.black]
@@ -143,7 +146,6 @@ exclude = '''
   )/
 )
 '''
-
 
 
 [tool.flake8]
@@ -184,6 +186,3 @@ archs = ["x86_64", "aarch64"]
 
 # On an Windows Intel runner build wheels
 archs = ["AMD64", "x86"]
-
-
-
