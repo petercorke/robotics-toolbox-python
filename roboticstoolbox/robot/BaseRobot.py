@@ -45,7 +45,7 @@ from spatialmath.base.argcheck import (
     getunit,
 )
 
-from fknm import Robot_link_T
+from roboticstoolbox.fknm import Robot_link_T
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.Gripper import Gripper
 from roboticstoolbox.robot.Link import BaseLink, Link, Link2
