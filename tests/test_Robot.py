@@ -6,6 +6,7 @@ import numpy.testing as nt
 import numpy as np
 import roboticstoolbox as rtb
 import unittest
+import os
 
 
 class TestRobot(unittest.TestCase):
@@ -622,6 +623,22 @@ class TestRobot(unittest.TestCase):
         )
 
         self.assertEqual(r.n, 7)
+
+    def test_showgraph(self):
+        r = rtb.models.Panda()
+
+        file = r.showgraph(display_graph=False)
+
+        self.assertIsNotNone(file)
+
+        self.assertTrue(file[-4:] == ".pdf")  # type: ignore
+
+    def test_dotfile(self):
+        r = rtb.models.Panda()
+
+        r.dotfile("test.dot")
+
+        os.remove("test.dot")
 
 
 if __name__ == "__main__":  # pragma nocover
