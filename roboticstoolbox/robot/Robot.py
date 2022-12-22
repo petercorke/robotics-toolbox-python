@@ -67,7 +67,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def __init__(
         self,
-        arg: Union[List[Link], ETS],
+        arg: Union[List[Link], ETS, "Robot"],
         gripper_links: Union[Link, List[Link], None] = None,
         name: str = "",
         manufacturer: str = "",
@@ -115,46 +115,45 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
             self._urdf_string = arg.urdf_string
             self._urdf_filepath = arg.urdf_filepath
-
-        elif isinstance(arg, ETS):
-            # We're passed an ETS string
-            links = []
-            # chop it up into segments, a link frame after every joint
-            parent = None
-            for j, ets_j in enumerate(arg.split()):
-                elink = Link(ETS(ets_j), parent=parent, name=f"link{j:d}")
-                if (
-                    elink.qlim is None
-                    and elink.v is not None
-                    and elink.v.qlim is not None
-                ):
-                    elink.qlim = elink.v.qlim
-                parent = elink
-                links.append(elink)
-
-        elif smb.islistof(arg, Link):
-            links = arg
-
         else:
-            raise TypeError("arg was invalid, must be List[Link], ETS, or Robot")
 
-        # Initialise Base Robot object
-        super().__init__(
-            links=links,
-            gripper_links=gripper_links,
-            name=name,
-            manufacturer=manufacturer,
-            comment=comment,
-            base=base,
-            tool=tool,
-            gravity=gravity,
-            keywords=keywords,
-            symbolic=symbolic,
-            configs=configs,
-            check_jindex=check_jindex,
-        )
+            if isinstance(arg, ETS):
+                # We're passed an ETS string
+                links = []
+                # chop it up into segments, a link frame after every joint
+                parent = None
+                for j, ets_j in enumerate(arg.split()):
+                    elink = Link(ETS(ets_j), parent=parent, name=f"link{j:d}")
+                    if (
+                        elink.qlim is None
+                        and elink.v is not None
+                        and elink.v.qlim is not None
+                    ):
+                        elink.qlim = elink.v.qlim  # pragma nocover
+                    parent = elink
+                    links.append(elink)
 
-        self.links
+            elif smb.islistof(arg, Link):
+                links = arg
+
+            else:
+                raise TypeError("arg was invalid, must be List[Link], ETS, or Robot")
+
+            # Initialise Base Robot object
+            super().__init__(
+                links=links,
+                gripper_links=gripper_links,
+                name=name,
+                manufacturer=manufacturer,
+                comment=comment,
+                base=base,
+                tool=tool,
+                gravity=gravity,
+                keywords=keywords,
+                symbolic=symbolic,
+                configs=configs,
+                check_jindex=check_jindex,
+            )
 
     # --------------------------------------------------------------------- #
     # --------- Swift Methods --------------------------------------------- #
@@ -280,14 +279,14 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             urdf_string = xacro.main(file_path, xacro_tld)
             try:
                 urdf = URDF.loadstr(urdf_string, file_path, base_path)
-            except BaseException as e:
+            except BaseException as e:  # pragma nocover
                 print("error parsing URDF file", file_path)
                 raise e
         else:  # pragma nocover
             urdf_string = open(file_path).read()
             urdf = URDF.loadstr(urdf_string, file_path, base_path)
 
-        if not isinstance(urdf_string, str):
+        if not isinstance(urdf_string, str):  # pragma nocover
             raise ValueError("Parsing failed, did not get valid URDF string back")
 
         return urdf.elinks, urdf.name, urdf_string, file_path
@@ -311,7 +310,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         """
 
-        links, name, _, _ = Robot.URDF_read(file_path)
+        links, name, urdf_string, urdf_filepath = Robot.URDF_read(file_path)
 
         gripperLink: Union[Link, None] = None
 
@@ -323,12 +322,12 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     if link.name == gripper:
                         gripperLink = link
                         break
-                else:
+                else:  # pragma nocover
                     raise ValueError(f"no link named {gripper}")
-            else:
+            else:  # pragma nocover
                 raise TypeError("bad argument passed as gripper")
 
-        links, name, urdf_string, urdf_filepath = Robot.URDF_read(file_path)
+        # links, name, urdf_string, urdf_filepath = Robot.URDF_read(file_path)
 
         return cls(
             links,
@@ -342,7 +341,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     # --------- Utility Methods ------------------------------------------- #
     # --------------------------------------------------------------------- #
 
-    def showgraph(self, **kwargs):
+    def showgraph(self, **kwargs):  # pragma nocover
         """
         Display a link transform graph in browser
 

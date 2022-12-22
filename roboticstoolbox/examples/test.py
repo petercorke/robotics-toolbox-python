@@ -3,9 +3,7 @@ import roboticstoolbox as rtb
 import spatialmath as sm
 
 
+r = rtb.models.Fetch()
 
-
-
-r = rtb.models.DH.Panda()
-
-print(isinstance(r, rtb.DHRobot))
+for l in r:
+    print(l.name)

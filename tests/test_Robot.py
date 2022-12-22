@@ -577,6 +577,52 @@ class TestRobot(unittest.TestCase):
 
         nt.assert_array_almost_equal(r.jacob0(q), ans)
 
+    def test_copy_init(self):
+        r = rtb.models.Panda()
+
+        r2 = rtb.Robot(r)
+
+        r2.jacob0(r.q)
+
+        self.assertEqual(r.n, r2.n)
+
+    def test_init2(self):
+        r = rtb.Robot(rtb.ETS(rtb.ET.Ry(qlim=[-1, 1])))
+
+        self.assertEqual(r.n, 1)
+
+    def test_to_dict(self):
+        r = rtb.models.Panda()
+
+        rdict = r._to_dict(collision_alpha=0.5)
+        rdict2 = r._to_dict()
+
+        self.assertTrue(len(rdict) > len(rdict2))
+
+        self.assertIsInstance(rdict, list)
+
+    def test_fk_dict(self):
+        r = rtb.models.Panda()
+
+        rdict = r._fk_dict(collision_alpha=0.5)
+        rdict2 = r._fk_dict()
+
+        self.assertTrue(len(rdict) > len(rdict2))
+
+    def test_URDF(self):
+
+        r = rtb.Robot.URDF("fetch_description/robots/fetch.urdf", gripper=6)
+
+        self.assertEqual(r.n, 5)
+
+    def test_URDF2(self):
+
+        r = rtb.Robot.URDF(
+            "fetch_description/robots/fetch.urdf", gripper="forearm_roll_link"
+        )
+
+        self.assertEqual(r.n, 7)
+
 
 if __name__ == "__main__":  # pragma nocover
     unittest.main()
