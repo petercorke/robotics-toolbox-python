@@ -18,8 +18,9 @@ from typing import (
     Dict,
     Tuple,
     overload,
-    Literal as L,
 )
+from typing_extensions import Literal as L
+
 
 import numpy as np
 
@@ -341,7 +342,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     # --------- Utility Methods ------------------------------------------- #
     # --------------------------------------------------------------------- #
 
-    def showgraph(self, **kwargs):  # pragma nocover
+    def showgraph(self, display_graph: bool = True, **kwargs) -> Union[None, str]:
         """
         Display a link transform graph in browser
 
@@ -366,6 +367,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         Parameters
         ----------
+        display_graph
+            Open the graph in a browser if True. Otherwise will return the
+            file path
         etsbox
             Put the link ETS in a box, otherwise an edge label
         jtype
@@ -403,7 +407,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         subprocess.run("dot -Tpdf", shell=True, stdin=dotfile, stdout=pdffile)
 
         # open the PDF file in browser (hopefully portable), then cleanup
-        webbrowser.open(f"file://{pdffile.name}")
+        if display_graph:
+            webbrowser.open(f"file://{pdffile.name}")
+        else:
+            return pdffile.name
 
     def dotfile(
         self,

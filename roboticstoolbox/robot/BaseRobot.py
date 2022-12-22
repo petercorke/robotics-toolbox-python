@@ -20,8 +20,9 @@ from typing import (
     Dict,
     Tuple,
     Set,
-    Literal as L,
 )
+
+from typing_extensions import Literal as L
 
 import numpy as np
 

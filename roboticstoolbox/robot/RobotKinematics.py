@@ -7,7 +7,8 @@ from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.robot.Gripper import Gripper
 from spatialmath import SE3
-from typing import Union, Tuple, overload, Literal as L
+from typing import Union, Tuple, overload
+from typing_extensions import Literal as L
 
 
 class RobotKinematicsMixin:
