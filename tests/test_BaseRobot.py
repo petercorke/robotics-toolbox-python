@@ -466,10 +466,10 @@ class TestBaseRobot(unittest.TestCase):
         panda = rtb.models.Panda()
 
         panda.tool = SE3.Ry(0.5)
-        nt.assert_almost_equal(panda.tool, SE3.Ry(0.5).A)
+        nt.assert_almost_equal(panda.tool.A, SE3.Ry(0.5).A)
 
         panda.tool = SE3.Ry(0.5).A
-        nt.assert_almost_equal(panda.tool, SE3.Ry(0.5).A)
+        nt.assert_almost_equal(panda.tool.A, SE3.Ry(0.5).A)
 
     def test_get_path(self):
         panda = rtb.models.Panda()

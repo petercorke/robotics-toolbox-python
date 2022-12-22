@@ -199,6 +199,8 @@ class BaseLink(SceneNode, ABC):
         self._joint_name = joint_name
         self._children = []
 
+        self.number = 0
+
         # Set the qlim if provided
         if qlim is not None and self.v:
             self.v.qlim = qlim
@@ -668,7 +670,7 @@ class BaseLink(SceneNode, ABC):
 
         elif isvector(I_new, 3):
             # 3-vector passed, moments of inertia [Ixx Iyy Izz]
-            I_new = diag(I_new)
+            I_new = diag(I_new)  # type: ignore
 
         else:
             raise ValueError("invalid shape passed: must be (3,3), (6,), (3,)")

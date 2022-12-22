@@ -25,7 +25,7 @@ from typing import (
 
 import numpy as np
 
-from spatialmath import SE3, SE2
+from spatialmath import SE3
 from spatialmath.base.argcheck import (
     getvector,
     getmatrix,
@@ -36,20 +36,11 @@ from ansitable import ANSITable, Column
 from swift import Swift
 from spatialgeometry import SceneNode
 
-from spatialmath import (
-    SE3,
-)
-from spatialmath.base.argcheck import (
-    getvector,
-    getmatrix,
-    getunit,
-)
-
 from roboticstoolbox.fknm import Robot_link_T
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.Gripper import Gripper
-from roboticstoolbox.robot.Link import BaseLink, Link, Link2
-from roboticstoolbox.robot.ETS import ETS, ETS2
+from roboticstoolbox.robot.Link import BaseLink, Link
+from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.tools.types import ArrayLike, NDArray
@@ -71,7 +62,7 @@ except ImportError:  # pragma nocover
     cm = str
     pass
 
-_default_backend = None
+# _default_backend = None
 
 # A generic type variable representing any subclass of BaseLink
 LinkType = TypeVar("LinkType", bound=BaseLink)
@@ -197,6 +188,8 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         # SceneNode, set a reference to the first link
         self.scene_children = [self.links[0]]  # type: ignore
 
+        self._default_backend = None
+
     # --------------------------------------------------------------------- #
     # --------- Private Methods ------------------------------------------- #
     # --------------------------------------------------------------------- #
@@ -262,7 +255,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
             # No parent links were given, assume they are sequential
             for i in range(len(links) - 1):
-                li = links[i]
+                # li = links[i]
                 links[i + 1].parent = links[i]
 
         # Set the base link
@@ -874,11 +867,11 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
 
         """
-        return _default_backend
+        return self._default_backend
 
     @default_backend.setter
     def default_backend(self, be):
-        _default_backend = be
+        self._default_backend = be
 
     @property
     def gravity(self) -> NDArray:
@@ -1544,7 +1537,8 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             # start effector is specified
             start_ret = self._getlink(start)
 
-        return end_ret, start_ret, tool  # type: ignore  because Gripper returns Link not LinkType
+        # because Gripper returns Link not LinkType
+        return end_ret, start_ret, tool  # type: ignore
 
     @lru_cache(maxsize=32)
     def ets(
@@ -1657,8 +1651,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         #     cls = rtb.DHRobot
         if isinstance(self, rtb.Robot2):
             cls = rtb.Robot2
-        elif isinstance(self, rtb.PoERobot):
-            cls = rtb.PoERobot  # pragma nocover
         else:
             cls = rtb.Robot
 
@@ -1680,7 +1672,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             name=name,
             manufacturer=manufacturer,
             comment=comment,
-            base=base,
+            base=base,  # type: ignore
             tool=tool,
             gravity=gravity,
             keywords=keywords,
@@ -2089,10 +2081,11 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         """
 
-        def recurse(link: LinkType, indent=0):
+        def recurse(link, indent=0):
             print(" " * indent * 2, link.name)
-            for child in link.children:
-                recurse(child, indent + 1)
+            if link.children is not None:
+                for child in link.children:
+                    recurse(child, indent + 1)
 
         recurse(self.base_link)
 

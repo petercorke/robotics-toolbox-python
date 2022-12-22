@@ -969,7 +969,7 @@ class TestDHRobot(unittest.TestCase):
 
         sol = puma.ikine_LM(T)
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=4)
 
     # def test_ikine_LMS(self):
     #     puma = rp.models.DH.Puma560()
