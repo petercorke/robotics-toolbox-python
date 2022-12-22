@@ -42,7 +42,7 @@ from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP
 
 from collections import UserList
 from spatialmath.base import issymbol, getmatrix
-from fknm import (
+from roboticstoolbox.fknm import (
     ETS_init,
     ETS_fkine,
     ETS_jacob0,

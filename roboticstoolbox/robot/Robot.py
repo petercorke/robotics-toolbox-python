@@ -19,7 +19,7 @@ from roboticstoolbox.robot.Dynamics import DynamicsMixin
 from roboticstoolbox.robot.ETS import ETS
 from typing import Union, Dict, Tuple
 from spatialgeometry import Shape
-from fknm import Robot_link_T
+from roboticstoolbox.fknm import Robot_link_T
 from functools import lru_cache
 from spatialgeometry import SceneNode
 from roboticstoolbox.robot.Link import BaseLink, Link

@@ -10,7 +10,7 @@ from roboticstoolbox.robot.Link import Link
 from typing import List
 from functools import lru_cache
 from typing import Union
-from fknm import Robot_link_T
+from roboticstoolbox.fknm import Robot_link_T
 
 ArrayLike = Union[list, np.ndarray, tuple, set]
 
