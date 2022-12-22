@@ -13,6 +13,8 @@ import unittest
 import sympy
 import pytest
 
+test_tol = 1e-5
+
 
 class TestIK(unittest.TestCase):
     def test_IK_NR1(self):
@@ -33,7 +35,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_IK_NR2(self):
 
@@ -55,7 +57,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_IK_NR3(self):
 
@@ -77,7 +79,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_IK_NR4(self):
 
@@ -107,7 +109,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_IK_NR5(self):
 
@@ -127,7 +129,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep.A, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_IK_NR6(self):
 
@@ -179,7 +181,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
     def test_IK_LM1(self):
@@ -202,7 +204,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_IK_LM2(self):
 
@@ -224,7 +226,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_IK_LM3(self):
 
@@ -246,7 +248,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     @pytest.mark.filterwarnings("ignore::RuntimeWarning")
     def test_IK_GN1(self):
@@ -269,7 +271,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_IK_GN2(self):
 
@@ -289,7 +291,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_IK_GN3(self):
 
@@ -309,7 +311,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_IK_QP1(self):
 
@@ -329,7 +331,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_IK_QP2(self):
 
@@ -349,7 +351,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_IK_QP3(self):
 
@@ -394,7 +396,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_ets_ikine_NR2(self):
 
@@ -414,7 +416,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep.A, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_ets_ikine_LM1(self):
 
@@ -434,7 +436,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_ets_ikine_LM2(self):
 
@@ -454,7 +456,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep.A, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_ets_ikine_GN1(self):
 
@@ -474,7 +476,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_ets_ikine_GN2(self):
 
@@ -494,7 +496,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep.A, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_ets_ikine_QP1(self):
 
@@ -514,7 +516,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
     def test_ets_ikine_QP2(self):
 
@@ -534,7 +536,7 @@ class TestIK(unittest.TestCase):
 
         _, E = solver.error(Tep.A, Tq)
 
-        self.assertGreater(tol, E)
+        self.assertGreater(test_tol, E)
 
 
 if __name__ == "__main__":

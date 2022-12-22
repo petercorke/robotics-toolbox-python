@@ -58,7 +58,7 @@ from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 
 if TYPE_CHECKING:
-    from matplotlib.cm import Color  # pragma: nocover
+    from matplotlib.cm import Color  # pragma nocover
 else:
     Color = None
 
@@ -1036,7 +1036,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
                     v = link.qlim
             else:
                 # Fixed link
-                continue  # pragma: nocover
+                continue  # pragma nocover
 
             limits[:, j] = v
             j += 1
@@ -1259,9 +1259,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             else:
                 self._T = T
 
-        else:
-            raise ValueError("base must be set to None (no tool), SE2, or SE3")
-
     # --------------------------------------------------------------------- #
 
     @lru_cache(maxsize=32)
@@ -1306,7 +1303,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             link = self._getlink(start, self.base_link)
             end = self._getlink(end, self.ee_links[0])
 
-            toplevel = path is None
+            toplevel = len(path) == 0
             explored.add(link)
 
             if link == end:
@@ -1349,7 +1346,9 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         path = search(start, end, set(), [])
 
         if path is None or len(path) == 0:
-            raise ValueError("No path found")
+            raise ValueError("No path found")  # pragma nocover
+        elif path[-1] != end:
+            path.append(end)
 
         if tool is None:
             tool = SE3()
@@ -1598,7 +1597,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         if isinstance(start, Gripper):
             ets_init = self._gripper_ets(start).inv()
             link = start.links[0].parent
-            if link is None:  # pragma: nocover
+            if link is None:  # pragma nocover
                 raise ValueError("Invalid robot link configuration")
         else:
             link = self._getlink(start, self.base_link)
@@ -1611,7 +1610,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             elif len(self.grippers) == 1:
                 end_link = self.grippers[0].links[0]
                 ets_end = self._gripper_ets(self.grippers[0])
-            elif len(self.grippers) > 1:
+            elif len(self.ee_links) > 1:
                 end_link = self._getlink(end, self.ee_links[0])
                 print(
                     "multiple end-effectors present, ambiguous, using self.ee_links[0]"
@@ -1622,7 +1621,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             if isinstance(end, Gripper):
                 ets_end = self._gripper_ets(end)
                 end_link = end.links[0].parent  # type: ignore
-                if end_link is None:  # pragma: nocover
+                if end_link is None:  # pragma nocover
                     raise ValueError("Invalid robot link configuration")
             else:
                 end_link = self._getlink(end, self.ee_links[0])
@@ -1635,7 +1634,9 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             ets = self._find_ets(link, end_link, explored, path=None)
 
         if ets is None:
-            raise ValueError("Could not find the requested ETS in this robot")
+            raise ValueError(
+                "Could not find the requested ETS in this robot"
+            )  # pragma nocover
 
         if ets_init is not None:
             ets = ets_init * ets
@@ -1652,6 +1653,15 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         links = []
 
+        # if isinstance(self, rtb.DHRobot):
+        #     cls = rtb.DHRobot
+        if isinstance(self, rtb.Robot2):
+            cls = rtb.Robot2
+        elif isinstance(self, rtb.PoERobot):
+            cls = rtb.PoERobot  # pragma nocover
+        else:
+            cls = rtb.Robot
+
         for link in self.links:
             links.append(deepcopy(link))
 
@@ -1665,9 +1675,8 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         symbolic = deepcopy(self.symbolic)
         configs = deepcopy(self.configs)
 
-        cls = self.__class__
         result = cls(
-            links=links,
+            links,
             name=name,
             manufacturer=manufacturer,
             comment=comment,
@@ -1748,12 +1757,10 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         q
             The joint configuration of the robot
 
-
         Returns
         -------
         q
             a vector of joint coordinates in radians and metres
-
 
         Examples
         --------
@@ -1951,11 +1958,10 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             if fmt is not None:
                 try:
                     return fmt.format(theta * deg) + "\u00b0"
-                except TypeError:
+                except TypeError:  # pragma nocover
                     pass
 
-            # pragma nocover
-            return str(theta * deg) + "\u00b0"
+            return str(theta * deg) + "\u00b0"  # pragma nocover
 
         # show named configurations
         if len(self._configs) > 0:
@@ -2006,7 +2012,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         qlim = self.qlim
         if np.any(np.isnan(qlim)):
-            raise ValueError("some joint limits not defined")
+            raise ValueError("some joint limits not defined")  # pragma nocover
         return np.random.uniform(low=qlim[0, :], high=qlim[1, :], size=(self.n,))
 
     def linkcolormap(self, linkcolors: Union[List[Any], str] = "viridis"):
@@ -2057,10 +2063,10 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         """
 
-        if isinstance(linkcolors, list) and len(linkcolors) == self.n:
+        if isinstance(linkcolors, list) and len(linkcolors) == self.n:  # pragma nocover
             # provided a list of color names
             return colors.ListedColormap(linkcolors)  # type: ignore
-        else:
+        else:  # pragma nocover
             # assume it is a colormap name
             return cm.get_cmap(linkcolors, 6)  # type: ignore
 
@@ -2083,9 +2089,9 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         """
 
-        def recurse(link, indent=0):
+        def recurse(link: LinkType, indent=0):
             print(" " * indent * 2, link.name)
-            for child in link.child:
+            for child in link.children:
                 recurse(child, indent + 1)
 
         recurse(self.base_link)
@@ -2223,7 +2229,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             env = PyPlot2()
 
         else:
-            raise ValueError("unknown backend", backend)
+            raise ValueError("unknown backend", backend)  # pragma nocover
 
         return env
 
@@ -2352,7 +2358,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         # List of images saved from each plot
         images = []
 
-        if movie is not None:
+        if movie is not None:  # pragma: nocover
             loop = False
 
         while True:
@@ -2381,7 +2387,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
                 break
 
         # Keep the plot open
-        if block:  # pragma: no cover
+        if block:  # pragma nocover
             env.hold()
 
         return env
@@ -2550,7 +2556,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         env.add(ellipse, jointaxes=jointaxes, eeframe=eeframe, shadow=shadow, name=name)
 
         # Keep the plot open
-        if block:  # pragma: no cover
+        if block:  # pragma nocover
             env.hold()
 
         return env
@@ -2639,7 +2645,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         if fellipse is None and q is not None:
             fellipse = self.fellipse(q, opt=opt, centre=centre)
         else:
-            raise ValueError("Must specify either q or fellipse")
+            raise ValueError("Must specify either q or fellipse")  # pragma: nocover
 
         return self.plot_ellipse(
             fellipse,
@@ -2733,7 +2739,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         if vellipse is None and q is not None:
             vellipse = self.vellipse(q=q, opt=opt, centre=centre)
         else:
-            raise ValueError("Must specify either q or fellipse")
+            raise ValueError("Must specify either q or fellipse")  # pragma: nocover
 
         return self.plot_ellipse(
             vellipse,
@@ -2808,7 +2814,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         # Make an empty 3D figure
         env = self._get_graphical_backend(backend)
 
-        if isinstance(env, Swift):
+        if isinstance(env, Swift):  # pragma: nocover
             raise TypeError("teach() not supported for Swift backend")
 
         # Add the self to the figure in readonly mode
@@ -2834,7 +2840,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             env.add(fell)
 
         # Keep the plot open
-        if block:  # pragma: no cover
+        if block:  # pragma nocover
             env.hold()
 
         return env

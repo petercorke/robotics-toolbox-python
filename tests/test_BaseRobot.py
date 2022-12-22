@@ -11,6 +11,7 @@ import spatialmath.base as sm
 from spatialmath import SE3
 import unittest
 from copy import copy, deepcopy
+from swift import Swift
 
 from roboticstoolbox.robot.Robot import BaseRobot
 
@@ -460,3 +461,216 @@ class TestBaseRobot(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             puma.manipulability(method="notamethod")  # type: ignore
+
+    def test_tool(self):
+        panda = rtb.models.Panda()
+
+        panda.tool = SE3.Ry(0.5)
+        nt.assert_almost_equal(panda.tool, SE3.Ry(0.5).A)
+
+        panda.tool = SE3.Ry(0.5).A
+        nt.assert_almost_equal(panda.tool, SE3.Ry(0.5).A)
+
+    def test_get_path(self):
+        panda = rtb.models.Panda()
+
+        links, n, tool = panda.get_path(end="panda_link1", start="panda_link4")
+
+        for link in links:
+            print(link.name)
+
+        self.assertEqual(links[0].name, "panda_link4")
+        self.assertEqual(links[1].name, "panda_link3")
+        self.assertEqual(links[2].name, "panda_link2")
+        self.assertEqual(links[3].name, "panda_link1")
+
+        self.assertEqual(n, 4)
+        nt.assert_equal(tool, np.eye(4))
+
+    def test_get_path2(self):
+        panda = rtb.models.Panda()
+
+        links, n, tool = panda.get_path(end="panda_link4", start="panda_link1")
+
+        for link in links:
+            print(link.name)
+
+        self.assertEqual(links[0].name, "panda_link1")
+        self.assertEqual(links[1].name, "panda_link2")
+        self.assertEqual(links[2].name, "panda_link3")
+        self.assertEqual(links[3].name, "panda_link4")
+
+        self.assertEqual(n, 4)
+        nt.assert_equal(tool, np.eye(4))
+
+    def test_get_path_fail(self):
+        panda = rtb.models.Panda()
+
+        with self.assertRaises(ValueError):
+            _, _, _ = panda.get_path(end="panda", start="panda")
+
+    def test_getlink(self):
+        panda = rtb.models.Panda()
+
+        l0 = panda._getlink(panda.grippers[0])
+
+        self.assertEqual(l0.name, "panda_hand")
+
+    def test_getlink_fail(self):
+        panda = rtb.models.Panda()
+
+        with self.assertRaises(ValueError):
+            panda._getlink(rtb.Link(rtb.ETS()))
+
+    def test_getlink_fail2(self):
+        panda = rtb.models.Panda()
+
+        with self.assertRaises(ValueError):
+            panda._getlink(rtb.Gripper([rtb.Link(rtb.ETS())]))
+
+    def test_getlink_fail3(self):
+        panda = rtb.models.Panda()
+
+        with self.assertRaises(TypeError):
+            panda._getlink(2.0)
+
+    def test_limits(self):
+        r = rtb.models.YuMi()
+
+        end, _, _ = r._get_limit_links()
+
+        self.assertEqual(end.name, "r_gripper")
+
+    def test_limits2(self):
+        r = rtb.models.Panda()
+
+        end, _, _ = r._get_limit_links()
+
+        self.assertEqual(end.name, "panda_hand")
+
+    def test_limits3(self):
+        l1 = rtb.Link(rtb.ETS(), name="l1")
+        l2 = rtb.Link(rtb.ETS(), parent=l1, name="l2")
+        l3 = rtb.Link(rtb.ETS(), parent=l1, name="l3")
+
+        r = rtb.Robot([l1, l2, l3])
+
+        end, _, _ = r._get_limit_links()
+
+        self.assertEqual(end.name, "l2")
+
+    def test_limits4(self):
+        r = rtb.models.Panda()
+
+        end, _, _ = r._get_limit_links(end=r.grippers[0])
+
+        self.assertEqual(end.name, "panda_hand")
+
+    def test_ets_gripper(self):
+        r = rtb.models.Panda()
+
+        ets = r.ets(start=r.grippers[0])
+
+        self.assertEqual(ets.n, 0)
+
+    def test_ets_gripper2(self):
+        r = rtb.models.YuMi()
+
+        ets = r.ets()
+
+        self.assertEqual(ets.n, 7)
+
+    def test_ets_gripper3(self):
+        l1 = rtb.Link(rtb.ETS(), name="l1")
+        l2 = rtb.Link(rtb.ETS(), parent=l1, name="l2")
+        l3 = rtb.Link(rtb.ETS(), parent=l1, name="l3")
+
+        r = rtb.Robot([l1, l2, l3])
+
+        ets = r.ets()
+
+        self.assertEqual(ets.n, 0)
+
+    def test_ets_gripper4(self):
+        r = rtb.models.Panda()
+
+        ets = r.ets(end=r.grippers[0])
+
+        self.assertEqual(ets.n, 7)
+
+    def test_ets(self):
+        r = rtb.models.Panda()
+
+        ets = r.ets(end=r.links[4], start=r.links[4])
+
+        self.assertEqual(ets.n, 1)
+
+    def test_copy(self):
+        r = rtb.models.Panda()
+
+        r2 = deepcopy(r)
+
+        self.assertTrue(r2.links[2] != r.links[2])
+
+    def test_copy2(self):
+        r = rtb.models.DH.Panda()
+
+        r2 = deepcopy(r)
+
+        self.assertTrue(r2.links[2] != r.links[2])
+
+    def test_copy3(self):
+        r = rtb.Robot2(rtb.ETS2(rtb.ET2.R()))
+
+        r2 = deepcopy(r)
+
+        self.assertTrue(r2.links[0] != r.links[0])
+
+    def test_toradians(self):
+        r = rtb.models.Panda()
+
+        q = np.ones((2, 7))
+
+        qn = r.toradians(q)
+
+        nt.assert_equal(qn, q * np.pi / 180.0)
+
+    def test_todegrees(self):
+        r = rtb.models.Panda()
+
+        q = np.ones((2, 7))
+
+        qn = r.todegrees(q)
+
+        nt.assert_equal(qn, q * 180.0 / np.pi)
+
+    def test_random_q(self):
+        r = rtb.models.Panda()
+
+        q = r.random_q()
+
+        self.assertEqual(q.shape[0], 7)
+
+    def test_heirarchy(self):
+        r = rtb.models.Panda()
+
+        r.hierarchy()
+
+    def test_segments2(self):
+        r = rtb.models.YuMi()
+
+        segs = r.segments()
+
+        self.assertEqual(len(segs), 7)
+
+    def test_get_backend(self):
+        r = rtb.models.Panda()
+
+        be = r._get_graphical_backend()
+
+        self.assertTrue(isinstance(be, Swift))
+
+    def test_teach(self):
+        robot = rtb.models.ETS.Panda()
+        e = robot.teach(q=None, block=False, vellipse=True, fellipse=True)
+        e.close()
