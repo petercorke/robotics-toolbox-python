@@ -521,14 +521,24 @@ graph [rankdir=LR];
                         estr = f"...q{link.jindex}"
                 else:
                     return
-                file.write(
-                    '  {} -> {} [label="{}", {}];\n'.format(
-                        parent,
-                        link.name,
-                        estr,
-                        edge_options,
+                try:
+                    file.write(
+                        '  {} -> {} [label="{}", {}];\n'.format(
+                            parent,
+                            link.name,
+                            estr,
+                            edge_options,
+                        )
                     )
-                )
+                except UnicodeEncodeError:
+                    file.write(
+                        '  {} -> {} [label="{}", {}];\n'.format(
+                            parent,
+                            link.name,
+                            estr.encode("ascii", "ignore").decode("ascii"),
+                            edge_options,
+                        )
+                    )
 
         file.write(header)
 
@@ -607,7 +617,7 @@ graph [rankdir=LR];
                                 # was constructed
                                 if link.qlim is not None:
                                     d += max(link.qlim)
-                                elif et.qlim is not None:
+                                elif et.qlim is not None:  # pragma nocover
                                     d += max(et.qlim)
                             else:
                                 d += abs(et.eta)
@@ -665,7 +675,7 @@ graph [rankdir=LR];
                     return
                 elif link.nchildren == 1:
                     # one child
-                    if link in self.ee_links:
+                    if link in self.ee_links:  # pragma nocover
                         # this link is an end-effector, go no further
                         return
                     link = link.children[0]
@@ -690,7 +700,7 @@ graph [rankdir=LR];
         method: L["yoshikawa", "asada", "minsingular", "invcondition"] = "yoshikawa",
         axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
         **kwargs,
-    ) -> Union[float, NDArray]:
+    ) -> Union[float, NDArray]:  # pragma nocover
         ...
 
     @overload
@@ -703,7 +713,7 @@ graph [rankdir=LR];
         method: L["yoshikawa", "asada", "minsingular", "invcondition"] = "yoshikawa",
         axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
         **kwargs,
-    ) -> Union[float, NDArray]:
+    ) -> Union[float, NDArray]:  # pragma nocover
         ...
 
     def manipulability(
