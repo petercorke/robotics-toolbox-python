@@ -3,18 +3,13 @@ import roboticstoolbox as rtb
 import spatialmath as sm
 
 
-l1 = rtb.Link(ets=rtb.ETS(rtb.ET.Ry()), m=1, r=[0.5, 0, 0], name="l1")
-l2 = rtb.Link(
-    ets=rtb.ETS(rtb.ET.tx(1)) * rtb.ET.Ry(), m=1, r=[0.5, 0, 0], parent=l1, name="l2"
-)
-r = rtb.Robot([l1, l2], name="simple 2 link")
-q = np.zeros(r.n)
+r = rtb.models.Panda()
+q = r.qr
 
-m1 = r.manipulability(q, method="asada")
+m1 = r.jacobm(q)
+m2 = r.jacobm(q, axes="trans")
+m3 = r.jacobm(q, axes="rot")
 
-# print(m1)
-
-# for l in r:
-#     print(l.jindex)
-
-print(r.inertia(q))
+print(m1.__repr__())
+print(m2.__repr__())
+print(m3.__repr__())

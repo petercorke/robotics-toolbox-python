@@ -957,7 +957,7 @@ graph [rankdir=LR];
         qd: ArrayLike,
         J0: None = None,
         representation: Union[L["rpy/xyz", "rpy/zyx", "eul", "exp"], None] = None,
-    ) -> NDArray:
+    ) -> NDArray:  # pragma no cover
         ...
 
     @overload
@@ -967,7 +967,7 @@ graph [rankdir=LR];
         qd: ArrayLike,
         J0: NDArray = ...,
         representation: Union[L["rpy/xyz", "rpy/zyx", "eul", "exp"], None] = None,
-    ) -> NDArray:
+    ) -> NDArray:  # pragma no cover
         ...
 
     def jacob0_dot(
@@ -1084,7 +1084,7 @@ graph [rankdir=LR];
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
         axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
-    ) -> NDArray:
+    ) -> NDArray:  # pragma no cover
         ...
 
     @overload
@@ -1096,7 +1096,7 @@ graph [rankdir=LR];
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
         axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
-    ) -> NDArray:
+    ) -> NDArray:  # pragma no cover
         ...
 
     def jacobm(
@@ -1157,8 +1157,9 @@ graph [rankdir=LR];
 
         end, start, _ = self._get_limit_links(end, start)
 
+        #
         if not isinstance(axes, list):
-            if axes == "all":
+            if axes.startswith("all"):
                 axes = [True, True, True, True, True, True]
             elif axes.startswith("trans"):
                 axes = [True, True, True, False, False, False]
@@ -1290,7 +1291,7 @@ graph [rankdir=LR];
             if link.iscollided(shape, skip=True):
                 return True
 
-        if isinstance(self, rtb.ERobot):
+        if isinstance(self, rtb.Robot):
             for gripper in self.grippers:
                 for link in gripper.links:
                     if link.iscollided(shape, skip=True):
@@ -1459,7 +1460,7 @@ graph [rankdir=LR];
 
                 l_Ain[0, :n_dim] = 1 * norm_h @ Je
                 l_bin = (xi * (d - ds) / (di - ds)) + dp
-            else:
+            else:  # pragma nocover
                 l_Ain = None
                 l_bin = None
 
@@ -1475,7 +1476,7 @@ graph [rankdir=LR];
                 for c in col_list:
                     pass
             else:
-                col_list = [collision_list[j - 1]]
+                col_list = [collision_list[j - 1]]  # pragma nocover
 
             for link_col in col_list:
                 l_Ain, l_bin = indiv_calculation(link, link_col, q)  # type: ignore
@@ -1505,7 +1506,7 @@ graph [rankdir=LR];
         end=None,
         start=None,
         collision_list=None,
-    ):
+    ):  # pragma nocover
         """
         Compute a vision collision constrain for QP motion control
 
@@ -1730,7 +1731,7 @@ graph [rankdir=LR];
         qdd = getmatrix(qdd, (None, None))
         l, _ = q.shape  # type: ignore
 
-        if symbolic:
+        if symbolic:  # pragma: nocover
             Q = np.empty((l, n), dtype="O")  # joint torque/force
         else:
             Q = np.empty((l, n))  # joint torque/force
@@ -1753,7 +1754,7 @@ graph [rankdir=LR];
             for link in self.links:
                 if link.isjoint:
                     I[j] = SpatialInertia(m=link.m, r=link.r)
-                    if symbolic and link.Ts is None:
+                    if symbolic and link.Ts is None:  # pragma: nocover
                         Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
                     else:
                         Xtree[j] = Ts * SE3(link.Ts, check=False)
@@ -1766,13 +1767,13 @@ graph [rankdir=LR];
 
                     # Reset the Ts tracker
                     Ts = SE3()
-                else:
+                else:  # pragma nocover
                     # TODO Keep track of inertia and transform???
                     Ts *= SE3(link.Ts, check=False)
 
             if gravity is None:
                 a_grav = -SpatialAcceleration(self.gravity)
-            else:
+            else:  # pragma nocover
                 a_grav = -SpatialAcceleration(gravity)
 
             # forward recursion
@@ -1806,7 +1807,7 @@ graph [rankdir=LR];
 
         if l == 1:
             return Q[0]
-        else:
+        else:  # pragma nocover
             return Q
 
 
@@ -1830,14 +1831,14 @@ class Robot2(BaseRobot[Link2]):
                     elink.qlim is None
                     and elink.v is not None
                     and elink.v.qlim is not None
-                ):
+                ):  # pragma nocover
                     elink.qlim = elink.v.qlim
                 links.append(elink)
 
         elif smb.islistof(arg, Link2):
             links = arg
 
-        else:
+        else:  # pragma nocover
             raise TypeError("constructor argument must be ETS2 or list of Link2")
 
         super().__init__(links, **kwargs)
@@ -1865,7 +1866,7 @@ class Robot2(BaseRobot[Link2]):
             no base transform, but this property will return ``SE3()`` which
             is an identity matrix.
         """
-        if self._base is None:
+        if self._base is None:  # pragma nocover
             self._base = SE2()
 
         # return a copy, otherwise somebody with
@@ -1874,16 +1875,10 @@ class Robot2(BaseRobot[Link2]):
 
     @base.setter
     def base(self, T):
-        if T is None:
+        if isinstance(T, SE2):
             self._base = T
-        elif isinstance(self, Robot2):
-            # 2D robot
-            if isinstance(T, SE2):
-                self._base = T
-            elif SE2.isvalid(T):
-                self._tool = SE2(T, check=True)
-        else:
-            raise ValueError("base must be set to None (no tool) or SE2")
+        elif SE2.isvalid(T):  # pragma nocover
+            self._tool = SE2(T, check=True)
 
     def jacob0(self, q, start=None, end=None):
         return self.ets(start, end).jacob0(q)

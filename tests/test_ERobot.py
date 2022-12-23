@@ -176,6 +176,18 @@ class TestERobot2(unittest.TestCase):
         e.step()
         e.close()
 
+    def test_base(self):
+        robot = rtb.models.ETS.Planar2()
+        nt.assert_almost_equal(robot.base.A, sm.SE2().A)
+
+    def test_jacobe(self):
+        robot = rtb.models.ETS.Planar2()
+        J = robot.jacobe(robot.qz)
+
+        a1 = np.array([[0.0, 0.0], [2.0, 1.0], [1.0, 1.0]])
+
+        nt.assert_almost_equal(J, a1)
+
 
 if __name__ == "__main__":  # pragma nocover
 
