@@ -701,27 +701,55 @@ class TestRobot(unittest.TestCase):
         with self.assertRaises(ValueError):
             puma.manipulability(axes="abcdef")  # type: ignore
 
-    # def test_asada(self):
-    #     puma = rtb.models.Puma560()
-    #     q = puma.qn  # type: ignore
+    def test_asada(self):
+        l1 = rtb.Link(ets=rtb.ETS(rtb.ET.Ry()), m=1, r=[0.5, 0, 0], name="l1")
+        l2 = rtb.Link(
+            ets=rtb.ETS(rtb.ET.tx(1)) * rtb.ET.Ry(),
+            m=1,
+            r=[0.5, 0, 0],
+            parent=l1,
+            name="l2",
+        )
+        r = rtb.Robot([l1, l2], name="simple 2 link")
+        q = np.array([1.0, 1.5])
 
-    #     m1 = puma.manipulability(q, method="asada")
-    #     m2 = puma.manipulability(np.c_[q, q].T, method="asada")
-    #     m3 = puma.manipulability(q, axes="trans", method="asada")
-    #     m4 = puma.manipulability(q, axes="rot", method="asada")
-    #     m5 = puma.manipulability(puma.qz, method="asada")
+        m1 = r.manipulability(q, method="asada")
+        m2 = r.manipulability(np.c_[q, q].T, method="asada")
+        m3 = r.manipulability(q, axes="trans", method="asada")
+        m4 = r.manipulability(q, axes="rot", method="asada")
 
-    #     a0 = 0.0044
-    #     a2 = 0.2094
-    #     a3 = 0.1716
-    #     a4 = 0.0
+        a0 = 0.0
+        a2 = 0.0
+        a3 = 0.0
 
-    #     nt.assert_almost_equal(m1, a0, decimal=4)
-    #     nt.assert_almost_equal(m2[0], a0, decimal=4)  # type: ignore
-    #     nt.assert_almost_equal(m2[1], a0, decimal=4)  # type: ignore
-    #     nt.assert_almost_equal(m3, a2, decimal=4)
-    #     nt.assert_almost_equal(m4, a3, decimal=4)
-    #     nt.assert_almost_equal(m5, a4, decimal=4)
+        nt.assert_almost_equal(m1, a0, decimal=4)
+        nt.assert_almost_equal(m2[0], a0, decimal=4)  # type: ignore
+        nt.assert_almost_equal(m2[1], a0, decimal=4)  # type: ignore
+        nt.assert_almost_equal(m3, a2, decimal=4)
+        nt.assert_almost_equal(m4, a3, decimal=4)
+
+    def test_cond(self):
+        r = rtb.models.Panda()
+
+        m = r.manipulability(r.qr, method="invcondition")
+
+        self.assertAlmostEqual(m, 0.11222, places=4)  # type: ignore
+
+    def test_minsingular(self):
+        r = rtb.models.Panda()
+
+        m = r.manipulability(r.qr, method="minsingular")
+
+        self.assertAlmostEqual(m, 0.209013, places=4)  # type: ignore
+
+    def test_jtraj(self):
+        r = rtb.models.Panda()
+
+        q1 = r.q + 0.2
+
+        q = r.jtraj(r.fkine(q1), r.fkine(r.qr), 5)
+
+        self.assertEqual(q.s.shape, (5, 7))
 
 
 if __name__ == "__main__":  # pragma nocover
