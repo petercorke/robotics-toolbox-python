@@ -508,7 +508,7 @@ graph [rankdir=LR];
                             node_options,
                         )
                     )
-                except UnicodeEncodeError:
+                except UnicodeEncodeError:  # pragma nocover
                     file.write(
                         "  {}_ets [shape=box, style=rounded, "
                         'label="{}"{}];\n'.format(
@@ -546,7 +546,7 @@ graph [rankdir=LR];
                             edge_options,
                         )
                     )
-                except UnicodeEncodeError:
+                except UnicodeEncodeError:  # pragma nocover
                     file.write(
                         '  {} -> {} [label="{}", {}];\n'.format(
                             parent,
@@ -1721,10 +1721,16 @@ graph [rankdir=LR];
         I = SpatialInertia.Alloc(n)  # noqa
         s = []  # joint motion subspace
 
+        # Handle trajectory case
+        q = getmatrix(q, (None, None))
+        qd = getmatrix(qd, (None, None))
+        qdd = getmatrix(qdd, (None, None))
+        l, _ = q.shape  # type: ignore
+
         if symbolic:
-            Q = np.empty((n,), dtype="O")  # joint torque/force
+            Q = np.empty((l, n), dtype="O")  # joint torque/force
         else:
-            Q = np.empty((n,))  # joint torque/force
+            Q = np.empty((l, n))  # joint torque/force
 
         # TODO Should the dynamic parameters of static links preceding joint be
         # somehow merged with the joint?
@@ -1735,65 +1741,75 @@ graph [rankdir=LR];
         # A counter through joints
         j = 0
 
-        # initialize intermediate variables
-        for link in self.links:
-            if link.isjoint:
-                I[j] = SpatialInertia(m=link.m, r=link.r)
-                if symbolic and link.Ts is None:
-                    Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
+        for k in range(l):
+            qk = q[k, :]
+            qdk = qd[k, :]
+            qddk = qdd[k, :]
+
+            # initialize intermediate variables
+            for link in self.links:
+                if link.isjoint:
+                    I[j] = SpatialInertia(m=link.m, r=link.r)
+                    if symbolic and link.Ts is None:
+                        Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
+                    else:
+                        Xtree[j] = Ts * SE3(link.Ts, check=False)
+
+                    if link.v is not None:
+                        s.append(link.v.s)
+
+                    # Increment the joint counter
+                    j += 1
+
+                    # Reset the Ts tracker
+                    Ts = SE3()
                 else:
-                    Xtree[j] = Ts * SE3(link.Ts, check=False)
+                    # TODO Keep track of inertia and transform???
+                    Ts *= SE3(link.Ts, check=False)
 
-                if link.v is not None:
-                    s.append(link.v.s)
-
-                # Increment the joint counter
-                j += 1
-
-                # Reset the Ts tracker
-                Ts = SE3()
+            if gravity is None:
+                a_grav = -SpatialAcceleration(self.gravity)
             else:
-                # TODO Keep track of inertia and transform???
-                Ts *= SE3(link.Ts, check=False)
+                a_grav = -SpatialAcceleration(gravity)
 
-        if gravity is None:
-            a_grav = -SpatialAcceleration(self.gravity)
+            # forward recursion
+            for j in range(0, n):
+                vJ = SpatialVelocity(s[j] * qdk[j])
+
+                # transform from parent(j) to j
+                Xup[j] = SE3(self.links[j].A(qk[j])).inv()
+
+                if self.links[j].parent is None:
+                    v[j] = vJ
+                    a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qddk[j])
+                else:
+                    jp = self.links[j].parent.jindex  # type: ignore
+                    v[j] = Xup[j] * v[jp] + vJ
+                    a[j] = (
+                        Xup[j] * a[jp] + SpatialAcceleration(s[j] * qddk[j]) + v[j] @ vJ
+                    )
+
+                f[j] = I[j] * a[j] + v[j] @ (I[j] * v[j])
+
+            # backward recursion
+            for j in reversed(range(0, n)):
+
+                # next line could be dot(), but fails for symbolic arguments
+                Q[k, j] = sum(f[j].A * s[j])
+
+                if self.links[j].parent is not None:
+                    jp = self.links[j].parent.jindex  # type: ignore
+                    f[jp] = f[jp] + Xup[j] * f[j]
+
+        if l == 1:
+            return Q[0]
         else:
-            a_grav = -SpatialAcceleration(gravity)
-
-        # forward recursion
-        for j in range(0, n):
-            vJ = SpatialVelocity(s[j] * qd[j])
-
-            # transform from parent(j) to j
-            Xup[j] = SE3(self.links[j].A(q[j])).inv()
-
-            if self.links[j].parent is None:
-                v[j] = vJ
-                a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qdd[j])
-            else:
-                jp = self.links[j].parent.jindex  # type: ignore
-                v[j] = Xup[j] * v[jp] + vJ
-                a[j] = Xup[j] * a[jp] + SpatialAcceleration(s[j] * qdd[j]) + v[j] @ vJ
-
-            f[j] = I[j] * a[j] + v[j] @ (I[j] * v[j])
-
-        # backward recursion
-        for j in reversed(range(0, n)):
-
-            # next line could be dot(), but fails for symbolic arguments
-            Q[j] = sum(f[j].A * s[j])
-
-            if self.links[j].parent is not None:
-                jp = self.links[j].parent.jindex  # type: ignore
-                f[jp] = f[jp] + Xup[j] * f[j]
-
-        return Q
+            return Q
 
 
-# ============================================================================================= #
-# ================= Robot2 Class ============================================================== #
-# ============================================================================================= #
+# ============================================================================= #
+# ================= Robot2 Class ============================================== #
+# ============================================================================= #
 
 
 class Robot2(BaseRobot[Link2]):
