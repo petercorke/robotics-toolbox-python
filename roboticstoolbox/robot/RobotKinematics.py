@@ -224,7 +224,7 @@ class RobotKinematicsMixin:
         start: Union[str, Link, Gripper, None] = None,
         J0: None = None,
         tool: Union[NDArray, SE3, None] = None,
-    ) -> NDArray:
+    ) -> NDArray:  # pragma nocover
         ...
 
     @overload
@@ -235,7 +235,7 @@ class RobotKinematicsMixin:
         start: Union[str, Link, Gripper, None] = None,
         J0: NDArray = ...,
         tool: Union[NDArray, SE3, None] = None,
-    ) -> NDArray:
+    ) -> NDArray:  # pragma nocover
         ...
 
     def hessian0(
@@ -326,7 +326,7 @@ class RobotKinematicsMixin:
         start: Union[str, Link, Gripper, None] = None,
         Je: None = None,
         tool: Union[NDArray, SE3, None] = None,
-    ) -> NDArray:
+    ) -> NDArray:  # pragma nocover
         ...
 
     @overload
@@ -337,7 +337,7 @@ class RobotKinematicsMixin:
         start: Union[str, Link, Gripper, None] = None,
         Je: NDArray = ...,
         tool: Union[NDArray, SE3, None] = None,
-    ) -> NDArray:
+    ) -> NDArray:  # pragma nocover
         ...
 
     def hessiane(
@@ -1223,8 +1223,6 @@ class RobotKinematicsMixin:
 
         Parameters
         ----------
-        Parameters
-        ----------
         Tep
             The desired end-effector pose
         end
@@ -1386,6 +1384,505 @@ class RobotKinematicsMixin:
             seed=seed,
             k=k,
             method=method,
+            kq=kq,
+            km=km,
+            ps=ps,
+            pi=pi,
+            **kwargs,
+        )
+
+    def ikine_NR(
+        self: KinematicsProtocol,
+        Tep: Union[NDArray, SE3],
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        q0: Union[ArrayLike, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        mask: Union[ArrayLike, None] = None,
+        joint_limits: bool = True,
+        seed: Union[int, None] = None,
+        pinv: bool = False,
+        kq: float = 0.0,
+        km: float = 0.0,
+        ps: float = 0.0,
+        pi: Union[NDArray, float] = 0.3,
+        **kwargs,
+    ):
+        r"""
+        Newton-Raphson Numerical Inverse Kinematics Solver
+
+        A method which provides functionality to perform numerical inverse kinematics (IK)
+        using the Newton-Raphson method.
+
+        See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
+        **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
+
+        Note
+        ----
+        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
+
+        Parameters
+        ----------
+        Tep
+            The desired end-effector pose
+        end
+            the link considered as the end-effector
+        start
+            the link considered as the base frame, defaults to the robots's base frame
+        q0
+            The initial joint coordinate vector
+        ilimit
+            How many iterations are allowed within a search before a new search
+            is started
+        slimit
+            How many searches are allowed before being deemed unsuccessful
+        tol
+            Maximum allowed residual error E
+        mask
+            A 6 vector which assigns weights to Cartesian degrees-of-freedom
+            error priority
+        joint_limits
+            Reject solutions with joint limit violations
+        seed
+            A seed for the private RNG used to generate random joint coordinate
+            vectors
+        pinv
+            If True, will use the psuedoinverse in the `step` method instead of
+            the normal inverse
+        kq
+            The gain for joint limit avoidance. Setting to 0.0 will remove this
+            completely from the solution
+        km
+            The gain for maximisation. Setting to 0.0 will remove this completely
+            from the solution
+        ps
+            The minimum angle/distance (in radians or metres) in which the joint is
+            allowed to approach to its limit
+        pi
+            The influence angle/distance (in radians or metres) in null space motion
+            becomes active
+
+        Synopsis
+        --------
+        Each iteration uses the Newton-Raphson optimisation method
+
+        .. math::
+
+            \vec{q}_{k+1} = \vec{q}_k + {^0\mat{J}(\vec{q}_k)}^{-1} \vec{e}_k
+
+        Examples
+        --------
+        The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
+        pose ``Tep``, and then solves for the joint coordinates which result in the pose
+        ``Tep`` using the `ikine_NR` method.
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        >>> panda.ikine_NR(Tep)
+
+        Notes
+        -----
+        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+        to a non-singular manipulator pose, since it uses the manipulator Jacobian.
+
+        This class supports null-space motion to assist with maximising manipulability and
+        avoiding joint limits. These are enabled by setting kq and km to non-zero values.
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        See Also
+        --------
+        :py:class:`~roboticstoolbox.robot.IK.IK_NR`
+            An IK Solver class which implements the Newton-Raphson optimisation technique
+        ikine_LM
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
+        ikine_GN
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`ETS` class
+        ikine_QP
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`ETS` class
+
+
+        .. versionchanged:: 1.0.3
+            Added the Newton-Raphson IK solver method on the `Robot` class
+
+        """  # noqa
+
+        return self.ets(start, end).ikine_NR(
+            Tep=Tep,
+            q0=q0,
+            ilimit=ilimit,
+            slimit=slimit,
+            tol=tol,
+            joint_limits=joint_limits,
+            mask=mask,
+            seed=seed,
+            pinv=pinv,
+            kq=kq,
+            km=km,
+            ps=ps,
+            pi=pi,
+            **kwargs,
+        )
+
+    def ikine_GN(
+        self: KinematicsProtocol,
+        Tep: Union[NDArray, SE3],
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        q0: Union[ArrayLike, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        mask: Union[ArrayLike, None] = None,
+        joint_limits: bool = True,
+        seed: Union[int, None] = None,
+        pinv: bool = False,
+        kq: float = 0.0,
+        km: float = 0.0,
+        ps: float = 0.0,
+        pi: Union[NDArray, float] = 0.3,
+        **kwargs,
+    ):
+        r"""
+        Gauss-Newton Numerical Inverse Kinematics Solver
+
+        A method which provides functionality to perform numerical inverse kinematics (IK)
+        using the Gauss-Newton method.
+
+        See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
+        **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
+
+        Note
+        ----
+        When using this method with redundant robots (>6 DoF), ``pinv`` must be set to ``True``
+
+        Parameters
+        ----------
+        Tep
+            The desired end-effector pose
+        end
+            the link considered as the end-effector
+        start
+            the link considered as the base frame, defaults to the robots's base frame
+        q0
+            The initial joint coordinate vector
+        ilimit
+            How many iterations are allowed within a search before a new search
+            is started
+        slimit
+            How many searches are allowed before being deemed unsuccessful
+        tol
+            Maximum allowed residual error E
+        mask
+            A 6 vector which assigns weights to Cartesian degrees-of-freedom
+            error priority
+        joint_limits
+            Reject solutions with joint limit violations
+        seed
+            A seed for the private RNG used to generate random joint coordinate
+            vectors
+        pinv
+            If True, will use the psuedoinverse in the `step` method instead of
+            the normal inverse
+        kq
+            The gain for joint limit avoidance. Setting to 0.0 will remove this
+            completely from the solution
+        km
+            The gain for maximisation. Setting to 0.0 will remove this completely
+            from the solution
+        ps
+            The minimum angle/distance (in radians or metres) in which the joint is
+            allowed to approach to its limit
+        pi
+            The influence angle/distance (in radians or metres) in null space motion
+            becomes active
+
+        Synopsis
+        --------
+        Each iteration uses the Gauss-Newton optimisation method
+
+        .. math::
+
+            \vec{q}_{k+1} &= \vec{q}_k +
+            \left(
+            {\mat{J}(\vec{q}_k)}^\top
+            \mat{W}_e \
+            {\mat{J}(\vec{q}_k)}
+            \right)^{-1}
+            \bf{g}_k \\
+            \bf{g}_k &=
+            {\mat{J}(\vec{q}_k)}^\top
+            \mat{W}_e
+            \vec{e}_k
+
+        where :math:`\mat{J} = {^0\mat{J}}` is the base-frame manipulator Jacobian. If
+        :math:`\mat{J}(\vec{q}_k)` is non-singular, and :math:`\mat{W}_e = \mat{1}_n`, then
+        the above provides the pseudoinverse solution. However, if :math:`\mat{J}(\vec{q}_k)`
+        is singular, the above can not be computed and the GN solution is infeasible.
+
+        Examples
+        --------
+        The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
+        pose ``Tep``, and then solves for the joint coordinates which result in the pose
+        ``Tep`` using the `ikine_GN` method.
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        >>> panda.ikine_GN(Tep)
+
+        Notes
+        -----
+        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+        to a non-singular manipulator pose, since it uses the manipulator Jacobian.
+
+        This class supports null-space motion to assist with maximising manipulability and
+        avoiding joint limits. These are enabled by setting kq and km to non-zero values.
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        See Also
+        --------
+        :py:class:`~roboticstoolbox.robot.IK.IK_NR`
+            An IK Solver class which implements the Newton-Raphson optimisation technique
+        ikine_LM
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
+        ikine_NR
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`ETS` class
+        ikine_QP
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_QP` class as a method within the :py:class:`ETS` class
+
+
+        .. versionchanged:: 1.0.3
+            Added the Gauss-Newton IK solver method on the `Robot` class
+
+        """  # noqa
+
+        return self.ets(start, end).ikine_GN(
+            Tep=Tep,
+            q0=q0,
+            ilimit=ilimit,
+            slimit=slimit,
+            tol=tol,
+            joint_limits=joint_limits,
+            mask=mask,
+            seed=seed,
+            pinv=pinv,
+            kq=kq,
+            km=km,
+            ps=ps,
+            pi=pi,
+            **kwargs,
+        )
+
+    def ikine_QP(
+        self: KinematicsProtocol,
+        Tep: Union[NDArray, SE3],
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        q0: Union[ArrayLike, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        mask: Union[ArrayLike, None] = None,
+        joint_limits: bool = True,
+        seed: Union[int, None] = None,
+        kj=1.0,
+        ks=1.0,
+        kq: float = 0.0,
+        km: float = 0.0,
+        ps: float = 0.0,
+        pi: Union[NDArray, float] = 0.3,
+        **kwargs,
+    ):
+        r"""
+        Quadratic Programming Numerical Inverse Kinematics Solver
+
+        A method that provides functionality to perform numerical inverse kinematics
+        (IK) using a quadratic progamming approach.
+
+        See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
+        **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
+
+        Parameters
+        ----------
+        Tep
+            The desired end-effector pose
+        end
+            the link considered as the end-effector
+        start
+            the link considered as the base frame, defaults to the robots's base frame
+        q0
+            The initial joint coordinate vector
+        ilimit
+            How many iterations are allowed within a search before a new search
+            is started
+        slimit
+            How many searches are allowed before being deemed unsuccessful
+        tol
+            Maximum allowed residual error E
+        mask
+            A 6 vector which assigns weights to Cartesian degrees-of-freedom
+            error priority
+        joint_limits
+            Reject solutions with joint limit violations
+        seed
+            A seed for the private RNG used to generate random joint coordinate
+            vectors
+        kj
+            A gain for joint velocity norm minimisation
+        ks
+            A gain which adjusts the cost of slack (intentional error)
+        kq
+            The gain for joint limit avoidance. Setting to 0.0 will remove this
+            completely from the solution
+        km
+            The gain for maximisation. Setting to 0.0 will remove this completely
+            from the solution
+        ps
+            The minimum angle/distance (in radians or metres) in which the joint is
+            allowed to approach to its limit
+        pi
+            The influence angle/distance (in radians or metres) in null space motion
+            becomes active
+
+        Raises
+        ------
+        ImportError
+            If the package ``qpsolvers`` is not installed
+
+        Synopsis
+        --------
+        Each iteration uses the following approach
+
+        .. math::
+
+            \vec{q}_{k+1} = \vec{q}_{k} + \dot{\vec{q}}.
+
+        where the QP is defined as
+
+        .. math::
+
+            \min_x \quad f_o(\vec{x}) &= \frac{1}{2} \vec{x}^\top \mathcal{Q} \vec{x}+ \mathcal{C}^\top \vec{x}, \\
+            \text{subject to} \quad \mathcal{J} \vec{x} &= \vec{\nu},  \\
+            \mathcal{A} \vec{x} &\leq \mathcal{B},  \\
+            \vec{x}^- &\leq \vec{x} \leq \vec{x}^+
+
+        with
+
+        .. math::
+
+            \vec{x} &=
+            \begin{pmatrix}
+                \dvec{q} \\ \vec{\delta}
+            \end{pmatrix} \in \mathbb{R}^{(n+6)}  \\
+            \mathcal{Q} &=
+            \begin{pmatrix}
+                \lambda_q \mat{1}_{n} & \mathbf{0}_{6 \times 6} \\ \mathbf{0}_{n \times n} & \lambda_\delta \mat{1}_{6}
+            \end{pmatrix} \in \mathbb{R}^{(n+6) \times (n+6)} \\
+            \mathcal{J} &=
+            \begin{pmatrix}
+                \mat{J}(\vec{q}) & \mat{1}_{6}
+            \end{pmatrix} \in \mathbb{R}^{6 \times (n+6)} \\
+            \mathcal{C} &=
+            \begin{pmatrix}
+                \mat{J}_m \\ \bf{0}_{6 \times 1}
+            \end{pmatrix} \in \mathbb{R}^{(n + 6)} \\
+            \mathcal{A} &=
+            \begin{pmatrix}
+                \mat{1}_{n \times n + 6} \\
+            \end{pmatrix} \in \mathbb{R}^{(l + n) \times (n + 6)} \\
+            \mathcal{B} &=
+            \eta
+            \begin{pmatrix}
+                \frac{\rho_0 - \rho_s}
+                        {\rho_i - \rho_s} \\
+                \vdots \\
+                \frac{\rho_n - \rho_s}
+                        {\rho_i - \rho_s}
+            \end{pmatrix} \in \mathbb{R}^{n} \\
+            \vec{x}^{-, +} &=
+            \begin{pmatrix}
+                \dvec{q}^{-, +} \\
+                \vec{\delta}^{-, +}
+            \end{pmatrix} \in \mathbb{R}^{(n+6)},
+
+        where :math:`\vec{\delta} \in \mathbb{R}^6` is the slack vector,
+        :math:`\lambda_\delta \in \mathbb{R}^+` is a gain term which adjusts the
+        cost of the norm of the slack vector in the optimiser,
+        :math:`\dvec{q}^{-,+}` are the minimum and maximum joint velocities, and
+        :math:`\dvec{\delta}^{-,+}` are the minimum and maximum slack velocities.
+
+        Examples
+        --------
+        The following example gets the ``ets`` of a ``panda`` robot object, makes a goal
+        pose ``Tep``, and then solves for the joint coordinates which result in the pose
+        ``Tep`` using the `ikine_QP` method.
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+        >>> panda.ikine_QP(Tep)
+
+        Notes
+        -----
+        When using the this method, the initial joint coordinates :math:`q_0`, should correspond
+        to a non-singular manipulator pose, since it uses the manipulator Jacobian.
+
+        This class supports null-space motion to assist with maximising manipulability and
+        avoiding joint limits. These are enabled by setting kq and km to non-zero values.
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        See Also
+        --------
+        :py:class:`~roboticstoolbox.robot.IK.IK_NR`
+            An IK Solver class which implements the Newton-Raphson optimisation technique
+        ikine_LM
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_LM` class as a method within the :py:class:`ETS` class
+        ikine_GN
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_GN` class as a method within the :py:class:`ETS` class
+        ikine_NR
+            Implements the :py:class:`~roboticstoolbox.robot.IK.IK_NR` class as a method within the :py:class:`ETS` class
+
+
+        .. versionchanged:: 1.0.4
+            Added the Quadratic Programming IK solver method on the `Robot` class
+
+        """  # noqa: E501
+
+        return self.ets(start, end).ikine_QP(
+            Tep=Tep,
+            q0=q0,
+            ilimit=ilimit,
+            slimit=slimit,
+            tol=tol,
+            joint_limits=joint_limits,
+            mask=mask,
+            seed=seed,
+            ks=ks,
+            kj=kj,
             kq=kq,
             km=km,
             ps=ps,

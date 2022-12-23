@@ -2,15 +2,12 @@
 @author: Jesse Haviland
 """
 
-import numpy.testing as nt
+# import numpy.testing as nt
 import roboticstoolbox as rtb
 import numpy as np
-
-# import spatialmath.base as sm
-from spatialmath import SE3
-from spatialmath.base import tr2jac
 import unittest
-import sympy
+
+# import sympy
 import pytest
 
 test_tol = 1e-5
@@ -39,7 +36,7 @@ class TestIK(unittest.TestCase):
 
     def test_IK_NR2(self):
 
-        q0 = [1, 2, 3, 4, 5, 6, 7]
+        q0 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
 
         tol = 1e-6
 
@@ -61,7 +58,7 @@ class TestIK(unittest.TestCase):
 
     def test_IK_NR3(self):
 
-        q0 = np.array([1, 2, 3, 4, 5, 6, 7])
+        q0 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
 
         tol = 1e-6
 
@@ -85,11 +82,11 @@ class TestIK(unittest.TestCase):
 
         q0 = np.array(
             [
-                [1.0, 2, 3, 4, 5, 6, 7],
-                [1.0, 2, 1, 2, 1, 2, 1],
-                [1.0, 2, 3, 1, 2, 3, 1],
-                [2.0, 2, 2, 2, 2, 2, 2],
-                [0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4],
+                [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
+                [1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0],
+                [1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0],
+                [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+                [0.0, -0.3, 0.0, -2.2, 0.0, 2.0, np.pi / 4],
             ]
         )
 
@@ -383,14 +380,17 @@ class TestIK(unittest.TestCase):
         tol = 1e-6
 
         panda = rtb.models.Panda().ets()
+        panda2 = rtb.models.Panda()
 
         Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
         solver = rtb.IK_NR()
 
         sol = panda.ikine_NR(Tep, pinv=True, tol=tol)
+        sol2 = panda2.ikine_NR(Tep, pinv=True, tol=tol)
 
         self.assertEqual(sol.success, True)
+        self.assertEqual(sol2.success, True)
 
         Tq = panda.eval(sol.q)
 
@@ -423,14 +423,17 @@ class TestIK(unittest.TestCase):
         tol = 1e-6
 
         panda = rtb.models.Panda().ets()
+        panda2 = rtb.models.Panda()
 
         Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
         solver = rtb.IK_LM()
 
         sol = panda.ikine_LM(Tep, tol=tol)
+        sol2 = panda2.ikine_LM(Tep, tol=tol)
 
         self.assertEqual(sol.success, True)
+        self.assertEqual(sol2.success, True)
 
         Tq = panda.eval(sol.q)
 
@@ -463,14 +466,17 @@ class TestIK(unittest.TestCase):
         tol = 1e-6
 
         panda = rtb.models.Panda().ets()
+        panda2 = rtb.models.Panda()
 
         Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
         solver = rtb.IK_GN()
 
         sol = panda.ikine_GN(Tep, pinv=True, tol=tol)
+        sol2 = panda2.ikine_GN(Tep, pinv=True, tol=tol)
 
         self.assertEqual(sol.success, True)
+        self.assertEqual(sol2.success, True)
 
         Tq = panda.eval(sol.q)
 
@@ -503,6 +509,7 @@ class TestIK(unittest.TestCase):
         tol = 1e-6
 
         panda = rtb.models.Panda().ets()
+        panda2 = rtb.models.Panda()
 
         Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
@@ -523,14 +530,17 @@ class TestIK(unittest.TestCase):
         tol = 1e-6
 
         panda = rtb.models.Panda().ets()
+        panda2 = rtb.models.Panda()
 
         Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
         solver = rtb.IK_QP()
 
         sol = panda.ikine_QP(Tep, tol=tol)
+        sol2 = panda2.ikine_QP(Tep, tol=tol)
 
         self.assertEqual(sol.success, True)
+        self.assertEqual(sol2.success, True)
 
         Tq = panda.eval(sol.q)
 
