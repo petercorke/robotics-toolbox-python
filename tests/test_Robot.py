@@ -657,6 +657,60 @@ class TestRobot(unittest.TestCase):
         r.dotfile("test.dot", ets="None")  # type: ignore
         os.remove("test.dot")
 
+    def test_fkine_all(self):
+        r = rtb.models.ETS.Panda()
+
+        r.fkine_all(r.q)
+
+    def test_fkine_all2(self):
+        r = rtb.models.YuMi()
+
+        r.fkine_all(r.q)
+
+    def test_yoshi(self):
+        puma = rtb.models.Puma560()
+        q = puma.qn  # type: ignore
+
+        m1 = puma.manipulability(q)
+        m2 = puma.manipulability(np.c_[q, q].T)
+        m3 = puma.manipulability(q, axes="trans")
+        m4 = puma.manipulability(q, axes="rot")
+
+        a0 = 0.0805
+        a2 = 0.1354
+        a3 = 2.44949
+
+        nt.assert_almost_equal(m1, a0, decimal=4)
+        nt.assert_almost_equal(m2[0], a0, decimal=4)  # type: ignore
+        nt.assert_almost_equal(m2[1], a0, decimal=4)  # type: ignore
+        nt.assert_almost_equal(m3, a2, decimal=4)
+        nt.assert_almost_equal(m4, a3, decimal=4)
+
+        with self.assertRaises(ValueError):
+            puma.manipulability(axes="abcdef")  # type: ignore
+
+    # def test_asada(self):
+    #     puma = rtb.models.Puma560()
+    #     q = puma.qn  # type: ignore
+
+    #     m1 = puma.manipulability(q, method="asada")
+    #     m2 = puma.manipulability(np.c_[q, q].T, method="asada")
+    #     m3 = puma.manipulability(q, axes="trans", method="asada")
+    #     m4 = puma.manipulability(q, axes="rot", method="asada")
+    #     m5 = puma.manipulability(puma.qz, method="asada")
+
+    #     a0 = 0.0044
+    #     a2 = 0.2094
+    #     a3 = 0.1716
+    #     a4 = 0.0
+
+    #     nt.assert_almost_equal(m1, a0, decimal=4)
+    #     nt.assert_almost_equal(m2[0], a0, decimal=4)  # type: ignore
+    #     nt.assert_almost_equal(m2[1], a0, decimal=4)  # type: ignore
+    #     nt.assert_almost_equal(m3, a2, decimal=4)
+    #     nt.assert_almost_equal(m4, a3, decimal=4)
+    #     nt.assert_almost_equal(m5, a4, decimal=4)
+
 
 if __name__ == "__main__":  # pragma nocover
     unittest.main()
