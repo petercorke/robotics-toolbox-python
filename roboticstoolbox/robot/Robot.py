@@ -498,12 +498,28 @@ graph [rankdir=LR];
                     node_options = ', fontcolor="blue"'
                 else:
                     node_options = ""
-                file.write(
-                    "  {}_ets [shape=box, style=rounded, "
-                    'label="{}"{}];\n'.format(
-                        link.name, link.ets.__str__(q=f"q{link.jindex}"), node_options
+
+                try:
+                    file.write(
+                        "  {}_ets [shape=box, style=rounded, "
+                        'label="{}"{}];\n'.format(
+                            link.name,
+                            link.ets.__str__(q=f"q{link.jindex}"),
+                            node_options,
+                        )
                     )
-                )
+                except UnicodeEncodeError:
+                    file.write(
+                        "  {}_ets [shape=box, style=rounded, "
+                        'label="{}"{}];\n'.format(
+                            link.name,
+                            link.ets.__str__(q=f"q{link.jindex}")
+                            .encode("ascii", "ignore")
+                            .decode("ascii"),
+                            node_options,
+                        )
+                    )
+
                 file.write("  {} -> {}_ets;\n".format(parent, link.name))
                 file.write(
                     "  {}_ets -> {} [{}];\n".format(link.name, link.name, edge_options)
