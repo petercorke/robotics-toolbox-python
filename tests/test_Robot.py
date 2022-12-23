@@ -8,6 +8,7 @@ import roboticstoolbox as rtb
 import unittest
 import os
 import spatialgeometry as sg
+from spatialmath.base import tr2jac
 
 # from spatialmath import SE3
 
@@ -1345,6 +1346,63 @@ class TestRobot(unittest.TestCase):
 
         nt.assert_almost_equal(Ain, a1, decimal=4)  # type: ignore
         nt.assert_almost_equal(Bin, a2, decimal=4)  # type: ignore
+
+    def test_hessiane(self):
+        deg = np.pi / 180
+        mm = 1e-3
+        tool_offset = (103) * mm
+
+        l0 = rtb.ET.tz(0.333) * rtb.ET.Rz(jindex=0)
+
+        l1 = rtb.ET.Rx(-90 * deg) * rtb.ET.Rz(jindex=1)
+
+        l2 = rtb.ET.Rx(90 * deg) * rtb.ET.tz(0.316) * rtb.ET.Rz(jindex=2)
+
+        l3 = rtb.ET.tx(0.0825) * rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=3)
+
+        l4 = (
+            rtb.ET.tx(-0.0825)
+            * rtb.ET.Rx(-90 * deg)
+            * rtb.ET.tz(0.384)
+            * rtb.ET.Rz(jindex=4)
+        )
+
+        l5 = rtb.ET.Rx(90 * deg) * rtb.ET.Rz(jindex=5)
+
+        l6 = (
+            rtb.ET.tx(0.088)
+            * rtb.ET.Rx(90 * deg)
+            * rtb.ET.tz(0.107)
+            * rtb.ET.Rz(jindex=6)
+        )
+
+        ee = rtb.ET.tz(tool_offset) * rtb.ET.Rz(-np.pi / 4)
+
+        r = rtb.Robot(l0 + l1 + l2 + l3 + l4 + l5 + l6 + ee)
+
+        q1 = np.array([1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9])
+        q2 = [1.4, 0.2, 1.8, 0.7, 0.1, 3.1, 2.9]
+        q3 = np.expand_dims(q1, 0)
+        q4 = np.expand_dims(q1, 1)
+
+        H0 = r.hessian0(q1)
+        He = np.empty((r.n, 6, r.n))
+        T = r.fkine(q1, include_base=False).A
+
+        for i in range(r.n):
+            He[i, :, :] = tr2jac(T.T) @ H0[i, :, :]
+
+        J = r.jacobe(q1)
+
+        nt.assert_array_almost_equal(r.hessiane(q1), He)
+        nt.assert_array_almost_equal(r.hessiane(q2), He)
+        nt.assert_array_almost_equal(r.hessiane(q3), He)
+        nt.assert_array_almost_equal(r.hessiane(q4), He)
+
+        nt.assert_array_almost_equal(r.hessiane(Je=J), He)
+        nt.assert_array_almost_equal(r.hessiane(Je=J), He)
+        nt.assert_array_almost_equal(r.hessiane(Je=J), He)
+        nt.assert_array_almost_equal(r.hessiane(Je=J), He)
 
 
 if __name__ == "__main__":  # pragma nocover

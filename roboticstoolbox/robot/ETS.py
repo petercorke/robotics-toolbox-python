@@ -18,7 +18,6 @@ from numpy import (
     sqrt,
     min,
     max,
-    where,
     cross,
     flip,
     concatenate,
@@ -35,12 +34,11 @@ from spatialmath.base import (
     t2r,
     rotvelxform,
     simplify,
+    getmatrix,
 )
 from roboticstoolbox import rtb_get_param
 from roboticstoolbox.robot.IK import IK_GN, IK_LM, IK_NR, IK_QP
 
-from collections import UserList
-from spatialmath.base import issymbol, getmatrix
 from roboticstoolbox.fknm import (
     ETS_init,
     ETS_fkine,
@@ -55,10 +53,7 @@ from roboticstoolbox.fknm import (
     IK_LM_Sugihara_c,
 )
 from copy import deepcopy
-from roboticstoolbox import rtb_get_param
 from roboticstoolbox.robot.ET import ET, ET2
-from spatialmath.base import getvector
-from spatialmath import SE3
 from typing import Union, overload, List, Set, Tuple
 from sys import version_info
 from roboticstoolbox.tools.types import ArrayLike
@@ -228,7 +223,7 @@ class BaseETS(UserList):
             >>> e.joint_idx()
 
         """
-        return where([e.isjoint for e in self])[0]
+        return where([e.isjoint for e in self])[0]  # type: ignore
 
     def joints(self) -> List[ET]:
         """
@@ -717,7 +712,8 @@ class ETS(BaseETS):
 
         elif jindices > 0 and not jindices == self.n:
             raise ValueError(
-                "You can not have some jindices set for the ET's in arg. It must be all or none"
+                "You can not have some jindices set for the ET's in arg. It must be all"
+                " or none"
             )
         elif jindices == 0 and self.n > 0:
             # Set them ourself
@@ -966,7 +962,7 @@ class ETS(BaseETS):
                     Tk = A @ Tk
 
             # add base transform if it is set
-            if include_base == True and bases is not None:
+            if include_base is True and bases is not None:
                 Tk = bases @ Tk
 
             # append
@@ -1135,7 +1131,7 @@ class ETS(BaseETS):
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
         function calulcates this based on the ETS of the robot.
-        
+
         One of J0 or q
         is required. Supply J0 if already calculated to save computation time
 
@@ -1215,7 +1211,7 @@ class ETS(BaseETS):
         The manipulator Hessian tensor maps joint acceleration to end-effector
         spatial acceleration, expressed in the world-coordinate frame. This
         function calulcates this based on the ETS of the robot.
-        
+
         One of Je or q
         is required. Supply Je if already calculated to save computation time
 
@@ -1604,12 +1600,16 @@ class ETS(BaseETS):
             # Add an axis to the count array
             count = concatenate(([0], count))
 
-            # This variables corresponds to indices within the previous partial derivatives
+            # This variables corresponds to indices within the previous
+            # partial derivatives
             # to be cross prodded
             # The order is: "[j, k, l, m, n, o, ...]"
-            # Although, our partial derivatives have the order: pd[..., o, n, m, l, k, cartesian DoF, j]
-            # For example, consider the Hessian Tensor H[n, 6, n], the index H[k, :, j]. This corrsponds
-            # to the second partial derivative of the kinematics of joint j with respect to joint k.
+            # Although, our partial derivatives have the order:
+            # pd[..., o, n, m, l, k, cartesian DoF, j]
+            # For example, consider the Hessian Tensor H[n, 6, n],
+            # the index H[k, :, j]. This corrsponds
+            # to the second partial derivative of the kinematics of joint j with
+            # respect to joint k.
             indices = add_indices(indices, c)
 
             # This variable corresponds to the indices in Td which corresponds to the
@@ -1629,7 +1629,8 @@ class ETS(BaseETS):
                 rot = zeros(3)
                 trn = zeros(3)
 
-                # This loop calculates a single column ([trn, rot]) of the tensor for dT(x)
+                # This loop calculates a single column ([trn, rot])
+                # of the tensor for dT(x)
                 for j in range(len(indices)):
                     pdr0 = dT[pdi[j][0]]
                     pdr1 = dT[pdi[j][1]]
@@ -1637,11 +1638,13 @@ class ETS(BaseETS):
                     idx0 = count[indices[j][0]]
                     idx1 = count[indices[j][1]]
 
-                    # This is a list of indices selecting the slices of the previous tensor
+                    # This is a list of indices selecting the slices of the
+                    # previous tensor
                     idx0_slices = flip(idx0[1:])
                     idx1_slices = flip(idx1[1:])
 
-                    # This index selecting the column within the 2d slice of the previous tensor
+                    # This index selecting the column within the 2d slice of the
+                    # previous tensor
                     idx0_n = idx0[0]
                     idx1_n = idx1[0]
 
@@ -1771,7 +1774,8 @@ class ETS(BaseETS):
 
         :seealso:
             TODO
-        """
+
+        """  # noqa
 
         return IK_LM_Chan_c(self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
 
@@ -1876,7 +1880,7 @@ class ETS(BaseETS):
 
         :seealso:
             TODO
-        """
+        """  # noqa
 
         return IK_LM_Wampler_c(
             self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
@@ -1983,7 +1987,7 @@ class ETS(BaseETS):
 
         :seealso:
             TODO
-        """
+        """  # noqa
 
         return IK_LM_Sugihara_c(
             self._fknm, Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
@@ -2091,7 +2095,7 @@ class ETS(BaseETS):
 
         :seealso:
             TODO
-        """
+        """  # noqa
 
         return IK_NR_c(
             self._fknm,
@@ -2208,7 +2212,7 @@ class ETS(BaseETS):
 
         :seealso:
             TODO
-        """
+        """  # noqa
 
         return IK_GN_c(
             self._fknm,
@@ -2396,7 +2400,7 @@ class ETS(BaseETS):
         .. versionchanged:: 1.0.3
             Added the Levemberg-Marquadt IK solver method on the `ETS` class
 
-        """
+        """  # noqa
 
         solver = IK_LM(
             ilimit=ilimit,
@@ -2536,7 +2540,7 @@ class ETS(BaseETS):
         .. versionchanged:: 1.0.3
             Added the Newton-Raphson IK solver method on the `ETS` class
 
-        """
+        """  # noqa
 
         solver = IK_NR(
             ilimit=ilimit,
@@ -2690,7 +2694,7 @@ class ETS(BaseETS):
         .. versionchanged:: 1.0.3
             Added the Gauss-Newton IK solver method on the `ETS` class
 
-        """
+        """  # noqa
 
         solver = IK_GN(
             ilimit=ilimit,
@@ -2794,16 +2798,16 @@ class ETS(BaseETS):
 
         .. math::
 
-            \min_x \quad f_o(\vec{x}) &= \frac{1}{2} \vec{x}^\top \mathcal{Q} \vec{x}+ \mathcal{C}^\top \vec{x}, \\ 
+            \min_x \quad f_o(\vec{x}) &= \frac{1}{2} \vec{x}^\top \mathcal{Q} \vec{x}+ \mathcal{C}^\top \vec{x}, \\
             \text{subject to} \quad \mathcal{J} \vec{x} &= \vec{\nu},  \\
             \mathcal{A} \vec{x} &\leq \mathcal{B},  \\
-            \vec{x}^- &\leq \vec{x} \leq \vec{x}^+ 
+            \vec{x}^- &\leq \vec{x} \leq \vec{x}^+
 
         with
 
         .. math::
 
-            \vec{x} &= 
+            \vec{x} &=
             \begin{pmatrix}
                 \dvec{q} \\ \vec{\delta}
             \end{pmatrix} \in \mathbb{R}^{(n+6)}  \\
@@ -2815,24 +2819,24 @@ class ETS(BaseETS):
             \begin{pmatrix}
                 \mat{J}(\vec{q}) & \mat{1}_{6}
             \end{pmatrix} \in \mathbb{R}^{6 \times (n+6)} \\
-            \mathcal{C} &= 
+            \mathcal{C} &=
             \begin{pmatrix}
                 \mat{J}_m \\ \bf{0}_{6 \times 1}
             \end{pmatrix} \in \mathbb{R}^{(n + 6)} \\
-            \mathcal{A} &= 
+            \mathcal{A} &=
             \begin{pmatrix}
                 \mat{1}_{n \times n + 6} \\
             \end{pmatrix} \in \mathbb{R}^{(l + n) \times (n + 6)} \\
-            \mathcal{B} &= 
+            \mathcal{B} &=
             \eta
             \begin{pmatrix}
                 \frac{\rho_0 - \rho_s}
                         {\rho_i - \rho_s} \\
                 \vdots \\
                 \frac{\rho_n - \rho_s}
-                        {\rho_i - \rho_s} 
+                        {\rho_i - \rho_s}
             \end{pmatrix} \in \mathbb{R}^{n} \\
-            \vec{x}^{-, +} &= 
+            \vec{x}^{-, +} &=
             \begin{pmatrix}
                 \dvec{q}^{-, +} \\
                 \vec{\delta}^{-, +}
@@ -2841,7 +2845,7 @@ class ETS(BaseETS):
         where :math:`\vec{\delta} \in \mathbb{R}^6` is the slack vector,
         :math:`\lambda_\delta \in \mathbb{R}^+` is a gain term which adjusts the
         cost of the norm of the slack vector in the optimiser,
-        :math:`\dvec{q}^{-,+}` are the minimum and maximum joint velocities, and 
+        :math:`\dvec{q}^{-,+}` are the minimum and maximum joint velocities, and
         :math:`\dvec{\delta}^{-,+}` are the minimum and maximum slack velocities.
 
         Examples
@@ -2886,7 +2890,7 @@ class ETS(BaseETS):
         .. versionchanged:: 1.0.3
             Added the Quadratic Programming IK solver method on the `ETS` class
 
-        """
+        """  # noqa: E501
 
         solver = IK_QP(
             ilimit=ilimit,
@@ -3006,7 +3010,8 @@ class ETS2(BaseETS):
             self._auto_jindex = True
         elif jindices > 0 and not jindices == self.n:
             raise ValueError(
-                "You can not have some jindices set for the ET's in arg. It must be all or none"
+                "You can not have some jindices set for the ET's in arg. It must be all"
+                " or none"
             )
         elif jindices == 0 and self.n > 0:
             # Set them ourself
@@ -3232,7 +3237,7 @@ class ETS2(BaseETS):
                     Tk = A @ Tk
 
             # add base transform if it is set
-            if include_base == True and bases is not None:
+            if include_base is True and bases is not None:
                 Tk = bases @ Tk
 
             # append
