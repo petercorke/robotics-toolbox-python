@@ -637,25 +637,37 @@ class TestRobot(unittest.TestCase):
         r = rtb.models.Panda()
 
         r.dotfile("test.dot")
-        os.remove("test.dot")
+        try:
+            os.remove("test.dot")
+        except PermissionError:
+            pass
 
     def test_dotfile2(self):
         r = rtb.models.Frankie()
 
         r.dotfile("test.dot", jtype=True, etsbox=True)
-        os.remove("test.dot")
+        try:
+            os.remove("test.dot")
+        except PermissionError:
+            pass
 
     def test_dotfile3(self):
         r = rtb.models.Panda()
 
         r.dotfile("test.dot", ets="brief")
-        os.remove("test.dot")
+        try:
+            os.remove("test.dot")
+        except PermissionError:
+            pass
 
     def test_dotfile4(self):
         r = rtb.models.Panda()
 
         r.dotfile("test.dot", ets="None")  # type: ignore
-        os.remove("test.dot")
+        try:
+            os.remove("test.dot")
+        except PermissionError:
+            pass
 
     def test_fkine_all(self):
         r = rtb.models.ETS.Panda()

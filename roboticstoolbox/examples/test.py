@@ -3,7 +3,11 @@ import roboticstoolbox as rtb
 import spatialmath as sm
 
 
-r = rtb.models.Fetch()
+puma = rtb.models.DH.Puma560()
+q = puma.qn  # type: ignore
 
-for l in r:
-    print(l.name)
+# m1 = puma.manipulability(q, method="asada")
+
+# print(m1)
+
+print(puma.inertia(q))
