@@ -22,6 +22,7 @@ dependencies = [
     "swift-sim~=1.0.0",
     "rtb-data",
     "progress",
+    "typing_extensions",
 ]
 
 license = { file = "LICENSE" }
