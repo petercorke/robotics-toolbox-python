@@ -76,9 +76,17 @@ class IKSolution:
         else:
             # Otherwise it is a numeric solution
             if self.success:
-                return f"IKSolution: q={q_str}, success=True, iterations={self.iterations}, searches={self.searches}, residual={self.residual:.3g}"
+                return (
+                    f"IKSolution: q={q_str}, success=True,"
+                    f" iterations={self.iterations}, searches={self.searches},"
+                    f" residual={self.residual:.3g}"
+                )
             else:
-                return f"IKSolution: q={q_str}, success=False, reason={self.reason}, iterations={self.iterations}, searches={self.searches}, residual={np.round(self.residual, 4):.3g}"
+                return (
+                    f"IKSolution: q={q_str}, success=False, reason={self.reason},"
+                    f" iterations={self.iterations}, searches={self.searches},"
+                    f" residual={np.round(self.residual, 4):.3g}"
+                )
 
 
 class IKSolver(ABC):
@@ -582,7 +590,7 @@ class IK_NR(IKSolver):
     .. versionchanged:: 1.0.3
         Added the Newton-Raphson IK solver class
 
-    """
+    """  # noqa
 
     def __init__(
         self,
@@ -770,7 +778,7 @@ class IK_LM(IKSolver):
     .. versionchanged:: 1.0.3
         Added the Levemberg-Marquadt IK solver class
 
-    """
+    """  # noqa
 
     def __init__(
         self,
@@ -904,7 +912,8 @@ class IK_LM(IKSolver):
         q
             The new joint coordinate vector
 
-        """
+        """  # noqa
+
         Te = ets.eval(q)
         e, E = self.error(Te, Tep)
 
@@ -1022,7 +1031,7 @@ class IK_GN(IKSolver):
     .. versionchanged:: 1.0.3
         Added the Gauss-Newton IK solver class
 
-    """
+    """  # noqa
 
     def __init__(
         self,
@@ -1114,7 +1123,7 @@ class IK_GN(IKSolver):
         q
             The new joint coordinate vector
 
-        """
+        """  # noqa
 
         Te = ets.eval(q)
         e, E = self.error(Te, Tep)
@@ -1223,7 +1232,7 @@ class IK_QP(IKSolver):
     .. versionchanged:: 1.0.3
         Added the Quadratic Programming IK solver class
 
-    """
+    """  # noqa
 
     def __init__(
         self,
@@ -1245,7 +1254,8 @@ class IK_QP(IKSolver):
 
         if not _qp:  # pragma: nocover
             raise ImportError(
-                "the package qpsolvers is required for this class. \nInstall using 'pip install qpsolvers'"
+                "the package qpsolvers is required for this class. \nInstall using 'pip"
+                " install qpsolvers'"
             )
 
         super().__init__(
@@ -1361,7 +1371,7 @@ class IK_QP(IKSolver):
         q
             The new joint coordinate vector
 
-        """
+        """  # noqa
 
         Te = ets.eval(q)
         e, E = self.error(Te, Tep)

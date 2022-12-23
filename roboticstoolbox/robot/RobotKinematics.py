@@ -85,7 +85,7 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """
+        """  # noqa
 
         return SE3(
             self.ets(start, end).fkine(
@@ -151,7 +151,7 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """
+        """  # noqa
 
         return self.ets(start, end).jacob0(q, tool=tool)
 
@@ -212,7 +212,7 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """
+        """  # noqa
 
         return self.ets(start, end).jacobe(q, tool=tool)
 
@@ -268,12 +268,12 @@ class RobotKinematicsMixin:
         tool
             a static tool transformation matrix to apply to the
             end of end, defaults to None
-        
+
         Returns
         -------
         h0
             The manipulator Hessian in the ``start`` frame
-        
+
         Synopsis
         --------
         This method computes the manipulator Hessian in the ``start`` frame.  If
@@ -296,7 +296,7 @@ class RobotKinematicsMixin:
         Similarly, we can write
         .. math::
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
-        
+
         Examples
         --------
         The following example makes a ``Panda`` robot object, and solves for the
@@ -314,7 +314,7 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        """
+        """  # noqa
 
         return self.ets(start, end).hessian0(q, J0=J0, tool=tool)
 
@@ -370,12 +370,12 @@ class RobotKinematicsMixin:
         tool
             a static tool transformation matrix to apply to the
             end of end, defaults to None
-        
+
         Returns
         -------
         he
             The manipulator Hessian in ``end`` frame
-        
+
         Synopsis
         --------
         This method computes the manipulator Hessian in the ``end`` frame.  If
@@ -398,7 +398,7 @@ class RobotKinematicsMixin:
         Similarly, we can write
         .. math::
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
-        
+
         Examples
         --------
         The following example makes a ``Panda`` robot object, and solves for the
@@ -416,7 +416,7 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        """
+        """  # noqa
 
         return self.ets(start, end).hessiane(q, Je=Je, tool=tool)
 
@@ -471,7 +471,7 @@ class RobotKinematicsMixin:
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
           Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-        """
+        """  # noqa
 
         return self.ets(start, end).partial_fkine0(q, n=n)
 
@@ -532,7 +532,7 @@ class RobotKinematicsMixin:
         >>> puma = rtb.models.ETS.Puma560()
         >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
 
-        """
+        """  # noqa
 
         return self.ets(start, end).jacob0_analytical(
             q, tool=tool, representation=representation
@@ -664,7 +664,7 @@ class RobotKinematicsMixin:
         See Also
         --------
             TODO
-        """
+        """  # noqa
 
         return self.ets(start, end).ik_lm_chan(
             Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
@@ -794,7 +794,7 @@ class RobotKinematicsMixin:
         See Also
         --------
             TODO
-        """
+        """  # noqa
 
         return self.ets(start, end).ik_lm_wampler(
             Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
@@ -924,7 +924,7 @@ class RobotKinematicsMixin:
         See Also
         --------
             TODO
-        """
+        """  # noqa
 
         return self.ets(start, end).ik_lm_sugihara(
             Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
@@ -1055,7 +1055,7 @@ class RobotKinematicsMixin:
         See Also
         --------
             TODO
-        """
+        """  # noqa
 
         return self.ets(start, end).ik_nr(
             Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
@@ -1186,7 +1186,7 @@ class RobotKinematicsMixin:
         See Also
         --------
             TODO
-        """
+        """  # noqa
 
         return self.ets(start, end).ik_gn(
             Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
@@ -1218,7 +1218,7 @@ class RobotKinematicsMixin:
         A method which provides functionality to perform numerical inverse kinematics (IK)
         using the Levemberg-Marquadt method.
 
-        See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a 
+        See the :ref:`Inverse Kinematics Docs Page <IK>` for more details and for a
         **tutorial** on numerical IK, see `here <https://bit.ly/3ak5GDi>`_.
 
         Parameters
@@ -1269,14 +1269,14 @@ class RobotKinematicsMixin:
 
         Synopsis
         --------
-        The operation is defined by the choice of the ``method`` kwarg. 
+        The operation is defined by the choice of the ``method`` kwarg.
 
         The step is deined as
 
         .. math::
 
-            \vec{q}_{k+1} 
-            &= 
+            \vec{q}_{k+1}
+            &=
             \vec{q}_k +
             \left(
                 \mat{A}_k
@@ -1373,7 +1373,7 @@ class RobotKinematicsMixin:
         .. versionchanged:: 1.0.3
             Added the Levemberg-Marquadt IK solver method on the `Robot` class
 
-        """
+        """  # noqa
 
         return self.ets(start, end).ikine_LM(
             Tep=Tep,

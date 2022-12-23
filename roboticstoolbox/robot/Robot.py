@@ -501,8 +501,7 @@ graph [rankdir=LR];
 
                 try:
                     file.write(
-                        "  {}_ets [shape=box, style=rounded, "
-                        'label="{}"{}];\n'.format(
+                        '  {}_ets [shape=box, style=rounded, label="{}"{}];\n'.format(
                             link.name,
                             link.ets.__str__(q=f"q{link.jindex}"),
                             node_options,
@@ -510,8 +509,7 @@ graph [rankdir=LR];
                     )
                 except UnicodeEncodeError:  # pragma nocover
                     file.write(
-                        "  {}_ets [shape=box, style=rounded, "
-                        'label="{}"{}];\n'.format(
+                        '  {}_ets [shape=box, style=rounded, label="{}"{}];\n'.format(
                             link.name,
                             link.ets.__str__(q=f"q{link.jindex}")
                             .encode("ascii", "ignore")
@@ -670,7 +668,8 @@ graph [rankdir=LR];
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """
+        """  # noqa
+
         q = getvector(q)
 
         Tbase = SE3(self.base)  # add base, also sets the type
@@ -939,7 +938,7 @@ graph [rankdir=LR];
         -------
         trajectory
 
-        """
+        """  # noqa
 
         if hasattr(self, "ikine_a"):
             ik = self.ikine_a  # type: ignore
@@ -1154,7 +1153,7 @@ graph [rankdir=LR];
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
 
-        """
+        """  # noqa
 
         end, start, _ = self._get_limit_links(end, start)
 
@@ -1590,7 +1589,9 @@ graph [rankdir=LR];
                 lpTvp = -wTlp + wTvp
 
                 norm = lpTvp / d
-                norm_h = np.expand_dims(np.concatenate((norm, [0.0, 0.0, 0.0])), axis=0)  # type: ignore
+                norm_h = np.expand_dims(
+                    np.concatenate((norm, [0.0, 0.0, 0.0])), axis=0
+                )  # type: ignore
 
                 tool = SE3(
                     (np.linalg.inv(self.fkine(q, end=link).A) @ SE3(wTlp).A)[:3, 3]
@@ -1604,7 +1605,9 @@ graph [rankdir=LR];
                     Jv = camera.jacob0(camera.q)
                     Jv[:3, :] = self._T[:3, :3] @ Jv[:3, :]
 
-                    Jv *= np.linalg.norm(wTvp - shape.T[:3, -1]) / los.length  # type: ignore
+                    Jv *= (
+                        np.linalg.norm(wTvp - shape.T[:3, -1]) / los.length
+                    )  # type: ignore
 
                     dpc = norm_h @ Jv
                     dpc = np.concatenate(

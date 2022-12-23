@@ -365,7 +365,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
                 for link in links:
                     if link.isjoint and link.jindex not in jset:
                         raise ValueError(
-                            f"joint index {link.jindex} was " "repeated or out of range"
+                            f"joint index {link.jindex} was repeated or out of range"
                         )
                     jset -= set([link.jindex])
                 if len(jset) > 0:  # pragma nocover  # is impossible
@@ -2054,7 +2054,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             - `Colormaps
             <https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py>`_
 
-        """
+        """  # noqa
 
         if isinstance(linkcolors, list) and len(linkcolors) == self.n:  # pragma nocover
             # provided a list of color names
@@ -2206,7 +2206,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
                 return env
             except ModuleNotFoundError:
                 if using_backend == "swift":
-                    print("Swift is not installed, " "install it using pip or conda")
+                    print("Swift is not installed, install it using pip or conda")
                 using_backend = "pyplot"
 
         if using_backend is None:
@@ -2320,7 +2320,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         --------
         :func:`teach`
 
-        """
+        """  # noqa
 
         env = None
 
@@ -2539,7 +2539,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         if not isinstance(ellipse, EllipsePlot):  # pragma nocover
             raise TypeError(
-                "ellipse must be of type " "roboticstoolbox.backend.PyPlot.EllipsePlot"
+                "ellipse must be of type roboticstoolbox.backend.PyPlot.EllipsePlot"
             )
 
         env = PyPlot()
