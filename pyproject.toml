@@ -81,6 +81,7 @@ dev = [
     "sympy",
     "qpsolvers",
     "cvxopt",
+    "pybullet",
 ]
 
 docs = ["sphinx", "sphinx_rtd_theme", "sphinx-autorun"]
@@ -127,6 +128,8 @@ packages = [
 
 line-length = 88
 target_version = ['py37']
+args = '--experimental-string-processing'
+
 include = '\.pyi?$'
 exclude = '''
 
@@ -151,6 +154,7 @@ exclude = '''
 
 [tool.flake8]
 
+ignore = ['F821', 'W503']
 max-line-length = 88
 extend-ignore = 'E203'
 
