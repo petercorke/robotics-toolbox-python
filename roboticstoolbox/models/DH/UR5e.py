@@ -3,21 +3,21 @@ from roboticstoolbox import DHRobot, RevoluteDH
 from spatialmath import SE3
 
 
-class UR5(DHRobot):
+class UR5e(DHRobot):
     """
-    Class that models a Universal Robotics UR5 manipulator
+    Class that models a Universal Robotics UR5e manipulator
 
     :param symbolic: use symbolic constants
     :type symbolic: bool
 
-    ``UR5()`` is an object which models a Universal Robotics UR5 robot and
+    ``UR5e()`` is an object which models a Universal Robotics UR5e robot and
     describes its kinematic and dynamic characteristics using standard DH
     conventions.
 
     .. runblock:: pycon
 
         >>> import roboticstoolbox as rtb
-        >>> robot = rtb.models.DH.UR5()
+        >>> robot = rtb.models.DH.UR5e()
         >>> print(robot)
 
     Defined joint configurations are:
@@ -32,10 +32,10 @@ class UR5(DHRobot):
 
         - `Parameters for calculations of kinematics and dynamics <https://www.universal-robots.com/articles/ur/parameters-for-calculations-of-kinematics-and-dynamics>`_
 
-    :sealso: :func:`UR5`, :func:`UR10`
+    :sealso: :func:`UR3e`, :func:`UR10e`
 
-
-    .. codeauthor:: Peter Corke
+    .. codeauthor:: Meng
+    .. sectionauthor:: Peter Corke
     """  # noqa
 
     def __init__(self, symbolic=False):
@@ -54,19 +54,19 @@ class UR5(DHRobot):
         inch = 0.0254
 
         # robot length values (metres)
-        a = [0, -0.42500, -0.39225, 0, 0, 0]
-        d = [0.089459, 0, 0, 0.10915, 0.09465, 0.0823]
+        a = [0, -0.425, -0.3922, 0, 0, 0]
+        d = [0.1625, 0, 0, 0.1333, 0.0997, 0.0996]
 
         alpha = [pi / 2, zero, zero, pi / 2, -pi / 2, zero]
 
         # mass data, no inertia available
-        mass = [3.7000, 8.3930, 2.33, 1.2190, 1.2190, 0.1897]
+        mass = [3.761, 8.058, 2.846, 1.37, 1.3, 0.365]
         center_of_mass = [
             [0, -0.02561, 0.00193],
             [0.2125, 0, 0.11336],
             [0.15, 0, 0.0265],
             [0, -0.0018, 0.01634],
-            [0, -0.0018, 0.01634],
+            [0, 0.0018, 0.01634],
             [0, 0, -0.001159],
         ]
         links = []
@@ -79,7 +79,7 @@ class UR5(DHRobot):
 
         super().__init__(
             links,
-            name="UR5",
+            name="UR5e",
             manufacturer="Universal Robotics",
             keywords=("dynamics", "symbolic"),
             symbolic=symbolic,
@@ -94,6 +94,6 @@ class UR5(DHRobot):
 
 if __name__ == "__main__":  # pragma nocover
 
-    ur5 = UR5(symbolic=False)
-    print(ur5)
-    # print(ur5.dyntable())
+    ur5e = UR5e(symbolic=False)
+    print(ur5e)
+    # print(ur5e.dyntable())
