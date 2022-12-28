@@ -20,6 +20,10 @@
 #include <iostream>
 
 static PyMethodDef fknmMethods[] = {
+    {"Angle_Axis",
+     (PyCFunction)Angle_Axis,
+     METH_VARARGS,
+     "Link"},
     {"IK_GN_c",
      (PyCFunction)IK_GN_c,
      METH_VARARGS,
@@ -103,6 +107,58 @@ PyMODINIT_FUNC PyInit_fknm(void)
 
 extern "C"
 {
+
+    static PyObject *Angle_Axis(PyObject *self, PyObject *args)
+    {
+        npy_float64 *np_Te, *np_Tep, *np_ret;
+        PyObject *py_Te, *py_Tep;
+        PyArrayObject *py_np_Te, *py_np_Tep;
+
+        if (!PyArg_ParseTuple(
+                args, "OO",
+                &py_Te,
+                &py_Tep))
+            return NULL;
+
+        // Inputs can be:
+        // Te, Tep can be SE3s or 4x4 numpy array
+
+        // Make sure Te, Tep is number array
+        // Cast to numpy array
+        // Get data out
+        if (!_check_array_type(py_Te))
+            return NULL;
+        py_np_Te = (PyArrayObject *)PyArray_FROMANY(py_Te, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        np_Te = (npy_float64 *)PyArray_DATA(py_np_Te);
+
+        if (!_check_array_type(py_Tep))
+            return NULL;
+        py_np_Tep = (PyArrayObject *)PyArray_FROMANY(py_Tep, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        np_Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
+
+        // Make our empty error vector
+        npy_intp dims[1] = {6};
+        PyObject *py_ret = PyArray_EMPTY(1, dims, NPY_DOUBLE, 0);
+        np_ret = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_ret);
+        MapVectorX ret(np_ret, 6);
+
+        // Get eigen matrices
+        // Tep in row major from Python
+        MapMatrix4dr row_Tep(np_Tep);
+        MapMatrix4dr row_Te(np_Te);
+
+        // Convert to col major here
+        Matrix4dc Tep = row_Tep;
+        Matrix4dc Te = row_Te;
+
+        // Get map matrix
+        MapMatrix4dc map_Te(&Te(0));
+
+        // Do the job
+        _angle_axis(map_Te, Tep, ret);
+
+        return py_ret;
+    }
 
     static PyObject *IK_GN_c(PyObject *self, PyObject *args)
     {

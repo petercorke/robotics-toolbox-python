@@ -40,6 +40,7 @@ __all__ = [
     # tools
     "null",
     "angle_axis",
+    "angle_axis_python",
     "p_servo",
     "Ticker",
     "quintic",
