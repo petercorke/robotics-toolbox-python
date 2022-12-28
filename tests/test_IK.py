@@ -547,139 +547,139 @@ class TestIK(unittest.TestCase):
 
         self.assertGreater(test_tol, E)
 
-    # def test_ik_nr(self):
+    def test_ik_nr(self):
 
-    #     tol = 1e-6
+        tol = 1e-6
 
-    #     solver = rtb.IK_LM()
+        solver = rtb.IK_LM()
 
-    #     r = rtb.models.Panda().ets()
-    #     r2 = rtb.models.Panda()
+        r = rtb.models.Panda().ets()
+        r2 = rtb.models.Panda()
 
-    #     Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
-    #     sol = r.ik_nr(Tep, tol=tol)
-    #     sol2 = r2.ik_nr(Tep, tol=tol)
+        sol = r.ik_nr(Tep, tol=tol)
+        sol2 = r2.ik_nr(Tep, tol=tol)
 
-    #     self.assertEqual(sol[1], True)
-    #     self.assertEqual(sol2[1], True)
+        self.assertEqual(sol[1], True)
+        self.assertEqual(sol2[1], True)
 
-    #     Tq = r.eval(sol[0])
-    #     Tq2 = r.eval(sol2[0])
+        Tq = r.eval(sol[0])
+        Tq2 = r.eval(sol2[0])
 
-    #     _, E = solver.error(Tep, Tq)
-    #     _, E2 = solver.error(Tep, Tq2)
+        _, E = solver.error(Tep, Tq)
+        _, E2 = solver.error(Tep, Tq2)
 
-    #     self.assertGreater(test_tol, E)
-    #     self.assertGreater(test_tol, E2)
+        self.assertGreater(test_tol, E)
+        self.assertGreater(test_tol, E2)
 
-    # def test_ik_lm_chan(self):
+    def test_ik_lm_chan(self):
 
-    #     tol = 1e-6
+        tol = 1e-6
 
-    #     solver = rtb.IK_LM()
+        solver = rtb.IK_LM()
 
-    #     r = rtb.models.Panda().ets()
-    #     r2 = rtb.models.Panda()
+        r = rtb.models.Panda().ets()
+        r2 = rtb.models.Panda()
 
-    #     Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
-    #     sol = r.ik_lm_chan(Tep, tol=tol)
-    #     sol2 = r2.ik_lm_chan(Tep, tol=tol)
+        sol = r.ik_lm_chan(Tep, tol=tol)
+        sol2 = r2.ik_lm_chan(Tep, tol=tol)
 
-    #     self.assertEqual(sol[1], True)
-    #     self.assertEqual(sol2[1], True)
+        self.assertEqual(sol[1], True)
+        self.assertEqual(sol2[1], True)
 
-    #     Tq = r.eval(sol[0])
-    #     Tq2 = r.eval(sol2[0])
+        Tq = r.eval(sol[0])
+        Tq2 = r.eval(sol2[0])
 
-    #     _, E = solver.error(Tep, Tq)
-    #     _, E2 = solver.error(Tep, Tq2)
+        _, E = solver.error(Tep, Tq)
+        _, E2 = solver.error(Tep, Tq2)
 
-    #     self.assertGreater(test_tol, E)
-    #     self.assertGreater(test_tol, E2)
+        self.assertGreater(test_tol, E)
+        self.assertGreater(test_tol, E2)
 
-    # def test_ik_lm_wampler(self):
+    def test_ik_lm_wampler(self):
 
-    #     tol = 1e-6
+        tol = 1e-6
 
-    #     solver = rtb.IK_LM()
+        solver = rtb.IK_LM()
 
-    #     r = rtb.models.Panda().ets()
-    #     r2 = rtb.models.Panda()
+        r = rtb.models.Panda().ets()
+        r2 = rtb.models.Panda()
 
-    #     Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
-    #     sol = r.ik_lm_wampler(Tep, tol=tol)
-    #     sol2 = r2.ik_lm_wampler(Tep, tol=tol)
+        sol = r.ik_lm_wampler(Tep, tol=tol, λ=0.01)
+        sol2 = r2.ik_lm_wampler(Tep, tol=tol, λ=0.01)
 
-    #     self.assertEqual(sol[1], True)
-    #     self.assertEqual(sol2[1], True)
+        self.assertEqual(sol[1], True)
+        self.assertEqual(sol2[1], True)
 
-    #     Tq = r.eval(sol[0])
-    #     Tq2 = r.eval(sol2[0])
+        Tq = r.eval(sol[0])
+        Tq2 = r.eval(sol2[0])
 
-    #     _, E = solver.error(Tep, Tq)
-    #     _, E2 = solver.error(Tep, Tq2)
+        _, E = solver.error(Tep, Tq)
+        _, E2 = solver.error(Tep, Tq2)
 
-    #     self.assertGreater(test_tol, E)
-    #     self.assertGreater(test_tol, E2)
+        self.assertGreater(test_tol, E)
+        self.assertGreater(test_tol, E2)
 
-    # def test_ik_lm_sugihara(self):
+    def test_ik_lm_sugihara(self):
 
-    #     tol = 1e-6
+        tol = 1e-6
 
-    #     solver = rtb.IK_LM()
+        solver = rtb.IK_LM()
 
-    #     r = rtb.models.Panda().ets()
-    #     r2 = rtb.models.Panda()
+        r = rtb.models.Panda().ets()
+        r2 = rtb.models.Panda()
 
-    #     Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
-    #     sol = r.ik_lm_sugihara(Tep, tol=tol)
-    #     sol2 = r2.ik_lm_sugihara(Tep, tol=tol)
+        sol = r.ik_lm_sugihara(Tep, tol=tol, λ=0.01)
+        sol2 = r2.ik_lm_sugihara(Tep, tol=tol, λ=0.01)
 
-    #     self.assertEqual(sol[1], True)
-    #     self.assertEqual(sol2[1], True)
+        self.assertEqual(sol[1], True)
+        self.assertEqual(sol2[1], True)
 
-    #     Tq = r.eval(sol[0])
-    #     Tq2 = r.eval(sol2[0])
+        Tq = r.eval(sol[0])
+        Tq2 = r.eval(sol2[0])
 
-    #     _, E = solver.error(Tep, Tq)
-    #     _, E2 = solver.error(Tep, Tq2)
+        _, E = solver.error(Tep, Tq)
+        _, E2 = solver.error(Tep, Tq2)
 
-    #     self.assertGreater(test_tol, E)
-    #     self.assertGreater(test_tol, E2)
+        self.assertGreater(test_tol, E)
+        self.assertGreater(test_tol, E2)
 
-    # def test_ik_gn(self):
+    def test_ik_gn(self):
 
-    #     tol = 1e-6
+        tol = 1e-6
 
-    #     solver = rtb.IK_LM()
+        solver = rtb.IK_LM()
 
-    #     r = rtb.models.Panda().ets()
-    #     r2 = rtb.models.Panda()
+        r = rtb.models.Panda().ets()
+        r2 = rtb.models.Panda()
 
-    #     Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+        Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
-    #     sol = r.ik_gn(Tep, tol=tol)
-    #     sol2 = r2.ik_gn(Tep, tol=tol)
+        sol = r.ik_gn(Tep, tol=tol)
+        sol2 = r2.ik_gn(Tep, tol=tol)
 
-    #     self.assertEqual(sol[1], True)
-    #     self.assertEqual(sol2[1], True)
+        self.assertEqual(sol[1], True)
+        self.assertEqual(sol2[1], True)
 
-    #     Tq = r.eval(sol[0])
-    #     Tq2 = r.eval(sol2[0])
+        Tq = r.eval(sol[0])
+        Tq2 = r.eval(sol2[0])
 
-    #     print(sol[4])
-    #     print(Tep)
-    #     print(Tq)
+        print(sol[4])
+        print(Tep)
+        print(Tq)
 
-    #     _, E = solver.error(Tep, Tq)
-    #     _, E2 = solver.error(Tep, Tq2)
+        _, E = solver.error(Tep, Tq)
+        _, E2 = solver.error(Tep, Tq2)
 
-    #     self.assertGreater(test_tol, E)
-    #     self.assertGreater(test_tol, E2)
+        self.assertGreater(test_tol, E)
+        self.assertGreater(test_tol, E2)
 
 
 if __name__ == "__main__":

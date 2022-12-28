@@ -76,8 +76,8 @@ class Testtools(unittest.TestCase):
     def test_c_angle_axis(self):
         n = 100
 
-        coord = np.random.random((n, 6))
-        coord2 = np.random.random((n, 6))
+        coord = (np.random.random((n, 6)) - 1.0) * 3.0
+        coord2 = (np.random.random((n, 6)) - 1.0) * 3.0
 
         for co, co2 in zip(coord, coord2):
             Te = (
