@@ -293,8 +293,8 @@ extern "C"
     {
         int iter = 1;
 
-        std::cout << Tep << "\n";
-        std::cout << std::endl;
+        // std::cout << Tep << "\n";
+        // std::cout << std::endl;
 
         double *np_Te = (double *)PyMem_RawCalloc(16, sizeof(double));
         MapMatrix4dc Te(np_Te);
