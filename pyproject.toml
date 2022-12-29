@@ -80,7 +80,7 @@ dev = [
     "pyyaml",
     "sympy",
     "qpsolvers",
-    "cvxopt",
+    "quadprog",
     "pybullet",
 ]
 
