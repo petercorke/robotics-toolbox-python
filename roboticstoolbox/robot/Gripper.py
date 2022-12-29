@@ -4,6 +4,7 @@
 """
 
 import numpy as np
+from spatialmath import SE3
 import spatialmath as sm
 from spatialmath.base.argcheck import getvector
 from roboticstoolbox.robot.Link import Link
@@ -12,7 +13,7 @@ from functools import lru_cache
 from typing import Union
 from roboticstoolbox.fknm import Robot_link_T
 
-ArrayLike = Union[list, np.ndarray, tuple, set]
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 class Gripper:
@@ -67,7 +68,7 @@ class Gripper:
                     jset -= set([link.jindex])
             if len(jset) > 0:  # pragma nocover # is impossible
                 raise ValueError("gripper joints {jset} were not assigned")
-        else:
+        else:  # pragma nocover
             # must be a mixture of Links with/without jindex
             raise ValueError(
                 "all gripper links must have a jindex, or none have a jindex"
@@ -85,7 +86,12 @@ class Gripper:
         return s
 
     def __repr__(self):
-        return self.__str__()
+        links = [link.__repr__() for link in self.links]
+
+        tool = None if np.all(self.tool.A == np.eye(4)) else self.tool.A.__repr__()
+        s = f'Gripper({links}, name="{self.name}", tool={tool})'
+
+        return s
 
     def dfs_links(self, start, func=None):
         """
@@ -114,6 +120,37 @@ class Gripper:
         vis_children(start)
 
         return visited
+
+    @property
+    def tool(self) -> SE3:
+        """
+        Get/set gripper tool transform
+
+        - ``gripper.tool`` is the gripper tool transform as an SE3 object
+        - ``gripper._tool`` is the gripper tool transform as a numpy array
+        - ``gripper.tool = ...`` checks and sets the gripper tool transform
+
+        Parameters
+        ----------
+        tool
+            the new gripper tool transform (as an SE(3))
+
+        Returns
+        -------
+        tool
+            gripper tool transform
+
+
+
+        """
+        return SE3(self._tool, check=False)
+
+    @tool.setter
+    def tool(self, T: Union[SE3, NDArray]):
+        if isinstance(T, SE3):
+            self._tool = T.A
+        else:
+            self._tool = T
 
     @property
     def n(self):
