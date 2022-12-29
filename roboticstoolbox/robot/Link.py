@@ -10,13 +10,13 @@ from spatialmath import SE3, SE2
 from ansitable import ANSITable, Column
 from spatialgeometry import Shape, SceneNode, SceneGroup
 from typing import List, Union, Tuple, overload
+
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.ET import ET, ET2
-from numpy import eye, ndarray, array, diag
 from warnings import warn
 
-ArrayLike = Union[list, ndarray, tuple, set]
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 
 def _listen_dyn(func):
@@ -57,39 +57,50 @@ def _listen_dyn(func):
 
 class BaseLink(SceneNode, ABC):
     """
-    Link superclass
-
-    :param name: name of the link
-    :type name: str
-
-    :param qlim: joint variable limits [min, max]
-    :type qlim: float ndarray(1,2)
-    :param flip: joint moves in opposite direction
-    :type flip: bool
-
-    :param m: dynamic - link mass
-    :type m: float
-    :param r: dynamic - position of COM with respect to link frame
-    :type r:  float ndarray(3)
-    :param I: dynamic - inertia of link with respect to COM
-    :type I: ndarray
-
-    :param Jm: dynamic - motor inertia
-    :type Jm: float
-    :param B: dynamic - motor viscous friction
-    :type B: float, or ndarray(2,)
-    :param Tc: dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
-    :type Tc: ndarray(2,)
-    :param G: dynamic - gear ratio
-    :type G: float
-
     An abstract link superclass for all link types.
+
+    Parameters
+    ----------
+    ets
+        kinematic - The elementary transforms which make up the link
+    name
+        name of the link
+    parent
+        a reference to the parent link in the kinematic chain
+    joint_name
+        the name of the joint variable
+    m
+        dynamic - link mass
+    r
+        dynamic - position of COM with respect to link frame
+    I
+        dynamic - inertia of link with respect to COM
+    Jm
+        dynamic - motor inertia
+    B
+        dynamic - motor viscous friction
+    Tc
+        dynamic - motor Coulomb friction [Tc⁺, Tc⁻]
+    G
+        dynamic - gear ratio
+    qlim
+        joint variable limits [min, max]
+    geometry
+        the visual geometry which represents the link. This is used
+        to display the link in Swift
+    collision
+        the collision geometry which represents the link in collision
+        checkers
+
 
     .. inheritance-diagram:: roboticstoolbox.RevoluteDH
         roboticstoolbox.PrismaticDH roboticstoolbox.RevoluteMDH
         roboticstoolbox.PrismaticMDH roboticstoolbox.Link
         :top-classes: roboticstoolbox.robot.Link
         :parts: 2
+
+    Synopsis
+    --------
 
     It holds metadata related to:
 
@@ -98,10 +109,11 @@ class BaseLink(SceneNode, ABC):
     - a robot joint, that connects this link to its parent, such as joint
       limits, direction of motion, motor and transmission parameters.
 
-    .. note::
-        - For a more sophisticated actuator model use the ``actuator``
-          attribute which is not initialized or used by this Toolbox.
-        - There is no ability to name a joint as supported by URDF
+    Notes
+    -----
+    - For a more sophisticated actuator model use the ``actuator``
+        attribute which is not initialized or used by this Toolbox.
+    - There is no ability to name a joint as supported by URDF
 
     """
 
@@ -214,9 +226,9 @@ class BaseLink(SceneNode, ABC):
         # to break everywhere, so initialise Ts np be identity
 
         if isinstance(self, Link2):
-            T = eye(3)
+            T = np.eye(3)
         else:
-            T = eye(4)
+            T = np.eye(4)
 
         for et in self._ets:
             # constant transforms only
@@ -228,11 +240,14 @@ class BaseLink(SceneNode, ABC):
         self._Ts = T
 
     @property
-    def Ts(self) -> ndarray:
+    def Ts(self) -> NDArray:
         """
         Constant part of link ETS
-        :return: constant part of link transform
-        :rtype: SE3 instance
+
+        Returns
+        -------
+        Ts
+            constant part of link transform
         The ETS for each Link comprises a constant part (possible the
         identity) followed by an optional joint variable transform.
         This property returns the constant part.  If no constant part
@@ -358,7 +373,7 @@ class BaseLink(SceneNode, ABC):
         # new = ccopy(self)
         # for k, v in self.__dict__.items():
         #     # print(k)
-        #     if k.startswith("_") and isinstance(v, np.ndarray):
+        #     if k.startswith("_") and isinstance(v, np.NDArray):
         #         setattr(new, k, np.copy(v))
 
         # new._geometry = [shape.copy() for shape in self._geometry]
@@ -482,14 +497,14 @@ class BaseLink(SceneNode, ABC):
     # -------------------------------------------------------------------------- #
 
     @property
-    def qlim(self) -> Union[ndarray, None]:
+    def qlim(self) -> Union[NDArray, None]:
         """
         Get/set joint limits
 
         - ``link.qlim`` is the joint limits
 
         :return: joint limits
-        :rtype: ndarray(2,) or Nine
+        :rtype: NDArray(2,) or Nine
 
         - ``link.qlim = ...`` checks and sets the joint limits
 
@@ -589,14 +604,14 @@ class BaseLink(SceneNode, ABC):
     # -------------------------------------------------------------------------- #
 
     @property
-    def r(self) -> ndarray:
+    def r(self) -> NDArray:
         """
         Get/set link centre of mass
 
         - ``link.r`` is the link centre of mass
 
         :return: link centre of mass
-        :rtype: ndarray(3,)
+        :rtype: NDArray(3,)
 
         - ``link.r = ...`` checks and sets the link centre of mass
 
@@ -613,14 +628,14 @@ class BaseLink(SceneNode, ABC):
     # -------------------------------------------------------------------------- #
 
     @property
-    def I(self) -> ndarray:  # noqa
+    def I(self) -> NDArray:  # noqa
         r"""
         Get/set link inertia
 
         - ``link.I`` is the link inertia
 
         :return: link inertia
-        :rtype: ndarray(3,3)
+        :rtype: NDArray(3,3)
 
         - ``link.I = ...`` checks and sets the link inertia
 
@@ -661,7 +676,7 @@ class BaseLink(SceneNode, ABC):
         elif isvector(I_new, 6):
             # 6-vector passed, moments and products of inertia,
             # [Ixx Iyy Izz Ixy Iyz Ixz]
-            I_new = array(
+            I_new = np.array(
                 [
                     [I_new[0], I_new[3], I_new[5]],  # type: ignore
                     [I_new[3], I_new[1], I_new[4]],  # type: ignore
@@ -732,14 +747,14 @@ class BaseLink(SceneNode, ABC):
     # -------------------------------------------------------------------------- #
 
     @property
-    def Tc(self) -> ndarray:
+    def Tc(self) -> NDArray:
         r"""
         Get/set motor Coulomb friction
 
         - ``link.Tc`` is the motor Coulomb friction
 
         :return: motor Coulomb friction
-        :rtype: ndarray(2)
+        :rtype: NDArray(2)
 
         - ``link.Tc = ...`` checks and sets the motor Coulomb friction. If a
           scalar is given the value is set to [T, -T], if a 2-vector it is
@@ -774,7 +789,7 @@ class BaseLink(SceneNode, ABC):
             # Coulomb friction model. FP>0 and FM<0.  FP is applied for a
             # positive joint velocity and FM for a negative joint
             # velocity.
-            Tc_new = array(getvector(Tc_new, 2))
+            Tc_new = np.array(getvector(Tc_new, 2))
 
         self._Tc = Tc_new
 
@@ -987,7 +1002,7 @@ class BaseLink(SceneNode, ABC):
 
     def closest_point(
         self, shape: Shape, inf_dist: float = 1.0, skip: bool = False
-    ) -> Tuple[Union[int, None], Union[np.ndarray, None], Union[np.ndarray, None],]:
+    ) -> Tuple[Union[int, None], Union[NDArray, None], Union[NDArray, None],]:
         """
         closest_point(shape, inf_dist) returns the minimum euclidean
         distance between this link and shape, provided it is less than
@@ -1003,7 +1018,7 @@ class BaseLink(SceneNode, ABC):
         :returns: d, p1, p2 where d is the distance between the shapes,
             p1 and p2 are the points in the world frame on the respective
             shapes. The points returned are [x, y, z].
-        :rtype: float, ndarray(1x3), ndarray(1x3)
+        :rtype: float, NDArray(1x3), NDArray(1x3)
         """
 
         if not skip:
@@ -1351,19 +1366,19 @@ class Link(BaseLink):
 
     :param ets: kinematic - The elementary transforms which make up the link
     :param qlim: joint variable limits [min max]
-    :type qlim: float ndarray(2)
+    :type qlim: float NDArray(2)
     :param m: dynamic - link mass
     :type m: float
     :param r: dynamic - position of COM with respect to link frame
     :type r:  SE3
     :param I: dynamic - inertia of link with respect to COM
-    :type I: float ndarray(3,3)
+    :type I: float NDArray(3,3)
     :param Jm: dynamic - motor inertia
     :type Jm: float
     :param B: dynamic - motor viscous friction
     :type B: float
     :param Tc: dynamic - motor Coulomb friction (1x2 or 2x1)
-    :type Tc: float ndarray(2)
+    :type Tc: float NDArray(2)
     :param G: dynamic - gear ratio
     :type G: float
 
