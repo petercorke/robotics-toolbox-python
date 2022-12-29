@@ -5,6 +5,7 @@
 import roboticstoolbox as rtb
 from spatialmath import SE3
 import numpy.testing as nt
+import numpy as np
 import unittest
 
 
@@ -100,6 +101,15 @@ class TestGripper(unittest.TestCase):
 
         s = g1.__repr__()
 
-        ans = """Gripper(['Link([ET.Rz(jindex=0)], name = "", parent="")', 'Link([ET.Rz(jindex=0)], name = "", parent="")'], name="", tool=None)"""
+        ans = """Gripper(['Link([ET.Rz(jindex=0)], name = "", parent="")', 'Link([ET.Rz(jindex=0)], name = "", parent="")'], name="", tool=None)"""  # noqa
 
         self.assertEqual(s, ans)
+
+    def test_q(self):
+        e1 = rtb.Link(rtb.ETS(rtb.ET.Rz()))
+        e2 = rtb.Link(rtb.ETS(rtb.ET.Rz()), parent=e1)
+        e3 = rtb.Link(rtb.ETS(rtb.ET.Rz()), parent=e2)
+
+        g1 = rtb.Gripper([e2, e3])
+
+        nt.assert_almost_equal(g1.q, np.zeros(2))
