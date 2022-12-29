@@ -22,21 +22,4 @@ Tep = panda.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
 solver = rtb.IK_QP()
 
-sol = panda.ikine_QP(Tep, tol=tol, q0=q0)
-
-Tq = panda.eval(sol.q)
-
-_, E = solver.error(Tep, Tq)
-
-
-print(sol.success)
-
-if sol.success and sol.searches < 2:
-    print(sol.q.__repr__())
-    print(sol.success)
-    print(sol.residual)
-    print(f"iterations: {sol.iterations}, search: {sol.searches}")
-
-    Tq = panda.eval(sol.q)
-
-    print(E)
+sol = panda.ik_LM(Tep, tol=tol, q0=q0, method="chan")

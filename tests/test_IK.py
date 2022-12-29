@@ -607,8 +607,8 @@ class TestIK(unittest.TestCase):
 
         Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
-        sol = r.ik_nr(Tep, tol=tol)
-        sol2 = r2.ik_nr(Tep, tol=tol)
+        sol = r.ik_NR(Tep, tol=tol)
+        sol2 = r2.ik_NR(Tep, tol=tol)
 
         self.assertEqual(sol[1], True)
         self.assertEqual(sol2[1], True)
@@ -633,8 +633,8 @@ class TestIK(unittest.TestCase):
 
         Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
-        sol = r.ik_lm_chan(Tep, tol=tol)
-        sol2 = r2.ik_lm_chan(Tep, tol=tol)
+        sol = r.ik_LM(Tep, tol=tol, method="chan")
+        sol2 = r2.ik_LM(Tep, tol=tol, method="chan")
 
         self.assertEqual(sol[1], True)
         self.assertEqual(sol2[1], True)
@@ -659,8 +659,8 @@ class TestIK(unittest.TestCase):
 
         Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
-        sol = r.ik_lm_wampler(Tep, tol=tol, λ=0.01)
-        sol2 = r2.ik_lm_wampler(Tep, tol=tol, λ=0.01)
+        sol = r.ik_LM(Tep, tol=tol, method="wampler", k=0.01)
+        sol2 = r2.ik_LM(Tep, tol=tol, method="wampler", k=0.01)
 
         self.assertEqual(sol[1], True)
         self.assertEqual(sol2[1], True)
@@ -685,8 +685,8 @@ class TestIK(unittest.TestCase):
 
         Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
-        sol = r.ik_lm_sugihara(Tep, tol=tol, λ=0.01)
-        sol2 = r2.ik_lm_sugihara(Tep, tol=tol, λ=0.01)
+        sol = r.ik_LM(Tep, tol=tol, k=0.01, method="sugihara")
+        sol2 = r2.ik_LM(Tep, tol=tol, k=0.01, method="sugihara")
 
         self.assertEqual(sol[1], True)
         self.assertEqual(sol2[1], True)
@@ -711,8 +711,8 @@ class TestIK(unittest.TestCase):
 
         Tep = r.eval([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
 
-        sol = r.ik_gn(Tep, tol=tol)
-        sol2 = r2.ik_gn(Tep, tol=tol)
+        sol = r.ik_GN(Tep, tol=tol)
+        sol2 = r2.ik_GN(Tep, tol=tol)
 
         self.assertEqual(sol[1], True)
         self.assertEqual(sol2[1], True)
