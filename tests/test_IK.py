@@ -730,6 +730,97 @@ class TestIK(unittest.TestCase):
         self.assertGreater(test_tol, E)
         self.assertGreater(test_tol, E2)
 
+    def test_sol_print1(self):
+
+        sol = rtb.IKSolution(
+            q=np.zeros(3),
+            success=True,
+            iterations=1,
+            searches=2,
+            residual=3.0,
+            reason="no",
+        )
+
+        s = sol.__str__()
+
+        ans = (
+            "IKSolution: q=[0, 0, 0], success=True, iterations=1, searches=2,"
+            " residual=3"
+        )
+
+        self.assertEqual(s, ans)
+
+    def test_sol_print2(self):
+
+        sol = rtb.IKSolution(
+            q=None,  # type: ignore
+            success=True,
+            iterations=1,
+            searches=2,
+            residual=3.0,
+            reason="no",
+        )
+
+        s = sol.__str__()
+
+        ans = "IKSolution: q=None, success=True, iterations=1, searches=2, residual=3"
+
+        self.assertEqual(s, ans)
+
+    def test_sol_print3(self):
+
+        sol = rtb.IKSolution(
+            q=np.zeros(3),
+            success=False,
+            iterations=0,
+            searches=0,
+            residual=3.0,
+            reason="no",
+        )
+
+        s = sol.__str__()
+
+        ans = "IKSolution: q=[0, 0, 0], success=False, reason=no"
+
+        self.assertEqual(s, ans)
+
+    def test_sol_print4(self):
+
+        sol = rtb.IKSolution(
+            q=np.zeros(3),
+            success=True,
+            iterations=0,
+            searches=0,
+            residual=3.0,
+            reason="no",
+        )
+
+        s = sol.__str__()
+
+        ans = "IKSolution: q=[0, 0, 0], success=True"
+
+        self.assertEqual(s, ans)
+
+    def test_sol_print5(self):
+
+        sol = rtb.IKSolution(
+            q=np.zeros(3),
+            success=False,
+            iterations=1,
+            searches=2,
+            residual=3.0,
+            reason="no",
+        )
+
+        s = sol.__str__()
+
+        ans = (
+            "IKSolution: q=[0, 0, 0], success=False, reason=no, iterations=1,"
+            " searches=2, residual=3"
+        )
+
+        self.assertEqual(s, ans)
+
 
 if __name__ == "__main__":
 
