@@ -1404,6 +1404,24 @@ class TestRobot(unittest.TestCase):
         nt.assert_array_almost_equal(r.hessiane(Je=J), He)
         nt.assert_array_almost_equal(r.hessiane(Je=J), He)
 
+    def test_erobot(self):
+        ets = rtb.ETS(rtb.ET.Rz())
+        robot = rtb.ERobot(
+            ets, name="myname", manufacturer="I made it", comment="other stuff"
+        )
+        self.assertEqual(robot.name, "myname")
+        self.assertEqual(robot.manufacturer, "I made it")
+        self.assertEqual(robot.comment, "other stuff")
+
+    def test_erobot2(self):
+        ets = rtb.ETS2(rtb.ET2.R())
+        robot = rtb.ERobot2(
+            ets, name="myname", manufacturer="I made it", comment="other stuff"
+        )
+        self.assertEqual(robot.name, "myname")
+        self.assertEqual(robot.manufacturer, "I made it")
+        self.assertEqual(robot.comment, "other stuff")
+
 
 if __name__ == "__main__":  # pragma nocover
     unittest.main()
