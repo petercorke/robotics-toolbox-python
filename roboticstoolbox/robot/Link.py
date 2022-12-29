@@ -1,4 +1,4 @@
-from copy import copy as ccopy, deepcopy
+from copy import deepcopy
 from abc import ABC
 from typing_extensions import Self
 
@@ -9,7 +9,7 @@ from spatialmath.base import getvector, isscalar, isvector, ismatrix
 from spatialmath import SE3, SE2
 from ansitable import ANSITable, Column
 from spatialgeometry import Shape, SceneNode, SceneGroup
-from typing import List, TypeVar, Union, Tuple, overload, Type
+from typing import List, Union, Tuple, overload
 import roboticstoolbox as rtb
 from roboticstoolbox.robot.ETS import ETS, ETS2
 from roboticstoolbox.robot.ET import ET, ET2
@@ -338,7 +338,8 @@ class BaseLink(SceneNode, ABC):
             In [1]: x
 
         """
-        # see https://ipython.org/ipython-doc/stable/api/generated/IPython.lib.pretty.html
+        # see
+        # https://ipython.org/ipython-doc/stable/api/generated/IPython.lib.pretty.html
 
         p.text(str(self))
 

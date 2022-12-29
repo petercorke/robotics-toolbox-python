@@ -154,7 +154,7 @@ exclude = '''
 
 [tool.flake8]
 
-ignore = ['F821', 'W503']
+ignore = ['F821', 'W503', 'E741']
 max-line-length = 88
 extend-ignore = 'E203'
 
