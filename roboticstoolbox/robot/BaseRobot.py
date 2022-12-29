@@ -689,7 +689,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     # --------------------------------------------------------------------- #
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
         Get/set robot name
 
@@ -710,11 +710,11 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         return self._name
 
     @name.setter
-    def name(self, name_new):
+    def name(self, name_new: str):
         self._name = name_new
 
     @property
-    def comment(self):
+    def comment(self) -> str:
         """
         Get/set robot comment
 
@@ -735,7 +735,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         return self._comment
 
     @comment.setter
-    def comment(self, comment_new):
+    def comment(self, comment_new: str):
         self._comment = comment_new
 
     @property
@@ -2331,9 +2331,9 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         # Add the self to the figure in readonly mode
         if q.shape[0] == 1:
-            env.launch(self.name + " Plot", limits=limits, fig=fig)
+            env.launch(name=self.name + " Plot", limits=limits, fig=fig)
         else:
-            env.launch(self.name + " Trajectory Plot", limits=limits, fig=fig)
+            env.launch(name=self.name + " Trajectory Plot", limits=limits, fig=fig)
 
         env.add(self, readonly=True, **kwargs)
 
