@@ -77,7 +77,10 @@ class Gripper:
         s = "Gripper("
         if self.name is not None:
             s += f'"{self.name}"'
-        s += f", connected to {self.links[0].parent_name}, {self.n} joints, {len(self.links)} links"
+        s += (
+            f", connected to {self.links[0].parent_name}, {self.n} joints,"
+            f" {len(self.links)} links"
+        )
         s += ")"
         return s
 
