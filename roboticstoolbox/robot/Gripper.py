@@ -8,16 +8,23 @@ from spatialmath import SE3
 import spatialmath as sm
 from spatialmath.base.argcheck import getvector
 from roboticstoolbox.robot.Link import Link
-from typing import List
 from functools import lru_cache
-from typing import Union
+from typing import Union, TypeVar, Generic, List, Callable
 from roboticstoolbox.fknm import Robot_link_T
-
 from roboticstoolbox.tools.types import ArrayLike, NDArray
+from roboticstoolbox.robot.Link import BaseLink
+
+# A generic type variable representing any subclass of BaseLink
+LinkType = TypeVar("LinkType", bound=BaseLink)
 
 
-class Gripper:
-    def __init__(self, elinks, name="", tool=None):
+class Gripper(Generic[LinkType]):
+    def __init__(
+        self,
+        links: List[LinkType],
+        name: str = "",
+        tool: Union[NDArray, SE3, None] = None,
+    ):
 
         self._n = 0
 
@@ -28,18 +35,18 @@ class Gripper:
         else:
             self.tool = tool
 
-        for link in elinks:
+        for link in links:
             if link.isjoint:
                 self._n += 1
 
         self.q = np.zeros(self.n)
-        self._links = elinks
+        self._links = links
 
         # assign the joint indices
         if all(
             [
                 link.jindex is None or link.ets._auto_jindex
-                for link in elinks
+                for link in links
                 if link.isjoint
             ]
         ):
@@ -53,12 +60,12 @@ class Gripper:
                     jindex[0] += 1
 
             # visit all links in DFS order
-            self.dfs_links(elinks[0], lambda link: visit_link(link, jindex))
+            self.dfs_links(links[0], lambda link: visit_link(link, jindex))
 
-        elif all([link.jindex is not None for link in elinks if link.isjoint]):
+        elif all([link.jindex is not None for link in links if link.isjoint]):
             # jindex set on all, check they are unique and sequential
             jset = set(range(self.n))
-            for link in elinks:
+            for link in links:
                 if link.isjoint:
                     if link.jindex not in jset:
                         raise ValueError(
@@ -93,18 +100,27 @@ class Gripper:
 
         return s
 
-    def dfs_links(self, start, func=None):
+    def dfs_links(
+        self, start: LinkType, func: Union[Callable[[Link], None], None] = None
+    ):
         """
+        Search links using depth first search
+
         Visit all links from start in depth-first order and will apply
         func to each visited link
 
-        :param start: the link to start at
-        :type start: Link
-        :param func: An optional function to apply to each link as it is found
-        :type func: function
+        Parameters
+        ----------
+        start
+            the link to start at
+        func
+            An optional function to apply to each link as it is found
 
-        :returns: A list of links
-        :rtype: list of Link
+        Returns
+        -------
+        links
+            A list of links
+
         """
         visited = []
 
@@ -153,61 +169,97 @@ class Gripper:
             self._tool = T
 
     @property
-    def n(self):
+    def n(self) -> int:
+        """
+        Number of joints
+
+        Returns
+        -------
+        n
+            Number of joints
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> robot.n
+
+        See Also
+        --------
+        :func:`nlinks`
+        :func:`nbranches`
+
+        """
+
         return self._n
 
     @property
-    def q(self):
+    def q(self) -> NDArray:
         """
         Get/set gripper joint configuration
 
         - ``gripper.q`` is the gripper joint configuration
-
-        :return: gripper joint configuration
-        :rtype: ndarray(n,)
-
         - ``gripper.q = ...`` checks and sets the joint configuration
 
-        .. note::  ???
+        Parameters
+        ----------
+        q
+            the new gripper joint configuration
+
+        Returns
+        -------
+        q
+            gripper joint configuration
+
         """
+
         return self._q
 
     @q.setter
-    def q(self, q_new):
-        self._q = getvector(q_new, self.n)
+    def q(self, q_new: ArrayLike):
+        self._q = np.array(getvector(q_new, self.n))
 
     # --------------------------------------------------------------------- #
 
     @property
-    def links(self) -> List[Link]:
+    def links(self) -> List[LinkType]:
         """
         Gripper links
 
-        :return: A list of link objects
-        :rtype: list of Link subclass instances
+        Returns
+        -------
+        links
+            A list of link objects
 
-        .. note:: It is probably more concise to index the robot object rather
-            than the list of links, ie. the following are equivalent::
-
-                robot.links[i]
-                robot[i]
         """
         return self._links
 
     # --------------------------------------------------------------------- #
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
-        Gripper name
+        Get/set gripper name
 
-        :return: The gripper name
-        :rtype: string
+        - ``gripper.name`` is the gripper name
+        - ``gripper.name = ...`` checks and sets the gripper name
+
+        Parameters
+        ----------
+        name
+            the new gripper name
+
+        Returns
+        -------
+        name
+            the current gripper name
+
         """
         return self._name
 
     @name.setter
-    def name(self, new_name):
+    def name(self, new_name: str):
         self._name = new_name
 
     # --------------------------------------------------------------------- #
