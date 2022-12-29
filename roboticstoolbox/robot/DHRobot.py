@@ -311,9 +311,7 @@ class DHRobot(Robot):
             for j in range(L.n):
                 nlinks.append(L.links[j])
         else:
-            raise TypeError(
-                "Can only combine DHRobots with other " "DHRobots or DHLinks"
-            )
+            raise TypeError("Can only combine DHRobots with other DHRobots or DHLinks")
 
         return DHRobot(
             nlinks,
@@ -1752,7 +1750,8 @@ class DHRobot(Robot):
                 )
                 if debug:
                     print(
-                        f"j={j:}, G={link.G:}, Jm={link.Jm:}, friction={link.friction(qd_k[j], coulomb=False):}"
+                        f"j={j:}, G={link.G:}, Jm={link.Jm:},"
+                        f" friction={link.friction(qd_k[j], coulomb=False):}"
                     )  # noqa
                     print()
 
@@ -2444,7 +2443,6 @@ class DHRobot(Robot):
         return self.ets().ik_gn(
             Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
         )
-
 
     def ikine_LM(
         self,
