@@ -258,21 +258,25 @@ class BaseET:
         """
         Get the transform constant
 
-        :return: The constant η if set
+        Returns
+        -------
+        ets
+            The constant η if set
 
-        Example:
-
+        Examples
+        --------
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.tx(1)
+        >>> e.eta
+        >>> e = ET.Rx(90, 'deg')
+        >>> e.eta
+        >>> e = ET.ty()
+        >>> e.eta
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.tx(1)
-            >>> e.eta
-            >>> e = ET.Rx(90, 'deg')
-            >>> e.eta
-            >>> e = ET.ty()
-            >>> e.eta
-
-        .. note:: If the value was given in degrees it will be converted and
+        Notes
+        -----
+        - If the value was given in degrees it will be converted and
             stored internally in radians
         """
         return self._eta
@@ -282,9 +286,14 @@ class BaseET:
         """
         Set the transform constant
 
-        :param value: The transform constant η
+        Parameters
+        ----------
+        value
+            The transform constant η
 
-        .. note:: No unit conversions are applied, it is assumed to be in
+        Notes
+        -----
+        - No unit conversions are applied, it is assumed to be in
             radians.
         """
         self._eta = value if issymbol(value) else float(value)
@@ -300,17 +309,19 @@ class BaseET:
         """
         The transform type and axis
 
-        :return: The transform type and axis
+        Returns
+        -------
+        axis
+            The transform type and axis
 
-        Example:
-
+        Examples
+        --------
         .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.tx(1)
-            >>> e.axis
-            >>> e = ET.Rx(90, 'deg')
-            >>> e.axis
+        >>> from roboticstoolbox import ET
+        >>> e = ET.tx(1)
+        >>> e.axis
+        >>> e = ET.Rx(90, 'deg')
+        >>> e.axis
 
         """
         return self._axis
@@ -320,17 +331,20 @@ class BaseET:
         """
         Test if ET is a joint
 
-        :return: True if a joint
+        Returns
+        -------
+        isjoint
+            True if a joint
 
-        Example:
-
+        Examples
+        --------
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.tx(1)
+        >>> e.isjoint
+        >>> e = ET.tx()
+        >>> e.isjoint
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.tx(1)
-            >>> e.isjoint
-            >>> e = ET.tx()
-            >>> e.isjoint
         """
         return self._joint
 
@@ -339,21 +353,25 @@ class BaseET:
         """
         Test if ET joint is flipped
 
-        :return: True if joint is flipped
-
         A flipped joint uses the negative of the joint variable, ie. it rotates
         or moves in the opposite direction.
 
-        Example:
+        Returns
+        -------
+        isflip
+            True if joint is flipped
 
+        Examples
+        --------
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.tx()
+        >>> e.T(1)
+        >>> eflip = ET.tx(flip=True)
+        >>> eflip.T(1)
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.tx()
-            >>> e.T(1)
-            >>> eflip = ET.tx(flip=True)
-            >>> eflip.T(1)
         """
+
         return self._flip
 
     @property
@@ -361,18 +379,22 @@ class BaseET:
         """
         Test if ET is a rotation
 
-        :return: True if a rotation
+        Returns
+        -------
+        isrotation
+            True if a rotation
 
-        Example:
-
+        Examples
+        --------
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.tx(1)
+        >>> e.isrotation
+        >>> e = ET.rx()
+        >>> e.isrotation
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.tx(1)
-            >>> e.isrotation
-            >>> e = ET.rx()
-            >>> e.isrotation
         """
+
         return self.axis[0] == "R"
 
     @property
@@ -380,18 +402,22 @@ class BaseET:
         """
         Test if ET is a translation
 
-        :return: True if a translation
+        Returns
+        -------
+        istranslation
+            True if a translation
 
-        Example:
-
+        Examples
+        --------
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.tx(1)
+        >>> e.istranslation
+        >>> e = ET.rx()
+        >>> e.istranslation
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.tx(1)
-            >>> e.istranslation
-            >>> e = ET.rx()
-            >>> e.istranslation
         """
+
         return self.axis[0] == "t"
 
     @property
@@ -410,21 +436,25 @@ class BaseET:
         """
         Get ET joint index
 
-        :return: The assigmed joint index
+        Returns
+        -------
+        jindex
+            The assigmed joint index
 
         Allows an ET to be associated with a numbered joint in a robot.
 
-        Example:
-
+        Examples
+        --------
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.tx()
+        >>> print(e)
+        >>> e = ET.tx(j=3)
+        >>> print(e)
+        >>> print(e.jindex)
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.tx()
-            >>> print(e)
-            >>> e = ET.tx(j=3)
-            >>> print(e)
-            >>> print(e.jindex)
         """
+
         return self._jindex
 
     @jindex.setter
@@ -439,31 +469,42 @@ class BaseET:
         """
         Test if ET is an elementary transform
 
-        :return: True if an elementary transform
+        Returns
+        -------
+        iselementary
+            True if an elementary transform
 
-        .. note:: ET's may not actually be "elementary", it can be a complex
+        Notes
+        -----
+        - ET's may not actually be "elementary", it can be a complex
             mix of rotations and translations.
 
-        :seealso: :func:`compile`
+        See Also
+        --------
+        :func:`compile`
+
         """
+
         return self.axis[0] != "S"
 
     def inv(self):
         r"""
         Inverse of ET
 
-        :return: Inverse of the ET
-
         The inverse of a given ET.
 
-        Example:
+        Returns
+        -------
+        inv
+            Inverse of the ET
 
+        Examples
+        --------
         .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz(2.5)
-            >>> print(e)
-            >>> print(e.inv())
+        >>> from roboticstoolbox import ET
+        >>> e = ET.Rz(2.5)
+        >>> print(e)
+        >>> print(e.inv())
 
         """  # noqa
 
@@ -485,19 +526,24 @@ class BaseET:
         """
         Evaluate an elementary transformation
 
-        :param q: Is used if this ET is variable (a joint)
+        Parameters
+        ----------
+        q
+            Is used if this ET is variable (a joint)
 
-        :return: The SE(3) or SE(2) matrix value of the ET
+        Returns
+        -------
+        T
+            The SE(3) or SE(2) matrix value of the ET
 
-        Example:
-
+        Examples
+        --------
         .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.tx(1)
-            >>> e.A()
-            >>> e = ET.tx()
-            >>> e.A(0.7)
+        >>> from roboticstoolbox import ET
+        >>> e = ET.tx(1)
+        >>> e.A()
+        >>> e = ET.tx()
+        >>> e.A(0.7)
 
         """
         try:
@@ -552,20 +598,33 @@ class ET(BaseET):
         """
         Pure rotation about the x-axis
 
-        :param η: rotation about the x-axis
-        :param unit: angular unit, "rad" [default] or "deg"
-        :param j: Explicit joint number within the robot
-        :param flip: Joint moves in opposite direction
-
-        :return: An elementary transform
-
         - ``ET.Rx(η)`` is an elementary rotation about the x-axis by a
           constant angle η
         - ``ET.Rx()`` is an elementary rotation about the x-axis by a variable
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        :seealso: :func:`ET`, :func:`isrotation`
+        Parameters
+        ----------
+        η
+            rotation about the x-axis
+        unit
+            angular unit, "rad" [default] or "deg"
+        j
+            Explicit joint number within the robot
+        flip
+            Joint moves in opposite direction
+
+        Returns
+        -------
+        Rx
+            An elementary transform
+
+        See Also
+        --------
+        :func:`ET`
+        :func:`isrotation`
+
         :SymPy: supported
         """
 
@@ -578,20 +637,33 @@ class ET(BaseET):
         """
         Pure rotation about the y-axis
 
-        :param η: rotation about the y-axis
-        :param unit: angular unit, "rad" [default] or "deg"
-        :param j: Explicit joint number within the robot
-        :param flip: Joint moves in opposite direction
-
-        :return: An elementary transform
-
         - ``ET.Ry(η)`` is an elementary rotation about the y-axis by a
           constant angle η
         - ``ET.Ry()`` is an elementary rotation about the y-axis by a variable
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        :seealso: :func:`ET`, :func:`isrotation`
+        Parameters
+        ----------
+        η
+            rotation about the y-axis
+        unit
+            angular unit, "rad" [default] or "deg"
+        j
+            Explicit joint number within the robot
+        flip
+            Joint moves in opposite direction
+
+        Returns
+        -------
+        Ry
+            An elementary transform
+
+        See Also
+        --------
+        :func:`ET`
+        :func:`isrotation`
+
         :SymPy: supported
         """
         return cls(axis="Ry", eta=eta, axis_func=troty, unit=unit, **kwargs)
@@ -603,20 +675,33 @@ class ET(BaseET):
         """
         Pure rotation about the z-axis
 
-        :param η: rotation about the z-axis
-        :param unit: angular unit, "rad" [default] or "deg"
-        :param j: Explicit joint number within the robot
-        :param flip: Joint moves in opposite direction
-
-        :return: An elementary transform
-
         - ``ET.Rz(η)`` is an elementary rotation about the z-axis by a
           constant angle η
         - ``ET.Rz()`` is an elementary rotation about the z-axis by a variable
           angle, i.e. a revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        :seealso: :func:`ET`, :func:`isrotation`
+        Parameters
+        ----------
+        η
+            rotation about the z-axis
+        unit
+            angular unit, "rad" [default] or "deg"
+        j
+            Explicit joint number within the robot
+        flip
+            Joint moves in opposite direction
+
+        Returns
+        -------
+        Rz
+            An elementary transform
+
+        See Also
+        --------
+        :func:`ET`
+        :func:`isrotation`
+
         :SymPy: supported
         """
         return cls(axis="Rz", eta=eta, axis_func=trotz, unit=unit, **kwargs)
@@ -626,19 +711,31 @@ class ET(BaseET):
         """
         Pure translation along the x-axis
 
-        :param η: translation distance along the z-axis
-        :param j: Explicit joint number within the robot
-        :param flip: Joint moves in opposite direction
-
-        :return: An elementary transform
-
         - ``ET.tx(η)`` is an elementary translation along the x-axis by a
           distance constant η
         - ``ET.tx()`` is an elementary translation along the x-axis by a
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        :seealso: :func:`ET`, :func:`istranslation`
+        Parameters
+        ----------
+        η
+            translation distance along the z-axis
+        j
+            Explicit joint number within the robot
+        flip
+            Joint moves in opposite direction
+
+        Returns
+        -------
+        tx
+            An elementary transform
+
+        See Also
+        --------
+        :func:`ET`
+        :func:`istranslation`
+
         :SymPy: supported
         """
 
@@ -660,19 +757,31 @@ class ET(BaseET):
         """
         Pure translation along the y-axis
 
-        :param η: translation distance along the y-axis
-        :param j: Explicit joint number within the robot
-        :param flip: Joint moves in opposite direction
-
-        :return: An elementary transform
-
         - ``ET.ty(η)`` is an elementary translation along the y-axis by a
           distance constant η
         - ``ET.ty()`` is an elementary translation along the y-axis by a
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        :seealso: :func:`ET`, :func:`istranslation`
+        Parameters
+        ----------
+        η
+            translation distance along the y-axis
+        j
+            Explicit joint number within the robot
+        flip
+            Joint moves in opposite direction
+
+        Returns
+        -------
+        ty
+            An elementary transform
+
+        See Also
+        --------
+        :func:`ET`
+        :func:`istranslation`
+
         :SymPy: supported
         """
 
@@ -693,19 +802,31 @@ class ET(BaseET):
         """
         Pure translation along the z-axis
 
-        :param η: translation distance along the z-axis
-        :param j: Explicit joint number within the robot
-        :param flip: Joint moves in opposite direction
-
-        :return: An elementary transform
-
         - ``ET.tz(η)`` is an elementary translation along the z-axis by a
           distance constant η
         - ``ET.tz()`` is an elementary translation along the z-axis by a
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        :seealso: :func:`ET`, :func:`istranslation`
+        Parameters
+        ----------
+        η
+            translation distance along the z-axis
+        j
+            Explicit joint number within the robot
+        flip
+            Joint moves in opposite direction
+
+        Returns
+        -------
+        tz
+            An elementary transform
+
+        See Also
+        --------
+        :func:`ET`
+        func:`istranslation`
+
         :SymPy: supported
         """
 
@@ -726,17 +847,27 @@ class ET(BaseET):
         """
         A static SE3
 
-        :param T: The SE3 trnasformation matrix
-
-        :return: An elementary transform
-
         - ``ET.T(η)`` is an elementary translation along the z-axis by a
           distance constant η
         - ``ET.tz()`` is an elementary translation along the z-axis by a
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        :seealso: :func:`ET`, :func:`istranslation`
+        Parameters
+        ----------
+        T
+            The SE3 trnasformation matrix
+
+        Returns
+        -------
+        SE3
+            An elementary transform
+
+        See Also
+        --------
+        :func:`ET`
+        :func:`istranslation`
+
         :SymPy: supported
         """
 
@@ -773,23 +904,38 @@ class ET2(BaseET):
         """
         Pure rotation
 
-        :param η: rotation angle
-        :param unit: angular unit, "rad" [default] or "deg"
-        :param j: Explicit joint number within the robot
-        :param flip: Joint moves in opposite direction
-
-        :return: An elementary transform
-
         - ``ET2.R(η)`` is an elementary rotation by a constant angle η
         - ``ET2.R()`` is an elementary rotation by a variable angle, i.e. a
           revolute robot joint. ``j`` or ``flip`` can be set in
           this case.
 
-        .. note:: In the 2D case this is rotation around the normal to the
+        Parameters
+        ----------
+        η
+            rotation angle
+        unit
+            angular unit, "rad" [default] or "deg"
+        j
+            Explicit joint number within the robot
+        flip
+            Joint moves in opposite direction
+
+        Returns
+        -------
+        R
+            An elementary transform
+
+        Notes
+        -----
+        - In the 2D case this is rotation around the normal to the
             xy-plane.
 
-        :seealso: :func:`ET2`, :func:`isrotation`
+        See Also
+        --------
+        :func:`ET2`, :func:`isrotation`
+
         """
+
         return cls(
             axis="R", eta=eta, axis_func=lambda theta: trot2(theta), unit=unit, **kwargs
         )
@@ -801,20 +947,33 @@ class ET2(BaseET):
         """
         Pure translation along the x-axis
 
-        :param η: translation distance along the z-axis
-        :param j: Explicit joint number within the robot
-        :param flip: Joint moves in opposite direction
-
-        :return: An elementary transform
-
         - ``ET2.tx(η)`` is an elementary translation along the x-axis by a
           distance constant η
         - ``ET2.tx()`` is an elementary translation along the x-axis by a
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        :seealso: :func:`ET2`, :func:`istranslation`
+        Parameters
+        ----------
+        η
+            translation distance along the x-axis
+        j
+            Explicit joint number within the robot
+        flip
+            Joint moves in opposite direction
+
+        Returns
+        -------
+        tx
+            An elementary transform
+
+        See Also
+        --------
+        :func:`ET2`
+        :func:`istranslation`
+
         """
+
         return cls(axis="tx", eta=eta, axis_func=lambda x: transl2(x, 0), **kwargs)
 
     @classmethod
@@ -824,20 +983,32 @@ class ET2(BaseET):
         """
         Pure translation along the y-axis
 
-        :param η: translation distance along the y-axis
-        :param j: Explicit joint number within the robot
-        :param flip: Joint moves in opposite direction
-
-        :return: An elementary transform
-
         - ``ET2.tx(η)`` is an elementary translation along the y-axis by a
           distance constant η
         - ``ET2.tx()`` is an elementary translation along the y-axis by a
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        :seealso: :func:`ET2`
+        Parameters
+        ----------
+        η
+            translation distance along the y-axis
+        j
+            Explicit joint number within the robot
+        flip
+            Joint moves in opposite direction
+
+        Returns
+        -------
+        ty
+            An elementary transform
+
+        See Also
+        --------
+        :func:`ET2`
+
         """
+
         return cls(axis="ty", eta=eta, axis_func=lambda y: transl2(0, y), **kwargs)
 
     @classmethod
@@ -845,17 +1016,27 @@ class ET2(BaseET):
         """
         A static SE2
 
-        :param T: The SE2 trnasformation matrix
-
-        :return: An elementary transform
-
         - ``ET2.T(η)`` is an elementary translation along the z-axis by a
           distance constant η
         - ``ET2.tz()`` is an elementary translation along the z-axis by a
           variable distance, i.e. a prismatic robot joint. ``j`` or ``flip``
           can be set in this case.
 
-        :seealso: :func:`ET2`, :func:`istranslation`
+        Parameters
+        ----------
+        T
+            The SE2 trnasformation matrix
+
+        Returns
+        -------
+        SE2
+            An elementary transform
+
+        See Also
+        --------
+        :func:`ET2`
+        :func:`istranslation`
+
         :SymPy: supported
         """
 
@@ -867,21 +1048,27 @@ class ET2(BaseET):
         """
         Evaluate an elementary transformation
 
-        :param q: Is used if this ET2 is variable (a joint)
+        Parameters
+        ----------
+        q
+            Is used if this ET2 is variable (a joint)
 
-        :return: The SE(2) matrix value of the ET2
+        Returns
+        -------
+        T
+            The SE(2) matrix value of the ET2
 
-        Example:
-
+        Examples
+        --------
         .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET2
-            >>> e = ET2.tx(1)
-            >>> e.A()
-            >>> e = ET2.tx()
-            >>> e.A(0.7)
+        >>> from roboticstoolbox import ET2
+        >>> e = ET2.tx(1)
+        >>> e.A()
+        >>> e = ET2.tx()
+        >>> e.A(0.7)
 
         """
+
         if self.isjoint:
             if self.isflip:
                 q = -1.0 * q
