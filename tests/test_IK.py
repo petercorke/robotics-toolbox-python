@@ -146,7 +146,7 @@ class TestIK(unittest.TestCase):
 
         Tep = panda.eval([0, -1.3, 0, 1.2, 0, 2.0, 0.1])
 
-        solver = rtb.IK_NR(joint_limits=True, seed=0, pinv=True, slimit=2)
+        solver = rtb.IK_NR(joint_limits=True, seed=0, pinv=True, ilimit=2, slimit=1)
 
         sol = solver.solve(panda, Tep)
 
