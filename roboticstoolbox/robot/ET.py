@@ -153,7 +153,10 @@ class BaseET:
                 T = self.A()
                 rpy = tr2rpy(T) * 180.0 / pi
                 if T[:3, -1].any() and rpy.any():
-                    eta_str = f"{T[0, -1]:.4g}, {T[1, -1]:.4g}, {T[2, -1]:.4g}; {rpy[0]:.4g}°, {rpy[1]:.4g}°, {rpy[2]:.4g}°"
+                    eta_str = (
+                        f"{T[0, -1]:.4g}, {T[1, -1]:.4g}, {T[2, -1]:.4g};"
+                        f" {rpy[0]:.4g}°, {rpy[1]:.4g}°, {rpy[2]:.4g}°"
+                    )
                 elif T[:3, -1].any():
                     eta_str = f"{T[0, -1]:.4g}, {T[1, -1]:.4g}, {T[2, -1]:.4g}"
                 elif rpy.any():
