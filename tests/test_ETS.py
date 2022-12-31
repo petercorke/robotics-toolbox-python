@@ -1751,7 +1751,7 @@ class TestETS(unittest.TestCase):
         tz = rtb.ETS(rtb.ET.tz(jindex=5, qlim=[-1, 1]))
         a = rtb.ETS(rtb.ET.SE3(np.eye(4)))
         r = tx + ty + tz + rx + ry + rz + a
-        r.plot(q=q2, block=False)
+        r.plot(q=q2, block=False, backend="pyplot")
 
     def test_teach(self):
         # x = sympy.Symbol("x")
@@ -1764,7 +1764,7 @@ class TestETS(unittest.TestCase):
         tz = rtb.ETS(rtb.ET.tz(jindex=5, qlim=[-1, 1]))
         a = rtb.ETS(rtb.ET.SE3(np.eye(4)))
         r = tx + ty + tz + rx + ry + rz + a
-        r.teach(q=q2, block=False)
+        r.teach(q=q2, block=False, backend="pyplot")
 
     def test_partial_fkine(self):
         deg = np.pi / 180
