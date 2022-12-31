@@ -163,7 +163,7 @@ class BaseETS(UserList):
             elif et.istranslation:
                 try:
                     s = f"{et.axis}({et.eta:.4g})"
-                except TypeError:
+                except TypeError:  # pragma: nocover
                     s = f"{et.axis}({et.eta})"
 
             elif not et.iselementary:
@@ -198,7 +198,7 @@ class BaseETS(UserList):
 
         """
 
-        print(self.__str__())
+        print(self.__str__())  # pragma: nocover
 
     def joint_idx(self) -> List[int]:
         """
@@ -302,8 +302,6 @@ class BaseETS(UserList):
         ValueError
             unset limits for a prismatic joint
 
-
-
         Examples
         --------
         .. runblock:: pycon
@@ -327,7 +325,7 @@ class BaseETS(UserList):
                 else:
                     v = et.qlim
             else:
-                raise ValueError("Undefined Joint Type")
+                raise ValueError("Undefined Joint Type")  # pragma: nocover
             limits[:, i] = v
 
         return limits
@@ -784,7 +782,7 @@ class ETS(BaseETS):
             raise ValueError(
                 "You can not have some jindices set for the ET's in arg. It must be all"
                 " or none"
-            )
+            )  # pragma: nocover
         elif jindices == 0 and self.n > 0:
             # Set them ourself
             for j, joint in enumerate(joints):
@@ -3154,7 +3152,7 @@ class ETS2(BaseETS):
             raise ValueError(
                 "You can not have some jindices set for the ET's in arg. It must be all"
                 " or none"
-            )
+            )  # pragma: nocover
         elif jindices == 0 and self.n > 0:
             # Set them ourself
             for j, joint in enumerate(joints):

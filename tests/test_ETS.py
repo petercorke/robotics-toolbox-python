@@ -4235,6 +4235,111 @@ class TestETS(unittest.TestCase):
         nt.assert_almost_equal(fk, ans)
         nt.assert_almost_equal(fk2, ans)
 
+    def test_qlim1(self):
+        rx = rtb.ETS(rtb.ET.Rx())
+
+        q = rx.qlim
+        nt.assert_equal(q, np.array([[-np.pi], [np.pi]]))
+
+    def test_qlim2(self):
+        rx = rtb.ETS(rtb.ET.Rx(qlim=[-1, 1]))
+
+        q = rx.qlim
+        nt.assert_equal(q, np.array([[-1], [1]]))
+
+    def test_qlim3(self):
+        rx = rtb.ETS(rtb.ET.tx(qlim=[-1, 1]))
+
+        q = rx.qlim
+        nt.assert_equal(q, np.array([[-1], [1]]))
+
+    def test_qlim4(self):
+        rx = rtb.ETS(rtb.ET.tx())
+
+        with self.assertRaises(ValueError):
+            rx.qlim
+
+    def test_random_q(self):
+        rx = rtb.ETS(rtb.ET.Rx(qlim=[-1, 1]))
+
+        q = rx.random_q()
+        self.assertTrue(-1 <= q <= 1)
+
+    def test_random_q2(self):
+        rx = rtb.ETS([rtb.ET.Rx(qlim=[-1, 1]), rtb.ET.Rx(qlim=[1, 2])])
+
+        q = rx.random_q(10)
+
+        self.assertTrue(np.all(-1 <= q[:, 0]) and np.all(q[:, 0] <= 1))
+        self.assertTrue(np.all(1 <= q[:, 1]) and np.all(q[:, 1] <= 2))
+
+    def test_manip(self):
+        r = rtb.models.Panda()
+        ets = r.ets()
+        q = r.qr
+
+        m1 = ets.manipulability(q)
+        m2 = ets.manipulability(q, axes="trans")
+        m3 = ets.manipulability(q, axes="rot")
+
+        nt.assert_almost_equal(m1, 0.0837, decimal=4)
+        nt.assert_almost_equal(m2, 0.1438, decimal=4)
+        nt.assert_almost_equal(m3, 2.7455, decimal=4)
+
+    def test_yoshi(self):
+        puma = rtb.models.Puma560()
+        ets = puma.ets()
+        q = puma.qn  # type: ignore
+
+        m1 = ets.manipulability(q, axes=[True, True, True, True, True, True])
+        m2 = ets.manipulability(np.c_[q, q].T)
+        m3 = ets.manipulability(q, axes="trans")
+        m4 = ets.manipulability(q, axes="rot")
+
+        a0 = 0.0805
+        a2 = 0.1354
+        a3 = 2.44949
+
+        nt.assert_almost_equal(m1, a0, decimal=4)
+        nt.assert_almost_equal(m2[0], a0, decimal=4)  # type: ignore
+        nt.assert_almost_equal(m2[1], a0, decimal=4)  # type: ignore
+        nt.assert_almost_equal(m3, a2, decimal=4)
+        nt.assert_almost_equal(m4, a3, decimal=4)
+
+        with self.assertRaises(ValueError):
+            puma.manipulability(axes="abcdef")  # type: ignore
+
+    def test_cond(self):
+        r = rtb.models.Panda()
+        ets = r.ets()
+
+        m = ets.manipulability(r.qr, method="invcondition")
+
+        self.assertAlmostEqual(m, 0.11222, places=4)  # type: ignore
+
+    def test_minsingular(self):
+        r = rtb.models.Panda()
+        ets = r.ets()
+
+        m = ets.manipulability(r.qr, method="minsingular")
+
+        self.assertAlmostEqual(m, 0.209013, places=4)  # type: ignore
+
+    def test_manipulability_fail(self):
+        puma = rtb.models.Puma560()
+        ets = puma.ets()
+
+        with self.assertRaises(ValueError):
+            ets.manipulability(q=[1, 2, 3.0], method="notamethod")  # type: ignore
+
+    def test_manip_fail2(self):
+        r = rtb.models.Panda()
+        ets = r.ets()
+        q = r.qr
+
+        with self.assertRaises(ValueError):
+            ets.manipulability(q, axes="abcdef")  # type: ignore
+
 
 if __name__ == "__main__":
 
