@@ -1152,6 +1152,8 @@ graph [rankdir=LR];
         ----------
         - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
           Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
         """  # noqa
 

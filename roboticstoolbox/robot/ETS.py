@@ -6,24 +6,9 @@
 """
 
 from collections import UserList
-from numpy import (
-    pi,
-    where,
-    all,
-    ndarray,
-    zeros,
-    array,
-    eye,
-    array_equal,
-    sqrt,
-    min,
-    max,
-    cross,
-    flip,
-    concatenate,
-)
+import numpy as np
 from numpy.random import uniform
-from numpy.linalg import inv, det, cond, pinv, matrix_rank, svd, eig
+from numpy.linalg import inv, det, cond, svd
 from spatialmath import SE3, SE2
 from spatialmath.base import (
     getvector,
@@ -173,7 +158,7 @@ class BaseETS(UserList):
                 if issymbol(et.eta):
                     s = f"{et.axis}({et.eta})"
                 else:
-                    s = f"{et.axis}({et.eta * 180 / pi:.4g}°)"
+                    s = f"{et.axis}({et.eta * 180 / np.pi:.4g}°)"
 
             elif et.istranslation:
                 try:
@@ -233,7 +218,7 @@ class BaseETS(UserList):
 
         """
 
-        return where([e.isjoint for e in self])[0]  # type: ignore
+        return np.where([e.isjoint for e in self])[0]  # type: ignore
 
     def joints(self) -> List[ET]:
         """
@@ -276,7 +261,7 @@ class BaseETS(UserList):
         return set([self[j].jindex for j in self.joint_idx()])  # type: ignore
 
     @c_property
-    def jindices(self) -> ndarray:
+    def jindices(self) -> NDArray:
         """
         Get an array of joint indices
 
@@ -294,7 +279,7 @@ class BaseETS(UserList):
 
         """
 
-        return array([j.jindex for j in self.joints()])  # type: ignore
+        return np.array([j.jindex for j in self.joints()])  # type: ignore
 
     @c_property
     def qlim(self):
@@ -328,12 +313,12 @@ class BaseETS(UserList):
 
         """
 
-        limits = zeros((2, self.n))
+        limits = np.zeros((2, self.n))
 
         for i, et in enumerate(self.joints()):
             if et.isrotation:
                 if et.qlim is None:
-                    v = [-pi, pi]
+                    v = [-np.pi, np.pi]
                 else:
                     v = et.qlim
             elif et.istranslation:
@@ -653,7 +638,7 @@ class BaseETS(UserList):
 
         robot.teach(*args, **kwargs)
 
-    def random_q(self, i: int = 1) -> ndarray:
+    def random_q(self, i: int = 1) -> NDArray:
         """
         Generate a random valid joint configuration
 
@@ -677,13 +662,13 @@ class BaseETS(UserList):
         """
 
         if i == 1:
-            q = zeros(self.n)
+            q = np.zeros(self.n)
 
             for i in range(self.n):
                 q[i] = uniform(self.qlim[0, i], self.qlim[1, i])
 
         else:
-            q = zeros((i, self.n))
+            q = np.zeros((i, self.n))
 
             for j in range(i):
                 for i in range(self.n):
@@ -826,23 +811,27 @@ class ETS(BaseETS):
         """
         Compile an ETS
 
-        :return: optimised ETS
-
         Perform constant folding for faster evaluation.  Consecutive constant
         ETs are compounded, leading to a constant ET which is denoted by
         ``SE3`` when displayed.
 
-        Example:
+        Returns
+        -------
+        compile
+            optimised ETS
 
+        Examples
+        --------
         .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.ETS.Panda()
+        >>> ets = robot.ets()
+        >>> ets
+        >>> ets.compile()
 
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.ETS.Panda()
-            >>> ets = robot.ets()
-            >>> ets
-            >>> ets.compile()
-
-        :seealso: :func:`isconstant`
+        See Also
+        --------
+        :func:`isconstant`
         """
         const = None
         ets = ETS()
@@ -853,7 +842,7 @@ class ETS(BaseETS):
                 # a joint
                 if const is not None:
                     # flush the constant
-                    if not array_equal(const, eye(4)):
+                    if not np.array_equal(const, np.eye(4)):
                         ets *= ET.SE3(const)
                     const = None
                 ets *= et  # emit the joint ET
@@ -866,7 +855,7 @@ class ETS(BaseETS):
 
         if const is not None:
             # flush the constant, tool transform
-            if not array_equal(const, eye(4)):
+            if not np.array_equal(const, np.eye(4)):
                 ets *= ET.SE3(const)
         return ets
 
@@ -878,21 +867,25 @@ class ETS(BaseETS):
         """
         Insert value
 
-        :param i: insert an ET or ETS into the ETS, default is at the end
-        :param arg: the elementary transform or sequence to insert
-
         Inserts an ET or ETS into the ET sequence.  The inserted value is at position
         ``i``.
 
-        Example:
+        Parameters
+        ----------
+        i
+            insert an ET or ETS into the ETS, default is at the end
+        arg
+            the elementary transform or sequence to insert
 
+        Examples
+        --------
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+        >>> f = ET.Ry()
+        >>> e.insert(f, 2)
+        >>> e
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-            >>> f = ET.Ry()
-            >>> e.insert(f, 2)
-            >>> e
         """
 
         if isinstance(arg, ET):
@@ -912,42 +905,64 @@ class ETS(BaseETS):
     def fkine(
         self,
         q: ArrayLike,
-        base: Union[ndarray, SE3, None] = None,
-        tool: Union[ndarray, SE3, None] = None,
+        base: Union[NDArray, SE3, None] = None,
+        tool: Union[NDArray, SE3, None] = None,
         include_base: bool = True,
     ) -> SE3:
         """
         Forward kinematics
 
-        :param q: Joint coordinates
-        :type q: ArrayLike
-        :param base: base transform, optional
-        :param tool: tool transform, optional
+        ``T = ets.fkine(q)`` evaluates forward kinematics for the ets at
+        joint configuration ``q``.
 
-        :return: The transformation matrix representing the pose of the
-            end-effector
-
-        - ``T = ets.fkine(q)`` evaluates forward kinematics for the robot at
-          joint configuration ``q``.
         **Trajectory operation**:
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is an ``SE3`` instance with ``m`` values.
-        .. note::
-            - The robot's base tool transform, if set, is incorporated
-              into the result.
-            - A tool transform, if provided, is incorporated into the result.
-            - Works from the end-effector link to the base
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        """
+
+        Attributes
+        ----------
+        q
+            Joint coordinates
+        base
+            A base transform applied before the ETS
+        tool
+            tool transform, optional
+        include_base
+            set to True if the base transform should be considered
+
+        Returns
+        -------
+            The transformation matrix representing the pose of the
+            end-effector
+
+        Examples
+        --------
+        The following example makes a ``panda`` robot object, gets the ets, and
+        solves for the forward kinematics at the listed configuration.
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+
+        Notes
+        -----
+        - A tool transform, if provided, is incorporated into the result.
+        - Works from the end-effector link to the base
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+
+        """  # noqa
 
         ret = SE3.Empty()
         fk = self.eval(q, base, tool, include_base)
 
         if fk.dtype == "O":
             # symbolic
-            fk = array(simplify(fk))
+            fk = np.array(simplify(fk))
 
         if fk.ndim == 3:
             for T in fk:
@@ -960,35 +975,56 @@ class ETS(BaseETS):
     def eval(
         self,
         q: ArrayLike,
-        base: Union[ndarray, SE3, None] = None,
-        tool: Union[ndarray, SE3, None] = None,
+        base: Union[NDArray, SE3, None] = None,
+        tool: Union[NDArray, SE3, None] = None,
         include_base: bool = True,
-    ) -> ndarray:
+    ) -> NDArray:
         """
         Forward kinematics
 
-        :param q: Joint coordinates
-        :type q: ArrayLike
-        :param base: base transform, optional
-        :param tool: tool transform, optional
+        ``T = ets.fkine(q)`` evaluates forward kinematics for the ets at
+        joint configuration ``q``.
 
-        :return: The transformation matrix representing the pose of the
-            end-effector
-
-        - ``T = ets.fkine(q)`` evaluates forward kinematics for the robot at
-          joint configuration ``q``.
         **Trajectory operation**:
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is an ``SE3`` instance with ``m`` values.
-        .. note::
-            - The robot's base tool transform, if set, is incorporated
-              into the result.
-            - A tool transform, if provided, is incorporated into the result.
-            - Works from the end-effector link to the base
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        """
+
+        Attributes
+        ----------
+        q
+            Joint coordinates
+        base
+            A base transform applied before the ETS
+        tool
+            tool transform, optional
+        include_base
+            set to True if the base transform should be considered
+        Returns
+        -------
+            The transformation matrix representing the pose of the
+            end-effector
+
+        Examples
+        --------
+        The following example makes a ``panda`` robot object, gets the ets, and
+        solves for the forward kinematics at the listed configuration.
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+
+        Notes
+        -----
+        - A tool transform, if provided, is incorporated into the result.
+        - Works from the end-effector link to the base
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+
+        """  # noqa
 
         try:
             return ETS_fkine(self._fknm, q, base, tool, include_base)
@@ -1000,29 +1036,29 @@ class ETS(BaseETS):
         end = self.data[-1]
 
         if isinstance(tool, SE3):
-            tool = array(tool.A)
+            tool = np.array(tool.A)
 
         if isinstance(base, SE3):
-            base = array(base.A)
+            base = np.array(base.A)
 
         if base is None:
             bases = None
-        elif array_equal(base, eye(3)):  # pragma: nocover
+        elif np.array_equal(base, np.eye(3)):  # pragma: nocover
             bases = None
         else:  # pragma: nocover
             bases = base
 
         if tool is None:
             tools = None
-        elif array_equal(tool, eye(3)):  # pragma: nocover
+        elif np.array_equal(tool, np.eye(3)):  # pragma: nocover
             tools = None
         else:  # pragma: nocover
             tools = tool
 
         if l > 1:
-            T = zeros((l, 4, 4), dtype=object)
+            T = np.zeros((l, 4, 4), dtype=object)
         else:
-            T = zeros((4, 4), dtype=object)
+            T = np.zeros((4, 4), dtype=object)
 
         # Tk = None
 
@@ -1061,38 +1097,53 @@ class ETS(BaseETS):
     def jacob0(
         self,
         q: ArrayLike,
-        tool: Union[ndarray, SE3, None] = None,
-    ) -> ndarray:
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
         r"""
-        Jacobian in base frame
-        :param q: Joint coordinate vector
-        :type q: ArrayLike
-        :param tool: a static tool transformation matrix to apply to the
+        Manipulator geometric Jacobian in the base frame
+
+        ``robot.jacobo(q)`` is the manipulator Jacobian matrix which maps
+        joint  velocity to end-effector spatial velocity expressed in the
+        base frame.
+
+        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
+        is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
+
+        Parameters
+        ----------
+        q
+            Joint coordinate vector
+        tool
+            a static tool transformation matrix to apply to the
             end of end, defaults to None
-        :return J: Manipulator Jacobian in the base frame
-        ``jacob0(q)`` is the ETS Jacobian matrix which maps joint
-        velocity to spatial velocity in the {0} frame.
-        End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x,
-        \omega_y, \omega_z)^T` is related to joint velocity by
-        :math:`{}^{e}\nu = {}^{e}\mathbf{J}_0(q) \dot{q}`.
-        If ``ets.eval(q)`` is already computed it can be passed in as ``T`` to
-        reduce computation time.
-        An ETS represents the relative pose from the {0} frame to the end frame
-        {e}. This is the composition of mAny relative poses, some constant and
-        some functions of the joint variables, which we can write as
-        :math:`\mathbf{E}(q)`.
-        .. math::
-            {}^0 T_e = \mathbf{E}(q) \in \mbox{SE}(3)
-        The temporal derivative of this is the spatial
-        velocity :math:`\nu` which is a 6-vector is related to the rate of
-        change of joint coordinates by the Jacobian matrix.
-        .. math::
-           {}^0 \nu = {}^0 \mathbf{J}(q) \dot{q} \in \mathbb{R}^6
-        This velocity can be expressed relative to the {0} frame or the {e}
-        frame.
-        :references:
-            - `Kinematic Derivatives using the Elementary Transform Sequence, J. Haviland and P. Corke <https://arxiv.org/abs/2010.08696>`_
-        :seealso: :func:`jacobe`, :func:`hessian0`
+
+        Returns
+        -------
+        J0
+            Manipulator Jacobian in the base frame
+
+        Examples
+        --------
+        The following example makes a ``Puma560`` robot object, and solves for the
+        base-frame Jacobian at the zero joint angle configuration
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> puma = rtb.models.Puma560().ets()
+        >>> puma.jacob0([0, 0, 0, 0, 0, 0])
+
+        Notes
+        -----
+        - This is the geometric Jacobian as described in texts by
+            Corke, Spong etal., Siciliano etal.  The end-effector velocity is
+            described in terms of translational and angular velocity, not a
+            velocity twist as per the text by Lynch & Park.
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+
         """  # noqa
 
         # Use c extension
@@ -1103,20 +1154,20 @@ class ETS(BaseETS):
 
         # Otherwise use Python
         if tool is None:
-            tools = eye(4)
+            tools = np.eye(4)
         elif isinstance(tool, SE3):
-            tools = array(tool.A)
+            tools = np.array(tool.A)
         else:  # pragma: nocover
-            tools = eye(4)
+            tools = np.eye(4)
 
         q = getvector(q, None)
 
         T = self.eval(q, include_base=False) @ tools
 
-        U = eye(4)
+        U = np.eye(4)
         j = 0
-        J = zeros((6, self.n), dtype="object")
-        zero = array([0, 0, 0])
+        J = np.zeros((6, self.n), dtype="object")
+        zero = np.array([0, 0, 0])
         end = self.data[-1]
 
         for link in self.data:
@@ -1171,28 +1222,58 @@ class ETS(BaseETS):
     def jacobe(
         self,
         q: ArrayLike,
-        tool: Union[ndarray, SE3, None] = None,
-    ) -> ndarray:
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
         r"""
         Manipulator geometric Jacobian in the end-effector frame
 
-        :param q: Joint coordinate vector
-        :type q: ArrayLike
-        :param tool: a static tool transformation matrix to apply to the
-            end of end, defaults to None
+        ``robot.jacobe(q)`` is the manipulator Jacobian matrix which maps
+        joint  velocity to end-effector spatial velocity expressed in the
+        ``end`` frame.
 
-        :return J: Manipulator Jacobian in the end-effector frame
-
-        - ``ets.jacobe(q)`` is the manipulator Jacobian matrix which maps
-          joint  velocity to end-effector spatial velocity expressed in the
-          end-effector frame.
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        .. warning:: This is the **geometric Jacobian** as described in texts by
+        Parameters
+        ----------
+        q
+            Joint coordinate vector
+        end
+            the particular link or gripper whose velocity the Jacobian
+            describes, defaults to the end-effector if only one is present
+        start
+            the link considered as the base frame, defaults to the robots's base frame
+        tool
+            a static tool transformation matrix to apply to the
+            end of end, defaults to None
+
+        Returns
+        -------
+        Je
+            Manipulator Jacobian in the ``end`` frame
+
+        Examples
+        --------
+        The following example makes a ``Puma560`` robot object, and solves for the
+        end-effector frame Jacobian at the zero joint angle configuration
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> puma = rtb.models.Puma560().ets()
+        >>> puma.jacobe([0, 0, 0, 0, 0, 0])
+
+        Notes
+        -----
+        - This is the geometric Jacobian as described in texts by
             Corke, Spong etal., Siciliano etal.  The end-effector velocity is
             described in terms of translational and angular velocity, not a
             velocity twist as per the text by Lynch & Park.
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+
         """  # noqa
 
         # Use c extension
@@ -1207,27 +1288,35 @@ class ETS(BaseETS):
     def hessian0(
         self,
         q: Union[ArrayLike, None] = None,
-        J0: Union[ndarray, None] = None,
-        tool: Union[ndarray, SE3, None] = None,
-    ) -> ndarray:
+        J0: Union[NDArray, None] = None,
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
         r"""
         Manipulator Hessian
 
         The manipulator Hessian tensor maps joint acceleration to end-effector
-        spatial acceleration, expressed in the world-coordinate frame. This
-        function calulcates this based on the ETS of the robot.
-
-        One of J0 or q
+        spatial acceleration, expressed in the base frame. This
+        function calulcates this based on the ETS of the robot. One of J0 or q
         is required. Supply J0 if already calculated to save computation time
 
-        :param q: The joint angles/configuration of the robot.
-        :type q: ArrayLike
-        :param J0: The manipulator Jacobian in the 0 frame
-        :param tool: a static tool transformation matrix to apply to the
-            end frame, defaults to None
+        Parameters
+        ----------
+        q
+            The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        J0
+            The manipulator Jacobian in the base frame
+        tool
+            a static tool transformation matrix to apply to the
+            end of end, defaults to None
 
-        :return: The manipulator Hessian in 0 frame
+        Returns
+        -------
+        h0
+            The manipulator Hessian in the base frame
 
+        Synopsis
+        --------
         This method computes the manipulator Hessian in the base frame.  If
         we take the time derivative of the differential kinematic relationship
         .. math::
@@ -1238,18 +1327,35 @@ class ETS(BaseETS):
             \dmat{J} = \mat{H} \dvec{q}
         and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
         Hessian tensor.
+
         The elements of the Hessian are
         .. math::
             \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
         where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
         of the spatial velocity vector.
+
         Similarly, we can write
         .. math::
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        """
+
+        Examples
+        --------
+        The following example makes a ``Panda`` robot object, and solves for the
+        base frame Hessian at the given joint angle configuration
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> panda.hessian0([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        """  # noqa
 
         # Use c extension
         try:
@@ -1261,7 +1367,7 @@ class ETS(BaseETS):
             x = a[1] * b[2] - a[2] * b[1]
             y = a[2] * b[0] - a[0] * b[2]
             z = a[0] * b[1] - a[1] * b[0]
-            return array([x, y, z])
+            return np.array([x, y, z])
 
         n = self.n
 
@@ -1271,7 +1377,7 @@ class ETS(BaseETS):
         else:
             verifymatrix(J0, (6, self.n))
 
-        H = zeros((n, 6, n))
+        H = np.zeros((n, 6, n))
 
         for j in range(n):
             for i in range(j, n):
@@ -1287,28 +1393,36 @@ class ETS(BaseETS):
     def hessiane(
         self,
         q: Union[ArrayLike, None] = None,
-        Je: Union[ndarray, None] = None,
-        tool: Union[ndarray, SE3, None] = None,
-    ) -> ndarray:
+        Je: Union[NDArray, None] = None,
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
         r"""
         Manipulator Hessian
 
         The manipulator Hessian tensor maps joint acceleration to end-effector
-        spatial acceleration, expressed in the world-coordinate frame. This
-        function calulcates this based on the ETS of the robot.
+        spatial acceleration, expressed in the end-effector coordinate frame. This
+        function calulcates this based on the ETS of the robot. One of J0 or q
+        is required. Supply J0 if already calculated to save computation time
 
-        One of Je or q
-        is required. Supply Je if already calculated to save computation time
+        Parameters
+        ----------
+        q
+            The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
+        J0
+            The manipulator Jacobian in the end-effector frame
+        tool
+            a static tool transformation matrix to apply to the
+            end of end, defaults to None
 
-        :param q: The joint angles/configuration of the robot.
-        :type q: ArrayLike
-        :param Je: The manipulator Jacobian in the ee frame
-        :param tool: a static tool transformation matrix to apply to the
-            end frame, defaults to None
+        Returns
+        -------
+        he
+            The manipulator Hessian in end-effector frame
 
-        :return: The manipulator Hessian in ee frame
-
-        This method computes the manipulator Hessian in the ee frame.  If
+        Synopsis
+        --------
+        This method computes the manipulator Hessian in the end-effector frame.  If
         we take the time derivative of the differential kinematic relationship
         .. math::
             \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
@@ -1318,18 +1432,35 @@ class ETS(BaseETS):
             \dmat{J} = \mat{H} \dvec{q}
         and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
         Hessian tensor.
+
         The elements of the Hessian are
         .. math::
             \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
         where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
         of the spatial velocity vector.
+
         Similarly, we can write
         .. math::
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        """
+
+        Examples
+        --------
+        The following example makes a ``Panda`` robot object, and solves for the
+        end-effector frame Hessian at the given joint angle configuration
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> panda.hessiane([0, -0.3, 0, -2.2, 0, 2, 0.7854])
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        """  # noqa
 
         # Use c extension
         try:
@@ -1341,7 +1472,7 @@ class ETS(BaseETS):
             x = a[1] * b[2] - a[2] * b[1]
             y = a[2] * b[0] - a[0] * b[2]
             z = a[0] * b[1] - a[1] * b[0]
-            return array([x, y, z])
+            return np.array([x, y, z])
 
         n = self.n
 
@@ -1351,7 +1482,7 @@ class ETS(BaseETS):
         else:
             verifymatrix(Je, (6, self.n))
 
-        H = zeros((n, 6, n))
+        H = np.zeros((n, 6, n))
 
         for j in range(n):
             for i in range(j, n):
@@ -1368,36 +1499,51 @@ class ETS(BaseETS):
         self,
         q: ArrayLike,
         representation: str = "rpy/xyz",
-        tool: Union[ndarray, SE3, None] = None,
+        tool: Union[NDArray, SE3, None] = None,
     ):
         r"""
         Manipulator analytical Jacobian in the base frame
 
-        :param q: Joint coordinate vector
-        :type q: ArrayLike
-        :param tool: a static tool transformation matrix to apply to the
+        ``robot.jacob0_analytical(q)`` is the manipulator Jacobian matrix which maps
+        joint  velocity to end-effector spatial velocity expressed in the
+        base frame.
+
+        Parameters
+        ----------
+        q
+            Joint coordinate vector
+        representation
+            angular representation
+        tool
+            a static tool transformation matrix to apply to the
             end of end, defaults to None
-        :param representation: describes the rotational representation
 
-        :return J: Manipulator Jacobian in the base frame
+        Returns
+        -------
+        jacob0
+            Manipulator Jacobian in the base frame
 
+        Synopsis
+        --------
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        ==================   ==================================
-        ``representation``          Rotational representation
-        ==================   ==================================
-        ``'rpy/xyz'``        RPY angular rates in XYZ order
-        ``'rpy/zyx'``        RPY angular rates in XYZ order
-        ``'eul'``            Euler angular rates in ZYZ order
-        ``'exp'``            exponential coordinate rates
-        ==================   ==================================
+        |``representation``   |       Rotational representation     |
+        |---------------------|-------------------------------------|
+        |``'rpy/xyz'``        |   RPY angular rates in XYZ order    |
+        |``'rpy/zyx'``        |   RPY angular rates in XYZ order    |
+        |``'eul'``            |   Euler angular rates in ZYZ order  |
+        |``'exp'``            |   exponential coordinate rates      |
 
-        Example:
+        Examples
+        --------
+        Makes a robot object and computes the analytic Jacobian for the given
+        joint configuration
+
         .. runblock:: pycon
-            >>> import roboticstoolbox as rtb
-            >>> puma = rtb.models.ETS.Puma560()
-            >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
+        >>> import roboticstoolbox as rtb
+        >>> puma = rtb.models.ETS.Puma560().ets()
+        >>> puma.jacob0_analytical([0, 0, 0, 0, 0, 0])
 
         """  # noqa
 
@@ -1406,16 +1552,27 @@ class ETS(BaseETS):
         A = rotvelxform(t2r(T), full=True, inverse=True, representation=representation)
         return A @ J
 
-    def jacobm(self, q: ArrayLike) -> ndarray:
+    def jacobm(self, q: ArrayLike) -> NDArray:
         r"""
-        Calculates the manipulability Jacobian. This measure relates the rate
-        of change of the manipulability to the joint velocities of the robot.
+        The manipulability Jacobian
 
-        :param q: The joint angles/configuration of the robot
+        This measure relates the rate of change of the manipulability to the
+        joint velocities of the robot. One of J or q is required. Supply J
+        and H if already calculated to save computation time
 
-        :return: The manipulability Jacobian
-        :rtype: float ndarray(n)
+        Parameters
+        ----------
+        q
+            The joint angles/configuration of the robot (Optional,
+            if not supplied will use the stored q values).
 
+        Returns
+        -------
+        jacobm
+            The manipulability Jacobian
+
+        Synopsis
+        --------
         Yoshikawa's manipulability measure
 
         .. math::
@@ -1428,10 +1585,14 @@ class ETS(BaseETS):
 
             \frac{\partial m(\vec{q})}{\partial \vec{q}}
 
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-              Sequence, J. Haviland and P. Corke
-        """
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        """  # noqa
 
         J = self.jacob0(q)
         H = self.hessian0(q)
@@ -1442,7 +1603,7 @@ class ETS(BaseETS):
         # H = H[:, axes, :]
 
         b = inv(J @ J.T)
-        Jm = zeros((self.n, 1))
+        Jm = np.zeros((self.n, 1))
 
         for i in range(self.n):
             c = J @ H[i, :, :].T
@@ -1450,50 +1611,50 @@ class ETS(BaseETS):
 
         return Jm
 
-    def manipulability(self, q, method="yoshikawa"):
+    def manipulability(
+        self,
+        q,
+        method: L["yoshikawa", "minsingular", "invcondition"] = "yoshikawa",
+        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+    ):
         """
         Manipulability measure
 
-        :param q: Joint coordinates, one of J or q required
-        :type q: ndarray(n), or ndarray(m,n)
-        :param J: Jacobian in world frame if already computed, one of J or
-            q required
-        :type J: ndarray(6,n)
-        :param method: method to use, "yoshikawa" (default), "condition",
-            "minsingular"  or "asada"
-        :type method: str
-        :param axes: Task space axes to consider: "all" [default],
-            "trans", "rot" or "both"
-        :type axes: str
-        :param kwargs: extra arguments to pass to ``jacob0``
-        :return: manipulability
-        :rtype: float or ndarray(m)
+        ``manipulability(q)`` is the scalar manipulability index
+        for the ets at the joint configuration ``q``.  It indicates
+        dexterity, that is, how well conditioned the ets is for motion
+        with respect to the 6 degrees of Cartesian motion.  The values is
+        zero if the ets is at a singularity.
 
-        - ``manipulability(q)`` is the scalar manipulability index
-          for the robot at the joint configuration ``q``.  It indicates
-          dexterity, that is, how well conditioned the robot is for motion
-          with respect to the 6 degrees of Cartesian motion.  The values is
-          zero if the robot is at a singularity.
+        Parameters
+        ----------
+        q
+            Joint coordinates, one of J or q required
+        method
+            method to use, "yoshikawa" (default), "invcondition",
+            "minsingular"
+        axes
+            Task space axes to consider: "all" [default],
+            "trans", or "rot"
+
+        Returns
+        -------
+        manipulability
+            the manipulability metric
+
+        Synopsis
+        --------
 
         Various measures are supported:
 
-        +-------------------+-------------------------------------------------+
         | Measure           |       Description                               |
-        +-------------------+-------------------------------------------------+
+        |-------------------|-------------------------------------------------|
         | ``"yoshikawa"``   | Volume of the velocity ellipsoid, *distance*    |
         |                   | from singularity [Yoshikawa85]_                 |
-        +-------------------+-------------------------------------------------+
         | ``"invcondition"``| Inverse condition number of Jacobian, isotropy  |
         |                   | of the velocity ellipsoid [Klein87]_            |
-        +-------------------+-------------------------------------------------+
         | ``"minsingular"`` | Minimum singular value of the Jacobian,         |
         |                   | *distance*  from singularity [Klein87]_         |
-        +-------------------+-------------------------------------------------+
-        | ``"asada"``       | Isotropy of the task-space acceleration         |
-        |                   | ellipsoid which is a function of the Cartesian  |
-        |                   | inertia matrix which depends on the inertial    |
-        |                   | parameters [Asada83]_                           |
-        +-------------------+-------------------------------------------------+
 
         **Trajectory operation**:
 
@@ -1501,35 +1662,47 @@ class ETS(BaseETS):
         manipulability indices for each joint configuration specified by a row
         of ``q``.
 
-        .. note::
+        Notes
+        -----
+        - Invokes the ``jacob0`` method of the robot if ``J`` is not passed
+        - The "all" option includes rotational and translational
+            dexterity, but this involves adding different units. It can be
+            more useful to look at the translational and rotational
+            manipulability separately.
+        - Examples in the RVC book (1st edition) can be replicated by
+            using the "all" option
+        - Asada's measure requires inertial a robot model with inertial
+            parameters.
 
-            - Invokes the ``jacob0`` method of the robot if ``J`` is not passed
-            - The "all" option includes rotational and translational
-              dexterity, but this involves adding different units. It can be
-              more useful to look at the translational and rotational
-              manipulability separately.
-            - Examples in the RVC book (1st edition) can be replicated by
-              using the "all" option
-            - Asada's measure requires inertial a robot model with inertial
-              parameters.
-
-        :references:
-
+        References
+        ----------
         .. [Yoshikawa85] Manipulability of Robotic Mechanisms. Yoshikawa T.,
                 The International Journal of Robotics Research.
                 1985;4(2):3-9. doi:10.1177/027836498500400201
-        .. [Asada83] A geometrical representation of manipulator dynamics and
-                its application to arm design, H. Asada,
-                Journal of Dynamic Systems, Measurement, and Control,
-                vol. 105, p. 131, 1983.
         .. [Klein87] Dexterity Measures for the Design and Control of
                 Kinematically Redundant Manipulators. Klein CA, Blaho BE.
                 The International Journal of Robotics Research.
                 1987;6(2):72-83. doi:10.1177/027836498700600206
-
         - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
 
+
+        .. versionchanged:: 1.0.4
+            Removed 'both' option for axes, added a custom list option.
+
         """
+
+        axes_list: List[bool] = []
+
+        if isinstance(axes, list):
+            axes_list = axes
+        elif axes == "all":
+            axes_list = [True, True, True, True, True, True]
+        elif axes.startswith("trans"):
+            axes_list = [True, True, True, False, False, False]
+        elif axes.startswith("rot"):
+            axes_list = [False, False, False, True, True, True]
+        else:
+            raise ValueError("axes must be all, trans, rot or both")
 
         def yoshikawa(robot, J, q, axes, **kwargs):
             J = J[axes, :]
@@ -1538,7 +1711,7 @@ class ETS(BaseETS):
                 return abs(det(J))
             else:
                 m2 = det(J @ J.T)
-                return sqrt(abs(m2))
+                return np.sqrt(abs(m2))
 
         def condition(robot, J, q, axes, **kwargs):
             J = J[axes, :]
@@ -1549,18 +1722,6 @@ class ETS(BaseETS):
             s = svd(J, compute_uv=False)
             return s[-1]  # return last/smallest singular value of J
 
-        def asada(robot, J, q, axes, **kwargs):
-            # dof = np.sum(axes)
-            if matrix_rank(J) < 6:
-                return 0
-            Ji = pinv(J)
-            Mx = Ji.T @ robot.inertia(q) @ Ji
-            d = where(axes)[0]
-            Mx = Mx[d]
-            Mx = Mx[:, d.tolist()]
-            e, _ = eig(Mx)
-            return min(e) / max(e)
-
         # choose the handler function
         if method == "yoshikawa":
             mfunc = yoshikawa
@@ -1568,47 +1729,68 @@ class ETS(BaseETS):
             mfunc = condition
         elif method == "minsingular":
             mfunc = minsingular
-        elif method == "asada":
-            mfunc = asada
         else:
             raise ValueError("Invalid method chosen")
 
-        # q = getmatrix(q, (None, self.n))
-        # w = zeros(q.shape[0])
-        axes = [True, True, True, True, True, True]
+        # Otherwise use the q vector/matrix
+        q = np.array(getmatrix(q, (None, self.n)))
+        w = np.zeros(q.shape[0])
 
-        # for k, qk in enumerate(q):
-        J = self.jacob0(q)
-        w = mfunc(self, J, q, axes)
+        for k, qk in enumerate(q):
+            Jk = self.jacob0(qk)
+            w[k] = mfunc(self, Jk, qk, axes_list)
 
-        # if len(w) == 1:
-        #     return w[0]
-        # else:
-        return w
+        if len(w) == 1:
+            return w[0]
+        else:
+            return w
 
-    def partial_fkine0(self, q: ArrayLike, n: int) -> ndarray:
+    def partial_fkine0(self, q: ArrayLike, n: int) -> NDArray:
         r"""
         Manipulator Forward Kinematics nth Partial Derivative
 
-        The manipulator Hessian tensor maps joint acceleration to end-effector
-        spatial acceleration, expressed in the ee frame. This
-        function calulcates this based on the ETS of the robot. One of Je or q
-        is required. Supply Je if already calculated to save computation time
+        This method computes the nth derivative of the forward kinematics where ``n`` is
+        greater than or equal to 3. This is an extension of the differential kinematics
+        where the Jacobian is the first partial derivative and the Hessian is the
+        second.
 
-        :param q: The joint angles/configuration of the robot (Optional,
+        Parameters
+        ----------
+        q
+            The joint angles/configuration of the robot (Optional,
             if not supplied will use the stored q values).
-        :type q: ArrayLike
-        :param end: the final link/Gripper which the Hessian represents
-        :param start: the first link which the Hessian represents
-        :param tool: a static tool transformation matrix to apply to the
+        end
+            the final link/Gripper which the Hessian represents
+        start
+            the first link which the Hessian represents
+        tool
+            a static tool transformation matrix to apply to the
             end of end, defaults to None
 
-        :return: The nth Partial Derivative of the forward kinematics
+        Returns
+        -------
+        A
+            The nth Partial Derivative of the forward kinematics
 
-        :references:
-            - Kinematic Derivatives using the Elementary Transform
-                Sequence, J. Haviland and P. Corke
-        """
+        Examples
+        --------
+        The following example makes a ``Panda`` robot object, and solves for the
+        base-effector frame 4th defivative of the forward kinematics at the given
+        joint angle configuration
+
+        .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.Panda().ets()
+        >>> panda.partial_fkine0([0, -0.3, 0, -2.2, 0, 2, 0.7854], n=4)
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+          Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
+
+        """  # noqa
 
         # Calculate the Jacobian and Hessian
         J = self.jacob0(q)
@@ -1625,7 +1807,7 @@ class ETS(BaseETS):
         # we are calculating
         # It stores the indices in the order: "j, k, l. m, n, o, ..."
         # where count is extended to match oder of the partial derivative
-        count = array([0, 0])
+        count = np.array([0, 0])
 
         # The order of derivative for which we are calculating
         # The Hessian is the 2nd-order so we start with c = 2
@@ -1683,7 +1865,7 @@ class ETS(BaseETS):
             size.insert(0, self.n)
 
             # Add an axis to the count array
-            count = concatenate(([0], count))
+            count = np.concatenate(([0], count))
 
             # This variables corresponds to indices within the previous
             # partial derivatives
@@ -1704,15 +1886,15 @@ class ETS(BaseETS):
             c += 1
 
             # Allocate our new partial derivative tensor
-            pd = zeros(size)
+            pd = np.zeros(size)
 
             # We need to loop n^c times
             # There are n^c columns to calculate
             for _ in range(self.n**c):
 
                 # Allocate the rotation and translation components
-                rot = zeros(3)
-                trn = zeros(3)
+                rot = np.zeros(3)
+                trn = np.zeros(3)
 
                 # This loop calculates a single column ([trn, rot])
                 # of the tensor for dT(x)
@@ -1725,8 +1907,8 @@ class ETS(BaseETS):
 
                     # This is a list of indices selecting the slices of the
                     # previous tensor
-                    idx0_slices = flip(idx0[1:])
-                    idx1_slices = flip(idx1[1:])
+                    idx0_slices = np.flip(idx0[1:])
+                    idx1_slices = np.flip(idx1[1:])
 
                     # This index selecting the column within the 2d slice of the
                     # previous tensor
@@ -1741,11 +1923,11 @@ class ETS(BaseETS):
                     col1_trn = pdr1[(*idx1_slices, slice(0, 3), idx1_n)]
 
                     # Perform the cross product as described in the maths above
-                    rot += cross(col0_rot, col1_rot)
-                    trn += cross(col0_rot, col1_trn)
+                    rot += np.cross(col0_rot, col1_rot)
+                    trn += np.cross(col0_rot, col1_trn)
 
-                pd[(*flip(count[1:]), slice(0, 3), count[0])] = trn
-                pd[(*flip(count[1:]), slice(3, 6), count[0])] = rot
+                pd[(*np.flip(count[1:]), slice(0, 3), count[0])] = trn
+                pd[(*np.flip(count[1:]), slice(3, 6), count[0])] = rot
 
                 count[0] += 1
                 for j in range(len(count)):
@@ -1918,16 +2100,16 @@ class ETS(BaseETS):
 
     def ik_NR(
         self,
-        Tep: Union[ndarray, SE3],
-        q0: Union[ndarray, None] = None,
+        Tep: Union[NDArray, SE3],
+        q0: Union[NDArray, None] = None,
         ilimit: int = 30,
         slimit: int = 100,
         tol: float = 1e-6,
-        mask: Union[ndarray, None] = None,
+        mask: Union[NDArray, None] = None,
         joint_limits: bool = True,
         pinv: int = True,
         pinv_damping: float = 0.0,
-    ) -> Tuple[ndarray, int, int, int, float]:
+    ) -> Tuple[NDArray, int, int, int, float]:
         r"""
         Fast numerical inverse kinematics using Newton-Raphson optimization
 
@@ -2189,7 +2371,7 @@ class ETS(BaseETS):
 
     def ikine_LM(
         self,
-        Tep: Union[ndarray, SE3],
+        Tep: Union[NDArray, SE3],
         q0: Union[ArrayLike, None] = None,
         ilimit: int = 30,
         slimit: int = 100,
@@ -2385,7 +2567,7 @@ class ETS(BaseETS):
 
     def ikine_NR(
         self,
-        Tep: Union[ndarray, SE3],
+        Tep: Union[NDArray, SE3],
         q0: Union[ArrayLike, None] = None,
         ilimit: int = 30,
         slimit: int = 100,
@@ -2397,7 +2579,7 @@ class ETS(BaseETS):
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: Union[ndarray, float] = 0.3,
+        pi: Union[NDArray, float] = 0.3,
         **kwargs,
     ):
         r"""
@@ -2524,7 +2706,7 @@ class ETS(BaseETS):
 
     def ikine_GN(
         self,
-        Tep: Union[ndarray, SE3],
+        Tep: Union[NDArray, SE3],
         q0: Union[ArrayLike, None] = None,
         ilimit: int = 30,
         slimit: int = 100,
@@ -2536,7 +2718,7 @@ class ETS(BaseETS):
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: Union[ndarray, float] = 0.3,
+        pi: Union[NDArray, float] = 0.3,
         **kwargs,
     ):
         r"""
@@ -2678,7 +2860,7 @@ class ETS(BaseETS):
 
     def ikine_QP(
         self,
-        Tep: Union[ndarray, SE3],
+        Tep: Union[NDArray, SE3],
         q0: Union[ArrayLike, None] = None,
         ilimit: int = 30,
         slimit: int = 100,
@@ -2691,7 +2873,7 @@ class ETS(BaseETS):
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
-        pi: Union[ndarray, float] = 0.3,
+        pi: Union[NDArray, float] = 0.3,
         **kwargs,
     ):
         r"""
@@ -3015,7 +3197,7 @@ class ETS2(BaseETS):
                 # a joint
                 if const is not None:
                     # flush the constant
-                    if not array_equal(const, eye(3)):
+                    if not np.array_equal(const, np.eye(3)):
                         ets *= ET2.SE2(const)
                     const = None
                 ets *= et  # emit the joint ET
@@ -3028,7 +3210,7 @@ class ETS2(BaseETS):
 
         if const is not None:
             # flush the constant, tool transform
-            if not array_equal(const, eye(3)):
+            if not np.array_equal(const, np.eye(3)):
                 ets *= ET2.SE2(const)
         return ets
 
@@ -3074,8 +3256,8 @@ class ETS2(BaseETS):
     def fkine(
         self,
         q: ArrayLike,
-        base: Union[ndarray, SE2, None] = None,
-        tool: Union[ndarray, SE2, None] = None,
+        base: Union[NDArray, SE2, None] = None,
+        tool: Union[NDArray, SE2, None] = None,
         include_base: bool = True,
     ) -> SE2:
         """
@@ -3108,7 +3290,7 @@ class ETS2(BaseETS):
 
         if fk.dtype == "O":
             # symbolic
-            fk = array(simplify(fk))
+            fk = np.array(simplify(fk))
 
         if fk.ndim == 3:
             for T in fk:
@@ -3121,10 +3303,10 @@ class ETS2(BaseETS):
     def eval(
         self,
         q: ArrayLike,
-        base: Union[ndarray, SE2, None] = None,
-        tool: Union[ndarray, SE2, None] = None,
+        base: Union[NDArray, SE2, None] = None,
+        tool: Union[NDArray, SE2, None] = None,
         include_base: bool = True,
-    ) -> ndarray:
+    ) -> NDArray:
         """
         Forward kinematics
         :param q: Joint coordinates
@@ -3157,8 +3339,8 @@ class ETS2(BaseETS):
         if base is None:
             bases = None
         elif isinstance(base, SE2):
-            bases = array(base.A)
-        elif array_equal(base, eye(3)):  # pragma: nocover
+            bases = np.array(base.A)
+        elif np.array_equal(base, np.eye(3)):  # pragma: nocover
             bases = None
         else:  # pragma: nocover
             bases = base
@@ -3166,16 +3348,16 @@ class ETS2(BaseETS):
         if tool is None:
             tools = None
         elif isinstance(tool, SE2):
-            tools = array(tool.A)
-        elif array_equal(tool, eye(3)):  # pragma: nocover
+            tools = np.array(tool.A)
+        elif np.array_equal(tool, np.eye(3)):  # pragma: nocover
             tools = None
         else:  # pragma: nocover
             tools = tool
 
         if l > 1:
-            T = zeros((l, 3, 3), dtype=object)
+            T = np.zeros((l, 3, 3), dtype=object)
         else:
-            T = zeros((3, 3), dtype=object)
+            T = np.zeros((3, 3), dtype=object)
 
         for k, qk in enumerate(q):  # type: ignore
             link = end  # start with last link
@@ -3220,10 +3402,10 @@ class ETS2(BaseETS):
         q = getvector(q)
 
         j = 0
-        J = zeros((3, self.n))
+        J = np.zeros((3, self.n))
         etjoints = self.joint_idx()
 
-        if not all(array([self[i].jindex for i in etjoints])):
+        if not np.all(np.array([self[i].jindex for i in etjoints])):
             # not all joints have a jindex it is required, set them
             for j in range(self.n):
                 i = etjoints[j]
@@ -3241,13 +3423,13 @@ class ETS2(BaseETS):
 
             axis = self[i].axis
             if axis == "R":
-                dTdq = array([[0, -1, 0], [1, 0, 0], [0, 0, 0]]) @ self[i].A(
+                dTdq = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 0]]) @ self[i].A(
                     q[jindex]  # type: ignore
                 )
             elif axis == "tx":
-                dTdq = array([[0, 0, 1], [0, 0, 0], [0, 0, 0]])
+                dTdq = np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]])
             elif axis == "ty":
-                dTdq = array([[0, 0, 0], [0, 0, 1], [0, 0, 0]])
+                dTdq = np.array([[0, 0, 0], [0, 0, 1], [0, 0, 0]])
             else:  # pragma: nocover
                 raise TypeError("Invalid axes")
 
