@@ -85,10 +85,6 @@ class BaseETS(UserList):
         """
         Pretty prints the ETS
 
-        :param q: control how joint variables are displayed
-        :type q: ArrayLike
-        :return: Pretty printed ETS
-
         ``q`` controls how the joint variables are displayed:
 
         - None, format depends on number of joint variables
@@ -102,37 +98,43 @@ class BaseETS(UserList):
           display joint variables as θ1, θ2, ...  ``j`` is either the joint
           index, if provided, otherwise a sequential value.
 
-        Example:
+        Parameters
+        ----------
+        q
+            control how joint variables are displayed
+
+        Returns
+        -------
+        str
+            Pretty printed ETS
+
+        Examples
+        --------
+        .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.Rz() * ET.tx(1) * ET.Rz()
+        >>> print(e[:2])
+        >>> print(e)
+        >>> print(e.__str__(""))
+        >>> print(e.__str__("θ{0}"))  # numbering from 0
+        >>> print(e.__str__("θ{1}"))  # numbering from 1
+        >>> # explicit joint indices
+        >>> e = ET.Rz(jindex=3) * ET.tx(1) * ET.Rz(jindex=4)
+        >>> print(e)
+        >>> print(e.__str__("θ{0}"))
+
+        Angular parameters are converted to degrees, except if they
+        are symbolic.
 
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> from spatialmath.base import symbol
+        >>> theta, d = symbol('theta, d')
+        >>> e = ET.Rx(theta) * ET.tx(2) * ET.Rx(45, 'deg') * ET.Ry(0.2) * ET.ty(d)
+        >>> str(e)
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.Rz()
-            >>> print(e[:2])
-            >>> print(e)
-            >>> print(e.__str__(""))
-            >>> print(e.__str__("θ{0}"))  # numbering from 0
-            >>> print(e.__str__("θ{1}"))  # numbering from 1
-            >>> # explicit joint indices
-            >>> e = ET.Rz(jindex=3) * ET.tx(1) * ET.Rz(jindex=4)
-            >>> print(e)
-            >>> print(e.__str__("θ{0}"))
-
-        .. note:: Angular parameters are converted to degrees, except if they
-            are symbolic.
-
-        Example:
-
-        .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> from spatialmath.base import symbol
-            >>> theta, d = symbol('theta, d')
-            >>> e = ET.Rx(theta) * ET.tx(2) * ET.Rx(45, 'deg') * ET.Ry(0.2) * ET.ty(d)
-            >>> str(e)
-
-        :SymPy: supported
         """
+
         es = []
         j = 0
         c = 0
@@ -194,67 +196,83 @@ class BaseETS(UserList):
         """
         Pretty string for IPython
 
-        :param p: pretty printer handle (ignored)
-        :param cycle: pretty printer flag (ignored)
-
         Print stringified version when variable is displayed in IPython, ie. on
         a line by itself.
 
-        Example::
+        Parameters
+        ----------
+        p
+            pretty printer handle (ignored)
+        cycle
+            pretty printer flag (ignored)
 
-            [In [1]: e
-            Out [1]: R(q0) ⊕ tx(1) ⊕ R(q1) ⊕ tx(1)
+        Examples
+        --------
+        In [1]: e
+        Out [1]: R(q0) ⊕ tx(1) ⊕ R(q1) ⊕ tx(1)
+
         """
+
         print(self.__str__())
 
     def joint_idx(self) -> List[int]:
         """
         Get index of joint transforms
 
-        :return: indices of transforms that are joints
+        Returns
+        -------
+        joint_idx
+            indices of transforms that are joints
 
-        Example:
-
+        Examples
+        --------
         .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-            >>> e.joint_idx()
+        >>> from roboticstoolbox import ET
+        >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+        >>> e.joint_idx()
 
         """
+
         return where([e.isjoint for e in self])[0]  # type: ignore
 
     def joints(self) -> List[ET]:
         """
         Get a list of the variable ETs with this ETS
 
-        :return: list of ETs that are joints
+        Returns
+        -------
+        joints
+            list of ETs that are joints
 
-        Example:
-
+        Examples
+        --------
         .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-            >>> e.joints()
+        >>> from roboticstoolbox import ET
+        >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+        >>> e.joints()
 
         """
+
         return [e for e in self if e.isjoint]
 
     def jindex_set(self) -> Set[int]:  #
         """
         Get set of joint indices
 
-        :return: set of unique joint indices
+        Returns
+        -------
+        jindex_set
+            set of unique joint indices
 
-        Example:
-
+        Examples
+        --------
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
+        >>> e.jointset()
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
-            >>> e.jointset()
         """
+
         return set([self[j].jindex for j in self.joint_idx()])  # type: ignore
 
     @c_property
@@ -262,16 +280,20 @@ class BaseETS(UserList):
         """
         Get an array of joint indices
 
-        :return: array of unique joint indices
+        Returns
+        -------
+        jindices
+            array of unique joint indices
 
-        Example:
-
+        Examples
+        --------
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
+        >>> e.jointset()
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz(jindex=1) * ET.tx(jindex=2) * ET.Rz(jindex=1) * ET.tx(1)
-            >>> e.jointset()
         """
+
         return array([j.jindex for j in self.joints()])  # type: ignore
 
     @c_property
@@ -279,24 +301,33 @@ class BaseETS(UserList):
         r"""
         Joint limits
 
-        :return: Array of joint limit values
-        :rtype: ndarray(2,n)
-        :exception ValueError: unset limits for a prismatic joint
-
         Limits are extracted from the link objects.  If joints limits are
         not set for:
 
-            - a revolute joint [-𝜋. 𝜋] is returned
-            - a prismatic joint an exception is raised
+        - a revolute joint [-𝜋. 𝜋] is returned
+        - a prismatic joint an exception is raised
 
-        Example:
+        Returns
+        -------
+        :return: Array of joint limit values
+        :rtype: ndarray(2,n)
 
+        Raises
+        ------
+        ValueError
+            unset limits for a prismatic joint
+
+
+
+        Examples
+        --------
         .. runblock:: pycon
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.DH.Puma560()
+        >>> robot.qlim
 
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.DH.Puma560()
-            >>> robot.qlim
         """
+
         limits = zeros((2, self.n))
 
         for i, et in enumerate(self.joints()):
@@ -321,20 +352,25 @@ class BaseETS(UserList):
         """
         Joint structure string
 
-        :return: A string indicating the joint types
-
         A string comprising the characters 'R' or 'P' which indicate the types
         of joints in order from left to right.
 
-        Example:
+        Returns
+        -------
+        structure
+            A string indicating the joint types
 
+
+
+        Examples
+        --------
         .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.tz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-            >>> e.structure
+        >>> from roboticstoolbox import ET
+        >>> e = ET.tz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+        >>> e.structure
 
         """
+
         return "".join(
             ["R" if self.data[i].isrotation else "P" for i in self.joint_idx()]
         )
@@ -344,19 +380,24 @@ class BaseETS(UserList):
         """
         Number of joints
 
-        :return: the number of joints in the ETS
-
         Counts the number of joints in the ETS.
 
-        Example:
+        Returns
+        -------
+        n
+            the number of joints in the ETS
 
+        Examples
+        --------
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.Rx() * ET.tx(1) * ET.tz()
+        >>> e.n
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rx() * ET.tx(1) * ET.tz()
-            >>> e.n
+        See Also
+        --------
+        :func:`joints`
 
-        :seealso: :func:`joints`
         """
 
         return self._n
@@ -366,29 +407,31 @@ class BaseETS(UserList):
         """
         Number of transforms
 
-        :return: the number of transforms in the ETS
-
         Counts the number of transforms in the ETS.
 
-        Example:
+        Returns
+        -------
+        m
+            the number of transforms in the ETS
 
+        Examples
+        --------
         .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rx() * ET.tx(1) * ET.tz()
-            >>> e.m
+        >>> from roboticstoolbox import ET
+        >>> e = ET.Rx() * ET.tx(1) * ET.tz()
+        >>> e.m
 
         """
 
         return self._m
 
     @overload
-    def data(self: "ETS") -> List[ET]:  # pragma: nocover
-        ...
+    def data(self: "ETS") -> List[ET]:
+        ...  # pragma: nocover
 
     @overload
-    def data(self: "ETS2") -> List[ET2]:  # pragma: nocover
-        ...
+    def data(self: "ETS2") -> List[ET2]:
+        ...  # pragma: nocover
 
     @property
     def data(self):
@@ -396,66 +439,83 @@ class BaseETS(UserList):
 
     @data.setter
     @overload
-    def data(self: "ETS", new_data: List[ET]):  # pragma: nocover
-        ...
+    def data(self: "ETS", new_data: List[ET]):
+        ...  # pragma: nocover
 
     @data.setter
     @overload
-    def data(self: "ETS", new_data: List[ET2]):  # pragma: nocover
-        ...
+    def data(self: "ETS", new_data: List[ET2]):
+        ...  # pragma: nocover
 
     @data.setter
     def data(self, new_data):
         self._data = new_data
 
     @overload
-    def pop(self: "ETS", i: int = -1) -> ET:  # pragma: nocover
-        ...
+    def pop(self: "ETS", i: int = -1) -> ET:
+        ...  # pragma: nocover
 
     @overload
-    def pop(self: "ETS2", i: int = -1) -> ET2:  # pragma: nocover
-        ...
+    def pop(self: "ETS2", i: int = -1) -> ET2:
+        ...  # pragma: nocover
 
     def pop(self, i=-1):
         """
         Pop value
 
-        :param i: item in the list to pop, default is last
-        :return: the popped value
-        :raises IndexError: if there are no values to pop
-
         Removes a value from the value list and returns it.  The original
         instance is modified.
 
-        Example:
+        Parameters
+        ----------
+        i
+            item in the list to pop, default is last
 
+        Returns
+        -------
+        pop
+            the popped value
+
+        Raises
+        ------
+        IndexError
+            if there are no values to pop
+
+        Examples
+        --------
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+        >>> tail = e.pop()
+        >>> tail
+        >>> e
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-            >>> tail = e.pop()
-            >>> tail
-            >>> e
         """
+
         item = super().pop(i)
         self._update_internals()
         return item
 
     @overload
-    def split(self: "ETS") -> List["ETS"]:  # pragma: nocover
-        ...
+    def split(self: "ETS") -> List["ETS"]:
+        ...  # pragma: nocover
 
     @overload
-    def split(self: "ETS2") -> List["ETS2"]:  # pragma: nocover
-        ...
+    def split(self: "ETS2") -> List["ETS2"]:
+        ...  # pragma: nocover
 
     def split(self):
         """
         Split ETS into link segments
 
-        Returns a list of ETS, each one, apart from the last,
-        ends with a variable ET.
+        Returns
+        -------
+        split
+            a list of ETS, each one, apart from the last,
+            ends with a variable ET.
+
         """
+
         segments = []
         start = 0
 
@@ -479,18 +539,16 @@ class BaseETS(UserList):
         return segments
 
     @overload
-    def inv(self: "ETS") -> "ETS":  # pragma: nocover
-        ...
+    def inv(self: "ETS") -> "ETS":
+        ...  # pragma: nocover
 
     @overload
-    def inv(self: "ETS2") -> "ETS2":  # pragma: nocover
-        ...
+    def inv(self: "ETS2") -> "ETS2":
+        ...  # pragma: nocover
 
     def inv(self):
         r"""
         Inverse of ETS
-
-        :return: Inverse of the ETS
 
         The inverse of a given ETS.  It is computed as the inverse of the
         individual ETs in the reverse order.
@@ -499,53 +557,66 @@ class BaseETS(UserList):
 
             (\mathbf{E}_0, \mathbf{E}_1 \cdots \mathbf{E}_{n-1} )^{-1} = (\mathbf{E}_{n-1}^{-1}, \mathbf{E}_{n-2}^{-1} \cdots \mathbf{E}_0^{-1}{n-1} )
 
-        Example:
+        Returns
+        -------
+        inv
+            Inverse of the ETS
 
+        Examples
+        --------
         .. runblock:: pycon
+        >>> from roboticstoolbox import ET
+        >>> e = ET.Rz(jindex=2) * ET.tx(1) * ET.Rx(jindex=3,flip=True) * ET.tx(1)
+        >>> print(e)
+        >>> print(e.inv())
 
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz(jindex=2) * ET.tx(1) * ET.Rx(jindex=3,flip=True) * ET.tx(1)
-            >>> print(e)
-            >>> print(e.inv())
-
-        .. note:: It is essential to use explicit joint indices to account for
+        Notes
+        -----
+        - It is essential to use explicit joint indices to account for
             the reversed order of the transforms.
+
         """  # noqa
 
         return self.__class__([et.inv() for et in reversed(self.data)])
 
     @overload
-    def __getitem__(self: "ETS", i: int) -> ET:  # pragma: nocover
-        ...
+    def __getitem__(self: "ETS", i: int) -> ET:
+        ...  # pragma: nocover
 
     @overload
-    def __getitem__(self: "ETS", i: slice) -> List[ET]:  # pragma: nocover
-        ...
+    def __getitem__(self: "ETS", i: slice) -> List[ET]:
+        ...  # pragma: nocover
 
     @overload
-    def __getitem__(self: "ETS2", i: int) -> ET2:  # pragma: nocover
-        ...
+    def __getitem__(self: "ETS2", i: int) -> ET2:
+        ...  # pragma: nocover
 
     @overload
-    def __getitem__(self: "ETS2", i: slice) -> List[ET2]:  # pragma: nocover
-        ...
+    def __getitem__(self: "ETS2", i: slice) -> List[ET2]:
+        ...  # pragma: nocover
 
     def __getitem__(self, i):
         """
         Index or slice an ETS
 
-        :param i: the index or slince
-        :return: Elementary transform
+        Parameters
+        ----------
+        i
+            the index or slince
 
-        Example:
+        Returns
+        -------
+        et
+            Elementary transform
 
+        Examples
+        --------
         .. runblock:: pycon
-
-            >>> from roboticstoolbox import ET
-            >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
-            >>> e[0]
-            >>> e[1]
-            >>> e[1:3]
+        >>> from roboticstoolbox import ET
+        >>> e = ET.Rz() * ET.tx(1) * ET.Rz() * ET.tx(1)
+        >>> e[0]
+        >>> e[1]
+        >>> e[1:3]
 
         """
         return self.data[i]  # can be [2] or slice, eg. [3:5]
@@ -586,20 +657,22 @@ class BaseETS(UserList):
         """
         Generate a random valid joint configuration
 
-        :param i: number of configurations to generate
-
         Generates a random q vector within the joint limits defined by
         `self.qlim`.
 
-        Example:
+        Parameters
+        ----------
+        i
+            number of configurations to generate
 
+        Examples
+        --------
         .. runblock:: pycon
-
-            >>> import roboticstoolbox as rtb
-            >>> robot = rtb.models.Panda()
-            >>> ets = robot.ets()
-            >>> q = ets.random_q()
-            >>> q
+        >>> import roboticstoolbox as rtb
+        >>> robot = rtb.models.Panda()
+        >>> ets = robot.ets()
+        >>> q = ets.random_q()
+        >>> q
 
         """
 
@@ -623,8 +696,6 @@ class ETS(BaseETS):
     """
     This class implements an elementary transform sequence (ETS) for 3D
 
-    :param arg: Function to compute ET value
-
     An instance can contain an elementary transform (ET) or an elementary
     transform sequence (ETS). It has list-like properties by subclassing
     UserList, which means we can perform indexing, slicing pop, insert, as well
@@ -634,24 +705,39 @@ class ETS(BaseETS):
     - ``ETS(et)`` an ETS containing a single ET
     - ``ETS([et0, et1, et2])`` an ETS consisting of three ET's
 
-    Example:
+    Parameters
+    ----------
+    arg
+        Function to compute ET value
 
-        .. runblock:: pycon
+    Examples
+    --------
+    .. runblock:: pycon
+    >>> from roboticstoolbox import ETS, ET
+    >>> e = ET.Rz(0.3) # a single ET, rotation about z
+    >>> ets1 = ETS(e)
+    >>> len(ets1)
+    >>> ets2 = ET.Rz(0.3) * ET.tx(2) # an ETS
+    >>> len(ets2)                    # of length 2
+    >>> ets2[1]                      # an ET sliced from the ETS
 
-            >>> from roboticstoolbox import ETS, ET
-            >>> e = ET.Rz(0.3) # a single ET, rotation about z
-            >>> ets1 = ETS(e)
-            >>> len(ets1)
-            >>> ets2 = ET.Rz(0.3) * ET.tx(2) # an ETS
-            >>> len(ets2)                    # of length 2
-            >>> ets2[1]                      # an ET sliced from the ETS
+    References
+    ----------
+    - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+        Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+    - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part II:
+        Acceleration and Advanced Applications." arXiv preprint arXiv:2207.01794 (2022).
 
-    :references:
-        - Kinematic Derivatives using the Elementary Transform Sequence,
-          J. Haviland and P. Corke
 
-    :seealso: :func:`rx`, :func:`ry`, :func:`rz`, :func:`tx`,
-        :func:`ty`, :func:`tz`
+    See Also
+    --------
+    :func:`rx`
+    :func:`ry`
+    :func:`rz`
+    :func:`tx`
+    :func:`ty`
+    :func:`tz`
+
     """
 
     def __init__(
@@ -3203,14 +3289,3 @@ class ETS2(BaseETS):
 
         T = self.fkine(q, include_base=False).A
         return tr2jac2(T.T) @ self.jacob0(q)
-
-
-# if __name__ == "__main__":
-
-#     from roboticstoolbox import models
-
-#     ur5 = models.URDF.UR5()
-
-#     ur5.fkine(ur5.qz)
-#     ur5.jacob0(ur5.qz)
-#     ur5.jacob0_analytic(ur5.qz)
