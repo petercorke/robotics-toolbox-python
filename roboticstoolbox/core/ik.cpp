@@ -94,7 +94,7 @@ extern "C"
                     // wrap q to +- pi
                     for (int i = 0; i < ets->n; i++)
                     {
-                        q(i) = std::fmod(q(i), PI);
+                        q(i) = std::fmod(q(i) + PI, PI_x2) - PI;
                     }
 
                     // Check for joint limit violation
@@ -228,7 +228,7 @@ extern "C"
                     // wrap q to +- pi
                     for (int i = 0; i < ets->n; i++)
                     {
-                        q(i) = std::fmod(q(i), PI);
+                        q(i) = std::fmod(q(i) + PI, PI_x2) - PI;
                     }
 
                     // Check for joint limit violation
@@ -293,6 +293,9 @@ extern "C"
     {
         int iter = 1;
 
+        // std::cout << Tep << "\n";
+        // std::cout << std::endl;
+
         double *np_Te = (double *)PyMem_RawCalloc(16, sizeof(double));
         MapMatrix4dc Te(np_Te);
 
@@ -351,7 +354,7 @@ extern "C"
                     // wrap q to +- pi
                     for (int i = 0; i < ets->n; i++)
                     {
-                        q(i) = std::fmod(q(i), PI);
+                        q(i) = std::fmod(q(i) + PI, PI_x2) - PI;
                     }
 
                     // Check for joint limit violation
@@ -465,7 +468,7 @@ extern "C"
                     // wrap q to +- pi
                     for (int i = 0; i < ets->n; i++)
                     {
-                        q(i) = std::fmod(q(i), PI);
+                        q(i) = std::fmod(q(i) + PI, PI_x2) - PI;
                     }
 
                     // Check for joint limit violation
@@ -577,7 +580,7 @@ extern "C"
                     // wrap q to +- pi
                     for (int i = 0; i < ets->n; i++)
                     {
-                        q(i) = std::fmod(q(i), PI);
+                        q(i) = std::fmod(q(i) + PI, PI_x2) - PI;
                     }
 
                     // Check for joint limit violation

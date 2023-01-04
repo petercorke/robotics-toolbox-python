@@ -32,7 +32,7 @@ extern "C"
                 int m;
 
                 // While this information is stored in the ET's
-                // Its much faster for IK to cahce it here
+                // Its much faster for IK to cache it here
                 double *qlim_l;
                 double *qlim_h;
                 double *q_range2;

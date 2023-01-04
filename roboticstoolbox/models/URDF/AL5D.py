@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Robot import Robot
 from math import pi
 
-class AL5D(ERobot):
+
+class AL5D(Robot):
     """
     Class that imports a AL5D URDF model
 
@@ -46,6 +47,7 @@ class AL5D(ERobot):
 
         # reference pose robot pointing upwards
         self.addconfiguration("up", np.array([0.0000, 0.0000, 1.5707, 0.0000]))
+
 
 if __name__ == "__main__":  # pragma nocover
 
