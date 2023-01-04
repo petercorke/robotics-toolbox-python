@@ -34,7 +34,7 @@ class RobotProto(Protocol):
         ...
 
     @property
-    def q(self) -> np.ndarray:
+    def q(self) -> NDArray:
         ...
 
     @property
@@ -46,7 +46,7 @@ class RobotProto(Protocol):
         ...
 
     @property
-    def gravity(self) -> np.ndarray:
+    def gravity(self) -> NDArray:
         ...
 
     def dynchanged(self):
@@ -57,8 +57,8 @@ class RobotProto(Protocol):
         q: ArrayLike,
         end: Union[str, BaseLink, Gripper, None] = None,
         start: Union[str, BaseLink, Gripper, None] = None,
-        tool: Union[np.ndarray, SE3, None] = None,
-    ) -> np.ndarray:
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
         ...
 
     def jacob0(
@@ -66,14 +66,14 @@ class RobotProto(Protocol):
         q: ArrayLike,
         end: Union[str, BaseLink, Gripper, None] = None,
         start: Union[str, BaseLink, Gripper, None] = None,
-        tool: Union[np.ndarray, SE3, None] = None,
-    ) -> np.ndarray:
+        tool: Union[NDArray, SE3, None] = None,
+    ) -> NDArray:
         ...
 
     def copy(self) -> Self:
         ...
 
-    def accel(self, q, qd, torque, gravity=None) -> np.ndarray:
+    def accel(self, q, qd, torque, gravity=None) -> NDArray:
         ...
 
     def nofriction(self, coulomb: bool, viscous: bool) -> Self:
@@ -82,20 +82,20 @@ class RobotProto(Protocol):
     def _fdyn(
         self,
         t: float,
-        x: np.ndarray,
-        torqfun: Callable[[Any], np.ndarray],
+        x: NDArray,
+        torqfun: Callable[[Any], NDArray],
         targs: Dict,
-    ) -> np.ndarray:
+    ) -> NDArray:
         ...
 
     def rne(
         self,
-        q: np.ndarray,
-        qd: np.ndarray,
-        qdd: np.ndarray,
+        q: NDArray,
+        qd: NDArray,
+        qdd: NDArray,
         symbolic: bool = False,
         gravity: Union[None, ArrayLike] = None,
-    ) -> np.ndarray:
+    ) -> NDArray:
         ...
 
     def gravload(
@@ -106,8 +106,8 @@ class RobotProto(Protocol):
     def pay(
         self,
         W: ArrayLike,
-        q: Union[np.ndarray, None] = None,
-        J: Union[np.ndarray, None] = None,
+        q: Union[NDArray, None] = None,
+        J: Union[NDArray, None] = None,
         frame: int = 1,
     ):
         ...

@@ -145,7 +145,7 @@ class DynamicsMixin:
 
     def nofriction(self: RobotProto, coulomb: bool = True, viscous: bool = False):
         """
-        Remove manipulator joint friction (Robot superclass)
+        Remove manipulator joint friction
 
         ``nofriction()`` copies the robot and returns
         a robot with the same link parameters except the Coulomb and/or viscous
@@ -171,7 +171,9 @@ class DynamicsMixin:
         """
 
         # shallow copy the robot object
-        self.delete_rne()  # remove the inherited C pointers
+        if isinstance(self, rtb.DHRobot):
+            self.delete_rne()  # remove the inherited C pointers
+
         nf = self.copy()
         nf.name = "NF/" + self.name
 
@@ -184,13 +186,13 @@ class DynamicsMixin:
         self: RobotProto,
         T: float,
         q0: ArrayLike,
-        torque=None,
-        torque_args: Dict={},
-        qd0: Union[ArrayLike, None]=None,
-        solver: str="RK45",
-        solver_args: Dict={},
-        dt: Union[float, None]=None,
-        progress: bool=False,
+        torque: Union[Callable[[Any, float, NDArray, NDArray], NDArray], None] = None,
+        torque_args: Dict = {},
+        qd0: Union[ArrayLike, None] = None,
+        solver: str = "RK45",
+        solver_args: Dict = {},
+        dt: Union[float, None] = None,
+        progress: bool = False,
     ):
         """
         Integrate forward dynamics
@@ -227,18 +229,18 @@ class DynamicsMixin:
         q0
             initial joint coordinates
         qd0
-            initial joint velocities, assumed zero if not given (Default value = None)
+            initial joint velocities, assumed zero if not given
         torque
             a function that computes torque as a function of time
-            and/or state (Default value = None)
+            and/or state
         torque_args
-            positional arguments passed to ``torque`` (Default value = {})
+            positional arguments passed to ``torque``
         solver
-            str (Default value = "RK45")
+            str
         solver_args
-            dict (Default value = {})
+            dict
         dt
-            float (Default value = None)
+            float
         progress
             show progress bar, default False
 
@@ -373,8 +375,8 @@ class DynamicsMixin:
     def _fdyn(
         self: RobotProto,
         t: float,
-        x: np.ndarray,
-        torqfun: Callable[[Any, float, np.ndarray, np.ndarray], np.ndarray],
+        x: NDArray,
+        torqfun: Callable[[Any, float, NDArray, NDArray], NDArray],
         targs: Dict,
     ):
         """
@@ -449,7 +451,7 @@ class DynamicsMixin:
             Joint torques of the robot
         gravity
             Gravitational acceleration (Optional, if not supplied will
-            use the ``gravity`` attribute of self). (Default value = None)            
+            use the ``gravity`` attribute of self).
 
         Returns
         -------
@@ -511,8 +513,8 @@ class DynamicsMixin:
     def pay(
         self: RobotProto,
         W: ArrayLike,
-        q: Union[np.ndarray, None] = None,
-        J: Union[np.ndarray, None] = None,
+        q: Union[NDArray, None] = None,
+        J: Union[NDArray, None] = None,
         frame: int = 1,
     ):
         """
@@ -568,7 +570,7 @@ class DynamicsMixin:
             W = np.array(getvector(W, 6))
             trajn = 0
         except ValueError:
-            if isinstance(W, np.ndarray):
+            if isinstance(W, NDArray):
                 trajn = W.shape[0]
                 verifymatrix(W, (trajn, 6))
             else:
@@ -663,7 +665,7 @@ class DynamicsMixin:
         q
             Joint coordinates
         qd
-            Joint velocity (Default value = None)
+            Joint velocity
 
         Returns
         -------
@@ -802,7 +804,7 @@ class DynamicsMixin:
         >>> puma = rtb.models.DH.Puma560()
         >>> puma.coriolis(puma.qz, 0.5 * np.ones((6,)))
 
-.       Notes
+        Notes
         -----
         - Joint viscous friction is also a joint force proportional to
             velocity but it is eliminated in the computation of this value.
@@ -860,7 +862,11 @@ class DynamicsMixin:
         else:
             return C
 
-    def gravload(self: RobotProto, q: Union[ArrayLike, None]=None, gravity: Union[ArrayLike, None]=None):
+    def gravload(
+        self: RobotProto,
+        q: Union[ArrayLike, None] = None,
+        gravity: Union[ArrayLike, None] = None,
+    ):
         """
         Compute gravity load
 
@@ -880,10 +886,10 @@ class DynamicsMixin:
         Parameters
         ----------
         q
-            Joint coordinates (Default value = None)
+            Joint coordinates
         gravity : ndarray(3)
             Gravitational acceleration (Optional, if not supplied will
-            use the stored gravity values). (Default value = None)
+            use the stored gravity values).
 
         Returns
         -------
@@ -953,7 +959,7 @@ class DynamicsMixin:
         Parameters
         ----------
         q
-            Joint coordinates (Default value = None)
+            Joint coordinates
         pinv
             use pseudo inverse rather than inverse (Default value = False)
         analytical
@@ -962,7 +968,7 @@ class DynamicsMixin:
         representation
             (Default value = "rpy/xyz")
         Ji
-            (Default value = None)
+            The inverse analytical Jacobian (base-frame)
 
         Returns
         -------
@@ -1078,18 +1084,18 @@ class DynamicsMixin:
         analytical
             the type of analytical Jacobian to use, default is
             'rpy/xyz'
-        representation :
+        representation
              (Default value = "rpy/xyz")
-        J :
-             (Default value = None)
-        Ji :
-             (Default value = None)
-        Jd :
-             (Default value = None)
-        C :
-             (Default value = None)
-        Mx :
-             (Default value = None)
+        J
+
+        Ji
+
+        Jd
+
+        C
+
+        Mx
+
 
         Returns
         -------
@@ -1206,10 +1212,10 @@ class DynamicsMixin:
         Parameters
         ----------
         q
-            Joint coordinates (Default value = None)
+            Joint coordinates
         gravity
             Gravitational acceleration (Optional, if not supplied will
-            use the ``gravity`` attribute of self). (Default value = None)
+            use the ``gravity`` attribute of self).
         pinv
             use pseudo inverse rather than inverse (Default value = False)
         analytical
@@ -1218,7 +1224,7 @@ class DynamicsMixin:
         representation :
              (Default value = "rpy/xyz")
         Ji :
-             (Default value = None)
+
 
         Returns
         -------
@@ -1325,7 +1331,7 @@ class DynamicsMixin:
             use pseudo inverse rather than inverse
         analytical
             the type of analytical Jacobian to use, default is
-            'rpy/xyz'            
+            'rpy/xyz'
         xd :
         representation :
             (Default value = "rpy/xyz")
@@ -1471,8 +1477,8 @@ class DynamicsMixin:
 
     def paycap(
         self: RobotProto,
-        w: np.ndarray,
-        tauR: np.ndarray,
+        w: NDArray,
+        tauR: NDArray,
         frame: int = 1,
         q: Union[ArrayLike, None] = None,
     ):
@@ -1623,183 +1629,4 @@ if __name__ == "__main__":  # pragma nocover
 
     import roboticstoolbox as rtb
 
-    # from spatialmath.base import symbolic as sym
-
     puma = rtb.models.DH.Puma560()
-
-    # for j, link in enumerate(puma):
-    #     print(f'joint {j:}::')
-    #     print(link.dyn(indent=4))
-    #     print()
-
-    # tau = puma.rne_dh(puma.qz, puma.qz, puma.qz)
-    # print(tau)
-    # tau = puma.rne_dh(np.r_[puma.qz, puma.qz, puma.qz])
-    # print(tau)
-    # tau = puma.rne_dh([0,0,0,0,0,0],  [0,0,0,0,0,0],  [0,0,0,0,0,0])
-    # print(tau)
-    # tau = puma.rne_dh([0,0,0,0,0,0,  0,0,0,0,0,0,  0,0,0,0,0,0])
-    # print(tau)
-
-    # puma = rtb.models.DH.Puma560(symbolic=True)
-    # print(puma)
-    # g = sym.symbol('g')
-    # puma.gravity = [0, 0, g]
-    # q = sym.symbol('q_:6')
-    # qd = sym.symbol('qd_:6')
-    # qdd = sym.symbol('qdd_:6')
-
-    # tau = puma.rne_dh(q, qd, qdd, debug=False)
-
-    # print(tau[0].coeff(qdd[0]))
-    # print(tau[0].expand().coeff(qdd[0]))
-
-    # q = puma.qz
-    # # qd = puma.qz
-    # # qdd = puma.qz
-    # ones = np.ones((6,))
-    # qd = ones
-    # qdd = ones
-
-    # print(puma.rne(q, qd, qdd))
-    # print(puma.rne_python(q, qd, qdd, debug=False))
-
-    # print(puma.gravity)
-    # print([link.isrevolute() for link in puma])
-
-    # NOT CONVINCED WE NEED THIS, AND IT'S ORPHAN CODE
-    # def gravjac(self: RobotProto, q, grav=None):
-    #     """
-    #     Compute gravity load and Jacobian
-
-    #     :param q: The joint configuration of the robot
-    #     :type q: ndarray(n)
-    #     :param grav: The gravity vector (Optional, if not supplied will
-    #         use the stored gravity values).
-    #     :type grav: ndarray(3,)
-
-    #     :return tau: The generalised joint force/torques due to gravity
-    #     :rtype tau: ndarray(n,)
-
-    #     ``tauB = gravjac(q, grav)`` calculates the generalised joint force/
-    #     torques due to gravity and the Jacobian
-
-    #     Trajectory operation:
-    #     If q is nxm where n is the number of robot joints then a
-    #     trajectory is assumed where each row of q corresponds to a robot
-    #     configuration. tau (nxm) is the generalised joint torque, each row
-    #     corresponding to an input pose, and jacob0 (6xnxm) where each
-    #     plane is a Jacobian corresponding to an input pose.
-
-    #     .. note::
-    #         - The gravity vector is defined by the SerialLink property if not
-    #           explicitly given.
-    #         - Does not use inverse dynamics function RNE.
-    #         - Faster than computing gravity and Jacobian separately.
-
-    #     Written by Bryan Moutrie
-
-    #     :seealso: :func:`gravload`
-    #     """
-
-    #     # TODO use np.cross instead
-    #     def _cross3(self: RobotProto, a, b):
-    #         c = np.zeros(3)
-    #         c[2] = a[0] * b[1] - a[1] * b[0]
-    #         c[0] = a[1] * b[2] - a[2] * b[1]
-    #         c[1] = a[2] * b[0] - a[0] * b[2]
-    #         return c
-
-    #     def makeJ(O, A, e, r):
-    #         J[3:6,:] = A
-    #         for j in range(r):
-    #             if r[j]:
-    #                 J[0:3,j] = cross3(A(:,j),e-O(:,j));
-    #             else:
-    #                 J[:,j] = J[[4 5 6 1 2 3],j]; %J(1:3,:) = 0;
-
-    #     if grav is None:
-    #         grav = np.copy(self.gravity)
-    #     else:
-    #         grav = getvector(grav, 3)
-
-    #     try:
-    #         if q is not None:
-    #             q = getvector(q, self.n, 'col')
-    #         else:
-    #             q = np.copy(self.q)
-    #             q = getvector(q, self.n, 'col')
-
-    #         poses = 1
-    #     except ValueError:
-    #         poses = q.shape[1]
-    #         verifymatrix(q, (self.n, poses))
-
-    #     if not self.mdh:
-    #         baseAxis = self.base.a
-    #         baseOrigin = self.base.t
-
-    #     tauB = np.zeros((self.n, poses))
-
-    #     # Forces
-    #     force = np.zeros((3, self.n))
-
-    #     for joint in range(self.n):
-    #         force[:, joint] = np.squeeze(self.links[joint].m * grav)
-
-    #     # Centre of masses (local frames)
-    #     r = np.zeros((4, self.n))
-    #     for joint in range(self.n):
-    #         r[:, joint] = np.r_[np.squeeze(self.links[joint].r), 1]
-
-    #     for pose in range(poses):
-    #         com_arr = np.zeros((3, self.n))
-
-    #         T = self.fkine_all(q[:, pose])
-
-    #         jointOrigins = np.zeros((3, self.n))
-    #         jointAxes = np.zeros((3, self.n))
-    #         for i in range(self.n):
-    #             jointOrigins[:, i] = T[i].t
-    #             jointAxes[:, i] = T[i].a
-
-    #         if not self.mdh:
-    #             jointOrigins = np.c_[
-    #                 baseOrigin, jointOrigins[:, :-1]
-    #             ]
-    #             jointAxes = np.c_[
-    #                 baseAxis, jointAxes[:, :-1]
-    #             ]
-
-    #         # Backwards recursion
-    #         for joint in range(self.n - 1, -1, -1):
-    #             # C.o.M. in world frame, homog
-    #             com = T[joint].A @ r[:, joint]
-
-    #             # Add it to the distal others
-    #             com_arr[:, joint] = com[0:3]
-
-    #             t = np.zeros(3)
-
-    #             # for all links distal to it
-    #             for link in range(joint, self.n):
-    #                 if not self.links[joint].sigma:
-    #                     # Revolute joint
-    #                     d = com_arr[:, link] - jointOrigins[:, joint]
-    #                     t = t + self._cross3(d, force[:, link])
-    #                     # Though r x F would give the applied torque
-    #                     # and not the reaction torque, the gravity
-    #                     # vector is nominally in the positive z
-    #                     # direction, not negative, hence the force is
-    #                     # the reaction force
-    #                 else:
-    #                     # Prismatic joint
-    #                     # Force on prismatic joint
-    #                     t = t + force[:, link]
-
-    #             tauB[joint, pose] = t.T @ jointAxes[:, joint]
-
-    #     if poses == 1:
-    #         return tauB[:, 0]
-    #     else:
-    #         return tauB
