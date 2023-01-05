@@ -21,6 +21,7 @@ from roboticstoolbox.robot.RobotProto import RobotProto
 
 from roboticstoolbox.tools.types import ArrayLike, NDArray
 from typing_extensions import Self
+import roboticstoolbox as rtb
 
 from ansitable import ANSITable, Column
 import warnings
