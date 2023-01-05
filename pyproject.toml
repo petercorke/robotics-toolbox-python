@@ -191,3 +191,7 @@ archs = ["x86_64", "aarch64"]
 
 # On an Windows Intel runner build wheels
 archs = ["AMD64", "x86"]
+
+
+[tool.coverage.run]
+omit = ["roboticstoolbox/examples/*", "roboticstoolbox/blocks/*"]
