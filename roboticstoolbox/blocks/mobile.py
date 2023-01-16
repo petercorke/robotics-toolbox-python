@@ -156,7 +156,7 @@ class Unicycle(TransferBlock):
             assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(len(x0), self.nstates)
             self._x0 = x0
 
-        self.vehicle = mobile.Unicycle(w=w,
+        self.vehicle = mobile.Unicycle(W=w,
             steer_max=steer_max, speed_max=speed_max, accel_max=accel_max)
 
         #TODO, add support for origin shift
@@ -174,7 +174,7 @@ class Unicycle(TransferBlock):
         #     \end{pmatrix}
         
     def output(self, t):
-        return self._x
+        return [self._x]
     
     def deriv(self):
         return self.vehicle.deriv(self._x, self.inputs)
@@ -253,17 +253,15 @@ class DiffSteer(TransferBlock):
             assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(len(x0), self.nstates)
             self._x0 = x0
 
-        self.vehicle = mobile.Unicycle(w=w,
+        self.vehicle = mobile.Unicycle(W=w,
             steer_max=steer_max, speed_max=speed_max, accel_max=accel_max)
 
     def output(self, t):
-        return self._x
+        return [self._x]
     
     def deriv(self):
-        # compute (v, omega) from left/right wheel speeds
-        v = self.R * (self.inputs[0] + self.inputs[1]) / 2
-        omega = (self.inputs[1] + self.inputs[0]) / self.W
-        return self.vehicle.deriv(self._x, (v, omega))
+
+        return self.vehicle.deriv(self._x, self.inputs)
 
 # ------------------------------------------------------------------------ #
 

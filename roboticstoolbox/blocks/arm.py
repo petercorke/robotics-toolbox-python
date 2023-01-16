@@ -426,7 +426,7 @@ class IDyn(FunctionBlock):
         self.outport_names(("$\tau$",))
 
     def output(self, t=None):
-        tau = self.robot.rne(self.inputs[0], self.inputs[1], self.inputs[2], gravity=gravity)
+        tau = self.robot.rne(self.inputs[0], self.inputs[1], self.inputs[2], gravity=self.gravity)
         return [tau]
 
 
@@ -480,7 +480,7 @@ class Gravload(FunctionBlock):
         super().__init__(**blockargs)
         self.type = "gravload"
 
-        self.robot = robots
+        self.robot = robot
         self.gravity = gravity
         self.inport_names(("q",))
         self.outport_names(("$\tau$",))
@@ -510,7 +510,7 @@ class Gravload_X(FunctionBlock):
     inlabels = ('q',)
     outlabels = ('w')
 
-    def __init__(self, robot, gravity=None, **blockargs):
+    def __init__(self, robot, representation="rpy/xyz", gravity=None, **blockargs):
         """
 
         :param robot: Robot model
@@ -539,19 +539,15 @@ class Gravload_X(FunctionBlock):
         super().__init__(**blockargs)
         self.type = "gravload-x"
 
-        self.robot = robots
+        self.robot = robot
         self.gravity = gravity
         self.inport_names(("q",))
         self.outport_names(("$\tau$",))
+        self.representation = representation
 
     def output(self, t=None):
         q = self.inputs[0]
-        tau = self.robot.gravload(q, gravity=self.gravity)
-        J = self.robot.jacob0(q)
-        if J.shape[0] == J.shape[1]:
-            w = np.linalg.inv(J).T * tau
-        else:
-            w = np.linalg.pinv(J).T * tau
+        w = self.robot.gravload_x(q, representation=self.representation, gravity=self.gravity)
         return [w]
 
 class Inertia(FunctionBlock):
@@ -575,7 +571,7 @@ class Inertia(FunctionBlock):
     inlabels = ('q',)
     outlabels = ('M')
 
-    def __init__(self, robot, gravity=None, **blockargs):
+    def __init__(self, robot, **blockargs):
         """
 
         :param robot: Robot model
@@ -602,7 +598,7 @@ class Inertia(FunctionBlock):
         super().__init__(**blockargs)
         self.type = "inertia"
 
-        self.robot = robots
+        self.robot = robot
         self.inport_names(("q",))
         self.outport_names(("M",))
 
@@ -631,7 +627,7 @@ class Inertia_X(FunctionBlock):
     inlabels = ('q',)
     outlabels = ('M')
 
-    def __init__(self, robot, representation=None, pinv=False, **blockargs):
+    def __init__(self, robot, representation="rpy/xyz", pinv=False, **blockargs):
         """
 
         :param robot: Robot model
@@ -779,7 +775,7 @@ class FDyn_X(TransferBlock):
         # compute joint forces
         w = self.inputs[0]
         assert len(w) == 6, "wrench vector wrong size"
-        Q = self.robot.jacob0_analytical(q, self.representation).T @ w
+        Q = self.robot.jacob0_analytical(q, representation=self.representation).T @ w
 
         if self.gravcomp or self.velcomp:
             if self.velcomp:
@@ -787,8 +783,8 @@ class FDyn_X(TransferBlock):
             else:
                 qd_rne = np.zeros((n,))
             Q_rne = self.robot.rne(q, qd_rne, np.zeros((n,)))
-
-        qdd = self.robot.accel(q, qd, Q + Q_rne)
+            Q += Q_rne
+        qdd = self.robot.accel(q, qd, Q)
 
         self._qdd = qdd
         return np.r_[qd, qdd]
