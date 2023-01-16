@@ -47,7 +47,7 @@ def eigdemo(A):
 
     def animate(theta):
 
-        x = np.r_[cos(theta), sin(theta)]
+        x = np.r_[cos(-theta), sin(-theta)]
         y = A @ x
 
         l1.set_xdata([0, x[0]])
