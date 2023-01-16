@@ -186,6 +186,8 @@ class DynamicsMixin:
         self,
         T,
         q0,
+        Q=None,
+        Q_args={},
         torque=None,
         torque_args={},
         qd0=None,
@@ -203,11 +205,11 @@ class DynamicsMixin:
         :type q0: array_like
         :param qd0: initial joint velocities, assumed zero if not given
         :type qd0: array_like
-        :param torque: a function that computes torque as a function of time
+        :param Q: a function that computes generalized joint force as a function of time
         and/or state
-        :type torque: callable
-        :param torque_args: positional arguments passed to ``torque``
-        :type torque_args: dict
+        :type Q: callable
+        :param Q_args: positional arguments passed to ``Q``
+        :type Q_args: dict
         :type solver: name of scipy solver to use, RK45 is the default
         :param solver: str
         :type solver_args: arguments passed to the solver
@@ -295,6 +297,9 @@ class DynamicsMixin:
 
         n = self.n
 
+        if torque is not None:
+            warnings.warn("torque option is deprecated, use Q and Q_args", DeprecationWarning)
+
         if not isscalar(T):
             raise ValueError("T must be a scalar")
         q0 = getvector(q0, n)
@@ -302,9 +307,9 @@ class DynamicsMixin:
             qd0 = np.zeros((n,))
         else:
             qd0 = getvector(qd0, n)
-        if torque is not None:
-            if not callable(torque):
-                raise ValueError("torque function must be callable")
+        if Q is not None:
+            if not callable(Q):
+                raise ValueError("generalized joint torque function must be callable")
 
         # concatenate q and qd into the initial state vector
         x0 = np.r_[q0, qd0]
@@ -313,7 +318,7 @@ class DynamicsMixin:
         scipy_integrator = integrate.__dict__[solver]
 
         integrator = scipy_integrator(
-            lambda t, y: self._fdyn(t, y, torque, torque_args),
+            lambda t, y: self._fdyn(t, y, Q, Q_args),
             t0=0.0,
             y0=x0,
             t_bound=T,
@@ -362,7 +367,7 @@ class DynamicsMixin:
         else:
             return namedtuple("fdyn", "t q qd")(tarray, xarray[:, :n], xarray[:, n:])
 
-    def _fdyn(self, t, x, torqfun, targs):
+    def _fdyn(self, t, x, Qfunc, Qargs):
         """
         Private function called by fdyn
 
@@ -370,11 +375,11 @@ class DynamicsMixin:
         :type t: float
         :param x: current state [q, qd]
         :type x: numpy array (2n,)
-        :param torqfun: a function that computes torque as a function of time
+        :param Qfunc: a function that computes torque as a function of time
         and/or state
-        :type torqfun: callable
-        :param targs: argumments passed to ``torqfun``
-        :type targs: dict
+        :type Qfunc: callable
+        :param Qargs: argumments passed to ``torqfun``
+        :type Qargs: dict
 
         :return: derivative of current state [qd, qdd]
         :rtype: numpy array (2n,)
@@ -388,10 +393,10 @@ class DynamicsMixin:
         qd = x[n:]
 
         # evaluate the torque function if one is given
-        if torqfun is None:
+        if Qfunc is None:
             tau = np.zeros((n,))
         else:
-            tau = torqfun(self, t, q, qd, **targs)
+            tau = Qfunc(self, t, q, qd, **Qargs)
             if len(tau) != n or not all(np.isreal(tau)):
                 raise RuntimeError(
                     "torque function must return vector with N real elements"
@@ -1136,7 +1141,7 @@ class DynamicsMixin:
         if q.shape[0] == 1:
             # single q case
             if Ji is None:
-                Ja = self.jacob0(q[0, :], analytical=representation)
+                Ja = self.jacob0_analytical(q[0, :], representation=representation)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
                 else:
@@ -1150,7 +1155,7 @@ class DynamicsMixin:
             # z = np.zeros(self.n)
 
             for k, qk in enumerate(q):
-                Ja = self.jacob0(qk, analytical=representation)
+                Ja = self.jacob0_analytical(qk, representation=representation)
                 G = self.gravload(qk)
                 if pinv:
                     Ji = np.linalg.pinv(Ja)
@@ -1230,7 +1235,7 @@ class DynamicsMixin:
 
         for k, (qk, xdk, wk) in enumerate(zip(q, xd, w)):
 
-            Ja = self.jacob0(qk, analytical=representation)
+            Ja = self.jacob0_analytical(qk, representation=representation)
             if pinv:
                 Ji = np.linalg.pinv(Ja)
             else:
@@ -1251,7 +1256,7 @@ class DynamicsMixin:
             # solve is faster than inv() which is faster than pinv()
             #   tau_rne = C(q,qd) + G(q)
             #   qdd = M^-1 (tau - C(q,qd) - G(q))
-            qdd = np.linalg.solve(M, J.T @ wk - tau_rne)
+            qdd = np.linalg.solve(M, Ja.T @ wk - tau_rne)
 
             # xd = Ja qd
             # xdd = Jad qd + Ja qdd
@@ -1262,7 +1267,7 @@ class DynamicsMixin:
 
             # need Jacobian dot
             qdk = Ji @ xdk
-            Jd = self.jacob_dot(qk, qdk, J0=J)
+            Jd = self.jacob0_dot(qk, qdk, J0=Ja)
 
             xdd[k, :] = T @ (Jd @ qdk + J @ qdd)
 
