@@ -119,7 +119,8 @@ class RandomPath(VehicleDriverBase):
             - The vehicle chooses a new waypoint when it is closer than ``dthresh``
               to the current waypoint.
             - Uses its own random number generator so as to not influence the performance
-              of other randomized algorithms such as path planning.
+              of other randomized algorithms such as path planning. Set ``seed=None`` to have it randomly initialized from the 
+              operating system.
 
         :seealso: :class:`Bicycle` :class:`Unicycle` :func:`~spatialmath.base.graphics.plotvol2`
         """

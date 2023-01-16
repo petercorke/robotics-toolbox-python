@@ -84,8 +84,7 @@ class SensorBase(ABC):
         - reseed the random number generator
         - reset the counter for handling the ``every`` and ``fail`` options
         """
-        if self._seed is not None:
-            self._random = np.random.default_rng(self._seed)
+        self._random = np.random.default_rng(self._seed)
         self._count = 0
 
     def __str__(self):
