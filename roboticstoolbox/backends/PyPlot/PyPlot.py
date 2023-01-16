@@ -311,7 +311,7 @@ class PyPlot(Connector):
 
         super().add()
 
-        if isinstance(ob, rp.DHRobot) or isinstance(ob, rp.ERobot):
+        if isinstance(ob, rp.DHRobot) or isinstance(ob, rp.ERobot) or isinstance(ob, rp.Robot):
             self.robots.append(
                 RobotPlot(
                     ob,
@@ -345,6 +345,7 @@ class PyPlot(Connector):
         plt.show(block=False)
 
         self._set_axes_equal()
+
         return id
 
     def remove(self, id):

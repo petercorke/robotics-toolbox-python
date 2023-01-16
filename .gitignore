@@ -1,3 +1,5 @@
+.DS_Store
+
 .pyodide*/**
 *.doctree
 
@@ -137,7 +139,6 @@ dmypy.json
 ### ROS ###
 devel/
 logs/
-bin/
 msg_gen/
 srv_gen/
 msg/*Action.msg

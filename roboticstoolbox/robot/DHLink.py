@@ -367,10 +367,7 @@ class DHLink(Link):
             qvar = f"q{self.id}"
         cls = self.__class__.__name__
         if self.isrevolute:
-            s = (
-                f"{cls}:   θ={qvar}{offset},  d={self.d}, "
-                f" a={self.a},  ⍺={self.alpha}"
-            )
+            s = f"{cls}:   θ={qvar}{offset},  d={self.d},  a={self.a},  ⍺={self.alpha}"
         elif self.isprismatic:
             s = (
                 f"{cls}:  θ={self.theta},  d={qvar}{offset}, "

@@ -32,7 +32,7 @@ from ansitable import ANSITable, Column
 from scipy.linalg import block_diag
 from roboticstoolbox.robot.DHLink import _check_rne, DHLink
 from roboticstoolbox import rtb_get_param
-from frne import init, frne, delete
+from roboticstoolbox.frne import init, frne, delete
 from numpy import any
 from typing import Union, Tuple
 from roboticstoolbox.robot.IK import IKSolution
@@ -92,6 +92,7 @@ class DHRobot(Robot):
 
         for link in links:
             if isinstance(link, DHLink):
+
                 # got a link
                 all_links.append(link)
                 link.number = self._n + 1
@@ -115,9 +116,15 @@ class DHRobot(Robot):
             else:
                 raise TypeError("Input can be only DHLink or DHRobot")
 
+        for i, link in enumerate(all_links):
+            if i > 0:
+                link.parent = all_links[i - 1]
+            else:
+                link.parent = None
+
         super().__init__(all_links, **kwargs)
 
-        self.ee_links = [self.links[-1]]
+        self._ee_links = [self.links[-1]]
 
         # Check the DH convention
         self._mdh = self.links[0].mdh
@@ -304,9 +311,7 @@ class DHRobot(Robot):
             for j in range(L.n):
                 nlinks.append(L.links[j])
         else:
-            raise TypeError(
-                "Can only combine DHRobots with other " "DHRobots or DHLinks"
-            )
+            raise TypeError("Can only combine DHRobots with other DHRobots or DHLinks")
 
         return DHRobot(
             nlinks,
@@ -722,7 +727,8 @@ class DHRobot(Robot):
             >>> robot.islimit([0, 0, -4, 4, 0, 0])
 
         """
-        q = self._getq(q)
+        if q is None:
+            q = self.q
 
         return [link.islimit(qk) for (link, qk) in zip(self, q)]
 
@@ -1037,7 +1043,9 @@ class DHRobot(Robot):
             - Joint offsets, if defined, are added to q before the forward
               kinematics are computed.
         """
-        q = self._getq(q)
+
+        if q is None:
+            q = self.q
 
         Tj = self.base.copy()
         Tall = Tj
@@ -1742,7 +1750,8 @@ class DHRobot(Robot):
                 )
                 if debug:
                     print(
-                        f"j={j:}, G={link.G:}, Jm={link.Jm:}, friction={link.friction(qd_k[j], coulomb=False):}"
+                        f"j={j:}, G={link.G:}, Jm={link.Jm:},"
+                        f" friction={link.friction(qd_k[j], coulomb=False):}"
                     )  # noqa
                     print()
 

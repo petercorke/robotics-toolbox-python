@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ERobot import ERobot, ERobot2
+from roboticstoolbox.robot.Robot import Robot
 from spatialmath import SE3
 
 
-class Panda(ERobot):
+class Panda(Robot):
     """
     Class that imports a Panda URDF model
 

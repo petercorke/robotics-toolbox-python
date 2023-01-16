@@ -4,6 +4,7 @@
 """
 
 import numpy as np
+
 # import scipy as sp
 from spatialmath import base
 import matplotlib.pyplot as plt
@@ -52,7 +53,7 @@ class ShapePlot:
 
 
 class EllipsePlot:
-    def __init__(self, robot, q, etype, opt="trans", centre=[0, 0, 0], scale=1):
+    def __init__(self, robot, q, etype, opt="trans", centre=[0, 0, 0], scale=1.0):
 
         super(EllipsePlot, self).__init__()
 
