@@ -344,46 +344,48 @@ class MultirotorBlockTest(unittest.TestCase):
         block.start(state=s)
         block.step(state=s)
 
-    @unittest.skip
     def test_quadrotor(self):
                 
         block = MultiRotor(quadrotor)
         print(block.D)
         z = np.r_[0, 0, 0, 0]
-        block.inputs = [z]
+        block.test_inputs = [z]
         block.setstate(block.getstate0())
         nt.assert_equal(block.getstate0(), np.zeros((12,)))
         block.setstate(block.getstate0())
         
         block._x[2] = -100  # set altitude
-        block.inputs[0] = 100 * np.r_[1, -1, 1, -1]
+        u = [100 * np.r_[1, -1, 1, -1]]
 
         # check outputs
-        out = block.output()
+        out = block.T_output(u)
         self.assertIsInstance(out, list)
-        self.assertEqual(len(out), 2)
-        self.assertIsInstance(out[0], np.ndarray)
-        self.assertEqual(out[0].shape, (12,))
-        self.assertIsInstance(out[1], dict)
-        self.assertEqual(len(out[1]), 2)
-        self.assertEqual(out[0][2], -100)
+        self.assertEqual(len(out), 1)
+
+        self.assertIsInstance(out[0], dict)
 
         # check deriv, checked against MATLAB version 20200621
-        block.inputs[0] = 800 * np.r_[1, -1, 1, -1]   # too little thrust, falling
-        d = block.deriv()
+        u = [800 * np.r_[1, -1, 1, -1]]   # too little thrust, falling
+        d = block.T_deriv(u)
         self.assertIsInstance(d, np.ndarray)
         self.assertEqual(d.shape, (12,))
         self.assertGreater(d[8], 0)
         nt.assert_array_almost_equal(np.delete(d, 8), np.zeros((11,))) # other derivs are zero
 
-        block.inputs[0] = 900 * np.r_[1, -1, 1, -1]  # too much thrust, rising
-        self.assertLess(block.deriv()[8], 0)
+        u = [900 * np.r_[1, -1, 1, -1]]  # too much thrust, rising
+        self.assertLess(block.T_deriv(u)[8], 0)
 
-        block.inputs[0] = 800 * np.r_[0.8, -1, 1.2, -1]  # pitching
-        self.assertGreater(block.deriv()[10], 20)
+        u = [800 * np.r_[1.2, -1, 0.8, -1]]  # + pitch
+        self.assertGreater(block.T_deriv(u)[10], 20)
 
-        block.inputs[0] = 800 * np.r_[1, -1.2, 1, -0.8]  # rolling
-        self.assertGreater(block.deriv()[9], 20)
+        u = [800 * np.r_[0.8, -1, 1.2, -1]]  # - pitch
+        self.assertLess(block.T_deriv(u)[10], -20)
+
+        u = [800 * np.r_[1, -0.8, 1, -1.2]]  # + roll
+        self.assertGreater(block.T_deriv(u)[9], 20)
+
+        u = [800 * np.r_[1, -1.2, 1, -0.8]]  # - roll
+        self.assertLess(block.T_deriv(u)[9], -20)
 
     @unittest.skip
     def test_quadrotorplot(self):
