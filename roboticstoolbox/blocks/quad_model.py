@@ -1,4 +1,4 @@
-#MDL_QUADCOPTER Dynamic parameters for a quadrotor.
+# MDL_QUADCOPTER Dynamic parameters for a quadrotor.
 #
 # MDL_QUADCOPTER is a script creates the workspace variable quad which
 # describes the dynamic characterstics of a quadrotor flying robot.
@@ -40,7 +40,7 @@
 #
 # References::
 # - Design, Construction and Control of a Large Quadrotor micro air vehicle.
-#   P.Pounds, PhD thesis, 
+#   P.Pounds, PhD thesis,
 #   Australian National University, 2007.
 #   http://www.eng.yale.edu/pep5/P_Pounds_Thesis_2008.pdf
 # - This is a heavy lift quadrotor
@@ -50,55 +50,83 @@ import numpy as np
 from math import pi, sqrt, inf
 
 quadrotor = {}
-quadrotor['nrotors'] = 4                # 4 rotors
-quadrotor['g'] = 9.81                   # g     Gravity
-quadrotor['rho'] = 1.184                # rho   Density of air
-quadrotor['muv'] = 1.5e-5               # muv   Viscosity of air
+quadrotor["nrotors"] = 4  # 4 rotors
+quadrotor["g"] = 9.81  # g     Gravity
+quadrotor["rho"] = 1.184  # rho   Density of air
+quadrotor["muv"] = 1.5e-5  # muv   Viscosity of air
 
 # Airframe
-quadrotor['M'] = 4                      # M    Mass
+quadrotor["M"] = 4  # M    Mass
 Ixx = 0.082
 Iyy = 0.082
-Izz = 0.149 #0.160
-quadrotor['J'] = np.diag([Ixx, Iyy, Izz])    # I   Flyer rotational inertia matrix     3x3
+Izz = 0.149  # 0.160
+quadrotor["J"] = np.diag([Ixx, Iyy, Izz])  # I   Flyer rotational inertia matrix     3x3
 
-quadrotor['h'] = -0.007                 # h    Height of rotors above CoG
-quadrotor['d'] = 0.315                  # d    Length of flyer arms
+quadrotor["h"] = -0.007  # h    Height of rotors above CoG
+quadrotor["d"] = 0.315  # d    Length of flyer arms
 
-#Rotor
-quadrotor['nb'] = 2                     # b    Number of blades per rotor
-quadrotor['r'] = 0.165                  # r    Rotor radius
+# Rotor
+quadrotor["nb"] = 2  # b    Number of blades per rotor
+quadrotor["r"] = 0.165  # r    Rotor radius
 
-quadrotor['c'] = 0.018                  # c    Blade chord
+quadrotor["c"] = 0.018  # c    Blade chord
 
-quadrotor['e'] = 0.0                    # e    Flapping hinge offset
-quadrotor['Mb'] = 0.005                 # Mb   Rotor blade mass
-quadrotor['Mc'] = 0.010                 # Mc   Estimated hub clamp mass
-quadrotor['ec'] = 0.004                 # ec   Blade root clamp displacement
-quadrotor['Ib'] = quadrotor['Mb'] * (quadrotor['r'] - quadrotor['ec'])**2 / 4       # Ib      Rotor blade rotational inertia
-quadrotor['Ic'] = quadrotor['Mc'] * (quadrotor['ec'])**2 / 4                        # Ic      Estimated root clamp inertia
-quadrotor['mb'] = quadrotor['g'] * (quadrotor['Mc'] * quadrotor['ec'] / 2 + quadrotor['Mb'] * quadrotor['r'] /2)    #   mb  Static blade moment
-quadrotor['Ir'] = quadrotor['nb'] * (quadrotor['Ib'] + quadrotor['Ic'])             # Ir      Total rotor inertia
+quadrotor["e"] = 0.0  # e    Flapping hinge offset
+quadrotor["Mb"] = 0.005  # Mb   Rotor blade mass
+quadrotor["Mc"] = 0.010  # Mc   Estimated hub clamp mass
+quadrotor["ec"] = 0.004  # ec   Blade root clamp displacement
+quadrotor["Ib"] = (
+    quadrotor["Mb"] * (quadrotor["r"] - quadrotor["ec"]) ** 2 / 4
+)  # Ib      Rotor blade rotational inertia
+quadrotor["Ic"] = (
+    quadrotor["Mc"] * (quadrotor["ec"]) ** 2 / 4
+)  # Ic      Estimated root clamp inertia
+quadrotor["mb"] = quadrotor["g"] * (
+    quadrotor["Mc"] * quadrotor["ec"] / 2 + quadrotor["Mb"] * quadrotor["r"] / 2
+)  #   mb  Static blade moment
+quadrotor["Ir"] = quadrotor["nb"] * (
+    quadrotor["Ib"] + quadrotor["Ic"]
+)  # Ir      Total rotor inertia
 
-quadrotor['Ct'] = 0.0048                                                            # Ct      Non-dim. thrust coefficient
-quadrotor['Cq'] = quadrotor['Ct'] * sqrt(quadrotor['Ct']/2)                         # Cq      Non-dim. torque coefficient
+quadrotor["Ct"] = 0.0048  # Ct      Non-dim. thrust coefficient
+quadrotor["Cq"] = quadrotor["Ct"] * sqrt(
+    quadrotor["Ct"] / 2
+)  # Cq      Non-dim. torque coefficient
 
-quadrotor['sigma'] = quadrotor['c'] * quadrotor['nb'] / (pi * quadrotor['r'])       # sigma   Rotor solidity ratio
-quadrotor['thetat'] = 6.8 * (pi / 180)                                              # thetat  Blade tip angle
-quadrotor['theta0'] = 14.6 * (pi / 180)                                             # theta0  Blade root angle
-quadrotor['theta1'] = quadrotor['thetat'] - quadrotor['theta0']                     # theta1  Blade twist angle
-quadrotor['theta75'] = quadrotor['theta0'] + 0.75 * quadrotor['theta1']             # theta76 3/4 blade angle
+quadrotor["sigma"] = (
+    quadrotor["c"] * quadrotor["nb"] / (pi * quadrotor["r"])
+)  # sigma   Rotor solidity ratio
+quadrotor["thetat"] = 6.8 * (pi / 180)  # thetat  Blade tip angle
+quadrotor["theta0"] = 14.6 * (pi / 180)  # theta0  Blade root angle
+quadrotor["theta1"] = (
+    quadrotor["thetat"] - quadrotor["theta0"]
+)  # theta1  Blade twist angle
+quadrotor["theta75"] = (
+    quadrotor["theta0"] + 0.75 * quadrotor["theta1"]
+)  # theta76 3/4 blade angle
 try:
-    quadrotor['thetai'] = quadrotor['thetat'] * (quadrotor['r'] / quadrotor['e'])       # thetai  Blade ideal root approximation
+    quadrotor["thetai"] = quadrotor["thetat"] * (
+        quadrotor["r"] / quadrotor["e"]
+    )  # thetai  Blade ideal root approximation
 except ZeroDivisionError:
-    quadrotor['thetai'] = inf
-quadrotor['a'] = 5.5                                                                # a       Lift slope gradient
+    quadrotor["thetai"] = inf
+quadrotor["a"] = 5.5  # a       Lift slope gradient
 
 # derived constants
-quadrotor['A'] = pi*quadrotor['r']**2                                               # A       Rotor disc area
-quadrotor['gamma'] = quadrotor['rho'] * quadrotor['a'] * quadrotor['c'] * quadrotor['r']**4 / (quadrotor['Ib'] + quadrotor['Ic'])  # gamma   Lock number
+quadrotor["A"] = pi * quadrotor["r"] ** 2  # A       Rotor disc area
+quadrotor["gamma"] = (
+    quadrotor["rho"]
+    * quadrotor["a"]
+    * quadrotor["c"]
+    * quadrotor["r"] ** 4
+    / (quadrotor["Ib"] + quadrotor["Ic"])
+)  # gamma   Lock number
 
-quadrotor['b'] = quadrotor['Ct'] * quadrotor['rho']*quadrotor['A']*quadrotor['r']**2     # T = b w^2
-quadrotor['k'] = quadrotor['Cq'] * quadrotor['rho']*quadrotor['A']*quadrotor['r']**3     # Q = k w^2
+quadrotor["b"] = (
+    quadrotor["Ct"] * quadrotor["rho"] * quadrotor["A"] * quadrotor["r"] ** 2
+)  # T = b w^2
+quadrotor["k"] = (
+    quadrotor["Cq"] * quadrotor["rho"] * quadrotor["A"] * quadrotor["r"] ** 3
+)  # Q = k w^2
 
-quadrotor['verbose'] = False
+quadrotor["verbose"] = False

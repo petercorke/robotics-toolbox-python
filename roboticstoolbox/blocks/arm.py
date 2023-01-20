@@ -38,8 +38,8 @@ class FKine(FunctionBlock):
 
     nin = 1
     nout = 1
-    inlabels = ('q',)
-    outlabels = ('T',)
+    inlabels = ("q",)
+    outlabels = ("T",)
 
     def __init__(self, robot=None, args={}, **blockargs):
         """
@@ -63,7 +63,7 @@ class FKine(FunctionBlock):
             :output T: End-effector pose as an SE(3) object
         """
         if robot is None:
-            raise ValueError('robot is not defined')
+            raise ValueError("robot is not defined")
 
         super().__init__(**blockargs)
         self.type = "forward-kinematics"
@@ -97,8 +97,8 @@ class IKine(FunctionBlock):
 
     nin = 1
     nout = 1
-    inlabels = ('T',)
-    outlabels = ('q',)
+    inlabels = ("T",)
+    outlabels = ("q",)
 
     def __init__(
         self, robot=None, q0=None, useprevious=True, ik=None, seed=None, **blockargs
@@ -132,7 +132,7 @@ class IKine(FunctionBlock):
 
         """
         if robot is None:
-            raise ValueError('robot is not defined')
+            raise ValueError("robot is not defined")
 
         super().__init__(**blockargs)
         self.type = "inverse-kinematics"
@@ -174,6 +174,7 @@ class IKine(FunctionBlock):
 
 # ------------------------------------------------------------------------ #
 
+
 class Jacobian(FunctionBlock):
     """
     :blockname:`JACOBIAN`
@@ -192,17 +193,11 @@ class Jacobian(FunctionBlock):
 
     nin = 1
     nout = 1
-    inlabels = ('q',)
-    outlabels = ('J',)
+    inlabels = ("q",)
+    outlabels = ("J",)
 
     def __init__(
-        self,
-        robot,
-        frame="0",
-        inverse=False,
-        pinv=False,
-        transpose=False,
-        **blockargs
+        self, robot, frame="0", inverse=False, pinv=False, transpose=False, **blockargs
     ):
         """
         :param robot: Robot model
@@ -238,8 +233,8 @@ class Jacobian(FunctionBlock):
               error will occur.
         """
         if robot is None:
-            raise ValueError('robot is not defined')
-            
+            raise ValueError("robot is not defined")
+
         super().__init__(**blockargs)
 
         self.robot = robot
@@ -273,8 +268,8 @@ class Jacobian(FunctionBlock):
         return [J]
 
 
-
 # ------------------------------------------------------------------------ #
+
 
 class FDyn(TransferBlock):
     """
@@ -296,8 +291,8 @@ class FDyn(TransferBlock):
 
     nin = 1
     nout = 3
-    outlabels = ('q', 'qd', 'qdd')
-    inlabels = ('τ')
+    outlabels = ("q", "qd", "qdd")
+    inlabels = "τ"
 
     def __init__(self, robot, q0=None, **blockargs):
         """
@@ -325,8 +320,8 @@ class FDyn(TransferBlock):
 
         """
         if robot is None:
-            raise ValueError('robot is not defined')
-            
+            raise ValueError("robot is not defined")
+
         super().__init__(**blockargs)
         self.type = "forward-dynamics"
 
@@ -385,8 +380,8 @@ class IDyn(FunctionBlock):
 
     nin = 3
     nout = 1
-    inlabels = ('q', 'qd', 'qdd')
-    outlabels = ('τ')
+    inlabels = ("q", "qd", "qdd")
+    outlabels = "τ"
 
     def __init__(self, robot, gravity=None, **blockargs):
         """
@@ -415,7 +410,7 @@ class IDyn(FunctionBlock):
         .. TODO:: end-effector wrench input, base wrench output, payload input
         """
         if robot is None:
-            raise ValueError('robot is not defined')
+            raise ValueError("robot is not defined")
 
         super().__init__(**blockargs)
         self.type = "inverse-dynamics"
@@ -429,7 +424,9 @@ class IDyn(FunctionBlock):
         self.outport_names(("$\tau$",))
 
     def output(self, t=None):
-        tau = self.robot.rne(self.inputs[0], self.inputs[1], self.inputs[2], gravity=self.gravity)
+        tau = self.robot.rne(
+            self.inputs[0], self.inputs[1], self.inputs[2], gravity=self.gravity
+        )
         return [tau]
 
 
@@ -451,8 +448,8 @@ class Gravload(FunctionBlock):
 
     nin = 1
     nout = 1
-    inlabels = ('q',)
-    outlabels = ('τ')
+    inlabels = ("q",)
+    outlabels = "τ"
 
     def __init__(self, robot, gravity=None, **blockargs):
         """
@@ -478,8 +475,8 @@ class Gravload(FunctionBlock):
 
         """
         if robot is None:
-            raise ValueError('robot is not defined')
-            
+            raise ValueError("robot is not defined")
+
         super().__init__(**blockargs)
         self.type = "gravload"
 
@@ -491,6 +488,7 @@ class Gravload(FunctionBlock):
     def output(self, t=None):
         tau = self.robot.gravload(self.inputs[0], gravity=self.gravity)
         return [tau]
+
 
 class Gravload_X(FunctionBlock):
     """
@@ -510,8 +508,8 @@ class Gravload_X(FunctionBlock):
 
     nin = 1
     nout = 1
-    inlabels = ('q',)
-    outlabels = ('w')
+    inlabels = ("q",)
+    outlabels = "w"
 
     def __init__(self, robot, representation="rpy/xyz", gravity=None, **blockargs):
         """
@@ -537,8 +535,8 @@ class Gravload_X(FunctionBlock):
 
         """
         if robot is None:
-            raise ValueError('robot is not defined')
-            
+            raise ValueError("robot is not defined")
+
         super().__init__(**blockargs)
         self.type = "gravload-x"
 
@@ -550,8 +548,11 @@ class Gravload_X(FunctionBlock):
 
     def output(self, t=None):
         q = self.inputs[0]
-        w = self.robot.gravload_x(q, representation=self.representation, gravity=self.gravity)
+        w = self.robot.gravload_x(
+            q, representation=self.representation, gravity=self.gravity
+        )
         return [w]
+
 
 class Inertia(FunctionBlock):
     """
@@ -571,8 +572,8 @@ class Inertia(FunctionBlock):
 
     nin = 1
     nout = 1
-    inlabels = ('q',)
-    outlabels = ('M')
+    inlabels = ("q",)
+    outlabels = "M"
 
     def __init__(self, robot, **blockargs):
         """
@@ -596,8 +597,8 @@ class Inertia(FunctionBlock):
 
         """
         if robot is None:
-            raise ValueError('robot is not defined')
-            
+            raise ValueError("robot is not defined")
+
         super().__init__(**blockargs)
         self.type = "inertia"
 
@@ -608,6 +609,7 @@ class Inertia(FunctionBlock):
     def output(self, t=None):
         M = self.robot.inertia(self.inputs[0])
         return [M]
+
 
 class Inertia_X(FunctionBlock):
     """
@@ -627,8 +629,8 @@ class Inertia_X(FunctionBlock):
 
     nin = 1
     nout = 1
-    inlabels = ('q',)
-    outlabels = ('M')
+    inlabels = ("q",)
+    outlabels = "M"
 
     def __init__(self, robot, representation="rpy/xyz", pinv=False, **blockargs):
         """
@@ -652,8 +654,8 @@ class Inertia_X(FunctionBlock):
 
         """
         if robot is None:
-            raise ValueError('robot is not defined')
-            
+            raise ValueError("robot is not defined")
+
         super().__init__(**blockargs)
         self.type = "inertia-x"
 
@@ -667,7 +669,10 @@ class Inertia_X(FunctionBlock):
         q = self.inputs[0]
         Mx = self.robot.inertia_x(q, pinv=self.pinv, representation=self.representation)
         return [Mx]
+
+
 # ------------------------------------------------------------------------ #
+
 
 class FDyn_X(TransferBlock):
     """
@@ -689,10 +694,18 @@ class FDyn_X(TransferBlock):
 
     nin = 1
     nout = 5
-    outlabels = ('q', 'qd', 'x', 'xd', 'xdd')
-    inlabels = ('w')
+    outlabels = ("q", "qd", "x", "xd", "xdd")
+    inlabels = "w"
 
-    def __init__(self, robot, q0=None, gravcomp=False, velcomp=False, representation='rpy/xyz', **blockargs):
+    def __init__(
+        self,
+        robot,
+        q0=None,
+        gravcomp=False,
+        velcomp=False,
+        representation="rpy/xyz",
+        **blockargs,
+    ):
         """
         :param robot: Robot model
         :type robot: Robot subclass
@@ -718,8 +731,8 @@ class FDyn_X(TransferBlock):
 
         """
         if robot is None:
-            raise ValueError('robot is not defined')
-            
+            raise ValueError("robot is not defined")
+
         super().__init__(**blockargs)
         self.type = "forward-dynamics-x"
 
@@ -795,6 +808,7 @@ class FDyn_X(TransferBlock):
 
 # ------------------------------------------------------------------------ #
 
+
 class ArmPlot(GraphicsBlock):
     """
     :blockname:`ARMPLOT`
@@ -813,7 +827,7 @@ class ArmPlot(GraphicsBlock):
 
     nin = 1
     nout = 0
-    inlabels = ('q',)
+    inlabels = ("q",)
 
     def __init__(self, robot=None, q0=None, backend=None, **blockargs):
         """
@@ -837,7 +851,7 @@ class ArmPlot(GraphicsBlock):
            block name.
         """
         if robot is None:
-            raise ValueError('robot is not defined')
+            raise ValueError("robot is not defined")
 
         super().__init__(**blockargs)
         self.inport_names(("q",))
@@ -848,13 +862,13 @@ class ArmPlot(GraphicsBlock):
         self.backend = backend
         self.q0 = q0
         self.env = None
-        print('ARMPLOT init')
+        print("ARMPLOT init")
 
     def start(self, state):
         # create the plot
         # super().reset()
         # if state.options.graphics:
-        print('ARMPLOT init')
+        print("ARMPLOT init")
         self.fig = self.create_figure(state)
         self.env = self.robot.plot(
             self.q0, backend=self.backend, fig=self.fig, block=False
@@ -868,7 +882,6 @@ class ArmPlot(GraphicsBlock):
         self.env.step()
 
         super().step(state)
-
 
 
 if __name__ == "__main__":

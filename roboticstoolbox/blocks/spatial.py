@@ -10,6 +10,7 @@ from bdsim.graphics import GraphicsBlock
 
 from roboticstoolbox import quintic_func, trapezoidal_func
 
+
 class Tr2Delta(FunctionBlock):
     """
     :blockname:`TR2DELTA`
@@ -28,8 +29,8 @@ class Tr2Delta(FunctionBlock):
 
     nin = 2
     nout = 1
-    inlabels = ('T1', 'T2')
-    outlabels = ('Δ',)
+    inlabels = ("T1", "T2")
+    outlabels = ("Δ",)
 
     def __init__(self, **blockargs):
         """
@@ -81,8 +82,8 @@ class Delta2Tr(FunctionBlock):
 
     nin = 1
     nout = 1
-    outlabels = ('T',)
-    inlabels = ('Δ',)
+    outlabels = ("T",)
+    inlabels = ("Δ",)
 
     def __init__(self, **blockargs):
         """
@@ -113,6 +114,7 @@ class Delta2Tr(FunctionBlock):
 
 
 # ------------------------------------------------------------------------ #
+
 
 class Point2Tr(FunctionBlock):
     """
@@ -184,8 +186,8 @@ class TR2T(FunctionBlock):
 
     nin = 1
     nout = 3
-    inlabels = ('T',)
-    outlabels = ('x', 'y', 'z')
+    inlabels = ("T",)
+    outlabels = ("x", "y", "z")
 
     def __init__(self, **blockargs):
         """
@@ -215,6 +217,7 @@ class TR2T(FunctionBlock):
         t = self.inputs[0].t
         return list(t)
 
+
 # ------------------------------------------------------------------------ #
 
 
@@ -236,7 +239,7 @@ class Traj(FunctionBlock):
 
     nin = -1
     nout = 3
-    outlabels = ('q',)
+    outlabels = ("q",)
 
     def __init__(self, y0=0, yf=1, T=None, time=False, traj="trapezoidal", **blockargs):
         """
@@ -269,7 +272,7 @@ class Traj(FunctionBlock):
         else:
             nin = 0
             blockclass = "source"
-            
+
         super().__init__(nin=nin, blockclass=blockclass, **blockargs)
 
         y0 = base.getvector(y0)
@@ -314,7 +317,9 @@ class Traj(FunctionBlock):
 
         return [np.hstack(y), np.hstack(yd), np.hstack(ydd)]
 
+
 # ------------------------------------------------------------------------ #
+
 
 class JTraj(SourceBlock):
     """
@@ -334,7 +339,7 @@ class JTraj(SourceBlock):
 
     nin = 0
     nout = 3
-    outlabels = ('q', 'qd', 'qdd')
+    outlabels = ("q", "qd", "qdd")
 
     def __init__(self, q0, qf, qd0=None, qdf=None, T=None, **blockargs):
         """
@@ -414,7 +419,6 @@ class JTraj(SourceBlock):
             self.T = 1
         self.start()
         self.T = T
-        
 
     def start(self, state=None):
 
@@ -456,7 +460,7 @@ class JTraj(SourceBlock):
 
         tscal = self.tscal
         ts = t / tscal
-        tt = np.array([ts ** 5, ts ** 4, ts ** 3, ts ** 2, ts, 1]).T
+        tt = np.array([ts**5, ts**4, ts**3, ts**2, ts, 1]).T
 
         qt = tt @ self.coeffs
 
@@ -464,11 +468,13 @@ class JTraj(SourceBlock):
         qdt = tt @ self.dcoeffs / tscal
 
         # compute  acceleration
-        qddt = tt @ self.ddcoeffs / tscal ** 2
+        qddt = tt @ self.ddcoeffs / tscal**2
 
         return [qt, qdt, qddt]
 
+
 # ------------------------------------------------------------------------ #
+
 
 class LSPB(SourceBlock):
     """
@@ -488,7 +494,7 @@ class LSPB(SourceBlock):
 
     nin = 0
     nout = 3
-    outlabels = ('q', 'qd', 'qdd')
+    outlabels = ("q", "qd", "qdd")
 
     def __init__(self, q0, qf, V=None, T=None, **blockargs):
         """
@@ -539,7 +545,9 @@ class LSPB(SourceBlock):
     def output(self, t=None):
         return list(self.trapezoidalfunc(t))
 
+
 # ------------------------------------------------------------------------ #
+
 
 class CTraj(SourceBlock):
     """
@@ -559,16 +567,9 @@ class CTraj(SourceBlock):
 
     nin = 0
     nout = 1
-    outlabels = ('T',)
+    outlabels = ("T",)
 
-    def __init__(
-        self,
-        T1,
-        T2,
-        T,
-        trapezoidal=True,
-        **blockargs
-    ):
+    def __init__(self, T1, T2, T, trapezoidal=True, **blockargs):
         """
         [summary]
 
@@ -589,7 +590,7 @@ class CTraj(SourceBlock):
 
         The block outputs a pose that varies smoothly from ``T1`` to ``T2`` over
         the course of ``T`` seconds.
-        
+
         If ``T`` is not given it defaults to the simulation time.
 
         If ``trapezoidal`` is True then a trapezoidal motion profile is used along the path
@@ -626,6 +627,7 @@ class CTraj(SourceBlock):
 
 # ------------------------------------------------------------------------ #
 
+
 class CirclePath(SourceBlock):
     """
     :blockname:`CIRCLEPATH`
@@ -653,7 +655,7 @@ class CirclePath(SourceBlock):
         frequency=1,
         unit="rps",
         phase=0,
-        **blockargs
+        **blockargs,
     ):
         """
 
@@ -679,7 +681,7 @@ class CirclePath(SourceBlock):
         The block outputs the coordinates of a point moving in a circle of
         radius ``r`` centred at ``centre`` and parallel to the xy-plane.
 
-        By default the output is a 3-vector :math:`(x, y, z)` but if 
+        By default the output is a 3-vector :math:`(x, y, z)` but if
         ``pose`` is an ``SE3`` instance the output is a copy of that pose with
         its translation set to the coordinate of the moving point.  This is the
         motion of a frame with fixed orientation following a circular path.
@@ -721,6 +723,7 @@ class CirclePath(SourceBlock):
             p = pp
 
         return [p]
+
 
 if __name__ == "__main__":
 

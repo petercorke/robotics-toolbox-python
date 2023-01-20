@@ -16,26 +16,33 @@ from roboticstoolbox import mobile
 class Bicycle(TransferBlock):
     """
     :blockname:`BICYCLE`
-    
+
     .. table::
        :align: left
-    
+
     +------------+------------+---------+
     | inputs     | outputs    |  states |
     +------------+------------+---------+
     | 2          | 1          | 3       |
     +------------+------------+---------+
-    | float      | ndarray(3) |         | 
+    | float      | ndarray(3) |         |
     +------------+------------+---------+
     """
 
     nin = 2
     nout = 1
-    inlabels = ('v', 'γ')
-    outlabels = ('q',)
+    inlabels = ("v", "γ")
+    outlabels = ("q",)
 
-    def __init__(self, L=1, speed_max=np.inf, accel_max=np.inf, steer_max=0.45 * pi, 
-        x0=None, **blockargs):
+    def __init__(
+        self,
+        L=1,
+        speed_max=np.inf,
+        accel_max=np.inf,
+        steer_max=0.45 * pi,
+        x0=None,
+        **blockargs,
+    ):
         r"""
         Create a vehicle model with Bicycle kinematics.
 
@@ -54,68 +61,80 @@ class Bicycle(TransferBlock):
         :return: a BICYCLE block
         :rtype: Bicycle instance
 
-        
-        Bicycle kinematic model with state/configuration :math:`[x, y, \theta]`.  
-        
+
+        Bicycle kinematic model with state/configuration :math:`[x, y, \theta]`.
+
         **Block ports**
-            
+
             :input v: Vehicle speed (metres/sec).  The velocity limit ``speed_max``
                 and acceleration limit ``accel_max`` is
                 applied to this input.
             :input γ: Steered wheel angle (radians).  The steering limit ``steer_max``
                 is applied to this input.
-            
+
             :output q: configuration (x, y, θ)
 
-        :seealso: :class:`roboticstoolbox.mobile.Bicycle` :class:`Unicycle` :class:`DiffSteer` 
+        :seealso: :class:`roboticstoolbox.mobile.Bicycle` :class:`Unicycle` :class:`DiffSteer`
         """
         # TODO: add option to model the effect of steering arms, responds to
         #  gamma dot
-        
+
         super().__init__(nstates=3, **blockargs)
 
-        self.vehicle = mobile.Bicycle(L=L,
-            steer_max=steer_max, speed_max=speed_max, accel_max=accel_max)
+        self.vehicle = mobile.Bicycle(
+            L=L, steer_max=steer_max, speed_max=speed_max, accel_max=accel_max
+        )
 
         if x0 is None:
             self._x0 = np.zeros((self.nstates,))
         else:
-            assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(len(x0), self.nstates)
+            assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(
+                len(x0), self.nstates
+            )
             self._x0 = x0
-            
-        self.inport_names(('v', '$\gamma$'))
-        self.outport_names(('q',))
-        self.state_names(('x', 'y', r'$\theta$'))
-        
+
+        self.inport_names(("v", "$\gamma$"))
+        self.outport_names(("q",))
+        self.state_names(("x", "y", r"$\theta$"))
+
     def output(self, t):
         return [self._x]  # one output which is ndarray(3)
-    
+
     def deriv(self):
         return self.vehicle.deriv(self._x, self.inputs)
-    
+
+
 # ------------------------------------------------------------------------ #
 class Unicycle(TransferBlock):
     r"""
     :blockname:`UNICYCLE`
-    
+
     .. table::
        :align: left
-    
+
     +------------+------------+---------+
     | inputs     | outputs    |  states |
     +------------+------------+---------+
     | 2          | 1          | 3       |
     +------------+------------+---------+
-    | float      | ndarray(3) |         | 
+    | float      | ndarray(3) |         |
     +------------+------------+---------+
     """
     nin = 2
     nout = 1
-    inlabels = ('v', 'ω')
-    outlabels = ('q',)
+    inlabels = ("v", "ω")
+    outlabels = ("q",)
 
-    def __init__(self, w=1, speed_max=np.inf, accel_max=np.inf, steer_max=np.inf, 
-        a=0, x0=None, **blockargs):
+    def __init__(
+        self,
+        w=1,
+        speed_max=np.inf,
+        accel_max=np.inf,
+        steer_max=np.inf,
+        a=0,
+        x0=None,
+        **blockargs,
+    ):
         r"""
         Create a vehicle model with Unicycle kinematics.
 
@@ -137,73 +156,86 @@ class Unicycle(TransferBlock):
         Unicycle kinematic model with state/configuration :math:`[x, y, \theta]`.
 
         **Block ports**
-            
+
             :input v: Vehicle speed (metres/sec).  The velocity limit ``speed_max`` and
                 acceleration limit ``accel_max`` is
                 applied to this input.
             :input ω: Angular velocity (radians/sec).  The steering limit ``steer_max``
                 is applied to this input.
-            
+
             :output q: configuration (x, y, θ)
 
         :seealso: :class:`roboticstoolbox.mobile.Unicycle` :class:`Bicycle` :class:`DiffSteer`
-        """        
+        """
         super().__init__(nstates=3, **blockargs)
-        
+
         if x0 is None:
             self._x0 = np.zeros((self.nstates,))
         else:
-            assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(len(x0), self.nstates)
+            assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(
+                len(x0), self.nstates
+            )
             self._x0 = x0
 
-        self.vehicle = mobile.Unicycle(W=w,
-            steer_max=steer_max, speed_max=speed_max, accel_max=accel_max)
+        self.vehicle = mobile.Unicycle(
+            W=w, steer_max=steer_max, speed_max=speed_max, accel_max=accel_max
+        )
 
-        #TODO, add support for origin shift
+        # TODO, add support for origin shift
         #         If ``a`` is non-zero then the planar velocity of that point $x=a$
         # can be controlled by
 
         # .. math::
 
-        #     \begin{pmatrix} v \\ \omega \end{pmatrix} = 
+        #     \begin{pmatrix} v \\ \omega \end{pmatrix} =
         #     \begin{pmatrix}
-        #         \cos \theta & \sin \theta \\ 
+        #         \cos \theta & \sin \theta \\
         #         -\frac{1}{a}\sin \theta & \frac{1}{a}\cos \theta
         #     \end{pmatrix}\begin{pmatrix}
         #         \dot{x} \\ \dot{y}
         #     \end{pmatrix}
-        
+
     def output(self, t):
         return [self._x]
-    
+
     def deriv(self):
         return self.vehicle.deriv(self._x, self.inputs)
-    
+
+
 # ------------------------------------------------------------------------ #
 class DiffSteer(TransferBlock):
     """
     :blockname:`DIFFSTEER`
-    
+
     .. table::
        :align: left
-    
+
     +------------+------------+---------+
     | inputs     | outputs    |  states |
     +------------+------------+---------+
     | 2          | 1          | 3       |
     +------------+------------+---------+
-    | float      | ndarray(3) |         | 
+    | float      | ndarray(3) |         |
     +------------+------------+---------+
     """
 
     nin = 2
     nout = 1
 
-    inlabels = ('ωL', 'ωR')
-    outlabels = ('q',)
+    inlabels = ("ωL", "ωR")
+    outlabels = ("q",)
 
-    def __init__(self, w=1, R=1, speed_max=np.inf, accel_max=np.inf, steer_max=None, 
-        a=0, x0=None, **blockargs):
+    def __init__(
+        self,
+        w=1,
+        R=1,
+        speed_max=np.inf,
+        accel_max=np.inf,
+        steer_max=None,
+        a=0,
+        x0=None,
+        **blockargs,
+    ):
         r"""
         Create a differential steer vehicle model
 
@@ -223,7 +255,7 @@ class DiffSteer(TransferBlock):
         :type blockargs: dict
         :return: a DIFFSTEER block
         :rtype: DiffSteer instance
-        
+
         Unicycle kinematic model with state :math:`[x, y, \theta]`, with
         inputs given as wheel angular velocity.
 
@@ -231,7 +263,7 @@ class DiffSteer(TransferBlock):
 
             :input ωL: Left-wheel angular velocity (radians/sec).
             :input ωR: Right-wheel angular velocity (radians/sec).
-              
+
             :output q: configuration (x, y, θ)
 
         The resulting forward velocity and turning rate from ωL and ωR have
@@ -244,51 +276,65 @@ class DiffSteer(TransferBlock):
         :seealso: :class:`roboticstoolbox.mobile.Unicycle` :class:`Bicycle` :class:`Unicycle`
         """
         super().__init__(nstates=3, **blockargs)
-        self.type = 'diffsteer'
+        self.type = "diffsteer"
         self.R = R
-        
+
         if x0 is None:
             self._x0 = np.zeros((slef.nstates,))
         else:
-            assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(len(x0), self.nstates)
+            assert len(x0) == self.nstates, "x0 is {:d} long, should be {:d}".format(
+                len(x0), self.nstates
+            )
             self._x0 = x0
 
-        self.vehicle = mobile.Unicycle(W=w,
-            steer_max=steer_max, speed_max=speed_max, accel_max=accel_max)
+        self.vehicle = mobile.Unicycle(
+            W=w, steer_max=steer_max, speed_max=speed_max, accel_max=accel_max
+        )
 
     def output(self, t):
         return [self._x]
-    
+
     def deriv(self):
 
         return self.vehicle.deriv(self._x, self.inputs)
 
+
 # ------------------------------------------------------------------------ #
+
 
 class VehiclePlot(GraphicsBlock):
     """
     :blockname:`VEHICLEPLOT`
-    
+
     .. table::
        :align: left
-    
+
     +--------+---------+---------+
     | inputs | outputs |  states |
     +--------+---------+---------+
     | 1      | 0       | 0       |
     +--------+---------+---------+
-    | ndarray|         |         | 
+    | ndarray|         |         |
     +--------+---------+---------+
     """
 
     nin = 1
     nout = 0
 
-    inlabels = ('q',)
+    inlabels = ("q",)
 
     # TODO add ability to render an image instead of an outline
-    
-    def __init__(self, animation=None, path=None, labels=['X', 'Y'], square=True, init=None, scale="auto", **blockargs):
+
+    def __init__(
+        self,
+        animation=None,
+        path=None,
+        labels=["X", "Y"],
+        square=True,
+        init=None,
+        scale="auto",
+        **blockargs,
+    ):
         """
         Create a vehicle animation
 
@@ -314,15 +360,15 @@ class VehiclePlot(GraphicsBlock):
         **Block ports**
 
             :input q: configuration (x, y, θ)
-        
+
         Notes:
-            
+
             - The ``init`` function is called after the axes are initialized
               and can be used to draw application specific detail on the
               plot. In the example below, this is the dot and star.
             - A dynamic trail, showing path to date can be animated if
               the option ``path`` is set to a linestyle.
-        
+
         .. figure:: ../../figs/rvc4_4.gif
            :width: 500px
            :alt: example of generated graphic
@@ -333,61 +379,60 @@ class VehiclePlot(GraphicsBlock):
         super().__init__(**blockargs)
         self.xdata = []
         self.ydata = []
-        self.type = 'vehicleplot'
+        self.type = "vehicleplot"
         if init is not None:
-            assert callable(init), 'graphics init function must be callable'
+            assert callable(init), "graphics init function must be callable"
         self.init = init
         self.square = square
 
         self.pathstyle = path
-        
-        if scale != 'auto':
+
+        if scale != "auto":
             if len(scale) == 2:
                 scale = scale * 2
         self.scale = scale
         self.labels = labels
-        
+
         if animation is None:
             animation = mobile.VehiclePolygon()
         elif not isinstance(animation, mobile.VehicleAnimationBase):
-            raise TypeError('animation object must be VehicleAnimationBase subclass')
+            raise TypeError("animation object must be VehicleAnimationBase subclass")
 
         self.animation = animation
 
-        
     def start(self, state=None):
         # create the plot
         # super().reset()
         # create the figures
         self.fig = self.create_figure(state)
         self.ax = self.fig.add_subplot(111)
-        
+
         if self.square:
-            self.ax.set_aspect('equal')
-        print('done')
+            self.ax.set_aspect("equal")
+        print("done")
 
         self.ax.grid(True)
         self.ax.set_xlabel(self.labels[0])
         self.ax.set_ylabel(self.labels[1])
         self.ax.set_title(self.name)
-        if self.scale != 'auto':
+        if self.scale != "auto":
             self.ax.set_xlim(*self.scale[0:2])
             self.ax.set_ylim(*self.scale[2:4])
         if self.init is not None:
             self.init(self.ax)
 
         if isinstance(self.pathstyle, str):
-            self.line, = plt.plot(0, 0, self.pathstyle)
+            (self.line,) = plt.plot(0, 0, self.pathstyle)
         elif isinstance(self.pathstyle, dict):
-            self.line, = plt.plot(0, 0, **self.pathstyle)
+            (self.line,) = plt.plot(0, 0, **self.pathstyle)
 
         self.animation.add()
-            
+
         plt.draw()
         plt.show(block=False)
 
         super().start()
-        
+
     def step(self, state=None, **kwargs):
         # inputs are set
         xyt = self.inputs[0]
@@ -401,14 +446,14 @@ class VehiclePlot(GraphicsBlock):
 
         # update the vehicle pose
         self.animation.update(xyt)
-    
-        if isinstance(self.scale, str) and self.scale == 'auto':
+
+        if isinstance(self.scale, str) and self.scale == "auto":
             self.ax.relim()
             self.ax.autoscale_view()
         super().step(state=state)
-        
+
     def done(self, block=False, **kwargs):
         if self.bd.runtime.options.graphics:
             plt.show(block=block)
-            
+
             super().done()
