@@ -84,7 +84,12 @@ dev = [
     "pybullet",
 ]
 
-docs = ["sphinx", "sphinx_rtd_theme", "sphinx-autorun"]
+docs = [
+    "sphinx",
+    "sphinx_rtd_theme",
+    "sphinx-autorun",
+    "sphinx_autodoc_typehints",
+]
 
 
 [project.scripts]
