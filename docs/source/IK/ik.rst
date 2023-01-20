@@ -90,22 +90,18 @@ The C++ solvers can be identified as methods which start with ``ik_``.
 .. autosummary::
     :toctree: stubs
     
-    ~roboticstoolbox.robot.ETS.ETS.ik_lm_chan
-    ~roboticstoolbox.robot.ETS.ETS.ik_lm_sugihara
-    ~roboticstoolbox.robot.ETS.ETS.ik_lm_wampler
-    ~roboticstoolbox.robot.ETS.ETS.ik_gn
-    ~roboticstoolbox.robot.ETS.ETS.ik_nr
+    ~roboticstoolbox.robot.ETS.ETS.ik_LM
+    ~roboticstoolbox.robot.ETS.ETS.ik_GN
+    ~roboticstoolbox.robot.ETS.ETS.ik_NR
 
 .. rubric:: Robot C++ IK Methods
 
 .. autosummary::
     :toctree: stubs
 
-    ~roboticstoolbox.robot.ERobot.ERobot.ik_lm_chan
-    ~roboticstoolbox.robot.ERobot.ERobot.ik_lm_sugihara
-    ~roboticstoolbox.robot.ERobot.ERobot.ik_lm_wampler
-    ~roboticstoolbox.robot.ERobot.ERobot.ik_gn
-    ~roboticstoolbox.robot.ERobot.ERobot.ik_nr
+    ~roboticstoolbox.robot.Robot.Robot.ik_LM
+    ~roboticstoolbox.robot.Robot.Robot.ik_GN
+    ~roboticstoolbox.robot.Robot.Robot.ik_NR
 
 In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and one of the fast IK solvers available within the :py:class:`~roboticstoolbox.robot.Robot.Robot` class.
 
@@ -117,7 +113,7 @@ In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Pa
     >>> # Make a goal pose
     >>> Tep = panda.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
     >>> # Solve the IK problem
-    >>> panda.ik_lm_chan(Tep)
+    >>> panda.ik_LM(Tep)
 
 In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Panda` robot and and then get the :py:class:`~roboticstoolbox.robot.ETS.ETS` representation. Subsequently, we use one of the fast IK solvers available within the :py:class:`~roboticstoolbox.robot.ETS.ETS` class.
 
@@ -131,7 +127,7 @@ In the following example, we create a :py:class:`~roboticstoolbox.models.URDF.Pa
     >>> # Make a goal pose
     >>> Tep = ets.fkine([0, -0.3, 0, -2.2, 0, 2, 0.7854])
     >>> # Solve the IK problem
-    >>> ets.ik_lm_chan(Tep)
+    >>> ets.ik_LM(Tep)
 
 
 
@@ -230,11 +226,10 @@ Additionally, these :py:class:`Class` based solvers have been implemented as met
 .. autosummary::
     :toctree: stubs
     
-    ~roboticstoolbox.robot.ERobot.ERobot.ikine_LM
-
-
-    .. ~roboticstoolbox.robot.ERobot.ERobot.ikine_GN
-    .. ~roboticstoolbox.robot.ERobot.ERobot.ikine_NR
+    ~roboticstoolbox.robot.Robot.Robot.ikine_LM
+    ~roboticstoolbox.robot.Robot.Robot.ikine_QP
+    ~roboticstoolbox.robot.Robot.Robot.ikine_GN
+    ~roboticstoolbox.robot.Robot.Robot.ikine_NR
 
 
 .. rubric:: Example 
