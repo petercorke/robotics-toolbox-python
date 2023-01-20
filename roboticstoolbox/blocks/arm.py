@@ -101,7 +101,7 @@ class IKine(FunctionBlock):
     outlabels = ('q',)
 
     def __init__(
-        self, robot=None, q0=None, useprevious=True, ik=None, **blockargs
+        self, robot=None, q0=None, useprevious=True, ik=None, seed=None, **blockargs
     ):
         """
         :param robot: Robot model, defaults to None
@@ -112,6 +112,8 @@ class IKine(FunctionBlock):
         :type useprevious: bool, optional
         :param ik: Specify an IK function, defaults to 'ikine_LM'
         :type ik: callable f(T)
+        :param seed: random seed for solution
+        :type seed: int
         :param blockargs: |BlockOptions|
         :type blockargs: dict
         :return: an INVERSE_KINEMATICS block
@@ -140,6 +142,7 @@ class IKine(FunctionBlock):
         self.qprev = q0
         self.useprevious = useprevious
         self.ik = None
+        self.seed = 0
 
         self.inport_names(("T",))
         self.outport_names(("q",))
@@ -156,7 +159,7 @@ class IKine(FunctionBlock):
             q0 = self.q0
 
         if self.ik is None:
-            sol = self.robot.ikine_LM(self.inputs[0], q0=q0)
+            sol = self.robot.ikine_LM(self.inputs[0], q0=q0, seed=self.seed)
         else:
             sol = self.ik(self.inputs[0])
 
