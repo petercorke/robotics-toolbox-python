@@ -288,7 +288,7 @@ class VehiclePlot(GraphicsBlock):
 
     # TODO add ability to render an image instead of an outline
     
-    def __init__(self, animation=None, path=None, labels=['X', 'Y'], square=True, init=None, scale=True, **blockargs):
+    def __init__(self, animation=None, path=None, labels=['X', 'Y'], square=True, init=None, scale="auto", **blockargs):
         """
         Create a vehicle animation
 
