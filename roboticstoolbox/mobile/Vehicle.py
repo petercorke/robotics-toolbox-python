@@ -64,6 +64,9 @@ class VehicleBase(ABC):
         [A, B, C, D]     A:B      C:D
         ==============  =======  =======
 
+        :note: Set ``seed=None`` to have it randomly initialized from the 
+            operating system.
+
         :seealso: :class:`Bicycle` :class:`Unicycle` :class:`VehicleAnimationBase`
         """
 
@@ -1068,16 +1071,16 @@ class Unicycle(VehicleBase):
         :seealso: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`Vehicle`
         """
         super().__init__(**kwargs)
-        self._w = W
+        self._W = W
 
     def __str__(self):
 
         s = super().__str__()
-        s += f"\n  W={self._w}, steer_max={self._steer_max}, vel_max={self._vel_max}, accel_max={self.accel_max}"
+        s += f"\n  W={self._W}, steer_max={self._steer_max}, vel_max={self._vel_max}, accel_max={self.accel_max}"
         return s
 
 
-    def deriv(self, t, x, u):
+    def deriv(self, x, u):
         r"""
         Time derivative of state
 
@@ -1109,7 +1112,7 @@ class Unicycle(VehicleBase):
         return np.r_[
                 v * cos(theta), 
                 v * sin(theta), 
-                vdiff / self.w
+                vdiff / self._W
                     ]
 
     def u_limited(self, u):
@@ -1133,7 +1136,98 @@ class Unicycle(VehicleBase):
         return ulim
 
 class DiffSteer(Unicycle):
-    pass
+    def __init__(self,
+                W=1,
+                **kwargs):
+        r"""
+        Create differential steering kinematic model
+
+        :param W: vehicle width, defaults to 1
+        :type W: float, optional
+        :param kwargs: additional arguments passed to :class:`VehicleBase`
+            constructor
+
+        Model the motion of a unicycle model with equations of motion given by:
+
+        .. math::
+
+            \dot{x} &= v \cos \theta \\
+            \dot{y} &= v \sin \theta \\
+            \dot{\theta} &= \omega
+
+        where :math:`v` is the velocity in body frame x-direction, and 
+        :math:`\omega` is the turn rate.
+
+        :seealso: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`Vehicle`
+        """
+        super().__init__(**kwargs)
+        self._W = W
+
+    def __str__(self):
+
+        s = super().__str__()
+        s += f"\n  W={self._W}, vel_max={self._vel_max}, accel_max={self.accel_max}"
+        return s
+
+
+    def deriv(self, x, u):
+        r"""
+        Time derivative of state
+
+        :param x: vehicle state :math:`(x, y, \theta)`
+        :type x: array_like(3)
+        :param u: control input :math:`(v, \omega)`
+        :type u: array_like(2)
+        :return: state derivative :math:`(\dot{x}, \dot{y}, \dot{\theta})`
+        :rtype: ndarray(3)
+
+        Returns the time derivative of state (3x1) at the state ``x`` with velocity :math:`v`
+        and turn rate :math:`\omega`
+
+        .. math::
+                    \dot{x} &= v \cos \theta \\
+                    \dot{y} &= v \sin \theta \\
+                    \dot{\theta} &= \omega
+
+        :seealso: :meth:`f`
+
+        .. note:: Vehicle speed and steering limits are not applied here
+        """
+        
+        # unpack some variables
+        theta = x[2]
+        vleft = u[0]
+        vright = u[1]
+
+        # convert wheel speeds to forward and differential velocity
+        v = (vright + vleft) / 2.0
+        vdiff = vright - vleft
+
+        return np.r_[
+                v * cos(theta), 
+                v * sin(theta), 
+                vdiff / self._W
+                    ]
+
+    def u_limited(self, u):
+        """
+        Apply vehicle velocity, acceleration and steering limits
+
+        :param u: Desired vehicle inputs :math:`(v, \omega)`
+        :type u: array_like(2)
+        :return: Allowable vehicle inputs :math:`(v, \omega)`
+        :rtype: ndarray(2)
+
+        Velocity and acceleration limits are applied to :math:`v` and 
+        turn rate limits are applied to :math:`\omega`.
+        """
+
+        # limit speed and steer angle
+        ulim = np.array(u)
+        ulim[0] = self.limits_va(u[0])
+        ulim[1] = self.limits_va(u[1])
+
+        return ulim
 
 if __name__ == "__main__":
 

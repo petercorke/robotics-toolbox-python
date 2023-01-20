@@ -103,7 +103,7 @@ def rtb_load_data(filename, handler, **kwargs):
 
     :seealso: :func:`path_to_datafile`
     """
-    path = rtb_path_to_datafile(filename)
+    path = rtb_path_to_datafile(filename, local=False)
     return handler(path, **kwargs)
 
 def rtb_path_to_datafile(*filename, local=True):
