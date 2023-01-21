@@ -23,7 +23,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: future
-        path: rtb
+        path: robotics-toolbox-python
         
     - name: Checkout Swift
       uses: actions/checkout@v2
@@ -55,11 +55,11 @@ jobs:
         python -m pip install .
         cd ../swift
         python -m pip install .
-        cd ../rtb/rtb-data
+        cd ../robotics-toolbox-python/rtb-data
         python -m pip install .
     - name: Test with pytest
       run: |
-        cd rtb
+        cd robotics-toolbox-python
         pip install .[dev,collision]
         pip install pytest-timeout
         pytest --timeout=50 --timeout_method thread -s
