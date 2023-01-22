@@ -62,4 +62,9 @@ jobs:
         cd robotics-toolbox-python
         pip install .[dev,collision]
         pip install pytest-timeout
+        ls
+        git status
+        pip list
+        python -c "import spatialgeometry"
+        python -c "import roboticstoolbox"
         pytest --timeout=50 --timeout_method thread -s
