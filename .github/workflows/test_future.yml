@@ -69,4 +69,4 @@ jobs:
         cd ..
         python -c "import spatialgeometry"
         python -c "import roboticstoolbox"
-        pytest --timeout=50 --timeout_method thread -s
+        pytest --timeout=50 --timeout_method thread -s ./robotics-toolbox-python
