@@ -48,24 +48,22 @@ jobs:
         
     - name: Install dependencies
       run: |
-        echo "Current wd and ls"
-        pwd
-        ls
-        echo "One up ls"
-        ls ../
-        echo "Two up ls"
-        ls ../../
-        echo "Three up ls"
-        ls ../../../
+        echo "Update pip"
         python -m pip install --upgrade pip
         cd sm
+        echo "Install sm"
+        ls
         pip install .
         cd ../sg
+        echo "Install sg"
+        ls
         pip install .
         cd ../swift
+        echo "Install swift"
+        ls
         pip install .
         cd ../robotics-toolbox-python/rtb-data
-        ip install .
+        pip install .
     - name: Test with pytest
       run: |
         cd robotics-toolbox-python
