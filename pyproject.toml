@@ -82,6 +82,7 @@ dev = [
     "qpsolvers",
     "quadprog",
     "pybullet",
+    "bdsim",
 ]
 
 docs = [
