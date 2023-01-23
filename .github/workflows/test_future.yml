@@ -48,6 +48,15 @@ jobs:
         
     - name: Install dependencies
       run: |
+        echo "Current wd and ls"
+        pwd
+        ls
+        echo "One up ls"
+        ls ../
+        echo "Two up ls"
+        ls ../../
+        echo "Three up ls"
+        ls ../../../
         python -m pip install --upgrade pip
         cd sm
         python -m pip install .
