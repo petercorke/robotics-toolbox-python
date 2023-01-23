@@ -59,23 +59,18 @@ jobs:
         ls ../../../
         python -m pip install --upgrade pip
         cd sm
-        python -m pip install .
+        pip install .
         cd ../sg
-        python -m pip install .
+        pip install .
         cd ../swift
-        python -m pip install .
+        pip install .
         cd ../robotics-toolbox-python/rtb-data
-        python -m pip install .
+        ip install .
     - name: Test with pytest
       run: |
         cd robotics-toolbox-python
         pip install .[dev,collision]
         pip install pytest-timeout
-        ls
-        ls ./roboticstoolbox
-        git status
-        pip list
-        cd ..
         python -c "import spatialgeometry"
         python -c "import roboticstoolbox"
-        pytest --timeout=50 --timeout_method thread -s ./robotics-toolbox-python
+        pytest --timeout=50 --timeout_method thread -s
