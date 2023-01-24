@@ -102,7 +102,7 @@ class TestPlanners(unittest.TestCase):
         path, status = rs.query(start, goal)
 
         self.assertIsInstance(path, np.ndarray)
-        self.assertEqual(path.shape, (66,3))
+        self.assertEqual(path.shape, (65,3))
         self.assertEqual(status.__class__.__name__, "ReedsSheppStatus")
         self.assertTrue(hasattr(status, 'segments'))
         self.assertTrue(hasattr(status, 'length'))
@@ -172,5 +172,6 @@ class TestPlanners(unittest.TestCase):
     #     dx.plot()
     #     dx.plot(path=path)
 if __name__ == '__main__':  # pragma nocover
+
     unittest.main()
     # pytest.main(['tests/test_SerialLink.py'])

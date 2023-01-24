@@ -26,6 +26,13 @@ class _Path:
         self.yaw = []
         self.directions = []
 
+    def __repr__(self):
+        s = f"_Path: L={self.L:.2g}, "
+        s += f"[{', '.join(['{}={:.2g}'.format(c,l) for c, l in zip(self.ctypes, self.lengths)])}]"
+        if len(self.x) > 0:
+            s += f", {len(self.x)} points on path"
+        return s
+
 
 def plot_arrow(x, y, yaw, length=1.0, width=0.5, fc="r", ec="k"):
     """
@@ -214,6 +221,18 @@ def left_straight_right(x, y, phi):
 
 
 def generate_path(q0, q1, max_curvature):
+    """
+    Return a set of feasible paths
+
+    :param q0: initial configuration
+    :type q0: array_like(3)
+    :param q1: final configuration
+    :type q1: array_like(3)
+    :param max_curvature: maximum path curvature
+    :type max_curvature: float
+    :return: set of paths
+    :rtype: list of _Path
+    """
     dx = q1[0] - q0[0]
     dy = q1[1] - q0[1]
     dth = q1[2] - q0[2]
@@ -222,6 +241,7 @@ def generate_path(q0, q1, max_curvature):
     x = (c * dx + s * dy) * max_curvature
     y = (-s * dx + c * dy) * max_curvature
 
+    # build a list of possible paths
     paths = []
     paths = straight_curve_straight(x, y, dth, paths)
     paths = curve_straight_curve(x, y, dth, paths)
@@ -304,7 +324,7 @@ def generate_local_course(total_length, lengths, mode, max_curvature, step_size)
             ind, l, m, max_curvature, ox, oy, oyaw, px, py, pyaw, directions)
 
     # remove unused data
-    while px[-1] == 0.0:
+    while abs(px[-1]) < 1e-10:
         px.pop()
         py.pop()
         pyaw.pop()
@@ -321,8 +341,10 @@ def calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step_size):
     q0 = [sx, sy, syaw]
     q1 = [gx, gy, gyaw]
 
+    # find set of feasible paths
     paths = generate_path(q0, q1, maxc)
     for path in paths:
+        # interpolate the path
         x, y, yaw, directions = generate_local_course(
             path.L, path.lengths, path.ctypes, maxc, step_size * maxc)
 
