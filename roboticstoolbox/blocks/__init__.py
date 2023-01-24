@@ -3,4 +3,4 @@ from .mobile import *
 from .uav import *
 from .spatial import *
 
-url = "https://petercorke.github.io/bdsim/" + __package__
+url = "https://petercorke.github.io/robotics-toolbox-python/" + __package__
