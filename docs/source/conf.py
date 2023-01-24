@@ -47,6 +47,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     # "scanpydoc.elegant_typehints",
     "sphinx_autorun",
+    "sphinx-favicon",
 ]
 
 autosummary_generate = True
@@ -174,3 +175,40 @@ napoleon_custom_sections = ["Synopsis"]
 
 # autodoc_default_flags = ["members"]
 autosummary_generate = True
+
+# -------- Options favicon -------------------------------------------------------#
+
+html_static_path = ["_static"]
+# create favicons online using https://favicon.io/favicon-converter/
+favicons = [
+    {
+        "rel": "icon",
+        "sizes": "16x16",
+        "static-file": "favicon-16x16.png",
+        "type": "image/png",
+    },
+    {
+        "rel": "icon",
+        "sizes": "32x32",
+        "static-file": "favicon-32x32.png",
+        "type": "image/png",
+    },
+    {
+        "rel": "apple-touch-icon",
+        "sizes": "180x180",
+        "static-file": "apple-touch-icon.png",
+        "type": "image/png",
+    },
+    {
+        "rel": "android-chrome",
+        "sizes": "192x192",
+        "static-file": "android-chrome-192x192.png ",
+        "type": "image/png",
+    },
+    {
+        "rel": "android-chrome",
+        "sizes": "512x512",
+        "static-file": "android-chrome-512x512.png ",
+        "type": "image/png",
+    },
+]
