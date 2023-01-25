@@ -111,7 +111,7 @@
 
 
 <div class="viewcode-block" id="PyPlot"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot">[docs]</a><span class="k">class</span> <span class="nc">PyPlot</span><span class="p">(</span><span class="n">Connector</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Graphical backend using matplotlib</span>
 
 <span class="sd">    matplotlib is a common and highly portable graphics library for Python,</span>
@@ -156,7 +156,7 @@
         <span class="k">return</span> <span class="n">s</span>
 
 <div class="viewcode-block" id="PyPlot.launch"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.launch">[docs]</a>    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Launch a graphical interface</span>
 
 <span class="sd">        ```env = launch()``` creates a blank 3D matplotlib figure and returns</span>
@@ -226,7 +226,7 @@
         <span class="c1"># TODO still need to finish this, and get Jupyter animation working</span>
 
 <div class="viewcode-block" id="PyPlot.step"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the graphical scene</span>
 
 <span class="sd">        :param dt: time step in seconds, defaults to 50 (0.05 s)</span>
@@ -297,7 +297,7 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PyPlot.reset"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reset the graphical scene</span>
 
 <span class="sd">        ``env.reset()`` triggers a reset of the 3D scene in the matplotlib</span>
@@ -309,7 +309,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PyPlot.restart"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.restart">[docs]</a>    <span class="k">def</span> <span class="nf">restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Restart the graphics display</span>
 
 <span class="sd">        ``env.restart()`` triggers a restart of the matplotlib view referenced</span>
@@ -322,7 +322,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">restart</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PyPlot.close"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        ``env.close()`` gracefully closes the matplotlib window</span>
 <span class="sd">        referenced by ``env``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -349,7 +349,7 @@
         <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a robot to the graphical scene</span>
 
 <span class="sd">        :param ob: The object to add to the plot (robot or ellipse)</span>
@@ -421,7 +421,7 @@
         <span class="k">return</span> <span class="nb">id</span></div>
 
 <div class="viewcode-block" id="PyPlot.remove"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove a robot or shape from the graphical scene</span>
 
 <span class="sd">        :param id: The id of the robot to remove. Can be either the DHLink or</span>
@@ -443,7 +443,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PyPlot.hold"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot.hold">[docs]</a>    <span class="k">def</span> <span class="nf">hold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        hold() keeps the plot open i.e. stops the plot from closing once</span>
 <span class="sd">        the main script has finished.</span>
 
@@ -495,7 +495,7 @@
     <span class="c1">#         pass</span>
 
     <span class="k">def</span> <span class="nf">_set_axes_equal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make axes of 3D plot have equal scale so that spheres appear as</span>
 <span class="sd">        spheres, cubes as cubes, etc..  This is one possible solution to</span>
 <span class="sd">        Matplotlib&#39;s ax.set_aspect(&#39;equal&#39;) and ax.axis(&#39;equal&#39;) not</span>
@@ -645,7 +645,7 @@
 
 
 <span class="k">def</span> <span class="nf">_isnotebook</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determine if code is being run from a Jupyter notebook</span>
 
 <span class="sd">    ``_isnotebook`` is True if running Jupyter notebook, else False</span>
@@ -675,7 +675,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

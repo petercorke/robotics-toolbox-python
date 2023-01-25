@@ -98,7 +98,7 @@
 
 
 <div class="viewcode-block" id="RRTPlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.RRTPlanner">[docs]</a><span class="k">class</span> <span class="nc">RRTPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rapidly exploring tree planner</span>
 
 <span class="sd">    :param map: occupancy grid</span>
@@ -201,7 +201,7 @@
         <span class="c1"># self.goal_xy_th = 0.5</span>
 
 <div class="viewcode-block" id="RRTPlanner.plan"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.RRTPlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">search_until_npoints</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plan paths to goal using RRT</span>
 
 <span class="sd">        :param goal: goal pose :math:`(x, y, \theta)`, defaults to previously set value</span>
@@ -270,7 +270,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">progress_end</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="RRTPlanner.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.RRTPlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find a path from start configuration</span>
 
 <span class="sd">        :param start: start configuration :math:`(x, y, \theta)`</span>
@@ -328,7 +328,7 @@
     <span class="c1">#     return math.hypot(dx, dy)</span>
 
 <div class="viewcode-block" id="RRTPlanner.qrandom"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.RRTPlanner.qrandom">[docs]</a>    <span class="k">def</span> <span class="nf">qrandom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Random configuration</span>
 
 <span class="sd">        :return: random configuration :math:`(x, y, \theta)`</span>
@@ -345,7 +345,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="RRTPlanner.qrandom_free"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.RRTPlanner.qrandom_free">[docs]</a>    <span class="k">def</span> <span class="nf">qrandom_free</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Random obstacle free configuration</span>
 
 <span class="sd">        :return: random configuration :math:`(x, y, \theta)`</span>
@@ -364,7 +364,7 @@
                 <span class="k">return</span> <span class="n">q</span></div>
 
 <div class="viewcode-block" id="RRTPlanner.iscollision"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.RRTPlanner.iscollision">[docs]</a>    <span class="k">def</span> <span class="nf">iscollision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test if configuration is collision</span>
 
 <span class="sd">        :param q: vehicle configuration :math:`(x, y, \theta)`</span>
@@ -415,7 +415,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

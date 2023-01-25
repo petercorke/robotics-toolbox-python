@@ -83,7 +83,7 @@
 
 <div class="viewcode-block" id="BaseMap"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseMap">[docs]</a><span class="k">class</span> <span class="nc">BaseMap</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">unused</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Abstract base class for maps</span>
 
 <span class="sd">        :param workspace: dimensions of 2D plot area, defaults to (-10:10) x (-10:10),</span>
@@ -112,7 +112,7 @@
 
 <div class="viewcode-block" id="BaseOccupancyGrid"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid">[docs]</a><span class="k">class</span> <span class="nc">BaseOccupancyGrid</span><span class="p">(</span><span class="n">BaseMap</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cellsize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Occupancy grid (superclass)</span>
 
 <span class="sd">        :param grid: occupancy grid as a NumPy array</span>
@@ -150,7 +150,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_cellsize</span> <span class="o">=</span> <span class="n">cellsize</span>
 
 <div class="viewcode-block" id="BaseOccupancyGrid.copy"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Copy an occupancy grid (superclass)</span>
 
 <span class="sd">        :return: copy of the ocupancy grid</span>
@@ -167,7 +167,7 @@
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compact string description of occupancy grid (superclass)</span>
 
 <span class="sd">        :return: summary of occupancy grid characteristics</span>
@@ -183,7 +183,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Occupancy grid as a NumPy array (superclass)</span>
 
 <span class="sd">        :return: binary occupancy grid</span>
@@ -196,7 +196,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">xmin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Minimum x-coordinate of this grid (superclass)</span>
 
 <span class="sd">        :return: minimum world x-coordinate</span>
@@ -206,7 +206,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">xmax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Maximum x-coordinate of this grid (superclass)</span>
 
 <span class="sd">        :return: maximum world x-coordinate</span>
@@ -216,7 +216,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ymin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Minimum y-coordinate of this grid (superclass)</span>
 
 <span class="sd">        :return: minimum world y-coordinate</span>
@@ -226,7 +226,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ymax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Maximum y-coordinate of this grid (superclass)</span>
 
 <span class="sd">        :return: maximum world y-coordinate</span>
@@ -236,7 +236,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Shape of the occupancy grid array (superclass)</span>
 
 <span class="sd">        :return: shape of the occupancy grid array</span>
@@ -248,7 +248,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">maxdim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Maximum dimension of grid in world coordinates (superclass)</span>
 
 <span class="sd">        :return: maximum side length of the occupancy grid</span>
@@ -258,7 +258,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Bounds of the occupancy grid in world coordinates (superclass)</span>
 
 <span class="sd">        :return: workspace bounds [xmin, xmax, ymin, ymax]</span>
@@ -270,7 +270,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Occupancy grid name (superclass)</span>
 
 <span class="sd">        :return: name of the occupancy grid</span>
@@ -280,7 +280,7 @@
 
     <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set occupancy grid name (superclass)</span>
 
 <span class="sd">        :param name: new name of the occupancy grid</span>
@@ -289,7 +289,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
 
 <div class="viewcode-block" id="BaseOccupancyGrid.set"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set region of map (superclass)</span>
 
 <span class="sd">        :param region: The region [xmin, ymin, xmax, ymax]</span>
@@ -302,7 +302,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">[</span><span class="n">bl</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="n">tr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">tr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
 
 <div class="viewcode-block" id="BaseOccupancyGrid.g2w"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid.g2w">[docs]</a>    <span class="k">def</span> <span class="nf">g2w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert grid coordinate to world coordinate (superclass)</span>
 
 <span class="sd">        :param p: grid coordinate (column, row)</span>
@@ -317,7 +317,7 @@
         <span class="k">return</span> <span class="n">p</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cellsize</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span></div>
 
 <div class="viewcode-block" id="BaseOccupancyGrid.w2g"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid.w2g">[docs]</a>    <span class="k">def</span> <span class="nf">w2g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert world coordinate to grid coordinate (superclass)</span>
 
 <span class="sd">        :param p: world coordinate (x, y)</span>
@@ -332,7 +332,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">p</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cellsize</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseOccupancyGrid.plot"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the occupancy grid (superclass)</span>
 
 <span class="sd">        :param map: array which is plotted instead of the grid, must be same</span>
@@ -364,7 +364,7 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseOccupancyGrid.line_w"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid.line_w">[docs]</a>    <span class="k">def</span> <span class="nf">line_w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get index of cells along a line segment (superclass)</span>
 
 <span class="sd">        :param p1: start</span>
@@ -395,7 +395,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ravel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Ravel the grid (superclass)</span>
 
 <span class="sd">        :return: 1D view of the occupancy grid</span>
@@ -406,7 +406,7 @@
 
 <div class="viewcode-block" id="BinaryOccupancyGrid"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BinaryOccupancyGrid">[docs]</a><span class="k">class</span> <span class="nc">BinaryOccupancyGrid</span><span class="p">(</span><span class="n">BaseOccupancyGrid</span><span class="p">):</span>
 <div class="viewcode-block" id="BinaryOccupancyGrid.__init__"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BinaryOccupancyGrid.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a binary occupancy grid instance</span>
 
 <span class="sd">        :param grid: occupancy grid as a NumPy array</span>
@@ -457,7 +457,7 @@
         <span class="k">return</span> <span class="n">s</span>
 
 <div class="viewcode-block" id="BinaryOccupancyGrid.isoccupied"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BinaryOccupancyGrid.isoccupied">[docs]</a>    <span class="k">def</span> <span class="nf">isoccupied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test if coordinate is occupied</span>
 
 <span class="sd">        :param p: world coordinate (x, y)</span>
@@ -479,7 +479,7 @@
             <span class="k">return</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="BinaryOccupancyGrid.inflate"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BinaryOccupancyGrid.inflate">[docs]</a>    <span class="k">def</span> <span class="nf">inflate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Inflate obstales</span>
 
 <span class="sd">        :param radius: radius of circular structuring element in world units</span>
@@ -503,7 +503,7 @@
 
 
 <div class="viewcode-block" id="OccupancyGrid"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.OccupancyGrid">[docs]</a><span class="k">class</span> <span class="nc">OccupancyGrid</span><span class="p">(</span><span class="n">BaseOccupancyGrid</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    General occupancy grid</span>
 
 
@@ -535,7 +535,7 @@
 
 <div class="viewcode-block" id="PolygonMap"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PolygonMap">[docs]</a><span class="k">class</span> <span class="nc">PolygonMap</span><span class="p">(</span><span class="n">BaseMap</span><span class="p">):</span>
 <div class="viewcode-block" id="PolygonMap.__init__"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PolygonMap.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">polygons</span><span class="o">=</span><span class="p">[]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Polygonal obstacle map</span>
 
 <span class="sd">        :param workspace: dimensions of 2D plot area, defaults to (-10:10) x (-10:10),</span>
@@ -561,7 +561,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span> <span class="o">=</span> <span class="n">polygons</span></div>
 
 <div class="viewcode-block" id="PolygonMap.add"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PolygonMap.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a polygon to map</span>
 
 <span class="sd">        :param polygon: a polygon</span>
@@ -576,7 +576,7 @@
             <span class="p">)</span>  <span class="c1"># lgtm [py/modification-of-default-value]</span></div>
 
 <div class="viewcode-block" id="PolygonMap.iscollision"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PolygonMap.iscollision">[docs]</a>    <span class="k">def</span> <span class="nf">iscollision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test for collision</span>
 
 <span class="sd">        :param polygon: a polygon</span>
@@ -600,7 +600,7 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PolygonMap.isoccupied"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PolygonMap.isoccupied">[docs]</a>    <span class="k">def</span> <span class="nf">isoccupied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test if point lies inside an obstacle</span>
 
 <span class="sd">        :param p: a 2D point</span>
@@ -619,7 +619,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Bounds of the occupancy grid</span>
 
 <span class="sd">        :return: workspace bounds [xmin, xmax, ymin, ymax]</span>
@@ -690,7 +690,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

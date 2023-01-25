@@ -263,7 +263,7 @@
             <span class="k">raise</span> <span class="ne">StopIteration</span>
 
 <div class="viewcode-block" id="Robot.__getitem__"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get link (Robot superclass)</span>
 
 <span class="sd">        :param i: link number or name</span>
@@ -305,7 +305,7 @@
     <span class="c1">#     return data</span>
 
 <div class="viewcode-block" id="Robot.dynchanged"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.dynchanged">[docs]</a>    <span class="k">def</span> <span class="nf">dynchanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">what</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dynamic parameters have changed (Robot superclass)</span>
 
 <span class="sd">        Called from a property setter to inform the robot that the cache of</span>
@@ -318,7 +318,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_hasdynamics</span> <span class="o">=</span> <span class="kc">True</span></div>
 
     <span class="k">def</span> <span class="nf">_getq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get joint coordinates (Robot superclass)</span>
 
 <span class="sd">        :param q: passed value, defaults to None</span>
@@ -335,7 +335,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of joints (Robot superclass)</span>
 
 <span class="sd">        :return: Number of joints</span>
@@ -355,7 +355,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nlinks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of links (Robot superclass)</span>
 
 <span class="sd">        :return: Number of links</span>
@@ -379,7 +379,7 @@
 
     <span class="nd">@abstractproperty</span>
     <span class="k">def</span> <span class="nf">nbranches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of branches (Robot superclass)</span>
 
 <span class="sd">        :return: Number of branches</span>
@@ -399,7 +399,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hasdynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Robot has dynamic parameters (Robot superclass)</span>
 
 <span class="sd">        :return: Robot has dynamic parameters</span>
@@ -419,7 +419,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hasgeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Robot has geometry model (Robot superclass)</span>
 
 <span class="sd">        :return: Robot has geometry model</span>
@@ -441,7 +441,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hascollision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Robot has collision model (Robot superclass)</span>
 
 <span class="sd">        :return: Robot has collision model</span>
@@ -463,7 +463,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qrandom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a random joint configuration</span>
 
 <span class="sd">        :return: Random joint configuration :rtype: ndarray(n)</span>
@@ -482,7 +482,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">default_backend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get default graphical backend</span>
 
 <span class="sd">        :return: backend name</span>
@@ -495,7 +495,7 @@
 
     <span class="nd">@default_backend</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">default_backend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">be</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set default graphical backend</span>
 
 <span class="sd">        :param be: backend name</span>
@@ -508,7 +508,7 @@
         <span class="n">_default_backend</span> <span class="o">=</span> <span class="n">be</span>
 
 <div class="viewcode-block" id="Robot.addconfiguration_attr"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.addconfiguration_attr">[docs]</a>    <span class="k">def</span> <span class="nf">addconfiguration_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rad&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a named joint configuration as an attribute (Robot superclass)</span>
 
 <span class="sd">        :param name: Name of the joint configuration</span>
@@ -541,7 +541,7 @@
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Robot.addconfiguration"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.addconfiguration">[docs]</a>    <span class="k">def</span> <span class="nf">addconfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a named joint configuration (Robot superclass)</span>
 
 <span class="sd">        :param name: Name of the joint configuration</span>
@@ -606,7 +606,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the joint structure string</span>
 
 <span class="sd">        :return: joint configuration string</span>
@@ -639,7 +639,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">revolutejoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Revolute joints as bool array</span>
 
 <span class="sd">        :return: array of joint type, True if revolute</span>
@@ -672,7 +672,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">prismaticjoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Revolute joints as bool array</span>
 
 <span class="sd">        :return: array of joint type, True if prismatic</span>
@@ -696,7 +696,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">isprismatic</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isjoint</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Robot.todegrees"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.todegrees">[docs]</a>    <span class="k">def</span> <span class="nf">todegrees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert joint angles to degrees</span>
 
 <span class="sd">        :param q: The joint configuration of the robot</span>
@@ -732,7 +732,7 @@
             <span class="k">return</span> <span class="n">q</span></div>
 
 <div class="viewcode-block" id="Robot.toradians"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.toradians">[docs]</a>    <span class="k">def</span> <span class="nf">toradians</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert joint angles to radians</span>
 
 <span class="sd">        :param q: The joint configuration of the robot</span>
@@ -767,7 +767,7 @@
             <span class="k">return</span> <span class="n">q</span></div>
 
 <div class="viewcode-block" id="Robot.linkcolormap"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.linkcolormap">[docs]</a>    <span class="k">def</span> <span class="nf">linkcolormap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linkcolors</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a colormap for robot joints</span>
 
 <span class="sd">        :param linkcolors: list of colors or colormap, defaults to &quot;viridis&quot;</span>
@@ -815,7 +815,7 @@
             <span class="k">return</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">linkcolors</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Robot.jtraj"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.jtraj">[docs]</a>    <span class="k">def</span> <span class="nf">jtraj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="n">T2</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Joint-space trajectory between SE(3) poses</span>
 
 <span class="sd">        :param T1: initial end-effector pose</span>
@@ -851,7 +851,7 @@
         <span class="k">return</span> <span class="n">rtb</span><span class="o">.</span><span class="n">jtraj</span><span class="p">(</span><span class="n">q1</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">q2</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Robot.manipulability"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.manipulability">[docs]</a>    <span class="k">def</span> <span class="nf">manipulability</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;yoshikawa&quot;</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulability measure</span>
 
 <span class="sd">        :param q: Joint coordinates, one of J or q required</span>
@@ -1007,7 +1007,7 @@
             <span class="k">return</span> <span class="n">w</span></div>
 
 <div class="viewcode-block" id="Robot.jacob0_dot"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.jacob0_dot">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0_dot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">representation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Derivative of Jacobian</span>
 
 <span class="sd">        :param q: The joint configuration of the robot</span>
@@ -1090,7 +1090,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Robot.jacobm"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.jacobm">[docs]</a>    <span class="k">def</span> <span class="nf">jacobm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the manipulability Jacobian. This measure relates the rate</span>
 <span class="sd">        of change of the manipulability to the joint velocities of the robot.</span>
 <span class="sd">        One of J or q is required. Supply J and H if already calculated to</span>
@@ -1183,7 +1183,7 @@
         <span class="n">start</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Link</span><span class="p">,</span> <span class="n">Gripper</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator analytical Jacobian in the ``start`` frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
@@ -1231,7 +1231,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot name (Robot superclass)</span>
 
 <span class="sd">        - ``robot.name`` is the robot name</span>
@@ -1251,7 +1251,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">manufacturer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot manufacturer&#39;s name (Robot superclass)</span>
 
 <span class="sd">        - ``robot.manufacturer`` is the robot manufacturer&#39;s name</span>
@@ -1271,7 +1271,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">links</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Robot links (Robot superclass)</span>
 
 <span class="sd">        :return: A list of link objects</span>
@@ -1289,7 +1289,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">base</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SE3</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot base transform (Robot superclass)</span>
 
 <span class="sd">        - ``robot.base`` is the robot base transform</span>
@@ -1325,7 +1325,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tool</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SE3</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot tool transform (Robot superclass)</span>
 
 <span class="sd">        - ``robot.tool`` is the robot tool transform</span>
@@ -1346,7 +1346,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Joint limits (Robot superclass)</span>
 
 <span class="sd">        :return: Array of joint limit values</span>
@@ -1393,7 +1393,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot joint configuration (Robot superclass)</span>
 
 <span class="sd">        - ``robot.q`` is the robot joint configuration</span>
@@ -1415,7 +1415,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qd</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot joint velocity (Robot superclass)</span>
 
 <span class="sd">        - ``robot.qd`` is the robot joint velocity</span>
@@ -1437,7 +1437,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qdd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot joint acceleration (Robot superclass)</span>
 
 <span class="sd">        - ``robot.qdd`` is the robot joint acceleration</span>
@@ -1459,7 +1459,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">control_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot control mode (Robot superclass)</span>
 
 <span class="sd">        - ``robot.control_type`` is the robot control mode</span>
@@ -1569,7 +1569,7 @@
         <span class="n">loop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Graphical display and animation</span>
 
 <span class="sd">        :param q: The joint configuration of the robot.</span>
@@ -1700,7 +1700,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="Robot.fellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.fellipse">[docs]</a>    <span class="k">def</span> <span class="nf">fellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s2">&quot;trans&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;rad&quot;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a force ellipsoid object for plotting with PyPlot</span>
 
 <span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
@@ -1739,7 +1739,7 @@
         <span class="k">return</span> <span class="n">ell</span></div>
 
 <div class="viewcode-block" id="Robot.vellipse"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.vellipse">[docs]</a>    <span class="k">def</span> <span class="nf">vellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="s2">&quot;trans&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;rad&quot;</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a velocity ellipsoid object for plotting with PyPlot</span>
 
 <span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
@@ -1786,7 +1786,7 @@
         <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the an ellipsoid</span>
 
 <span class="sd">        :param block: Block operation of the code and keep the figure open</span>
@@ -1851,7 +1851,7 @@
         <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the force ellipsoid for manipulator</span>
 
 <span class="sd">        :param block: Block operation of the code and keep the figure open</span>
@@ -1941,7 +1941,7 @@
         <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the velocity ellipsoid for manipulator</span>
 
 <span class="sd">        :param block: Block operation of the code and keep the figure open</span>
@@ -2035,7 +2035,7 @@
         <span class="n">name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Graphical teach pendant</span>
 
 <span class="sd">        :param block: Block operation of the code and keep the figure open</span>
@@ -2125,7 +2125,7 @@
 <div class="viewcode-block" id="Robot.closest_point"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.closest_point">[docs]</a>    <span class="k">def</span> <span class="nf">closest_point</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">],]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        closest_point(shape, inf_dist) returns the minimum euclidean</span>
 <span class="sd">        distance between this robot and shape, provided it is less than</span>
 <span class="sd">        inf_dist. It will also return the points on self and shape in the</span>
@@ -2166,7 +2166,7 @@
         <span class="k">return</span> <span class="n">d</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span></div>
 
 <div class="viewcode-block" id="Robot.iscollided"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.iscollided">[docs]</a>    <span class="k">def</span> <span class="nf">iscollided</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        collided(shape) checks if this robot and shape have collided</span>
 <span class="sd">        :param shape: The shape to compare distance to</span>
 <span class="sd">        :type shape: Shape</span>
@@ -2195,7 +2195,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="Robot.collided"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.collided">[docs]</a>    <span class="k">def</span> <span class="nf">collided</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        collided(shape) checks if this robot and shape have collided</span>
 <span class="sd">        :param shape: The shape to compare distance to</span>
 <span class="sd">        :type shape: Shape</span>
@@ -2209,7 +2209,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iscollided</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Robot.joint_velocity_damper"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.joint_velocity_damper">[docs]</a>    <span class="k">def</span> <span class="nf">joint_velocity_damper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ps</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">pi</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Formulates an inequality contraint which, when optimised for will</span>
 <span class="sd">        make it impossible for the robot to run into joint limits. Requires</span>
 <span class="sd">        the joint limits of the robot to be specified. See examples/mmc.py</span>
@@ -2251,7 +2251,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="k">def</span> <span class="nf">_update_link_tf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This private method updates the local transform of each link within</span>
 <span class="sd">        this robot according to q (or self.q if q is none)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2300,7 +2300,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

@@ -251,16 +251,18 @@ if traversable of nonzero if untraversable, ie. an obstacle.</p>
 vertically is a travel distance of 1, and for the Euclidean distance
 measure, the crossing the cell diagonally is a distance of <span class="math notranslate nohighlight">\(\sqrt{2}\)</span>.</p>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">DistanceTransformPlanner</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">simplegrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">));</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">simplegrid</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dx</span> <span class="o">=</span> <span class="n">DistanceTransformPlanner</span><span class="p">(</span><span class="n">simplegrid</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">distance</span><span class="o">=</span><span class="s2">&quot;manhattan&quot;</span><span class="p">);</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dx</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-<span class="go">[[5 5 5 4 3 2 1]</span>
-<span class="go"> [4 3 2 1 1 1 1]]</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/PlannerBase.py&quot;, line 326, in validate_endpoint</span>
+<span class="go">    p = base.getvector(p, self._ndims, dtype=dtype)</span>
+<span class="go">NameError: name &#39;base&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;dx&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;dx&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;path&#39; is not defined</span>
 </pre></div>
 </div>
 <div class="admonition warning">
@@ -737,18 +739,21 @@ of traversing that cell.  The cost of diagonal traverse is <span class="math not
 the value of the cell.  An infinite cost indicates an untraversable cell
 or obstacle.</p>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">DstarPlanner</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">costmap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">));</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">costmap</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">DstarPlanner</span><span class="p">(</span><span class="n">costmap</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">));</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-<span class="go">[[5 5 5 4 3 2 1]</span>
-<span class="go"> [4 3 2 1 1 1 1]]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
-<span class="go">_DstarStatus(cost=6.414213562373095)</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/PlannerBase.py&quot;, line 326, in validate_endpoint</span>
+<span class="go">    p = base.getvector(p, self._ndims, dtype=dtype)</span>
+<span class="go">NameError: name &#39;base&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;ds&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;ds&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;path&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;status&#39; is not defined</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -1124,12 +1129,9 @@ defaults to None</p></li>
 <p>Creates a planner that finds the path between two points in the
 plane using omnidirectional motion.  The path comprises a set of way points.</p>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">AttributeError: &#39;UVertex&#39; object has no attribute &#39;distance&#39;</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/PRMPlanner.py&quot;</span>, line <span class="m">260</span>, in <span class="n">query</span>
-    <span class="n">vstart</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">closest</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
-<span class="gr">AttributeError</span>: <span class="n">&#39;UGraph&#39; object has no attribute &#39;closest&#39;</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/PlannerBase.py&quot;, line 326, in validate_endpoint</span>
+<span class="go">    p = base.getvector(p, self._ndims, dtype=dtype)</span>
+<span class="go">NameError: name &#39;base&#39; is not defined</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
 <span class="gr">NameError</span>: <span class="n">name &#39;path&#39; is not defined</span>
@@ -1466,16 +1468,17 @@ the vertex is not added.</p>
 <p>The path through the lattice is found using A* graph search, and <code class="docutils literal notranslate"><span class="pre">costs</span></code>
 changes the weighting for path costs at query time.</p>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">  File &quot;&lt;input&gt;&quot;, line 1, in &lt;module&gt;</span>
-<span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/LatticePlanner.py&quot;, line 274, in query</span>
-<span class="go">    vs, ds = self.graph.closest(start)</span>
-<span class="go">AttributeError: &#39;LatticePlanner&#39; object has no attribute &#39;graph&#39;</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">NameError</span>: <span class="n">name &#39;path&#39; is not defined</span>
-<span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">NameError</span>: <span class="n">name &#39;status&#39; is not defined</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">LatticePlanner</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lattice</span> <span class="o">=</span> <span class="n">LatticePlanner</span><span class="p">();</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lattice</span><span class="o">.</span><span class="n">plan</span><span class="p">(</span><span class="n">iterations</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">goal</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="go">[[0.     1.     1.    ]</span>
+<span class="go"> [0.     1.     2.    ]</span>
+<span class="go"> [0.     1.5708 1.5708]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+<span class="go">LatticeStatus(cost=2.5707963267948966, segments=[&#39;L&#39;, &#39;S&#39;], edges=[Edge{[0] -- [0L], cost=1.571}, Edge{[0L] -- [0LS], cost=1}])</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -1823,18 +1826,15 @@ start and goal configuration <span class="math notranslate nohighlight">\((x, y,
 plane using forward motion only.  The path comprises upto 3 segments that are
 straight lines, or arcs with curvature of <span class="math notranslate nohighlight">\(\pm\)</span> <code class="docutils literal notranslate"><span class="pre">curvature</span></code>.</p>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">DubinsPlanner</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dubins</span> <span class="o">=</span> <span class="n">DubinsPlanner</span><span class="p">(</span><span class="n">curvature</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="n">dubins</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="n">goal</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">[:</span><span class="mi">5</span><span class="p">,:])</span>
-<span class="go">[[ 0.      0.      1.5708]</span>
-<span class="go"> [-0.005   0.0998  1.6708]</span>
-<span class="go"> [-0.0199  0.1987  1.7708]</span>
-<span class="go"> [-0.0447  0.2955  1.8708]</span>
-<span class="go"> [-0.0789  0.3894  1.9708]]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
-<span class="go">DubinsStatus(segments=[&#39;L&#39;, &#39;S&#39;, &#39;L&#39;], length=7.283185307179586, seglengths=[4.71238898038469, 1.0, 1.5707963267948966])</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/PlannerBase.py&quot;, line 326, in validate_endpoint</span>
+<span class="go">    p = base.getvector(p, self._ndims, dtype=dtype)</span>
+<span class="go">NameError: name &#39;base&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;path&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;status&#39; is not defined</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -2174,18 +2174,15 @@ plane using forward and backward motion.  The path comprises upto 3 segments
 that are straight lines, or arcs with  curvature of <span class="math notranslate nohighlight">\(\pm\)</span>
 <code class="docutils literal notranslate"><span class="pre">curvature</span></code>.</p>
 <p>Example:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">ReedsSheppPlanner</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">reedshepp</span> <span class="o">=</span> <span class="n">ReedsSheppPlanner</span><span class="p">(</span><span class="n">curvature</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="n">reedshepp</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="n">goal</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">[:</span><span class="mi">5</span><span class="p">,:])</span>
-<span class="go">[[0.     0.     1.5708]</span>
-<span class="go"> [0.005  0.0998 1.4708]</span>
-<span class="go"> [0.0199 0.1987 1.3708]</span>
-<span class="go"> [0.0447 0.2955 1.2708]</span>
-<span class="go"> [0.0789 0.3894 1.1708]]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
-<span class="go">ReedsSheppStatus(segments=[&#39;R&#39;, &#39;L&#39;, &#39;R&#39;], length=6.283185307179586, seglengths=[4.459708725242611, -0.5053605102841573, 1.3181160716528177], direction=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">  File &quot;/opt/hostedtoolcache/Python/3.7.15/x64/lib/python3.7/site-packages/roboticstoolbox/mobile/PlannerBase.py&quot;, line 326, in validate_endpoint</span>
+<span class="go">    p = base.getvector(p, self._ndims, dtype=dtype)</span>
+<span class="go">NameError: name &#39;base&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;path&#39; is not defined</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;status&#39; is not defined</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -3661,7 +3658,7 @@ stored occupancy grid.</p>
 <p>Successive calls to <code class="docutils literal notranslate"><span class="pre">inflate</span></code> will compound the inflation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.binary_dilation.html#scipy.ndimage.binary_dilation" title="(in SciPy v1.9.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.binary_dilation()</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.binary_dilation.html#scipy.ndimage.binary_dilation" title="(in SciPy v1.10.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.binary_dilation()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -5155,7 +5152,7 @@ points given in world coordinates.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

@@ -96,7 +96,7 @@
 <div class="viewcode-block" id="VehicleBase.__init__"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">speed_max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">accel_max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
                  <span class="n">control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">animation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">polygon</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Superclass for vehicle kinematic models</span>
 
 <span class="sd">        :param covar: odometry covariance, defaults to zero</span>
@@ -185,7 +185,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span> <span class="o">=</span> <span class="kc">None</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        String representation of vehicle (superclass)</span>
 
 <span class="sd">        :return: String representation of vehicle object</span>
@@ -199,7 +199,7 @@
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="VehicleBase.f"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">odo</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        State transition function</span>
 
 <span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
@@ -249,7 +249,7 @@
             <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">dd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">dd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">dth</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="VehicleBase.Fx"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.Fx">[docs]</a>    <span class="k">def</span> <span class="nf">Fx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">odo</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jacobian of state transition function df/dx</span>
 
 <span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
@@ -277,7 +277,7 @@
         <span class="k">return</span> <span class="n">J</span></div>
 
 <div class="viewcode-block" id="VehicleBase.Fv"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.Fv">[docs]</a>    <span class="k">def</span> <span class="nf">Fv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">odo</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jacobian of state transition function df/dv</span>
 
 <span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
@@ -306,7 +306,7 @@
         
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">control</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set vehicle control (superclass)</span>
 
 <span class="sd">        :getter: Returns vehicle&#39;s control</span>
@@ -348,7 +348,7 @@
 
 
 <div class="viewcode-block" id="VehicleBase.eval_control"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.eval_control">[docs]</a>    <span class="k">def</span> <span class="nf">eval_control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate vehicle control input (superclass method)</span>
 
 <span class="sd">        :param control: vehicle control</span>
@@ -398,7 +398,7 @@
         <span class="k">return</span> <span class="n">ulim</span></div>
 
 <div class="viewcode-block" id="VehicleBase.limits_va"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.limits_va">[docs]</a>    <span class="k">def</span> <span class="nf">limits_va</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply velocity and acceleration limits (superclass)</span>
 
 <span class="sd">        :param v: desired velocity</span>
@@ -428,7 +428,7 @@
 
 
 <div class="viewcode-block" id="VehicleBase.polygon"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.polygon">[docs]</a>    <span class="k">def</span> <span class="nf">polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Bounding polygon at vehicle configuration</span>
 
 <span class="sd">        :param q: vehicle configuration :math:`(x, y, \theta)`</span>
@@ -450,7 +450,7 @@
         <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="VehicleBase.add_driver"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.add_driver">[docs]</a>    <span class="k">def</span> <span class="nf">add_driver</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">driver</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a driver agent (superclass)</span>
 
 <span class="sd">        :param driver: a driver agent object</span>
@@ -467,7 +467,7 @@
 
 
 <div class="viewcode-block" id="VehicleBase.run"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Simulate motion of vehicle (superclass)</span>
 
 <span class="sd">        :param N: Number of simulation steps, defaults to 1000</span>
@@ -514,7 +514,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_hist</span></div>
 
 <div class="viewcode-block" id="VehicleBase.init"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">control</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize for simulation (superclass)</span>
 
 <span class="sd">        :param x0: Initial state, defaults to value given to Vehicle constructor</span>
@@ -574,7 +574,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_control</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VehicleBase.step"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Step simulator by one time step (superclass)</span>
 
 <span class="sd">        :return: odometry :math:`(\delta_d, \delta_\theta)`</span>
@@ -645,7 +645,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Size of robot workspace (superclass)</span>
 
 <span class="sd">        :return: workspace bounds [xmin, xmax, ymin, ymax]</span>
@@ -663,7 +663,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get vehicle state/configuration (superclass)</span>
 
 <span class="sd">        :return: Vehicle state :math:`(x, y, \theta)`</span>
@@ -675,7 +675,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get vehicle state/configuration (superclass)</span>
 
 <span class="sd">        :return: Vehicle state :math:`(x, y, \theta)`</span>
@@ -687,7 +687,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">x0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get vehicle initial state/configuration (superclass)</span>
 
 <span class="sd">        :return: Vehicle state :math:`(x, y, \theta)`</span>
@@ -702,7 +702,7 @@
 
     <span class="nd">@x0</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">x0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set vehicle initial state/configuration (superclass)</span>
 
 <span class="sd">        :param x0: Vehicle state :math:`(x, y, \theta)`</span>
@@ -717,7 +717,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get private random number generator</span>
 
 <span class="sd">        :return: NumPy random number generator</span>
@@ -740,7 +740,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">x_hist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get vehicle state/configuration history (superclass)</span>
 
 <span class="sd">        :return: Vehicle state history</span>
@@ -755,7 +755,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">speed_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get maximum speed of vehicle (superclass)</span>
 
 <span class="sd">        :return: maximum speed</span>
@@ -769,7 +769,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">accel_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get maximum acceleration of vehicle (superclass)</span>
 
 <span class="sd">        :return: maximum acceleration</span>
@@ -783,7 +783,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get sample time (superclass)</span>
 
 <span class="sd">        :return: discrete time step for simulation</span>
@@ -798,7 +798,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get verbosity (superclass)</span>
 
 <span class="sd">        :return: verbosity level</span>
@@ -810,7 +810,7 @@
 
     <span class="nd">@verbose</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set verbosity (superclass)</span>
 
 <span class="sd">        :return: verbosity level</span>
@@ -821,7 +821,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
 <div class="viewcode-block" id="VehicleBase.stopsim"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.stopsim">[docs]</a>    <span class="k">def</span> <span class="nf">stopsim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Stop the simulation (superclass)</span>
 
 <span class="sd">        A control function can stop the simulation initated by the ``run``</span>
@@ -863,7 +863,7 @@
     <span class="c1">#     base.plot_poly(SE2(x) * vertices, close=True, **kwargs)</span>
 
 <div class="viewcode-block" id="VehicleBase.plot_xy"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.plot_xy">[docs]</a>    <span class="k">def</span> <span class="nf">plot_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot xy-path from history</span>
 
 <span class="sd">        :param block: block until plot dismissed, defaults to False</span>
@@ -884,7 +884,7 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VehicleBase.plot_xyt"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.plot_xyt">[docs]</a>    <span class="k">def</span> <span class="nf">plot_xyt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot configuration vs time from history</span>
 
 <span class="sd">        :param block: block until plot dismissed, defaults to False</span>
@@ -966,7 +966,7 @@
                 <span class="n">steer_max</span><span class="o">=</span><span class="mf">0.45</span> <span class="o">*</span> <span class="n">pi</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span>
                 <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create bicycle kinematic model</span>
 
 <span class="sd">        :param L: wheel base, defaults to 1</span>
@@ -1002,7 +1002,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">l</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Vehicle wheelbase</span>
 
 <span class="sd">        :return: vehicle wheelbase</span>
@@ -1012,7 +1012,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">radius_min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Vehicle turning radius</span>
 
 <span class="sd">        :return: radius of minimum possible turning circle</span>
@@ -1029,7 +1029,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">curvature_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Vehicle maximum path curvature</span>
 
 <span class="sd">        :return: maximum curvature</span>
@@ -1046,7 +1046,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">steer_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Vehicle maximum steered wheel angle</span>
 
 <span class="sd">        :return: maximum angle</span>
@@ -1055,7 +1055,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steer_max</span>
 
 <div class="viewcode-block" id="Bicycle.deriv"><a class="viewcode-back" href="../../../mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.deriv">[docs]</a>    <span class="k">def</span> <span class="nf">deriv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Time derivative of state</span>
 
 <span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
@@ -1091,7 +1091,7 @@
                     <span class="p">]</span></div>
 
 <div class="viewcode-block" id="Bicycle.u_limited"><a class="viewcode-back" href="../../../mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.u_limited">[docs]</a>    <span class="k">def</span> <span class="nf">u_limited</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply vehicle velocity, acceleration and steering limits</span>
 
 <span class="sd">        :param u: Desired vehicle inputs :math:`(v, \gamma)`</span>
@@ -1117,7 +1117,7 @@
                 <span class="n">W</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                 <span class="n">steer_max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create unicycle kinematic model</span>
 
 <span class="sd">        :param W: vehicle width, defaults to 1</span>
@@ -1151,7 +1151,7 @@
 
 
 <div class="viewcode-block" id="Unicycle.deriv"><a class="viewcode-back" href="../../../mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.deriv">[docs]</a>    <span class="k">def</span> <span class="nf">deriv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Time derivative of state</span>
 
 <span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
@@ -1186,7 +1186,7 @@
                     <span class="p">]</span></div>
 
 <div class="viewcode-block" id="Unicycle.u_limited"><a class="viewcode-back" href="../../../mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.u_limited">[docs]</a>    <span class="k">def</span> <span class="nf">u_limited</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply vehicle velocity, acceleration and steering limits</span>
 
 <span class="sd">        :param u: Desired vehicle inputs :math:`(v, \omega)`</span>
@@ -1284,7 +1284,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

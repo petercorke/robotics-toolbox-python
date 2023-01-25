@@ -126,7 +126,7 @@
         <span class="k">return</span> <span class="n">s</span>
 
 <div class="viewcode-block" id="PyPlot2.launch"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot2.launch">[docs]</a>    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        env = launch() launchs a blank 2D matplotlib figure</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -169,7 +169,7 @@
         <span class="c1"># signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)</span>
 
 <div class="viewcode-block" id="PyPlot2.step"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot2.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        state = step(args) triggers the external program to make a time step</span>
 <span class="sd">        of defined time updating the state of the environment as defined by</span>
 <span class="sd">        the robot&#39;s actions.</span>
@@ -203,7 +203,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_robots</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PyPlot2.reset"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot2.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        state = reset() triggers the external program to reset to the</span>
 <span class="sd">        original state defined by launch</span>
 
@@ -212,7 +212,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PyPlot2.restart"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot2.restart">[docs]</a>    <span class="k">def</span> <span class="nf">restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        state = restart() triggers the external program to close and relaunch</span>
 <span class="sd">        to thestate defined by launch</span>
 
@@ -221,7 +221,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">restart</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PyPlot2.close"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot2.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        close() closes the plot</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -236,7 +236,7 @@
     <span class="c1">#</span>
 
 <div class="viewcode-block" id="PyPlot2.add"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot2.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ob</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eeframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        id = add(robot) adds the robot to the external environment. robot must</span>
 <span class="sd">        be of an appropriate class. This adds a robot object to a list of</span>
 <span class="sd">        robots which will act upon the step() method being called.</span>
@@ -255,7 +255,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ellipses</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ellipses</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">draw2</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PyPlot2.remove"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot2.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        id = remove(robot) removes the robot to the external environment.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -263,7 +263,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>  <span class="c1"># ???</span></div>
 
 <div class="viewcode-block" id="PyPlot2.hold"><a class="viewcode-back" href="../../../../arm_backend_pyplot.html#roboticstoolbox.backends.PyPlot.PyPlot2.hold">[docs]</a>    <span class="k">def</span> <span class="nf">hold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        hold() keeps the plot open i.e. stops the plot from closing once</span>
 <span class="sd">        the main script has finished.</span>
 
@@ -321,7 +321,7 @@
     <span class="c1">#     plt.pause(0.001)</span>
 
     <span class="k">def</span> <span class="nf">_add_teach_panel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a teach panel</span>
 
 <span class="sd">        :param robot: Robot being taught</span>
@@ -429,7 +429,7 @@
 
 
 <span class="k">def</span> <span class="nf">_isnotebook</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determine if code is being run from a Jupyter notebook</span>
 
 <span class="sd">    ``_isnotebook`` is True if running Jupyter notebook, else False</span>
@@ -459,7 +459,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

@@ -88,7 +88,7 @@
 
 
 <div class="viewcode-block" id="DistanceTransformPlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner">[docs]</a><span class="k">class</span> <span class="nc">DistanceTransformPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Distance transform path planner</span>
 
 <span class="sd">    :param occgrid: occupancy grid</span>
@@ -147,7 +147,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the distance metric</span>
 
 <span class="sd">        :return: Get the metric, either &quot;euclidean&quot; or &quot;manhattan&quot;</span>
@@ -157,7 +157,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">distancemap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the distance map</span>
 
 <span class="sd">        :return: distance map</span>
@@ -180,7 +180,7 @@
         <span class="k">return</span> <span class="n">s</span>
 
 <div class="viewcode-block" id="DistanceTransformPlanner.plan"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plan path using distance transform</span>
 
 <span class="sd">        :param goal: goal position :math:`(x, y)`, defaults to previously set value</span>
@@ -212,7 +212,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="DistanceTransformPlanner.next"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find next point on the path</span>
 
 <span class="sd">        :param position: current robot position</span>
@@ -271,7 +271,7 @@
             <span class="k">return</span> <span class="nb">next</span></div>
 
 <div class="viewcode-block" id="DistanceTransformPlanner.plot_3d"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner.plot_3d">[docs]</a>    <span class="k">def</span> <span class="nf">plot_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot path on 3D cost surface</span>
 
 <span class="sd">        :param path: robot path, defaults to None</span>
@@ -312,7 +312,7 @@
 
 
 <span class="k">def</span> <span class="nf">distancexform</span><span class="p">(</span><span class="n">occgrid</span><span class="p">,</span> <span class="n">goal</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;cityblock&quot;</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">summary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Distance transform for path planning</span>
 
 <span class="sd">    :param occgrid: Occupancy grid, 0 is free, &gt;0 is occupied/obstacle</span>
@@ -472,7 +472,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

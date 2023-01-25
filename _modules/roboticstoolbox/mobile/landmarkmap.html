@@ -80,7 +80,7 @@
 <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 
 <div class="viewcode-block" id="LandmarkMap"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.landmarkmap.LandmarkMap">[docs]</a><span class="k">class</span> <span class="nc">LandmarkMap</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Map of planar point landmarks</span>
 
 <span class="sd">    :param map: map or number of landmarks</span>
@@ -167,7 +167,7 @@
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of landmarks in map</span>
 
 <span class="sd">        :return: number of landmarks in the map</span>
@@ -178,7 +178,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">landmarks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        xy-coordinates of all landmarks</span>
 
 <span class="sd">        :return: xy-coordinates for landmark points</span>
@@ -188,7 +188,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Size of map workspace</span>
 
 <span class="sd">        :return: workspace bounds [xmin, xmax, ymin, ymax]</span>
@@ -200,7 +200,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get landmark coordinates from map</span>
 
 <span class="sd">        :param k: landmark index</span>
@@ -211,7 +211,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map</span><span class="p">[:,</span> <span class="n">k</span><span class="p">]</span>
 
 <div class="viewcode-block" id="LandmarkMap.plot"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.landmarkmap.LandmarkMap.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot landmark map</span>
 
 <span class="sd">        :param labels: number the points on the plot, defaults to False</span>
@@ -263,7 +263,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

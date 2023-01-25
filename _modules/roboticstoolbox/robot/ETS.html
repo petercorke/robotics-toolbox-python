@@ -169,7 +169,7 @@
         <span class="c1"># self._fknm = [et.fknm for et in self.data]</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pretty prints the ETS</span>
 
 <span class="sd">        :param q: control how joint variables are displayed</span>
@@ -258,7 +258,7 @@
                 <span class="k">if</span> <span class="n">issymbol</span><span class="p">(</span><span class="n">et</span><span class="o">.</span><span class="n">eta</span><span class="p">):</span>
                     <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">et</span><span class="o">.</span><span class="n">axis</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">et</span><span class="o">.</span><span class="n">eta</span><span class="si">}</span><span class="s2">)&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">et</span><span class="o">.</span><span class="n">axis</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">et</span><span class="o">.</span><span class="n">eta</span> <span class="o">*</span> <span class="mi">180</span> <span class="o">/</span> <span class="n">pi</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">°)&quot;</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">et</span><span class="o">.</span><span class="n">axis</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">et</span><span class="o">.</span><span class="n">eta</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">180</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">pi</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">°)&quot;</span>
 
             <span class="k">elif</span> <span class="n">et</span><span class="o">.</span><span class="n">istranslation</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -278,7 +278,7 @@
             <span class="k">return</span> <span class="s2">&quot; * &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">es</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_repr_pretty_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">cycle</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pretty string for IPython</span>
 
 <span class="sd">        :param p: pretty printer handle (ignored)</span>
@@ -295,7 +295,7 @@
         <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">joint_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get index of joint transforms</span>
 
 <span class="sd">        :return: indices of transforms that are joints</span>
@@ -312,7 +312,7 @@
         <span class="k">return</span> <span class="n">where</span><span class="p">([</span><span class="n">e</span><span class="o">.</span><span class="n">isjoint</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">joints</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ET</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a list of the variable ETs with this ETS</span>
 
 <span class="sd">        :return: list of ETs that are joints</span>
@@ -329,7 +329,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">isjoint</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">jindex_set</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>  <span class="c1">#</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get set of joint indices</span>
 
 <span class="sd">        :return: set of unique joint indices</span>
@@ -346,7 +346,7 @@
 
     <span class="nd">@c_property</span>
     <span class="k">def</span> <span class="nf">jindices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get an array of joint indices</span>
 
 <span class="sd">        :return: array of unique joint indices</span>
@@ -363,7 +363,7 @@
 
     <span class="nd">@c_property</span>
     <span class="k">def</span> <span class="nf">qlim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Joint limits</span>
 
 <span class="sd">        :return: Array of joint limit values</span>
@@ -405,7 +405,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Joint structure string</span>
 
 <span class="sd">        :return: A string indicating the joint types</span>
@@ -428,7 +428,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of joints</span>
 
 <span class="sd">        :return: the number of joints in the ETS</span>
@@ -450,7 +450,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of transforms</span>
 
 <span class="sd">        :return: the number of transforms in the ETS</span>
@@ -504,7 +504,7 @@
         <span class="o">...</span>
 
     <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pop value</span>
 
 <span class="sd">        :param i: item in the list to pop, default is last</span>
@@ -537,7 +537,7 @@
         <span class="o">...</span>
 
     <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Split ETS into link segments</span>
 
 <span class="sd">        Returns a list of ETS, each one, apart from the last,</span>
@@ -574,7 +574,7 @@
         <span class="o">...</span>
 
     <span class="k">def</span> <span class="nf">inv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Inverse of ETS</span>
 
 <span class="sd">        :return: Inverse of the ETS</span>
@@ -618,7 +618,7 @@
         <span class="o">...</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Index or slice an ETS</span>
 
 <span class="sd">        :param i: the index or slince</span>
@@ -670,7 +670,7 @@
         <span class="n">robot</span><span class="o">.</span><span class="n">teach</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">random_q</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate a random valid joint configuration</span>
 
 <span class="sd">        :param i: number of configurations to generate</span>
@@ -707,7 +707,7 @@
 
 
 <div class="viewcode-block" id="ETS"><a class="viewcode-back" href="../../../arm_ets.html#roboticstoolbox.robot.ETS.ETS">[docs]</a><span class="k">class</span> <span class="nc">ETS</span><span class="p">(</span><span class="n">BaseETS</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class implements an elementary transform sequence (ETS) for 3D</span>
 
 <span class="sd">    :param arg: Function to compute ET value</span>
@@ -823,7 +823,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mul__</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>  <span class="c1"># pragma: nocover</span>
 
 <div class="viewcode-block" id="ETS.compile"><a class="viewcode-back" href="../../../arm_ets.html#roboticstoolbox.robot.ETS.ETS.compile">[docs]</a>    <span class="k">def</span> <span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ETS&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compile an ETS</span>
 
 <span class="sd">        :return: optimised ETS</span>
@@ -875,7 +875,7 @@
         <span class="n">arg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ET</span><span class="p">,</span> <span class="s2">&quot;ETS&quot;</span><span class="p">],</span>
         <span class="n">i</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Insert value</span>
 
 <span class="sd">        :param i: insert an ET or ETS into the ETS, default is at the end</span>
@@ -916,7 +916,7 @@
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">include_base</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SE3</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward kinematics</span>
 
 <span class="sd">        :param q: Joint coordinates</span>
@@ -964,7 +964,7 @@
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">include_base</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward kinematics</span>
 
 <span class="sd">        :param q: Joint coordinates</span>
@@ -1063,7 +1063,7 @@
         <span class="n">q</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jacobian in base frame</span>
 <span class="sd">        :param q: Joint coordinate vector</span>
 <span class="sd">        :type q: ArrayLike</span>
@@ -1173,7 +1173,7 @@
         <span class="n">q</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator geometric Jacobian in the end-effector frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
@@ -1210,7 +1210,7 @@
         <span class="n">J0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Hessian</span>
 
 <span class="sd">        The manipulator Hessian tensor maps joint acceleration to end-effector</span>
@@ -1290,7 +1290,7 @@
         <span class="n">Je</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Hessian</span>
 
 <span class="sd">        The manipulator Hessian tensor maps joint acceleration to end-effector</span>
@@ -1370,7 +1370,7 @@
         <span class="n">representation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rpy/xyz&quot;</span><span class="p">,</span>
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator analytical Jacobian in the base frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
@@ -1407,7 +1407,7 @@
         <span class="k">return</span> <span class="n">A</span> <span class="o">@</span> <span class="n">J</span>
 
     <span class="k">def</span> <span class="nf">jacobm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the manipulability Jacobian. This measure relates the rate</span>
 <span class="sd">        of change of the manipulability to the joint velocities of the robot.</span>
 
@@ -1452,7 +1452,7 @@
         <span class="k">return</span> <span class="n">Jm</span>
 
     <span class="k">def</span> <span class="nf">manipulability</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;yoshikawa&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulability measure</span>
 
 <span class="sd">        :param q: Joint coordinates, one of J or q required</span>
@@ -1588,7 +1588,7 @@
         <span class="k">return</span> <span class="n">w</span>
 
     <span class="k">def</span> <span class="nf">partial_fkine0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Forward Kinematics nth Partial Derivative</span>
 
 <span class="sd">        The manipulator Hessian tensor maps joint acceleration to end-effector</span>
@@ -1763,7 +1763,7 @@
         <span class="n">we</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">λ</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan&#39;s Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -1868,7 +1868,7 @@
         <span class="n">we</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">λ</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan&#39;s Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -1975,7 +1975,7 @@
         <span class="n">we</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">λ</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan&#39;s Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2083,7 +2083,7 @@
         <span class="n">use_pinv</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">pinv_damping</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan&#39;s Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2200,7 +2200,7 @@
         <span class="n">use_pinv</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">pinv_damping</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan&#39;s Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2332,7 +2332,7 @@
 
 
 <div class="viewcode-block" id="ETS2"><a class="viewcode-back" href="../../../arm_ets.html#roboticstoolbox.robot.ETS.ETS2">[docs]</a><span class="k">class</span> <span class="nc">ETS2</span><span class="p">(</span><span class="n">BaseETS</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class implements an elementary transform sequence (ETS) for 2D</span>
 
 <span class="sd">    :param arg: Function to compute ET value</span>
@@ -2451,7 +2451,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mul__</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>  <span class="c1"># pragma: nocover</span>
 
 <div class="viewcode-block" id="ETS2.compile"><a class="viewcode-back" href="../../../arm_ets.html#roboticstoolbox.robot.ETS.ETS2.compile">[docs]</a>    <span class="k">def</span> <span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ETS2&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compile an ETS2</span>
 
 <span class="sd">        :return: optimised ETS2</span>
@@ -2493,7 +2493,7 @@
         <span class="n">arg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ET2</span><span class="p">,</span> <span class="s2">&quot;ETS2&quot;</span><span class="p">],</span>
         <span class="n">i</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Insert value</span>
 
 <span class="sd">        :param i: insert an ET or ETS into the ETS, default is at the end</span>
@@ -2534,7 +2534,7 @@
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE2</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">include_base</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SE2</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward kinematics</span>
 <span class="sd">        :param q: Joint coordinates</span>
 <span class="sd">        :type q: ArrayLike</span>
@@ -2581,7 +2581,7 @@
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE2</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">include_base</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward kinematics</span>
 <span class="sd">        :param q: Joint coordinates</span>
 <span class="sd">        :type q: ArrayLike</span>
@@ -2727,7 +2727,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">q</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jacobian in base frame</span>
 
 <span class="sd">        :param q: joint coordinates</span>
@@ -2766,7 +2766,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

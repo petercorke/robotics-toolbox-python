@@ -91,7 +91,7 @@
 
 
 <div class="viewcode-block" id="VehicleDriverBase"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.VehicleDriverBase">[docs]</a><span class="k">class</span> <span class="nc">VehicleDriverBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract Vehicle driver class</span>
 
 <span class="sd">    Abtract class that can drive a mobile robot.</span>
@@ -101,7 +101,7 @@
 
 <div class="viewcode-block" id="VehicleDriverBase.demand"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.VehicleDriverBase.demand">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">demand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute speed and heading</span>
 
 <span class="sd">        :return: speed and steering for :class:`VehicleBase`</span>
@@ -117,7 +117,7 @@
 
 <div class="viewcode-block" id="VehicleDriverBase.init"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.VehicleDriverBase.init">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize driving agent</span>
 
 <span class="sd">        Called at the start of a simulation run.  Used to initialize state</span>
@@ -127,7 +127,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vehicle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set/get the vehicle under control</span>
 
 <span class="sd">        :getter: return :class:`VehicleBase` instance</span>
@@ -149,7 +149,7 @@
 <div class="viewcode-block" id="RandomPath"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.RandomPath">[docs]</a><span class="k">class</span> <span class="nc">RandomPath</span><span class="p">(</span><span class="n">VehicleDriverBase</span><span class="p">):</span>
 
 <div class="viewcode-block" id="RandomPath.__init__"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.RandomPath.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workspace</span><span class="p">,</span> <span class="n">speed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dthresh</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">headinggain</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">goalmarkerstyle</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Driving agent for random path</span>
 
 <span class="sd">        :param workspace: dimension of workspace, see :func:`spatialmath.base.exand_dims`</span>
@@ -232,7 +232,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_veh</span> <span class="o">=</span> <span class="kc">None</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;%RandomPath.char Convert to string</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;%RandomPath.char Convert to string</span>
 <span class="sd">        %</span>
 <span class="sd">        % s = R.char() is a string showing driver parameters and state in in </span>
 <span class="sd">        % a compact human readable format. &quot;&quot;&quot;</span>
@@ -244,7 +244,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Size of robot driving workspace</span>
 
 <span class="sd">        :return: workspace bounds [xmin, xmax, ymin, ymax]</span>
@@ -256,7 +256,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span>
 
 <div class="viewcode-block" id="RandomPath.init"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.RandomPath.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize random path driving agent</span>
 
 <span class="sd">        :param ax: axes in which to draw via points, defaults to None</span>
@@ -277,7 +277,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_goal_marker</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_goal_marker_style</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;random waypoint&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="RandomPath.demand"><a class="viewcode-back" href="../../../mobile_drivers.html#roboticstoolbox.mobile.drivers.RandomPath.demand">[docs]</a>    <span class="k">def</span> <span class="nf">demand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute speed and heading for random waypoint</span>
 <span class="sd">            %</span>
 <span class="sd">            % [SPEED,STEER] = R.demand() is the speed and steer angle to</span>
@@ -366,7 +366,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

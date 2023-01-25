@@ -89,7 +89,7 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.mobile.PlannerBase</span> <span class="kn">import</span> <span class="n">PlannerBase</span>
 
 <div class="viewcode-block" id="Bug2"><a class="viewcode-back" href="../../../mobile_reactive.html#roboticstoolbox.mobile.Bug2">[docs]</a><span class="k">class</span> <span class="nc">Bug2</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct a Bug2 reactive navigator</span>
 
 <span class="sd">    :param occgrid: occupancy grid</span>
@@ -125,7 +125,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">m_line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get m-line</span>
 
 <span class="sd">        :return: m-line in homogeneous form</span>
@@ -137,7 +137,7 @@
 
     <span class="c1"># override query method of base class</span>
 <div class="viewcode-block" id="Bug2.run"><a class="viewcode-back" href="../../../mobile_reactive.html#roboticstoolbox.mobile.Bug2.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pause</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">trail</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">movie</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find a path using Bug2 reactive navigation algorithm</span>
 <span class="sd">        </span>
 <span class="sd">        :param start: starting position</span>
@@ -228,7 +228,7 @@
         <span class="k">return</span> <span class="n">path</span></div>
 
 <div class="viewcode-block" id="Bug2.plot_m_line"><a class="viewcode-back" href="../../../mobile_reactive.html#roboticstoolbox.mobile.Bug2.plot_m_line">[docs]</a>    <span class="k">def</span> <span class="nf">plot_m_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot m-line</span>
 
 <span class="sd">        :param ls: linestyle, defaults to ``&quot;k--&quot;``</span>
@@ -255,7 +255,7 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">],</span> <span class="n">y</span><span class="p">,</span> <span class="n">ls</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;m-line&#39;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        One step of the finite state automaton</span>
 
 <span class="sd">        :param position: current robot position</span>
@@ -291,7 +291,7 @@
 
             <span class="c1"># detect if next step is an obstacle</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isoccupied</span><span class="p">(</span><span class="n">position</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">]):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">: obstacle at </span><span class="si">{</span><span class="n">position</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">: obstacle at </span><span class="si">{</span><span class="n">position</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">dx</span><span class="p">,</span><span class="w"> </span><span class="n">dy</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>  <span class="c1"># save hit point</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># transition to step 2</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">: change to step 2&quot;</span><span class="p">)</span>
@@ -353,7 +353,7 @@
     <span class="p">])</span>
 <span class="c1"># fmt: on</span>
 <span class="k">def</span> <span class="nf">edgelist</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find edge of a region</span>
 
 <span class="sd">    :param im: binary image</span>
@@ -467,7 +467,7 @@
 <span class="c1"># https://github.com/petercorke/toolbox-common-matlab/blob/master/edgelist.m</span>
 
 <span class="k">def</span> <span class="nf">adjacent_point</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">pix0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Find adjacent point</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find adjacent point</span>
 
 <span class="sd">    :param im: occupancy grid</span>
 <span class="sd">    :type im: ndarray(m,n)</span>
@@ -525,7 +525,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

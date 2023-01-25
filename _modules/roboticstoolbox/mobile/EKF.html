@@ -97,7 +97,7 @@
             <span class="n">P0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_est</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">joseph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
             <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extended Kalman filter</span>
 
 <span class="sd">        :param robot: robot motion model</span>
@@ -433,7 +433,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">x_est</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get EKF state</span>
 
 <span class="sd">        :return: state vector</span>
@@ -446,7 +446,7 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">P_est</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get EKF covariance</span>
 
 <span class="sd">        :return: covariance matrix</span>
@@ -459,7 +459,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">P0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get initial EKF covariance</span>
 
 <span class="sd">        :return: covariance matrix</span>
@@ -471,7 +471,7 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">V_est</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get estimated odometry covariance</span>
 
 <span class="sd">        :return: odometry covariance</span>
@@ -484,7 +484,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">W_est</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get estimated sensor covariance</span>
 
 <span class="sd">        :return: sensor covariance</span>
@@ -497,7 +497,7 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">robot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get robot object</span>
 
 <span class="sd">        :return: robot used in simulation</span>
@@ -507,7 +507,7 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get sensor object</span>
 
 <span class="sd">        :return: sensor used in simulation</span>
@@ -517,7 +517,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get map object</span>
 
 <span class="sd">        :return: map used in simulation</span>
@@ -527,7 +527,7 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get verbosity state</span>
 
 <span class="sd">        :return: verbosity</span>
@@ -537,7 +537,7 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">history</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get EKF simulation history</span>
 
 <span class="sd">        :return: simulation history</span>
@@ -554,7 +554,7 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Size of robot workspace</span>
 
 <span class="sd">        :return: workspace bounds [xmin, xmax, ymin, ymax]</span>
@@ -568,7 +568,7 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">landmarks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get landmark information</span>
 
 <span class="sd">        :return: landmark information</span>
@@ -587,7 +587,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span>
 
 <div class="viewcode-block" id="EKF.landmark"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.landmark">[docs]</a>    <span class="k">def</span> <span class="nf">landmark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Landmark information</span>
 
 <span class="sd">        :param id: landmark index</span>
@@ -606,7 +606,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown landmark </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span></div>
 
 <div class="viewcode-block" id="EKF.landmark_index"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.landmark_index">[docs]</a>    <span class="k">def</span> <span class="nf">landmark_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Landmark index in complete state vector</span>
 
 <span class="sd">        :param id: landmark index</span>
@@ -628,7 +628,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown landmark </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span></div>
 
 <div class="viewcode-block" id="EKF.landmark_mindex"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.landmark_mindex">[docs]</a>    <span class="k">def</span> <span class="nf">landmark_mindex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Landmark index in map state vector</span>
 
 <span class="sd">        :param id: landmark index</span>
@@ -647,7 +647,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown landmark </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span></div>
 
 <div class="viewcode-block" id="EKF.landmark_x"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.landmark_x">[docs]</a>    <span class="k">def</span> <span class="nf">landmark_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Landmark position</span>
 
 <span class="sd">        :param id: landmark index</span>
@@ -689,7 +689,7 @@
             <span class="c1"># np.full((2, len(self.sensor.map)), -1, dtype=int)</span>
 
 <div class="viewcode-block" id="EKF.run"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">movie</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the EKF simulation</span>
 
 <span class="sd">        :param T: maximum simulation time in seconds</span>
@@ -746,7 +746,7 @@
 
     <span class="c1"># TODO: Make the following methods private.</span>
     <span class="k">def</span> <span class="nf">_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z_pred</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute one timestep of the simulation</span>
 
 <span class="sd">        :param z_pred: _description_, defaults to None</span>
@@ -1030,7 +1030,7 @@
 
 
 <div class="viewcode-block" id="EKF.get_t"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.get_t">[docs]</a>    <span class="k">def</span> <span class="nf">get_t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get time from simulation</span>
 
 <span class="sd">        :return: simulation time vector</span>
@@ -1044,7 +1044,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">t</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="EKF.get_xyt"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.get_xyt">[docs]</a>    <span class="k">def</span> <span class="nf">get_xyt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get estimated vehicle trajectory</span>
 
 <span class="sd">        :return: vehicle trajectory where each row is configuration :math:`(x, y, \theta)`</span>
@@ -1059,7 +1059,7 @@
         <span class="k">return</span> <span class="n">xyt</span></div>
 
 <div class="viewcode-block" id="EKF.plot_xy"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.plot_xy">[docs]</a>    <span class="k">def</span> <span class="nf">plot_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot estimated vehicle position</span>
 
 <span class="sd">        :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`</span>
@@ -1079,7 +1079,7 @@
         <span class="c1"># plt.show(block=block)</span>
 
 <div class="viewcode-block" id="EKF.plot_ellipse"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.plot_ellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_ellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot uncertainty ellipses</span>
 
 <span class="sd">        :param confidence: ellipse confidence interval, defaults to 0.95</span>
@@ -1110,7 +1110,7 @@
 
 
 <div class="viewcode-block" id="EKF.plot_error"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.plot_error">[docs]</a>    <span class="k">def</span> <span class="nf">plot_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot error with uncertainty bounds</span>
 
 <span class="sd">        :param bgcolor: background color, defaults to &#39;r&#39;</span>
@@ -1196,7 +1196,7 @@
         <span class="c1"># ylabel(&#39;\theta error&#39;)</span>
 
 <div class="viewcode-block" id="EKF.get_map"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.get_map">[docs]</a>    <span class="k">def</span> <span class="nf">get_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get estimated map</span>
 
 <span class="sd">        :return: landmark coordinates :math:`(x, y)`</span>
@@ -1219,7 +1219,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xy</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="EKF.plot_map"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.plot_map">[docs]</a>    <span class="k">def</span> <span class="nf">plot_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">confidence</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot estimated landmarks</span>
 
 <span class="sd">        :param marker: plot marker for landmark, arguments passed to :meth:`~matplotlib.axes.Axes.plot`, defaults to &quot;r+&quot;</span>
@@ -1264,7 +1264,7 @@
         <span class="c1"># plot_ellipse( P * chi2inv_rtb(opt.confidence, 2), xf, args{:});</span>
 
 <div class="viewcode-block" id="EKF.get_P"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.get_P">[docs]</a>    <span class="k">def</span> <span class="nf">get_P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get covariance matrices from simulation</span>
 
 <span class="sd">        :param k: timestep, defaults to None</span>
@@ -1283,7 +1283,7 @@
             <span class="k">return</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">P</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="EKF.get_Pnorm"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.get_Pnorm">[docs]</a>    <span class="k">def</span> <span class="nf">get_Pnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get covariance norm from simulation</span>
 
 <span class="sd">        :param k: timestep, defaults to None</span>
@@ -1304,7 +1304,7 @@
 
 
 <div class="viewcode-block" id="EKF.disp_P"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.disp_P">[docs]</a>    <span class="k">def</span> <span class="nf">disp_P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Display covariance matrix</span>
 
 <span class="sd">        :param P: covariance matrix</span>
@@ -1334,7 +1334,7 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="o">**</span><span class="n">colorbar</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="EKF.get_transform"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.get_transform">[docs]</a>    <span class="k">def</span> <span class="nf">get_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">map</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transformation from estimated map to true map frame</span>
 
 <span class="sd">        :param map: known landmark positions</span>
@@ -1568,7 +1568,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

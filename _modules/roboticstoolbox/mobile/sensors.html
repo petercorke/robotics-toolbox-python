@@ -120,7 +120,7 @@
         
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">,</span> <span class="nb">map</span><span class="p">,</span> <span class="n">every</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fail</span><span class="o">=</span><span class="p">[],</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Sensor.Sensor Sensor object constructor</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sensor.Sensor Sensor object constructor</span>
 <span class="sd">        %</span>
 <span class="sd">        # S = Sensor(VEHICLE, MAP, OPTIONS) is a sensor mounted on a vehicle</span>
 <span class="sd">        # described by the Vehicle subclass object VEHICLE and observing landmarks</span>
@@ -151,7 +151,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize sensor (superclass)</span>
 
 <span class="sd">        - reseed the random number generator</span>
@@ -162,7 +162,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_count</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert sensor parameters to a string (superclass)</span>
 <span class="sd">        %</span>
 <span class="sd">        # s = self.char() is a string showing sensor parameters in</span>
@@ -177,7 +177,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">robot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Robot associated with sensor (superclass)</span>
 
 <span class="sd">        :return: robot</span>
@@ -187,7 +187,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Landmark map associated with sensor (superclass)</span>
 
 <span class="sd">        :return: robot</span>
@@ -197,7 +197,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get private random number generator (superclass)</span>
 
 <span class="sd">        :return: NumPy random number generator</span>
@@ -220,7 +220,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get verbosity state</span>
 
 <span class="sd">        :return: verbosity</span>
@@ -229,7 +229,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span>
 
     <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot sensor observation</span>
 
 <span class="sd">        :param id: landmark id</span>
@@ -284,7 +284,7 @@
             <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Range and bearing angke sensor</span>
 
 <span class="sd">        :param robot: model of robot carrying the sensor</span>
@@ -376,7 +376,7 @@
         <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
 
 <div class="viewcode-block" id="RangeBearingSensor.init"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize sensor</span>
 
 <span class="sd">        - reseed the random number generator</span>
@@ -394,7 +394,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">W</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get sensor covariance</span>
 
 <span class="sd">        :return: sensor covariance</span>
@@ -407,7 +407,7 @@
     
 
 <div class="viewcode-block" id="RangeBearingSensor.reading"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.reading">[docs]</a>    <span class="k">def</span> <span class="nf">reading</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Choose landmark and return observation</span>
 
 <span class="sd">        :return: range and bearing angle to a landmark, and landmark id</span>
@@ -524,7 +524,7 @@
         <span class="k">return</span> <span class="n">z</span><span class="p">,</span> <span class="n">lm_id</span></div>
 
 <div class="viewcode-block" id="RangeBearingSensor.visible"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.visible">[docs]</a>    <span class="k">def</span> <span class="nf">visible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        List of all visible landmarks</span>
 
 <span class="sd">        :return: list of visible landmarks</span>
@@ -551,7 +551,7 @@
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">zk</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RangeBearingSensor.isvisible"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.isvisible">[docs]</a>    <span class="k">def</span> <span class="nf">isvisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test if landmark is visible</span>
 
 <span class="sd">        :param id: landmark id</span>
@@ -571,7 +571,7 @@
 
 
 <div class="viewcode-block" id="RangeBearingSensor.h"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.h">[docs]</a>    <span class="k">def</span> <span class="nf">h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">landmark</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Landmark observation function</span>
 
 <span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
@@ -644,7 +644,7 @@
             <span class="k">return</span> <span class="n">z</span></div>
 
 <div class="viewcode-block" id="RangeBearingSensor.Hx"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.Hx">[docs]</a>    <span class="k">def</span> <span class="nf">Hx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">landmark</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jacobian dh/dx</span>
 
 <span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
@@ -680,7 +680,7 @@
         <span class="c1"># fmt: on</span>
 
 <div class="viewcode-block" id="RangeBearingSensor.Hp"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.Hp">[docs]</a>    <span class="k">def</span> <span class="nf">Hp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">landmark</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jacobian dh/dp</span>
 
 <span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
@@ -714,7 +714,7 @@
         <span class="c1"># fmt: on</span>
 
 <div class="viewcode-block" id="RangeBearingSensor.Hw"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.Hw">[docs]</a>    <span class="k">def</span> <span class="nf">Hw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">landmark</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jacobian dh/dw</span>
 
 <span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
@@ -737,7 +737,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RangeBearingSensor.g"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.g">[docs]</a>    <span class="k">def</span> <span class="nf">g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Landmark position from sensor observation</span>
 
 <span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
@@ -765,7 +765,7 @@
         <span class="c1"># fmt: on</span>
 
 <div class="viewcode-block" id="RangeBearingSensor.Gx"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.Gx">[docs]</a>    <span class="k">def</span> <span class="nf">Gx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jacobian dg/dx</span>
 
 <span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
@@ -791,7 +791,7 @@
         <span class="c1"># fmt: on</span>
 
 <div class="viewcode-block" id="RangeBearingSensor.Gz"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.RangeBearingSensor.Gz">[docs]</a>    <span class="k">def</span> <span class="nf">Gz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jacobian dg/dz</span>
 
 <span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
@@ -837,7 +837,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

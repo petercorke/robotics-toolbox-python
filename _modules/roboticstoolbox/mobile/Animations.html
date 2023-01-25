@@ -88,7 +88,7 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">rtb_load_data</span>
 
 <div class="viewcode-block" id="VehicleAnimationBase"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleAnimationBase">[docs]</a><span class="k">class</span> <span class="nc">VehicleAnimationBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract base class to support animation of a vehicle on Matplotlib plot</span>
 
 <span class="sd">    There are three concrete subclasses:</span>
@@ -131,7 +131,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add vehicle animation to the current plot</span>
 
 <span class="sd">        :param ax: Axis to add to, defaults to current axis</span>
@@ -154,7 +154,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_add</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the vehicle animation (superclass)</span>
 
 <span class="sd">        :param q: vehicle position or configuration</span>
@@ -167,7 +167,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add vehicle to the current plot (superclass)</span>
 
 <span class="sd">        :param q: vehicle position or configuration</span>
@@ -190,7 +190,7 @@
 <span class="c1"># ========================================================================= #</span>
 <div class="viewcode-block" id="VehicleMarker"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleMarker">[docs]</a><span class="k">class</span> <span class="nc">VehicleMarker</span><span class="p">(</span><span class="n">VehicleAnimationBase</span><span class="p">):</span>
 <div class="viewcode-block" id="VehicleMarker.__init__"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleMarker.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create graphical animation of vehicle as a Matplotlib marker</span>
 
 <span class="sd">        :param kwargs: additional arguments passed to Matplotlib :meth:`~matplotlib.axes.Axes.plot`.</span>
@@ -236,7 +236,7 @@
 
 <div class="viewcode-block" id="VehiclePolygon"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehiclePolygon">[docs]</a><span class="k">class</span> <span class="nc">VehiclePolygon</span><span class="p">(</span><span class="n">VehicleAnimationBase</span><span class="p">):</span>
 <div class="viewcode-block" id="VehiclePolygon.__init__"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehiclePolygon.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s2">&quot;car&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create graphical animation of vehicle as a polygon</span>
 
 <span class="sd">        :param shape: polygon shape as vertices or a predefined shape, defaults to &quot;car&quot;</span>
@@ -328,7 +328,7 @@
 
 <div class="viewcode-block" id="VehicleIcon"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleIcon">[docs]</a><span class="k">class</span> <span class="nc">VehicleIcon</span><span class="p">(</span><span class="n">VehicleAnimationBase</span><span class="p">):</span>
 <div class="viewcode-block" id="VehicleIcon.__init__"><a class="viewcode-back" href="../../../mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleIcon.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create graphical animation of vehicle as an image icon</span>
 
 <span class="sd">        :param filename: Standard icon name or a path to an image</span>
@@ -549,7 +549,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

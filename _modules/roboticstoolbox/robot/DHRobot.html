@@ -116,7 +116,7 @@
 
 
 <div class="viewcode-block" id="DHRobot"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot">[docs]</a><span class="k">class</span> <span class="nc">DHRobot</span><span class="p">(</span><span class="n">Robot</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for robots defined using Denavit-Hartenberg notation</span>
 
 <span class="sd">    :param L: List of links which define the robot</span>
@@ -211,7 +211,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_rne_ob</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pretty prints the DH Model of the robot. Will output angles in degrees</span>
 
 <span class="sd">        :return: Pretty print of the robot model</span>
@@ -262,7 +262,7 @@
                 <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">isprismatic</span><span class="p">:</span>
                     <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">sign</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">offset</span><span class="si">:}</span><span class="s2">&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">sign</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">offset</span> <span class="o">*</span> <span class="n">deg</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="se">\u00b0</span><span class="s2">&quot;</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">sign</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">offset</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">deg</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="se">\u00b0</span><span class="s2">&quot;</span>
             <span class="k">return</span> <span class="n">s</span>
 
         <span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -471,7 +471,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="k">def</span> <span class="nf">_set_link_fk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        robot._set_link_fk(q) evaluates fkine for each link within a</span>
 <span class="sd">        robot and stores that pose in a private variable within the link.</span>
 
@@ -505,7 +505,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mdh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Modified Denavit-Hartenberg status</span>
 
 <span class="sd">        :return: whether robot is defined using modified Denavit-Hartenberg</span>
@@ -527,7 +527,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link offset values</span>
 
 <span class="sd">        :return: List of link offset values :math:`d_j`.</span>
@@ -553,7 +553,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link length values</span>
 
 <span class="sd">        :return: List of link length values :math:`a_j`.</span>
@@ -579,7 +579,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">theta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Joint angle values</span>
 
 <span class="sd">        :return: List of joint angle values :math:`\theta_j`.</span>
@@ -605,7 +605,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link twist values</span>
 
 <span class="sd">        :return: List of link twist values :math:`\alpha_j`.</span>
@@ -631,7 +631,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">r</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link centre of mass values</span>
 
 <span class="sd">        :return: Array of link centre of mass values :math:`r_j`.</span>
@@ -653,7 +653,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Joint offset values</span>
 
 <span class="sd">        :return: List of joint offset values :math:`\bar{q}_j`.</span>
@@ -674,7 +674,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reach</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reach of the robot</span>
 
 <span class="sd">        :return: Maximum reach of the robot</span>
@@ -706,7 +706,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nbranches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of branches</span>
 
 <span class="sd">        :return: number of branches in the robot&#39;s kinematic tree</span>
@@ -727,7 +727,7 @@
         <span class="k">return</span> <span class="mi">1</span>
 
 <div class="viewcode-block" id="DHRobot.A"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link forward kinematics</span>
 
 <span class="sd">        :param j: Joints to compute link transform for</span>
@@ -770,7 +770,7 @@
         <span class="k">return</span> <span class="n">T</span></div>
 
 <div class="viewcode-block" id="DHRobot.islimit"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.islimit">[docs]</a>    <span class="k">def</span> <span class="nf">islimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Joint limit test</span>
 
 <span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
@@ -800,7 +800,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">link</span><span class="o">.</span><span class="n">islimit</span><span class="p">(</span><span class="n">qk</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">qk</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">)]</span></div>
 
 <div class="viewcode-block" id="DHRobot.isspherical"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.isspherical">[docs]</a>    <span class="k">def</span> <span class="nf">isspherical</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test for spherical wrist</span>
 
 <span class="sd">        :return: True if spherical wrist</span>
@@ -837,7 +837,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="DHRobot.dhunique"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.dhunique">[docs]</a>    <span class="k">def</span> <span class="nf">dhunique</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print the unique DH parameters</span>
 
 <span class="sd">        Print a table showing all the non-zero DH parameters, and their</span>
@@ -872,7 +872,7 @@
         <span class="n">table</span><span class="o">.</span><span class="n">print</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="DHRobot.twists"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.twists">[docs]</a>    <span class="k">def</span> <span class="nf">twists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Joint axes as  twists</span>
 
 <span class="sd">        :param q: The joint configuration of the robot, defaults to zero</span>
@@ -933,7 +933,7 @@
         <span class="k">return</span> <span class="n">tw</span><span class="p">,</span> <span class="n">T</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="DHRobot.ets"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.ets">[docs]</a>    <span class="k">def</span> <span class="nf">ets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ETS</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Robot kinematics as an elemenary transform sequence</span>
 
 <span class="sd">        :return: elementary transform sequence</span>
@@ -975,7 +975,7 @@
         <span class="k">return</span> <span class="n">ets</span></div>
 
 <div class="viewcode-block" id="DHRobot.fkine"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine">[docs]</a>    <span class="k">def</span> <span class="nf">fkine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward kinematics</span>
 
 <span class="sd">        :param q: The joint configuration</span>
@@ -1037,7 +1037,7 @@
         <span class="k">return</span> <span class="n">T</span></div>
 
 <div class="viewcode-block" id="DHRobot.fkine_path"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine_path">[docs]</a>    <span class="k">def</span> <span class="nf">fkine_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the pose of every link frame</span>
 
 <span class="sd">        :param q: The joint configuration</span>
@@ -1075,7 +1075,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">segments</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="DHRobot.fkine_all"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.fkine_all">[docs]</a>    <span class="k">def</span> <span class="nf">fkine_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward kinematics for all link frames</span>
 
 <span class="sd">        :param q: The joint configuration of the robot (Optional,</span>
@@ -1121,7 +1121,7 @@
         <span class="k">return</span> <span class="n">Tall</span></div>
 
 <div class="viewcode-block" id="DHRobot.jacobe"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacobe">[docs]</a>    <span class="k">def</span> <span class="nf">jacobe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Jacobian in end-effector frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
@@ -1197,7 +1197,7 @@
         <span class="k">return</span> <span class="n">J</span></div>
 
 <div class="viewcode-block" id="DHRobot.jacob0"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacob0">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">half</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Jacobian in world frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
@@ -1255,7 +1255,7 @@
         <span class="k">return</span> <span class="n">J0</span></div>
 
 <div class="viewcode-block" id="DHRobot.jacob0_analytical"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.jacob0_analytical">[docs]</a>    <span class="k">def</span> <span class="nf">jacob0_analytical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">representation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Jacobian in world frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
@@ -1332,7 +1332,7 @@
         <span class="k">return</span> <span class="n">A</span> <span class="o">@</span> <span class="n">J0</span></div>
 
 <div class="viewcode-block" id="DHRobot.hessian0"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.hessian0">[docs]</a>    <span class="k">def</span> <span class="nf">hessian0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">J0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Hessian in base frame</span>
 
 <span class="sd">        :param q: joint coordinates</span>
@@ -1418,7 +1418,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_rne_ob</span> <span class="o">=</span> <span class="n">init</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdh</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">gravity</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DHRobot.delete_rne"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.delete_rne">[docs]</a>    <span class="k">def</span> <span class="nf">delete_rne</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Frees the memory holding the robot object in c if the robot object</span>
 <span class="sd">        has been initialised in c.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1429,7 +1429,7 @@
 
 <div class="viewcode-block" id="DHRobot.rne"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.rne">[docs]</a>    <span class="nd">@_check_rne</span>
     <span class="k">def</span> <span class="nf">rne</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">qd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qdd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gravity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fext</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">base_wrench</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Inverse dynamics</span>
 
 <span class="sd">        :param q: Joint coordinates</span>
@@ -1522,7 +1522,7 @@
         <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">base_wrench</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute inverse dynamics via recursive Newton-Euler formulation</span>
 
 <span class="sd">        :param Q: Joint coordinates</span>
@@ -1815,7 +1815,7 @@
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;j=</span><span class="si">{</span><span class="n">j</span><span class="si">:}</span><span class="s2">, G=</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">G</span><span class="si">:}</span><span class="s2">, Jm=</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">Jm</span><span class="si">:}</span><span class="s2">, friction=</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">friction</span><span class="p">(</span><span class="n">qd_k</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">:}</span><span class="s2">&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;j=</span><span class="si">{</span><span class="n">j</span><span class="si">:}</span><span class="s2">, G=</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">G</span><span class="si">:}</span><span class="s2">, Jm=</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">Jm</span><span class="si">:}</span><span class="s2">, friction=</span><span class="si">{</span><span class="n">link</span><span class="o">.</span><span class="n">friction</span><span class="p">(</span><span class="n">qd_k</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="w"> </span><span class="n">coulomb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">:}</span><span class="s2">&quot;</span>
                     <span class="p">)</span>  <span class="c1"># noqa</span>
                     <span class="nb">print</span><span class="p">()</span>
 
@@ -1932,7 +1932,7 @@
             <span class="p">)</span></div>
 
 <div class="viewcode-block" id="DHRobot.config_validate"><a class="viewcode-back" href="../../../arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot.config_validate">[docs]</a>    <span class="k">def</span> <span class="nf">config_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">allowables</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate a configuration string</span>
 
 <span class="sd">        :param config: a configuration string</span>
@@ -1988,7 +1988,7 @@
         <span class="n">we</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">λ</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan&#39;s Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2093,7 +2093,7 @@
         <span class="n">we</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">λ</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Wamplers&#39;s Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2198,7 +2198,7 @@
         <span class="n">we</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">λ</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Sugihara&#39;s Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2304,7 +2304,7 @@
         <span class="n">use_pinv</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">pinv_damping</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Newton-Raphson Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2412,7 +2412,7 @@
         <span class="n">use_pinv</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">pinv_damping</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Gauss-Newton Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2587,7 +2587,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

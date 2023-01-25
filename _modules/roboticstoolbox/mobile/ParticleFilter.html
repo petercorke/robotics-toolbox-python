@@ -100,7 +100,7 @@
     
 <div class="viewcode-block" id="ParticleFilter.__init__"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">,</span> <span class="n">sensor</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">nparticles</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Particle filter</span>
 
 <span class="sd">        :param robot: robot motion model</span>
@@ -224,7 +224,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">robot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get robot object</span>
 
 <span class="sd">        :return: robot used in simulation</span>
@@ -234,7 +234,7 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get sensor object</span>
 
 <span class="sd">        :return: sensor used in simulation</span>
@@ -244,7 +244,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get map object</span>
 
 <span class="sd">        :return: map used in simulation</span>
@@ -254,7 +254,7 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get verbosity state</span>
 
 <span class="sd">        :return: verbosity</span>
@@ -264,7 +264,7 @@
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">history</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get EKF simulation history</span>
 
 <span class="sd">        :return: simulation history</span>
@@ -281,7 +281,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Size of robot workspace</span>
 
 <span class="sd">        :return: workspace bounds [xmin, xmax, ymin, ymax]</span>
@@ -295,7 +295,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get private random number generator</span>
 
 <span class="sd">        :return: NumPy random number generator</span>
@@ -353,7 +353,7 @@
 
 
 <div class="viewcode-block" id="ParticleFilter.run"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the particle filter simulation</span>
 
 <span class="sd">        :param T: maximum simulation time in seconds</span>
@@ -441,7 +441,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ParticleFilter.plot_pdf"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.plot_pdf">[docs]</a>    <span class="k">def</span> <span class="nf">plot_pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot particle PDF</span>
 
 <span class="sd">        Displays a discrete PDF of vehicle position.  Creates a 3D plot where</span>
@@ -538,7 +538,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">inextgen</span><span class="p">,</span> <span class="p">:]</span>
 
 <div class="viewcode-block" id="ParticleFilter.get_t"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.get_t">[docs]</a>    <span class="k">def</span> <span class="nf">get_t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get time from simulation</span>
 
 <span class="sd">        :return: simulation time vector</span>
@@ -550,7 +550,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">t</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ParticleFilter.get_xyt"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.get_xyt">[docs]</a>    <span class="k">def</span> <span class="nf">get_xyt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get estimated vehicle trajectory</span>
 
 <span class="sd">        :return: vehicle trajectory where each row is configuration :math:`(x, y, \theta)`</span>
@@ -561,7 +561,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">xest</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ParticleFilter.get_std"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.get_std">[docs]</a>    <span class="k">def</span> <span class="nf">get_std</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get standard deviation of particles</span>
 
 <span class="sd">        :return: standard deviation of vehicle position estimate</span>
@@ -575,7 +575,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">std</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ParticleFilter.plot_xy"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.ParticleFilter.plot_xy">[docs]</a>    <span class="k">def</span> <span class="nf">plot_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot estimated vehicle position</span>
 
 <span class="sd">        :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`</span>
@@ -600,7 +600,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

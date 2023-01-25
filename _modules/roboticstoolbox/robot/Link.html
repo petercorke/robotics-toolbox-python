@@ -91,7 +91,7 @@
 
 
 <span class="k">def</span> <span class="nf">_listen_dyn</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    @_listen_dyn</span>
 
 <span class="sd">    Decorator for property setters</span>
@@ -127,7 +127,7 @@
 
 
 <div class="viewcode-block" id="BaseLink"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.BaseLink">[docs]</a><span class="k">class</span> <span class="nc">BaseLink</span><span class="p">(</span><span class="n">SceneNode</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Link superclass</span>
 
 <span class="sd">    :param name: name of the link</span>
@@ -297,7 +297,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">Ts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constant part of link ETS</span>
 <span class="sd">        :return: constant part of link transform</span>
 <span class="sd">        :rtype: SE3 instance</span>
@@ -363,7 +363,7 @@
         <span class="k">return</span> <span class="n">s</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pretty prints the ETS Model of the link. Will output angles in degrees</span>
 <span class="sd">        :return: Pretty print of the robot link</span>
 <span class="sd">        :rtype: str</span>
@@ -392,7 +392,7 @@
         <span class="k">return</span> <span class="n">s</span>
 
     <span class="k">def</span> <span class="nf">_repr_pretty_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">cycle</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pretty string for IPython (superclass method)</span>
 
 <span class="sd">        :param p: pretty printer handle (ignored)</span>
@@ -413,7 +413,7 @@
     <span class="c1"># -------------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="BaseLink.copy"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.BaseLink.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;BaseLink&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Copy of link object</span>
 
 <span class="sd">        :return: Shallow copy of link object</span>
@@ -494,7 +494,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Variable part of link ETS</span>
 <span class="sd">        :return: joint variable transform</span>
 <span class="sd">        :rtype: ET instance</span>
@@ -512,7 +512,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set link name</span>
 
 <span class="sd">        - ``link.name`` is the link name</span>
@@ -532,7 +532,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">robot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;rtb.Robot&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get forward reference to the robot which owns this link</span>
 
 <span class="sd">        :return: The robot object</span>
@@ -541,7 +541,7 @@
 
     <span class="nd">@robot</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">robot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot_ref</span><span class="p">:</span> <span class="s2">&quot;rtb.Robot&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the forward reference to the robot which owns this link</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span> <span class="o">=</span> <span class="n">robot_ref</span>
@@ -550,7 +550,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">qlim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set joint limits</span>
 
 <span class="sd">        - ``link.qlim`` is the joint limits</span>
@@ -580,7 +580,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hasdynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link has dynamic parameters (Link superclass)</span>
 
 <span class="sd">        :return: Link has dynamic parameters</span>
@@ -606,7 +606,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">isflip</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set joint flip</span>
 
 <span class="sd">        - ``link.flip`` is the joint flip status</span>
@@ -635,7 +635,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set link mass</span>
 
 <span class="sd">        - ``link.m`` is the link mass</span>
@@ -657,7 +657,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">r</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set link centre of mass</span>
 
 <span class="sd">        - ``link.r`` is the link centre of mass</span>
@@ -681,7 +681,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">I</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>  <span class="c1"># noqa</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set link inertia</span>
 
 <span class="sd">        - ``link.I`` is the link inertia</span>
@@ -749,7 +749,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">Jm</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set motor inertia</span>
 
 <span class="sd">        - ``link.Jm`` is the motor inertia</span>
@@ -772,7 +772,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">B</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set motor viscous friction</span>
 
 <span class="sd">        - ``link.B`` is the motor viscous friction</span>
@@ -800,7 +800,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">Tc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set motor Coulomb friction</span>
 
 <span class="sd">        - ``link.Tc`` is the motor Coulomb friction</span>
@@ -849,7 +849,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">G</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set gear ratio</span>
 
 <span class="sd">        - ``link.G`` is the transmission gear ratio</span>
@@ -876,7 +876,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SceneGroup</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set joint visual geometry</span>
 <span class="sd">        - ``link.geometry`` is the list of the visual geometries which</span>
 <span class="sd">            represent the shape of the link</span>
@@ -889,7 +889,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">collision</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SceneGroup</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set joint collision geometry</span>
 <span class="sd">        - ``link.collision`` is the list of the collision geometries which</span>
 <span class="sd">            represent the collidable shape of the link.</span>
@@ -925,7 +925,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">isjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test if link has joint</span>
 <span class="sd">        :return: test if link has a joint</span>
 <span class="sd">        :rtype: bool</span>
@@ -943,7 +943,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">jindex</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set joint index</span>
 <span class="sd">        - ``link.jindex`` is the joint index</span>
 <span class="sd">            :return: joint index</span>
@@ -967,7 +967,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">isprismatic</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if the joint is of prismatic type</span>
 <span class="sd">        :return: True if is prismatic</span>
 <span class="sd">        :rtype: bool</span>
@@ -976,7 +976,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">isrevolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if the joint is of revolute type</span>
 <span class="sd">        :return: True if is revolute</span>
 <span class="sd">        :rtype: bool</span>
@@ -993,7 +993,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parent link</span>
 <span class="sd">        :return: Link&#39;s parent</span>
 <span class="sd">        :rtype: Link instance</span>
@@ -1008,7 +1008,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parent_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parent link name</span>
 
 <span class="sd">        :return: Link&#39;s parent name</span>
@@ -1020,7 +1020,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">children</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="s2">&quot;Link&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        List of child links</span>
 <span class="sd">        :return: child links</span>
 <span class="sd">        :rtype: list of ``Link`` instances</span>
@@ -1030,7 +1030,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nchildren</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of child links</span>
 <span class="sd">        :return: number of child links</span>
 <span class="sd">        :rtype: int</span>
@@ -1041,7 +1041,7 @@
 <div class="viewcode-block" id="BaseLink.closest_point"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.BaseLink.closest_point">[docs]</a>    <span class="k">def</span> <span class="nf">closest_point</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="n">inf_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">],]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        closest_point(shape, inf_dist) returns the minimum euclidean</span>
 <span class="sd">        distance between this link and shape, provided it is less than</span>
 <span class="sd">        inf_dist. It will also return the points on self and shape in the</span>
@@ -1082,7 +1082,7 @@
         <span class="k">return</span> <span class="n">d</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span></div>
 
 <div class="viewcode-block" id="BaseLink.iscollided"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.BaseLink.iscollided">[docs]</a>    <span class="k">def</span> <span class="nf">iscollided</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        collided(shape) checks if this link and shape have collided</span>
 
 <span class="sd">        :param shape: The shape to compare distance to</span>
@@ -1103,7 +1103,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="BaseLink.collided"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.BaseLink.collided">[docs]</a>    <span class="k">def</span> <span class="nf">collided</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Shape</span><span class="p">,</span> <span class="n">skip</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        collided(shape) checks if this link and shape have collided</span>
 
 <span class="sd">        :param shape: The shape to compare distance to</span>
@@ -1115,7 +1115,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iscollided</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseLink.dyn"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.BaseLink.dyn">[docs]</a>    <span class="k">def</span> <span class="nf">dyn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Inertial properties of link as a string</span>
 
 <span class="sd">        :param indent: indent each line by this many spaces</span>
@@ -1185,7 +1185,7 @@
         <span class="k">return</span> <span class="n">s</span></div>
 
     <span class="k">def</span> <span class="nf">_dyn2list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{: .3g}</span><span class="s2">&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Inertial properties of link as a string</span>
 
 <span class="sd">        :param fmt: conversion format for each number</span>
@@ -1291,7 +1291,7 @@
         <span class="k">return</span> <span class="n">l</span>
 
 <div class="viewcode-block" id="BaseLink.islimit"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.BaseLink.islimit">[docs]</a>    <span class="k">def</span> <span class="nf">islimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks if joint exceeds limit</span>
 
 <span class="sd">        :param q: joint coordinate</span>
@@ -1312,7 +1312,7 @@
             <span class="k">return</span> <span class="n">q</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">q</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">qlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="BaseLink.nofriction"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.BaseLink.nofriction">[docs]</a>    <span class="k">def</span> <span class="nf">nofriction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">viscous</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clone link without friction</span>
 
 <span class="sd">        :param coulomb: if True, will set the Coulomb friction to 0</span>
@@ -1341,7 +1341,7 @@
         <span class="k">return</span> <span class="n">link</span></div>
 
 <div class="viewcode-block" id="BaseLink.friction"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.BaseLink.friction">[docs]</a>    <span class="k">def</span> <span class="nf">friction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qd</span><span class="p">,</span> <span class="n">coulomb</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute joint friction</span>
 
 <span class="sd">        :param qd: The joint velocity</span>
@@ -1399,7 +1399,7 @@
 
 
 <div class="viewcode-block" id="Link"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.Link">[docs]</a><span class="k">class</span> <span class="nc">Link</span><span class="p">(</span><span class="n">BaseLink</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ETS link class</span>
 
 <span class="sd">    :param ets: kinematic - The elementary transforms which make up the link</span>
@@ -1489,7 +1489,7 @@
     <span class="c1">#         self._isjoint = False</span>
 
 <div class="viewcode-block" id="Link.A"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.Link.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SE3</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link transform matrix</span>
 <span class="sd">        :param q: Joint coordinate (radians or metres). Not required for links</span>
 <span class="sd">            with no variable</span>
@@ -1555,7 +1555,7 @@
     <span class="c1">#         self._isjoint = False</span>
 
 <div class="viewcode-block" id="Link2.A"><a class="viewcode-back" href="../../../arm_superclass.html#roboticstoolbox.robot.Link.Link2.A">[docs]</a>    <span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SE2</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Link transform matrix</span>
 
 <span class="sd">        :param q: Joint coordinate (radians or metres). Not required for links</span>
@@ -1608,7 +1608,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

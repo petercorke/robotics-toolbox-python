@@ -441,7 +441,7 @@ specified using additional keyword arguments.</p>
 <span class="linenos">36</span>
 <span class="linenos">37</span><span class="gp">&gt;&gt;&gt; </span><span class="n">sol</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>                          <span class="c1"># inverse kinematics</span>
 <span class="linenos">38</span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
-<span class="linenos">39</span><span class="go">IKSolution: q=[ 2.1012  1.1163  0.3    -2.1888  1.6505  2.1556], success=True, iterations=9, searches=1, residual=1.3893001306983908e-09</span>
+<span class="linenos">39</span><span class="go">IKSolution: q=[ 0.1     0.2     0.3    -2.7416 -0.5    -2.5416], success=True, iterations=21, searches=1, residual=5.092137107204569e-09</span>
 </pre></div>
 </div>
 <p>The Toolbox supports named joint configurations and these are shown in the table
@@ -703,7 +703,7 @@ At a singular configuration</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_rank</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
 <span class="go">5</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rtb</span><span class="o">.</span><span class="n">jsingu</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
-<span class="go">column 5 = + 1 column_3</span>
+<span class="go">column 5 =2.6e-15 column_0 + 1 column_3</span>
 </pre></div>
 </div>
 <p>Jacobians can also be computed for symbolic joint variables as for forward kinematics above.</p>
@@ -721,7 +721,7 @@ At a singular configuration</p>
 <span class="go">Yoshikawa manipulability is 0.07861716534599998</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">puma</span><span class="o">.</span><span class="n">manipulability</span><span class="p">(</span><span class="n">puma</span><span class="o">.</span><span class="n">qn</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;asada&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Asada manipulability is&quot;</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
-<span class="go">Asada manipulability is 0.004374613728166503</span>
+<span class="go">Asada manipulability is 0.004374613728166502</span>
 </pre></div>
 </div>
 <p>for the Yoshikawa and Asada measures respectively, and</p>
@@ -968,7 +968,7 @@ making and SLAM; and a minimalist block-diagram simulation tool <a class="refere
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

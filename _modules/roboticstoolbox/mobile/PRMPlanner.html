@@ -92,7 +92,7 @@
 
 
 <div class="viewcode-block" id="PRMPlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PRMPlanner">[docs]</a><span class="k">class</span> <span class="nc">PRMPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Distance transform path planner</span>
 
 <span class="sd">    :param occgrid: occupancy grid</span>
@@ -159,7 +159,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">npoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of points in the roadmap</span>
 
 <span class="sd">        :return: Number of points</span>
@@ -169,7 +169,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dist_thresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Distance threshold</span>
 
 <span class="sd">        :return: distance threshold</span>
@@ -190,7 +190,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Roadmap graph</span>
 
 <span class="sd">        :return: roadmap as an undirected graph</span>
@@ -266,7 +266,7 @@
         <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="PRMPlanner.plan"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PRMPlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npoints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dist_thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plan PRM path</span>
 
 <span class="sd">        :param npoints: number of random points, defaults to ``npoints`` given</span>
@@ -305,7 +305,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_roadmap</span><span class="p">(</span><span class="n">npoints</span><span class="p">,</span> <span class="n">dist_thresh</span><span class="p">,</span> <span class="n">animate</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PRMPlanner.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PRMPlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find a path from start to goal using planner</span>
 
 <span class="sd">        :param start: start position :math:`(x, y)`, defaults to previously set value</span>
@@ -345,7 +345,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PRMPlanner.plot"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PRMPlanner.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">vertex</span><span class="o">=</span><span class="p">{},</span> <span class="n">edge</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot PRM path</span>
 
 <span class="sd">        :param vertex: vertex style, defaults to {}</span>
@@ -399,7 +399,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 

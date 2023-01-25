@@ -125,7 +125,7 @@
 
 <div class="viewcode-block" id="BaseERobot"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot">[docs]</a><span class="k">class</span> <span class="nc">BaseERobot</span><span class="p">(</span><span class="n">Robot</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct an ERobot object</span>
 <span class="sd">    :param et_list: List of elementary transforms which represent the robot</span>
 <span class="sd">        kinematics</span>
@@ -368,7 +368,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">scene_children</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pretty prints the ETS Model of the robot.</span>
 <span class="sd">        :return: Pretty print of the robot model</span>
 <span class="sd">        :rtype: str</span>
@@ -428,7 +428,7 @@
         <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s2"> joints (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="si">}</span><span class="s2">)&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">)</span><span class="si">}</span><span class="s2"> gripper</span><span class="si">{</span><span class="s1">&#39;s&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">)</span><span class="si">}</span><span class="s2"> gripper</span><span class="si">{</span><span class="s1">&#39;s&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grippers</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbranches</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nbranches</span><span class="si">}</span><span class="s2"> branches&quot;</span>
@@ -462,7 +462,7 @@
         <span class="o">...</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get link</span>
 
 <span class="sd">        :param i: link number or name</span>
@@ -505,7 +505,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">links</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Link</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Robot links</span>
 
 <span class="sd">        :return: A list of link objects</span>
@@ -516,7 +516,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of joints</span>
 <span class="sd">        :return: number of variable joint in the robot&#39;s kinematic tree</span>
 <span class="sd">        :rtype: int</span>
@@ -528,7 +528,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">grippers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Gripper</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Grippers attached to the robot</span>
 
 <span class="sd">        :return: A list of grippers</span>
@@ -539,7 +539,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nbranches</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Number of branches</span>
 
 <span class="sd">        :return: number of branches in the robot&#39;s kinematic tree</span>
@@ -637,7 +637,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reach</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reach of the robot</span>
 <span class="sd">        :return: Maximum reach of the robot</span>
 <span class="sd">        :rtype: float</span>
@@ -680,7 +680,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="BaseERobot.hierarchy"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.hierarchy">[docs]</a>    <span class="k">def</span> <span class="nf">hierarchy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pretty print the robot link hierachy</span>
 <span class="sd">        :return: Pretty print of the robot model</span>
 <span class="sd">        :rtype: str</span>
@@ -701,7 +701,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
     <span class="k">def</span> <span class="nf">_find_ets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">explored</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ETS</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Privade method which will recursively find the ETS of a path</span>
 <span class="sd">        see ets()</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -744,7 +744,7 @@
                     <span class="k">return</span> <span class="n">p</span>
 
     <span class="k">def</span> <span class="nf">_gripper_ets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gripper</span><span class="p">:</span> <span class="n">Gripper</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ETS</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Privade method which will find the ETS of a gripper</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># return gripper.links[0].ets * ET.SE3(gripper.tool)</span>
@@ -756,7 +756,7 @@
         <span class="n">start</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Link</span><span class="p">,</span> <span class="n">Gripper</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">end</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Link</span><span class="p">,</span> <span class="n">Gripper</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ETS</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        ERobot to ETS</span>
 
 <span class="sd">        :param start: start of path, defaults to ``base_link``</span>
@@ -839,7 +839,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="BaseERobot.segments"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.segments">[docs]</a>    <span class="k">def</span> <span class="nf">segments</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Link</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Segments of branched robot</span>
 
 <span class="sd">        :return: Segment list</span>
@@ -889,7 +889,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="BaseERobot.fkine_all"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.fkine_all">[docs]</a>    <span class="k">def</span> <span class="nf">fkine_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the pose of every link frame</span>
 
 <span class="sd">        :param q: The joint configuration</span>
@@ -951,7 +951,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="BaseERobot.showgraph"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.showgraph">[docs]</a>    <span class="k">def</span> <span class="nf">showgraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Display a link transform graph in browser</span>
 <span class="sd">        :param etsbox: Put the link ETS in a box, otherwise an edge label</span>
 <span class="sd">        :type etsbox: bool</span>
@@ -998,7 +998,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="BaseERobot.dotfile"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.dotfile">[docs]</a>    <span class="k">def</span> <span class="nf">dotfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">etsbox</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ets</span><span class="o">=</span><span class="s2">&quot;full&quot;</span><span class="p">,</span> <span class="n">jtype</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">static</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write a link transform graph as a GraphViz dot file</span>
 <span class="sd">        :param file: Name of file to write to</span>
 <span class="sd">        :type file: str or file</span>
@@ -1122,7 +1122,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="BaseERobot.dfs_links"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.BaseERobot.dfs_links">[docs]</a>    <span class="k">def</span> <span class="nf">dfs_links</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Visit all links from start in depth-first order and will apply</span>
 <span class="sd">        func to each visited link</span>
 <span class="sd">        :param start: the link to start at</span>
@@ -1152,7 +1152,7 @@
         <span class="n">end</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Gripper</span><span class="p">,</span> <span class="n">Link</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">start</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Gripper</span><span class="p">,</span> <span class="n">Link</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Link</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Link</span><span class="p">,</span> <span class="n">Gripper</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">SE3</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get and validate an end-effector, and a base link</span>
 <span class="sd">        :param end: end-effector or gripper to compute forward kinematics to</span>
 <span class="sd">        :type end: str or Link or Gripper, optional</span>
@@ -1223,7 +1223,7 @@
         <span class="n">link</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Link</span><span class="p">,</span> <span class="n">Gripper</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
         <span class="n">default</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Link</span><span class="p">,</span> <span class="n">Gripper</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Link</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate reference to Link</span>
 
 <span class="sd">        :param link: link</span>
@@ -1374,7 +1374,7 @@
 
 <div class="viewcode-block" id="ERobot.URDF"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.URDF">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">URDF</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">gripper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct an ERobot object from URDF file</span>
 <span class="sd">        :param file_path: [description]</span>
 <span class="sd">        :type file_path: [type]</span>
@@ -1484,7 +1484,7 @@
 
 <div class="viewcode-block" id="ERobot.URDF_read"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.URDF_read">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">URDF_read</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">tld</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xacro_tld</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read a URDF file as Links</span>
 <span class="sd">        :param file_path: File path relative to the xacro folder</span>
 <span class="sd">        :type file_path: str, in Posix file path fprmat</span>
@@ -1534,7 +1534,7 @@
     <span class="c1"># --------------------------------------------------------------------- #</span>
 
 <div class="viewcode-block" id="ERobot.get_path"><a class="viewcode-back" href="../../../arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot.get_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find a path from start to end. The end must come after</span>
 <span class="sd">        the start (ie end must be further away from the base link</span>
 <span class="sd">        of the robot than start) in the kinematic chain and both links</span>
@@ -1599,7 +1599,7 @@
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">include_base</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SE3</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Forward kinematics</span>
 
 <span class="sd">        :param q: Joint coordinates</span>
@@ -1645,7 +1645,7 @@
         <span class="n">start</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Link</span><span class="p">,</span> <span class="n">Gripper</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator geometric Jacobian in the base frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
@@ -1688,7 +1688,7 @@
         <span class="n">start</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Link</span><span class="p">,</span> <span class="n">Gripper</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator geometric Jacobian in the end-effector frame</span>
 
 <span class="sd">        :param q: Joint coordinate vector</span>
@@ -1731,7 +1731,7 @@
         <span class="n">J0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Hessian</span>
 
 <span class="sd">        The manipulator Hessian tensor maps joint acceleration to end-effector</span>
@@ -1784,7 +1784,7 @@
         <span class="n">Je</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">tool</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">SE3</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Hessian</span>
 
 <span class="sd">        The manipulator Hessian tensor maps joint acceleration to end-effector</span>
@@ -1836,7 +1836,7 @@
         <span class="n">end</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Link</span><span class="p">,</span> <span class="n">Gripper</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">start</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Link</span><span class="p">,</span> <span class="n">Gripper</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Manipulator Forward Kinematics nth Partial Derivative</span>
 
 <span class="sd">        The manipulator Hessian tensor maps joint acceleration to end-effector</span>
@@ -1872,7 +1872,7 @@
         <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">collision_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Formulates an inequality contraint which, when optimised for will</span>
 <span class="sd">        make it impossible for the robot to run into a collision. Requires</span>
 <span class="sd">        See examples/neo.py for use case</span>
@@ -1977,7 +1977,7 @@
         <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">collision_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Formulates an inequality contraint which, when optimised for will</span>
 <span class="sd">        make it impossible for the robot to run into a line of sight.</span>
 <span class="sd">        See examples/fetch_vision.py for use case</span>
@@ -2212,7 +2212,7 @@
         <span class="n">we</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">λ</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Chan&#39;s Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2323,7 +2323,7 @@
         <span class="n">we</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">λ</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Wamplers&#39;s Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2434,7 +2434,7 @@
         <span class="n">we</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">λ</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Sugihara&#39;s Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2546,7 +2546,7 @@
         <span class="n">use_pinv</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">pinv_damping</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Newton-Raphson Method)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2658,7 +2658,7 @@
         <span class="n">use_pinv</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">pinv_damping</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Numerical inverse kinematics by Levenberg-Marquadt optimization (Gauss-NewtonMethod)</span>
 
 <span class="sd">        :param Tep: The desired end-effector pose or pose trajectory</span>
@@ -2815,7 +2815,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">base</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SE2</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get/set robot base transform (Robot superclass)</span>
 
 <span class="sd">        - ``robot.base`` is the robot base transform</span>
@@ -2980,7 +2980,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 31-Dec-2022.
+      <span class="lastupdated">Last updated on 25-Jan-2023.
       </span></p>
   </div>
 
