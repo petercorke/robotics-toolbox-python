@@ -2234,7 +2234,9 @@ class ERobot(BaseERobot):
             TODO
         """
 
-        return self.ets(start, end).ik_lm_chan(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+        return self.ets(start, end).ik_lm_chan(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
+        )
 
     def ik_lm_wampler(
         self,
@@ -2343,7 +2345,9 @@ class ERobot(BaseERobot):
             TODO
         """
 
-        return self.ets(start, end).ik_lm_wampler(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+        return self.ets(start, end).ik_lm_wampler(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
+        )
 
     def ik_lm_sugihara(
         self,
@@ -2452,7 +2456,9 @@ class ERobot(BaseERobot):
             TODO
         """
 
-        return self.ets(start, end).ik_lm_sugihara(Tep, q0, ilimit, slimit, tol, reject_jl, we, λ)
+        return self.ets(start, end).ik_lm_sugihara(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, λ
+        )
 
     def ik_nr(
         self,
@@ -2562,7 +2568,9 @@ class ERobot(BaseERobot):
             TODO
         """
 
-        return self.ets(start, end).ik_nr(Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping)
+        return self.ets(start, end).ik_nr(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
+        )
 
     def ik_gn(
         self,
@@ -2672,8 +2680,33 @@ class ERobot(BaseERobot):
             TODO
         """
 
-        return self.ets(start, end).ik_gn(Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping)
+        return self.ets(start, end).ik_gn(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
+        )
 
+    def ikine_LM(
+        self,
+        Tep: Union[ndarray, SE3],
+        end: Union[str, Link, Gripper, None] = None,
+        start: Union[str, Link, Gripper, None] = None,
+        q0: Union[ArrayLike, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        joint_limits: bool = False,
+        mask: Union[ArrayLike, None] = None,
+        seed: Union[int, None] = None,
+    ):
+        return self.ets(start, end).ikine_LM(
+            Tep=Tep,
+            q0=q0,
+            ilimit=ilimit,
+            slimit=slimit,
+            tol=tol,
+            joint_limits=joint_limits,
+            mask=mask,
+            seed=seed,
+        )
 
 
 # =========================================================================== #

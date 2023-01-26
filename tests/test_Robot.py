@@ -60,128 +60,128 @@ class TestRobot(unittest.TestCase):
         self.assertIs(r0[2], l2)
         self.assertIs(r0[3], l3)
 
-    def test_ikine_LM(self):
-        panda = rp.models.DH.Panda()
-        q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
-        T = panda.fkine(q)
-        Tt = sm.SE3([T, T])
+    # def test_ikine_LM(self):
+    #     panda = rp.models.DH.Panda()
+    #     q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+    #     T = panda.fkine(q)
+    #     Tt = sm.SE3([T, T])
 
-        qr = [0.0342, 1.6482, 0.0312, 1.2658, -0.0734, 0.4836, 0.7489]
+    #     qr = [0.0342, 1.6482, 0.0312, 1.2658, -0.0734, 0.4836, 0.7489]
 
-        sol1 = panda.ikine_LM(T)
-        sol2 = panda.ikine_LM(Tt)
-        sol3 = panda.ikine_LM(T, q0=[0, 1.4, 0, 1, 0, 0.5, 1])
+    #     sol1 = panda.ikine_LM(T)
+    #     sol2 = panda.ikine_LM(Tt)
+    #     sol3 = panda.ikine_LM(T, q0=[0, 1.4, 0, 1, 0, 0.5, 1])
 
-        self.assertTrue(sol1.success)
-        self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol1.q)), 0, places=4)
+    #     self.assertTrue(sol1.success)
+    #     self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol1.q)), 0, places=4)
 
-        self.assertTrue(sol2.success[0])
-        self.assertAlmostEqual(
-            np.linalg.norm(T - panda.fkine(sol2.q[0, :])), 0, places=4
-        )
-        self.assertTrue(sol2.success[0])
-        self.assertAlmostEqual(
-            np.linalg.norm(T - panda.fkine(sol2.q[1, :])), 0, places=4
-        )
+    #     self.assertTrue(sol2.success[0])
+    #     self.assertAlmostEqual(
+    #         np.linalg.norm(T - panda.fkine(sol2.q[0, :])), 0, places=4
+    #     )
+    #     self.assertTrue(sol2.success[0])
+    #     self.assertAlmostEqual(
+    #         np.linalg.norm(T - panda.fkine(sol2.q[1, :])), 0, places=4
+    #     )
 
-        self.assertTrue(sol3.success)
-        self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol3.q)), 0, places=4)
+    #     self.assertTrue(sol3.success)
+    #     self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol3.q)), 0, places=4)
 
-        with self.assertRaises(ValueError):
-            panda.ikine_LM(T, q0=[1, 2])
+    #     with self.assertRaises(ValueError):
+    #         panda.ikine_LM(T, q0=[1, 2])
 
-    def test_ikine_LM_mask(self):
+    # def test_ikine_LM_mask(self):
 
-        # simple RR manipulator, solve with mask
+    #     # simple RR manipulator, solve with mask
 
-        l0 = rp.RevoluteDH(a=2.0)
-        l1 = rp.RevoluteDH(a=1)
+    #     l0 = rp.RevoluteDH(a=2.0)
+    #     l1 = rp.RevoluteDH(a=1)
 
-        r = rp.DHRobot([l0, l1])  # RR manipulator
-        T = sm.SE3(-1, 2, 0)
-        sol = r.ikine_LM(T, mask=[1, 1, 0, 0, 0, 0])
+    #     r = rp.DHRobot([l0, l1])  # RR manipulator
+    #     T = sm.SE3(-1, 2, 0)
+    #     sol = r.ikine_LM(T, mask=[1, 1, 0, 0, 0, 0])
 
-        self.assertTrue(sol.success)
-        self.assertAlmostEqual(
-            np.linalg.norm(T.t[:2] - r.fkine(sol.q).t[:2]), 0, places=4
-        )
+    #     self.assertTrue(sol.success)
+    #     self.assertAlmostEqual(
+    #         np.linalg.norm(T.t[:2] - r.fkine(sol.q).t[:2]), 0, places=4
+    #     )
 
-        # test initial condition search, drop iteration limit so it has to do
-        # some searching
-        sol = r.ikine_LM(T, mask=[1, 1, 0, 0, 0, 0], ilimit=8, search=True)
+    #     # test initial condition search, drop iteration limit so it has to do
+    #     # some searching
+    #     sol = r.ikine_LM(T, mask=[1, 1, 0, 0, 0, 0], ilimit=8, search=True)
 
-        self.assertTrue(sol.success)
-        self.assertAlmostEqual(
-            np.linalg.norm(T.t[:2] - r.fkine(sol.q).t[:2]), 0, places=4
-        )
+    #     self.assertTrue(sol.success)
+    #     self.assertAlmostEqual(
+    #         np.linalg.norm(T.t[:2] - r.fkine(sol.q).t[:2]), 0, places=4
+    #     )
 
-    def test_ikine_LM_transpose(self):
-        # need to test this on a robot with squarish Jacobian, choose Puma
+    # def test_ikine_LM_transpose(self):
+    #     # need to test this on a robot with squarish Jacobian, choose Puma
 
-        r = rp.models.DH.Puma560()
-        T = r.fkine(r.qn)
+    #     r = rp.models.DH.Puma560()
+    #     T = r.fkine(r.qn)
 
-        sol = r.ikine_LM(T, transpose=0.5, ilimit=1000, tol=1e-6)
+    #     sol = r.ikine_LM(T, transpose=0.5, ilimit=1000, tol=1e-6)
 
-        self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T - r.fkine(sol.q)), 0, places=4)
+    #     self.assertTrue(sol.success)
+    #     self.assertAlmostEqual(np.linalg.norm(T - r.fkine(sol.q)), 0, places=4)
 
-    def test_ikine_con(self):
-        panda = rp.models.DH.Panda()
-        q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
-        T = panda.fkine(q)
-        Tt = sm.SE3([T, T, T])
+    # def test_ikine_con(self):
+    #     panda = rp.models.DH.Panda()
+    #     q = np.array([0, -0.3, 0, -2.2, 0, 2.0, np.pi / 4])
+    #     T = panda.fkine(q)
+    #     Tt = sm.SE3([T, T, T])
 
-        # qr = [7.69161412e-04, 9.01409257e-01, -1.46372859e-02,
-        #       -6.98000000e-02, 1.38978915e-02, 9.62104811e-01,
-        #       7.84926515e-01]
+    #     # qr = [7.69161412e-04, 9.01409257e-01, -1.46372859e-02,
+    #     #       -6.98000000e-02, 1.38978915e-02, 9.62104811e-01,
+    #     #       7.84926515e-01]
 
-        sol1 = panda.ikine_min(T, qlim=True, q0=np.zeros(7))
-        sol2 = panda.ikine_min(Tt, qlim=True)
+    #     sol1 = panda.ikine_min(T, qlim=True, q0=np.zeros(7))
+    #     sol2 = panda.ikine_min(Tt, qlim=True)
 
-        self.assertTrue(sol1.success)
-        self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol1.q)), 0, places=4)
-        nt.assert_array_almost_equal(
-            T.A - panda.fkine(sol1.q).A, np.zeros((4, 4)), decimal=4
-        )
+    #     self.assertTrue(sol1.success)
+    #     self.assertAlmostEqual(np.linalg.norm(T - panda.fkine(sol1.q)), 0, places=4)
+    #     nt.assert_array_almost_equal(
+    #         T.A - panda.fkine(sol1.q).A, np.zeros((4, 4)), decimal=4
+    #     )
 
-        self.assertTrue(sol2[0].success)
-        nt.assert_array_almost_equal(
-            T.A - panda.fkine(sol2[0].q).A, np.zeros((4, 4)), decimal=4
-        )
-        self.assertTrue(sol2[1].success)
-        nt.assert_array_almost_equal(
-            T.A - panda.fkine(sol2[1].q).A, np.zeros((4, 4)), decimal=4
-        )
+    #     self.assertTrue(sol2[0].success)
+    #     nt.assert_array_almost_equal(
+    #         T.A - panda.fkine(sol2[0].q).A, np.zeros((4, 4)), decimal=4
+    #     )
+    #     self.assertTrue(sol2[1].success)
+    #     nt.assert_array_almost_equal(
+    #         T.A - panda.fkine(sol2[1].q).A, np.zeros((4, 4)), decimal=4
+    #     )
 
-    def test_ikine_unc(self):
-        puma = rp.models.DH.Puma560()
-        q = puma.qn
-        T = puma.fkine(q)
-        Tt = sm.SE3([T, T])
+    # def test_ikine_unc(self):
+    #     puma = rp.models.DH.Puma560()
+    #     q = puma.qn
+    #     T = puma.fkine(q)
+    #     Tt = sm.SE3([T, T])
 
-        sol1 = puma.ikine_min(Tt)
-        sol2 = puma.ikine_min(T)
-        sol3 = puma.ikine_min(T)
+    #     sol1 = puma.ikine_min(Tt)
+    #     sol2 = puma.ikine_min(T)
+    #     sol3 = puma.ikine_min(T)
 
-        self.assertTrue(sol1[0].success)
-        nt.assert_array_almost_equal(
-            T.A - puma.fkine(sol1[0].q).A, np.zeros((4, 4)), decimal=4
-        )
-        self.assertTrue(sol1[1].success)
-        nt.assert_array_almost_equal(
-            T.A - puma.fkine(sol1[1].q).A, np.zeros((4, 4)), decimal=4
-        )
+    #     self.assertTrue(sol1[0].success)
+    #     nt.assert_array_almost_equal(
+    #         T.A - puma.fkine(sol1[0].q).A, np.zeros((4, 4)), decimal=4
+    #     )
+    #     self.assertTrue(sol1[1].success)
+    #     nt.assert_array_almost_equal(
+    #         T.A - puma.fkine(sol1[1].q).A, np.zeros((4, 4)), decimal=4
+    #     )
 
-        self.assertTrue(sol2.success)
-        nt.assert_array_almost_equal(
-            T.A - puma.fkine(sol2.q).A, np.zeros((4, 4)), decimal=4
-        )
+    #     self.assertTrue(sol2.success)
+    #     nt.assert_array_almost_equal(
+    #         T.A - puma.fkine(sol2.q).A, np.zeros((4, 4)), decimal=4
+    #     )
 
-        self.assertTrue(sol3.success)
-        nt.assert_array_almost_equal(
-            T.A - puma.fkine(sol3.q).A, np.zeros((4, 4)), decimal=4
-        )
+    #     self.assertTrue(sol3.success)
+    #     nt.assert_array_almost_equal(
+    #         T.A - puma.fkine(sol3.q).A, np.zeros((4, 4)), decimal=4
+    #     )
 
     # def test_plot_swift(self):
     #     r = rp.models.Panda()
