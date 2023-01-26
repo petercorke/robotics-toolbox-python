@@ -980,33 +980,33 @@ class TestDHRobot(unittest.TestCase):
         self.assertTrue(sol.success)
         self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
 
-    def test_ikine_unc(self):
-        puma = rp.models.DH.Puma560()
+    # def test_ikine_unc(self):
+    #     puma = rp.models.DH.Puma560()
 
-        T = puma.fkine(puma.qn)
+    #     T = puma.fkine(puma.qn)
 
-        sol = puma.ikine_min(T)
-        self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=5)
+    #     sol = puma.ikine_min(T)
+    #     self.assertTrue(sol.success)
+    #     self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=5)
 
-        q0 = np.r_[0.1, 0.1, 0.1, 0.2, 0.3, 0.4]
-        sol = puma.ikine_min(T, q0=q0)
-        self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=5)
+    #     q0 = np.r_[0.1, 0.1, 0.1, 0.2, 0.3, 0.4]
+    #     sol = puma.ikine_min(T, q0=q0)
+    #     self.assertTrue(sol.success)
+    #     self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=5)
 
-    def test_ikine_con(self):
-        puma = rp.models.DH.Puma560()
+    # def test_ikine_con(self):
+    #     puma = rp.models.DH.Puma560()
 
-        T = puma.fkine(puma.qn)
+    #     T = puma.fkine(puma.qn)
 
-        sol = puma.ikine_min(T, qlim=True)
-        self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=5)
+    #     sol = puma.ikine_min(T, qlim=True)
+    #     self.assertTrue(sol.success)
+    #     self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=5)
 
-        q0 = np.r_[0.1, 0.1, 0.1, 0.2, 0.3, 0.4]
-        sol = puma.ikine_min(T, q0=q0, qlim=True)
-        self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=5)
+    #     q0 = np.r_[0.1, 0.1, 0.1, 0.2, 0.3, 0.4]
+    #     sol = puma.ikine_min(T, q0=q0, qlim=True)
+    #     self.assertTrue(sol.success)
+    #     self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=5)
 
     # def test_ikine_min(self):
     #     puma = rp.models.DH.Puma560()

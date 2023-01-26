@@ -323,7 +323,7 @@ def edgelist(im, p, direction=1):
       IAPR Workshop on Machine Vision Applications Dec. 13-15, 1994, Kawasaki
 
     """
-    p = base.getvector(p, 2, dtype=np.int)
+    p = base.getvector(p, 2, dtype=int)
     
     if direction > 0:
         neighbours = np.arange(start=0, stop=8, step=1)

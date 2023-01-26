@@ -4,6 +4,7 @@
 """
 
 from collections import namedtuple
+from email import message
 from roboticstoolbox.tools.data import rtb_path_to_datafile
 import warnings
 import copy
@@ -31,11 +32,14 @@ from ansitable import ANSITable, Column
 from scipy.linalg import block_diag
 from roboticstoolbox.robot.DHLink import _check_rne, DHLink
 from roboticstoolbox import rtb_get_param
-from frne import init, frne, delete
+from roboticstoolbox.frne import init, frne, delete
 from numpy import any
 from typing import Union, Tuple
+from roboticstoolbox.robot.IK import IKSolution
 
-iksol = namedtuple("IKsolution", "q, success, reason")
+ArrayLike = Union[list, np.ndarray, tuple, set]
+
+# iksol = namedtuple("IKsolution", "q, success, reason")
 
 
 class DHRobot(Robot):
@@ -855,7 +859,7 @@ class DHRobot(Robot):
 
         return tw, T[-1]
 
-    def ets(self, *args, **kwargs):
+    def ets(self, *args, **kwargs) -> ETS:
         """
         Robot kinematics as an elemenary transform sequence
 
@@ -1833,21 +1837,22 @@ class DHRobot(Robot):
                 # Remove the link offset angles
                 theta = theta - self.offset
 
-                solution = iksol(theta, True, "")
+                # solution = iksol(theta, True, "")
+                solution = IKSolution(q=theta, success=True)
 
             else:
                 # ikfunc can return None or a str reason
                 if theta is None:
-                    solution = iksol(None, False, "")
+                    solution = IKSolution(q=None, success=False)
                 else:
-                    solution = iksol(None, False, theta)
+                    solution = IKSolution(q=None, success=False, reason=theta)
 
             solutions.append(solution)
 
         if len(T) == 1:
             return solutions[0]
         else:
-            return iksol(
+            return IKSolution(
                 np.vstack([sol.q for sol in solutions]),
                 np.array([sol.success for sol in solutions]),
                 [sol.reason for sol in solutions],
@@ -2318,7 +2323,9 @@ class DHRobot(Robot):
             TODO
         """
 
-        return self.ets().ik_nr(Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping)
+        return self.ets().ik_nr(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
+        )
 
     def ik_gn(
         self,
@@ -2424,11 +2431,32 @@ class DHRobot(Robot):
             TODO
         """
 
-        return self.ets().ik_gn(Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping)
+        return self.ets().ik_gn(
+            Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
+        )
 
 
-
-
+    def ikine_LM(
+        self,
+        Tep: Union[np.ndarray, SE3],
+        q0: Union[ArrayLike, None] = None,
+        ilimit: int = 30,
+        slimit: int = 100,
+        tol: float = 1e-6,
+        joint_limits: bool = False,
+        mask: Union[ArrayLike, None] = None,
+        seed: Union[int, None] = None,
+    ):
+        return self.ets().ikine_LM(
+            Tep=Tep,
+            q0=q0,
+            ilimit=ilimit,
+            slimit=slimit,
+            tol=tol,
+            joint_limits=joint_limits,
+            mask=mask,
+            seed=seed,
+        )
 
 
 class SerialLink(DHRobot):

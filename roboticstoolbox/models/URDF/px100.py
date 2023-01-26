@@ -24,7 +24,7 @@ class px100(ERobot):
     - qr, vertical 'READY' configuration
 
     :reference:
-        - http://www.support.interbotix.com/html/specifications/px100.html
+        - https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/px100.html
 
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke

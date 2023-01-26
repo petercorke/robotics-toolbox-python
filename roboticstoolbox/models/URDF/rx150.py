@@ -24,7 +24,7 @@ class rx150(ERobot):
     - qr, vertical 'READY' configuration
 
     :reference:
-        - http://www.support.interbotix.com/html/specifications/rx150.html
+        - https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/rx150.html
 
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke

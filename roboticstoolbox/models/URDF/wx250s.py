@@ -24,7 +24,7 @@ class wx250s(ERobot):
     - qr, vertical 'READY' configuration
 
     :reference:
-        - http://www.support.interbotix.com/html/specifications/wx2506dof.html
+        - https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/wx250s.html
 
     .. codeauthor:: Jesse Haviland
     .. sectionauthor:: Peter Corke
