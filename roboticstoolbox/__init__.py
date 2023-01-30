@@ -98,6 +98,6 @@ __all__ = [
 
 try:
     import importlib.metadata
-    __version__ = importlib.metadata.version("roboticstoolbox")
+    __version__ = importlib.metadata.version("roboticstoolbox-python")
 except:
     pass
