@@ -15,12 +15,12 @@ poe = PoERobot([link1, link2], TE0)
 poe2ets = Robot(poe.ets())
 
 q = [0, 0]
-q = [np.pi/2, 0]
+q = [np.pi/2, 1]
 print("RR robot - book example")
 print(poe.fkine(q))
 print(poe2ets.fkine(q))
 
-"""
+
 print("----------")
 
 
@@ -32,7 +32,7 @@ link4 = PoERevolute([0, -1, 0], [0.2, 0, 0.5])
 TE0 = SE3(np.array([[1, 0, 0, 0.3], [0, 0, -1, 0], [0, 1, 0, 0.5], [0, 0, 0, 1]]))
 
 poe = PoERobot([link1, link2, link3, link4], TE0)
-poe2ets = ERobot(poe.ets())
+poe2ets = Robot(poe.ets())
 
 q = [0, 0, 0, 0]
 q = [np.pi/7, -np.pi/5, 0.3, -np.pi/3]
@@ -66,7 +66,7 @@ TE0 = np.array([[0.2535, -0.5986, 0.7599, 0.2938], [-0.8063, 0.3032, 0.5078, -0.
 TE0 = SE3(trnorm(TE0))
 
 poe = PoERobot([link1, link2, link3, link4], TE0)
-poe2ets = ERobot(poe.ets())
+poe2ets = Robot(poe.ets())
 
 q = [0, 0, 0, 0]
 q = [np.pi/2, np.pi/7, np.pi/5, 0.58]
@@ -74,4 +74,4 @@ q = [np.pi/2, np.pi/7, np.pi/5, 0.58]
 print("3RP robot - arbitrary structure")
 print(poe.fkine(q))
 print(poe2ets.fkine(q))
-"""
+
