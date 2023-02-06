@@ -209,9 +209,9 @@ class PoERobot(Robot):
         """
         Generate ETS from robot screw axis and tool frame.
 
-        This method generates ETS for a robot that is given as PoERobot
-        class in 3D. It overrides the default ets() method from Robot
-        class. It works for both revolute and prismatic links.
+        This method generates ETS for a robot that is given as PoERobot class in 3D.
+        It overrides the default ets() method from Robot class. It works for both
+        revolute and prismatic links.
 
         --------
         Example description
@@ -227,8 +227,8 @@ class PoERobot(Robot):
 
         References
         ----------
-        .. D. Huczala et al. "An Automated Conversion Between Selected
-        Robot Kinematic Representations," 2022 ICCMA, Luxembourg, 2022,
+        .. D. Huczala et al. "An Automated Conversion Between Selected Robot
+        Kinematic Representations," 2022 ICCMA, Luxembourg, 2022,
         doi: 10.1109/ICCMA56665.2022.10011595.
 
         """
@@ -241,7 +241,8 @@ class PoERobot(Robot):
             v = self.links[i].S.v
 
             # get point on the screw axis
-            if np.linalg.norm(w) == 0.0:  # test prismatic joint (test "isrevolute" gives False even though the class is PoERevolute)
+            if np.linalg.norm(w) == 0.0:  # test prismatic joint
+                # (test "isrevolute" gives False even though the class is PoERevolute)
                 # switch the directional vector components
                 w = v
                 # point on screw axis
@@ -260,7 +261,8 @@ class PoERobot(Robot):
                 else:
                     n_vec = n_vec / np.linalg.norm(n_vec)
 
-                # get lambda parameter on the point on screw line, nearest to previous partial tf origin
+                # get lambda param for the point on screw line, nearest to previous
+                # partial tf origin
                 lam = np.dot(full_tf[i].t - principalpoint, w)
                 # get position vector part
                 t_vec = principalpoint + (lam * w)
@@ -297,7 +299,7 @@ class PoERobot(Robot):
             if tf.t[2] != 0.0:
                 et.append(ET.tz(tf.t[2]))
 
-            # RPY parameters, due to RPY convention the order of multiplication is reversed
+            # RPY parameters, due to RPY convention the order of is reversed
             rpy = tf.rpy()
             if rpy[2] != 0.0:
                 et.append(ET.Rz(rpy[2]))
