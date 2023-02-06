@@ -2,7 +2,9 @@
 import numpy as np
 from spatialmath import Twist3, SE3
 from spatialmath.base import skew, trnorm
-from roboticstoolbox.robot import Link, Robot, ET, ETS
+from roboticstoolbox.robot import Link, Robot
+from roboticstoolbox.robot.ET import ET
+from roboticstoolbox.robot.ETS import ETS
 
 
 class PoELink(Link):
@@ -206,6 +208,29 @@ class PoERobot(Robot):
     def ets(self) -> ETS:
         """
         Generate ETS from robot screw axis and tool frame.
+
+        This method generates ETS for a robot that is given as PoERobot
+        class in 3D. It overrides the default ets() method from Robot
+        class. It works for both revolute and prismatic links.
+
+        --------
+        Example description
+
+        .. runblock:: pycon
+        >>> from spatialmath import SE3
+        >>> from roboticstoolbox import PoERobot, PoERevolute
+        >>> link1 = PoERevolute([0, 0, 1], [0, 0, 0])
+        >>> link2 = PoERevolute([0, 0, 1], [1, 0, 0])
+        >>> TE0 = SE3.Tx(2)
+        >>> r = PoERobot([link1, link2], TE0)
+        >>> ets = r.ets()
+
+        References
+        ----------
+        .. D. Huczala et al. "An Automated Conversion Between Selected
+        Robot Kinematic Representations," 2022 ICCMA, Luxembourg, 2022,
+        doi: 10.1109/ICCMA56665.2022.10011595.
+
         """
         # initialize partial transformations between joints from base to ee
         full_tf = [SE3()] * (self.nj + 2)
