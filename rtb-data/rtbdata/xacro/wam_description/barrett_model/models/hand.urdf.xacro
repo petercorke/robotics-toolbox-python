@@ -1,0 +1,252 @@
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find barrett_model)/models/common.urdf.xacro"/>
+  <xacro:property name="b" value="1.1"/>
+
+  <!-- High-leveel hand macro -->
+  <xacro:macro name="bhand" params="parent_link prefix xyz rpy">
+    <xacro:bhand_palm parent_link="${parent_link}" prefix="${prefix}" xyz="${xyz}" rpy="${rpy}"/>
+    <xacro:bhand_finger_1 prefix="${prefix}"/>
+    <xacro:bhand_finger_2 prefix="${prefix}"/>
+    <xacro:bhand_finger_3 prefix="${prefix}"/>
+  </xacro:macro>
+
+  <!-- Fingers -->
+  <xacro:macro name="bhand_finger_1" params="prefix">
+    <xacro:bhand_finger_prox prefix="${prefix}/finger_1" parent_link="${prefix}/bhand_palm_link" xyz="-0.025 0.0 0.0415" rpy="0 0 -${PI/2}" axis="0 0 -1"/>
+    <xacro:bhand_finger_med prefix="${prefix}/finger_1" parent_link="${prefix}/finger_1/prox_link" xyz="0.05 0.0 0.03390" rpy="${PI/2} 0 0"/>
+    <xacro:bhand_finger_dist prefix="${prefix}/finger_1"/>
+    <xacro:bhand_finger_tip prefix="${prefix}/finger_1"/>
+  </xacro:macro>
+
+  <xacro:macro name="bhand_finger_2" params="prefix">
+    <xacro:bhand_finger_prox prefix="${prefix}/finger_2" parent_link="${prefix}/bhand_palm_link" xyz="0.025 0.0 0.0415" rpy="0 0 -${PI/2}" axis="0 0 1"/>
+    <xacro:bhand_finger_med prefix="${prefix}/finger_2" parent_link="${prefix}/finger_2/prox_link" xyz="0.05 0.0 0.03390" rpy="${PI/2} 0 0"/>
+    <xacro:bhand_finger_dist prefix="${prefix}/finger_2"/>
+    <xacro:bhand_finger_tip prefix="${prefix}/finger_2"/>
+  </xacro:macro>
+
+  <xacro:macro name="bhand_finger_3" params="prefix">
+    <xacro:bhand_finger_med prefix="${prefix}/finger_3" parent_link="${prefix}/bhand_palm_link" xyz="0 0.05 0.0754" rpy="${PI/2} 0 ${PI/2}"/>
+    <xacro:bhand_finger_dist prefix="${prefix}/finger_3"/>
+    <xacro:bhand_finger_tip prefix="${prefix}/finger_3"/>
+  </xacro:macro>
+
+  <xacro:macro name="gz_hand_link" params="collide">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <xacro:if value="${collide}">
+      <selfCollide>true</selfCollide>
+    </xacro:if>
+  </xacro:macro>
+
+  <!-- Components -->
+  <xacro:macro name="bhand_palm" params="prefix parent_link xyz rpy">
+    <joint name="${prefix}/bhand_base_joint" type="fixed">
+      <parent link="${parent_link}"/>
+      <child link="${prefix}/bhand_palm_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+    <gazebo reference="${prefix}/bhand_palm_link">
+      <xacro:gz_hand_link collide="false"/>
+    </gazebo>
+    <link name="${prefix}/bhand_palm_link">
+      <inertial>
+        <origin xyz="-5.1098e-005 0.0050433 0.036671"/>
+        <mass value="0.50573" />
+        <inertia
+          ixx="3.8374e-005" ixy="-5.604e-008"  ixz="-4.2034e-005"
+                           iyy="0.00022405"   iyz="1.3283e-007"
+                                              izz="0.00020045" />
+      </inertial>
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.9 0.9 0.9 0.0"/>
+        </material>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/bhand/bhand_palm_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/bhand/bhand_palm_link_convex_decomposition.dae"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}/bhand_palm_surface_joint" type="fixed">
+      <parent link="${prefix}/bhand_palm_link"/>
+      <child link="${prefix}/bhand_palm_surface_link"/>
+      <origin xyz="0 0 0.08" rpy="0 0 0"/>
+      <limit effort="5" lower="0" upper="${PI}" velocity="5.0"/>
+      <dynamics damping="${0.1*b}" friction="0"/>
+    </joint>
+    <link name="${prefix}/bhand_palm_surface_link">
+      <inertial>
+        <mass value="0.000001" />
+        <inertia
+          ixx="0.000001" ixy="0.0"  ixz="0.0"
+          iyy="0.000001" iyz="0.0"
+          izz="0.000001" />
+      </inertial>
+    </link>
+
+    <joint name="${prefix}/bhand_grasp_joint" type="fixed">
+      <parent link="${prefix}/bhand_palm_link"/>
+      <child link="${prefix}/bhand_grasp_link"/>
+      <origin xyz="0 0 0.12" rpy="0 0 0"/>
+      <limit effort="5" lower="0" upper="${PI}" velocity="5.0"/>
+      <dynamics damping="${0.1*b}" friction="0"/>
+    </joint>
+    <link name="${prefix}/bhand_grasp_link">
+      <inertial>
+        <mass value="0.000001" />
+        <inertia
+          ixx="0.000001" ixy="0.0"  ixz="0.0"
+          iyy="0.000001" iyz="0.0"
+          izz="0.000001" />
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="bhand_finger_prox" params="prefix parent_link xyz rpy axis">
+    <joint name="${prefix}/prox_joint" type="revolute">
+      <parent link="${parent_link}"/>
+      <child link="${prefix}/prox_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <axis xyz="${axis}"/>
+      <limit effort="5" lower="0" upper="${PI}" velocity="5.0"/>
+      <dynamics damping="${0.1*b}" friction="0"/>
+    </joint>
+    <gazebo reference="${prefix}/prox_joint">
+      <xacro:gz_joint/>
+    </gazebo>
+    <gazebo reference="${prefix}/prox_link">
+      <xacro:gz_hand_link collide="false"/>
+    </gazebo>
+    <link name="${prefix}/prox_link">
+      <inertial>
+        <origin xyz="0.023133 0.00078642 0.00052792" />
+        <mass value="0.14109" />
+        <inertia
+          ixx="4.872e-006" ixy="1.7103e-006"  ixz="3.4041e-008"
+                           iyy="7.6588e-005"  iyz="2.3133e-008"
+                                              izz="7.7733e-005" />
+      </inertial>
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.9 0.9 0.9 0.0"/>
+        </material>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/bhand/bhand_finger_prox_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/bhand/bhand_finger_prox_link_convex_decomposition.dae"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="bhand_finger_med" params="prefix parent_link xyz rpy">
+    <joint name="${prefix}/med_joint" type="revolute">
+      <parent link="${parent_link}"/>
+      <child link="${prefix}/med_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="5" lower="0" upper="${140/180*PI}" velocity="5.00"/>
+      <dynamics damping="${0.1*b}" friction="0"/>
+    </joint>
+    <gazebo reference="${prefix}/med_joint">
+      <xacro:gz_joint/>
+    </gazebo>
+    <gazebo reference="${prefix}/med_link">
+      <xacro:gz_hand_link collide="false"/>
+    </gazebo>
+    <link name="${prefix}/med_link">
+      <inertial>
+        <origin xyz="0.023133 0.00078642 0.00052792" />
+        <mass value="0.062139" />
+        <inertia
+          ixx="4.872e-006" ixy="1.7103e-006"  ixz="3.4041e-008"
+                           iyy="7.6588e-005"  iyz="2.3133e-008"
+                                              izz="7.7733e-005" />
+      </inertial>
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.9 0.9 0.9 0.0"/>
+        </material>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/bhand/bhand_finger_med_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/bhand/bhand_finger_med_link_convex.dae"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="bhand_finger_dist" params="prefix">
+    <joint name="${prefix}/dist_joint" type="revolute">
+      <parent link="${prefix}/med_link"/>
+      <child link="${prefix}/dist_link"/>
+      <origin xyz="0.06994 0.003 0.0" rpy="0 0 ${PI/4}"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="5" lower="0" upper="${48/180*PI}" velocity="5.00"/>
+      <dynamics damping="${0.1*b}" friction="0"/>
+    </joint>
+    <gazebo reference="${prefix}/dist_joint">
+      <xacro:gz_joint/>
+    </gazebo>
+    <gazebo reference="${prefix}/dist_link">
+      <xacro:gz_hand_link collide="true"/>
+    </gazebo>
+    <link name="${prefix}/dist_link">
+      <inertial>
+        <origin xyz="0.022825 0.0010491 0.0004203" rpy="0 0 0"/>
+        <mass value="0.041377" />
+        <inertia
+          ixx="3.1582e-006" ixy="1.4308e-006"  ixz="1.0106e-007"
+                           iyy="3.8376e-005"   iyz="0"
+                                              izz="3.7275e-005" />
+      </inertial>
+      <visual>
+        <origin rpy="0 0 ${-PI/4}"/>
+        <material name="WAMGrey">
+          <color rgba="0.9 0.9 0.9 0.0"/>
+        </material>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/bhand/bhand_finger_dist_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 ${-PI/4}"/>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/bhand/bhand_finger_dist_link_convex.dae"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="bhand_finger_tip" params="prefix">
+    <joint name="${prefix}/tip_joint" type="fixed">
+      <parent link="${prefix}/dist_link"/>
+      <child link="${prefix}/tip_link"/>
+      <origin xyz="0.05 0.0 0.0" rpy="0 0 0"/>
+    </joint>
+    <link name="${prefix}/tip_link">
+      <inertial>
+        <mass value="1E-6" />
+        <inertia
+          ixx="1E-6" ixy="0"    ixz="0"
+                     iyy="1E-6" iyz="0"
+                                izz="1E-6" />
+      </inertial>
+    </link>
+  </xacro:macro>
+
+</robot>

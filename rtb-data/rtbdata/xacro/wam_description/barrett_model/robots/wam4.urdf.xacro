@@ -1,0 +1,12 @@
+<robot name="wam"
+  xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Includea all the WAM stuff -->
+  <xacro:include filename="$(find barrett_model)/models/wam_top.urdf.xacro"/>
+
+  <!-- Root link is in the world frame-->
+  <link name="world"/>
+
+  <!-- 4-DOF Wam -->
+  <xacro:wam_4dof prefix="wam" parent_link="world" xyz="0.0 0.0 1" rpy="0 0 0" />
+</robot>
