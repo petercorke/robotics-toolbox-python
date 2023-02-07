@@ -215,6 +215,7 @@ class PoERobot(Robot):
         It overrides the default ets() method from Robot class. It works for both
         revolute and prismatic links.
 
+        Example
         --------
         Example description
 
@@ -229,7 +230,7 @@ class PoERobot(Robot):
 
         References
         ----------
-        .. D. Huczala et al. "An Automated Conversion Between Selected Robot
+        - D. Huczala et al. "An Automated Conversion Between Selected Robot
         Kinematic Representations," 2022 ICCMA, Luxembourg, 2022,
         doi: 10.1109/ICCMA56665.2022.10011595.
 
