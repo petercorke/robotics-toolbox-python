@@ -325,7 +325,6 @@ class PoERobot(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     T0 = SE3.Trans(2, 0, 0)
 
     # rotate about z-axis, through (0,0,0)
