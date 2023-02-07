@@ -99,12 +99,8 @@ class PoERobot(Robot):
 
         self._n = len(links)
 
-        super().__init__(links, **kwargs)  # ISSUE: the argument PoERobot.n (self.n)
-        # returns 0 instead of number of joints, it is changed using this line
+        super().__init__(links, **kwargs)
         self.T0 = T0
-
-        self.nj = len(links)  # Temporary overcome of the bug above: argument nj
-        # provides correct number of joints and the methods work
 
     def __str__(self):
         """
@@ -236,9 +232,9 @@ class PoERobot(Robot):
 
         """
         # initialize partial transformations between joints from base to ee
-        full_tf = [SE3()] * (self.nj + 2)
+        full_tf = [SE3()] * (self.n + 2)
         # get transforms from screws, related to base frame
-        for i in range(self.nj):
+        for i in range(self.n):
             # get screw axis components
             w = self.links[i].S.w
             v = self.links[i].S.v
@@ -287,8 +283,8 @@ class PoERobot(Robot):
         full_tf[-1] = self.T0
 
         # get partial transforms
-        partial_tf = [SE3()] * (self.nj + 2)
-        for i in reversed(range(1, self.nj + 2)):
+        partial_tf = [SE3()] * (self.n + 2)
+        for i in reversed(range(1, self.n + 2)):
             partial_tf[i] = full_tf[i - 1].inv() * full_tf[i]
 
         # prepare ET sequence
@@ -312,7 +308,7 @@ class PoERobot(Robot):
                 et.append(ET.Rx(rpy[0]))
 
             # assign joint variable, if the frame is not base or tool frame
-            if num != 0 and num != (self.nj + 1):
+            if num != 0 and num != (self.n + 1):
                 if np.linalg.norm(self.links[num - 1].S.w) != 0:  # if revolute
                     et.append(ET.Rz())
                 else:  # if prismatic
