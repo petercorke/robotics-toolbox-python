@@ -99,10 +99,12 @@ class PoERobot(Robot):
 
         self._n = len(links)
 
-        super().__init__(links, **kwargs)  # ISSUE: the argument PoERobot.n (self.n) returns 0 instead of number of joints, it is changed using this line
+        super().__init__(links, **kwargs)  # ISSUE: the argument PoERobot.n (self.n)
+        # returns 0 instead of number of joints, it is changed using this line
         self.T0 = T0
 
-        self.nj = len(links)  # Temporary overcome of the bug above: argument nj provides correct number of joints and the methods work
+        self.nj = len(links)  # Temporary overcome of the bug above: argument nj
+        # provides correct number of joints and the methods work
 
     def __str__(self):
         """

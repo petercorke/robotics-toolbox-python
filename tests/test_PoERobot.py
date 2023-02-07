@@ -15,7 +15,9 @@ class TestPoERobot(unittest.TestCase):
         link2 = PoERevolute([0, 1, 0], [0, 0, 0.2])
         link3 = PoEPrismatic([0, 1, 0])
         link4 = PoERevolute([0, -1, 0], [0.2, 0, 0.5])
-        tool = SE3(np.array([[1, 0, 0, 0.3], [0, 0, -1, 0], [0, 1, 0, 0.5], [0, 0, 0, 1]]))
+        tool = SE3(
+            np.array([[1, 0, 0, 0.3], [0, 0, -1, 0], [0, 1, 0, 0.5], [0, 0, 0, 1]])
+        )
 
         r = PoERobot([link1, link2, link3, link4], tool)
         r_poe2ets = Robot(r.ets())
@@ -24,5 +26,5 @@ class TestPoERobot(unittest.TestCase):
         nt.assert_almost_equal(r.fkine(q).A, r_poe2ets.fkine(q).A)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
