@@ -685,7 +685,7 @@ class Gravload(FunctionBlock):
         super().__init__(**blockargs)
         self.type = "gravload"
 
-        self.robot = robots
+        self.robot = robot
         self.gravity = gravity
         self.inport_names(("q",))
         self.outport_names(("$\tau$",))
@@ -744,7 +744,7 @@ class Gravload_X(FunctionBlock):
         super().__init__(**blockargs)
         self.type = "gravload-x"
 
-        self.robot = robots
+        self.robot = robot
         self.gravity = gravity
         self.inport_names(("q",))
         self.outport_names(("$\tau$",))
@@ -807,7 +807,7 @@ class Inertia(FunctionBlock):
         super().__init__(**blockargs)
         self.type = "inertia"
 
-        self.robot = robots
+        self.robot = robot
         self.inport_names(("q",))
         self.outport_names(("M",))
 
