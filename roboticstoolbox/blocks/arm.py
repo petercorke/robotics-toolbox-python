@@ -631,7 +631,7 @@ class IDyn(FunctionBlock):
         self.outport_names(("$\tau$",))
 
     def output(self, t=None):
-        tau = self.robot.rne(self.inputs[0], self.inputs[1], self.inputs[2], gravity=gravity)
+        tau = self.robot.rne(self.inputs[0], self.inputs[1], self.inputs[2], gravity=self.gravity)
         return [tau]
 
 
@@ -1253,13 +1253,13 @@ class JTraj(SourceBlock):
         if qd0 is None:
             qd0 = np.zeros(q0.shape)
         else:
-            qd0 = getvector(qd0)
+            qd0 = base.getvector(qd0)
             if not len(qd0) == len(q0):
                 raise ValueError("qd0 has wrong size")
         if qdf is None:
             qdf = np.zeros(q0.shape)
         else:
-            qd1 = getvector(qdf)
+            qd1 = base.getvector(qdf)
             if not len(qd1) == len(q0):
                 raise ValueError("qd1 has wrong size")
 
@@ -1475,7 +1475,7 @@ class CTraj(SourceBlock):
             self.trapezoidalfunc = trapezoidal_func(self.q0, self.qf, self.T)
 
     def output(self, t=None):
-        if trapezoidal:
+        if self.trapezoidal:
             s = self.trapezoidalfunc(t)
         else:
             s = np.min(t / self.T, 1.0)
