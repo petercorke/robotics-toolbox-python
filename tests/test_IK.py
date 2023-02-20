@@ -6,6 +6,7 @@
 import roboticstoolbox as rtb
 import numpy as np
 import unittest
+import numpy.testing as nt
 
 # import sympy
 import pytest
@@ -820,6 +821,24 @@ class TestIK(unittest.TestCase):
         )
 
         self.assertEqual(s, ans)
+
+    def test_iter_iksol(self):
+        sol = rtb.IKSolution(
+            np.array([1.0, 2.0, 3.0]),
+            success=True,
+            iterations=10,
+            searches=100,
+            residual=0.1,
+        )
+
+        a, b, c, d, e, f = sol
+
+        nt.assert_almost_equal(a, np.array([1.0, 2.0, 3.0]))  # type: ignore
+        self.assertEqual(b, True)
+        self.assertEqual(c, 10)
+        self.assertEqual(d, 100)
+        self.assertEqual(e, 0.1)
+        self.assertEqual(f, "")
 
 
 if __name__ == "__main__":

@@ -54,6 +54,18 @@ class IKSolution:
     residual: float = 0.0
     reason: str = ""
 
+    def __iter__(self):
+        return iter(
+            (
+                self.q,
+                self.success,
+                self.iterations,
+                self.searches,
+                self.residual,
+                self.reason,
+            )
+        )
+
     def __str__(self):
 
         if self.q is not None:
@@ -1435,3 +1447,14 @@ class IK_QP(IKSolver):
         q += xd[: ets.n]
 
         return E, q
+
+
+if __name__ == "__main__":  # pragma nocover
+
+    sol = IKSolution(
+        np.array([1, 2, 3]), success=True, iterations=10, searches=100, residual=0.1
+    )
+
+    a, b, c, d, e = sol
+
+    print(a, b, c, d, e)
