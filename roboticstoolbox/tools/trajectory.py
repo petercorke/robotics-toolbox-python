@@ -57,7 +57,10 @@ class Trajectory:
         self.istime = istime
 
     def __str__(self):
-        s = f"Trajectory created by {self.name}: {len(self)} time steps x {self.naxes} axes"
+        s = (
+            f"Trajectory created by {self.name}: {len(self)} time steps x"
+            f" {self.naxes} axes"
+        )
         return s
 
     def __repr__(self):
@@ -162,11 +165,15 @@ class Trajectory:
         if textargs is not None:
             textopts = {**textopts, **textargs}
 
+        nplots = 3
+        if self.name == "mstraj":
+            nplots = 1
+
         plt.figure()
-        ax = plt.subplot(3, 1, 1)
+        ax = plt.subplot(nplots, 1, 1)
 
         # plot position
-        if self.name == "quintic":
+        if self.name in "quintic":
             ax.plot(self.t, self.s, **plotopts)
 
         elif self.name == "trapezoidal":
@@ -214,29 +221,30 @@ class Trajectory:
         else:
             ax.set_ylabel("$q(k)$", **textopts)
 
-        # plot velocity
-        ax = plt.subplot(3, 1, 2)
-        ax.plot(self.t, self.sd, **plotopts)
-        ax.grid(True)
-        ax.set_xlim(0, max(self.t))
+        if nplots > 1:
+            # plot velocity
+            ax = plt.subplot(3, 1, 2)
+            ax.plot(self.t, self.sd, **plotopts)
+            ax.grid(True)
+            ax.set_xlim(0, max(self.t))
 
-        if self.istime:
-            ax.set_ylabel("$\dot{{q}}(t)$", **textopts)
-        else:
-            ax.set_ylabel("$dq/dk$", **textopts)
+            if self.istime:
+                ax.set_ylabel("$\dot{{q}}(t)$", **textopts)
+            else:
+                ax.set_ylabel("$dq/dk$", **textopts)
 
-        # plot acceleration
-        ax = plt.subplot(3, 1, 3)
-        ax.plot(self.t, self.sdd, **plotopts)
-        ax.grid(True)
-        ax.set_xlim(0, max(self.t))
+            # plot acceleration
+            ax = plt.subplot(3, 1, 3)
+            ax.plot(self.t, self.sdd, **plotopts)
+            ax.grid(True)
+            ax.set_xlim(0, max(self.t))
 
-        if self.istime:
-            ax.set_ylabel(f"$\ddot{{q}}(t)$", **textopts)
-            ax.set_xlabel("t (seconds)")
-        else:
-            ax.set_ylabel("$d^2q/dk^2$", **textopts)
-            ax.set_xlabel("k (step)")
+            if self.istime:
+                ax.set_ylabel(f"$\ddot{{q}}(t)$", **textopts)
+                ax.set_xlabel("t (seconds)")
+            else:
+                ax.set_ylabel("$d^2q/dk^2$", **textopts)
+                ax.set_xlabel("k (step)")
 
         plt.show(block=block)
 
@@ -970,10 +978,13 @@ def mstraj(
         qd = dq / tseg
 
         # add the blend polynomial
-        qb = jtraj(q0, q_prev + tacc2 * qd, mrange(0, taccx, dt), qd0=qd_prev, qd1=qd).s
-        if verbose:  # pragma nocover
-            print(qb)
-        tg = np.vstack([tg, qb[1:, :]])
+        if taccx > 0:
+            qb = jtraj(
+                q0, q_prev + tacc2 * qd, mrange(0, taccx, dt), qd0=qd_prev, qd1=qd
+            ).s
+            if verbose:  # pragma nocover
+                print(qb)
+            tg = np.vstack([tg, qb[1:, :]])
 
         clock = clock + taccx  # update the clock
 
@@ -990,8 +1001,9 @@ def mstraj(
         qd_prev = qd
 
     # add the final blend
-    qb = jtraj(q0, q_next, mrange(0, tacc2, dt), qd0=qd_prev, qd1=qdf).s
-    tg = np.vstack([tg, qb[1:, :]])
+    if tacc2 > 0:
+        qb = jtraj(q0, q_next, mrange(0, tacc2, dt), qd0=qd_prev, qd1=qdf).s
+        tg = np.vstack([tg, qb[1:, :]])
 
     infolist.append(info(None, tseg, clock))
 
@@ -1020,8 +1032,14 @@ if __name__ == "__main__":
     # t.plot(block=True)
 
     from roboticstoolbox import *
+    from spatialmath import SO2
 
-    puma = models.DH.Puma560()
+    # puma = models.DH.Puma560()
 
-    traj = jtraj(puma.qz, puma.qr, 100)
-    traj.plot(block=True)
+    # traj = jtraj(puma.qz, puma.qr, 100)
+    # traj.plot(block=True)
+
+    via = SO2(30, unit="deg") * np.array([[-1, 1, 1, -1, -1], [1, 1, -1, -1, 1]])
+    traj0 = mstraj(via.T, dt=0.2, tacc=0.5, qdmax=[2, 1])
+    xplot(traj0.q[:, 0], traj0.q[:, 1], color="red")
+    traj0.plot(block=True)
