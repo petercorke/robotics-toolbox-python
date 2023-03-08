@@ -451,9 +451,3 @@ class VehiclePlot(GraphicsBlock):
             self.ax.relim()
             self.ax.autoscale_view()
         super().step(state=state)
-
-    def done(self, block=False, **kwargs):
-        if self.bd.runtime.options.graphics:
-            plt.show(block=block)
-
-            super().done()
