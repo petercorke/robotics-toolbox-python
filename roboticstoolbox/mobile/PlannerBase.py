@@ -11,7 +11,7 @@ from abc import ABC
 from spatialmath.base.transforms2d import *
 from spatialmath.base.vectors import *
 from spatialmath.base.argcheck import getvector
-from spatialmath.base.graphics import axes_logic, plotvol2
+from spatialmath.base.graphics import axes_logic, plotvol2, axes_get_scale
 
 # from spatialmath import SE2, SE3
 from matplotlib import cm
@@ -125,8 +125,8 @@ class PlannerBase(ABC):
         :rtype: str
         """
         s = f"{self.__class__.__name__}: "
-        if self._occgrid0 is not None:
-            s += "\n  " + str(self.occgrid)
+        if hasattr(self, "_occgrid") and self._occgrid is not None:
+            s += "\n  " + str(self._occgrid)
         if self._start is not None:
             s += f"\n  Start: {self.start}"
         if self._goal is not None:
@@ -766,7 +766,8 @@ class PlannerBase(ABC):
         else:
             ax.set_zlabel(r"$\theta$")
 
-        plt.show(block=block)
+        if block:
+            plt.show(block=block)
 
         return ax
 
@@ -802,6 +803,7 @@ class PlannerBase(ABC):
         ax=None,
         inflated=True,
         colorbar=True,
+        block=False,
         **unused,
     ):
         """
