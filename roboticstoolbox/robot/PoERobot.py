@@ -21,6 +21,9 @@ class PoELink(Link):
         self.S = Twist3(twist)
         self.name = name
 
+        # consider a given PoELink (both revolute or prismatic) as joint variable
+        self._isjoint = True
+
     def __repr__(self):
         s = f"PoELink({np.array2string(self.S.S, separator=',')}"
         if self.name is not None:
