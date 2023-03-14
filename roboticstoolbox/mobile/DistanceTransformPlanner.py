@@ -106,7 +106,7 @@ class DistanceTransformPlanner(PlannerBase):
 
         return s
 
-    def plan(self, goal=None, animate=False, verbose=False):
+    def plan(self, goal=None, animate=False, summary=False):
         r"""
         Plan path using distance transform
 
@@ -135,7 +135,8 @@ class DistanceTransformPlanner(PlannerBase):
             self.occgrid.grid,
             goal=self._goal,
             metric=self._metric,
-            animate=animate
+            animate=animate,
+            summary=summary,
         )
 
     def next(self, position):
@@ -215,7 +216,7 @@ class DistanceTransformPlanner(PlannerBase):
             line/surface handling.
         """
         fig = plt.figure()
-        ax = fig.gca(projection="3d")
+        ax = fig.add_subplot(111, projection="3d")
 
         distance = self._distancemap
         X, Y = np.meshgrid(np.arange(distance.shape[1]), np.arange(distance.shape[0]))
@@ -273,7 +274,7 @@ def distancexform(occgrid, goal, metric="cityblock", animate=False, summary=Fals
     # - other cells are inf
     # - goal is zero
 
-    goal = base.getvector(goal, 2, dtype=np.int)
+    goal = base.getvector(goal, 2, dtype=int)
 
     distance = occgrid.astype(np.float32)
     distance[occgrid > 0] = np.nan  # assign nan to obstacle cells

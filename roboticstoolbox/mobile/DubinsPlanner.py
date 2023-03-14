@@ -391,6 +391,15 @@ class DubinsPlanner(PlannerBase):
             super().__str__()
             + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
         )
+        return s
+
+    @property
+    def curvature(self):
+        return self._curvature
+
+    @property
+    def stepsize(self):
+        return self._stepsize
 
     def query(self, start, goal, **kwargs):
         r"""
