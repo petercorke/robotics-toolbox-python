@@ -17,12 +17,12 @@ class PoELink(Link):
     """
 
     def __init__(self, twist, name=None):
-        super().__init__()
+        # get ETS of the link in the world frame, given by its twist
+        ets = self.ets_world(twist)
+
+        super().__init__(ets)
         self.S = Twist3(twist)
         self.name = name
-
-        # consider a given PoELink (both revolute or prismatic) as joint variable
-        self._isjoint = True
 
     def __repr__(self):
         s = f"PoELink({np.array2string(self.S.S, separator=',')}"
@@ -49,6 +49,83 @@ class PoELink(Link):
         # see https://ipython.org/ipython-doc/stable/api/generated/IPython.lib.pretty.html
 
         p.text(f"{i}:\n{str(x)}")
+
+    def ets_world(self, tw):
+        # initialize partial transformations between a joint from base to ee
+        tf = SE3()
+        # get transforms from screws, related to base frame
+        # get screw axis components
+        w = tw.w
+        v = tw.v
+
+        # get point on the screw axis
+        if np.linalg.norm(w) == 0.0:  # test prismatic joint
+            # (test "isrevolute" gives False even though the class is PoERevolute)
+            # switch the directional vector components
+            a_vec = v
+            # get vector of the x axis
+            n_vec = tf.n
+            # point on screw axis
+            t_vec = tf.t
+
+        else:  # is revolute
+            # get the nearest point of the screw axis closest to the origin
+            principalpoint = np.cross(w, v)
+
+            # get vector of the x-axis
+            if round(np.linalg.norm(principalpoint), 3) == 0.0:  # the points are
+                # coincident
+                n_vec = tf.n
+            else:
+                n_vec = principalpoint / np.linalg.norm(principalpoint)
+
+            a_vec = w
+            t_vec = principalpoint
+
+        # obtain the other vector elements of transformation matrix
+        o_vec = np.cross(a_vec, n_vec)
+
+        # construct transformation matrix from obtained vectors
+        f_tf = np.eye(4)
+        f_tf[0:3, 0] = n_vec
+        f_tf[0:3, 1] = o_vec
+        f_tf[0:3, 2] = a_vec
+        f_tf[0:3, 3] = t_vec
+        # normalize the matrix
+        tf = SE3(trnorm(f_tf))
+        # print(tf)
+        # print(twist.SE3())
+        # print("--------------------------------------")
+        # tf = twist.SE3()
+
+        et = []
+        if tf.t[0] != 0.0:
+            et.append(ET.tx(tf.t[0]))
+        if tf.t[1] != 0.0:
+            et.append(ET.ty(tf.t[1]))
+        if tf.t[2] != 0.0:
+            et.append(ET.tz(tf.t[2]))
+
+        # RPY parameters, due to RPY convention the order of is reversed
+        rpy = tf.rpy()
+        if rpy[2] != 0.0:
+            et.append(ET.Rz(rpy[2]))
+        if rpy[1] != 0.0:
+            et.append(ET.Ry(rpy[1]))
+        if rpy[0] != 0.0:
+            et.append(ET.Rx(rpy[0]))
+
+        # assign joint variable, if the frame is not base or tool frame
+        if np.linalg.norm(w) == 0.0:  # test prismatic joint
+            et.append(ET.tz())
+        else:  # if revolute
+            et.append(ET.Rz())
+
+        ets = ETS()
+        for e in et:
+            ets *= e
+
+        return ets
 
 
 class PoERevolute(PoELink):
