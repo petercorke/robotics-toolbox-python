@@ -3,9 +3,9 @@
 # The following code is based on code from Python Robotics
 # https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning
 # RRTDubins planning
-# Author: Atsushi Sakai 
+# Author: Atsushi Sakai
 # Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
-# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
 
 import math
 from collections import namedtuple
@@ -57,7 +57,7 @@ class RRTPlanner(PlannerBase):
     the forward or backward direction.
 
     Polygons are used for obstacle avoidance:
-    
+
     - the environment is defined by a set of polygons represented by a :class:`PolygonMap`
     - the vehicle is defined by a single polygon specified by the ``polygon``
       argument to its constructor
@@ -70,7 +70,7 @@ class RRTPlanner(PlannerBase):
 
         # create polygonal obstacles
         map = PolygonMap(workspace=[0, 10])
-        map.add([(5, 50), (5, 6), (6, 6), (6, 50)]) 
+        map.add([(5, 50), (5, 6), (6, 6), (6, 50)])
         map.add([(5, 4), (5, -50), (6, -50), (6, 4)])
 
         # create outline polygon for vehicle
@@ -95,6 +95,7 @@ class RRTPlanner(PlannerBase):
 
     :seealso: :class:`DubinsPlanner` :class:`Vehicle` :class:`PlannerBase`
     """
+
     def __init__(
         self,
         map,
@@ -103,7 +104,7 @@ class RRTPlanner(PlannerBase):
         stepsize=0.2,
         showsamples=False,
         npoints=50,
-        **kwargs
+        **kwargs,
     ):
 
         super().__init__(ndims=2, **kwargs)

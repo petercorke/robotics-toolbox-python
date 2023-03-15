@@ -40,7 +40,7 @@ class DistanceTransformPlanner(PlannerBase):
 
     The map is described by a 2D occupancy ``occgrid`` whose elements are zero
     if traversable of nonzero if untraversable, ie. an obstacle.
-    
+
     The cells are assumed to be unit squares. Crossing the cell horizontally or
     vertically is a travel distance of 1, and for the Euclidean distance
     measure, the crossing the cell diagonally is a distance of :math:`\sqrt{2}`.
@@ -148,7 +148,7 @@ class DistanceTransformPlanner(PlannerBase):
         :raises RuntimeError: no plan has been computed
         :return: next robot position
         :rtype: ndarray(2)
-        
+
         Return the robot position that is one step closer to the goal. Called
         by :meth:`query` to find a path from start to goal.
 
