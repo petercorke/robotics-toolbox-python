@@ -10,6 +10,7 @@ import numpy as np
 from scipy import interpolate
 
 import matplotlib.pyplot as plt
+
 # from matplotlib import patches
 # import matplotlib.transforms as mtransforms
 
@@ -19,10 +20,21 @@ from roboticstoolbox.mobile.Animations import VehiclePolygon
 
 
 class VehicleBase(ABC):
-
-    def __init__(self, covar=None, speed_max=np.inf, accel_max=np.inf, x0=[0, 0, 0], dt=0.1,
-                 control=None, seed=0, animation=None, verbose=False, plot=False, workspace=None,
-                 polygon=None):
+    def __init__(
+        self,
+        covar=None,
+        speed_max=np.inf,
+        accel_max=np.inf,
+        x0=[0, 0, 0],
+        dt=0.1,
+        control=None,
+        seed=0,
+        animation=None,
+        verbose=False,
+        plot=False,
+        workspace=None,
+        polygon=None,
+    ):
         r"""
         Superclass for vehicle kinematic models
 
@@ -64,7 +76,7 @@ class VehicleBase(ABC):
         [A, B, C, D]     A:B      C:D
         ==============  =======  =======
 
-        :note: Set ``seed=None`` to have it randomly initialized from the 
+        :note: Set ``seed=None`` to have it randomly initialized from the
             operating system.
 
         :seealso: :class:`Bicycle` :class:`Unicycle` :class:`VehicleAnimationBase`
@@ -76,8 +88,8 @@ class VehicleBase(ABC):
             x0 = np.zeros((3,), dtype=float)
         else:
             x0 = base.getvector(x0)
-            if len(x0) not in (2,3):
-                raise ValueError('x0 must be length 2 or 3')
+            if len(x0) not in (2, 3):
+                raise ValueError("x0 must be length 2 or 3")
         self._x0 = x0
         self._x = x0.copy()
 
@@ -141,7 +153,7 @@ class VehicleBase(ABC):
         :return: predicted vehicle state
         :rtype: ndarray(3)
 
-        Predict the next state based on current state and odometry 
+        Predict the next state based on current state and odometry
         value.  ``v`` is a random variable that represents additive
         odometry noise for simulation purposes.
 
@@ -164,7 +176,12 @@ class VehicleBase(ABC):
             # used by particle filter
             dd, dth = odo
             theta = x[:, 2]
-            return np.array(x) + np.c_[dd * np.cos(theta), dd * np.sin(theta), np.full(theta.shape, dth)]
+            return (
+                np.array(x)
+                + np.c_[
+                    dd * np.cos(theta), dd * np.sin(theta), np.full(theta.shape, dth)
+                ]
+            )
         else:
             # x is a vector
             x = base.getvector(x, 3)
@@ -188,7 +205,7 @@ class VehicleBase(ABC):
         :type odo: array_like(2)
         :return: Jacobian matrix
         :rtype: ndarray(3,3)
-        
+
         Returns the Jacobian matrix :math:`\frac{\partial \vec{f}}{\partial \vec{x}}` for
         the given state and odometry.
 
@@ -216,7 +233,7 @@ class VehicleBase(ABC):
         :type odo: array_like(2)
         :return: Jacobian matrix
         :rtype: ndarray(3,2)
-        
+
         Returns the Jacobian matrix :math:`\frac{\partial \vec{f}}{\partial \vec{v}}` for
         the given state and odometry.
 
@@ -233,7 +250,7 @@ class VehicleBase(ABC):
             ])
         # fmt: on
         return J
-        
+
     @property
     def control(self):
         """
@@ -260,7 +277,7 @@ class VehicleBase(ABC):
             >>> bike.control = RandomPath(10)
             >>> print(bike)
 
-        :seealso: :meth:`run` :meth:`eval_control` :obj:`scipy.interpolate.interp1d` :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase` 
+        :seealso: :meth:`run` :meth:`eval_control` :obj:`scipy.interpolate.interp1d` :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`
         """
         return self._control
 
@@ -275,7 +292,6 @@ class VehicleBase(ABC):
         if isinstance(control, VehicleDriverBase):
             # if this is a driver agent, connect it to the vehicle
             control.vehicle = self
-
 
     def eval_control(self, control, x):
         """
@@ -307,7 +323,7 @@ class VehicleBase(ABC):
         if base.isvector(control, 2):
             # control is a constant
             u = base.getvector(control, 2)
-        
+
         elif isinstance(control, VehicleDriverBase):
             # vehicle has a driver object
             u = control.demand()
@@ -321,7 +337,7 @@ class VehicleBase(ABC):
             u = control(self, self._t, x)
 
         else:
-            raise ValueError('bad control specified')
+            raise ValueError("bad control specified")
 
         # apply limits
         ulim = self.u_limited(u)
@@ -346,16 +362,15 @@ class VehicleBase(ABC):
         # acceleration limit
         if self._accel_max is not None:
             if (v - self._v_prev) / self._dt > self._accel_max:
-                v = self._v_prev + self._accelmax * self._dt;
+                v = self._v_prev + self._accelmax * self._dt
             elif (v - self._v_prev) / self._dt < -self._accel_max:
-                v = self._v_prev - self._accel_max * self._dt;
+                v = self._v_prev - self._accel_max * self._dt
         self._v_prev = v
-        
+
         # speed limit
         if self._speed_max is not None:
             v = np.clip(v, -self._speed_max, self._speed_max)
         return v
-
 
     def polygon(self, q):
         """
@@ -391,10 +406,9 @@ class VehicleBase(ABC):
         :seealso: :class:`VehicleDriverBase` :meth:`control`
         """
 
-        warnings.warn('add_driver is deprecated, use veh.control=driver instead')
+        warnings.warn("add_driver is deprecated, use veh.control=driver instead")
         self._control = driver
         driver._veh = self
-
 
     def run(self, T=10, x0=None, control=None, animate=False):
         r"""
@@ -427,18 +441,18 @@ class VehicleBase(ABC):
 
         The simulation can be stopped prematurely by the control function
         calling :meth:`stopif`.
-        
+
         :seealso: :meth:`init` :meth:`step` :meth:`control`
         """
 
         self.init(control=control, x0=x0)
-        
+
         for i in range(round(T / self.dt)):
             self.step(animate=animate)
 
             # check for user requested stop
             if self._stopsim:
-                print('USER REEQUESTED STOP AT time', self._t)
+                print("USER REEQUESTED STOP AT time", self._t)
                 break
 
         return self.x_hist
@@ -478,7 +492,7 @@ class VehicleBase(ABC):
         if control is not None:
             # override control
             self._control = control
-        
+
         if self._control is not None:
             self._control.init()
 
@@ -489,15 +503,16 @@ class VehicleBase(ABC):
 
             # setup the plot
             self._ax = base.plotvol2(self.workspace)
-        
-            self._ax.set_xlabel('x')
-            self._ax.set_ylabel('y')
-            self._ax.set_aspect('equal')
+
+            self._ax.set_xlabel("x")
+            self._ax.set_ylabel("y")
+            self._ax.set_aspect("equal")
             self._ax.figure.canvas.manager.set_window_title(
-                f"Robotics Toolbox for Python (Figure {self._ax.figure.number})")
+                f"Robotics Toolbox for Python (Figure {self._ax.figure.number})"
+            )
 
             self._animation.add(ax=self._ax)  # add vehicle animation to axis
-            self._timer = plt.figtext(0.85, 0.95, '')  # display time counter
+            self._timer = plt.figtext(0.85, 0.95, "")  # display time counter
 
         # initialize the driver
         if isinstance(self._control, VehicleDriverBase):
@@ -569,7 +584,10 @@ class VehicleBase(ABC):
 
         # be verbose
         if self._verbose:
-            print(f"{self._t:8.2f}: u=({u[0]:8.2f}, {u[1]:8.2f}), x=({self._x[0]:8.2f}, {self._x[1]:8.2f}, {self._x[2]:8.2f})")
+            print(
+                f"{self._t:8.2f}: u=({u[0]:8.2f}, {u[1]:8.2f}), x=({self._x[0]:8.2f},"
+                f" {self._x[1]:8.2f}, {self._x[2]:8.2f})"
+            )
 
         return odo
 
@@ -807,8 +825,8 @@ class VehicleBase(ABC):
 
         :seealso: :meth:`run` :meth:`plot_xyt`
         """
-        if args is None and 'color' not in kwargs:
-            kwargs['color'] = 'b'
+        if args is None and "color" not in kwargs:
+            kwargs["color"] = "b"
         xyt = self.x_hist
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
         if block is not None:
@@ -849,11 +867,11 @@ class VehicleBase(ABC):
     #     :rtype: ndarray(1), ndarray(n,3)
 
     #     XF = V.path(TF, U) is the final state of the vehicle (3x1) from the initial
-    #     state (0,0,0) with the control inputs U (vehicle specific).  TF is  a scalar to 
+    #     state (0,0,0) with the control inputs U (vehicle specific).  TF is  a scalar to
     #     specify the total integration time.
 
     #     XP = V.path(TV, U) is the trajectory of the vehicle (Nx3) from the initial
-    #     state (0,0,0) with the control inputs U (vehicle specific).  T is a vector (N) of 
+    #     state (0,0,0) with the control inputs U (vehicle specific).  T is a vector (N) of
     #     times for which elements of the trajectory will be computed.
 
     #     XP = V.path(T, U, X0) as above but specify the initial state.
@@ -887,16 +905,11 @@ class VehicleBase(ABC):
     #     return (sol.t, sol.y.T)
 
 
-
 # ========================================================================= #
 
-class Bicycle(VehicleBase):
 
-    def __init__(self,
-                L=1,
-                steer_max=0.45 * pi,
-                **kwargs
-                ):
+class Bicycle(VehicleBase):
+    def __init__(self, L=1, steer_max=0.45 * pi, **kwargs):
         r"""
         Create bicycle kinematic model
 
@@ -928,7 +941,10 @@ class Bicycle(VehicleBase):
     def __str__(self):
 
         s = super().__str__()
-        s += f"\n  L={self._l}, steer_max={self._steer_max:g}, speed_max={self._speed_max:g}, accel_max={self._accel_max:g}"
+        s += (
+            f"\n  L={self._l}, steer_max={self._steer_max:g},"
+            f" speed_max={self._speed_max:g}, accel_max={self._accel_max:g}"
+        )
         return s
 
     @property
@@ -1006,7 +1022,7 @@ class Bicycle(VehicleBase):
 
         :seealso: :meth:`f`
         """
-        
+
         # unpack some variables
         theta = x[2]
 
@@ -1014,12 +1030,8 @@ class Bicycle(VehicleBase):
             u = self.u_limited(u)
         v = u[0]
         gamma = u[1]
-            
-        return v * np.r_[
-                cos(theta), 
-                sin(theta), 
-                tan(gamma) / self.l
-                    ]
+
+        return v * np.r_[cos(theta), sin(theta), tan(gamma) / self.l]
 
     def u_limited(self, u):
         """
@@ -1030,7 +1042,7 @@ class Bicycle(VehicleBase):
         :return: Allowable vehicle inputs :math:`(v, \gamma)`
         :rtype: ndarray(2)
 
-        Velocity and acceleration limits are applied to :math:`v` and 
+        Velocity and acceleration limits are applied to :math:`v` and
         steered wheel angle limits are applied to :math:`\gamma`.
         """
         # limit speed and steer angle
@@ -1040,14 +1052,12 @@ class Bicycle(VehicleBase):
 
         return ulim
 
+
 # ========================================================================= #
 
-class Unicycle(VehicleBase):
 
-    def __init__(self,
-                W=1,
-                steer_max=np.inf,
-                **kwargs):
+class Unicycle(VehicleBase):
+    def __init__(self, W=1, steer_max=np.inf, **kwargs):
         r"""
         Create unicycle kinematic model
 
@@ -1077,9 +1087,11 @@ class Unicycle(VehicleBase):
     def __str__(self):
 
         s = super().__str__()
-        s += f"\n  W={self._W}, steer_max={self._steer_max}, vel_max={self._vel_max}, accel_max={self.accel_max}"
+        s += (
+            f"\n  W={self._W}, steer_max={self._steer_max}, vel_max={self._vel_max},"
+            f" accel_max={self.accel_max}"
+        )
         return s
-
 
     def deriv(self, x, u):
         r"""
@@ -1104,17 +1116,13 @@ class Unicycle(VehicleBase):
 
         .. note:: Vehicle speed and steering limits are not applied here
         """
-        
+
         # unpack some variables
         theta = x[2]
         v = u[0]
         vdiff = u[1]
 
-        return np.r_[
-                v * cos(theta), 
-                v * sin(theta), 
-                vdiff / self._W
-                    ]
+        return np.r_[v * cos(theta), v * sin(theta), vdiff / self._W]
 
     def u_limited(self, u):
         """
@@ -1125,7 +1133,7 @@ class Unicycle(VehicleBase):
         :return: Allowable vehicle inputs :math:`(v, \omega)`
         :rtype: ndarray(2)
 
-        Velocity and acceleration limits are applied to :math:`v` and 
+        Velocity and acceleration limits are applied to :math:`v` and
         turn rate limits are applied to :math:`\omega`.
         """
 
@@ -1136,10 +1144,9 @@ class Unicycle(VehicleBase):
 
         return ulim
 
+
 class DiffSteer(Unicycle):
-    def __init__(self,
-                W=1,
-                **kwargs):
+    def __init__(self, W=1, **kwargs):
         r"""
         Create differential steering kinematic model
 
@@ -1170,7 +1177,6 @@ class DiffSteer(Unicycle):
         s += f"\n  W={self._W}, vel_max={self._vel_max}, accel_max={self.accel_max}"
         return s
 
-
     def deriv(self, x, u):
         r"""
         Time derivative of state
@@ -1194,7 +1200,7 @@ class DiffSteer(Unicycle):
 
         .. note:: Vehicle speed and steering limits are not applied here
         """
-        
+
         # unpack some variables
         theta = x[2]
         vleft = u[0]
@@ -1204,11 +1210,7 @@ class DiffSteer(Unicycle):
         v = (vright + vleft) / 2.0
         vdiff = vright - vleft
 
-        return np.r_[
-                v * cos(theta), 
-                v * sin(theta), 
-                vdiff / self._W
-                    ]
+        return np.r_[v * cos(theta), v * sin(theta), vdiff / self._W]
 
     def u_limited(self, u):
         """
@@ -1219,7 +1221,7 @@ class DiffSteer(Unicycle):
         :return: Allowable vehicle inputs :math:`(v, \omega)`
         :rtype: ndarray(2)
 
-        Velocity and acceleration limits are applied to :math:`v` and 
+        Velocity and acceleration limits are applied to :math:`v` and
         turn rate limits are applied to :math:`\omega`.
         """
 
@@ -1229,6 +1231,7 @@ class DiffSteer(Unicycle):
         ulim[1] = self.limits_va(u[1])
 
         return ulim
+
 
 if __name__ == "__main__":
 
@@ -1282,7 +1285,6 @@ if __name__ == "__main__":
 
     # ax.set_xlim(-5, 5)
     # ax.set_ylim(-5, 5)
-
 
     # v = VehicleAnimation.Polygon(shape='triangle', maxdim=0.1, color='r')
     # v = VehicleAnimation.Icon('car3.png', maxdim=2, centre=[0.3, 0.5])
