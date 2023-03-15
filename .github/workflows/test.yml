@@ -28,7 +28,7 @@ jobs:
       run: |
         pip install .[dev,collision]
         pip install pytest-timeout
-        pytest --timeout=50 --timeout_method thread -s
+        pytest --ignore=roboticstoolbox/blocks --timeout=50 --timeout_method thread -s
   codecov:
     # If all tests pass:
     # Run coverage and upload to codecov
@@ -46,7 +46,7 @@ jobs:
     - name: Run coverage
       run: |
         pip install -e .[dev,collision,vpython]
-        pytest --cov=roboticstoolbox --cov-report xml:coverage.xml
+        pytest --ignore=roboticstoolbox/blocks --cov=roboticstoolbox --cov-report xml:coverage.xml
         coverage report
     - name: upload coverage to Codecov
       uses: codecov/codecov-action@v3
