@@ -476,7 +476,7 @@ class PlannerBase(ABC):
         start=None,
         goal=None,
         ax=None,
-        block=False,
+        block=None,
         bgargs={},
         **unused,
     ):
@@ -587,7 +587,6 @@ class PlannerBase(ABC):
         :seealso: :meth:`plot_bg` :func:`base.plot_poly`
         """
         # create default markers
-
         # passed to Matplotlib plot()
         if start_marker is None:
             start_marker = {
@@ -803,7 +802,7 @@ class PlannerBase(ABC):
         ax=None,
         inflated=True,
         colorbar=True,
-        block=False,
+        block=None,
         **unused,
     ):
         """
@@ -905,7 +904,7 @@ class PlannerBase(ABC):
             # overlay obstacles
             c_map = mpl.colors.ListedColormap(colors)
             # self.occgrid.plot(image, cmap=c_map, zorder=1)
-            self.occgrid.plot(cmap=c_map, zorder=1)
+            self.occgrid.plot(cmap=c_map, zorder=1, ax=ax)
 
         ax.set_facecolor((1, 1, 1))  # create white background
         ax.set_xlabel("x (cells)")
@@ -916,8 +915,9 @@ class PlannerBase(ABC):
         # ax.set_xlim(ax.get_xlim())
         # ax.set_ylim(ax.get_ylim())
 
-        plt.draw()
-        plt.show(block=False)
+        # plt.draw()
+        if block is not None:
+            plt.show(block=block)
 
     def message(self, s, color=None):
         """
