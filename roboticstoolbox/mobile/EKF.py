@@ -1000,13 +1000,13 @@ class EKF:
             xyt = None
         return xyt
 
-    def plot_xy(self, *args, block=False, **kwargs):
+    def plot_xy(self, *args, block=None, **kwargs):
         """
         Plot estimated vehicle position
 
         :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`
-        :param block: hold plot until figure is closed, defaults to False
+        :param block: hold plot until figure is closed, defaults to None
         :type block: bool, optional
 
         Plot the estimated vehicle path in the xy-plane.
@@ -1018,9 +1018,10 @@ class EKF:
             kwargs["color"] = "r"
         xyt = self.get_xyt()
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
-        # plt.show(block=block)
+        if block is not None:
+            plt.show(block=block)
 
-    def plot_ellipse(self, confidence=0.95, N=10, **kwargs):
+    def plot_ellipse(self, confidence=0.95, N=10, block=None, **kwargs):
         """
         Plot uncertainty ellipses
 
@@ -1028,6 +1029,8 @@ class EKF:
         :type confidence: float, optional
         :param N: number of ellipses to plot, defaults to 10
         :type N: int, optional
+        :param block: hold plot until figure is closed, defaults to None
+        :type block: bool, optional
         :param kwargs: arguments passed to :meth:`spatialmath.base.graphics.plot_ellipse`
 
         Plot ``N`` uncertainty ellipses spaced evenly along the trajectory.
@@ -1062,8 +1065,10 @@ class EKF:
                     inverted=True,
                     **kwargs,
                 )
+        if block is not None:
+            plt.show(block=block)
 
-    def plot_error(self, bgcolor="r", confidence=0.95, ax=None, **kwargs):
+    def plot_error(self, bgcolor="r", confidence=0.95, ax=None, block=None, **kwargs):
         r"""
         Plot error with uncertainty bounds
 
@@ -1071,6 +1076,8 @@ class EKF:
         :type bgcolor: str, optional
         :param confidence: confidence interval, defaults to 0.95
         :type confidence: float, optional
+        :param block: hold plot until figure is closed, defaults to None
+        :type block: bool, optional
 
         Plot the error between actual and estimated vehicle
         path :math:`(x, y, \theta)`` versus time as three stacked plots.
@@ -1128,6 +1135,9 @@ class EKF:
             ax.set_ylabel(labels[k] + " error")
             ax.set_xlim(0, t[-1])
 
+        if block is not None:
+            plt.show(block=block)
+
         # subplot(opt.nplots*100+12)
         # if opt.confidence
         #     edge = [pxy(:,2); -pxy(end:-1:1,2)];
@@ -1176,7 +1186,7 @@ class EKF:
             xy.append(xf)
         return np.array(xy)
 
-    def plot_map(self, marker=None, ellipse=None, confidence=0.95):
+    def plot_map(self, marker=None, ellipse=None, confidence=0.95, block=None):
         """
         Plot estimated landmarks
 
@@ -1186,6 +1196,8 @@ class EKF:
         :type ellipse: dict, optional
         :param confidence: ellipse confidence interval, defaults to 0.95
         :type confidence: float, optional
+        :param block: hold plot until figure is closed, defaults to None
+        :type block: bool, optional
 
         Plot a marker  and covariance ellipses for each estimated landmark.
 
@@ -1232,6 +1244,8 @@ class EKF:
                         **ellipse,
                     )
         # plot_ellipse( P * chi2inv_rtb(opt.confidence, 2), xf, args{:});
+        if block is not None:
+            plt.show(block=block)
 
     def get_P(self, k=None):
         """

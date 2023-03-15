@@ -386,7 +386,7 @@ class PoseGraph:
     def g2w(self, g):
         return (np.r_[g] - self._ngrid / 2) * self._cellsize + self._centre
 
-    def plot_occgrid(self, w, block=True):
+    def plot_occgrid(self, w, block=None):
 
         bl = self.g2w([0, 0])
         tr = self.g2w([w.shape[1], w.shape[0]])
@@ -399,7 +399,9 @@ class PoseGraph:
         plt.imshow(w, cmap="gray", extent=[bl[0], tr[0], bl[1], tr[1]])
         plt.xlabel("x")
         plt.ylabel("y")
-        plt.show(block=block)
+
+        if block is not None:
+            plt.show(block=block)
 
     # The following methods were inspired by, and modeled on, the MATLAB/Octave file
     # ls-slam.m by Giorgio Grisetti and Gian Diego Tipaldi.

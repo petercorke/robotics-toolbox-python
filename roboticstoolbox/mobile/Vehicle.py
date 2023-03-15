@@ -792,11 +792,11 @@ class VehicleBase(ABC):
     #     vertices = np.array(vertices).T
     #     base.plot_poly(SE2(x) * vertices, close=True, **kwargs)
 
-    def plot_xy(self, *args, block=False, **kwargs):
+    def plot_xy(self, *args, block=None, **kwargs):
         """
         Plot xy-path from history
 
-        :param block: block until plot dismissed, defaults to False
+        :param block: block until plot dismissed, defaults to None
         :type block: bool, optional
         :param args: positional arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keyword arguments passed to :meth:`~matplotlib.axes.Axes.plot`
@@ -811,9 +811,10 @@ class VehicleBase(ABC):
             kwargs['color'] = 'b'
         xyt = self.x_hist
         plt.plot(xyt[:, 0], xyt[:, 1], *args, **kwargs)
-        plt.show(block=block)
+        if block is not None:
+            plt.show(block=block)
 
-    def plot_xyt(self, block=False, **kwargs):
+    def plot_xyt(self, block=None, **kwargs):
         """
         Plot configuration vs time from history
 
@@ -829,10 +830,10 @@ class VehicleBase(ABC):
         """
         xyt = self.x_hist
         t = np.arange(0, xyt.shape[0] * self._dt, self._dt)
-        plt.plot(xyt[:,0], xyt[:, :], **kwargs)
-        plt.legend(['x', 'y', '$\\theta$'])
-        plt.show(block=block)
-
+        plt.plot(xyt[:, 0], xyt[:, :], **kwargs)
+        plt.legend(["x", "y", "$\\theta$"])
+        if block is not None:
+            plt.show(block=block)
 
     # def path(self, t=10, u=None, x0=None):
     #     """

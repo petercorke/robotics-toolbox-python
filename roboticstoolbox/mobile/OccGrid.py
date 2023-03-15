@@ -258,7 +258,7 @@ class BaseOccupancyGrid(BaseMap):
         """
         return (np.round((p - self._origin) / self._cellsize)).astype(int)
 
-    def plot(self, map=None, ax=None, block=False, **kwargs):
+    def plot(self, map=None, ax=None, block=None, **kwargs):
         """
         Plot the occupancy grid (superclass)
 
@@ -267,7 +267,7 @@ class BaseOccupancyGrid(BaseMap):
         :type map: ndarray(N,M), optional
         :param ax: matplotlib axes to plot into, defaults to None
         :type ax: Axes2D, optional
-        :param block: block until plot is dismissed, defaults to False
+        :param block: block until plot is dismissed, defaults to None
         :type block: bool, optional
         :param kwargs: arguments passed to ``imshow``
 
@@ -288,7 +288,8 @@ class BaseOccupancyGrid(BaseMap):
         ax.imshow(map, origin="lower", interpolation=None, **kwargs)
         ax.set_xlabel("x")
         ax.set_ylabel("y")
-        plt.show(block=block)
+        if block is not None:
+            plt.show(block=block)
 
     def line_w(self, p1, p2):
         """
@@ -518,13 +519,14 @@ class PolygonMap(BaseMap):
         """
         return polygon.intersects(self.polygons)
 
-    def plot(self, block=False):
+    def plot(self, block=None):
         base.plotvol2(self.workspace)
 
         for polygon in self.polygons:
             polygon.plot(color="r")
 
-        plt.show(block=block)
+        if block is not None:
+            plt.show(block=block)
 
     def isoccupied(self, p):
         """

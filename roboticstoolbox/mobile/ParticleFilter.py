@@ -501,13 +501,13 @@ class ParticleFilter:
         """
         return np.array([h.std for h in self._history])
 
-    def plot_xy(self, block=False, **kwargs):
+    def plot_xy(self, block=None, **kwargs):
         r"""
         Plot estimated vehicle position
 
         :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`
-        :param block: hold plot until figure is closed, defaults to False
+        :param block: hold plot until figure is closed, defaults to None
         :type block: bool, optional
 
         Plot the estimated vehicle path in the xy-plane.
@@ -516,4 +516,5 @@ class ParticleFilter:
         """
         xyt = self.get_xyt()
         plt.plot(xyt[:, 0], xyt[:, 1], **kwargs)
-        # plt.show(block=block)
+        if block is not None:
+            plt.show(block=block)
