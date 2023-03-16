@@ -10,17 +10,18 @@ link1 = PoERevolute([0, 0, 1], [0, 0, 0])
 link2 = PoERevolute([0, 0, 1], [1, 0, 0])
 TE0 = SE3.Tx(2)
 
-poe = PoERobot([link1, link2], TE0)
+pr = PoERobot([link1, link2], TE0)
 
-poe2ets = Robot(poe.ets())
+ets = pr.ets()
+er = Robot(ets)
 
 q = [0, 0]
 q = [np.pi/2, 1]
 print("RR robot - book example")
-print(poe.fkine(q))
-print(poe2ets.fkine(q))
+print(pr.fkine(q))
+print(er.fkine(q))
 
-
+"""
 print("----------")
 
 
@@ -38,8 +39,8 @@ q = [0, 0, 0, 0]
 q = [np.pi/7, -np.pi/5, 0.3, -np.pi/3]
 
 print("RRPR robot")
-print(poe.fkine(q))
-print(poe2ets.fkine(q))
+print(pr.fkine(q))
+print(er.fkine(q))
 
 
 print("----------")
@@ -72,6 +73,6 @@ q = [0, 0, 0, 0]
 q = [np.pi/2, np.pi/7, np.pi/5, 0.58]
 
 print("3RP robot - arbitrary structure")
-print(poe.fkine(q))
-print(poe2ets.fkine(q))
-
+print(pr.fkine(q))
+print(er.fkine(q))
+"""
