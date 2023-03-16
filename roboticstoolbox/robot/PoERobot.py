@@ -368,6 +368,11 @@ class PoERobot(Robot):
 
             self.links[i].ets = link_ets
 
+            if self.links[i].isrevolute:
+                et.append(ET.Rz())
+            elif self.links[i].isprismatic:
+                et.append(ET.tz())
+
 
 """
                 link_ets = ETS()
