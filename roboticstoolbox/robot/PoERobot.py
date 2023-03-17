@@ -186,6 +186,9 @@ class PoERobot(Robot):
 
         super().__init__(links, **kwargs)
         self.T0 = T0
+
+        # update ETS according to links order
+        # (in PoELink their ETS is in relation to base frame, not previous joint's ETS)
         self._update_ets()
 
     def __str__(self):
@@ -236,11 +239,11 @@ class PoERobot(Robot):
         :rtype: SE3
         """
         T = None
-        for link, qk in zip(self, q):
+        for i in range(self.n):
             if T is None:
-                T = link.S.exp(qk)
+                T = self.links[i+1].S.exp(q[i])
             else:
-                T *= link.S.exp(qk)
+                T *= self.links[i+1].S.exp(q[i])
 
         return T * self.T0
 
@@ -358,9 +361,9 @@ class PoERobot(Robot):
 
             # assign joint variable, if the frame is not base or tool frame
             if self.links[i].isrevolute:
-                et.append(ET.Rz())
+                et.append(ET.Rz(jindex=i-1))
             elif self.links[i].isprismatic:
-                et.append(ET.tz())
+                et.append(ET.tz(jindex=i-1))
 
             link_ets = ETS()
             for e in et:
@@ -372,31 +375,6 @@ class PoERobot(Robot):
                 et.append(ET.Rz())
             elif self.links[i].isprismatic:
                 et.append(ET.tz())
-
-
-"""
-                link_ets = ETS()
-                for e in et:
-                    link_ets *= e
-
-                self.links[i].ets = link_ets
-
-            else:  # if base_link or end-effector link
-                link_ets = ETS()
-                if et == []:
-                    et = [ET.tx(0)]
-                for e in et:
-                    link_ets *= e
-
-                self.links[i].ets = link_ets
-"""
-
-
-
-
-
-
-
 
 if __name__ == "__main__":  # pragma nocover
     T0 = SE3.Trans(2, 0, 0)
