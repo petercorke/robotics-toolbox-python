@@ -467,32 +467,12 @@ class ReedsSheppPlanner(PlannerBase):
 if __name__ == '__main__':
     from math import pi
 
-    # start = (-1, -4, -np.radians(20))
-    # goal = (5, 5, np.radians(25))
-
-
     start = (0, 0, 0)
     goal = (0, 0, pi)
 
     reedsshepp = ReedsSheppPlanner(curvature=1.0, stepsize=0.1)
     path, status = reedsshepp.query(start, goal)
     print(status)
-
-    # px, py, pyaw, mode, clen = reeds_shepp_path_planning(
-    #     start_x, start_y, start_yaw, end_x, end_y, end_yaw, curvature, step_size)
-
-    # if show_animation:  # pragma: no cover
-    #     plt.cla()
-    #     plt.plot(px, py, label="final course " + str(mode))
-
-    #     # plotting
-    #     plot_arrow(start_x, start_y, start_yaw)
-    #     plot_arrow(end_x, end_y, end_yaw)
-
-    #     plt.legend()
-    #     plt.grid(True)
-    #     plt.axis("equal")
-    #     plt.show(block=True)
 
     reedsshepp.plot(path=path, direction=status.direction, configspace=True)
     plt.show(block=True)
