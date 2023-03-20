@@ -6,7 +6,6 @@ Created on 28 December 2020
 import numpy.testing as nt
 import roboticstoolbox as rtb
 import numpy as np
-import numpy.testing as nt
 import spatialmath.base as sm
 import unittest
 
