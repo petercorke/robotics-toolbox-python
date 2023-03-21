@@ -4,6 +4,8 @@ from spatialmath.base import trnorm
 from roboticstoolbox import Robot, ETS, ET
 import numpy as np
 from roboticstoolbox.models.ETS import Panda
+np.set_printoptions(3)
+
 
 
 # Book example
@@ -25,11 +27,15 @@ er = Robot(ets)
 q = [0, 0]
 q = [np.pi/2, -np.pi/2]
 print("RR robot - book example")
-print(pr.fkine(q))
 print(er.fkine(q))
-print(e.fkine(q))
+print(np.isclose(pr.fkine(q), er.fkine(q)))
+print("--- jacob0:")
+print(np.isclose(pr.jacob0(q), er.jacob0(q)))
+print("--- jacobe:")
+print(np.isclose(pr.jacobe(q), er.jacobe(q)))
 
-
+print("----------")
+print("")
 print("----------")
 
 
@@ -44,13 +50,18 @@ pr = PoERobot([link1, link2, link3, link4], TE0)
 er = Robot(pr.ets())
 
 q = [0, 0, 0, 0]
-q = [np.pi/7, -np.pi/5, 0.3, -np.pi/3]
+#q = [np.pi/7, -np.pi/5, 0.3, -np.pi/3]
 
 print("RRPR robot")
-print(pr.fkine(q))
 print(er.fkine(q))
+print(np.isclose(pr.fkine(q), er.fkine(q)))
+print("--- jacob0:")
+print(np.isclose(pr.jacob0(q), er.jacob0(q)))
+print("--- jacobe:")
+print(np.isclose(pr.jacobe(q), er.jacobe(q)))
 
-
+print("----------")
+print("")
 print("----------")
 
 
@@ -78,9 +89,13 @@ pr = PoERobot([link1, link2, link3, link4], TE0)
 er = Robot(pr.ets())
 
 q = [0, 0, 0, 0]
-q = [np.pi/2, np.pi/7, np.pi/5, 0.58]
+#q = [np.pi/2, np.pi/7, np.pi/5, 0.58]
 
 print("3RP robot - arbitrary structure")
-print(pr.fkine(q))
 print(er.fkine(q))
+print(np.isclose(pr.fkine(q), er.fkine(q)))
+print("--- jacob0:")
+print(np.isclose(pr.jacob0(q), er.jacob0(q)))
+print("--- jacobe:")
+print(np.isclose(pr.jacobe(q), er.jacobe(q)))
 
