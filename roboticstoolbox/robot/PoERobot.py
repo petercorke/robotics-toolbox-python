@@ -252,9 +252,9 @@ class PoERobot(Robot):
         """
         columns = []
         T = SE3()
-        for link, qk in zip(self, q):
-            columns.append(T.Ad() @ link.S.S)
-            T *= link.S.exp(qk)
+        for i in range(self.n):
+            columns.append(T.Ad() @ self.links[i+1].S.S)
+            T *= self.links[i+1].S.exp(q[i])
         T *= self.T0
         J = np.column_stack(columns)
 
@@ -274,9 +274,9 @@ class PoERobot(Robot):
         """
         columns = []
         T = SE3()
-        for link, qk in zip(self, q):
-            columns.append(T.Ad() @ link.S.S)
-            T *= link.S.exp(qk)
+        for i in range(self.n):
+            columns.append(T.Ad() @ self.links[i + 1].S.S)
+            T *= self.links[i + 1].S.exp(q[i])
         T *= self.T0
         J = np.column_stack(columns)
 
