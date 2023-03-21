@@ -114,12 +114,7 @@ class PoELink(Link):
         elif isinstance(self, PoERevolute):
             et.append(ET.Rz())
 
-        # create ETS from ET list
-        ets = ETS()
-        for e in et:
-            ets *= e
-
-        return ets
+        return ETS(et)
 
 
 class PoERevolute(PoELink):
@@ -322,11 +317,7 @@ class PoERobot(Robot):
             elif self.links[i].isprismatic:
                 et.append(ET.tz(jindex=i-1))
 
-            link_ets = ETS()
-            for e in et:
-                link_ets *= e
-
-            self.links[i].ets = link_ets
+            self.links[i].ets = ETS(et)
 
 if __name__ == "__main__":  # pragma nocover
     T0 = SE3.Trans(2, 0, 0)
