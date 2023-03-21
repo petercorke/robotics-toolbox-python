@@ -1,7 +1,7 @@
 # PoERobot
 import numpy as np
 from spatialmath import Twist3, SE3
-from spatialmath.base import skew, trnorm
+from spatialmath.base import skew
 from roboticstoolbox.robot import Link, Robot
 from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.ETS import ETS
@@ -18,7 +18,7 @@ class PoELink(Link):
 
     def __init__(self, twist, name=None):
         # get ETS of the link in the world frame, given by its twist
-        ets = self.ets_world(twist)
+        ets = self._ets_world(twist)
 
         super().__init__(ets)
         self.S = Twist3(twist)
@@ -50,23 +50,22 @@ class PoELink(Link):
 
         p.text(f"{i}:\n{str(x)}")
 
-    def ets_world(self, tw):
-        # initialize partial transformations between a joint from base to ee
+    def _ets_world(self, tw):
+        # initialize a transformation that will represent the twist
         tf = SE3()
-        # get transforms from screws, related to base frame
         # get screw axis components
         w = tw.w
         v = tw.v
 
         if isinstance(self, PoEPrismatic):
-            # switch the directional vector components
+            # get the axis directional vector component
             a_vec = v
-            # get vector of the x axis
+            # get vector of the x-axis
             n_vec = tf.n
-            # point on screw axis
+            # point on screw axis set as origin
             t_vec = tf.t
 
-        elif isinstance(self, PoERevolute):  # is revolute
+        elif isinstance(self, PoERevolute):
             # get the nearest point of the screw axis closest to the origin
             principalpoint = np.cross(w, v)
 
@@ -77,53 +76,45 @@ class PoELink(Link):
             else:
                 n_vec = principalpoint / np.linalg.norm(principalpoint)
 
+            # get the axis directional vector component
             a_vec = w
+            # point on screw axis
             t_vec = principalpoint
-
 
         else:  # not a joint
             n_vec = tf.n
             a_vec = tf.a
             t_vec = v
 
-        # obtain the other vector elements of transformation matrix
-        o_vec = np.cross(a_vec, n_vec)
-
         # construct transformation matrix from obtained vectors
-        f_tf = np.eye(4)
-        f_tf[0:3, 0] = n_vec
-        f_tf[0:3, 1] = o_vec
-        f_tf[0:3, 2] = a_vec
-        f_tf[0:3, 3] = t_vec
-        # normalize the matrix
-        tf = SE3(trnorm(f_tf))
+        tf = SE3.OA(np.cross(a_vec, n_vec), a_vec)
+        tf.t = t_vec
 
+        # create list of ET for a given SE3
         et = []
-        if tf.t[0] != 0.0:
+        if np.around(tf.t[0], 4) != 0.0:
             et.append(ET.tx(tf.t[0]))
-        if tf.t[1] != 0.0:
+        if np.around(tf.t[1], 4) != 0.0:
             et.append(ET.ty(tf.t[1]))
-        if tf.t[2] != 0.0:
+        if np.around(tf.t[2], 4) != 0.0:
             et.append(ET.tz(tf.t[2]))
 
         # RPY parameters, due to RPY convention the order of is reversed
         rpy = tf.rpy()
-        if rpy[2] != 0.0:
+        if np.around(rpy[2], 4) != 0.0:
             et.append(ET.Rz(rpy[2]))
-        if rpy[1] != 0.0:
+        if np.around(rpy[1], 4) != 0.0:
             et.append(ET.Ry(rpy[1]))
-        if rpy[0] != 0.0:
+        if np.around(rpy[0], 4) != 0.0:
             et.append(ET.Rx(rpy[0]))
 
         # assign joint variable, if the frame is not base or tool frame
-        if isinstance(self, PoEPrismatic):  # test prismatic joint
+        if isinstance(self, PoEPrismatic):
             et.append(ET.tz())
-        elif isinstance(self, PoERevolute):  # if revolute
+        elif isinstance(self, PoERevolute):
             et.append(ET.Rz())
-        elif et == []:
-            et.append(ET.tx(0))
 
-
+        # create ETS from ET list
         ets = ETS()
         for e in et:
             ets *= e
@@ -187,7 +178,7 @@ class PoERobot(Robot):
         super().__init__(links, **kwargs)
         self.T0 = T0
 
-        # update ETS according to links order
+        # update ETS according to the given links order
         # (in PoELink their ETS is in relation to base frame, not previous joint's ETS)
         self._update_ets()
 
@@ -292,40 +283,6 @@ class PoERobot(Robot):
         # convert velocity twist from world frame to EE frame
         return T.inv().Ad() @ J
 
-    def ets2(self) -> ETS:
-        """
-        Generate ETS from robot screw axis and tool frame.
-
-        This method generates ETS for a robot that is given as PoERobot class in 3D.
-        It overrides the default ets() method from Robot class. It works for both
-        revolute and prismatic links.
-
-        Example
-        --------
-        Example description
-
-        .. runblock:: pycon
-        >>> from spatialmath import SE3
-        >>> from roboticstoolbox import PoERobot, PoERevolute
-        >>> link1 = PoERevolute([0, 0, 1], [0, 0, 0])
-        >>> link2 = PoERevolute([0, 0, 1], [1, 0, 0])
-        >>> TE0 = SE3.Tx(2)
-        >>> r = PoERobot([link1, link2], TE0)
-        >>> ets = r.ets()
-
-        References
-        ----------
-        - D. Huczala et al. "An Automated Conversion Between Selected Robot
-        Kinematic Representations," 2022 ICCMA, Luxembourg, 2022,
-        doi: 10.1109/ICCMA56665.2022.10011595.
-
-        """
-        ets = ETS()
-        for i in range(self.n):
-            ets *= self.links[i].ets
-
-        return ets
-
     def _update_ets(self):
         # initialize transformations between joints from joint 1 to ee, related to
         # the base frame
@@ -370,11 +327,6 @@ class PoERobot(Robot):
                 link_ets *= e
 
             self.links[i].ets = link_ets
-
-            if self.links[i].isrevolute:
-                et.append(ET.Rz())
-            elif self.links[i].isprismatic:
-                et.append(ET.tz())
 
 if __name__ == "__main__":  # pragma nocover
     T0 = SE3.Trans(2, 0, 0)
