@@ -311,7 +311,7 @@ class PoERobot(Robot):
             if np.around(rpy[0], 4) != 0.0:
                 et.append(ET.Rx(rpy[0]))
 
-            # assign joint variable, if the frame is not base or tool frame
+            # assign joint variable with corresponding index
             if self.links[i].isrevolute:
                 et.append(ET.Rz(jindex=i-1))
             elif self.links[i].isprismatic:
