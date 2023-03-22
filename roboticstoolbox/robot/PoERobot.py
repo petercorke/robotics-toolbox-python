@@ -283,7 +283,7 @@ class PoERobot(Robot):
         # the base frame
         tf_base = [SE3()] * (self.n + 1)
         for i in range(self.n + 1):
-            tf_base[i] = self.links[i].ets.fkine([0])
+            tf_base[i] = SE3(self.links[i].Ts)
         tf_base.append(self.T0)
 
         # get partial transforms
