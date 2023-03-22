@@ -3,9 +3,7 @@ from spatialmath import SE3
 from spatialmath.base import trnorm
 from roboticstoolbox import Robot, ETS, ET
 import numpy as np
-from roboticstoolbox.models.ETS import Panda
-np.set_printoptions(3)
-
+np.set_printoptions(2)
 
 
 # Book example
@@ -13,15 +11,9 @@ link1 = PoERevolute([0, 0, 1], [0, 0, 0])
 link2 = PoERevolute([0, 0, 1], [0.5, 0, 0])
 TE0 = SE3.Tx(2)
 
-ets_orig = ETS(ET.Rz() * ET.tx(0.5) * ET.Rz() * ET.tx(1.5))
-e = Robot(ets_orig)
-
-
 pr = PoERobot([link1, link2], TE0)
 
 ets = pr.ets()
-#ets2 = pr.ets2()
-
 er = Robot(ets)
 
 q = [0, 0]
@@ -50,7 +42,7 @@ pr = PoERobot([link1, link2, link3, link4], TE0)
 er = Robot(pr.ets())
 
 q = [0, 0, 0, 0]
-#q = [np.pi/7, -np.pi/5, 0.3, -np.pi/3]
+q = [np.pi/7, -np.pi/5, 0.3, -np.pi/3]
 
 print("RRPR robot")
 print(er.fkine(q))
@@ -89,7 +81,7 @@ pr = PoERobot([link1, link2, link3, link4], TE0)
 er = Robot(pr.ets())
 
 q = [0, 0, 0, 0]
-#q = [np.pi/2, np.pi/7, np.pi/5, 0.58]
+q = [np.pi/2, np.pi/7, np.pi/5, 0.58]
 
 print("3RP robot - arbitrary structure")
 print(er.fkine(q))
