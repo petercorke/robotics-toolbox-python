@@ -50,71 +50,61 @@ class PoELink(Link):
 
         p.text(f"{i}:\n{str(x)}")
 
-    def _ets_world(self, tw):
+    def _ets_world(self, twist) -> ETS:
         # initialize a transformation that will represent the twist
-        tf = SE3()
+        twist_tf = SE3()
         # get screw axis components
-        w = tw.w
-        v = tw.v
+        w = twist.w
+        v = twist.v
 
         if isinstance(self, PoEPrismatic):
             # get the axis directional vector component
             a_vec = v
             # get vector of the x-axis
-            n_vec = tf.n
+            n_vec = twist_tf.n
             # point on screw axis set as origin
-            t_vec = tf.t
+            t_vec = twist_tf.t
 
         elif isinstance(self, PoERevolute):
             # get the nearest point of the screw axis closest to the origin
-            principalpoint = np.cross(w, v)
+            principal_point = np.cross(w, v)
 
             # get vector of the x-axis
-            if round(np.linalg.norm(principalpoint), 3) == 0.0:  # the points are
+            if np.isclose(np.linalg.norm(principal_point), 0.0):  # the points are
                 # coincident
-                n_vec = tf.n
+                n_vec = twist_tf.n
             else:
-                n_vec = principalpoint / np.linalg.norm(principalpoint)
+                n_vec = principal_point / np.linalg.norm(principal_point)
 
             # get the axis directional vector component
             a_vec = w
             # point on screw axis
-            t_vec = principalpoint
+            t_vec = principal_point
 
         else:  # not a joint
-            n_vec = tf.n
-            a_vec = tf.a
+            n_vec = twist_tf.n
+            a_vec = twist_tf.a
             t_vec = v
 
         # construct transformation matrix from obtained vectors
-        tf = SE3.OA(np.cross(a_vec, n_vec), a_vec)
-        tf.t = t_vec
+        twist_tf = SE3.OA(np.cross(a_vec, n_vec), a_vec)
+        twist_tf.t = t_vec
+        # get RPY parameters
+        rpy = twist_tf.rpy()
 
-        # create list of ET for a given SE3
-        et = []
-        if np.around(tf.t[0], 4) != 0.0:
-            et.append(ET.tx(tf.t[0]))
-        if np.around(tf.t[1], 4) != 0.0:
-            et.append(ET.ty(tf.t[1]))
-        if np.around(tf.t[2], 4) != 0.0:
-            et.append(ET.tz(tf.t[2]))
-
-        # RPY parameters, due to RPY convention the order of is reversed
-        rpy = tf.rpy()
-        if np.around(rpy[2], 4) != 0.0:
-            et.append(ET.Rz(rpy[2]))
-        if np.around(rpy[1], 4) != 0.0:
-            et.append(ET.Ry(rpy[1]))
-        if np.around(rpy[0], 4) != 0.0:
-            et.append(ET.Rx(rpy[0]))
+        # prepare list of ETs, due to RPY convention the RPY order is reversed
+        et_list = [ET.tx(twist_tf.t[0]), ET.ty(twist_tf.t[1]), ET.tz(twist_tf.t[2]),
+                   ET.Rz(rpy[2]), ET.Ry(rpy[1]), ET.Rx(rpy[0])]
+        # remove ETs with empty transform
+        et_list = [et for et in et_list if not np.isclose(et.eta, 0.0)]
 
         # assign joint variable, if the frame is not base or tool frame
         if isinstance(self, PoEPrismatic):
-            et.append(ET.tz())
+            et_list.append(ET.tz())
         elif isinstance(self, PoERevolute):
-            et.append(ET.Rz())
+            et_list.append(ET.Rz())
 
-        return ETS(et)
+        return ETS(et_list)
 
 
 class PoERevolute(PoELink):
@@ -280,44 +270,35 @@ class PoERobot(Robot):
 
     def _update_ets(self):
         # initialize transformations between joints from joint 1 to ee, related to
-        # the base frame
-        tf_base = [SE3()] * (self.n + 1)
+        # the world (base) frame
+        twist_tf_world = [SE3()] * (self.n + 1)
         for i in range(self.n + 1):
-            tf_base[i] = SE3(self.links[i].Ts)
-        tf_base.append(self.T0)
+            twist_tf_world[i] = SE3(self.links[i].Ts)
+        twist_tf_world.append(self.T0)
 
-        # get partial transforms
-        tf_partial = [SE3()] * (self.n + 2)
+        # get partial transforms between links
+        twist_tf_partial = [SE3()] * (self.n + 2)
         for i in reversed(range(1, self.n + 2)):
-            tf_partial[i] = tf_base[i - 1].inv() * tf_base[i]
+            twist_tf_partial[i] = twist_tf_world[i - 1].inv() * twist_tf_world[i]
 
         # prepare ET sequence
-        for i, tf in enumerate(tf_partial):
-            et = []
-            # XYZ parameters
-            if np.around(tf.t[0], 4) != 0.0:
-                et.append(ET.tx(tf.t[0]))
-            if np.around(tf.t[1], 4) != 0.0:
-                et.append(ET.ty(tf.t[1]))
-            if np.around(tf.t[2], 4) != 0.0:
-                et.append(ET.tz(tf.t[2]))
-
-            # RPY parameters, due to RPY convention the order of is reversed
+        for i, tf in enumerate(twist_tf_partial):
+            # get RPY parameters
             rpy = tf.rpy()
-            if np.around(rpy[2], 4) != 0.0:
-                et.append(ET.Rz(rpy[2]))
-            if np.around(rpy[1], 4) != 0.0:
-                et.append(ET.Ry(rpy[1]))
-            if np.around(rpy[0], 4) != 0.0:
-                et.append(ET.Rx(rpy[0]))
+
+            # prepare list of ETs, due to RPY convention the RPY order is reversed
+            et_list = [ET.tx(tf.t[0]), ET.ty(tf.t[1]), ET.tz(tf.t[2]),
+                       ET.Rz(rpy[2]), ET.Ry(rpy[1]), ET.Rx(rpy[0])]
+            # remove ETs with empty transform
+            et_list = [et for et in et_list if not np.isclose(et.eta, 0.0)]
 
             # assign joint variable with corresponding index
             if self.links[i].isrevolute:
-                et.append(ET.Rz(jindex=i-1))
+                et_list.append(ET.Rz(jindex=i-1))
             elif self.links[i].isprismatic:
-                et.append(ET.tz(jindex=i-1))
+                et_list.append(ET.tz(jindex=i-1))
 
-            self.links[i].ets = ETS(et)
+            self.links[i].ets = ETS(et_list)
 
 if __name__ == "__main__":  # pragma nocover
     T0 = SE3.Trans(2, 0, 0)
