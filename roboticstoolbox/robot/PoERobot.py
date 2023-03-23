@@ -271,10 +271,10 @@ class PoERobot(Robot):
     def _update_ets(self):
         # initialize transformations between joints from joint 1 to ee, related to
         # the world (base) frame
-        twist_tf_world = [SE3()] * (self.n + 1)
-        for i in range(self.n + 1):
-            twist_tf_world[i] = SE3(self.links[i].Ts)
-        twist_tf_world.append(self.T0)
+        twist_tf_world = [SE3(link.Ts) for link in self.links]
+        # update the end-effector since its twist can provide transform
+        # with different x and y -axes
+        twist_tf_world[-1] = self.T0
 
         # get partial transforms between links
         twist_tf_partial = [SE3()] * (self.n + 2)
