@@ -13,7 +13,7 @@ authors = [
 
 dependencies = [
     "numpy>=1.17.4",
-    "spatialmath-python~=1.0.0",
+    "spatialmath-python>=1.1.5",
     "spatialgeometry~=1.0.0",
     "pgraph-python",
     "scipy",
