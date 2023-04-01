@@ -1274,8 +1274,10 @@ class Robot(SceneNode, ABC, DynamicsMixin):
     @property
     def qlim(self):
         r"""
-        Joint limits (Robot superclass)
-
+        Get/set robot joint limits (Robot superclass)
+        
+        - ``robots.qlim`` is the robot joint limits
+        
         :return: Array of joint limit values
         :rtype: ndarray(2,n)
         :exception ValueError: unset limits for a prismatic joint
@@ -1286,6 +1288,8 @@ class Robot(SceneNode, ABC, DynamicsMixin):
             - a revolute joint [-𝜋. 𝜋] is returned
             - a prismatic joint an exception is raised
 
+        - ``robot.qlim = ...`` checks and sets the robot joint limits
+        
         Example:
 
         .. runblock:: pycon
@@ -1315,6 +1319,14 @@ class Robot(SceneNode, ABC, DynamicsMixin):
             limits[:, j] = v
             j += 1
         return limits
+
+    @qlim.setter
+    def qlim(self, limits):
+        qlim_new = getmatrix(np.array(limits) , shape = (2, self.n))
+        j = 0
+        for link in self:
+            link.qlim = qlim_new[:, j]
+            j += 1
 
     # --------------------------------------------------------------------- #
 
