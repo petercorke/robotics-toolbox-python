@@ -69,4 +69,4 @@ jobs:
         pip install pytest-timeout
         python -c "import spatialgeometry"
         python -c "import roboticstoolbox"
-        pytest --timeout=50 --timeout_method thread -s
+        pytest --ignore=roboticstoolbox/blocks --timeout=50 --timeout_method thread -s

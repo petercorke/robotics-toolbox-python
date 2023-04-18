@@ -1904,9 +1904,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         """
 
-        v = getvector(q, self.n)
-        v = getunit(v, unit)
-        v = np.array(v)
+        v = getunit(q, unit, dim=self.n)
         self._configs[name] = v
         setattr(self, name, v)
 

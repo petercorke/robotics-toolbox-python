@@ -23,10 +23,22 @@ odometry and observations of known landmarks.
 
 # TODO: refactor this and EKF, RNG, history, common plots, animation, movie
 
+
 class ParticleFilter:
-    
-    def __init__(self, robot, sensor, R, L, nparticles=500, seed=0, x0=None,
-    verbose=False, animate=False, history=True, workspace=None):
+    def __init__(
+        self,
+        robot,
+        sensor,
+        R,
+        L,
+        nparticles=500,
+        seed=0,
+        x0=None,
+        verbose=False,
+        animate=False,
+        history=True,
+        workspace=None,
+    ):
         """
         Particle filter
 
@@ -54,7 +66,7 @@ class ParticleFilter:
         This class implements a Monte-Carlo estimator or particle filter for
         vehicle state, based on odometry, a landmark map, and landmark
         observations.  The state of each particle is a possible vehicle
-        configuration :math:`(x,y,\theta)`.  Bootstrap particle resampling is 
+        configuration :math:`(x,y,\theta)`.  Bootstrap particle resampling is
         used.
 
         The working area is defined by ``workspace`` or inherited from the
@@ -116,7 +128,7 @@ class ParticleFilter:
         self._random = np.random.default_rng(seed)
         self._seed = seed
 
-        self._keep_history = history     #  keep history
+        self._keep_history = history  #  keep history
         self._htuple = namedtuple("PFlog", "t odo xest std weights")
 
         if workspace is not None:
@@ -128,7 +140,7 @@ class ParticleFilter:
         self._init()
 
     def __str__(self):
-        #ParticleFilter.char Convert to string
+        # ParticleFilter.char Convert to string
         #
         # PF.char() is a string representing the state of the ParticleFilter
         # object in human-readable form.
@@ -136,14 +148,14 @@ class ParticleFilter:
         # See also ParticleFilter.display.
 
         def indent(s, n=2):
-            spaces = ' ' * n
-            return s.replace('\n', '\n' + spaces)
+            spaces = " " * n
+            return s.replace("\n", "\n" + spaces)
 
         s = f"ParticleFilter object: {self.nparticles} particles"
-        s += '\nR:  ' + base.array2str(self.R)
-        s += '\nL:  ' + base.array2str(self.L)
+        s += "\nR:  " + base.array2str(self.R)
+        s += "\nL:  " + base.array2str(self.L)
         if self.robot is not None:
-            s += indent("\nrobot: "  + str(self.robot))
+            s += indent("\nrobot: " + str(self.robot))
 
         if self.sensor is not None:
             s += indent("\nsensor: " + str(self.sensor))
@@ -158,7 +170,7 @@ class ParticleFilter:
         :rtype: :class:`VehicleBase` subclass
         """
         return self._robot
-    
+
     @property
     def sensor(self):
         """
@@ -178,7 +190,7 @@ class ParticleFilter:
         :rtype: :class:`LandmarkMap` subclass
         """
         return self._map
-    
+
     @property
     def verbose(self):
         """
@@ -188,7 +200,7 @@ class ParticleFilter:
         :rtype: bool
         """
         return self._verbose
-    
+
     @property
     def history(self):
         """
@@ -201,8 +213,8 @@ class ParticleFilter:
         list.  It contains, for that time step, estimated state and covariance,
         and sensor observation.
 
-        :seealso: :meth:`get_t` :meth:`get_xy` :meth:`get_std` 
-            :meth:`get_Pnorm` 
+        :seealso: :meth:`get_t` :meth:`get_xy` :meth:`get_std`
+            :meth:`get_Pnorm`
         """
         return self._history
 
@@ -218,7 +230,6 @@ class ParticleFilter:
         option ``workspace``
         """
         return self._workspace
-
 
     @property
     def random(self):
@@ -243,7 +254,7 @@ class ParticleFilter:
         return self._random
 
     def _init(self, x0=None):
-        #ParticleFilter.init Initialize the particle filter
+        # ParticleFilter.init Initialize the particle filter
         #
         # PF.init() initializes the particle distribution and clears the
         # history.
@@ -256,7 +267,7 @@ class ParticleFilter:
         self.robot.init()
         self.sensor.init()
 
-        #clear the history
+        # clear the history
         self._history = []
 
         # create a new private random number generator
@@ -271,13 +282,16 @@ class ParticleFilter:
         if x0 is None:
             # create initial particle distribution as uniformly randomly distributed
             # over the map workspace and heading angles
-            x = self.random.uniform(self.workspace[0], self.workspace[1], size=(self.nparticles,))
-            y = self.random.uniform(self.workspace[2], self.workspace[3], size=(self.nparticles,))
+            x = self.random.uniform(
+                self.workspace[0], self.workspace[1], size=(self.nparticles,)
+            )
+            y = self.random.uniform(
+                self.workspace[2], self.workspace[3], size=(self.nparticles,)
+            )
             t = self.random.uniform(-np.pi, np.pi, size=(self.nparticles,))
-            self.x = np.c_[x, y, t] 
+            self.x = np.c_[x, y, t]
 
         self.weight = np.ones((self.nparticles,))
-
 
     def run(self, T=10, x0=None):
         """
@@ -301,7 +315,7 @@ class ParticleFilter:
             - execute the EKF
             - save information as a namedtuple to the history list for later display
 
-        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks` 
+        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks`
             :meth:`get_xy` :meth:`get_t` :meth:`get_std`
             :meth:`plot_xy`
         """
@@ -312,9 +326,18 @@ class ParticleFilter:
 
         # display the initial particles
         if self._animate:
-            self.h, = plt.plot(self.x[:, 0], self.x[:, 1], 'go', zorder=0, markersize=3, markeredgecolor='none', alpha=0.3, label='particle')
+            (self.h,) = plt.plot(
+                self.x[:, 0],
+                self.x[:, 1],
+                "go",
+                zorder=0,
+                markersize=3,
+                markeredgecolor="none",
+                alpha=0.3,
+                label="particle",
+            )
         # set(self.h, 'Tag', 'particles')
-        
+
         # self.robot.plot()
 
         # iterate over time
@@ -324,19 +347,19 @@ class ParticleFilter:
         # anim.close()
 
     def _step(self):
-             
-        #fprintf('---- step\n')
-        odo = self.robot.step()        # move the robot
+
+        # fprintf('---- step\n')
+        odo = self.robot.step()  # move the robot
 
         # update the particles based on odometry
         self._predict(odo)
 
         # get a sensor reading
-        z, lm_id = self.sensor.reading()         
+        z, lm_id = self.sensor.reading()
 
         if z is not None:
             self._observe(z, lm_id)
-            #fprintf(' observe beacon #d\n', lm_id)
+            # fprintf(' observe beacon #d\n', lm_id)
 
             self._select()
 
@@ -345,7 +368,9 @@ class ParticleFilter:
         std_est = self.x.std(axis=0)
 
         # std is more complex for angles, need to account for 2pi wrap
-        std_est[2] = np.sqrt(np.sum(base.angdiff(self.x[:,2], x_est[2]) ** 2)) / (self.nparticles-1)
+        std_est[2] = np.sqrt(np.sum(base.angdiff(self.x[:, 2], x_est[2]) ** 2)) / (
+            self.nparticles - 1
+        )
 
         # display the updated particles
         # set(self.h, 'Xdata', self.x(:,1), 'Ydata', self.x(:,2), 'Zdata', self.x(:,3))
@@ -353,17 +378,13 @@ class ParticleFilter:
         if self._animate:
             self.h.set_xdata(self.x[:, 0])
             self.h.set_ydata(self.x[:, 1])
-        
+
         # if ~isempty(self.anim)
         #     self.anim.add()
 
         if self._keep_history:
             hist = self._htuple(
-                self.robot._t,
-                odo.copy(),
-                x_est,
-                std_est,
-                self.weight.copy()
+                self.robot._t, odo.copy(), x_est, std_est, self.weight.copy()
             )
             self._history.append(hist)
 
@@ -380,14 +401,14 @@ class ParticleFilter:
         ax = base.plotvol3()
         for (x, y, t), weight in zip(self.x, self.weight):
             # ax.plot([x, x], [y, y], [0, weight], 'r')
-            ax.plot([x, x], [y, y], [0, weight], 'skyblue', linewidth=3)
-            ax.plot(x, y, weight, 'k.', markersize=6)
+            ax.plot([x, x], [y, y], [0, weight], "skyblue", linewidth=3)
+            ax.plot(x, y, weight, "k.", markersize=6)
 
         plt.grid(True)
-        plt.xlabel('X')
-        plt.ylabel('Y')
+        plt.xlabel("X")
+        plt.ylabel("Y")
         plt.xlim()
-        ax.set_zlabel('particle weight')
+        ax.set_zlabel("particle weight")
         ax.view_init(29, 59)
 
     def _predict(self, odo):
@@ -397,32 +418,32 @@ class ParticleFilter:
         # Straightforward code:
         #
         # for i=1:self.nparticles
-        #    x = self.robot.f( self.x(i,:), odo)' + sqrt(self.R)*self.randn[2,0]   
+        #    x = self.robot.f( self.x(i,:), odo)' + sqrt(self.R)*self.randn[2,0]
         #    x[2] = angdiff(x[2])
         #    self.x(i,:) = x
         #
         # Vectorized code:
 
-        self.x = self.robot.f(self.x, odo) + \
-            self.random.multivariate_normal((0, 0, 0), self.R, size=self.nparticles)   
+        self.x = self.robot.f(self.x, odo) + self.random.multivariate_normal(
+            (0, 0, 0), self.R, size=self.nparticles
+        )
         self.x[:, 2] = base.angdiff(self.x[:, 2])
-
 
     def _observe(self, z, lm_id):
         # step 3
         # predict observation and score the particles
-        
+
         # Straightforward code:
         #
         # for p = 1:self.nparticles
         #    # what do we expect observation to be for this particle?
         #    # use the sensor model h(.)
         #    z_pred = self.sensor.h( self.x(p,:), lm_id)
-        #    
+        #
         #    # how different is it
         #    innov[0] = z[0] - z_pred[0]
         #    innov[1] = angdiff(z[1], z_pred[1])
-        #    
+        #
         #    # get likelihood (new importance). Assume Gaussian but any PDF works!
         #    # If predicted obs is very different from actual obs this score will be low
         #    #  ie. this particle is not very good at predicting the observation.
@@ -438,27 +459,33 @@ class ParticleFilter:
         z_pred[:, 0] = z[0] - z_pred[:, 0]
         z_pred[:, 1] = base.angdiff(z[1], z_pred[:, 1])
 
-        LL = -0.5 * np.r_[invL[0,0], invL[1,1], 2*invL[0,1]]
-        e = np.c_[z_pred[:, 0]**2, z_pred[:, 1]**2, z_pred[:,0] * z_pred[:, 1]] @ LL
-        self.weight = np.exp(e) + self.w0  
-
-
+        LL = -0.5 * np.r_[invL[0, 0], invL[1, 1], 2 * invL[0, 1]]
+        e = (
+            np.c_[z_pred[:, 0] ** 2, z_pred[:, 1] ** 2, z_pred[:, 0] * z_pred[:, 1]]
+            @ LL
+        )
+        self.weight = np.exp(e) + self.w0
 
     def _select(self):
         # step 4
         # select particles based on their weights
-        #       
+        #
         # particles with large weights will occupy a greater percentage of the
         # y axis in a cummulative plot
         cdf = np.cumsum(self.weight) / self.weight.sum()
 
         # so randomly (uniform) choosing y values is more likely to correspond to
         # better particles...
-        iselect  = self.random.uniform(0, 1, size=(self.nparticles,))
+        iselect = self.random.uniform(0, 1, size=(self.nparticles,))
 
         # find the particle that corresponds to each y value (just a look up)
-        interpfun = sp.interpolate.interp1d(cdf, np.arange(self.nparticles), 
-                assume_sorted=True, kind='nearest', fill_value='extrapolate')
+        interpfun = sp.interpolate.interp1d(
+            cdf,
+            np.arange(self.nparticles),
+            assume_sorted=True,
+            kind="nearest",
+            fill_value="extrapolate",
+        )
         inextgen = interpfun(iselect).astype(np.int)
 
         # copy selected particles for next generation..
@@ -501,13 +528,13 @@ class ParticleFilter:
         """
         return np.array([h.std for h in self._history])
 
-    def plot_xy(self, block=False, **kwargs):
+    def plot_xy(self, block=None, **kwargs):
         r"""
         Plot estimated vehicle position
 
         :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`
         :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`
-        :param block: hold plot until figure is closed, defaults to False
+        :param block: hold plot until figure is closed, defaults to None
         :type block: bool, optional
 
         Plot the estimated vehicle path in the xy-plane.
@@ -516,4 +543,5 @@ class ParticleFilter:
         """
         xyt = self.get_xyt()
         plt.plot(xyt[:, 0], xyt[:, 1], **kwargs)
-        # plt.show(block=block)
+        if block is not None:
+            plt.show(block=block)

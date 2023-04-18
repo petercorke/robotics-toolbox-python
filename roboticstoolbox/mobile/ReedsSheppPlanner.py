@@ -11,12 +11,12 @@ from spatialmath import base
 # The following code is modified from Python Robotics
 # https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning
 # D* grid planning
-# Author: Atsushi Sakai 
+# Author: Atsushi Sakai
 # Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
-# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
+
 
 class _Path:
-
     def __init__(self):
         self.lengths = []
         self.ctypes = []
@@ -43,24 +43,32 @@ def plot_arrow(x, y, yaw, length=1.0, width=0.5, fc="r", ec="k"):
         for (ix, iy, iyaw) in zip(x, y, yaw):
             plot_arrow(ix, iy, iyaw)
     else:
-        plt.arrow(x, y, length * math.cos(yaw), length * math.sin(yaw),
-                  fc=fc, ec=ec, head_width=width, head_length=width)
+        plt.arrow(
+            x,
+            y,
+            length * math.cos(yaw),
+            length * math.sin(yaw),
+            fc=fc,
+            ec=ec,
+            head_width=width,
+            head_length=width,
+        )
         plt.plot(x, y)
 
 
 def straight_left_straight(x, y, phi):
     phi = base.wrap_0_2pi(phi)
     if y > 0.0 and 0.0 < phi < math.pi * 0.99:
-        xd = - y / math.tan(phi) + x
+        xd = -y / math.tan(phi) + x
         t = xd - math.tan(phi / 2.0)
         u = phi
-        v = math.sqrt((x - xd) ** 2 + y ** 2) - math.tan(phi / 2.0)
+        v = math.sqrt((x - xd) ** 2 + y**2) - math.tan(phi / 2.0)
         return True, t, u, v
     elif y < 0.0 < phi < math.pi * 0.99:
-        xd = - y / math.tan(phi) + x
+        xd = -y / math.tan(phi) + x
         t = xd - math.tan(phi / 2.0)
         u = phi
-        v = -math.sqrt((x - xd) ** 2 + y ** 2) - math.tan(phi / 2.0)
+        v = -math.sqrt((x - xd) ** 2 + y**2) - math.tan(phi / 2.0)
         return True, t, u, v
 
     return False, 0.0, 0.0, 0.0
@@ -73,7 +81,7 @@ def set_path(paths, lengths, ctypes):
 
     # check same path exist
     for tpath in paths:
-        typeissame = (tpath.ctypes == path.ctypes)
+        typeissame = tpath.ctypes == path.ctypes
         if typeissame:
             if sum(np.abs(tpath.lengths)) - sum(np.abs(path.lengths)) <= 0.01:
                 return paths  # not insert path
@@ -100,7 +108,7 @@ def straight_curve_straight(x, y, phi, paths):
 
 
 def polar(x, y):
-    r = math.sqrt(x ** 2 + y ** 2)
+    r = math.sqrt(x**2 + y**2)
     theta = math.atan2(y, x)
     return r, theta
 
@@ -207,7 +215,7 @@ def curve_straight_curve(x, y, phi, paths):
 
 def left_straight_right(x, y, phi):
     u1, t1 = polar(x + math.sin(phi), y - 1.0 - math.cos(phi))
-    u1 = u1 ** 2
+    u1 = u1**2
     if u1 >= 4.0:
         u = math.sqrt(u1 - 4.0)
         theta = math.atan2(2.0, u)
@@ -250,7 +258,19 @@ def generate_path(q0, q1, max_curvature):
     return paths
 
 
-def interpolate(ind, length, mode, max_curvature, origin_x, origin_y, origin_yaw, path_x, path_y, path_yaw, directions):
+def interpolate(
+    ind,
+    length,
+    mode,
+    max_curvature,
+    origin_x,
+    origin_y,
+    origin_yaw,
+    path_x,
+    path_y,
+    path_yaw,
+    directions,
+):
     if mode == "S":
         path_x[ind] = origin_x + length / max_curvature * math.cos(origin_yaw)
         path_y[ind] = origin_y + length / max_curvature * math.sin(origin_yaw)
@@ -307,21 +327,23 @@ def generate_local_course(total_length, lengths, mode, max_curvature, step_size)
 
         ind -= 1
         if i >= 1 and (lengths[i - 1] * lengths[i]) > 0:
-            pd = - d - ll
+            pd = -d - ll
         else:
             pd = d - ll
 
         while abs(pd) <= abs(l):
             ind += 1
             px, py, pyaw, directions = interpolate(
-                ind, pd, m, max_curvature, ox, oy, oyaw, px, py, pyaw, directions)
+                ind, pd, m, max_curvature, ox, oy, oyaw, px, py, pyaw, directions
+            )
             pd += d
 
         ll = l - pd - d  # calc remain length
 
         ind += 1
         px, py, pyaw, directions = interpolate(
-            ind, l, m, max_curvature, ox, oy, oyaw, px, py, pyaw, directions)
+            ind, l, m, max_curvature, ox, oy, oyaw, px, py, pyaw, directions
+        )
 
     # remove unused data
     while abs(px[-1]) < 1e-10:
@@ -346,13 +368,18 @@ def calc_paths(sx, sy, syaw, gx, gy, gyaw, maxc, step_size):
     for path in paths:
         # interpolate the path
         x, y, yaw, directions = generate_local_course(
-            path.L, path.lengths, path.ctypes, maxc, step_size * maxc)
+            path.L, path.lengths, path.ctypes, maxc, step_size * maxc
+        )
 
         # convert global coordinate
-        path.x = [math.cos(-q0[2]) * ix + math.sin(-q0[2])
-                  * iy + q0[0] for (ix, iy) in zip(x, y)]
-        path.y = [-math.sin(-q0[2]) * ix + math.cos(-q0[2])
-                  * iy + q0[1] for (ix, iy) in zip(x, y)]
+        path.x = [
+            math.cos(-q0[2]) * ix + math.sin(-q0[2]) * iy + q0[0]
+            for (ix, iy) in zip(x, y)
+        ]
+        path.y = [
+            -math.sin(-q0[2]) * ix + math.cos(-q0[2]) * iy + q0[1]
+            for (ix, iy) in zip(x, y)
+        ]
         path.yaw = [pi_2_pi(iyaw + q0[2]) for iyaw in yaw]
         path.directions = directions
         path.lengths = [length / maxc for length in path.lengths]
@@ -382,10 +409,11 @@ def reeds_shepp_path_planning(start, goal, maxc, step_size):
 
     return bpath
 
+
 # ====================== RTB wrapper ============================= #
 
 # Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
-# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
 class ReedsSheppPlanner(PlannerBase):
     r"""
     Reeds-Shepp path planner
@@ -423,19 +451,23 @@ class ReedsSheppPlanner(PlannerBase):
         >>> print(status)
 
     :reference: Optimal paths for a car that goes both forwards and backwards,
-        Reeds, J.A. and L.A. Shepp, Pacific J. Math., 145 (1990), 
-        pp. 367–393. 
+        Reeds, J.A. and L.A. Shepp, Pacific J. Math., 145 (1990),
+        pp. 367–393.
 
     :thanks: based on Reeds-Shepp path planning from `Python Robotics <https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning>`_
     :seealso: :class:`DubinsPlanner` :class:`PlannerBase`
     """
+
     def __init__(self, curvature=1, stepsize=0.1, **kwargs):
         super().__init__(ndims=3, **kwargs)
         self._curvature = curvature
         self._stepsize = stepsize
 
     def __str__(self):
-        s = super().__str__() + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
+        s = (
+            super().__str__()
+            + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
+        )
 
     def query(self, start, goal, **kwargs):
         r"""
@@ -466,32 +498,39 @@ class ReedsSheppPlanner(PlannerBase):
         +-------------+-----------------------------------------------------+
         |``direction``| the direction of motion at each point on the path   |
         +-------------+-----------------------------------------------------+
-    
-        .. note:: The direction of turning is reversed when travelling 
+
+        .. note:: The direction of turning is reversed when travelling
             backwards.
 
         """
         super().query(start=start, goal=goal, next=False, **kwargs)
 
         bpath = reeds_shepp_path_planning(
-            start=self.start, goal=self.goal,
-            maxc=self._curvature, step_size=self._stepsize)
+            start=self.start,
+            goal=self.goal,
+            maxc=self._curvature,
+            step_size=self._stepsize,
+        )
 
         path = np.c_[bpath.x, bpath.y, bpath.yaw]
 
-        status = namedtuple('ReedsSheppStatus', 
-            ['segments', 'length', 'seglengths', 'direction'])
+        status = namedtuple(
+            "ReedsSheppStatus", ["segments", "length", "seglengths", "direction"]
+        )
 
-        return path, status(bpath.ctypes, sum([abs(l) for l in bpath.lengths]),
-            bpath.lengths, bpath.directions)
+        return path, status(
+            bpath.ctypes,
+            sum([abs(l) for l in bpath.lengths]),
+            bpath.lengths,
+            bpath.directions,
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from math import pi
 
     # start = (-1, -4, -np.radians(20))
     # goal = (5, 5, np.radians(25))
-
 
     start = (0, 0, 0)
     goal = (0, 0, pi)

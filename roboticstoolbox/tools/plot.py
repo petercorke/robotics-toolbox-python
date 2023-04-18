@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def xplot(
     x,
     y=None,
@@ -101,7 +102,7 @@ def xplot(
         plt.grid(grid)
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Joint coordinates (rad,m)")
-        ax.set_xlim(t[0], t[-1])
+        # ax.set_xlim(t[0], t[-1])  fails with RVC3 Sec 3.3.3
 
     plt.show(block=block)
 

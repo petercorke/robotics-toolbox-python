@@ -863,7 +863,7 @@ class MultiRotorPlot(GraphicsBlock):
 
         # plot the vehicle's centroid on the ground plane
         plot3(self.shadow, [z[0], 0], [-z[1], 0], [0, 0])
-        plot3(self.groundmark, z[0], -z[1], 0)
+        plot3(self.groundmark, [z[0]], [-z[1]], [0])
 
         textstr = f"t={state.t: .2f}\nh={z[2]: .2f}\nγ={n[0]: .2f}"
         self.panel.set_text(textstr)

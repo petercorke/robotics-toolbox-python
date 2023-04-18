@@ -5,6 +5,7 @@
 from abc import ABC
 from math import pi, atan2
 import numpy as np
+
 # from scipy import integrate, linalg, interpolate
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -13,6 +14,7 @@ import matplotlib.transforms as mtransforms
 
 from spatialmath import SE2, base
 from roboticstoolbox import rtb_load_data
+
 
 class VehicleAnimationBase(ABC):
     """
@@ -114,6 +116,7 @@ class VehicleAnimationBase(ABC):
         if self._object is not None:
             self._object.remove()
 
+
 # ========================================================================= #
 class VehicleMarker(VehicleAnimationBase):
     def __init__(self, **kwargs):
@@ -160,6 +163,7 @@ class VehicleMarker(VehicleAnimationBase):
 
 
 # ========================================================================= #
+
 
 class VehiclePolygon(VehicleAnimationBase):
     def __init__(self, shape="car", scale=1, **kwargs):
@@ -272,7 +276,7 @@ class VehicleIcon(VehicleAnimationBase):
 
         Creates an object that can be passed to a ``Vehicle`` subclass to
         depict the moving robot as an image icon during simulation.  The image
-        is translated and rotated to represent the vehicle configuration. 
+        is translated and rotated to represent the vehicle configuration.
 
         The car is scaled to an image with a horizontal length (width) of
         ``scale`` in the units of the plot. By default the image is assumed to
@@ -416,7 +420,7 @@ if __name__ == "__main__":
 
     V = np.diag(np.r_[0.02, 0.5 * pi / 180] ** 2)
 
-    v = VehiclePolygon(facecolor='None', edgecolor='k')
+    v = VehiclePolygon(facecolor="None", edgecolor="k")
     # v = VehicleIcon('greycar2', scale=2, rotation=90)
 
     veh = Bicycle(covar=V, animation=v, control=RandomPath(10), verbose=False)
