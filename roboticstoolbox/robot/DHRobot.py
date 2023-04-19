@@ -77,7 +77,6 @@ class DHRobot(Robot):
     """
 
     def __init__(self, links, meshdir=None, **kwargs):
-
         # Verify L
         if not isinstance(links, list):
             raise TypeError("The links must be stored in a list.")
@@ -92,7 +91,6 @@ class DHRobot(Robot):
 
         for link in links:
             if isinstance(link, DHLink):
-
                 # got a link
                 all_links.append(link)
                 link.number = self._n + 1
@@ -287,7 +285,7 @@ class DHRobot(Robot):
             if tool is not None:
                 table.row(
                     "tool",
-                    tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
+                    tool.strline(orient="rpy/xyz", fmt="{:.2g}"),
                 )
             s += "\n" + str(table)
 
@@ -323,7 +321,6 @@ class DHRobot(Robot):
         )
 
     def __deepcopy__(self, memo):
-
         links = []
 
         for link in self.links:
@@ -425,7 +422,6 @@ class DHRobot(Robot):
         tall = self.fkine_all(q, old=True)
 
         for i, link in enumerate(self.links):
-
             # Update the link model transforms
             for col in link.collision:
                 col.wT = tall[i]
@@ -952,7 +948,6 @@ class DHRobot(Robot):
 
         T = SE3.Empty()
         for qr in getmatrix(q, (None, self.n)):
-
             first = True
             for q, L in zip(qr, self.links):
                 if first:
@@ -1002,7 +997,6 @@ class DHRobot(Robot):
         return T
 
     def segments(self):
-
         segments = [None]
         segments.extend(self.links)
         return [segments]
@@ -1618,7 +1612,6 @@ class DHRobot(Robot):
             # -----------------  the forward recursion -------------------- #
 
             for j, link in enumerate(self.links):
-
                 Rt = Rm[j].T  # transpose!!
                 pstar = pstarm[:, j]
                 r = link.r
@@ -2482,7 +2475,6 @@ def _cross(a, b):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     import roboticstoolbox as rtb
 
     # import spatialmath.base.symbolic as sym
