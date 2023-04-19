@@ -2,7 +2,8 @@
 
 import roboticstoolbox as rtb
 import pgraph
-from spatialmath import base, SE2
+from spatialmath import SE2
+import spatialmath.base as smb
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sp
@@ -52,12 +53,12 @@ class PGEdge(pgraph.Edge):
         z_ij = self.mean
 
         # compute the homoeneous transforms of the previous solutions
-        zt_ij = base.trot2(z_ij[2], t=z_ij[0:2])
-        vt_i = base.trot2(v_i[2], t=v_i[0:2])
-        vt_j = base.trot2(v_j[2], t=v_j[0:2])
+        zt_ij = smb.trot2(z_ij[2], t=z_ij[0:2])
+        vt_i = smb.trot2(v_i[2], t=v_i[0:2])
+        vt_j = smb.trot2(v_j[2], t=v_j[0:2])
 
         # compute the displacement between x_i and x_j
-        f_ij = base.trinv2(vt_i) @ vt_j
+        f_ij = smb.trinv2(vt_i) @ vt_j
 
         # this below is too long to explain, to understand it derive it by hand
         theta_i = v_i[2]
@@ -80,9 +81,9 @@ class PGEdge(pgraph.Edge):
             [  0,  0,  1 ],
                 ])
         # fmt: on
-        ztinv = base.trinv2(zt_ij)
+        ztinv = smb.trinv2(zt_ij)
         T = ztinv @ f_ij
-        e = base.tr2xyt(T)
+        e = smb.tr2xyt(T)
         ztinv[0:2, 2] = 0
         A = ztinv @ A
         B = ztinv @ B
@@ -308,7 +309,7 @@ class PoseGraph:
         return np.c_[x, y].T
 
     def plot_scan(self, n):
-        n = base.getvector(n)
+        n = smb.getvector(n)
         for i in n:
             x, y = self.scanxy(i)
             plt.plot(x, y, ".", "MarkerSize", 10)
@@ -335,7 +336,7 @@ class PoseGraph:
     def scanmatch(self, s1, s2):
         p1 = self.scanxy(s1)
         p2 = self.scanxy(s2)
-        T = base.ICP2d(p1, p2)
+        T = smb.ICP2d(p1, p2)
         return SE2(T)
 
     def scanmap(self, occgrid, maxrange=None):
@@ -411,27 +412,33 @@ class PoseGraph:
     #  "A Tutorial on Graph-Based SLAM,” in IEEE Intelligent Transportation Systems Magazine,
     #  vol. 2, no. 4, pp. 31-43, winter 2010, doi: 10.1109/MITS.2010.939925.
 
-    def optimize(self, iterations=10, animate=False, retain=False, **kwargs):
+    def optimize(self, iterations=10, animate=False, retain=True, **kwargs):
 
         eprev = math.inf
+        eo = {}
 
         if animate and retain:
             colors = plt.cm.Greys(np.linspace(0.3, 1, iterations))
             if "eopt" in kwargs:
                 eo = kwargs["eopt"]
                 kwargs = {k: v for (k, v) in kwargs.items() if k != "eopt"}
-            else:
-                eo = {}
+            # else:
+            #     eo = {}
 
         for i in range(iterations):
             if animate:
+                if retain:
+                    if i == 0:
+                        ax = smb.axes_logic(None, 2)
+                else:
+                    ax = smb.axes_logic(None, 2, new=True)
+
                 if not retain:
-                    plt.clf()
                     eopt = eo
                 else:
                     eopt = {**eo, **dict(color=tuple(colors[i, :]), label=i)}
                 self.graph.plot(
-                    eopt=eopt, force2d=True, colorcomponents=False, **kwargs
+                    eopt=eopt, force2d=True, colorcomponents=False, ax=ax, **kwargs
                 )
                 plt.pause(0.5)
 
@@ -500,7 +507,7 @@ class PoseGraph:
             i = vertex.index * 3
             vertex.coord += deltax[i : i + 3]
             # normalize the angles between -PI and PI
-            vertex.coord[2] = base.angdiff(vertex.coord[2])
+            vertex.coord[2] = smb.angdiff(vertex.coord[2])
 
         dt = time.time() - t0
         print(f"done in {dt*1e3:0.2f} msec.  Total cost {etotal:g}")
@@ -510,8 +517,16 @@ class PoseGraph:
 
 if __name__ == "__main__":
 
-    scan = PoseGraph("killian.g2o", lidar=True, verbose=False)
-    print(scan.graph.nc)
-    # scan.plot()
-    w = scan.scanmap(maxrange=40)
-    scan.plot_occgrid(w)
+    pg = PoseGraph("data/pg1.g2o");
+    pg.optimize(animate=True, retain=False)
+
+    plt.show(block=True)
+
+    # pg = PoseGraph("data/killian-small.toro");
+    # pg.optimize()
+
+    # scan = PoseGraph("killian.g2o", lidar=True, verbose=False)
+    # print(scan.graph.nc)
+    # # scan.plot()
+    # w = scan.scanmap(maxrange=40)
+    # scan.plot_occgrid(w)

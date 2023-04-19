@@ -10,6 +10,7 @@ import numpy as np
 from scipy import interpolate
 
 import matplotlib.pyplot as plt
+from matplotlib import animation
 
 # from matplotlib import patches
 # import matplotlib.transforms as mtransforms
@@ -410,25 +411,25 @@ class VehicleBase(ABC):
         self._control = driver
         driver._veh = self
 
-    def run(self, T=10, x0=None, control=None, animate=False):
+    def run(self, T=10, x0=None, control=None, animate=True):
         r"""
         Simulate motion of vehicle (superclass)
 
-        :param N: Number of simulation steps, defaults to 1000
-        :type N: int, optional
+        :param T: Simulation time in seconds, defaults to 10
+        :type T: float, optional
         :param x0: Initial state, defaults to value given to Vehicle constructor
         :type x0: array_like(3) or array_like(2)
-        :param animation: vehicle animation object, defaults to None
-        :type animation: VehicleAnimation subclass, optional
-        :param plot: Enable plotting, defaults to False
-        :type plot: bool, optional
+        :param control: vehicle control inputs, defaults to None
+        :type control: array_like(2), callable, driving agent
+        :param animate: Enable graphical animation of vehicle, defaults to False
+        :type animate: bool, optional
         :return: State trajectory, each row is :math:`(x,y,\theta)`.
         :rtype: ndarray(n,3)
 
-        Runs the vehicle simulation for ``N`` timesteps and optionally plots
+        Runs the vehicle simulation for ``T`` seconds and optionally plots
         an animation.  The method :meth:`step` performs each time step.
 
-        The control inputs are providd by ``control`` which can be:
+        The control inputs are provided by ``control`` which can be:
 
             * a constant tuple as the control inputs to the vehicle
             * a function called as ``f(vehicle, t, x)`` that returns a tuple
@@ -440,16 +441,21 @@ class VehicleBase(ABC):
         acceleration and steering limits.
 
         The simulation can be stopped prematurely by the control function
-        calling :meth:`stopif`.
+        calling :meth:`stopsim`.
 
-        :seealso: :meth:`init` :meth:`step` :meth:`control`
+        .. note::
+            * the simulation is fixed-time step with the step given by the ``dt`` 
+              attribute set by the constructor.
+            * integration uses rectangular integration.
+
+        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`
         """
 
-        self.init(control=control, x0=x0)
+        self.init(control=control, animate=animate, x0=x0)
 
         for i in range(round(T / self.dt)):
             self.step(animate=animate)
-
+        
             # check for user requested stop
             if self._stopsim:
                 print("USER REEQUESTED STOP AT time", self._t)
@@ -457,7 +463,104 @@ class VehicleBase(ABC):
 
         return self.x_hist
 
-    def init(self, x0=None, control=None):
+
+    def run_animation(self, T=10, x0=None, control=None, format=None, file=None):
+        r"""
+        Simulate motion of vehicle (superclass)
+
+        :param T: Simulation time in seconds, defaults to 10
+        :type T: float, optional
+        :param x0: Initial state, defaults to value given to Vehicle constructor
+        :type x0: array_like(3) or array_like(2)
+        :param control: vehicle control inputs, defaults to None
+        :type control: array_like(2), callable, driving agent
+        :param format: Output format
+        :type format: str, optional
+        :param file: File name
+        :type file: str, optional
+        :return: Matplotlib animation object 
+        :rtype: :meth:`matplotlib.animation.FuncAnimation`
+
+        Runs the vehicle simulation for ``T`` seconds and returns an animation
+        in various formats::
+
+            ``format``    ``file``   description
+            ============  =========  ============================
+            ``"html"``    str, None  return HTML5 video
+            ``"jshtml"``  str, None  return JS+HTML video
+            ``"gif"``     str        return animated GIF
+            ``"mp4"``     str        return MP4/H264 video
+            ``None``                 return a ``FuncAnimation`` object
+
+        The allowables types for ``file`` are given in the second column.  A str
+        value is the file name.  If ``None`` is an option then return the video as a string.
+
+        For the last case, a reference to the animation object must be held if used for
+        animation in a Jupyter cell::
+
+            anim = robot.run_animation(T=20)
+
+        The control inputs are provided by ``control`` which can be:
+
+            * a constant tuple as the control inputs to the vehicle
+            * a function called as ``f(vehicle, t, x)`` that returns a tuple
+            * an interpolator called as ``f(t)`` that returns a tuple, see
+              SciPy interp1d
+            * a driver agent, subclass of :class:`VehicleDriverBase`
+
+        This is evaluated by :meth:`eval_control` which applies velocity,
+        acceleration and steering limits.
+
+        The simulation can be stopped prematurely by the control function
+        calling :meth:`stopsim`.
+
+        .. note::
+            * the simulation is fixed-time step with the step given by the ``dt`` 
+              attribute set by the constructor.
+            * integration uses rectangular integration.
+
+        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`
+        """
+
+        fig, ax = plt.subplots()
+
+        nframes = round(T / self.dt)
+        anim = animation.FuncAnimation(
+            fig=fig, 
+            func=lambda i: self.step(animate=True, pause=False),
+            init_func=lambda: self.init(animate=True),
+            frames=nframes, 
+            interval=self.dt*1000, 
+            blit=False,
+            repeat=False,
+        )
+        # anim._interval = self.dt*1000/2
+        # anim._repeat = True
+        ret = None
+        if format == "html":
+            ret = anim.to_html5_video()  # convert to embeddable HTML5 animation
+        elif format == "jshtml":
+            ret = anim.to_jshtml()   # convert to embeddable Javascript/HTML animation
+        elif format == "gif":
+            anim.save(file, writer=animation.PillowWriter(fps=1/self.dt))  # convert to GIF
+            ret = None
+        elif format == "mp4":
+            anim.save(file, writer=animation.FFMpegWriter(fps=1/self.dt))  # convert to mp4/H264
+            ret = None
+        elif format == None:
+            # return the anim object
+            return anim
+        else:
+            raise ValueError("unknown format")
+        
+        if ret is not None and file is not None:
+            with open(file, "w") as f:
+                f.write(ret)
+            ret = None
+        plt.close(fig)
+        return ret
+    
+    def init(self, x0=None, control=None, animate=True):
         """
         Initialize for simulation (superclass)
 
@@ -499,7 +602,7 @@ class VehicleBase(ABC):
         self._t = 0
 
         # initialize the graphics
-        if self._animation is not None:
+        if animate and self._animation is not None:
 
             # setup the plot
             self._ax = base.plotvol2(self.workspace)
@@ -507,9 +610,12 @@ class VehicleBase(ABC):
             self._ax.set_xlabel("x")
             self._ax.set_ylabel("y")
             self._ax.set_aspect("equal")
-            self._ax.figure.canvas.manager.set_window_title(
-                f"Robotics Toolbox for Python (Figure {self._ax.figure.number})"
-            )
+            try:
+                self._ax.figure.canvas.manager.set_window_title(
+                    f"Robotics Toolbox for Python (Figure {self._ax.figure.number})"
+                )
+            except AttributeError:
+                pass
 
             self._animation.add(ax=self._ax)  # add vehicle animation to axis
             self._timer = plt.figtext(0.85, 0.95, "")  # display time counter
@@ -518,7 +624,7 @@ class VehicleBase(ABC):
         if isinstance(self._control, VehicleDriverBase):
             self._control.init(ax=self._ax)
 
-    def step(self, u=None, animate=False):
+    def step(self, u=None, animate=True, pause=True):
         r"""
         Step simulator by one time step (superclass)
 
@@ -576,9 +682,12 @@ class VehicleBase(ABC):
         # do the graphics
         if animate and self._animation:
             self._animation.update(self._x)
-            if self._timer is not None:
-                self._timer.set_text(f"t = {self._t:.2f}")
-            plt.pause(self._dt)
+            # if self._timer is not None:
+            #     self._timer.set_text(f"t = {self._t:.2f}")
+            if pause:
+                plt.pause(self._dt)
+            # plt.show(block=False)
+            # pass
 
         self._t += self._dt
 
@@ -590,6 +699,7 @@ class VehicleBase(ABC):
             )
 
         return odo
+
 
     @property
     def workspace(self):
@@ -1243,7 +1353,13 @@ if __name__ == "__main__":
 
     robot.control = RandomPath(workspace=10)
 
-    robot.run(T=10)
+    # robot.run(T=10, animate=True)
+    # plt.show(block=True)
+
+    anim = robot.run_animation(T=10, format="html", file="veh.html")
+    # anim.save("veh.mp4", writer=animation.FFMpegWriter(fps=1/robot.dt))  # convert to mp4/H264
+    # with open("veh.html", "w") as f:
+    #     f.write(anim.to_html5_video())
 
     # from math import pi
 

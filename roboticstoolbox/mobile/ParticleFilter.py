@@ -14,7 +14,7 @@ from collections import namedtuple
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
-from spatialmath import base
+import spatialmath.base as smb
 
 """
 Monte-carlo based localisation for estimating vehicle pose based on
@@ -132,12 +132,12 @@ class ParticleFilter:
         self._htuple = namedtuple("PFlog", "t odo xest std weights")
 
         if workspace is not None:
-            self._dim = base.expand_dims(workspace)
+            self._dim = smb.expand_dims(workspace)
         else:
             self._dim = sensor.map.workspace
 
         self._workspace = self.robot.workspace
-        self._init()
+        # self._init()
 
     def __str__(self):
         # ParticleFilter.char Convert to string
@@ -152,8 +152,8 @@ class ParticleFilter:
             return s.replace("\n", "\n" + spaces)
 
         s = f"ParticleFilter object: {self.nparticles} particles"
-        s += "\nR:  " + base.array2str(self.R)
-        s += "\nL:  " + base.array2str(self.L)
+        s += "\nR:  " + smb.array2str(self.R)
+        s += "\nL:  " + smb.array2str(self.L)
         if self.robot is not None:
             s += indent("\nrobot: " + str(self.robot))
 
@@ -325,8 +325,9 @@ class ParticleFilter:
         # anim = Animate(opt.movie)
 
         # display the initial particles
+        ax = smb.axes_logic(None, 2)
         if self._animate:
-            (self.h,) = plt.plot(
+            (self.h,) = ax.plot(
                 self.x[:, 0],
                 self.x[:, 1],
                 "go",
@@ -341,15 +342,19 @@ class ParticleFilter:
         # self.robot.plot()
 
         # iterate over time
+        import time
         for i in range(round(T / self.robot.dt)):
             self._step()
+            # time.sleep(0.2)
+            plt.pause(0.2)
+            # plt.draw()
             # anim.add()
         # anim.close()
 
     def _step(self):
 
         # fprintf('---- step\n')
-        odo = self.robot.step()  # move the robot
+        odo = self.robot.step(animate=self._animate)  # move the robot
 
         # update the particles based on odometry
         self._predict(odo)
@@ -368,7 +373,7 @@ class ParticleFilter:
         std_est = self.x.std(axis=0)
 
         # std is more complex for angles, need to account for 2pi wrap
-        std_est[2] = np.sqrt(np.sum(base.angdiff(self.x[:, 2], x_est[2]) ** 2)) / (
+        std_est[2] = np.sqrt(np.sum(smb.angdiff(self.x[:, 2], x_est[2]) ** 2)) / (
             self.nparticles - 1
         )
 
@@ -398,16 +403,16 @@ class ParticleFilter:
         segment of height equal to particle weight.
         """
 
-        ax = base.plotvol3()
+        ax = smb.plotvol3()
         for (x, y, t), weight in zip(self.x, self.weight):
             # ax.plot([x, x], [y, y], [0, weight], 'r')
             ax.plot([x, x], [y, y], [0, weight], "skyblue", linewidth=3)
             ax.plot(x, y, weight, "k.", markersize=6)
 
-        plt.grid(True)
-        plt.xlabel("X")
-        plt.ylabel("Y")
-        plt.xlim()
+        ax.set_grid(True)
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.set_xlim()
         ax.set_zlabel("particle weight")
         ax.view_init(29, 59)
 
@@ -427,7 +432,7 @@ class ParticleFilter:
         self.x = self.robot.f(self.x, odo) + self.random.multivariate_normal(
             (0, 0, 0), self.R, size=self.nparticles
         )
-        self.x[:, 2] = base.angdiff(self.x[:, 2])
+        self.x[:, 2] = smb.angdiff(self.x[:, 2])
 
     def _observe(self, z, lm_id):
         # step 3
@@ -457,7 +462,7 @@ class ParticleFilter:
         invL = np.linalg.inv(self.L)
         z_pred = self.sensor.h(self.x, lm_id)
         z_pred[:, 0] = z[0] - z_pred[:, 0]
-        z_pred[:, 1] = base.angdiff(z[1], z_pred[:, 1])
+        z_pred[:, 1] = smb.angdiff(z[1], z_pred[:, 1])
 
         LL = -0.5 * np.r_[invL[0, 0], invL[1, 1], 2 * invL[0, 1]]
         e = (
@@ -486,7 +491,7 @@ class ParticleFilter:
             kind="nearest",
             fill_value="extrapolate",
         )
-        inextgen = interpfun(iselect).astype(np.int)
+        inextgen = interpfun(iselect).astype(int)
 
         # copy selected particles for next generation..
         self.x = self.x[inextgen, :]
@@ -545,3 +550,18 @@ class ParticleFilter:
         plt.plot(xyt[:, 0], xyt[:, 1], **kwargs)
         if block is not None:
             plt.show(block=block)
+
+
+if __name__ == "__main__":
+    from roboticstoolbox import *
+
+    map = LandmarkMap(20, workspace=10);
+    V = np.diag([0.02, np.deg2rad(0.5)]) ** 2;
+    robot = Bicycle(covar=V, animation="car", workspace=map);
+    robot.control = RandomPath(workspace=map)
+    W = np.diag([0.1, np.deg2rad(1)]) ** 2;
+    sensor = RangeBearingSensor(robot, map, covar=W, plot=True);
+    R = np.diag([0.1, 0.1, np.deg2rad(1)]) ** 2;
+    L = np.diag([0.1, 0.1]);
+    pf = ParticleFilter(robot, sensor=sensor, R=R, L=L, nparticles=1000, animate=True);
+    pf.run(T=10);

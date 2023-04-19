@@ -135,7 +135,7 @@ class LandmarkMap:
         """
         return self._map[:, k]
 
-    def plot(self, labels=False, block=False, **kwargs):
+    def plot(self, labels=False, block=None, **kwargs):
         """
         Plot landmark map
 
@@ -173,7 +173,8 @@ class LandmarkMap:
             labels = None
         base.plot_point(self._map, text=labels, **kwargs)
         plt.grid(True)
-        plt.show(block=block)
+        if block is not None:
+            plt.show(block=block)
 
 
 if __name__ == "__main__":

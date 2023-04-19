@@ -10,6 +10,7 @@ from scipy import integrate, randn
 from scipy.linalg import sqrtm, block_diag
 from scipy.stats.distributions import chi2
 import matplotlib.pyplot as plt
+from matplotlib import animation
 
 from spatialmath.base.animate import Animate
 from spatialmath import base, SE2
@@ -340,7 +341,7 @@ class EKF:
         # if np.any(sensor) and not isinstance(sensor, 'Sensor'):
         #     raise ValueError('expecting Sensor object')
 
-        self._init()
+        self.init()
 
         self.xxdata = ([], [])
 
@@ -601,7 +602,7 @@ class EKF:
         jx = self.landmark_index(id)
         return self._x_est[jx : jx + 2]
 
-    def _init(self):
+    def init(self):
         # EKF.init Reset the filter
         #
         # E.init() resets the filter state and clears landmarks and history.
@@ -629,7 +630,7 @@ class EKF:
 
             # np.full((2, len(self.sensor.map)), -1, dtype=int)
 
-    def run(self, T, animate=False, movie=None):
+    def run(self, T, animate=False):
         """
         Run the EKF simulation
 
@@ -637,8 +638,6 @@ class EKF:
         :type T: float
         :param animate: animate motion of vehicle, defaults to False
         :type animate: bool, optional
-        :param movie: name of movie file to create, defaults to None
-        :type movie: str, optional
 
         Simulates the motion of a vehicle (under the control of a driving agent)
         and the EKF estimator.  The steps are:
@@ -654,38 +653,116 @@ class EKF:
         :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks`
             :meth:`get_xyt` :meth:`get_t` :meth:`get_map` :meth:`get_P` :meth:`get_Pnorm`
             :meth:`plot_xy` :meth:`plot_ellipse` :meth:`plot_error` :meth:`plot_map`
+            :meth:`run_animation`
         """
-        self._init()
+        self.init()
         if animate:
             if self.sensor is not None:
                 self.sensor.map.plot()
-            elif self._dim is not None:
-                if not Iterable(self._dim):
-                    d = self._dim
-                    plt.axis([-d, d, -d, d])
-                elif len(self._dim) == 2:
-                    w = self._dim[1]
-                    h = self._dim(2)
-                    plt.axis([-w, w, -h, h])
-                elif len(self._dim) == 4:
-                    plt.axis(self._dim)
-            else:
-                animate = False
 
             plt.xlabel("X")
             plt.ylabel("Y")
 
-        # anim = Animate(movie)
         for k in range(round(T / self.robot.dt)):
             if animate:
-                self.robot.plot()
-            self._step()
-        #     anim.add()
+                # self.robot.plot()
+                self.robot._animation.update(self.robot.x)
+            self.step()
 
-        # anim.close()
 
-    # TODO: Make the following methods private.
-    def _step(self, z_pred=None):
+    def run_animation(self, T=10, x0=None, control=None, format=None, file=None):
+        r"""
+        Run the EKF simulation
+
+        :param T: maximum simulation time in seconds
+        :type T: float
+        :param format: Output format
+        :type format: str, optional
+        :param file: File name
+        :type file: str, optional
+        :return: Matplotlib animation object 
+        :rtype: :meth:`matplotlib.animation.FuncAnimation`
+
+        Simulates the motion of a vehicle (under the control of a driving agent)
+        and the EKF estimator for ``T`` seconds and returns an animation
+        in various formats::
+
+            ``format``    ``file``   description
+            ============  =========  ============================
+            ``"html"``    str, None  return HTML5 video
+            ``"jshtml"``  str, None  return JS+HTML video
+            ``"gif"``     str        return animated GIF
+            ``"mp4"``     str        return MP4/H264 video
+            ``None``                 return a ``FuncAnimation`` object
+
+        If ``file`` can be ``None`` then return the video as a string, otherwise it 
+        must be a filename.
+        
+        The simulation steps are:
+
+        - initialize the filter, vehicle and vehicle driver agent, sensor
+        - for each time step:
+
+            - step the vehicle and its driver agent, obtain odometry
+            - take a sensor reading
+            - execute the EKF
+            - save information as a namedtuple to the history list for later display
+
+        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks`
+            :meth:`get_xyt` :meth:`get_t` :meth:`get_map` :meth:`get_P` :meth:`get_Pnorm`
+            :meth:`plot_xy` :meth:`plot_ellipse` :meth:`plot_error` :meth:`plot_map`
+            :meth:`run_animation`
+        """
+
+        fig, ax = plt.subplots()
+
+        def init():
+            self.init()
+            if self.sensor is not None:
+                self.sensor.map.plot()
+            ax.set_xlabel("X")
+            ax.set_ylabel("Y")
+
+        def animate(i):
+            self.robot._animation.update(self.robot.x)
+            self.step(pause=False)
+
+        nframes = round(T / self.robot._dt)
+        anim = animation.FuncAnimation(
+            fig=fig, 
+            func=animate,
+            init_func=init,
+            frames=nframes, 
+            interval=self.robot.dt*1000, 
+            blit=False,
+            repeat=False,
+        )
+
+        ret = None
+        if format == "html":
+            ret = anim.to_html5_video()  # convert to embeddable HTML5 animation
+        elif format == "jshtml":
+            ret = anim.to_jshtml()   # convert to embeddable Javascript/HTML animation
+        elif format == "gif":
+            anim.save(file, writer=animation.PillowWriter(fps=1/self.robot.dt))  # convert to GIF
+            ret = None
+        elif format == "mp4":
+            anim.save(file, writer=animation.FFMpegWriter(fps=1/self.robot.dt))  # convert to mp4/H264
+            ret = None
+        elif format == None:
+            # return the anim object
+            return anim
+        else:
+            raise ValueError("unknown format")
+        
+        if ret is not None and file is not None:
+            with open(file, "w") as f:
+                f.write(ret)
+            ret = None
+        plt.close(fig)
+        return ret
+    
+    def step(self, z_pred=None, pause=None):
         """
         Execute one timestep of the simulation
 
@@ -694,7 +771,7 @@ class EKF:
         """
 
         # move the robot
-        odo = self.robot.step()
+        odo = self.robot.step(pause=pause)
 
         # =================================================================
         # P R E D I C T I O N
@@ -782,7 +859,7 @@ class EKF:
 
             # compute the innovation
             z_pred = self.sensor.h(xv_pred, lm_id)
-            innov = np.array([z[0] - z_pred[0], base.wrap_mpi_pi(z[1], z_pred[1])])
+            innov = np.array([z[0] - z_pred[0], base.wrap_mpi_pi(z[1] - z_pred[1])])
 
             if self._est_ekf_map:
                 # the ekf_map is estimated MM or SLAM case
@@ -799,7 +876,7 @@ class EKF:
 
                     z_pred = self.sensor.h(xv_pred, xf)
                     innov = np.array(
-                        [z[0] - z_pred[0], base.wrap_mpi_pi(z[1], z_pred[1])]
+                        [z[0] - z_pred[0], base.wrap_mpi_pi(z[1] - z_pred[1])]
                     )
 
                     #  create the Jacobian for all landmarks
@@ -1338,8 +1415,8 @@ class EKF:
             p.append(map[lm_id])
             q.append(self.landmark_x(lm_id))
 
-        p = np.array(p)
-        q = np.array(q)
+        p = np.array(p).T
+        q = np.array(q).T
 
         T = base.points2tr2(p, q)
         return SE2(T)
@@ -1349,12 +1426,14 @@ if __name__ == "__main__":
 
     from roboticstoolbox import *
 
-    robot = Bicycle()
+    V = np.diag([0.02, np.deg2rad(0.5)]) ** 2;
+    robot = Bicycle(covar=V, animation="car")
     robot.control = RandomPath(workspace=10)
     P0 = np.diag([1, 1, 1])
     V = np.diag([1, 1])
-    ekf = EKF(robot=(robot, V), P0=P0)
+    ekf = EKF(robot=(robot, V), P0=P0, animate=False)
     print(ekf)
+    ekf.run_animation(T=20, format="mp4", file="ekf.mp4")
 
     # from roboticstoolbox import Bicycle
 
