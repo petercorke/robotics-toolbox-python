@@ -955,8 +955,10 @@ extern "C"
         // Get data out
         if (!_check_array_type(py_q))
             return NULL;
-        py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
+        py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_C_CONTIGUOUS);
         q = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q);
+
+        // std::cout << "q: " << q[0] << ", " << q[1] << ", " << q[2] << ", " << q[3] << ", " << q[4] << ", " << q[5] << std::endl;
 
         // Check the dimesnions of q
         q_nd = PyArray_NDIM((PyArrayObject *)py_np_q);
@@ -992,8 +994,15 @@ extern "C"
         }
         else
         {
+            // if using a trajectory, make a duplicate of ret as we will need to
+            // extreme reshape it due to Fortran ordering
+            // Fortran ordering of 3D array wants (4, 4, n) while numpy looping
+            // typically likes to have (n, 4, 4)
+
+            // therefore we make the returned python array (n, 4, 4) and row-major
+            // and later on we transpose each (4, 4) component
             dim3[0] = trajn;
-            py_ret = PyArray_EMPTY(3, dim3, NPY_DOUBLE, 1);
+            py_ret = PyArray_EMPTY(3, dim3, NPY_DOUBLE, 0);
         }
 
         // Get numpy reference to return array
@@ -1028,11 +1037,18 @@ extern "C"
         // Do the actual job
         for (int i = 0; i < trajn; i++)
         {
-            // Get pointers to the new section of return array and q array
             retp = ret + (4 * 4 * i);
+
             MapMatrix4dc e_retp(retp);
             qp = q + (n * i);
             _ETS_fkine(ets, qp, base, tool, e_retp);
+
+            // Transpose if we have a trajectory
+            // as the returned trajectory is row-major
+            if (trajn > 1)
+            {
+                e_retp.transposeInPlace();
+            }
         }
 
         // Free memory
