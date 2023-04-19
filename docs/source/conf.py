@@ -47,7 +47,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     # "scanpydoc.elegant_typehints",
     "sphinx_autorun",
-    "sphinx-favicon",
+    "sphinx_favicon",
 ]
 
 autosummary_generate = True
