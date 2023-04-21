@@ -293,6 +293,42 @@ class TestBicycle(unittest.TestCase):
         )
 
 
+class TestUnicycle(unittest.TestCase):
+    def test_str(self):
+        """
+        check the string representation of the unicycle
+        """
+        uni = Unicycle()
+        self.assertEqual(
+            str(uni),
+            """Unicycle: x = [ 0, 0, 0 ]
+  W=1, steer_max=inf, vel_max=inf, accel_max=inf""",
+        )
+
+        uni = Unicycle(steer_max=0.7)
+        self.assertEqual(
+            str(uni),
+            """Unicycle: x = [ 0, 0, 0 ]
+  W=1, steer_max=0.7, vel_max=inf, accel_max=inf""",
+        )
+
+    def test_deriv(self):
+        """
+        test the derivative function
+        """
+        uni = Unicycle()
+
+        state = np.r_[0, 0, 0]
+        input = [1, 0]  # no rotation
+        nt.assert_almost_equal(uni.deriv(state, input), np.r_[1.0, 0, 0])
+
+        input = [0, 1]  # only rotate
+        nt.assert_almost_equal(uni.deriv(state, input), np.r_[0, 0, 1])
+
+        input = [1, 1]  # turn and rotate
+        nt.assert_almost_equal(uni.deriv(state, input), np.r_[1, 0, 1])
+
+
 # function setupOnce(testCase)
 #     testCase.TestData.Duration = 50;
 # end
