@@ -118,6 +118,7 @@ extern "C"
         Matrix4dc temp;
         Matrix4dc ret;
         int j = ets->n - 1;
+        double sign = 1.0;
 
         if (tool != NULL)
         {
@@ -132,35 +133,66 @@ extern "C"
 
             if (et->isjoint)
             {
+
                 if (et->axis == 0)
                 {
                     tJ(Eigen::seq(0, 2), j) = U(2, Eigen::seq(0, 2)) * U(1, 3) - U(1, Eigen::seq(0, 2)) * U(2, 3);
                     tJ(Eigen::seq(3, 5), j) = U(0, Eigen::seq(0, 2));
+
+                    if (et->isflip)
+                    {
+                        tJ(Eigen::seq(0, 5), j) = -tJ(Eigen::seq(0, 5), j);
+                    }
                 }
                 else if (et->axis == 1)
                 {
                     tJ(Eigen::seq(0, 2), j) = U(0, Eigen::seq(0, 2)) * U(2, 3) - U(2, Eigen::seq(0, 2)) * U(0, 3);
                     tJ(Eigen::seq(3, 5), j) = U(1, Eigen::seq(0, 2));
+
+                    if (et->isflip)
+                    {
+                        tJ(Eigen::seq(0, 5), j) = -tJ(Eigen::seq(0, 5), j);
+                    }
                 }
                 else if (et->axis == 2)
                 {
                     tJ(Eigen::seq(0, 2), j) = U(1, Eigen::seq(0, 2)) * U(0, 3) - U(0, Eigen::seq(0, 2)) * U(1, 3);
                     tJ(Eigen::seq(3, 5), j) = U(2, Eigen::seq(0, 2));
+
+                    if (et->isflip)
+                    {
+                        tJ(Eigen::seq(0, 5), j) = -tJ(Eigen::seq(0, 5), j);
+                    }
                 }
                 else if (et->axis == 3)
                 {
                     tJ(Eigen::seq(0, 2), j) = U(0, Eigen::seq(0, 2));
                     tJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
+
+                    if (et->isflip)
+                    {
+                        tJ(Eigen::seq(0, 2), j) = -tJ(Eigen::seq(0, 5), j);
+                    }
                 }
                 else if (et->axis == 4)
                 {
                     tJ(Eigen::seq(0, 2), j) = U(1, Eigen::seq(0, 2));
                     tJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
+
+                    if (et->isflip)
+                    {
+                        tJ(Eigen::seq(0, 2), j) = -tJ(Eigen::seq(0, 5), j);
+                    }
                 }
                 else if (et->axis == 5)
                 {
                     tJ(Eigen::seq(0, 2), j) = U(2, Eigen::seq(0, 2));
                     tJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
+
+                    if (et->isflip)
+                    {
+                        tJ(Eigen::seq(0, 2), j) = -tJ(Eigen::seq(0, 5), j);
+                    }
                 }
 
                 _ET_T(et, &ret(0), q[et->jindex]);
@@ -212,31 +244,61 @@ extern "C"
                 {
                     eJ(Eigen::seq(0, 2), j) = U(2, Eigen::seq(0, 2)) * U(1, 3) - U(1, Eigen::seq(0, 2)) * U(2, 3);
                     eJ(Eigen::seq(3, 5), j) = U(0, Eigen::seq(0, 2));
+
+                    if (et->isflip)
+                    {
+                        eJ(Eigen::seq(0, 5), j) = -eJ(Eigen::seq(0, 5), j);
+                    }
                 }
                 else if (et->axis == 1)
                 {
                     eJ(Eigen::seq(0, 2), j) = U(0, Eigen::seq(0, 2)) * U(2, 3) - U(2, Eigen::seq(0, 2)) * U(0, 3);
                     eJ(Eigen::seq(3, 5), j) = U(1, Eigen::seq(0, 2));
+
+                    if (et->isflip)
+                    {
+                        eJ(Eigen::seq(0, 5), j) = -eJ(Eigen::seq(0, 5), j);
+                    }
                 }
                 else if (et->axis == 2)
                 {
                     eJ(Eigen::seq(0, 2), j) = U(1, Eigen::seq(0, 2)) * U(0, 3) - U(0, Eigen::seq(0, 2)) * U(1, 3);
                     eJ(Eigen::seq(3, 5), j) = U(2, Eigen::seq(0, 2));
+
+                    if (et->isflip)
+                    {
+                        eJ(Eigen::seq(0, 5), j) = -eJ(Eigen::seq(0, 5), j);
+                    }
                 }
                 else if (et->axis == 3)
                 {
                     eJ(Eigen::seq(0, 2), j) = U(0, Eigen::seq(0, 2));
                     eJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
+
+                    if (et->isflip)
+                    {
+                        eJ(Eigen::seq(0, 2), j) = -eJ(Eigen::seq(0, 5), j);
+                    }
                 }
                 else if (et->axis == 4)
                 {
                     eJ(Eigen::seq(0, 2), j) = U(1, Eigen::seq(0, 2));
                     eJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
+
+                    if (et->isflip)
+                    {
+                        eJ(Eigen::seq(0, 2), j) = -eJ(Eigen::seq(0, 5), j);
+                    }
                 }
                 else if (et->axis == 5)
                 {
                     eJ(Eigen::seq(0, 2), j) = U(2, Eigen::seq(0, 2));
                     eJ(Eigen::seq(3, 5), j) = Eigen::Vector3d::Zero();
+
+                    if (et->isflip)
+                    {
+                        eJ(Eigen::seq(0, 2), j) = -eJ(Eigen::seq(0, 5), j);
+                    }
                 }
 
                 _ET_T(et, &ret(0), q[et->jindex]);
