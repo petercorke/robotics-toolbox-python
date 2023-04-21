@@ -1197,10 +1197,7 @@ class Unicycle(VehicleBase):
     def __str__(self):
 
         s = super().__str__()
-        s += (
-            f"\n  W={self._W}, steer_max={self._steer_max}, vel_max={self._vel_max},"
-            f" accel_max={self.accel_max}"
-        )
+        s += f"\n  W={self._W}, vel_max={self._speed_max}, accel_max={self._accel_max}"
         return s
 
     def deriv(self, x, u):
@@ -1284,7 +1281,6 @@ class DiffSteer(Unicycle):
     def __str__(self):
 
         s = super().__str__()
-        s += f"\n  W={self._W}, vel_max={self._vel_max}, accel_max={self.accel_max}"
         return s
 
     def deriv(self, x, u):
