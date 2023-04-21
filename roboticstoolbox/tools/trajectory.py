@@ -452,15 +452,12 @@ def trapezoidal_func(q0, qf, tf, V=None):
         elif abs(V) > (2 * abs(qf - q0) / tf):
             raise ValueError("V too big")
 
-    if q0 == qf:
-        # Commented these because they arent used anywhere
-        # s = np.ones((len(t), len(t))) @ q0
-        # sd = np.zeros((len(t), len(t)))
-        # sdd = np.zeros((len(t), len(t)))
-        return
-
-    tb = (q0 - qf + V * tf) / V
-    a = V / tb
+    if V == 0:
+        tb = np.inf
+        a = 0
+    else:
+        tb = (q0 - qf + V * tf) / V
+        a = V / tb
 
     def trapezoidalfunc(t):
 
