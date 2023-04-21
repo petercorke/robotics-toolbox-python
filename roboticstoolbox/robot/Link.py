@@ -1362,7 +1362,7 @@ class BaseLink(SceneNode, ABC):
         format(dyn, fmt, self.m)
         format(dyn, fmt, self.r)
         I = self.I.flatten()  # noqa
-        format(dyn, fmt, np.r_[[I[k] for k in [0, 4, 8, 1, 2, 5]]])
+        format(dyn, fmt, np.r_[[I[k] for k in [0, 4, 8, 1, 5, 2]]])
         format(dyn, fmt, self.Jm)
         format(dyn, fmt, self.B)
         format(dyn, fmt, self.Tc)
