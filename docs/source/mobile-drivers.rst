@@ -1,8 +1,8 @@
-Mobile robot drivers
-====================
+Drivers
+=======
 
-These classes can drive a mobile robot around a workplace. Useful for testing
-localization algorithms.
+These classes define agents thta can drive a mobile robot around a workplace, and are
+useful for testing localization algorithms.
 
 Random Path
 ^^^^^^^^^^^

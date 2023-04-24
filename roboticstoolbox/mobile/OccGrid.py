@@ -469,8 +469,11 @@ class PolygonMap(BaseMap):
         :param workspace: dimensions of 2D plot area, defaults to (-10:10) x (-10:10),
             see :func:`~spatialmath.base.graphics.plotvol2`
         :type workspace: float, array_like(2), array_like(4)
-        :param polygons: _description_, defaults to []
+        :param polygons: obstacle polygons, defaults to []
         :type polygons: list, optional
+
+        The obstacle polygons are specified as instances of :class:`~spatialmath.geom2d.Polygon2`
+        or ndarray(2,N).
 
         The workspace can be specified in several ways:
 

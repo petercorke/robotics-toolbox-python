@@ -669,7 +669,6 @@ class EKF:
                 self.robot._animation.update(self.robot.x)
             self.step()
 
-
     def run_animation(self, T=10, x0=None, control=None, format=None, file=None):
         r"""
         Run the EKF simulation
@@ -680,7 +679,7 @@ class EKF:
         :type format: str, optional
         :param file: File name
         :type file: str, optional
-        :return: Matplotlib animation object 
+        :return: Matplotlib animation object
         :rtype: :meth:`matplotlib.animation.FuncAnimation`
 
         Simulates the motion of a vehicle (under the control of a driving agent)
@@ -695,9 +694,9 @@ class EKF:
             ``"mp4"``     str        return MP4/H264 video
             ``None``                 return a ``FuncAnimation`` object
 
-        If ``file`` can be ``None`` then return the video as a string, otherwise it 
+        If ``file`` can be ``None`` then return the video as a string, otherwise it
         must be a filename.
-        
+
         The simulation steps are:
 
         - initialize the filter, vehicle and vehicle driver agent, sensor
@@ -729,11 +728,11 @@ class EKF:
 
         nframes = round(T / self.robot._dt)
         anim = animation.FuncAnimation(
-            fig=fig, 
+            fig=fig,
             func=animate,
             init_func=init,
-            frames=nframes, 
-            interval=self.robot.dt*1000, 
+            frames=nframes,
+            interval=self.robot.dt * 1000,
             blit=False,
             repeat=False,
         )
@@ -742,32 +741,33 @@ class EKF:
         if format == "html":
             ret = anim.to_html5_video()  # convert to embeddable HTML5 animation
         elif format == "jshtml":
-            ret = anim.to_jshtml()   # convert to embeddable Javascript/HTML animation
+            ret = anim.to_jshtml()  # convert to embeddable Javascript/HTML animation
         elif format == "gif":
-            anim.save(file, writer=animation.PillowWriter(fps=1/self.robot.dt))  # convert to GIF
+            anim.save(
+                file, writer=animation.PillowWriter(fps=1 / self.robot.dt)
+            )  # convert to GIF
             ret = None
         elif format == "mp4":
-            anim.save(file, writer=animation.FFMpegWriter(fps=1/self.robot.dt))  # convert to mp4/H264
+            anim.save(
+                file, writer=animation.FFMpegWriter(fps=1 / self.robot.dt)
+            )  # convert to mp4/H264
             ret = None
         elif format == None:
             # return the anim object
             return anim
         else:
             raise ValueError("unknown format")
-        
+
         if ret is not None and file is not None:
             with open(file, "w") as f:
                 f.write(ret)
             ret = None
         plt.close(fig)
         return ret
-    
-    def step(self, z_pred=None, pause=None):
+
+    def step(self, pause=None):
         """
         Execute one timestep of the simulation
-
-        :param z_pred: _description_, defaults to None
-        :type z_pred: _type_, optional
         """
 
         # move the robot
@@ -1426,7 +1426,7 @@ if __name__ == "__main__":
 
     from roboticstoolbox import *
 
-    V = np.diag([0.02, np.deg2rad(0.5)]) ** 2;
+    V = np.diag([0.02, np.deg2rad(0.5)]) ** 2
     robot = Bicycle(covar=V, animation="car")
     robot.control = RandomPath(workspace=10)
     P0 = np.diag([1, 1, 1])

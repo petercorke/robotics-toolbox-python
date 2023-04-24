@@ -96,7 +96,7 @@ class RandomPath(VehicleDriverBase):
         :param dthresh: distance threshold, defaults to 0.05
         :type dthresh: float, optional
 
-        :raises ValueError: [description]
+        :raises ValueError: bad workspace specified
 
         Returns a *driver* object that drives the attached vehicle to a
         sequence of random waypoints.
@@ -176,7 +176,10 @@ class RandomPath(VehicleDriverBase):
         % a compact human readable format."""
 
         s = "RandomPath driver object\n"
-        s += f"  X {self._workspace[0]} : {self._workspace[1]}; Y {self._workspace[0]} : {self._workspace[1]}, dthresh={self._dthresh}\n"
+        s += (
+            f"  X {self._workspace[0]} : {self._workspace[1]}; Y {self._workspace[0]} :"
+            f" {self._workspace[1]}, dthresh={self._dthresh}\n"
+        )
         s += f"  current goal={self._goal}"
         return s
 

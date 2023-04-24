@@ -22,9 +22,9 @@ class VehicleAnimationBase(ABC):
 
     There are three concrete subclasses:
 
-    - ``VehicleMarker`` animates a Matplotlib marker
-    - ``VehiclePolygon`` animates a polygon shape (outline or filled), including predefined shapes
-    - ``VehicleIcon`` animates an image
+    - ``VehicleMarker`` animates a Matplotlib marker (shows position only)
+    - ``VehiclePolygon`` animates a polygon shape (outline or filled), including predefined shapes (shows position and orientation)
+    - ``VehicleIcon`` animates an image (shows position and orientation)
 
     An instance ``a`` of these classes can be used in three different ways, firstly::
 

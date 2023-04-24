@@ -188,7 +188,7 @@ class QuinticPolyPlanner(PlannerBase):
     :type goal_vel: float, optional
     :param goal_acc: goal acceleration, defaults to 0
     :type goal_acc: float, optional
-    :param max_acc: [description], defaults to 1
+    :param max_acc: maximum acceleration, defaults to 1
     :type max_acc: int, optional
     :param max_jerk: maximum jerk, defaults to 0.5
     :type min_t: float, optional
@@ -217,6 +217,8 @@ class QuinticPolyPlanner(PlannerBase):
             x(t) &= a_0 + a_1 t + a_2 t^2 + a_3 t^3 + a_4 t^4 + a_5 t^5 \\
             y(t) &= b_0 + b_1 t + b_2 t^2 + b_3 t^3 + b_4 t^4 + b_5 t^5
 
+    that meets the given constraints.  Trajectory time is given as a range.
+    
     :reference: "Local Path Planning And Motion Control For AGV In
         Positioning",  Takahashi, T. Hongo, Y. Ninomiya and G.
         Sugimoto; Proceedings. IEEE/RSJ International Workshop on
