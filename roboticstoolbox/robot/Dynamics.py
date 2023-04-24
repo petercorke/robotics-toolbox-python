@@ -306,9 +306,6 @@ class DynamicsMixin:
 
         n = self.n
 
-        if torque is not None:
-            warnings.warn("torque option is deprecated, use Q and Q_args", DeprecationWarning)
-
         if not isscalar(T):
             raise ValueError("T must be a scalar")
         q0 = getvector(q0, n)
