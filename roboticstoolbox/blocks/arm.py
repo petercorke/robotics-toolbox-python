@@ -225,8 +225,8 @@ class Jacobian(FunctionBlock):
             - :math:`\mathbf{J}`
 
     Compute the Jacobian matrix as a function of the input joint configuration.  The
-    Jacobian can be computed in the world or end-effector frame, and its inverse or
-    transpose can be returned.
+    Jacobian can be computed in the world or end-effector frame, for spatial or
+    analytical velocity, and its inverse, damped inverse or transpose can be returned.
 
     :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.jacob0` :meth:`~roboticstoolbox.robot.Robot.Robot.jacobe`
     """
@@ -237,28 +237,46 @@ class Jacobian(FunctionBlock):
     outlabels = ("J",)
 
     def __init__(
-        self, robot, frame="0", inverse=False, pinv=False, transpose=False, **blockargs
+        self,
+        robot,
+        frame="0",
+        representation=None,
+        inverse=False,
+        pinv=False,
+        damping=None,
+        transpose=False,
+        **blockargs,
     ):
         """
         :param robot: Robot model
         :type robot: Robot subclass
         :param frame: Frame to compute Jacobian for, one of: "0" [default], "e"
         :type frame: str, optional
+        :param representation: representation for analytical Jacobian, defaults to None
+        :type represenstation: str
         :param inverse: output inverse of Jacobian, defaults to False
         :type inverse: bool, optional
         :param pinv: output pseudo-inverse of Jacobian, defaults to False
         :type pinv: bool, optional
+        :param damping: damping term for inverse, defaults to None
+        :type damping: float or array_like(N)
         :param transpose: output transpose of Jacobian, defaults to False
         :type transpose: bool, optional
         :param blockargs: |BlockOptions|
         :type blockargs: dict
 
-        .. notes::
+        If an inverse is requested and ``damping`` is not None it is added to the
+        diagonal of the Jacobian prior to the inversion.  If a scalar is provided it is
+        added to each element of the diagonal, otherwise an N-vector is assumed.
+
+        .. note::
             - Only one of ``inverse`` or ``pinv`` can be True
             - ``inverse`` or ``pinv`` can be used in conjunction with ``transpose``
             - ``inverse`` requires that the Jacobian is square
             - If ``inverse`` is True and the Jacobian is singular a runtime
               error will occur.
+
+        :seealso: :meth:`~roboticstoolbox.robot.Robot.RobotKinematics.jacob0_analytical`
         """
         if robot is None:
             raise ValueError("robot is not defined")
@@ -268,9 +286,17 @@ class Jacobian(FunctionBlock):
         self.robot = robot
 
         if frame in (0, "0"):
-            self.jfunc = robot.jacob0
+            if representation is None:
+                self.jfunc = robot.jacob0
+            else:
+                self.jfunc = lambda q: robot.jacob0_analytical(
+                    q, representation=representation
+                )
         elif frame == "e":
-            self.jfunc = robot.jacobe
+            if representation is None:
+                self.jfunc = robot.jacobe
+            else:
+                raise ValueError("cannot compute analytical Jacobian in EE frame")
         else:
             raise ValueError("unknown frame")
 
@@ -280,18 +306,32 @@ class Jacobian(FunctionBlock):
             raise ValueError("can only set one of inverse and pinv")
         self.inverse = inverse
         self.pinv = pinv
+        self.damping = damping
         self.transpose = transpose
+        self.representation = representation
 
         self.inport_names(("q",))
         self.outport_names(("J",))
 
     def output(self, t, inports, x):
         q = inports[0]
-        J = self.jfunc(q)
+
+        if self.representation is None:
+            J = self.jfunc(q)
+
+        # add damping term if given
+        if (self.inverse or self.pinv) and self.damping is not None:
+            D = np.zeros(J.shape)
+            np.fill_diagonal(D, self.damping)
+            J = J + D
+
+        # optionally invert the Jacobian
         if self.inverse:
             J = np.linalg.inv(J)
         if self.pinv:
             J = np.linalg.pinv(J)
+
+        # optionally transpose the Jacobian
         if self.transpose:
             J = J.T
         return [J]
