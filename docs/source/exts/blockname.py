@@ -1,5 +1,6 @@
 from docutils import nodes
-#from docutils.parsers.rst import Directive
+
+# from docutils.parsers.rst import Directive
 
 
 def block_name(name, rawtext, text, lineno, inliner, options={}, content=[]):
@@ -14,7 +15,8 @@ def block_name(name, rawtext, text, lineno, inliner, options={}, content=[]):
 
     html = """
     <table width="100%">
-    	<col style="width:80%">
+    	<col style="width:75%">
+        <col style="width:5%;">
 	    <col style="width:20%">
     <tr>
     <td>
@@ -22,23 +24,28 @@ def block_name(name, rawtext, text, lineno, inliner, options={}, content=[]):
     {0}
     </p>
     </td>
+    <td></td>
     <td>
-    <img src="{1}" width=80 height=80>
+    <img src="{1}" width=80 height=80 style="border:2px solid black; border-radius:10px; padding: 4px">
     </td>
     </tr>
     </table>
     """
 
     # this is the path to the icons within the github repo
-    path =  "https://github.com/petercorke/robotics-toolbox-python/raw/master/roboticstoolbox/blocks/Icons/" + text.lower() + ".png"
-    html_node = nodes.raw(text=html.format(text, path), format='html')
+    path = (
+        "https://github.com/petercorke/robotics-toolbox-python/raw/master/roboticstoolbox/blocks/Icons/"
+        + text.lower()
+        + ".png"
+    )
+    html_node = nodes.raw(text=html.format(text, path), format="html")
     return [html_node], []
 
 
 def setup(app):
     app.add_role("blockname", block_name)
     return {
-        'version': '0.1',
-        'parallel_read_safe': True,
-        'parallel_write_safe': True,
+        "version": "0.1",
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
     }
