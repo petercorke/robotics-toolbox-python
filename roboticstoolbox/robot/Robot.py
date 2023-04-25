@@ -837,6 +837,15 @@ graph [rankdir=LR];
             axes_list = [True, True, True, False, False, False]
         elif axes.startswith("rot"):
             axes_list = [False, False, False, True, True, True]
+        elif axes == "both":
+            return (
+                self.manipulability(
+                    q=q, J=J, end=end, start=start, method=method, axes="trans"
+                ),
+                self.manipulability(
+                    q=q, J=J, end=end, start=start, method=method, axes="rot"
+                ),
+            )
         else:
             raise ValueError("axes must be all, trans, rot or both")
 
@@ -1890,3 +1899,122 @@ class Robot2(BaseRobot[Link2]):
 
     def fkine(self, q, end=None, start=None):
         return self.ets(start, end).fkine(q)
+
+    @property
+    def reach(self) -> float:
+        r"""
+        Reach of the robot
+
+        A conservative estimate of the reach of the robot. It is computed as
+        the sum of the translational ETs that define the link transform.
+
+        Note
+        ----
+        Computed on the first access. If kinematic parameters
+        subsequently change this will not be reflected.
+
+        Returns
+        -------
+        reach
+            Maximum reach of the robot
+
+        Notes
+        -----
+        - Probably an overestimate of reach
+        - Used by numerical inverse kinematics to scale translational
+          error.
+        - For a prismatic joint, uses ``qlim`` if it is set
+
+        """
+
+        # TODO
+        # This should be a start, end method and compute the reach based on the
+        # given ets. Then use an lru_cache to speed up return
+
+        if self._reach is None:
+            d_all = []
+            for link in self.ee_links:
+                d = 0
+                while True:
+                    for et in link.ets:
+                        if et.istranslation:
+                            if et.isjoint:
+                                # the length of a prismatic joint depends on the
+                                # joint limits.  They might be set in the ET
+                                # or in the Link depending on how the robot
+                                # was constructed
+                                if link.qlim is not None:
+                                    d += max(link.qlim)
+                                elif et.qlim is not None:  # pragma nocover
+                                    d += max(et.qlim)
+                            else:
+                                d += abs(et.eta)
+                    link = link.parent
+                    if link is None or isinstance(link, str):
+                        d_all.append(d)
+                        break
+
+            self._reach = max(d_all)
+        return self._reach
+
+    def fkine_all(self, q: ArrayLike) -> SE2:
+        """
+        Compute the pose of every link frame
+
+        ``T = robot.fkine_all(q)`` is  an SE3 instance with ``robot.nlinks +
+        1`` values:
+
+        - ``T[0]`` is the base transform
+        - ``T[i]`` is the pose of link whose ``number`` is ``i``
+
+        Parameters
+        ----------
+        q
+            The joint configuration
+
+        Returns
+        -------
+        fkine_all
+            Pose of all links
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+
+        """  # noqa
+
+        q = getvector(q)
+
+        Tbase = SE2(self.base)  # add base, also sets the type
+
+        linkframes = Tbase.__class__.Alloc(self.nlinks + 1)
+        linkframes[0] = Tbase
+
+        def recurse(Tall, Tparent, q, link):
+            # if joint??
+            T = Tparent
+            while True:
+                T *= SE2(link.A(q[link.jindex]))
+
+                Tall[link.number] = T
+
+                if link.nchildren == 0:
+                    # no children
+                    return
+                elif link.nchildren == 1:
+                    # one child
+                    if link in self.ee_links:  # pragma nocover
+                        # this link is an end-effector, go no further
+                        return
+                    link = link.children[0]
+                    continue
+                else:
+                    # multiple children
+                    for child in link.children:
+                        recurse(Tall, T, q, child)
+                    return
+
+        recurse(linkframes, Tbase, q, self.links[0])
+
+        return linkframes
