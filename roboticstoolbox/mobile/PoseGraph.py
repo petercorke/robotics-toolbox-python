@@ -16,7 +16,7 @@ from progress.bar import FillingCirclesBar
 
 class PGVertex(pgraph.UVertex):
 
-    nvertices = 0
+    nvertices = 0  # reset this before each PGGraph build
 
     def __init__(self, type, **kwargs):
         super().__init__(**kwargs)
@@ -160,6 +160,7 @@ class PoseGraph:
 
             self.vindex = {}
             firstlidar = True
+            PGVertex.nvertices = 0  # reset vertex counter in PGVertex class
             for line in f:
                 # for zip file, we get data as bytes not str
                 if isinstance(line, bytes):
@@ -479,13 +480,19 @@ class PoseGraph:
             jslice = slice(j * 3, (j + 1) * 3)
 
             # accumulate the blocks in H and b
-            H[islice, islice] += Hii
-            H[jslice, jslice] += Hjj
-            H[islice, jslice] += Hij
-            H[jslice, islice] += Hij.T
+            try:
+                H[islice, islice] += Hii
+                H[jslice, jslice] += Hjj
+                H[islice, jslice] += Hij
+                H[jslice, islice] += Hij.T
 
-            b[islice, 0] += bi
-            b[jslice, 0] += bj
+                b[islice, 0] += bi
+                b[jslice, 0] += bj
+            except ValueError:
+                print("linearize_and_solve failed")
+                print(v)
+                print(H.shape, b.shape, Hii.shape, Hjj.shape, Hij.shape)
+                print(islice, jslice)
 
             etotal += np.inner(e, e)
 
