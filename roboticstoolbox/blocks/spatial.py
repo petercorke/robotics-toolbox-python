@@ -41,9 +41,9 @@ class Tr2Delta(FunctionBlock):
             - ndarray(6)
             - :math:`\Delta`
 
-    Difference between :math:`mathbf{T}_1` and :math:`mathbf{T}_2` as a 6-vector
+    Difference between :math:`\mathbf{T}_1` and :math:`\mathbf{T}_2` as a 6-vector
 
-    :seealso: :class:`Delta2Tr` :func:`spatialmath.base.tr2delta`
+    :seealso: :class:`Delta2Tr` :func:`~spatialmath.base.transforms3d.tr2delta`
     """
 
     nin = 2
@@ -92,10 +92,11 @@ class Delta2Tr(FunctionBlock):
         *   - Output
             - 0
             - SE3
-            - :math:`\mathbf{T}` pose.
+            - :math:`\mathbf{T}`, pose.
 
+    6-vector spatial displacement to transform.
 
-    :seealso: :class:`Tr2Delta` :func:`spatialmath.base.delta2tr`
+    :seealso: :class:`Tr2Delta` :func:`~spatialmath.base.transforms3d.delta2tr`
     """
 
     nin = 1
@@ -140,11 +141,11 @@ class Point2Tr(FunctionBlock):
         *   - Input
             - 0
             - ndarray(3)
-            - :math:`\mathit{p}` point.
+            - :math:`\mathit{p}`, point.
         *   - Output
             - 0
             - SE3
-            - :math:`\mathbf{T}` pose.
+            - :math:`\mathbf{T}`, pose.
 
     The parameter ``T`` is an SE3 object whose translation part is replaced by the input
     """
@@ -211,7 +212,7 @@ class TR2T(FunctionBlock):
             - float
             - :math:`z` component of translation.
 
-    :seealso: :func:`spatialmath.base.transl`
+    :seealso: :func:`~spatialmath.base.transforms3d.transl`
     """
 
     nin = 1

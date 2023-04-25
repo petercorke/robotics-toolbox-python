@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from spatialmath import base
 import scipy.ndimage as sp
 from abc import ABC
-from spatialmath import base
+import spatialmath.base as smb
 
 from spatialmath.geom2d import Polygon2
 
@@ -30,7 +30,7 @@ class BaseMap(ABC):
         ==============  =======  =======
         """
         if workspace is not None:
-            workspace = base.expand_dims(workspace)
+            workspace = smb.expand_dims(workspace)
             self._workspace = workspace
             self.dx = workspace[1] - workspace[0]
             self.dy = workspace[3] - workspace[2]
@@ -66,7 +66,7 @@ class BaseOccupancyGrid(BaseMap):
 
         if grid is not None:
             self._grid = grid
-            self._origin = base.getvector(origin, 2)
+            self._origin = smb.getvector(origin, 2)
 
         elif self._workspace is not None:
             self._grid = np.full(
@@ -240,7 +240,7 @@ class BaseOccupancyGrid(BaseMap):
         The grid cell size and offset are used to convert occupancy grid
         coordinate ``p`` to a world coordinate.
         """
-        p = base.getvector(p, 2)
+        p = smb.getvector(p, 2)
         return p * self._cellsize + self._origin
 
     def w2g(self, p):
@@ -279,7 +279,7 @@ class BaseOccupancyGrid(BaseMap):
 
         """
 
-        ax = base.axes_logic(ax, 2)
+        ax = smb.axes_logic(ax, 2)
 
         if map is None:
             map = self._grid
@@ -317,7 +317,7 @@ class BaseOccupancyGrid(BaseMap):
 
     def _line(self, p1, p2):
 
-        x, y = base.bresenham(p1, p2, array=self.grid)
+        x, y = smb.bresenham(p1, p2)
         z = np.ravel_multi_index(np.vstack((y, x)), self.grid.shape)
         return z
 
@@ -523,7 +523,7 @@ class PolygonMap(BaseMap):
         return polygon.intersects(self.polygons)
 
     def plot(self, block=None):
-        base.plotvol2(self.workspace)
+        smb.plotvol2(self.workspace)
 
         for polygon in self.polygons:
             polygon.plot(color="r")

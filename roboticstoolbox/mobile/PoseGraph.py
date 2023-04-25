@@ -517,7 +517,7 @@ class PoseGraph:
 
 if __name__ == "__main__":
 
-    pg = PoseGraph("data/pg1.g2o");
+    pg = PoseGraph("data/pg1.g2o")
     pg.optimize(animate=True, retain=False)
 
     plt.show(block=True)

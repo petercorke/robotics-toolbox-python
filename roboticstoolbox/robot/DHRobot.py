@@ -69,8 +69,7 @@ class DHRobot(Robot):
 
     :reference:
 
-        - Robotics, Vision & Control, Chaps 7-9,
-          P. Corke, Springer 2011.
+        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7-9.
         - Robot, Modeling & Control,
           M.Spong, S. Hutchinson & M. Vidyasagar, Wiley 2006.
 

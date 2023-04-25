@@ -392,7 +392,7 @@ class VehiclePlot(GraphicsBlock):
         :param blockargs: |BlockOptions|
         :type blockargs: dict
 
-        .. notes::
+        .. note::
 
             - The ``init`` function is called after the axes are initialized
               and can be used to draw application specific detail on the

@@ -1681,7 +1681,7 @@ class ETS(BaseETS):
                 Kinematically Redundant Manipulators. Klein CA, Blaho BE.
                 The International Journal of Robotics Research.
                 1987;6(2):72-83. doi:10.1177/027836498700600206
-        - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
+        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
 
         .. versionchanged:: 1.0.4

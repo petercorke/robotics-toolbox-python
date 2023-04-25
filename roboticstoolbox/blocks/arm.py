@@ -120,7 +120,7 @@ class IKine(FunctionBlock):
     :note: The solution may not exist and is not unique.  The solution will depend
         on the initial joint configuration ``q0``.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.IKSolver`
+    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.ik_LM`
     """
 
     nin = 1
@@ -228,7 +228,9 @@ class Jacobian(FunctionBlock):
     Jacobian can be computed in the world or end-effector frame, for spatial or
     analytical velocity, and its inverse, damped inverse or transpose can be returned.
 
-    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.jacob0` :meth:`~roboticstoolbox.robot.Robot.Robot.jacobe`
+    :seealso: :meth:`~roboticstoolbox.robot.Robot.Robot.jacob0`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.jacobe`
+        :meth:`~roboticstoolbox.robot.Robot.Robot.jacob0_analytical`
     """
 
     nin = 1
@@ -253,7 +255,7 @@ class Jacobian(FunctionBlock):
         :param frame: Frame to compute Jacobian for, one of: "0" [default], "e"
         :type frame: str, optional
         :param representation: representation for analytical Jacobian, defaults to None
-        :type represenstation: str
+        :type representation: str, optional
         :param inverse: output inverse of Jacobian, defaults to False
         :type inverse: bool, optional
         :param pinv: output pseudo-inverse of Jacobian, defaults to False
@@ -275,8 +277,6 @@ class Jacobian(FunctionBlock):
             - ``inverse`` requires that the Jacobian is square
             - If ``inverse`` is True and the Jacobian is singular a runtime
               error will occur.
-
-        :seealso: :meth:`~roboticstoolbox.robot.Robot.RobotKinematics.jacob0_analytical`
         """
         if robot is None:
             raise ValueError("robot is not defined")
@@ -399,14 +399,12 @@ class ArmPlot(GraphicsBlock):
         self.backend = backend
         self.q0 = q0
         self.env = None
-        print("ARMPLOT init")
 
     def start(self, simstate):
         # create the plot
         # super().reset()
         # if state.options.graphics:
         super().start(simstate)
-        print("ARMPLOT init")
         self.fig = self.create_figure(simstate)
         self.env = self.robot.plot(
             self.q0, backend=self.backend, fig=self.fig, block=False
@@ -422,9 +420,6 @@ class ArmPlot(GraphicsBlock):
 
 
 # ======================================================================== #
-
-
-# ------------------------------------------------------------------------ #
 
 
 class JTraj(SourceBlock):
@@ -461,7 +456,9 @@ class JTraj(SourceBlock):
     ``qf`` over the course of the simulation. A quintic (5th order) polynomial is used
     with default zero boundary conditions for velocity and acceleration.
 
-    :seealso: :func:`ctraj`, :func:`qplot`, :func:`~SerialLink.jtraj`
+    :seealso: :func:`~roboticstoolbox.tools.trajectory.ctraj`
+        :func:`~roboticstoolbox.tools.trajectory.xplot`
+        :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
 
     nin = 0
@@ -611,7 +608,10 @@ class CTraj(SourceBlock):
     to provide initial acceleration and final deceleration.  Otherwise,
     motion is at constant velocity.
 
-    :seealso: :method:`SE3.interp`
+    :seealso: :meth:`~spatialmath.pose3d.SE3.interp`
+        :func:`~roboticstoolbox.tools.trajectory.ctraj`
+        :func:`~roboticstoolbox.tools.trajectory.xplot`
+        :func:`~roboticstoolbox.tools.trajectory.jtraj`
     """
 
     nin = 0
