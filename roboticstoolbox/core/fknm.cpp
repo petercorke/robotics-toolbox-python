@@ -1124,8 +1124,9 @@ extern "C"
 
         et = (ET *)PyMem_RawMalloc(sizeof(ET));
 
-        if (!PyArg_ParseTuple(args, "OiiiiO!O!",
+        if (!PyArg_ParseTuple(args, "OiiiiiO!O!",
                               &py_et,
+                              &et->isstaticsym,
                               &isjoint,
                               &isflip,
                               &jindex,
@@ -1188,7 +1189,8 @@ extern "C"
 
         et = (ET *)PyMem_RawMalloc(sizeof(ET));
 
-        if (!PyArg_ParseTuple(args, "iiiiO!O!",
+        if (!PyArg_ParseTuple(args, "iiiiiO!O!",
+                              &et->isstaticsym,
                               &et->isjoint,
                               &et->isflip,
                               &et->jindex,
@@ -1251,6 +1253,12 @@ extern "C"
 
         if (!(et = (ET *)PyCapsule_GetPointer(py_et, "ET")))
             return NULL;
+
+        if (et->isstaticsym)
+        {
+            PyErr_SetString(PyExc_TypeError, "Symbolic value");
+            return NULL;
+        }
 
         if (py_eta != Py_None)
         {

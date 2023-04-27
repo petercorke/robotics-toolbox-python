@@ -40,6 +40,7 @@ extern "C"
 
         struct ET
         {
+                int isstaticsym; /* this ET is static and has a symbolic value */
                 int isjoint;
                 int isflip;
                 int jindex;
