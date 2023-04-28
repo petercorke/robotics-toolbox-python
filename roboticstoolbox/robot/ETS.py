@@ -135,7 +135,6 @@ class BaseETS(UserList):
         # For et in the object, display it, data comes from properties
         # which come from the named tuple
         for et in self.data:
-
             if et.isjoint:
                 if q is not None:
                     if et.jindex is None:  # pragma: nocover  this is no longer possible
@@ -605,7 +604,6 @@ class BaseETS(UserList):
         return self.data[i]  # can be [2] or slice, eg. [3:5]
 
     def __deepcopy__(self, memo):
-
         new_data = []
 
         for data in self:
@@ -835,7 +833,6 @@ class ETS(BaseETS):
         ets = ETS()
 
         for et in self:
-
             if et.isjoint:
                 # a joint
                 if const is not None:
@@ -1379,7 +1376,6 @@ class ETS(BaseETS):
 
         for j in range(n):
             for i in range(j, n):
-
                 H[j, :3, i] = cross(J0[3:, j], J0[:3, i])
                 H[j, 3:, i] = cross(J0[3:, j], J0[3:, i])
 
@@ -1484,7 +1480,6 @@ class ETS(BaseETS):
 
         for j in range(n):
             for i in range(j, n):
-
                 H[j, :3, i] = cross(Je[3:, j], Je[:3, i])
                 H[j, 3:, i] = cross(Je[3:, j], Je[3:, i])
 
@@ -1858,7 +1853,6 @@ class ETS(BaseETS):
 
         # The length of dT correspods to the number of derivatives we have calculated
         while len(dT) != n:
-
             # Add to the start of the tensor size list
             size.insert(0, self.n)
 
@@ -1889,7 +1883,6 @@ class ETS(BaseETS):
             # We need to loop n^c times
             # There are n^c columns to calculate
             for _ in range(self.n**c):
-
                 # Allocate the rotation and translation components
                 rot = np.zeros(3)
                 trn = np.zeros(3)
@@ -3190,7 +3183,6 @@ class ETS2(BaseETS):
         ets = ETS2()
 
         for et in self:
-
             if et.isjoint:
                 # a joint
                 if const is not None:
@@ -3393,8 +3385,7 @@ class ETS2(BaseETS):
     def jacob0(
         self,
         q: ArrayLike,
-    ):
-
+    ) -> NDArray:
         # very inefficient implementation, just put a 1 in last row
         # if its a rotation joint
         q = getvector(q)
