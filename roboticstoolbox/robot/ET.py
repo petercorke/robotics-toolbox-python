@@ -561,7 +561,7 @@ class BaseET:
             # We can't use the fast version, lets use Python instead
             if self.isjoint:
                 if self.isflip:
-                    q = -q
+                    q = -q  # type: ignore
 
                 if self.axis_func is not None:
                     return self.axis_func(q)

@@ -226,25 +226,25 @@ class BaseLink(SceneNode, ABC):
     def _init_Ts(self):
         # Compute the leading, constant, part of the ETS
 
-        # Ts can not be equal to None otherwise things seem
-        # to break everywhere, so initialise Ts np be identity
-
         if isinstance(self, Link2):
-            T = np.eye(3)
+            T = None
         else:
-            T = np.eye(4)
+            T = None
 
         for et in self._ets:
             # constant transforms only
             if et.isjoint:
                 break
             else:
-                T = T @ et.A()
+                if T is None:
+                    T = et.A()
+                else:
+                    T = T @ et.A()
 
         self._Ts = T
 
     @property
-    def Ts(self) -> NDArray:
+    def Ts(self) -> Union[NDArray, None]:
         """
         Constant part of link ETS
 
@@ -733,7 +733,6 @@ class BaseLink(SceneNode, ABC):
     @I.setter
     @_listen_dyn
     def I(self, I_new: ArrayLike):  # noqa
-
         if ismatrix(I_new, (3, 3)):
             # 3x3 matrix passed
             if np.any(np.abs(I_new - I_new.T) > 1e-8):  # type: ignore
@@ -947,7 +946,6 @@ class BaseLink(SceneNode, ABC):
 
     @collision.setter
     def collision(self, coll: Union[SceneGroup, List[Shape], Shape]):
-
         if isinstance(coll, list):
             self.collision.scene_children = coll  # type: ignore
         elif isinstance(coll, Shape):
@@ -957,7 +955,6 @@ class BaseLink(SceneNode, ABC):
 
     @geometry.setter
     def geometry(self, geom: Union[SceneGroup, List[Shape], Shape]):
-
         if isinstance(geom, list):
             self.geometry.scene_children = geom  # type: ignore
         elif isinstance(geom, Shape):
@@ -1616,7 +1613,6 @@ class Link(BaseLink):
     def __init__(
         self, ets: Union[ETS, ET] = ETS(), jindex: Union[None, int] = None, **kwargs
     ):
-
         # process common options
         super().__init__(ets=ets, **kwargs)
 
@@ -1651,14 +1647,19 @@ class Link(BaseLink):
 
         """
         if self.isjoint:
-            return SE3(self._Ts @ self._ets[-1].A(q), check=False)
-        else:
+            if self._Ts is not None:
+                return SE3(self._Ts @ self._ets[-1].A(q), check=False)
+            else:
+                return SE3(self._ets[-1].A(q), check=False)
+
+        elif self._Ts is not None:
             return SE3(self._Ts, check=False)
+        else:
+            return SE3()
 
 
 class Link2(BaseLink):
     def __init__(self, ets: ETS2 = ETS2(), jindex: Union[int, None] = None, **kwargs):
-
         # process common options
         super().__init__(ets=ets, **kwargs)
 
@@ -1693,6 +1694,12 @@ class Link2(BaseLink):
         """
 
         if self.isjoint:
-            return SE2(self._Ts @ self._ets[-1].A(q), check=False)
-        else:
+            if self._Ts is not None:
+                return SE2(self._Ts @ self._ets[-1].A(q), check=False)
+            else:
+                return SE2(self._ets[-1].A(q), check=False)
+
+        elif self._Ts is not None:
             return SE2(self._Ts, check=False)
+        else:
+            return SE2()

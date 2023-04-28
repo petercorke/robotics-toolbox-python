@@ -63,7 +63,6 @@ LinkType = TypeVar("LinkType", bound=BaseLink)
 
 
 class Robot(BaseRobot[Link], RobotKinematicsMixin):
-
     _color = True
 
     def __init__(
@@ -83,7 +82,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         urdf_string: Union[str, None] = None,
         urdf_filepath: Union[Path, PurePosixPath, None] = None,
     ):
-
         # Process links
         if isinstance(arg, Robot):
             # We're passed a Robot, clone it
@@ -117,7 +115,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             self._urdf_string = arg.urdf_string
             self._urdf_filepath = arg.urdf_filepath
         else:
-
             if isinstance(arg, ETS):
                 # We're passed an ETS string
                 links = []
@@ -161,11 +158,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     # --------------------------------------------------------------------- #
 
     def _to_dict(self, robot_alpha=1.0, collision_alpha=0.0):
-
         ob = []
 
         for link in self.links:
-
             if robot_alpha > 0:
                 for gi in link.geometry:
                     gi.set_alpha(robot_alpha)
@@ -178,7 +173,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
-
                 if robot_alpha > 0:
                     for gi in link.geometry:
                         gi.set_alpha(robot_alpha)
@@ -198,7 +192,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         # Do the robot
         for link in self.links:
-
             if robot_alpha > 0:
                 for gi in link.geometry:
                     ob.append(gi.fk_dict())
@@ -1049,7 +1042,6 @@ graph [rankdir=LR];
         qd = np.array(qd)
 
         if representation is None:
-
             if J0 is None:
                 J0 = self.jacob0(q)
             H = self.hessian0(q, J0=J0)
@@ -1767,7 +1759,7 @@ graph [rankdir=LR];
                     I[j] = SpatialInertia(m=link.m, r=link.r)
                     if symbolic and link.Ts is None:  # pragma: nocover
                         Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
-                    else:
+                    elif link.Ts is not None:
                         Xtree[j] = Ts * SE3(link.Ts, check=False)
 
                     if link.v is not None:
@@ -1780,7 +1772,8 @@ graph [rankdir=LR];
                     Ts = SE3()
                 else:  # pragma nocover
                     # TODO Keep track of inertia and transform???
-                    Ts *= SE3(link.Ts, check=False)
+                    if link.Ts is not None:
+                        Ts *= SE3(link.Ts, check=False)
 
             if gravity is None:
                 a_grav = -SpatialAcceleration(self.gravity)
@@ -1808,7 +1801,6 @@ graph [rankdir=LR];
 
             # backward recursion
             for j in reversed(range(0, n)):
-
                 # next line could be dot(), but fails for symbolic arguments
                 Q[k, j] = sum(f[j].A * s[j])
 
@@ -1829,7 +1821,6 @@ graph [rankdir=LR];
 
 class Robot2(BaseRobot[Link2]):
     def __init__(self, arg, **kwargs):
-
         if isinstance(arg, ETS2):
             # we're passed an ETS string
             links = []

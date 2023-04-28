@@ -166,7 +166,6 @@ qlim  =      -2.8 to      2.8""",  # noqa
         self.assertEqual(l0.Jm, 0.0)
 
     def test_fail_parent(self):
-
         with self.assertRaises(TypeError):
             rtb.Link(parent=1)
 
@@ -243,7 +242,7 @@ qlim  =      -2.8 to      2.8""",  # noqa
         e1 = rtb.ET2.R()
         link = BaseLink(e1)
 
-        nt.assert_almost_equal(link.Ts, np.eye(4))
+        self.assertEqual(link.Ts, None)
 
     def test_get_ets(self):
         e1 = rtb.ETS(rtb.ET.Ry())
@@ -334,7 +333,6 @@ qlim  =      -2.8 to      2.8""",  # noqa
         self.assertEqual(s, ans)
 
     def test_init_fail4(self):
-
         with self.assertRaises(TypeError):
             rtb.Link(2.0)  # type: ignore
 
@@ -352,5 +350,4 @@ qlim  =      -2.8 to      2.8""",  # noqa
 
 
 if __name__ == "__main__":
-
     unittest.main()
