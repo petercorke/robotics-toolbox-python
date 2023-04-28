@@ -205,6 +205,12 @@ class DHRobot(Robot):
                 else:
                     return str(theta * deg) + "\u00b0"
 
+        def format_attr(attr) -> str:
+            if isinstance(attr, float):
+                return f"{attr:.4g}"
+            else:
+                return str(attr)
+
         has_qlim = any([link.qlim is not None for link in self])
         if has_qlim:
             qlim_columns = [
@@ -249,6 +255,7 @@ class DHRobot(Robot):
                 *qlim_columns,
                 border=border,
             )
+
             for j, L in enumerate(self):
                 if has_qlim:
                     if L.isprismatic:
@@ -259,11 +266,19 @@ class DHRobot(Robot):
                     ql = []
                 if L.isprismatic:
                     table.row(
-                        angle(L.theta), qstr(j, L), f"{L.a:.4g}", angle(L.alpha), *ql
+                        angle(L.theta),
+                        qstr(j, L),
+                        format_attr(L.a),
+                        angle(L.alpha),
+                        *ql,
                     )
                 else:
                     table.row(
-                        qstr(j, L), f"{L.d:.4g}", f"{L.a:.4g}", angle(L.alpha), *ql
+                        qstr(j, L),
+                        format_attr(L.d),
+                        format_attr(L.a),
+                        angle(L.alpha),
+                        *ql,
                     )
 
         s += str(table)
