@@ -126,6 +126,10 @@ class BaseETS(UserList):
         s = None
         unicode = rtb_get_param("unicode")
 
+        # An empty SE3
+        if len(self.data) == 0:
+            return "SE3()"
+
         if q is None:
             if len(self.joints()) > 1:
                 q = "q{0}"
