@@ -284,16 +284,21 @@ class BaseETS(UserList):
 
         return np.array([j.jindex for j in self.joints()])  # type: ignore
 
-    @c_property
+    @property
     def qlim(self):
         r"""
-        Joint limits
+        Get/Set Joint limits
 
         Limits are extracted from the link objects.  If joints limits are
         not set for:
 
         - a revolute joint [-𝜋. 𝜋] is returned
         - a prismatic joint an exception is raised
+
+        Parameters
+        ----------
+        new_qlim
+            An ndarray(2, n) of the new joint limits to set
 
         Returns
         -------
@@ -332,6 +337,24 @@ class BaseETS(UserList):
             limits[:, i] = v
 
         return limits
+
+    @qlim.setter
+    def qlim(self, new_qlim: ArrayLike):
+        new_qlim = np.array(new_qlim)
+
+        if new_qlim.shape == (2,) and self.n == 1:
+            new_qlim = new_qlim.reshape(2, 1)
+
+        if new_qlim.shape != (2, self.n):
+            raise ValueError("new_qlim must be of shape (2, n)")
+
+        for j, i in enumerate(self.joint_idx()):
+            et = self[i]
+            et.qlim = new_qlim[:, j]
+
+            self[i] = et
+
+        self._update_internals()
 
     @property
     def structure(self) -> str:

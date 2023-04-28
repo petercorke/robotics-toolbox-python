@@ -578,7 +578,7 @@ class BaseLink(SceneNode, ABC):
     @qlim.setter
     def qlim(self, qlim_new: ArrayLike):
         if self.v:
-            self.v.qlim = qlim_new
+            self.ets.qlim = qlim_new
         else:
             raise ValueError("Can not set qlim on a static joint")
 

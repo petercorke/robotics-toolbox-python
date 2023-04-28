@@ -85,7 +85,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         configs: Union[Dict[str, NDArray], None] = None,
         check_jindex: bool = True,
     ):
-
         # Initialise the scene node
         SceneNode.__init__(self)
 
@@ -140,7 +139,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         # Time to checkout the links for geometry information
         for link in self.links:
-
             # Add link back to robot object
             link._robot = self
 
@@ -226,7 +224,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         # Make sure each link has a name
         # ------------------------------
         for k, link in enumerate(links):
-
             if not isinstance(link, BaseLink):
                 raise TypeError("links should all be Link subclass")
 
@@ -253,7 +250,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
                 link.parent = self._linkdict[link.parent_name]
 
         if all([link.parent is None for link in links]):
-
             # No parent links were given, assume they are sequential
             for i in range(len(links) - 1):
                 # li = links[i]
@@ -336,7 +332,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         # Assign the joint indices and sort the links
         # -------------------------------------------
         if all([link.jindex is None or link.ets._auto_jindex for link in links]):
-
             # No joints have an index
             jindex = [0]  # "mutable integer" hack
 
@@ -1017,7 +1012,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         j = 0
 
         for link in self.links:
-
             if link.isrevolute:
                 if link.qlim is None or np.any(np.isnan(link.qlim)):
                     v = [-np.pi, np.pi]
@@ -1036,6 +1030,19 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             j += 1
 
         return limits
+
+    @qlim.setter
+    def qlim(self, new_qlim: ArrayLike):
+        new_qlim = np.array(new_qlim)
+
+        if new_qlim.shape != (2, self.n):
+            raise ValueError("new_qlim must be of shape (2, n)")
+
+        j = 0
+        for link in self.links:
+            if link.isjoint:
+                link.qlim = new_qlim[:, j]
+                j += 1
 
     @property
     def structure(self) -> str:
@@ -1244,7 +1251,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
     @base.setter
     def base(self, T: Union[NDArray, SE3]):
-
         if isinstance(self, rtb.Robot):
             # All 3D robots
             # Set the SceneNode T
@@ -1293,7 +1299,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             explored: Set[Union[LinkType, Link]],
             path: List[Union[LinkType, Link]],
         ) -> Union[List[Union[LinkType, Link]], None]:
-
             link = self._getlink(start, self.base_link)
             end = self._getlink(end, self.ee_links[0])
 
@@ -1499,7 +1504,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         tool = None
         if end is None:
-
             if len(self.grippers) > 1:
                 end_ret = self.grippers[0].links[0]
                 tool = self.grippers[0].tool
@@ -1645,7 +1649,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         return deepcopy(self)
 
     def __deepcopy__(self, memo):
-
         links = []
 
         # if isinstance(self, rtb.DHRobot):
@@ -1945,7 +1948,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         # TODO: factor this out of DHRobot
         def angle(theta, fmt=None):
-
             if fmt is not None:
                 try:
                     return fmt.format(theta * deg) + "\u00b0"
@@ -2120,7 +2122,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         """
 
         def recurse(link: Link):
-
             segs = [link.parent]
             while True:
                 segs.append(link)
@@ -2168,7 +2169,6 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     def _get_graphical_backend(
         self, backend: Union[L["swift", "pyplot", "pyplot2"], None] = None
     ) -> Union[Swift, PyPlot, PyPlot2]:
-
         default = self.default_backend
 
         # figure out the right default
