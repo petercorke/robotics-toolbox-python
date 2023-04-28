@@ -22,7 +22,9 @@ from roboticstoolbox.fknm import ET_T, ET_init, ET_update
 from spatialmath.base import getvector
 from spatialmath import SE3, SE2
 from typing import Optional, Callable, Union, TYPE_CHECKING
-from roboticstoolbox.tools.types import ArrayLike
+
+# from spatialmath.base.types import ArrayLike
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 if TYPE_CHECKING:  # pragma: nocover
     import sympy
@@ -64,9 +66,9 @@ class BaseET:
         self._jindex = jindex
 
         if qlim is not None:
-            self._qlim = array(getvector(qlim, 2, out="array"))
+            self._qlim: Union[NDArray, None] = getvector(qlim, 2, out="array")
         else:
-            self._qlim = None
+            self._qlim: Union[NDArray, None] = None
 
         if self.eta is None:
             if T is None:
@@ -435,7 +437,7 @@ class BaseET:
     @qlim.setter
     def qlim(self, qlim_new: Union[ArrayLike, None]) -> None:
         if qlim_new is not None:
-            qlim_new = array(getvector(qlim_new, 2, out="array"))
+            qlim_new = getvector(qlim_new, 2, out="array")
         self._qlim = qlim_new
         self.__update_c()
 
