@@ -107,7 +107,10 @@ class BaseET:
             jindex = self.jindex
 
         if self.qlim is None:
-            qlim = array([0, 0])
+            if self.axis[0] == "R":
+                qlim = array([-pi, pi])
+            else:
+                qlim = array([0, 1])
         else:
             qlim = self.qlim
 
@@ -131,7 +134,10 @@ class BaseET:
             jindex = self.jindex
 
         if self.qlim is None:
-            qlim = array([0, 0])
+            if self.axis[0] == "R":
+                qlim = array([-pi, pi])
+            else:
+                qlim = array([0, 1])
         else:
             qlim = self.qlim
 
