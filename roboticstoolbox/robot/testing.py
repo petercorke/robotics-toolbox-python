@@ -82,6 +82,7 @@ er = Robot(pr.ets())
 
 q = [0, 0, 0, 0]
 q = [np.pi/2, np.pi/7, np.pi/5, 0.58]
+q = [1, -2, -1, 0.58]
 
 print("3RP robot - arbitrary structure")
 print(er.fkine(q))
