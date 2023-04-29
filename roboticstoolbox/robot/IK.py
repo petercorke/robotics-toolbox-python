@@ -54,8 +54,19 @@ class IKSolution:
     residual: float = 0.0
     reason: str = ""
 
-    def __str__(self):
+    def __iter__(self):
+        return iter(
+            (
+                self.q,
+                self.success,
+                self.iterations,
+                self.searches,
+                self.residual,
+                self.reason,
+            )
+        )
 
+    def __str__(self):
         if self.q is not None:
             q_str = np.array2string(
                 self.q,
@@ -144,7 +155,6 @@ class IKSolver(ABC):
         joint_limits: bool = True,
         seed: Union[int, None] = None,
     ):
-
         # Solver parameters
         self.name = name
         self.slimit = slimit
@@ -200,20 +210,36 @@ class IKSolver(ABC):
             The reason the IK problem failed if applicable
 
         """
+        # Get the largest jindex in the ETS. If this is greater than ETS.n
+        # then we need to pad the q vector with zeros
+        max_jindex: int = 0
+
+        for j in ets.joints():
+            if j.jindex > max_jindex:  # type: ignore
+                max_jindex = j.jindex  # type: ignore
+
+        q0_method = np.zeros((self.slimit, max_jindex + 1))
 
         if q0 is None:
-            q0 = self._random_q(ets, self.slimit)
+            q0_method[:, ets.jindices] = self._random_q(ets, self.slimit)
+
         elif not isinstance(q0, np.ndarray):
             q0 = np.array(q0)
 
-        if q0.ndim == 1:
-            q0_new = self._random_q(ets, self.slimit)
+        if q0 is not None and q0.ndim == 1:
+            q0_method[:, ets.jindices] = self._random_q(ets, self.slimit)
 
-            q0_new[0] = q0
-            q0 = q0_new
+            q0_method[0, ets.jindices] = q0
+
+        if q0 is not None and q0.ndim == 2:
+            q0_method[:, ets.jindices] = self._random_q(ets, self.slimit)
+
+            q0_method[: q0.shape[0], ets.jindices] = q0
+
+        q0 = q0_method
 
         if isinstance(Tep, SE3):
-            Tep = Tep.A
+            Tep: np.ndarray = Tep.A
 
         # Iteration count
         i = 0
@@ -245,7 +271,6 @@ class IKSolver(ABC):
 
                 # Check if we have arrived
                 if E < self.tol:
-
                     # Wrap q to be within +- 180 deg
                     # If your robot has larger than 180 deg range on a joint
                     # this line should be modified in incorporate the extra range
@@ -260,7 +285,7 @@ class IKSolver(ABC):
                         break
                     else:
                         return IKSolution(
-                            q=q,
+                            q=q[ets.jindices],
                             success=True,
                             iterations=total_i + i,
                             searches=search + 1,
@@ -413,7 +438,6 @@ class IKSolver(ABC):
 
         # Loop through the joints in the ETS
         for i in range(ets.n):
-
             # Get the corresponding joint limits
             ql0 = ets.qlim[0, i]
             ql1 = ets.qlim[1, i]
@@ -608,7 +632,6 @@ class IK_NR(IKSolver):
         pi: Union[np.ndarray, float] = 0.3,
         **kwargs,
     ):
-
         super().__init__(
             name=name,
             ilimit=ilimit,
@@ -678,11 +701,11 @@ class IK_NR(IKSolver):
         )
 
         if self.pinv:
-            q += np.linalg.pinv(J) @ e + qnull
+            q[ets.jindices] += np.linalg.pinv(J) @ e + qnull
         else:
-            q += np.linalg.inv(J) @ e + qnull
+            q[ets.jindices] += np.linalg.inv(J) @ e + qnull
 
-        return E, q
+        return E, q[ets.jindices]
 
 
 class IK_LM(IKSolver):
@@ -935,9 +958,9 @@ class IK_LM(IKSolver):
             ets=ets, q=q, J=J, λΣ=self.kq, λm=self.km, ps=self.ps, pi=self.pi
         )
 
-        q += np.linalg.inv(J.T @ self.We @ J + Wn) @ g + qnull
+        q[ets.jindices] += np.linalg.inv(J.T @ self.We @ J + Wn) @ g + qnull
 
-        return E, q
+        return E, q[ets.jindices]
 
 
 class IK_GN(IKSolver):
@@ -1049,7 +1072,6 @@ class IK_GN(IKSolver):
         pi: Union[np.ndarray, float] = 0.3,
         **kwargs,
     ):
-
         super().__init__(
             name=name,
             ilimit=ilimit,
@@ -1136,11 +1158,11 @@ class IK_GN(IKSolver):
         )
 
         if self.pinv:
-            q += np.linalg.pinv(J) @ e + qnull
+            q[ets.jindices] += np.linalg.pinv(J) @ e + qnull
         else:
-            q += np.linalg.inv(J) @ e + qnull
+            q[ets.jindices] += np.linalg.inv(J) @ e + qnull
 
-        return E, q
+        return E, q[ets.jindices]
 
 
 class IK_QP(IKSolver):
@@ -1251,7 +1273,6 @@ class IK_QP(IKSolver):
         pi: Union[np.ndarray, float] = 0.3,
         **kwargs,
     ):
-
         if not _qp:  # pragma: nocover
             raise ImportError(
                 "the package qpsolvers is required for this class. \nInstall using 'pip"
@@ -1435,3 +1456,13 @@ class IK_QP(IKSolver):
         q += xd[: ets.n]
 
         return E, q
+
+
+if __name__ == "__main__":  # pragma nocover
+    sol = IKSolution(
+        np.array([1, 2, 3]), success=True, iterations=10, searches=100, residual=0.1
+    )
+
+    a, b, c, d, e = sol
+
+    print(a, b, c, d, e)

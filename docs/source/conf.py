@@ -42,12 +42,13 @@ extensions = [
     "sphinx.ext.autosummary",
     "blockname",
     "sphinx.ext.intersphinx",
+    "matplotlib.sphinxext.plot_directive",
     "format_example",
     "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
     # "scanpydoc.elegant_typehints",
     "sphinx_autorun",
-    "sphinx-favicon",
+    "sphinx_favicon",
 ]
 
 autosummary_generate = True
@@ -160,6 +161,7 @@ intersphinx_mapping = {
     "numpy": ("http://docs.scipy.org/doc/numpy/", None),
     "scipy": ("http://docs.scipy.org/doc/scipy/reference/", None),
     "matplotlib": ("http://matplotlib.sourceforge.net/", None),
+    "spatialmath": ("https://petercorke.github.io/spatialmath-python/", None),
 }
 
 

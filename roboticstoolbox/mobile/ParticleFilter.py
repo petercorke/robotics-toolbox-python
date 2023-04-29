@@ -14,7 +14,9 @@ from collections import namedtuple
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
-from spatialmath import base
+from matplotlib import animation
+
+import spatialmath.base as smb
 
 """
 Monte-carlo based localisation for estimating vehicle pose based on
@@ -132,12 +134,12 @@ class ParticleFilter:
         self._htuple = namedtuple("PFlog", "t odo xest std weights")
 
         if workspace is not None:
-            self._dim = base.expand_dims(workspace)
+            self._dim = smb.expand_dims(workspace)
         else:
             self._dim = sensor.map.workspace
 
         self._workspace = self.robot.workspace
-        self._init()
+        # self._init()
 
     def __str__(self):
         # ParticleFilter.char Convert to string
@@ -152,8 +154,8 @@ class ParticleFilter:
             return s.replace("\n", "\n" + spaces)
 
         s = f"ParticleFilter object: {self.nparticles} particles"
-        s += "\nR:  " + base.array2str(self.R)
-        s += "\nL:  " + base.array2str(self.L)
+        s += "\nR:  " + smb.array2str(self.R)
+        s += "\nL:  " + smb.array2str(self.L)
         if self.robot is not None:
             s += indent("\nrobot: " + str(self.robot))
 
@@ -253,7 +255,7 @@ class ParticleFilter:
         """
         return self._random
 
-    def _init(self, x0=None):
+    def _init(self, x0=None, animate=False, ax=None):
         # ParticleFilter.init Initialize the particle filter
         #
         # PF.init() initializes the particle distribution and clears the
@@ -291,6 +293,19 @@ class ParticleFilter:
             t = self.random.uniform(-np.pi, np.pi, size=(self.nparticles,))
             self.x = np.c_[x, y, t]
 
+        if animate:
+            # display the initial particles
+            (self.h,) = ax.plot(
+                self.x[:, 0],
+                self.x[:, 1],
+                "go",
+                zorder=0,
+                markersize=3,
+                markeredgecolor="none",
+                alpha=0.3,
+                label="particle",
+            )
+
         self.weight = np.ones((self.nparticles,))
 
     def run(self, T=10, x0=None):
@@ -299,13 +314,11 @@ class ParticleFilter:
 
         :param T: maximum simulation time in seconds
         :type T: float
-        :param animate: animate motion of vehicle, defaults to False
-        :type animate: bool, optional
-        :param movie: name of movie file to create, defaults to None
-        :type movie: str, optional
+        :param x0: Initial state, defaults to value given to Vehicle constructor
+        :type x0: array_like(3) or array_like(2)
 
         Simulates the motion of a vehicle (under the control of a driving agent)
-        and the EKF estimator.  The steps are:
+        and the particle-filter estimator.  The steps are:
 
         - initialize the filter, vehicle and vehicle driver agent, sensor
         - for each time step:
@@ -325,8 +338,9 @@ class ParticleFilter:
         # anim = Animate(opt.movie)
 
         # display the initial particles
+        ax = smb.axes_logic(None, 2)
         if self._animate:
-            (self.h,) = plt.plot(
+            (self.h,) = ax.plot(
                 self.x[:, 0],
                 self.x[:, 1],
                 "go",
@@ -341,15 +355,145 @@ class ParticleFilter:
         # self.robot.plot()
 
         # iterate over time
+        import time
+
         for i in range(round(T / self.robot.dt)):
             self._step()
+            # time.sleep(0.2)
+            plt.pause(0.2)
+            # plt.draw()
             # anim.add()
         # anim.close()
+
+    def run_animation(self, T=10, x0=None, format=None, file=None):
+        """
+        Run the particle filter simulation
+
+        :param T: maximum simulation time in seconds
+        :type T: float
+        :param x0: Initial state, defaults to value given to Vehicle constructor
+        :type x0: array_like(3) or array_like(2)
+        :param format: Output format
+        :type format: str, optional
+        :param file: File name
+        :type file: str, optional
+        :return: Matplotlib animation object
+        :rtype: :meth:`matplotlib.animation.FuncAnimation`
+
+        Simulates the motion of a vehicle (under the control of a driving agent)
+        and the particle-filter estimator and returns an animation
+        in various formats::
+
+            ``format``    ``file``   description
+            ============  =========  ============================
+            ``"html"``    str, None  return HTML5 video
+            ``"jshtml"``  str, None  return JS+HTML video
+            ``"gif"``     str        return animated GIF
+            ``"mp4"``     str        return MP4/H264 video
+            ``None``                 return a ``FuncAnimation`` object
+
+        The allowables types for ``file`` are given in the second column.  A str
+        value is the file name.  If ``None`` is an option then return the video as a string.
+
+        For the last case, a reference to the animation object must be held if used for
+        animation in a Jupyter cell::
+
+            anim = robot.run_animation(T=20)
+
+        The steps are:
+
+        - initialize the filter, vehicle and vehicle driver agent, sensor
+        - for each time step:
+
+            - step the vehicle and its driver agent, obtain odometry
+            - take a sensor reading
+            - execute the EKF
+            - save information as a namedtuple to the history list for later display
+
+        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks`
+            :meth:`get_xy` :meth:`get_t` :meth:`get_std`
+            :meth:`plot_xy`
+        """
+
+        fig, ax = plt.subplots()
+
+        nframes = round(T / self.robot.dt)
+        anim = animation.FuncAnimation(
+            fig=fig,
+            # func=lambda i: self._step(animate=True, pause=False),
+            # init_func=lambda: self._init(animate=True),
+            func=lambda i: self._step(),
+            init_func=lambda: self._init(ax=ax, animate=True),
+            frames=nframes,
+            interval=self.robot.dt * 1000,
+            blit=False,
+            repeat=False,
+        )
+        # anim._interval = self.dt*1000/2
+        # anim._repeat = True
+        ret = None
+        if format == "html":
+            ret = anim.to_html5_video()  # convert to embeddable HTML5 animation
+        elif format == "jshtml":
+            ret = anim.to_jshtml()  # convert to embeddable Javascript/HTML animation
+        elif format == "gif":
+            anim.save(
+                file, writer=animation.PillowWriter(fps=1 / self.dt)
+            )  # convert to GIF
+            ret = None
+        elif format == "mp4":
+            anim.save(
+                file, writer=animation.FFMpegWriter(fps=1 / self.dt)
+            )  # convert to mp4/H264
+            ret = None
+        elif format == None:
+            # return the anim object
+            return anim
+        else:
+            raise ValueError("unknown format")
+
+        if ret is not None and file is not None:
+            with open(file, "w") as f:
+                f.write(ret)
+            ret = None
+        plt.close(fig)
+        return ret
+        # self._init(x0=x0)
+
+        # # anim = Animate(opt.movie)
+
+        # # display the initial particles
+        # ax = smb.axes_logic(None, 2)
+        # if self._animate:
+        #     (self.h,) = ax.plot(
+        #         self.x[:, 0],
+        #         self.x[:, 1],
+        #         "go",
+        #         zorder=0,
+        #         markersize=3,
+        #         markeredgecolor="none",
+        #         alpha=0.3,
+        #         label="particle",
+        #     )
+        # # set(self.h, 'Tag', 'particles')
+
+        # # self.robot.plot()
+
+        # # iterate over time
+        # import time
+
+        # for i in range(round(T / self.robot.dt)):
+        #     self._step()
+        #     # time.sleep(0.2)
+        #     plt.pause(0.2)
+        #     # plt.draw()
+        #     # anim.add()
+        # # anim.close()
 
     def _step(self):
 
         # fprintf('---- step\n')
-        odo = self.robot.step()  # move the robot
+        odo = self.robot.step(animate=self._animate)  # move the robot
 
         # update the particles based on odometry
         self._predict(odo)
@@ -368,7 +512,7 @@ class ParticleFilter:
         std_est = self.x.std(axis=0)
 
         # std is more complex for angles, need to account for 2pi wrap
-        std_est[2] = np.sqrt(np.sum(base.angdiff(self.x[:, 2], x_est[2]) ** 2)) / (
+        std_est[2] = np.sqrt(np.sum(smb.angdiff(self.x[:, 2], x_est[2]) ** 2)) / (
             self.nparticles - 1
         )
 
@@ -398,16 +542,16 @@ class ParticleFilter:
         segment of height equal to particle weight.
         """
 
-        ax = base.plotvol3()
+        ax = smb.plotvol3()
         for (x, y, t), weight in zip(self.x, self.weight):
             # ax.plot([x, x], [y, y], [0, weight], 'r')
             ax.plot([x, x], [y, y], [0, weight], "skyblue", linewidth=3)
             ax.plot(x, y, weight, "k.", markersize=6)
 
-        plt.grid(True)
-        plt.xlabel("X")
-        plt.ylabel("Y")
-        plt.xlim()
+        ax.grid(True)
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.set_xlim()
         ax.set_zlabel("particle weight")
         ax.view_init(29, 59)
 
@@ -427,7 +571,7 @@ class ParticleFilter:
         self.x = self.robot.f(self.x, odo) + self.random.multivariate_normal(
             (0, 0, 0), self.R, size=self.nparticles
         )
-        self.x[:, 2] = base.angdiff(self.x[:, 2])
+        self.x[:, 2] = smb.angdiff(self.x[:, 2])
 
     def _observe(self, z, lm_id):
         # step 3
@@ -457,7 +601,7 @@ class ParticleFilter:
         invL = np.linalg.inv(self.L)
         z_pred = self.sensor.h(self.x, lm_id)
         z_pred[:, 0] = z[0] - z_pred[:, 0]
-        z_pred[:, 1] = base.angdiff(z[1], z_pred[:, 1])
+        z_pred[:, 1] = smb.angdiff(z[1], z_pred[:, 1])
 
         LL = -0.5 * np.r_[invL[0, 0], invL[1, 1], 2 * invL[0, 1]]
         e = (
@@ -486,7 +630,7 @@ class ParticleFilter:
             kind="nearest",
             fill_value="extrapolate",
         )
-        inextgen = interpfun(iselect).astype(np.int)
+        inextgen = interpfun(iselect).astype(int)
 
         # copy selected particles for next generation..
         self.x = self.x[inextgen, :]
@@ -545,3 +689,18 @@ class ParticleFilter:
         plt.plot(xyt[:, 0], xyt[:, 1], **kwargs)
         if block is not None:
             plt.show(block=block)
+
+
+if __name__ == "__main__":
+    from roboticstoolbox import *
+
+    map = LandmarkMap(20, workspace=10)
+    V = np.diag([0.02, np.deg2rad(0.5)]) ** 2
+    robot = Bicycle(covar=V, animation="car", workspace=map)
+    robot.control = RandomPath(workspace=map)
+    W = np.diag([0.1, np.deg2rad(1)]) ** 2
+    sensor = RangeBearingSensor(robot, map, covar=W, plot=True)
+    R = np.diag([0.1, 0.1, np.deg2rad(1)]) ** 2
+    L = np.diag([0.1, 0.1])
+    pf = ParticleFilter(robot, sensor=sensor, R=R, L=L, nparticles=1000, animate=True)
+    pf.run(T=10)

@@ -63,7 +63,6 @@ LinkType = TypeVar("LinkType", bound=BaseLink)
 
 
 class Robot(BaseRobot[Link], RobotKinematicsMixin):
-
     _color = True
 
     def __init__(
@@ -83,7 +82,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         urdf_string: Union[str, None] = None,
         urdf_filepath: Union[Path, PurePosixPath, None] = None,
     ):
-
         # Process links
         if isinstance(arg, Robot):
             # We're passed a Robot, clone it
@@ -117,7 +115,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             self._urdf_string = arg.urdf_string
             self._urdf_filepath = arg.urdf_filepath
         else:
-
             if isinstance(arg, ETS):
                 # We're passed an ETS string
                 links = []
@@ -161,11 +158,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
     # --------------------------------------------------------------------- #
 
     def _to_dict(self, robot_alpha=1.0, collision_alpha=0.0):
-
         ob = []
 
         for link in self.links:
-
             if robot_alpha > 0:
                 for gi in link.geometry:
                     gi.set_alpha(robot_alpha)
@@ -178,7 +173,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         # Do the grippers now
         for gripper in self.grippers:
             for link in gripper.links:
-
                 if robot_alpha > 0:
                     for gi in link.geometry:
                         gi.set_alpha(robot_alpha)
@@ -198,7 +192,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         # Do the robot
         for link in self.links:
-
             if robot_alpha > 0:
                 for gi in link.geometry:
                     ob.append(gi.fk_dict())
@@ -837,6 +830,15 @@ graph [rankdir=LR];
             axes_list = [True, True, True, False, False, False]
         elif axes.startswith("rot"):
             axes_list = [False, False, False, True, True, True]
+        elif axes == "both":
+            return (
+                self.manipulability(
+                    q=q, J=J, end=end, start=start, method=method, axes="trans"
+                ),
+                self.manipulability(
+                    q=q, J=J, end=end, start=start, method=method, axes="rot"
+                ),
+            )
         else:
             raise ValueError("axes must be all, trans, rot or both")
 
@@ -1040,7 +1042,6 @@ graph [rankdir=LR];
         qd = np.array(qd)
 
         if representation is None:
-
             if J0 is None:
                 J0 = self.jacob0(q)
             H = self.hessian0(q, J0=J0)
@@ -1758,7 +1759,7 @@ graph [rankdir=LR];
                     I[j] = SpatialInertia(m=link.m, r=link.r)
                     if symbolic and link.Ts is None:  # pragma: nocover
                         Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
-                    else:
+                    elif link.Ts is not None:
                         Xtree[j] = Ts * SE3(link.Ts, check=False)
 
                     if link.v is not None:
@@ -1771,7 +1772,8 @@ graph [rankdir=LR];
                     Ts = SE3()
                 else:  # pragma nocover
                     # TODO Keep track of inertia and transform???
-                    Ts *= SE3(link.Ts, check=False)
+                    if link.Ts is not None:
+                        Ts *= SE3(link.Ts, check=False)
 
             if gravity is None:
                 a_grav = -SpatialAcceleration(self.gravity)
@@ -1799,7 +1801,6 @@ graph [rankdir=LR];
 
             # backward recursion
             for j in reversed(range(0, n)):
-
                 # next line could be dot(), but fails for symbolic arguments
                 Q[k, j] = sum(f[j].A * s[j])
 
@@ -1820,7 +1821,6 @@ graph [rankdir=LR];
 
 class Robot2(BaseRobot[Link2]):
     def __init__(self, arg, **kwargs):
-
         if isinstance(arg, ETS2):
             # we're passed an ETS string
             links = []
@@ -1890,3 +1890,122 @@ class Robot2(BaseRobot[Link2]):
 
     def fkine(self, q, end=None, start=None):
         return self.ets(start, end).fkine(q)
+
+    @property
+    def reach(self) -> float:
+        r"""
+        Reach of the robot
+
+        A conservative estimate of the reach of the robot. It is computed as
+        the sum of the translational ETs that define the link transform.
+
+        Note
+        ----
+        Computed on the first access. If kinematic parameters
+        subsequently change this will not be reflected.
+
+        Returns
+        -------
+        reach
+            Maximum reach of the robot
+
+        Notes
+        -----
+        - Probably an overestimate of reach
+        - Used by numerical inverse kinematics to scale translational
+          error.
+        - For a prismatic joint, uses ``qlim`` if it is set
+
+        """
+
+        # TODO
+        # This should be a start, end method and compute the reach based on the
+        # given ets. Then use an lru_cache to speed up return
+
+        if self._reach is None:
+            d_all = []
+            for link in self.ee_links:
+                d = 0
+                while True:
+                    for et in link.ets:
+                        if et.istranslation:
+                            if et.isjoint:
+                                # the length of a prismatic joint depends on the
+                                # joint limits.  They might be set in the ET
+                                # or in the Link depending on how the robot
+                                # was constructed
+                                if link.qlim is not None:
+                                    d += max(link.qlim)
+                                elif et.qlim is not None:  # pragma nocover
+                                    d += max(et.qlim)
+                            else:
+                                d += abs(et.eta)
+                    link = link.parent
+                    if link is None or isinstance(link, str):
+                        d_all.append(d)
+                        break
+
+            self._reach = max(d_all)
+        return self._reach
+
+    def fkine_all(self, q: ArrayLike) -> SE2:
+        """
+        Compute the pose of every link frame
+
+        ``T = robot.fkine_all(q)`` is  an SE3 instance with ``robot.nlinks +
+        1`` values:
+
+        - ``T[0]`` is the base transform
+        - ``T[i]`` is the pose of link whose ``number`` is ``i``
+
+        Parameters
+        ----------
+        q
+            The joint configuration
+
+        Returns
+        -------
+        fkine_all
+            Pose of all links
+
+        References
+        ----------
+        - J. Haviland, and P. Corke. "Manipulator Differential Kinematics Part I:
+          Kinematics, Velocity, and Applications." arXiv preprint arXiv:2207.01796 (2022).
+
+        """  # noqa
+
+        q = getvector(q)
+
+        Tbase = SE2(self.base)  # add base, also sets the type
+
+        linkframes = Tbase.__class__.Alloc(self.nlinks + 1)
+        linkframes[0] = Tbase
+
+        def recurse(Tall, Tparent, q, link):
+            # if joint??
+            T = Tparent
+            while True:
+                T *= SE2(link.A(q[link.jindex]))
+
+                Tall[link.number] = T
+
+                if link.nchildren == 0:
+                    # no children
+                    return
+                elif link.nchildren == 1:
+                    # one child
+                    if link in self.ee_links:  # pragma nocover
+                        # this link is an end-effector, go no further
+                        return
+                    link = link.children[0]
+                    continue
+                else:
+                    # multiple children
+                    for child in link.children:
+                        recurse(Tall, T, q, child)
+                    return
+
+        recurse(linkframes, Tbase, q, self.links[0])
+
+        return linkframes

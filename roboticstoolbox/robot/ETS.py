@@ -126,6 +126,10 @@ class BaseETS(UserList):
         s = None
         unicode = rtb_get_param("unicode")
 
+        # An empty SE3
+        if len(self.data) == 0:
+            return "SE3()"
+
         if q is None:
             if len(self.joints()) > 1:
                 q = "q{0}"
@@ -135,7 +139,6 @@ class BaseETS(UserList):
         # For et in the object, display it, data comes from properties
         # which come from the named tuple
         for et in self.data:
-
             if et.isjoint:
                 if q is not None:
                     if et.jindex is None:  # pragma: nocover  this is no longer possible
@@ -281,16 +284,21 @@ class BaseETS(UserList):
 
         return np.array([j.jindex for j in self.joints()])  # type: ignore
 
-    @c_property
+    @property
     def qlim(self):
         r"""
-        Joint limits
+        Get/Set Joint limits
 
         Limits are extracted from the link objects.  If joints limits are
         not set for:
 
         - a revolute joint [-𝜋. 𝜋] is returned
         - a prismatic joint an exception is raised
+
+        Parameters
+        ----------
+        new_qlim
+            An ndarray(2, n) of the new joint limits to set
 
         Returns
         -------
@@ -329,6 +337,24 @@ class BaseETS(UserList):
             limits[:, i] = v
 
         return limits
+
+    @qlim.setter
+    def qlim(self, new_qlim: ArrayLike):
+        new_qlim = np.array(new_qlim)
+
+        if new_qlim.shape == (2,) and self.n == 1:
+            new_qlim = new_qlim.reshape(2, 1)
+
+        if new_qlim.shape != (2, self.n):
+            raise ValueError("new_qlim must be of shape (2, n)")
+
+        for j, i in enumerate(self.joint_idx()):
+            et = self[i]
+            et.qlim = new_qlim[:, j]
+
+            self[i] = et
+
+        self._update_internals()
 
     @property
     def structure(self) -> str:
@@ -605,7 +631,6 @@ class BaseETS(UserList):
         return self.data[i]  # can be [2] or slice, eg. [3:5]
 
     def __deepcopy__(self, memo):
-
         new_data = []
 
         for data in self:
@@ -835,7 +860,6 @@ class ETS(BaseETS):
         ets = ETS()
 
         for et in self:
-
             if et.isjoint:
                 # a joint
                 if const is not None:
@@ -1379,7 +1403,6 @@ class ETS(BaseETS):
 
         for j in range(n):
             for i in range(j, n):
-
                 H[j, :3, i] = cross(J0[3:, j], J0[:3, i])
                 H[j, 3:, i] = cross(J0[3:, j], J0[3:, i])
 
@@ -1484,7 +1507,6 @@ class ETS(BaseETS):
 
         for j in range(n):
             for i in range(j, n):
-
                 H[j, :3, i] = cross(Je[3:, j], Je[:3, i])
                 H[j, 3:, i] = cross(Je[3:, j], Je[3:, i])
 
@@ -1681,7 +1703,7 @@ class ETS(BaseETS):
                 Kinematically Redundant Manipulators. Klein CA, Blaho BE.
                 The International Journal of Robotics Research.
                 1987;6(2):72-83. doi:10.1177/027836498700600206
-        - Robotics, Vision & Control, Chap 8, P. Corke, Springer 2011.
+        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
 
         .. versionchanged:: 1.0.4
@@ -1858,7 +1880,6 @@ class ETS(BaseETS):
 
         # The length of dT correspods to the number of derivatives we have calculated
         while len(dT) != n:
-
             # Add to the start of the tensor size list
             size.insert(0, self.n)
 
@@ -1889,7 +1910,6 @@ class ETS(BaseETS):
             # We need to loop n^c times
             # There are n^c columns to calculate
             for _ in range(self.n**c):
-
                 # Allocate the rotation and translation components
                 rot = np.zeros(3)
                 trn = np.zeros(3)
@@ -3190,7 +3210,6 @@ class ETS2(BaseETS):
         ets = ETS2()
 
         for et in self:
-
             if et.isjoint:
                 # a joint
                 if const is not None:
@@ -3393,8 +3412,7 @@ class ETS2(BaseETS):
     def jacob0(
         self,
         q: ArrayLike,
-    ):
-
+    ) -> NDArray:
         # very inefficient implementation, just put a 1 in last row
         # if its a rotation joint
         q = getvector(q)

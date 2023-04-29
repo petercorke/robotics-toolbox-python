@@ -10,6 +10,7 @@ import numpy as np
 from scipy import interpolate
 
 import matplotlib.pyplot as plt
+from matplotlib import animation
 
 # from matplotlib import patches
 # import matplotlib.transforms as mtransforms
@@ -97,7 +98,7 @@ class VehicleBase(ABC):
         self._seed = seed
         self._speed_max = speed_max
         self._accel_max = accel_max
-        self._v_prev = 0
+        self._v_prev = [0]
         self._polygon = polygon
 
         if isinstance(animation, str):
@@ -343,29 +344,32 @@ class VehicleBase(ABC):
         ulim = self.u_limited(u)
         return ulim
 
-    def limits_va(self, v):
+    def limits_va(self, v, v_prev):
         """
         Apply velocity and acceleration limits (superclass)
 
         :param v: desired velocity
         :type v: float
+        :param v_prev: previous velocity, reference to list
+        :type v_prev: list with single element
         :return: allowed velocity
         :rtype: float
 
         Determine allowable velocity given desired velocity, speed and
         acceleration limits.
 
-        .. note:: This function is stateful, requires previous velocity,
-            ``_v_prev`` attribute, to enable acceleration limiting.  This
-            is reset to zero at the start of each simulation.
+        .. note:: This function requires previous velocity, ``v_prev`` to enable
+            acceleration limiting.  This is passed as a reference to a mutable value,
+            a single-element list. This is reset to zero at the start of each simulation.
         """
         # acceleration limit
+        vp = v_prev[0]
         if self._accel_max is not None:
-            if (v - self._v_prev) / self._dt > self._accel_max:
-                v = self._v_prev + self._accelmax * self._dt
-            elif (v - self._v_prev) / self._dt < -self._accel_max:
-                v = self._v_prev - self._accel_max * self._dt
-        self._v_prev = v
+            if (v - vp) / self._dt > self._accel_max:
+                v = vp + self._accelmax * self._dt
+            elif (v - vp) / self._dt < -self._accel_max:
+                v = vp - self._accel_max * self._dt
+        v_prev[0] = v
 
         # speed limit
         if self._speed_max is not None:
@@ -410,25 +414,25 @@ class VehicleBase(ABC):
         self._control = driver
         driver._veh = self
 
-    def run(self, T=10, x0=None, control=None, animate=False):
+    def run(self, T=10, x0=None, control=None, animate=True):
         r"""
         Simulate motion of vehicle (superclass)
 
-        :param N: Number of simulation steps, defaults to 1000
-        :type N: int, optional
+        :param T: Simulation time in seconds, defaults to 10
+        :type T: float, optional
         :param x0: Initial state, defaults to value given to Vehicle constructor
         :type x0: array_like(3) or array_like(2)
-        :param animation: vehicle animation object, defaults to None
-        :type animation: VehicleAnimation subclass, optional
-        :param plot: Enable plotting, defaults to False
-        :type plot: bool, optional
+        :param control: vehicle control inputs, defaults to None
+        :type control: array_like(2), callable, driving agent
+        :param animate: Enable graphical animation of vehicle, defaults to False
+        :type animate: bool, optional
         :return: State trajectory, each row is :math:`(x,y,\theta)`.
         :rtype: ndarray(n,3)
 
-        Runs the vehicle simulation for ``N`` timesteps and optionally plots
+        Runs the vehicle simulation for ``T`` seconds and optionally plots
         an animation.  The method :meth:`step` performs each time step.
 
-        The control inputs are providd by ``control`` which can be:
+        The control inputs are provided by ``control`` which can be:
 
             * a constant tuple as the control inputs to the vehicle
             * a function called as ``f(vehicle, t, x)`` that returns a tuple
@@ -440,12 +444,17 @@ class VehicleBase(ABC):
         acceleration and steering limits.
 
         The simulation can be stopped prematurely by the control function
-        calling :meth:`stopif`.
+        calling :meth:`stopsim`.
 
-        :seealso: :meth:`init` :meth:`step` :meth:`control`
+        .. note::
+            * the simulation is fixed-time step with the step given by the ``dt``
+              attribute set by the constructor.
+            * integration uses rectangular integration.
+
+        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`
         """
 
-        self.init(control=control, x0=x0)
+        self.init(control=control, animate=animate, x0=x0)
 
         for i in range(round(T / self.dt)):
             self.step(animate=animate)
@@ -457,7 +466,107 @@ class VehicleBase(ABC):
 
         return self.x_hist
 
-    def init(self, x0=None, control=None):
+    def run_animation(self, T=10, x0=None, control=None, format=None, file=None):
+        r"""
+        Simulate motion of vehicle (superclass)
+
+        :param T: Simulation time in seconds, defaults to 10
+        :type T: float, optional
+        :param x0: Initial state, defaults to value given to Vehicle constructor
+        :type x0: array_like(3) or array_like(2)
+        :param control: vehicle control inputs, defaults to None
+        :type control: array_like(2), callable, driving agent
+        :param format: Output format
+        :type format: str, optional
+        :param file: File name
+        :type file: str, optional
+        :return: Matplotlib animation object
+        :rtype: :meth:`matplotlib.animation.FuncAnimation`
+
+        Runs the vehicle simulation for ``T`` seconds and returns an animation
+        in various formats::
+
+            ``format``    ``file``   description
+            ============  =========  ============================
+            ``"html"``    str, None  return HTML5 video
+            ``"jshtml"``  str, None  return JS+HTML video
+            ``"gif"``     str        return animated GIF
+            ``"mp4"``     str        return MP4/H264 video
+            ``None``                 return a ``FuncAnimation`` object
+
+        The allowables types for ``file`` are given in the second column.  A str
+        value is the file name.  If ``None`` is an option then return the video as a string.
+
+        For the last case, a reference to the animation object must be held if used for
+        animation in a Jupyter cell::
+
+            anim = robot.run_animation(T=20)
+
+        The control inputs are provided by ``control`` which can be:
+
+            * a constant tuple as the control inputs to the vehicle
+            * a function called as ``f(vehicle, t, x)`` that returns a tuple
+            * an interpolator called as ``f(t)`` that returns a tuple, see
+              SciPy interp1d
+            * a driver agent, subclass of :class:`VehicleDriverBase`
+
+        This is evaluated by :meth:`eval_control` which applies velocity,
+        acceleration and steering limits.
+
+        The simulation can be stopped prematurely by the control function
+        calling :meth:`stopsim`.
+
+        .. note::
+            * the simulation is fixed-time step with the step given by the ``dt``
+              attribute set by the constructor.
+            * integration uses rectangular integration.
+
+        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`
+        """
+
+        fig, ax = plt.subplots()
+
+        nframes = round(T / self.dt)
+        anim = animation.FuncAnimation(
+            fig=fig,
+            func=lambda i: self.step(animate=True, pause=False),
+            init_func=lambda: self.init(animate=True),
+            frames=nframes,
+            interval=self.dt * 1000,
+            blit=False,
+            repeat=False,
+        )
+        # anim._interval = self.dt*1000/2
+        # anim._repeat = True
+        ret = None
+        if format == "html":
+            ret = anim.to_html5_video()  # convert to embeddable HTML5 animation
+        elif format == "jshtml":
+            ret = anim.to_jshtml()  # convert to embeddable Javascript/HTML animation
+        elif format == "gif":
+            anim.save(
+                file, writer=animation.PillowWriter(fps=1 / self.dt)
+            )  # convert to GIF
+            ret = None
+        elif format == "mp4":
+            anim.save(
+                file, writer=animation.FFMpegWriter(fps=1 / self.dt)
+            )  # convert to mp4/H264
+            ret = None
+        elif format == None:
+            # return the anim object
+            return anim
+        else:
+            raise ValueError("unknown format")
+
+        if ret is not None and file is not None:
+            with open(file, "w") as f:
+                f.write(ret)
+            ret = None
+        plt.close(fig)
+        return ret
+
+    def init(self, x0=None, control=None, animate=True):
         """
         Initialize for simulation (superclass)
 
@@ -493,13 +602,14 @@ class VehicleBase(ABC):
             # override control
             self._control = control
 
-        if self._control is not None:
+        if isinstance(self._control, VehicleDriverBase):
             self._control.init()
 
         self._t = 0
+        self._v_prev = [0]
 
         # initialize the graphics
-        if self._animation is not None:
+        if animate and self._animation is not None:
 
             # setup the plot
             self._ax = base.plotvol2(self.workspace)
@@ -507,9 +617,12 @@ class VehicleBase(ABC):
             self._ax.set_xlabel("x")
             self._ax.set_ylabel("y")
             self._ax.set_aspect("equal")
-            self._ax.figure.canvas.manager.set_window_title(
-                f"Robotics Toolbox for Python (Figure {self._ax.figure.number})"
-            )
+            try:
+                self._ax.figure.canvas.manager.set_window_title(
+                    f"Robotics Toolbox for Python (Figure {self._ax.figure.number})"
+                )
+            except AttributeError:
+                pass
 
             self._animation.add(ax=self._ax)  # add vehicle animation to axis
             self._timer = plt.figtext(0.85, 0.95, "")  # display time counter
@@ -518,7 +631,7 @@ class VehicleBase(ABC):
         if isinstance(self._control, VehicleDriverBase):
             self._control.init(ax=self._ax)
 
-    def step(self, u=None, animate=False):
+    def step(self, u=None, animate=True, pause=True):
         r"""
         Step simulator by one time step (superclass)
 
@@ -576,9 +689,12 @@ class VehicleBase(ABC):
         # do the graphics
         if animate and self._animation:
             self._animation.update(self._x)
-            if self._timer is not None:
-                self._timer.set_text(f"t = {self._t:.2f}")
-            plt.pause(self._dt)
+            # if self._timer is not None:
+            #     self._timer.set_text(f"t = {self._t:.2f}")
+            if pause:
+                plt.pause(self._dt)
+            # plt.show(block=False)
+            # pass
 
         self._t += self._dt
 
@@ -606,7 +722,7 @@ class VehicleBase(ABC):
         # get workspace specified for Vehicle or from its driver
         if self._workspace is not None:
             return self._workspace
-        if self._control is not None:
+        if self._control is not None and hasattr(self._control, "_workspace"):
             return self._control._workspace
 
     @property
@@ -779,37 +895,6 @@ class VehicleBase(ABC):
         """
         self._stopsim = True
 
-    # def plot(self, x=None, shape='box', block=False, size=True, **kwargs):
-    #     r"""
-    #     Plot vehicle configuration (superclass)
-
-    #     :param x: configuration :math:`(x, y, \theta)`, defaults to None
-    #     :type x: array_like(3), optional
-    #     :param shape: [description], defaults to 'box'
-    #     :type shape: str, optional
-    #     :param block: [description], defaults to False
-    #     :type block: bool, optional
-    #     :param size: [description], defaults to True
-    #     :type size: bool, optional
-    #     :raises ValueError: [description]
-    #     """
-    #     if shape == 'triangle':
-    #         L = size
-    #         W = 0.6 * size
-    #         vertices = [(L, 0), (-L, -W), (-L, W)]
-    #     elif shape == 'box':
-    #         L1 = size
-    #         L2 = size
-    #         W = 0.6 * size
-    #         vertices = [(-L1, W), (0.6*L2, W), (L2, 0.5*W), (L2, -0.5*W), (0.6*L2, -W), (-L1, -W)]
-    #     elif isinstance(shape, np.ndarray):
-    #         vertices = shape
-    #     else:
-    #         raise ValueError('bad vehicle shape specified')
-
-    #     vertices = np.array(vertices).T
-    #     base.plot_poly(SE2(x) * vertices, close=True, **kwargs)
-
     def plot_xy(self, *args, block=None, **kwargs):
         """
         Plot xy-path from history
@@ -853,57 +938,6 @@ class VehicleBase(ABC):
         if block is not None:
             plt.show(block=block)
 
-    # def path(self, t=10, u=None, x0=None):
-    #     """
-    #     Compute path by integration (superclass)
-
-    #     :param t: integration time in seconds, defaults to 10
-    #     :type t: float, optional
-    #     :param u: vehicle command, defaults to None
-    #     :type u: array_like(2), optional
-    #     :param x0: initial state, defaults to (0,0,0)
-    #     :type x0: array_like(3), optional
-    #     :return: time vector and state history
-    #     :rtype: ndarray(1), ndarray(n,3)
-
-    #     XF = V.path(TF, U) is the final state of the vehicle (3x1) from the initial
-    #     state (0,0,0) with the control inputs U (vehicle specific).  TF is  a scalar to
-    #     specify the total integration time.
-
-    #     XP = V.path(TV, U) is the trajectory of the vehicle (Nx3) from the initial
-    #     state (0,0,0) with the control inputs U (vehicle specific).  T is a vector (N) of
-    #     times for which elements of the trajectory will be computed.
-
-    #     XP = V.path(T, U, X0) as above but specify the initial state.
-
-    #     .. note::
-    #         - Integration is performed using ODE45.
-    #         - The ODE being integrated is given by the deriv method of the vehicle object.
-
-    #     :seealso: :obj:`scipy.integrate.solve_ivp`
-    #     """
-
-    #     # t, x = veh.path(5, u=control)
-    #     # print(t)
-    #     if x0 is None:
-    #         x0 = np.zeros(3)
-
-    #     def xdot(t, x, vehicle, u):
-    #         # u = vehicle.control(demand, x)
-    #         return vehicle.deriv(x, u)
-
-    #     if base.isscalar(t):
-    #         t_span = (0, t)
-    #         t_eval = np.linspace(0, t, 100)
-    #     elif isinstance(t, np.ndarray):
-    #         t_span = (t[0], t[-1])
-    #         t_eval = t
-    #     else:
-    #         raise ValueError('bad time argument')
-    #     sol = integrate.solve_ivp(xdot, t_span, x0, t_eval=t_eval, method="RK45", args=(self, u))
-
-    #     return (sol.t, sol.y.T)
-
 
 # ========================================================================= #
 
@@ -915,7 +949,7 @@ class Bicycle(VehicleBase):
 
         :param L: wheel base, defaults to 1
         :type L: float, optional
-        :param steer_max: [description], defaults to :math:`0.45\pi`
+        :param steer_max: maximum steering angle, defaults to :math:`0.45\pi`
         :type steer_max: float, optional
         :param kwargs: additional arguments passed to :class:`VehicleBase`
             constructor
@@ -1009,6 +1043,8 @@ class Bicycle(VehicleBase):
         :type x: array_like(3)
         :param u: control input :math:`(v, \gamma)`
         :type u: array_like(2)
+        :param limits: limits are applied to input, default True
+        :type limits: bool
         :return: state derivative :math:`(\dot{x}, \dot{y}, \dot{\theta})`
         :rtype: ndarray(3)
 
@@ -1019,6 +1055,9 @@ class Bicycle(VehicleBase):
                     \dot{x} &= v \cos \theta \\
                     \dot{y} &= v \sin \theta \\
                     \dot{\theta} &= \frac{v}{L} \tan \gamma
+
+        If ``limits`` is True then speed, acceleration and steer-angle limits are
+        applied to ``u``.
 
         :seealso: :meth:`f`
         """
@@ -1047,7 +1086,7 @@ class Bicycle(VehicleBase):
         """
         # limit speed and steer angle
         ulim = np.array(u)
-        ulim[0] = self.limits_va(u[0])
+        ulim[0] = self.limits_va(u[0], self._v_prev)
         ulim[1] = np.clip(u[1], -self._steer_max, self._steer_max)
 
         return ulim
@@ -1083,17 +1122,18 @@ class Unicycle(VehicleBase):
         """
         super().__init__(**kwargs)
         self._W = W
+        self._steer_max = steer_max
 
     def __str__(self):
 
         s = super().__str__()
         s += (
-            f"\n  W={self._W}, steer_max={self._steer_max}, vel_max={self._vel_max},"
-            f" accel_max={self.accel_max}"
+            f"\n  W={self._W}, steer_max={self._steer_max:g},"
+            f" vel_max={self._speed_max}, accel_max={self._accel_max}"
         )
         return s
 
-    def deriv(self, x, u):
+    def deriv(self, x, u, limits=True):
         r"""
         Time derivative of state
 
@@ -1101,6 +1141,8 @@ class Unicycle(VehicleBase):
         :type x: array_like(3)
         :param u: control input :math:`(v, \omega)`
         :type u: array_like(2)
+        :param limits: limits are applied to input, default True
+        :type limits: bool
         :return: state derivative :math:`(\dot{x}, \dot{y}, \dot{\theta})`
         :rtype: ndarray(3)
 
@@ -1112,11 +1154,13 @@ class Unicycle(VehicleBase):
                     \dot{y} &= v \sin \theta \\
                     \dot{\theta} &= \omega
 
+        If ``limits`` is True then speed, acceleration and steer-angle limits are
+        applied to ``u``.
+
         :seealso: :meth:`f`
-
-        .. note:: Vehicle speed and steering limits are not applied here
         """
-
+        if limits:
+            u = self.u_limited(u)
         # unpack some variables
         theta = x[2]
         v = u[0]
@@ -1139,7 +1183,7 @@ class Unicycle(VehicleBase):
 
         # limit speed and steer angle
         ulim = np.array(u)
-        ulim[0] = self.limits_va(u[0])
+        ulim[0] = self.limits_va(u[0], self._v_prev)
         ulim[1] = np.maximum(-self._steer_max, np.minimum(self._steer_max, u[1]))
 
         return ulim
@@ -1163,44 +1207,58 @@ class DiffSteer(Unicycle):
             \dot{y} &= v \sin \theta \\
             \dot{\theta} &= \omega
 
-        where :math:`v` is the velocity in body frame x-direction, and 
-        :math:`\omega` is the turn rate.
+        where :math:`v = (v_R + v_L)/2` is the velocity in body frame x-direction, and 
+        :math:`\omega = (v_R - v_L)/W` is the turn rate.
 
         :seealso: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`Vehicle`
         """
         super().__init__(**kwargs)
         self._W = W
+        self._v_prev_L = [0]
+        self._v_prev_R = [0]
 
     def __str__(self):
 
         s = super().__str__()
-        s += f"\n  W={self._W}, vel_max={self._vel_max}, accel_max={self.accel_max}"
         return s
 
-    def deriv(self, x, u):
+    def init(self):
+        super().init()
+        self._v_prev_L = [0]
+        self._v_prev_R = [0]
+
+    def deriv(self, x, u, limits=True):
         r"""
         Time derivative of state
 
         :param x: vehicle state :math:`(x, y, \theta)`
         :type x: array_like(3)
-        :param u: control input :math:`(v, \omega)`
+        :param u: Desired vehicle inputs :math:`(v_L, v_R)`
         :type u: array_like(2)
+        :param limits: limits are applied to input, default True
+        :type limits: bool
         :return: state derivative :math:`(\dot{x}, \dot{y}, \dot{\theta})`
         :rtype: ndarray(3)
 
-        Returns the time derivative of state (3x1) at the state ``x`` with velocity :math:`v`
-        and turn rate :math:`\omega`
+        Returns the time derivative of state (3x1) at the state ``x`` with left and
+        right wheel speeds ``u``.
 
         .. math::
-                    \dot{x} &= v \cos \theta \\
-                    \dot{y} &= v \sin \theta \\
-                    \dot{\theta} &= \omega
+
+            \dot{x} &= v \cos \theta \\
+            \dot{y} &= v \sin \theta \\
+            \dot{\theta} &= \omega
+
+        where :math:`v = (v_R + v_L)/2` is the velocity in body frame x-direction, and 
+        :math:`\omega = (v_R - v_L)/W` is the turn rate.
+
+        If ``limits`` is True then speed and acceleration limits are applied to the
+        wheel speeds ``u``.
 
         :seealso: :meth:`f`
-
-        .. note:: Vehicle speed and steering limits are not applied here
         """
-
+        if limits:
+            u = self.u_limited(u)
         # unpack some variables
         theta = x[2]
         vleft = u[0]
@@ -1214,11 +1272,11 @@ class DiffSteer(Unicycle):
 
     def u_limited(self, u):
         """
-        Apply vehicle velocity, acceleration and steering limits
+        Apply vehicle velocity and acceleration limits
 
-        :param u: Desired vehicle inputs :math:`(v, \omega)`
+        :param u: Desired vehicle inputs :math:`(v_L, v_R)`
         :type u: array_like(2)
-        :return: Allowable vehicle inputs :math:`(v, \omega)`
+        :return: Allowable vehicle inputs :math:`(v_L, v_R)`
         :rtype: ndarray(2)
 
         Velocity and acceleration limits are applied to :math:`v` and
@@ -1227,8 +1285,8 @@ class DiffSteer(Unicycle):
 
         # limit speed and steer angle
         ulim = np.array(u)
-        ulim[0] = self.limits_va(u[0])
-        ulim[1] = self.limits_va(u[1])
+        ulim[0] = self.limits_va(u[0], self._v_prev_L)
+        ulim[1] = self.limits_va(u[1], self._v_prev_R)
 
         return ulim
 
@@ -1237,13 +1295,27 @@ if __name__ == "__main__":
 
     from roboticstoolbox import RandomPath
 
-    V = np.eye(2) * 0.001
-    robot = Bicycle(covar=V, animation="car")
-    odo = robot.step((1, 0.3), animate=False)
+    import roboticstoolbox as rtb
 
-    robot.control = RandomPath(workspace=10)
+    a = rtb.VehicleMarker(marker="s", markerfacecolor="b")
+    veh = rtb.Bicycle(animation=a, workspace=10)
+    veh.control = (4, 0.5)
+    veh.run(20)
 
-    robot.run(T=10)
+    # V = np.eye(2) * 0.001
+    # robot = Bicycle(covar=V, animation="car")
+    # odo = robot.step((1, 0.3), animate=False)
+
+    # robot.control = RandomPath(workspace=10)
+
+    # # robot.run(T=10, animate=True)
+    # # plt.show(block=True)
+
+    # anim = robot.run_animation(T=10, format="html", file="veh.html")
+
+    # anim.save("veh.mp4", writer=animation.FFMpegWriter(fps=1/robot.dt))  # convert to mp4/H264
+    # with open("veh.html", "w") as f:
+    #     f.write(anim.to_html5_video())
 
     # from math import pi
 

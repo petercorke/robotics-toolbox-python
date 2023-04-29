@@ -232,6 +232,32 @@ class TestETS(unittest.TestCase):
         )
         # nt.assert_almost_equal(r2.fkine(q2, tool=tool), ans6)  # type: ignore
 
+    def test_fkine_traj(self):
+        robot = rtb.ERobot(
+            [
+                rtb.Link(rtb.ET.Rx()),
+                rtb.Link(rtb.ET.Ry()),
+                rtb.Link(rtb.ET.Rz()),
+                rtb.Link(rtb.ET.tx()),
+                rtb.Link(rtb.ET.ty()),
+                rtb.Link(rtb.ET.tz()),
+            ]
+        )
+
+        ets = robot.ets()
+
+        qt = np.arange(10 * ets.n).reshape(10, ets.n)
+
+        T_individual = []
+
+        for q in qt:
+            T_individual.append(ets.eval(q))
+
+        T_traj = ets.eval(qt)
+
+        for i in range(10):
+            nt.assert_allclose(T_traj[i, :, :], T_individual[i])
+
     def test_jacob0_panda(self):
         deg = np.pi / 180
         mm = 1e-3
@@ -4342,5 +4368,4 @@ class TestETS(unittest.TestCase):
 
 
 if __name__ == "__main__":
-
     unittest.main()

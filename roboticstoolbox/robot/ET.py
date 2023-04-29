@@ -22,7 +22,9 @@ from roboticstoolbox.fknm import ET_T, ET_init, ET_update
 from spatialmath.base import getvector
 from spatialmath import SE3, SE2
 from typing import Optional, Callable, Union, TYPE_CHECKING
-from roboticstoolbox.tools.types import ArrayLike
+
+# from spatialmath.base.types import ArrayLike
+from roboticstoolbox.tools.types import ArrayLike, NDArray
 
 if TYPE_CHECKING:  # pragma: nocover
     import sympy
@@ -46,6 +48,10 @@ class BaseET:
     ):
         self._axis = axis
 
+        # A flag to check if the ET is a static joint with a symbolic value
+        # Defaults to False as is set to True if eta is a symbol below
+        self._isstaticsym = False
+
         if eta is None:
             self._eta = None
         else:
@@ -60,9 +66,9 @@ class BaseET:
         self._jindex = jindex
 
         if qlim is not None:
-            self._qlim = array(getvector(qlim, 2, out="array"))
+            self._qlim: Union[NDArray, None] = getvector(qlim, 2, out="array")
         else:
-            self._qlim = None
+            self._qlim: Union[NDArray, None] = None
 
         if self.eta is None:
             if T is None:
@@ -74,6 +80,10 @@ class BaseET:
                 self._joint = False
                 self._T = T.copy(order="F")
         else:
+            # This is a static joint
+            if issymbol(eta):
+                self._isstaticsym = True
+
             self._joint = False
             if axis_func is not None:
                 self._T = axis_func(self.eta).copy(order="F")
@@ -97,11 +107,15 @@ class BaseET:
             jindex = self.jindex
 
         if self.qlim is None:
-            qlim = array([0, 0])
+            if self.axis[0] == "R":
+                qlim = array([-pi, pi])
+            else:
+                qlim = array([0, 1])
         else:
             qlim = self.qlim
 
         return ET_init(
+            self._isstaticsym,
             self.isjoint,
             self.isflip,
             jindex,
@@ -120,12 +134,16 @@ class BaseET:
             jindex = self.jindex
 
         if self.qlim is None:
-            qlim = array([0, 0])
+            if self.axis[0] == "R":
+                qlim = array([-pi, pi])
+            else:
+                qlim = array([0, 1])
         else:
             qlim = self.qlim
 
         ET_update(
             self.fknm,
+            self._isstaticsym,
             self.isjoint,
             self.isflip,
             jindex,
@@ -135,7 +153,6 @@ class BaseET:
         )
 
     def __str__(self):
-
         eta_str = ""
 
         if self.isjoint:
@@ -175,7 +192,6 @@ class BaseET:
         return f"{self.axis}({eta_str})"
 
     def __repr__(self):
-
         s_eta = "" if self.eta is None else f"eta={self.eta}"
         s_T = (
             f"T={repr(self._T)}"
@@ -427,7 +443,7 @@ class BaseET:
     @qlim.setter
     def qlim(self, qlim_new: Union[ArrayLike, None]) -> None:
         if qlim_new is not None:
-            qlim_new = array(getvector(qlim_new, 2, out="array"))
+            qlim_new = getvector(qlim_new, 2, out="array")
         self._qlim = qlim_new
         self.__update_c()
 
@@ -553,7 +569,7 @@ class BaseET:
             # We can't use the fast version, lets use Python instead
             if self.isjoint:
                 if self.isflip:
-                    q = -1.0 * q
+                    q = -q  # type: ignore
 
                 if self.axis_func is not None:
                     return self.axis_func(q)

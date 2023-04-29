@@ -4,7 +4,7 @@ name = "roboticstoolbox-python"
 
 description = "A Python library for robotics education and research"
 
-version = "1.0.3"
+version = "1.1.0"
 
 authors = [
     { name = "Jesse Haviland", email = "j.haviland@qut.edu.au" },
@@ -13,13 +13,13 @@ authors = [
 
 dependencies = [
     "numpy>=1.17.4",
-    "spatialmath-python~=1.0.0",
-    "spatialgeometry~=1.0.0",
+    "spatialmath-python>=1.1.5",
+    "spatialgeometry>=1.0.0",
     "pgraph-python",
     "scipy",
     "matplotlib",
     "ansitable",
-    "swift-sim~=1.0.0",
+    "swift-sim>=1.0.0",
     "rtb-data",
     "progress",
     "typing_extensions",
@@ -200,4 +200,4 @@ archs = ["AMD64", "x86"]
 
 
 [tool.coverage.run]
-omit = ["roboticstoolbox/examples/*", "test_*.py",]
+omit = ["roboticstoolbox/examples/*", "test_*.py"]

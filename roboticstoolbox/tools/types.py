@@ -4,7 +4,6 @@
 """
 
 from typing import Tuple, Union, List, Set
-
 from numpy import ndarray
 
 NDArray = ndarray

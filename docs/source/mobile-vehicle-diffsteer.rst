@@ -1,7 +1,7 @@
-Unicycle model
---------------
+Differential steering
+---------------------
 
-.. autoclass:: roboticstoolbox.mobile.Unicycle
+.. autoclass:: roboticstoolbox.mobile.DiffSteer
    :members:
    :undoc-members:
    :show-inheritance:

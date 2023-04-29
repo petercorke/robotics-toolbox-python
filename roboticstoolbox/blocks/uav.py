@@ -9,19 +9,87 @@ from bdsim.graphics import GraphicsBlock
 
 
 class MultiRotor(TransferBlock):
-    """
+    r"""
     :blockname:`MULTIROTOR`
 
-    .. table::
-       :align: left
+    Dynamic model of a multi-rotor flying robot.
 
-    +------------+---------+---------+
-    | inputs     | outputs |  states |
-    +------------+---------+---------+
-    | 1          | 1       | 16      |
-    +------------+---------+---------+
-    | ndarray(4) | dict    |         |
-    +------------+---------+---------+
+    :inputs: 1
+    :outputs: 1
+    :states: 16
+
+    .. list-table::
+        :header-rows: 1
+
+        *   - Port type
+            - Port number
+            - Types
+            - Description
+        *   - Input
+            - 0
+            - ndarray(N)
+            - :math:`\varpi`, rotor velocities in (radians/sec)
+        *   - Output
+            - 0
+            - dict
+            - :math:`\mathit{x}`, vehicle state
+
+    Dynamic model of a multi-rotor flying robot that includes rotor flapping.  The
+    vehicle state is a dict containing the following items:
+
+        - ``x`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
+        - ``vb`` translational velocity in the world frame (metres/sec)
+        - ``w`` angular rates in the world frame as yaw-pitch-roll rates (radians/second)
+        - ``a1s`` longitudinal flapping angles (radians)
+        - ``b1s`` lateral flapping angles (radians)
+
+
+    The dynamic model is a dict with the following key/value pairs.
+
+    ===========   ==========================================
+    key           description
+    ===========   ==========================================
+    ``nrotors``   Number of rotors (even integer)
+    ``J``         Flyer rotational inertia matrix (3x3)
+    ``h``         Height of rotors above CoG
+    ``d``         Length of flyer arms
+    ``nb``        Number of blades per rotor
+    ``r``         Rotor radius
+    ``c``         Blade chord
+    ``e``         Flapping hinge offset
+    ``Mb``        Rotor blade mass
+    ``Mc``        Estimated hub clamp mass
+    ``ec``        Blade root clamp displacement
+    ``Ib``        Rotor blade rotational inertia
+    ``Ic``        Estimated root clamp inertia
+    ``mb``        Static blade moment
+    ``Ir``        Total rotor inertia
+    ``Ct``        Non-dim. thrust coefficient
+    ``Cq``        Non-dim. torque coefficient
+    ``sigma``     Rotor solidity ratio
+    ``thetat``    Blade tip angle
+    ``theta0``    Blade root angle
+    ``theta1``    Blade twist angle
+    ``theta75``   3/4 blade angle
+    ``thetai``    Blade ideal root approximation
+    ``a``         Lift slope gradient
+    ``A``         Rotor disc area
+    ``gamma``     Lock number
+    ===========   ==========================================
+
+    .. note::
+        - Based on MATLAB code developed by Pauline Pounds 2004.
+        - SI units are used.
+        - Rotor velocity is defined looking down, clockwise from the front rotor
+          which lies on the x-axis.
+
+    :References:
+        - Design, Construction and Control of a Large Quadrotor micro air vehicle.
+          P.Pounds, `PhD thesis <https://openresearch-repository.anu.edu.au/handle/1885/146543>`_
+          Australian National University, 2007.
+        - Robotics, Vision & Control by Peter Corke, sec 4.2 in all editions
+
+    :seealso: :class:`MultiRotorMixer` :class:`MultiRotorPlot`
     """
 
     nin = 1
@@ -92,75 +160,11 @@ class MultiRotor(TransferBlock):
         :type x0: array_like(6) or array_like(12), optional
         :param blockargs: |BlockOptions|
         :type blockargs: dict
-        :return: a MULTIROTOR block
-        :rtype: MultiRotor instance
-
-        Dynamic model of a multi-rotor flying robot, includes rotor flapping.
-
-        **Block ports**
-
-            :input ω: a vector of input rotor speeds in (radians/sec).  These are,
-                looking down, clockwise from the front rotor which lies on the x-axis.
-
-            :output x: a dictionary signal with the following items:
-
-                - ``x`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
-                - ``vb`` translational velocity in the world frame (metres/sec)
-                - ``w`` angular rates in the world frame as yaw-pitch-roll rates (radians/second)
-                - ``a1s`` longitudinal flapping angles (radians)
-                - ``b1s`` lateral flapping angles (radians)
-
-        **Model parameters**
-
-        The dynamic model is a dict with the following key/value pairs.
-
-        ===========   ==========================================
-        key           description
-        ===========   ==========================================
-        ``nrotors``   Number of rotors (even integer)
-        ``J``         Flyer rotational inertia matrix (3x3)
-        ``h``         Height of rotors above CoG
-        ``d``         Length of flyer arms
-        ``nb``        Number of blades per rotor
-        ``r``         Rotor radius
-        ``c``         Blade chord
-        ``e``         Flapping hinge offset
-        ``Mb``        Rotor blade mass
-        ``Mc``        Estimated hub clamp mass
-        ``ec``        Blade root clamp displacement
-        ``Ib``        Rotor blade rotational inertia
-        ``Ic``        Estimated root clamp inertia
-        ``mb``        Static blade moment
-        ``Ir``        Total rotor inertia
-        ``Ct``        Non-dim. thrust coefficient
-        ``Cq``        Non-dim. torque coefficient
-        ``sigma``     Rotor solidity ratio
-        ``thetat``    Blade tip angle
-        ``theta0``    Blade root angle
-        ``theta1``    Blade twist angle
-        ``theta75``   3/4 blade angle
-        ``thetai``    Blade ideal root approximation
-        ``a``         Lift slope gradient
-        ``A``         Rotor disc area
-        ``gamma``     Lock number
-        ===========   ==========================================
-
-        .. note::
-            - SI units are used.
-            - Based on MATLAB code developed by Pauline Pounds 2004.
-
-        :References:
-            - Design, Construction and Control of a Large Quadrotor micro air vehicle.
-              P.Pounds, `PhD thesis <https://openresearch-repository.anu.edu.au/handle/1885/146543>`_
-              Australian National University, 2007.
-
-        :seealso: :class:`MultiRotorMixer` :class:`MultiRotorPlot`
         """
         if model is None:
             raise ValueError("no model provided")
 
         super().__init__(nin=1, nout=1, **blockargs)
-        self.type = "quadrotor"
 
         try:
             nrotors = model["nrotors"]
@@ -207,7 +211,7 @@ class MultiRotor(TransferBlock):
         self.a1s = np.zeros((self.nrotors,))
         self.b1s = np.zeros((self.nrotors,))
 
-    def output(self, t=None):
+    def output(self, t, inports, x):
 
         model = self.model
 
@@ -217,7 +221,7 @@ class MultiRotor(TransferBlock):
         #   n      Attitude                         3x1   (Y,P,R)
         #   o      Angular velocity                 3x1   (Yd,Pd,Rd)
 
-        n = self._x[3:6]  # RPY angles
+        n = x[3:6]  # RPY angles
         phi = n[0]  # yaw
         the = n[1]  # pitch
         psi = n[2]  # roll
@@ -251,20 +255,18 @@ class MultiRotor(TransferBlock):
 
         # return velocity in the body frame
 
-        vd = (
-            np.linalg.inv(R) @ self._x[6:9]
-        )  # translational velocity mapped to body frame
-        rpyd = iW @ self._x[9:12]  # RPY rates mapped to body frame
+        vd = np.linalg.inv(R) @ x[6:9]  # translational velocity mapped to body frame
+        rpyd = iW @ x[9:12]  # RPY rates mapped to body frame
 
         out = {}
 
-        out["x"] = self._x[0:6]
-        out["trans"] = np.r_[self._x[:3], vd]
-        out["rot"] = np.r_[self._x[3:6], rpyd]
+        out["x"] = x[0:6]
+        out["trans"] = np.r_[x[:3], vd]
+        out["rot"] = np.r_[x[3:6], rpyd]
 
         out["a1s"] = self.a1s
         out["b1s"] = self.b1s
-        out["X"] = np.r_[self._x[:6], vd, rpyd]
+        out["X"] = np.r_[x[:6], vd, rpyd]
 
         # sys = [ x(1:6);
         #     inv(R)*x(7:9);   % translational velocity mapped to body frame
@@ -272,7 +274,7 @@ class MultiRotor(TransferBlock):
 
         return [out]
 
-    def deriv(self):
+    def deriv(self, t, inports, x):
 
         model = self.model
 
@@ -281,7 +283,7 @@ class MultiRotor(TransferBlock):
         e3 = np.r_[0, 0, 1]
 
         # process inputs
-        w = self.inputs[0]
+        w = inports[0]
         if len(w) != self.nrotors:
             raise RuntimeError("input vector wrong size")
 
@@ -291,10 +293,10 @@ class MultiRotor(TransferBlock):
             raise RuntimeError("quadrotor_dynamics: not defined for zero rotor speed")
 
         # EXTRACT STATES FROM X
-        z = self._x[0:3]  # position in {W}
-        n = self._x[3:6]  # RPY angles {W}
-        v = self._x[6:9]  # velocity in {W}
-        o = self._x[9:12]  # angular velocity in {W}
+        z = x[0:3]  # position in {W}
+        n = x[3:6]  # RPY angles {W}
+        v = x[6:9]  # velocity in {W}
+        o = x[9:12]  # angular velocity in {W}
 
         # PREPROCESS ROTATION AND WRONSKIAN MATRICIES
         phi = n[0]  # yaw
@@ -451,19 +453,60 @@ class MultiRotor(TransferBlock):
 
 
 class MultiRotorMixer(FunctionBlock):
-    """
+    r"""
     :blockname:`MULTIROTORMIXER`
 
-    .. table::
-       :align: left
+    Speed mixer for a multi-rotor flying vehicle.
 
-    +--------+------------+---------+
-    | inputs | outputs    |  states |
-    +--------+------------+---------+
-    | 4      | 1          | 0       |
-    +--------+------------+---------+
-    | float  | ndarray(4) |         |
-    +--------+------------+---------+
+    :inputs: 4
+    :outputs: 1
+    :states: 0
+
+    .. list-table::
+        :header-rows: 1
+
+        *   - Port type
+            - Port number
+            - Types
+            - Description
+        *   - Input
+            - 0
+            - float
+            - :math:`\tau_R`, roll torque
+        *   - Input
+            - 1
+            - float
+            - :math:`\tau_P`, pitch torque
+        *   - Input
+            - 2
+            - float
+            - :math:`\tau_Y`, yaw torque
+        *   - Input
+            - 3
+            - float
+            - :math:`T`, total thrust
+        *   - Output
+            - 0
+            - ndarray(N)
+            - :math:`\varpi`, rotor speeds
+
+    This block converts airframe moments and total thrust into a 1D
+    array of rotor speeds which can be input to the ``MULTIROTOR`` block.
+
+    The model is a dict with the following key/value pairs.
+
+    ===========   ==========================================
+    key           description
+    ===========   ==========================================
+    ``nrotors``   Number of rotors (even integer)
+    ``h``         Height of rotors above CoG
+    ``d``         Length of flyer arms
+    ``r``         Rotor radius
+    ===========   ==========================================
+
+    .. note:: Based on MATLAB code developed by Pauline Pounds 2004.
+
+    :seealso: :class:`MultiRotor` :class:`MultiRotorPlot`
     """
 
     nin = 4
@@ -473,8 +516,6 @@ class MultiRotorMixer(FunctionBlock):
 
     def __init__(self, model=None, wmax=1000, wmin=5, **blockargs):
         """
-        Create a speed mixer block for a multi-rotor flying vehicle.
-
         :param model: A dictionary of vehicle geometric and inertial properties
         :type model: dict
         :param maxw: maximum rotor speed in rad/s, defaults to 1000
@@ -483,38 +524,6 @@ class MultiRotorMixer(FunctionBlock):
         :type minw: float
         :param blockargs: |BlockOptions|
         :type blockargs: dict
-        :return: a MULTIROTORMIXER block
-        :rtype: MultiRotorMixer instance
-
-        This block converts airframe moments and total thrust into a 1D
-        array of rotor speeds which can be input to the MULTIROTOR block.
-
-        **Block ports**
-
-            :input 𝛕r: roll torque
-            :input 𝛕p: pitch torque
-            :input 𝛕y: yaw torque
-            :input T: total thrust
-
-            :output ω: 1D array of rotor speeds
-
-        **Model parameters**
-
-        The model is a dict with the following key/value pairs.
-
-        ===========   ==========================================
-        key           description
-        ===========   ==========================================
-        ``nrotors``   Number of rotors (even integer)
-        ``h``         Height of rotors above CoG
-        ``d``         Length of flyer arms
-        ``r``         Rotor radius
-        ===========   ==========================================
-
-        .. note::
-            - Based on MATLAB code developed by Pauline Pounds 2004.
-
-        :seealso: :class:`MultiRotor` :class:`MultiRotorPlot`
         """
         if model is None:
             raise ValueError("no model provided")
@@ -544,8 +553,8 @@ class MultiRotorMixer(FunctionBlock):
         self.Minv = np.linalg.inv(self.M)
         self.signs = np.array(s)
 
-    def output(self, t):
-        tau = self.inputs
+    def output(self, t, inports, x):
+        tau = inports
 
         # mix airframe force/torque to rotor thrusts
         w = self.Minv @ tau
@@ -569,16 +578,54 @@ class MultiRotorPlot(GraphicsBlock):
     """
     :blockname:`MULTIROTORPLOT`
 
-    .. table::
-       :align: left
+    Displays/animates a multi-rotor flying vehicle.
 
-    +--------+---------+---------+
-    | inputs | outputs |  states |
-    +--------+---------+---------+
-    | 1      | 0       | 0       |
-    +--------+---------+---------+
-    | dict   |         |         |
-    +--------+---------+---------+
+    :inputs: 1
+    :outputs: 0
+    :states: 0
+
+    .. list-table::
+        :header-rows: 1
+
+        *   - Port type
+            - Port number
+            - Types
+            - Description
+        *   - Input
+            - 0
+            - dict
+            - :math:`\mathit{x}`, vehicle state
+
+    Animate a multi-rotor flying vehicle using Matplotlib graphics.  The
+    rotors are shown as circles and their orientation includes rotor
+    flapping which can be exagerated by ``flapscale``.
+
+    .. figure:: ../figs/multirotorplot.png
+        :width: 500px
+        :alt: example of generated graphic
+
+        Example of quad-rotor display.
+
+    The input is a dictionary signal and the block requires the items:
+
+            - ``x`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
+            - ``a1s`` rotor flap angle
+            - ``b1s`` rotor flap angle
+
+    The model is a dict with the following key/value pairs.
+
+    ===========   ==========================================
+    key           description
+    ===========   ==========================================
+    ``nrotors``   Number of rotors (even integer)
+    ``h``         Height of rotors above CoG
+    ``d``         Length of flyer arms
+    ``r``         Rotor radius
+    ===========   ==========================================
+
+    .. note:: Based on MATLAB code developed by Pauline Pounds 2004.
+
+    :seealso: :class:`MultiRotor` :class:`MultiRotorMixer`
     """
 
     nin = 1
@@ -618,8 +665,6 @@ class MultiRotorPlot(GraphicsBlock):
         **blockargs,
     ):
         """
-        Create a block that displays/animates a multi-rotor flying vehicle.
-
         :param model: A dictionary of vehicle geometric and inertial properties
         :type model: dict
         :param scale: dimensions of workspace: xmin, xmax, ymin, ymax, zmin, zmax, defaults to [-2,2,-2,2,10]
@@ -630,44 +675,6 @@ class MultiRotorPlot(GraphicsBlock):
         :type projection: str
         :param blockargs: |BlockOptions|
         :type blockargs: dict
-        :return: a MULTIROTORPLOT block
-        :rtype: MultiRotorPlot instance
-
-        Animate a multi-rotor flying vehicle using Matplotlib graphics.  The
-        rotors are shown as circles and their orientation includes rotor
-        flapping which can be exagerated by ``flapscale``.
-
-        .. figure:: ../../figs/multirotorplot.png
-           :width: 500px
-           :alt: example of generated graphic
-
-           Example of quad-rotor display.
-
-        **Block ports**
-
-            :input x: a dictionary signal that includes the item:
-
-                - ``x`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
-                - ``a1s`` rotor flap angle
-                - ``b1s`` rotor flap angle
-
-        **Model parameters**
-
-        The model is a dict with the following key/value pairs.
-
-        ===========   ==========================================
-        key           description
-        ===========   ==========================================
-        ``nrotors``   Number of rotors (even integer)
-        ``h``         Height of rotors above CoG
-        ``d``         Length of flyer arms
-        ``r``         Rotor radius
-        ===========   ==========================================
-
-        .. note::
-            - Based on MATLAB code developed by Pauline Pounds 2004.
-
-        :seealso: :class:`MultiRotor` :class:`MultiRotorMixer`
         """
         if model is None:
             raise ValueError("no model provided")
@@ -680,7 +687,7 @@ class MultiRotorPlot(GraphicsBlock):
         self.projection = projection
         self.flapscale = flapscale
 
-    def start(self, state):
+    def start(self, simstate):
         quad = self.model
 
         # vehicle dimensons
@@ -701,7 +708,7 @@ class MultiRotorPlot(GraphicsBlock):
             ]
 
         # draw ground
-        self.fig = self.create_figure(state)
+        self.fig = self.create_figure(simstate)
         # no axes in the figure, create a 3D axes
         self.ax = self.fig.add_subplot(111, projection="3d", proj_type=self.projection)
 
@@ -756,22 +763,23 @@ class MultiRotorPlot(GraphicsBlock):
         plt.draw()
         plt.show(block=False)
 
-        super().start()
+        super().start(simstate)
 
-    def step(self, state):
+    def step(self, t, inports):
         def plot3(h, x, y, z):
             h.set_data_3d(x, y, z)
             # h.set_data(x, y)
             # h.set_3d_properties(np.r_[z])
 
-        # READ STATE
-        z = self.inputs[0]["x"][0:3]
-        n = self.inputs[0]["x"][3:6]
+        # read UAV output "bus"
+        input = inports[0]
+        z = input["x"][0:3]
+        n = input["x"][3:6]
 
         # TODO, check input dimensions, 12 or 12+2N, deal with flapping
 
-        a1s = self.inputs[0]["a1s"]
-        b1s = self.inputs[0]["b1s"]
+        a1s = input["a1s"]
+        b1s = input["b1s"]
 
         quad = self.model
 
@@ -865,21 +873,15 @@ class MultiRotorPlot(GraphicsBlock):
         plot3(self.shadow, [z[0], 0], [-z[1], 0], [0, 0])
         plot3(self.groundmark, [z[0]], [-z[1]], [0])
 
-        textstr = f"t={state.t: .2f}\nh={z[2]: .2f}\nγ={n[0]: .2f}"
+        textstr = f"t={t: .2f}\nh={z[2]: .2f}\nγ={n[0]: .2f}"
         self.panel.set_text(textstr)
 
-        super().step(state=state)
-
-    def done(self, block=False, **kwargs):
-        if self.bd.options.graphics:
-            plt.show(block=block)
-
-            super().done()
+        super().step(t, inports)
 
 
 if __name__ == "__main__":
 
-    from bdsim.blocks.quad_model import quadrotor
+    from quad_model import quadrotor
 
     # m = MultiRotorMixer(model=quadrotor)
     # print(m.M)
@@ -906,16 +908,16 @@ if __name__ == "__main__":
         print(w[0] ** 2 + w[2] ** 2 - w[1] ** 2 - w[3] ** 2)
         print(w)
 
-        m._x = np.r_[0.0, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        x = np.r_[0.0, 0, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        inputs = [np.r_[w]]
 
-        m.inputs = [np.r_[w]]
-        dx = m.deriv()
+        dx = m.deriv(0.0, inputs, x)
 
         print("zdd", dx[8])
         print("wd", dx[9:12])
 
-        m._x = dx
-        x = m.output()[0]["X"]
+        x = dx
+        x = m.output(0.0, inputs, x)[0]["X"]
         print("zd", x[8])
         print("ypr_dot", x[9:12])
 

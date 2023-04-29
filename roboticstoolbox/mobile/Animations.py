@@ -18,13 +18,13 @@ from roboticstoolbox import rtb_load_data
 
 class VehicleAnimationBase(ABC):
     """
-    Abstract base class to support animation of a vehicle on Matplotlib plot
+    Abstract base class to support animation of a vehicle in a Matplotlib plot
 
     There are three concrete subclasses:
 
-    - ``VehicleMarker`` animates a Matplotlib marker
-    - ``VehiclePolygon`` animates a polygon shape (outline or filled), including predefined shapes
-    - ``VehicleIcon`` animates an image
+    - ``VehicleMarker`` animates a Matplotlib marker (shows position only)
+    - ``VehiclePolygon`` animates a polygon shape (outline or filled), including predefined shapes (shows position and orientation)
+    - ``VehicleIcon`` animates an image (shows position and orientation)
 
     An instance ``a`` of these classes can be used in three different ways, firstly::
 
@@ -36,7 +36,7 @@ class VehicleAnimationBase(ABC):
 
         a.update(q)
 
-    will animate it.
+    will animate it with the configuration given by ``q``.
 
     Secondly, an instance can be passed to a Vehicle subclass object to make an animation
     during simulation::

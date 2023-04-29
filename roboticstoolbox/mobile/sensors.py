@@ -52,7 +52,7 @@ class SensorBase(ABC):
         map,
         every=1,
         fail=[],
-        animate=False,
+        plot=False,
         delay=0.1,
         seed=0,
         verbose=False,
@@ -82,7 +82,7 @@ class SensorBase(ABC):
 
         self.delay = 0.1
 
-        self._animate = animate
+        self._animate = plot
 
         self._seed = seed
         self.init()
@@ -223,7 +223,7 @@ class RangeBearingSensor(SensorBase):
     ):
 
         r"""
-        Range and bearing angke sensor
+        Range and bearing angle sensor
 
         :param robot: model of robot carrying the sensor
         :type robot: :class:`VehicleBase` subclass
@@ -237,7 +237,7 @@ class RangeBearingSensor(SensorBase):
         :type range: float or array_like(2), optional
         :param angle: angular field of view, from :math:`[-\theta, \theta]` defaults to None
         :type angle: float, optional
-        :param plot: [description], defaults to False
+        :param plot: animate the sensor beams, defaults to False
         :type plot: bool, optional
         :param seed: random number seed, defaults to 0
         :type seed: int, optional
@@ -267,6 +267,8 @@ class RangeBearingSensor(SensorBase):
 
         :seealso: :class:`~roboticstoolbox.mobile.LandmarkMap` :class:`~roboticstoolbox.mobile.EKF`
         """
+
+        # TODO change plot option to animate, but RVC3 uses plot
 
         # call the superclass constructor
         super().__init__(robot, map, **kwargs)

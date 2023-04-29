@@ -615,13 +615,11 @@ class TestRobot(unittest.TestCase):
         self.assertTrue(len(rdict) > len(rdict2))
 
     def test_URDF(self):
-
         r = rtb.Robot.URDF("fetch_description/robots/fetch.urdf", gripper=6)
 
         self.assertEqual(r.n, 5)
 
     def test_URDF2(self):
-
         r = rtb.Robot.URDF(
             "fetch_description/robots/fetch.urdf", gripper="forearm_roll_link"
         )
@@ -1421,6 +1419,41 @@ class TestRobot(unittest.TestCase):
         self.assertEqual(robot.name, "myname")
         self.assertEqual(robot.manufacturer, "I made it")
         self.assertEqual(robot.comment, "other stuff")
+
+    def test_qlim_setters(self):
+        et = rtb.ET.Rz(qlim=[-1, 1])
+        ets = rtb.ETS([et])
+        l = rtb.Link(ets)
+        r = rtb.Robot([l])
+
+        nt.assert_almost_equal(et.qlim, np.array([-1, 1]))
+        nt.assert_almost_equal(ets.qlim, np.array([[-1, 1]]).T)
+        nt.assert_almost_equal(l.qlim, np.array([-1, 1]))
+        nt.assert_almost_equal(r.qlim, np.array([[-1, 1]]).T)
+
+        et.qlim = [-2, 2]
+        nt.assert_almost_equal(et.qlim, np.array([-2, 2]))
+        nt.assert_almost_equal(ets.qlim, np.array([[-1, 1]]).T)
+        nt.assert_almost_equal(l.qlim, np.array([-1, 1]))
+        nt.assert_almost_equal(r.qlim, np.array([[-1, 1]]).T)
+
+        ets.qlim = np.array([[-2, 2]]).T
+        nt.assert_almost_equal(et.qlim, np.array([-2, 2]))
+        nt.assert_almost_equal(ets.qlim, np.array([[-2, 2]]).T)
+        nt.assert_almost_equal(l.qlim, np.array([-2, 2]))
+        nt.assert_almost_equal(r.qlim, np.array([[-2, 2]]).T)
+
+        l.qlim = [-3, 3]
+        nt.assert_almost_equal(et.qlim, np.array([-2, 2]))
+        nt.assert_almost_equal(ets.qlim, np.array([[-3, 3]]).T)
+        nt.assert_almost_equal(l.qlim, np.array([-3, 3]))
+        nt.assert_almost_equal(r.qlim, np.array([[-3, 3]]).T)
+
+        r.qlim = np.array([[-4, 4]]).T
+        nt.assert_almost_equal(et.qlim, np.array([-2, 2]))
+        nt.assert_almost_equal(ets.qlim, np.array([[-4, 4]]).T)
+        nt.assert_almost_equal(l.qlim, np.array([-4, 4]))
+        nt.assert_almost_equal(r.qlim, np.array([[-4, 4]]).T)
 
 
 if __name__ == "__main__":  # pragma nocover

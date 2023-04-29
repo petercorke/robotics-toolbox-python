@@ -10,6 +10,7 @@ block diagram simulation environment.
 .. toctree::
    :maxdepth: 2
 
+   blocks-spatial
    blocks-arm
    blocks-mobile
    blocks-uav
