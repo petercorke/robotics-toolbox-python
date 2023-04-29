@@ -19,6 +19,7 @@ Robot blocks:
 """
 # The constructor of each class ``MyClass`` with a ``@block`` decorator becomes a method ``MYCLASS()`` of the BlockDiagram instance.
 
+
 # ------------------------------------------------------------------------ #
 class FKine(FunctionBlock):
     r"""
@@ -184,7 +185,7 @@ class IKine(FunctionBlock):
         else:
             q0 = self.q0
 
-        sol = self.ik(inputs[0], q0=q0, seed=self.seed, **self.args)
+        sol = self.ik(inports[0], q0=q0, seed=self.seed, **self.args)
 
         if not sol.success:
             raise RuntimeError("inverse kinematic failure for pose", inports[0])
@@ -411,7 +412,6 @@ class ArmPlot(GraphicsBlock):
         )
 
     def step(self, t, inports):
-
         # update the robot plot
         self.robot.q = inports[0]
         self.env.step()
@@ -518,11 +518,12 @@ class JTraj(SourceBlock):
         # set T to 1 just for now
         if T is None:
             self.T = 1
-        self.start()
         self.T = T
 
-    def start(self, simstate):
+        # valid value, to allow compile to call output() before start()
+        self.start(None)
 
+    def start(self, simstate):
         if self.T is None:
             # use simulation tmax
             self.T = simstate.T
@@ -558,7 +559,6 @@ class JTraj(SourceBlock):
         )
 
     def output(self, t, inports, x):
-
         tscal = self.tscal
         ts = t / tscal
         tt = np.array([ts**5, ts**4, ts**3, ts**2, ts, 1]).T
@@ -822,7 +822,6 @@ class Trapezoidal(SourceBlock):
         self.qf = qf
 
     def start(self, simstate):
-
         if self.T is None:
             self.T = simstate.T
         self.trapezoidalfunc = trapezoidal_func(self.q0, self.qf, self.T)
@@ -946,7 +945,7 @@ class Traj(FunctionBlock):
         else:
             # input based
             xmax = 1
-        sim.xmax = xmax
+        self.xmax = xmax
 
         for i in range(len(self.y0)):
             self.trajfuncs.append(trajfunc(self.y0[i], self.yf[i], xmax))
@@ -1557,7 +1556,6 @@ class FDyn_X(TransferBlock):
 
 
 if __name__ == "__main__":
-
     from pathlib import Path
 
     exec(

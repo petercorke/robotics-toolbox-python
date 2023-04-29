@@ -87,6 +87,7 @@ class Bicycle(TransferBlock):
         #  gamma dot
 
         super().__init__(nstates=3, **blockargs)
+        self.type = "bicycle"
 
         self.vehicle = mobile.Bicycle(
             L=L, steer_max=steer_max, speed_max=speed_max, accel_max=accel_max
@@ -185,6 +186,7 @@ class Unicycle(TransferBlock):
         :type blockargs: dict
         """
         super().__init__(nstates=3, **blockargs)
+        self.type = "unicycle"
 
         if x0 is None:
             self._x0 = np.zeros((self.nstates,))
@@ -299,7 +301,7 @@ class DiffSteer(TransferBlock):
         :type blockargs: dict
         """
         super().__init__(nstates=3, **blockargs)
-        # self.type = "diffsteer"
+        self.type = "diffsteer"
         self.R = R
 
         if x0 is None:
@@ -310,7 +312,7 @@ class DiffSteer(TransferBlock):
             )
             self._x0 = x0
 
-        self.vehicle = mobile.Unicycle(
+        self.vehicle = mobile.DiffSteer(
             W=w, steer_max=steer_max, speed_max=speed_max, accel_max=accel_max
         )
 
