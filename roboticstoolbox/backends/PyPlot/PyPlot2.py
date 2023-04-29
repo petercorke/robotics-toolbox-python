@@ -56,7 +56,7 @@ class PyPlot2(Connector):
         if s == "":
             return f"PyPlot2D backend, t = {self.sim_time}, empty scene"
         else:
-            return f"PyPlot2D backend, t = {self.sim_time}, scene:\n"
+            return f"PyPlot2D backend, t = {self.sim_time}, scene:\n" + s
 
     def launch(self, name=None, limits=None, **kwargs):
         """
