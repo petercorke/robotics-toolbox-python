@@ -241,6 +241,9 @@ class IKSolver(ABC):
         if isinstance(Tep, SE3):
             Tep: np.ndarray = Tep.A
 
+        if Tep.shape != (4, 4):
+            raise ValueError("Tep must be a 4x4 SE3 matrix")
+
         # Iteration count
         i = 0
         total_i = 0

@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 
 class ShapePlot:
     def __init__(self, shape, wireframe=True, **kwargs):
-
         self.shape = shape  # reference to the spatialgeom shape
         self.wireframe = wireframe
         self.args = kwargs
@@ -54,7 +53,6 @@ class ShapePlot:
 
 class EllipsePlot:
     def __init__(self, robot, q, etype, opt="trans", centre=[0, 0, 0], scale=1.0):
-
         super(EllipsePlot, self).__init__()
 
         try:
@@ -65,7 +63,7 @@ class EllipsePlot:
         except TypeError:
             if centre != "ee":
                 raise ValueError(
-                    "Centre must be a three vector or 'ee' meaning" "end-effector"
+                    "Centre must be a three vector or 'ee' meaningend-effector"
                 )
 
         self.ell = None
@@ -91,7 +89,11 @@ class EllipsePlot:
         self.make_ellipsoid()
 
         if self.ell is not None:
-            self.ax.collections.remove(self.ell)
+            self.ell.remove()
+            # print(type(self.ell))
+            # print(type(self.ax))
+            # assert True == False
+            # self.ax.collections.remove(self.ell)
 
         self.ell = self.ax.plot_wireframe(
             self.x, self.y, self.z, rstride=6, cstride=6, color="#2980b9", alpha=0.2
@@ -181,7 +183,7 @@ class EllipsePlot:
             A = J @ J.T
         elif self.opt == "rot":
             raise ValueError(
-                "Can not do rotational ellipse for a 2d robot plot." " Set opt='trans'"
+                "Can not do rotational ellipse for a 2d robot plot. Set opt='trans'"
             )
 
         # if not self.vell:
