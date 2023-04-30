@@ -33,18 +33,6 @@ class PoELink(Link):
         s += "]"
         return s
 
-    def _repr_pretty_(self, p, cycle):
-        """
-        Pretty string for IPython (superclass method)
-
-        :param p: pretty printer handle (ignored)
-        :param cycle: pretty printer flag (ignored)
-
-        """
-        # see https://ipython.org/ipython-doc/stable/api/generated/IPython.lib.pretty.html
-
-        p.text(f"{i}:\n{str(x)}")
-
 
 class PoERevolute(PoELink):
     def __init__(self, axis, point, **kwargs):
@@ -114,26 +102,14 @@ class PoERobot(Robot):
         return s
 
     def __repr__(self):
-        s = "PoERobot([\n    "
-        for j, link in enumerate(self):
-            s += repr(link) + ","
-        s += "],\n"
+        s = "PoERobot([\n"
+        s += "\n".join(["    " + repr(link) + "," for link in self])
+        s += "\n    ],\n"
         s += f"    T0=SE3({np.array_repr(self.T0.A)}),\n"
-        s += f"    name={self.name},\n"
+        s += f"    name=\"{self.name}\",\n"
         s += ")"
         return s
 
-    def _repr_pretty_(self, p, cycle):
-        """
-        Pretty string for IPython (superclass method)
-
-        :param p: pretty printer handle (ignored)
-        :param cycle: pretty printer flag (ignored)
-
-        """
-        # see https://ipython.org/ipython-doc/stable/api/generated/IPython.lib.pretty.html
-
-        p.text(f"{i}:\n{str(x)}")
 
     def nbranches(self):
         return 0
