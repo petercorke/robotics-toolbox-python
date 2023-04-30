@@ -2336,13 +2336,13 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         env.add(self, readonly=True, **kwargs)
 
         if vellipse:
-            vell = self.vellipse(q, centre="ee")
+            vell = self.vellipse(q[0], centre="ee")
             env.add(vell)
         else:
             vell = None
 
         if fellipse:
-            fell = self.fellipse(q, centre="ee")
+            fell = self.fellipse(q[0], centre="ee")
             env.add(fell)
         else:
             fell = None
