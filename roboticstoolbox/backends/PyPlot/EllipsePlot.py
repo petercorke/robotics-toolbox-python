@@ -192,6 +192,9 @@ class EllipsePlot:
         #         A = np.linalg.inv(A)
         #     except:
         #         A = np.zeros((2,2))
+        if self.vell:
+            # Do the extra step for the velocity ellipse
+            A = np.linalg.inv(A)
 
         if isinstance(self.centre, str) and self.centre == "ee":
             centre = self.robot.fkine(self.q).A[:3, -1]
@@ -204,7 +207,7 @@ class EllipsePlot:
         # RVC2 p 602
         # x = sp.linalg.sqrtm(A) @ y
 
-        x, y = base.ellipse(A, inverted=True, centre=centre[:2], scale=self.scale)
+        x, y = base.ellipse(A, inverted=False, centre=centre[:2], scale=self.scale)
         self.x = x
         self.y = y
         # = x[0,:] * self.scale + centre[0]
