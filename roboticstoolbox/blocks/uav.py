@@ -270,8 +270,8 @@ class MultiRotor(TransferBlock):
         out["x"] = x[0:6]
         out["trans"] = np.r_[x[:3], vd]
         out["rot"] = np.r_[x[3:6], rpyd]
-        out["vb"] = np.linalg.inv(R) @ self._x[6:9]   # translational velocity mapped to body frame
-        out["w"] = iW @ self._x[9:12]                 # RPY rates mapped to body frame
+        out["vb"] = np.linalg.inv(R) @ x[6:9]   # translational velocity mapped to body frame
+        out["w"] = iW @ x[9:12]                 # RPY rates mapped to body frame
 
         out["a1s"] = self.a1s
         out["b1s"] = self.b1s
