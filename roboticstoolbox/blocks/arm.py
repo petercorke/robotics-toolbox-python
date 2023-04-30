@@ -3,7 +3,8 @@ from math import sin, cos, pi
 
 # import matplotlib.pyplot as plt
 import time
-from spatialmath import base, SE3
+from spatialmath import SE3
+import spatialmath.base as smb
 
 from bdsim.components import TransferBlock, FunctionBlock, SourceBlock
 from bdsim.graphics import GraphicsBlock
@@ -490,8 +491,8 @@ class JTraj(SourceBlock):
             )
         )
 
-        q0 = base.getvector(q0)
-        qf = base.getvector(qf)
+        q0 = smb.getvector(q0)
+        qf = smb.getvector(qf)
 
         if not len(q0) == len(qf):
             raise ValueError("q0 and q1 must be same size")
@@ -912,8 +913,8 @@ class Traj(FunctionBlock):
 
         super().__init__(nin=nin, blockclass=blockclass, **blockargs)
 
-        y0 = base.getvector(y0)
-        yf = base.getvector(yf)
+        y0 = smb.getvector(y0)
+        yf = smb.getvector(yf)
         assert len(y0) == len(yf), "y0 and yf must have same length"
 
         self.y0 = y0
@@ -1389,7 +1390,7 @@ class FDyn(TransferBlock):
         if q0 is None:
             q0 = np.zeros((robot.n,))
         else:
-            q0 = base.getvector(q0, robot.n)
+            q0 = smb.getvector(q0, robot.n)
         self._x0 = np.r_[q0, np.zeros((robot.n,))]
         self._qdd = None
 
@@ -1474,8 +1475,15 @@ class FDyn_X(TransferBlock):
         """
         :param robot: Robot model
         :type robot: Robot subclass
-        :param end: Link to compute pose of, defaults to end-effector
-        :type end: Link or str
+        :param q0: Initial joint configuration
+        :type q0: array_like(n)
+        :param gravcomp: perform gravity compensation
+        :type gravcomp: bool
+        :param velcomp: perform velocity term compensation
+        :type velcomp: bool
+        :param representation: task-space representation, defaults to "rpy/xyz"
+        :type represenstation: str
+    
         :param blockargs: |BlockOptions|
         :type blockargs: dict
         """
@@ -1499,7 +1507,7 @@ class FDyn_X(TransferBlock):
         if q0 is None:
             q0 = np.zeros((robot.n,))
         else:
-            q0 = base.getvector(q0, robot.n)
+            q0 = smb.getvector(q0, robot.n)
         # append qd0, assumed to be zero
         self._x0 = np.r_[q0, np.zeros((robot.n,))]
         self._qdd = None
@@ -1511,7 +1519,7 @@ class FDyn_X(TransferBlock):
         qdd = self._qdd  # from last deriv
 
         T = self.robot.fkine(q)
-        x = base.tr2x(T.A)
+        x = smb.tr2x(T.A)
 
         Ja = self.robot.jacob0_analytical(q, self.representation)
         xd = Ja @ qd
@@ -1524,7 +1532,7 @@ class FDyn_X(TransferBlock):
         if qdd is None:
             xdd = None
         else:
-            Ja_dot = self.robot.jacob_dot(q, qd, J0=Ja)
+            Ja_dot = self.robot.jacob0_dot(q, qd, J0=Ja)
             xdd = Ja @ qdd + Ja_dot @ qd
 
         return [q, qd, x, xd, xdd]

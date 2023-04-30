@@ -3,7 +3,8 @@ from math import sin, cos, pi
 
 # import matplotlib.pyplot as plt
 import time
-from spatialmath import base, SE3
+from spatialmath import SE3
+import spatialmath.base as smb
 
 from bdsim.components import TransferBlock, FunctionBlock, SourceBlock
 from bdsim.graphics import GraphicsBlock
@@ -62,7 +63,7 @@ class Tr2Delta(FunctionBlock):
         self.outport_names(("$\delta$",))
 
     def output(self, t, inports, x):
-        return [base.tr2delta(inports[0].A, inports[1].A)]
+        return [smb.tr2delta(inports[0].A, inports[1].A)]
 
 
 # ------------------------------------------------------------------------ #

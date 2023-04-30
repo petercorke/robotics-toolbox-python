@@ -9,7 +9,6 @@ import time
 from bdsim.components import TransferBlock
 from bdsim.graphics import GraphicsBlock
 
-from spatialmath import base
 from roboticstoolbox import mobile
 
 # ------------------------------------------------------------------------ #
