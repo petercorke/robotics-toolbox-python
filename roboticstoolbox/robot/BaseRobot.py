@@ -1015,7 +1015,11 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         for link in self.links:
             if link.isrevolute:
-                if link.qlim is None or np.any(np.isnan(link.qlim)):
+                if (
+                    link.qlim is None
+                    or link.qlim[0] is None
+                    or np.any(np.isnan(link.qlim))
+                ):
                     v = [-np.pi, np.pi]
                 else:
                     v = link.qlim
