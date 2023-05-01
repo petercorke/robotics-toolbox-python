@@ -19,16 +19,6 @@ from IPython.terminal.prompts import ClassicPrompts
 from traitlets.config import Config
 import IPython
 import argparse
-from math import pi  # lgtm [py/unused-import]
-import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt  # lgtm [py/unused-import]
-from roboticstoolbox import *  # lgtm [py/unused-import]
-from spatialmath import *  # lgtm [py/polluting-import]
-from spatialgeometry import *  # lgtm [py/polluting-import]
-import spatialmath.base as smb 
-from spatialmath.base import sym
-import matplotlib as mpl
 from pathlib import Path
 import sys
 from importlib.metadata import version
@@ -41,6 +31,26 @@ try:
 except ImportError:
     # print('colored not found')
     _colored = False
+
+# imports for use by IPython and user
+import math
+from math import pi  # lgtm [py/unused-import]
+import numpy as np
+from scipy import linalg, optimize
+import matplotlib.pyplot as plt  # lgtm [py/unused-import]
+
+from spatialmath import *  # lgtm [py/polluting-import]
+from spatialmath.base import *
+import spatialmath.base as smb 
+from spatialmath.base import sym
+
+from spatialgeometry import *  # lgtm [py/polluting-import]
+
+from roboticstoolbox import *  # lgtm [py/unused-import]
+# load some robot models
+puma = models.DH.Puma560()
+panda = models.DH.Panda()
+
 
 def main():
     # setup defaults
@@ -131,19 +141,7 @@ def main():
         print(f"Using matplotlb backend {args.backend}")
         mpl.use(args.backend)
 
-    # load some robot models
-    puma = models.DH.Puma560()
-    panda = models.DH.Panda()
-
     # build the banner, import * packages and their versions
-    versions = f"(RTB=={version('roboticstoolbox-python')}, SMTB=={version('spatialmath-python')}"
-    imports = ["roboticstoolbox", "spatialmath"]
-    if args.vision:
-        versions += f", MVTB=={version('machinevision-toolbox-python')}"
-        imports.append("machinevisiontoolbox")
-
-    versions += ")"
-    imports = "\n".join([f"    from {x} import *" for x in imports])
 
     # banner template
     # https://patorjk.com/software/taag/#p=display&f=Cybermedium&t=Robotics%20Toolbox%0A
@@ -152,11 +150,33 @@ def main():
     |__/ |  | |__] |  |  |  | |    [__      |  |  | |  | |    |__] |  |  \/
     |  \ |__| |__] |__|  |  | |___ ___]     |  |__| |__| |___ |__] |__| _/\_
 
-    for Python {versions}
+    for Python"""
+    
+    versions = []
+    versions.append(f"RTB=={version('roboticstoolbox-python')}")
+    versions.append(f"SMTB=={version('spatialmath-python')}")
+    versions.append(f"SG=={version('spatialmath-python')}")
+    versions.append(f"NumPy=={version('numpy')}")
+    versions.append(f"SciPy=={version('scipy')}")
+    versions.append(f"Matplotlib=={version('matplotlib')}")
 
-{imports}
+    # create banner
+    banner += " (" + ", ".join(versions) + ")"
+    banner += r"""
+
+    import math
     import numpy as np
-    import scipy as sp
+    from scipy import linalg, optimize
+    import matplotlib.pyplot as plt
+    from spatialmath import *
+    from spatialmath.base import *
+    from spatialmath.base import sym
+    from roboticstoolbox import *"
+
+    # useful variables
+    from math import pi
+    puma = models.DH.Puma560()
+    panda = models.DH.Panda()
 
     func/object?       - show brief help
     help(func/object)  - show detailed help
