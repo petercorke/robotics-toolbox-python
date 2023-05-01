@@ -10,6 +10,7 @@ from abc import ABC
 from copy import deepcopy
 from functools import lru_cache
 from typing import (
+    IO,
     TYPE_CHECKING,
     Any,
     Callable,
@@ -48,6 +49,7 @@ from roboticstoolbox.tools.types import ArrayLike, NDArray
 from roboticstoolbox.tools.params import rtb_get_param
 from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
+
 
 if TYPE_CHECKING:
     from matplotlib.cm import Color  # pragma nocover
@@ -1013,7 +1015,11 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         for link in self.links:
             if link.isrevolute:
-                if link.qlim is None or np.any(np.isnan(link.qlim)):
+                if (
+                    link.qlim is None
+                    or link.qlim[0] is None
+                    or np.any(np.isnan(link.qlim))
+                ):
                     v = [-np.pi, np.pi]
                 else:
                     v = link.qlim
@@ -2838,3 +2844,247 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         return env
 
     # --------------------------------------------------------------------- #
+
+    # --------------------------------------------------------------------- #
+    # --------- Utility Methods ------------------------------------------- #
+    # --------------------------------------------------------------------- #
+
+    def showgraph(self, display_graph: bool = True, **kwargs) -> Union[None, str]:
+        """
+        Display a link transform graph in browser
+
+        ``robot.showgraph()`` displays a graph of the robot's link frames
+        and the ETS between them.  It uses GraphViz dot.
+
+        The nodes are:
+            - Base is shown as a grey square. This is the world frame origin,
+              but can be changed using the ``base`` attribute of the robot.
+            - Link frames are indicated by circles
+            - ETS transforms are indicated by rounded boxes
+
+        The edges are:
+            - an arrow if `jtype` is False or the joint is fixed
+            - an arrow with a round head if `jtype` is True and the joint is
+              revolute
+            - an arrow with a box head if `jtype` is True and the joint is
+              prismatic
+
+        Edge labels or nodes in blue have a fixed transformation to the
+        preceding link.
+
+        Parameters
+        ----------
+        display_graph
+            Open the graph in a browser if True. Otherwise will return the
+            file path
+        etsbox
+            Put the link ETS in a box, otherwise an edge label
+        jtype
+            Arrowhead to node indicates revolute or prismatic type
+        static
+            Show static joints in blue and bold
+
+        Examples
+        --------
+        >>> import roboticstoolbox as rtb
+        >>> panda = rtb.models.URDF.Panda()
+        >>> panda.showgraph()
+
+        .. image:: ../figs/panda-graph.svg
+            :width: 600
+
+        See Also
+        --------
+        :func:`dotfile`
+
+        """
+
+        # Lazy import
+        import tempfile
+        import subprocess
+        import webbrowser
+
+        # create the temporary dotfile
+        dotfile = tempfile.TemporaryFile(mode="w")
+        self.dotfile(dotfile, **kwargs)
+
+        # rewind the dot file, create PDF file in the filesystem, run dot
+        dotfile.seek(0)
+        pdffile = tempfile.NamedTemporaryFile(suffix=".pdf", delete=False)
+        subprocess.run("dot -Tpdf", shell=True, stdin=dotfile, stdout=pdffile)
+
+        # open the PDF file in browser (hopefully portable), then cleanup
+        if display_graph:  # pragma nocover
+            webbrowser.open(f"file://{pdffile.name}")
+        else:
+            return pdffile.name
+
+    def dotfile(
+        self,
+        filename: Union[str, IO[str]],
+        etsbox: bool = False,
+        ets: L["full", "brief"] = "full",
+        jtype: bool = False,
+        static: bool = True,
+    ):
+        """
+        Write a link transform graph as a GraphViz dot file
+
+        The file can be processed using dot:
+            % dot -Tpng -o out.png dotfile.dot
+
+        The nodes are:
+            - Base is shown as a grey square.  This is the world frame origin,
+              but can be changed using the ``base`` attribute of the robot.
+            - Link frames are indicated by circles
+            - ETS transforms are indicated by rounded boxes
+
+        The edges are:
+            - an arrow if `jtype` is False or the joint is fixed
+            - an arrow with a round head if `jtype` is True and the joint is
+              revolute
+            - an arrow with a box head if `jtype` is True and the joint is
+              prismatic
+
+        Edge labels or nodes in blue have a fixed transformation to the
+        preceding link.
+
+        Note
+        ----
+        If ``filename`` is a file object then the file will *not*
+            be closed after the GraphViz model is written.
+
+        Parameters
+        ----------
+        file
+            Name of file to write to
+        etsbox
+            Put the link ETS in a box, otherwise an edge label
+        ets
+            Display the full ets with "full" or a brief version with "brief"
+        jtype
+            Arrowhead to node indicates revolute or prismatic type
+        static
+            Show static joints in blue and bold
+
+        See Also
+        --------
+        :func:`showgraph`
+
+        """
+
+        if isinstance(filename, str):
+            file = open(filename, "w")
+        else:
+            file = filename
+
+        header = r"""digraph G {
+graph [rankdir=LR];
+"""
+
+        def draw_edge(link, etsbox, jtype, static):
+            # draw the edge
+            if jtype:
+                if link.isprismatic:
+                    edge_options = 'arrowhead="box", arrowtail="inv", dir="both"'
+                elif link.isrevolute:
+                    edge_options = 'arrowhead="dot", arrowtail="inv", dir="both"'
+                else:
+                    edge_options = 'arrowhead="normal"'
+            else:
+                edge_options = 'arrowhead="normal"'
+
+            if link.parent is None:
+                parent = "BASE"
+            else:
+                parent = link.parent.name
+
+            if etsbox:
+                # put the ets fragment in a box
+                if not link.isjoint and static:
+                    node_options = ', fontcolor="blue"'
+                else:
+                    node_options = ""
+
+                try:
+                    file.write(
+                        '  {}_ets [shape=box, style=rounded, label="{}"{}];\n'.format(
+                            link.name,
+                            link.ets.__str__(q=f"q{link.jindex}"),
+                            node_options,
+                        )
+                    )
+                except UnicodeEncodeError:  # pragma nocover
+                    file.write(
+                        '  {}_ets [shape=box, style=rounded, label="{}"{}];\n'.format(
+                            link.name,
+                            link.ets.__str__(q=f"q{link.jindex}")
+                            .encode("ascii", "ignore")
+                            .decode("ascii"),
+                            node_options,
+                        )
+                    )
+
+                file.write("  {} -> {}_ets;\n".format(parent, link.name))
+                file.write(
+                    "  {}_ets -> {} [{}];\n".format(link.name, link.name, edge_options)
+                )
+            else:
+                # put the ets fragment as an edge label
+                if not link.isjoint and static:
+                    edge_options += 'fontcolor="blue"'
+                if ets == "full":
+                    estr = link.ets.__str__(q=f"q{link.jindex}")
+                elif ets == "brief":
+                    if link.jindex is None:
+                        estr = ""
+                    else:
+                        estr = f"...q{link.jindex}"
+                else:
+                    return
+                try:
+                    file.write(
+                        '  {} -> {} [label="{}", {}];\n'.format(
+                            parent,
+                            link.name,
+                            estr,
+                            edge_options,
+                        )
+                    )
+                except UnicodeEncodeError:  # pragma nocover
+                    file.write(
+                        '  {} -> {} [label="{}", {}];\n'.format(
+                            parent,
+                            link.name,
+                            estr.encode("ascii", "ignore").decode("ascii"),
+                            edge_options,
+                        )
+                    )
+
+        file.write(header)
+
+        # add the base link
+        file.write("  BASE [shape=square, style=filled, fillcolor=gray]\n")
+
+        # add the links
+        for link in self:
+            # draw the link frame node (circle) or ee node (doublecircle)
+            if link in self.ee_links:
+                # end-effector
+                node_options = 'shape="doublecircle", color="blue", fontcolor="blue"'
+            else:
+                node_options = 'shape="circle"'
+
+            file.write("  {} [{}];\n".format(link.name, node_options))
+
+            draw_edge(link, etsbox, jtype, static)
+
+        for gripper in self.grippers:
+            for link in gripper.links:
+                file.write("  {} [shape=cds];\n".format(link.name))
+                draw_edge(link, etsbox, jtype, static)
+
+        file.write("}\n")
+
+        if isinstance(filename, str):
+            file.close()  # noqa
