@@ -35,11 +35,11 @@ class Planar2(Robot2):
 
         super().__init__([l0, l1, l2], name="Planar2", comment="Planar 2D manipulator")
 
-        self.qr = np.array([0, 0])
+        self.qb = np.array([0, np.pi/2])
         self.qz = np.zeros(2)
 
-        self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)
+        self.addconfiguration("qb", self.qb)
 
 
 if __name__ == "__main__":  # pragma nocover

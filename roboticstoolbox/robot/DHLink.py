@@ -380,11 +380,11 @@ class DHLink(Link):
         name = self.__class__.__name__
         args = []
         if self.isrevolute:
-            self._format(args, "d")
+            self._format_param(args, "d")
         else:
-            self._format(args, "theta", "θ")
-        self._format(args, "a")
-        self._format(args, "alpha", "⍺")
+            self._format_param(args, "theta", "θ")
+        self._format_param(args, "a")
+        self._format_param(args, "alpha", "⍺")
         args.extend(super()._params())
         return name + "(" + ", ".join(args) + ")"
 

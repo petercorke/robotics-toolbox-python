@@ -170,7 +170,7 @@ class TestERobot2(unittest.TestCase):
     def test_plot_with_vellipse(self):
         robot = rtb.models.ETS.Planar2()
         e = robot.plot(
-            robot.qz, block=False, name=True, vellipse=True, limits=[1, 2, 1, 2]
+            robot.qb, block=False, name=True, vellipse=True, limits=[1, 2, 1, 2]
         )
         e.step()
         e.close()
