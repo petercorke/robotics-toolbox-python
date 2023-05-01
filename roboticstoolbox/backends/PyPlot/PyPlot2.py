@@ -68,8 +68,9 @@ class PyPlot2(Connector):
 
         labels = ["X", "Y"]
 
-        if name is not None:
-            self.fig = plt.figure(name)
+        if name is not None and not _isnotebook():
+            # jupyter does weird stuff when figures have the same name
+            self.fig = plt.figure()
         else:
             self.fig = plt.figure()
 
