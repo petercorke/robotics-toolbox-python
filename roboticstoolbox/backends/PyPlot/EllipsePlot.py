@@ -186,29 +186,18 @@ class EllipsePlot:
                 "Can not do rotational ellipse for a 2d robot plot. Set opt='trans'"
             )
 
-        # if not self.vell:
-        #     # Do the extra step for the force ellipse
-        #     try:
-        #         A = np.linalg.inv(A)
-        #     except:
-        #         A = np.zeros((2,2))
-        if self.vell:
-            # Do the extra step for the velocity ellipse
-            A = np.linalg.inv(A)
+        # velocity ellipsoid is E = A^-1
+        # force ellipsoid is E = A
+        #
+        # rather than compute the inverse we can have base.ellipse()  do it for us
+        # using the inverted argument. For the velocity ellipse we already have the 
+        # inverse of E, it is A, so we set inverted=True.
 
         if isinstance(self.centre, str) and self.centre == "ee":
             centre = self.robot.fkine(self.q).A[:3, -1]
         else:
             centre = self.centre
 
-        # points on unit circle
-        # theta = np.linspace(0.0, 2.0 * np.pi, 50)
-        # y = np.array([np.cos(theta), np.sin(theta)])
-        # RVC2 p 602
-        # x = sp.linalg.sqrtm(A) @ y
-
-        x, y = base.ellipse(A, inverted=False, centre=centre[:2], scale=self.scale)
+        x, y = base.ellipse(A, inverted=self.vell, centre=centre[:2], scale=self.scale)
         self.x = x
         self.y = y
-        # = x[0,:] * self.scale + centre[0]
-        # self.y = x[1,:] * self.scale + centre[1]
