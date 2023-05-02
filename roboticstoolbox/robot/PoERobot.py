@@ -315,9 +315,9 @@ class PoERobot(Robot):
 
             # assign joint variable with corresponding index
             if self.links[i].isrevolute:
-                et_list.append(ET.Rz(jindex=i-1))
+                et_list.append(ET.Rz(jindex=i - 1))
             elif self.links[i].isprismatic:
-                et_list.append(ET.tz(jindex=i-1))
+                et_list.append(ET.tz(jindex=i - 1))
 
             # update the ETS for given link
             self.links[i].ets = ETS(et_list)
