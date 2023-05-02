@@ -38,11 +38,18 @@ class MultiRotor(TransferBlock):
     vehicle state is a dict containing the following items:
 
         - ``x`` pose in the world frame as :math:`[x, y, z, \theta_Y, \theta_P, \theta_R]`
-        - ``vb`` translational velocity in the world frame (metres/sec)
-        - ``w`` angular rates in the world frame as yaw-pitch-roll rates (radians/second)
+        - ``trans`` position and velocity in the world frame as 
+          :math:`[x, y, z, \dot{x}, \dot{y}, \dot{z}]`
+        - ``rot`` orientation and angular rate in the world frame as 
+          :math:`[\theta_Y, \theta_P, \theta_R, \dot{\theta_Y}, \dot{\theta_P}, \dot{\theta_R}]`
+        - ``vb`` translational velocity in the body frame as
+          :math:`[\dot{x}, \dot{y}, \dot{z}]`
+        - ``w`` angular rates in the body frame as
+           :math:`[\dot{\theta_Y}, \dot{\theta_P}, \dot{\theta_R}]`
         - ``a1s`` longitudinal flapping angles (radians)
         - ``b1s`` lateral flapping angles (radians)
-
+        - ``X`` full state vector as 
+          :math:`[x, y, z, \theta_Y, \theta_P, \theta_R, \dot{x}, \dot{y}, \dot{z}, \dot{\theta_Y}, \dot{\theta_P}, \dot{\theta_R}]`
 
     The dynamic model is a dict with the following key/value pairs.
 
@@ -263,6 +270,8 @@ class MultiRotor(TransferBlock):
         out["x"] = x[0:6]
         out["trans"] = np.r_[x[:3], vd]
         out["rot"] = np.r_[x[3:6], rpyd]
+        out["vb"] = np.linalg.inv(R) @ x[6:9]   # translational velocity mapped to body frame
+        out["w"] = iW @ x[9:12]                 # RPY rates mapped to body frame
 
         out["a1s"] = self.a1s
         out["b1s"] = self.b1s

@@ -1367,61 +1367,62 @@ class BaseLink(SceneNode, ABC):
 
         return dyn
 
-    def _params(self, name: bool = True):  # pragma nocover
-        def format_param(
-            self, l, name, symbol=None, ignorevalue=None, indices=None
-        ):  # noqa  # pragma nocover
-            # if value == ignorevalue then don't display it
+    def _format_param(
+        self, l, name, symbol=None, ignorevalue=None, indices=None
+    ):  # noqa  # pragma nocover
+        # if value == ignorevalue then don't display it
 
-            v = getattr(self, name)
-            s = None
-            if v is None:
-                return
-            if isinstance(v, str):
-                s = f'{name} = "{v}"'
-            elif isscalar(v) and v != ignorevalue:
-                if symbol is not None:
-                    s = f"{symbol}={v:.3g}"
-                else:  # pragma: nocover
-                    try:
-                        s = f"{name}={v:.3g}"
-                    except TypeError:
-                        s = f"{name}={v}"
-            elif isinstance(v, np.ndarray):
-                # if np.linalg.norm(v, ord=np.inf) > 0:
-                #     if indices is not None:
-                #         flat = v.flatten()
-                #         v = np.r_[[flat[k] for k in indices]]
-                #     s = f"{name}=[" + ", ".join([f"{x:.3g}" for x in v]) + "]"
-                if indices is not None:
-                    v = v.ravel()[indices]
-                s = f"{name}=" + np.array2string(
-                    v,
-                    separator=", ",
-                    suppress_small=True,
-                    formatter={"float": lambda x: f"{x:.3g}"},
-                )
-            if s is not None:
-                l.append(s)
+        v = getattr(self, name)
+        s = None
+        if v is None:
+            return
+        if isinstance(v, str):
+            s = f'{name} = "{v}"'
+        elif isscalar(v) and v != ignorevalue:
+            if symbol is not None:
+                s = f"{symbol}={v:.3g}"
+            else:  # pragma: nocover
+                try:
+                    s = f"{name}={v:.3g}"
+                except TypeError:
+                    s = f"{name}={v}"
+        elif isinstance(v, np.ndarray):
+            # if np.linalg.norm(v, ord=np.inf) > 0:
+            #     if indices is not None:
+            #         flat = v.flatten()
+            #         v = np.r_[[flat[k] for k in indices]]
+            #     s = f"{name}=[" + ", ".join([f"{x:.3g}" for x in v]) + "]"
+            if indices is not None:
+                v = v.ravel()[indices]
+            s = f"{name}=" + np.array2string(
+                v,
+                separator=", ",
+                suppress_small=True,
+                formatter={"float": lambda x: f"{x:.3g}"},
+            )
+        if s is not None:
+            l.append(s)
+
+    def _params(self, name: bool = True):  # pragma nocover
 
         l = []  # noqa
         if name:
-            format_param(self, l, "name")
+            self._format_param(l, "name")
         if self.parent_name is not None:
             l.append('parent="' + self.parent_name + '"')
         elif isinstance(self.parent, BaseLink):
             l.append('parent="' + self.parent.name + '"')
-        format_param(self, l, "parent")
-        format_param(self, l, "isflip", ignorevalue=False)
-        format_param(self, l, "qlim")
+        self._format_param(l, "parent")
+        self._format_param(l, "isflip", ignorevalue=False)
+        self._format_param(l, "qlim")
         if self._hasdynamics:
-            format_param(self, l, "m")
-            format_param(self, l, "r")
-            format_param(self, l, "I", indices=[0, 4, 8, 1, 2, 5])
-            format_param(self, l, "Jm")
-            format_param(self, l, "B")
-            format_param(self, l, "Tc")
-            format_param(self, l, "G")
+            self._format_param(l, "m")
+            self._format_param(l, "r")
+            self._format_param(l, "I", indices=[0, 4, 8, 1, 2, 5])
+            self._format_param(l, "Jm")
+            self._format_param(l, "B")
+            self._format_param(l, "Tc")
+            self._format_param(l, "G")
 
         return l
 

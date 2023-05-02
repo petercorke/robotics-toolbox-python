@@ -15,6 +15,13 @@ import spatialmath as sm
 import spatialgeometry as gm
 from math import pi, sin, cos
 
+try:
+    from sympy import symbols
+
+    _sympy = True
+except ModuleNotFoundError:
+    _sympy = False
+
 
 class TestERobot(unittest.TestCase):
     def test_jacobm(self):
@@ -163,7 +170,7 @@ class TestERobot2(unittest.TestCase):
     def test_plot_with_vellipse(self):
         robot = rtb.models.ETS.Planar2()
         e = robot.plot(
-            robot.qz, block=False, name=True, vellipse=True, limits=[1, 2, 1, 2]
+            robot.qb, block=False, name=True, vellipse=True, limits=[1, 2, 1, 2]
         )
         e.step()
         e.close()
@@ -187,6 +194,28 @@ class TestERobot2(unittest.TestCase):
         a1 = np.array([[0.0, 0.0], [2.0, 1.0], [1.0, 1.0]])
 
         nt.assert_almost_equal(J, a1)
+
+    @unittest.skipUnless(_sympy, "sympy not installed")
+    def test_symdyn(self):
+
+        a1, a2, r1, r2, m1, m2, g = symbols("a1 a2 r1 r2 m1 m2 g")
+        link1 = Link(ET.Ry(flip=True), m=m1, r=[r1, 0, 0], name="link0")
+        link2 = Link(ET.tx(a1) * ET.Ry(flip=True), m=m2, r=[r2, 0, 0], name="link1")
+        robot = ERobot([link1, link2])
+
+        q = symbols("q:2")
+        qd = symbols("qd:2")
+        qdd = symbols("qdd:2")
+        Q = robot.rne(q, qd, qdd, gravity=[0, 0, g], symbolic=True)
+
+        self.assertEqual(
+            str(Q[0]),
+            "a1**2*m2*qd0**2*sin(q1)*cos(q1) + a1*qd0*(-a1*m2*qd0*cos(q1) - m2*r2*(qd0 + qd1))*sin(q1) - a1*(m2*(a1*qd0*qd1*cos(q1) - a1*qdd0*sin(q1) - g*sin(q0)*cos(q1) - g*sin(q1)*cos(q0)) + (qd0 + qd1)*(-a1*m2*qd0*cos(q1) - m2*r2*(qd0 + qd1)))*sin(q1) - a1*(-a1*m2*qd0*(-qd0 - qd1)*sin(q1) - m2*r2*(qdd0 + qdd1) + m2*(-a1*qd0*qd1*sin(q1) - a1*qdd0*cos(q1) + g*sin(q0)*sin(q1) - g*cos(q0)*cos(q1)))*cos(q1) + g*m1*r1*cos(q0) + m1*qdd0*r1**2 + m2*r2**2*(qdd0 + qdd1) - m2*r2*(-a1*qd0*qd1*sin(q1) - a1*qdd0*cos(q1) + g*sin(q0)*sin(q1) - g*cos(q0)*cos(q1))",
+        )
+        self.assertEqual(
+            str(Q[1]),
+            "a1**2*m2*qd0**2*sin(q1)*cos(q1) + a1*qd0*(-a1*m2*qd0*cos(q1) - m2*r2*(qd0 + qd1))*sin(q1) + m2*r2**2*(qdd0 + qdd1) - m2*r2*(-a1*qd0*qd1*sin(q1) - a1*qdd0*cos(q1) + g*sin(q0)*sin(q1) - g*cos(q0)*cos(q1))",
+        )
 
 
 if __name__ == "__main__":  # pragma nocover

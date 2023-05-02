@@ -1227,6 +1227,27 @@ class DiffSteer(Unicycle):
         self._v_prev_L = [0]
         self._v_prev_R = [0]
 
+
+    def u_limited(self, u):
+        """
+        Apply vehicle velocity and acceleration limits
+
+        :param u: Desired vehicle inputs :math:`(v_L, v_R)`
+        :type u: array_like(2)
+        :return: Allowable vehicle inputs :math:`(v_L, v_R)`
+        :rtype: ndarray(2)
+
+        Velocity and acceleration limits are applied to :math:`v` and
+        turn rate limits are applied to :math:`\omega`.
+        """
+
+        # limit speed and acceleration of each wheel/track
+        ulim = np.array(u)
+        ulim[0] = self.limits_va(u[0], self._v_prev_L)
+        ulim[1] = self.limits_va(u[1], self._v_prev_R)
+
+        return ulim
+    
     def deriv(self, x, u, limits=True):
         r"""
         Time derivative of state
@@ -1270,27 +1291,8 @@ class DiffSteer(Unicycle):
 
         return np.r_[v * cos(theta), v * sin(theta), vdiff / self._W]
 
-    def u_limited(self, u):
-        """
-        Apply vehicle velocity and acceleration limits
 
-        :param u: Desired vehicle inputs :math:`(v_L, v_R)`
-        :type u: array_like(2)
-        :return: Allowable vehicle inputs :math:`(v_L, v_R)`
-        :rtype: ndarray(2)
-
-        Velocity and acceleration limits are applied to :math:`v` and
-        turn rate limits are applied to :math:`\omega`.
-        """
-
-        # limit speed and steer angle
-        ulim = np.array(u)
-        ulim[0] = self.limits_va(u[0], self._v_prev_L)
-        ulim[1] = self.limits_va(u[1], self._v_prev_R)
-
-        return ulim
-
-
+    
 if __name__ == "__main__":
 
     from roboticstoolbox import RandomPath

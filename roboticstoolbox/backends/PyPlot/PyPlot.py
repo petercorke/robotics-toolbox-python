@@ -89,7 +89,7 @@ class PyPlot(Connector):
         if s == "":
             return f"PyPlot3D backend, t = {self.sim_time}, empty scene"
         else:
-            return f"PyPlot3D backend, t = {self.sim_time}, scene:\n"
+            return f"PyPlot3D backend, t = {self.sim_time}, scene:\n" + s
 
     def launch(self, name=None, fig=None, limits=None, **kwargs):
         """

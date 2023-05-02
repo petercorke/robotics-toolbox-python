@@ -238,9 +238,62 @@ class IKSolver(ABC):
 
         q0 = q0_method
 
-        if isinstance(Tep, SE3):
-            Tep: np.ndarray = Tep.A
+        traj = False
 
+        methTep: np.ndarray
+
+        if isinstance(Tep, SE3):
+            if len(Tep) > 1:
+                traj = True
+                methTep = np.empty((len(Tep), 4, 4))
+
+                for i, T in enumerate(Tep):
+                    methTep[i] = T.A
+            else:
+                methTep = Tep.A
+        elif Tep.ndim == 3:
+            traj = True
+            methTep = Tep
+        elif Tep.shape != (4, 4):
+            raise ValueError("Tep must be a 4x4 SE3 matrix")
+        else:
+            methTep = Tep
+
+        if traj:
+            q = np.empty((methTep.shape[0], ets.n))
+            success = True
+            interations = 0
+            searches = 0
+            residual = np.inf
+            reason = ""
+
+            for i, T in enumerate(methTep):
+                sol = self._solve(ets, T, q0)
+                q[i] = sol.q
+                if not sol.success:
+                    success = False
+                    reason = sol.reason
+                interations += sol.iterations
+                searches += sol.searches
+
+                if sol.residual < residual:
+                    residual = sol.residual
+
+            return IKSolution(
+                q=q,
+                success=success,
+                iterations=interations,
+                searches=searches,
+                residual=residual,
+                reason=reason,
+            )
+
+        else:
+            sol = self._solve(ets, methTep, q0)
+
+        return sol
+
+    def _solve(self, ets: "rtb.ETS", Tep: np.ndarray, q0: np.ndarray) -> IKSolution:
         # Iteration count
         i = 0
         total_i = 0

@@ -2578,8 +2578,8 @@ class ETS(BaseETS):
             **kwargs,
         )
 
-        if isinstance(Tep, SE3):
-            Tep = Tep.A
+        # if isinstance(Tep, SE3):
+        #     Tep = Tep.A
 
         return solver.solve(ets=self, Tep=Tep, q0=q0)
 
@@ -2717,8 +2717,8 @@ class ETS(BaseETS):
             **kwargs,
         )
 
-        if isinstance(Tep, SE3):
-            Tep = Tep.A
+        # if isinstance(Tep, SE3):
+        #     Tep = Tep.A
 
         return solver.solve(ets=self, Tep=Tep, q0=q0)
 
@@ -2871,8 +2871,8 @@ class ETS(BaseETS):
             **kwargs,
         )
 
-        if isinstance(Tep, SE3):
-            Tep = Tep.A
+        # if isinstance(Tep, SE3):
+        #     Tep = Tep.A
 
         return solver.solve(ets=self, Tep=Tep, q0=q0)
 
@@ -3068,8 +3068,8 @@ class ETS(BaseETS):
             **kwargs,
         )
 
-        if isinstance(Tep, SE3):
-            Tep = Tep.A
+        # if isinstance(Tep, SE3):
+        #     Tep = Tep.A
 
         return solver.solve(ets=self, Tep=Tep, q0=q0)
 
