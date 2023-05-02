@@ -100,8 +100,14 @@ class PoELink(Link):
         rpy = twist_as_SE3.rpy()
 
         # prepare list of ETs, due to RPY convention the RPY order is reversed
-        et_list = [ET.tx(twist_as_SE3.t[0]), ET.ty(twist_as_SE3.t[1]),
-                   ET.tz(twist_as_SE3.t[2]), ET.Rz(rpy[2]), ET.Ry(rpy[1]), ET.Rx(rpy[0])]
+        et_list = [
+            ET.tx(twist_as_SE3.t[0]),
+            ET.ty(twist_as_SE3.t[1]),
+            ET.tz(twist_as_SE3.t[2]),
+            ET.Rz(rpy[2]),
+            ET.Ry(rpy[1]),
+            ET.Rx(rpy[0]),
+        ]
         # remove ETs with empty transform
         et_list = [et for et in et_list if not np.isclose(et.eta, 0.0)]
 
@@ -212,9 +218,9 @@ class PoERobot(Robot):
         T = None
         for i in range(self.n):
             if T is None:
-                T = self.links[i+1].S.exp(q[i])
+                T = self.links[i + 1].S.exp(q[i])
             else:
-                T *= self.links[i+1].S.exp(q[i])
+                T *= self.links[i + 1].S.exp(q[i])
 
         return T * self.T0
 
@@ -233,8 +239,8 @@ class PoERobot(Robot):
         columns = []
         T = SE3()
         for i in range(self.n):
-            columns.append(T.Ad() @ self.links[i+1].S.S)
-            T *= self.links[i+1].S.exp(q[i])
+            columns.append(T.Ad() @ self.links[i + 1].S.S)
+            T *= self.links[i + 1].S.exp(q[i])
         T *= self.T0
         J = np.column_stack(columns)
 
@@ -255,8 +261,8 @@ class PoERobot(Robot):
         columns = []
         T = SE3()
         for i in range(self.n):
-            columns.append(T.Ad() @ self.links[i+1].S.S)
-            T *= self.links[i+1].S.exp(q[i])
+            columns.append(T.Ad() @ self.links[i + 1].S.S)
+            T *= self.links[i + 1].S.exp(q[i])
         T *= self.T0
         J = np.column_stack(columns)
 
@@ -286,8 +292,9 @@ class PoERobot(Robot):
 
         # get partial transforms between links
         for i in reversed(range(1, self.n + 2)):
-            twist_as_SE3_partial[i] = twist_as_SE3_world[i - 1].inv() * \
-                                      twist_as_SE3_world[i]
+            twist_as_SE3_partial[i] = (
+                twist_as_SE3_world[i - 1].inv() * twist_as_SE3_world[i]
+            )
 
         # prepare ET sequence
         for i, tf in enumerate(twist_as_SE3_partial):
@@ -295,8 +302,14 @@ class PoERobot(Robot):
             rpy = tf.rpy()
 
             # prepare list of ETs, due to RPY convention the RPY order is reversed
-            et_list = [ET.tx(tf.t[0]), ET.ty(tf.t[1]), ET.tz(tf.t[2]),
-                       ET.Rz(rpy[2]), ET.Ry(rpy[1]), ET.Rx(rpy[0])]
+            et_list = [
+                ET.tx(tf.t[0]),
+                ET.ty(tf.t[1]),
+                ET.tz(tf.t[2]),
+                ET.Rz(rpy[2]),
+                ET.Ry(rpy[1]),
+                ET.Rx(rpy[0]),
+            ]
             # remove ETs with empty transform
             et_list = [et for et in et_list if not np.isclose(et.eta, 0.0)]
 
@@ -308,6 +321,7 @@ class PoERobot(Robot):
 
             # update the ETS for given link
             self.links[i].ets = ETS(et_list)
+
 
 if __name__ == "__main__":  # pragma nocover
     T0 = SE3.Trans(2, 0, 0)

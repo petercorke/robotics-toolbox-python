@@ -9,6 +9,7 @@ from roboticstoolbox import Robot, PoERobot, PoERevolute, PoEPrismatic
 from spatialmath import SE3
 from spatialmath.base import trnorm
 
+
 class TestPoERobot(unittest.TestCase):
     def test_poe2ets_conversion(self):
         # 2RPR standard structure
@@ -51,8 +52,13 @@ class TestPoERobot(unittest.TestCase):
         link4a = PoEPrismatic(w)
 
         toola = np.array(
-            [[0.2535, -0.5986, 0.7599, 0.2938], [-0.8063, 0.3032, 0.5078, -0.0005749],
-             [-0.5344, -0.7414, -0.4058, 0.08402], [0, 0, 0, 1]])
+            [
+                [0.2535, -0.5986, 0.7599, 0.2938],
+                [-0.8063, 0.3032, 0.5078, -0.0005749],
+                [-0.5344, -0.7414, -0.4058, 0.08402],
+                [0, 0, 0, 1],
+            ]
+        )
         toola = SE3(trnorm(toola))
 
         ra = PoERobot([link1a, link2a, link3a, link4a], toola)
@@ -66,6 +72,7 @@ class TestPoERobot(unittest.TestCase):
         # test jacobians
         nt.assert_almost_equal(ra.jacob0(qa), ra_as_ets.jacob0(qa))
         nt.assert_almost_equal(ra.jacobe(qa), ra_as_ets.jacobe(qa))
+
 
 if __name__ == "__main__":
     unittest.main()
