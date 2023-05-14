@@ -148,7 +148,7 @@ class IKine(FunctionBlock):
         :param useprevious: Use previous IK solution as q0, defaults to True
         :type useprevious: bool, optional
         :param ik: Specify an IK function, defaults to ``Robot.ikine_LM``
-        :type ik: callable f(T)
+        :type ik: callable
         :param args: Options passed to IK function
         :type args: dict
         :param seed: random seed for solution
@@ -244,7 +244,7 @@ class Jacobian(FunctionBlock):
         self,
         robot,
         frame="0",
-        representation=None,
+        representation="rpy/xyz",
         inverse=False,
         pinv=False,
         damping=None,
@@ -256,7 +256,7 @@ class Jacobian(FunctionBlock):
         :type robot: Robot subclass
         :param frame: Frame to compute Jacobian for, one of: "0" [default], "e"
         :type frame: str, optional
-        :param representation: representation for analytical Jacobian, defaults to None
+        :param representation: representation for analytical Jacobian, defaults to "rpy/xyz"
         :type representation: str, optional
         :param inverse: output inverse of Jacobian, defaults to False
         :type inverse: bool, optional
@@ -1157,7 +1157,7 @@ class Gravload_X(FunctionBlock):
         :param robot: Robot model
         :type robot: Robot subclass
         :param representation: task-space representation, defaults to "rpy/xyz"
-        :type represenstation: str
+        :type representation: str
         :param gravity: gravitational acceleration
         :type gravity: float
         :param blockargs: |BlockOptions|
@@ -1293,7 +1293,7 @@ class Inertia_X(FunctionBlock):
         :param robot: Robot model
         :type robot: Robot subclass
         :param representation: task-space representation, defaults to "rpy/xyz"
-        :type represenstation: str
+        :type representation: str
         :param blockargs: |BlockOptions|
         :type blockargs: dict
         """
@@ -1482,7 +1482,7 @@ class FDyn_X(TransferBlock):
         :param velcomp: perform velocity term compensation
         :type velcomp: bool
         :param representation: task-space representation, defaults to "rpy/xyz"
-        :type represenstation: str
+        :type representation: str
     
         :param blockargs: |BlockOptions|
         :type blockargs: dict
