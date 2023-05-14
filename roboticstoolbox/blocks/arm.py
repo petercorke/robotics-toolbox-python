@@ -244,7 +244,7 @@ class Jacobian(FunctionBlock):
         self,
         robot,
         frame="0",
-        representation="rpy/xyz",
+        representation=None,
         inverse=False,
         pinv=False,
         damping=None,
@@ -256,7 +256,7 @@ class Jacobian(FunctionBlock):
         :type robot: Robot subclass
         :param frame: Frame to compute Jacobian for, one of: "0" [default], "e"
         :type frame: str, optional
-        :param representation: representation for analytical Jacobian, defaults to "rpy/xyz"
+        :param representation: representation for analytical Jacobian
         :type representation: str, optional
         :param inverse: output inverse of Jacobian, defaults to False
         :type inverse: bool, optional
@@ -318,8 +318,7 @@ class Jacobian(FunctionBlock):
     def output(self, t, inports, x):
         q = inports[0]
 
-        if self.representation is None:
-            J = self.jfunc(q)
+        J = self.jfunc(q)
 
         # add damping term if given
         if (self.inverse or self.pinv) and self.damping is not None:
