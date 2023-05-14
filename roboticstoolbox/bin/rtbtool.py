@@ -23,6 +23,8 @@ from pathlib import Path
 import sys
 from importlib.metadata import version
 
+
+
 try:
     from colored import fg, bg, attr
 
@@ -51,17 +53,12 @@ from roboticstoolbox import *  # lgtm [py/unused-import]
 puma = models.DH.Puma560()
 panda = models.DH.Panda()
 
-
-def main():
-    # setup defaults
-    np.set_printoptions(
-        linewidth=120,
-        formatter={"float": lambda x: f"{0:8.4g}" if abs(x) < 1e-10 else f"{x:8.4g}"},
-    )
-
+def parse_arguments():
     parser = argparse.ArgumentParser("Robotics Toolbox shell")
     parser.add_argument("script", default=None, nargs="?", help="specify script to run")
-    parser.add_argument("--backend", "-b", default=None, help="specify Matplotlib backend")
+    parser.add_argument(
+        "--backend", "-B", default=None, help="specify graphics backend"
+    )
     parser.add_argument(
         "--color",
         "-c",
@@ -79,6 +76,14 @@ def main():
         help="execution result prefix, include {} for execution count number",
     )
     parser.add_argument(
+        "-b",
+        "--no-banner",
+        dest="banner",
+        default=True,
+        action="store_false",
+        help="suppress startup banner",
+    )
+    parser.add_argument(
         "--showassign",
         "-a",
         default=False,
@@ -88,10 +93,6 @@ def main():
     parser.add_argument(
         "--book", default=False, action="store_true",
         help="use defaults as per RVC book"
-    )
-    parser.add_argument(
-        "--vision", default=False, action="store_true",
-        help="import vision toolbox (MVTB)"
     )
     parser.add_argument(
         "--ansi",
@@ -113,38 +114,25 @@ def main():
         action="store_true",
         help="use Swift as default backend",
     )
-    args = parser.parse_args()
+    args, rest = parser.parse_known_args()
+
+    # remove the arguments we've just parsed from sys.argv so that IPython can have a
+    # go at them later
+    sys.argv = [sys.argv[0]] + rest
 
     # TODO more options
     # color scheme, light/dark
     # silent startup
 
-    sys.argv = [sys.argv[0]]
+    if args.script is not None:
+        args.banner = False
 
-    if args.book:
-        # set book options
-        args.resultprefix = ""
-        args.prompt = ">>> "
-        args.showassign = True
-        args.ansi = False
-        args.examples = True
+    return args
 
-    # set default backend for Robot.plot
-    if args.swift:
-        Robot.default_backend = "swift"
-
-    # set matrix printing mode for spatialmath
-    SE3._ansimatrix = args.ansi
-
-    # set default matplotlib backend
-    if args.backend is not None:
-        print(f"Using matplotlb backend {args.backend}")
-        mpl.use(args.backend)
-
-    # build the banner, import * packages and their versions
-
+def make_banner():
     # banner template
     # https://patorjk.com/software/taag/#p=display&f=Cybermedium&t=Robotics%20Toolbox%0A
+
     banner = f"""\
     ____ ____ ___  ____ ___ _ ____ ____    ___ ____ ____ _    ___  ____ _  _
     |__/ |  | |__] |  |  |  | |    [__      |  |  | |  | |    |__] |  |  \/
@@ -186,13 +174,53 @@ def main():
 
     print(fg("yellow") + banner + attr(0))
 
-    if args.showassign:
+def startup():
+    plt.ion()
+
+def main():
+
+    args = parse_arguments()
+
+
+    # setup defaults
+    np.set_printoptions(
+        linewidth=120,
+        formatter={"float": lambda x: f"{0:8.4g}" if abs(x) < 1e-10 else f"{x:8.4g}"},
+    )
+
+    if args.book:
+        # set book options
+        args.resultprefix = ""
+        args.prompt = ">>> "
+        args.showassign = True
+        args.ansi = False
+        args.examples = True
+
+    # set default backend for Robot.plot
+    if args.swift:
+        Robot.default_backend = "swift"
+
+    # set matrix printing mode for spatialmath
+    SE3._ansimatrix = args.ansi
+
+    # set default matplotlib backend
+    if args.backend is not None:
+        print(f"Using matplotlb backend {args.backend}")
+        mpl.use(args.backend)
+
+    # build the banner, import * packages and their versions
+
+
+    if args.banner:
+        banner = make_banner()
+        print(banner)
+
+    if args.showassign and args.banner:
         print(
             fg("red")
-            + """Results of assignments will be displayed, use trailing ; to suppress
-
-    """,
-            attr(0),
+            + "Results of assignments will be displayed, use trailing ; to suppress"
+            + attr(0)
+            + "\n"
         )
 
     # drop into IPython
@@ -222,7 +250,7 @@ def main():
     c.InteractiveShell.prompts_class = MyPrompt
     if args.showassign:
         c.InteractiveShell.ast_node_interactivity = "last_expr_or_assign"
-
+    c.TerminalIPythonApp.force_interact = False
     # set precision, same as %precision
     c.PlainTextFormatter.float_precision = "%.3f"
 
@@ -235,17 +263,15 @@ def main():
         code = path.open("r").readlines()
     if code is None:
         code = [
+            "startup()",
             "%precision %.3g",
-            "plt.ion()",
         ]
-
     else:
         code.append("plt.ion()")
-    if args.vision:
-        code.append("from machinevisiontoolbox import *")
+
+
     c.InteractiveShellApp.exec_lines = code
     IPython.start_ipython(config=c, user_ns=globals())
-
 
 
 if __name__ == "__main__":
