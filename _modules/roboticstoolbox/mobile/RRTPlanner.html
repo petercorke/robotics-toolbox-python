@@ -7,6 +7,7 @@
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -28,12 +29,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -41,7 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Robot Arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
 </ul>
@@ -56,10 +61,10 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">roboticstoolbox.mobile.RRTPlanner</li>
       <li class="wy-breadcrumbs-aside">
@@ -76,9 +81,9 @@
 <span class="c1"># The following code is based on code from Python Robotics</span>
 <span class="c1"># https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning</span>
 <span class="c1"># RRTDubins planning</span>
-<span class="c1"># Author: Atsushi Sakai </span>
+<span class="c1"># Author: Atsushi Sakai</span>
 <span class="c1"># Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors</span>
-<span class="c1"># Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE </span>
+<span class="c1"># Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE</span>
 
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
@@ -97,8 +102,8 @@
 <span class="kn">from</span> <span class="nn">pgraph</span> <span class="kn">import</span> <span class="n">DGraph</span>
 
 
-<div class="viewcode-block" id="RRTPlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.RRTPlanner">[docs]</a><span class="k">class</span> <span class="nc">RRTPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="RRTPlanner"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.RRTPlanner">[docs]</a><span class="k">class</span> <span class="nc">RRTPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rapidly exploring tree planner</span>
 
 <span class="sd">    :param map: occupancy grid</span>
@@ -109,8 +114,6 @@
 <span class="sd">    :type curvature: float, optional</span>
 <span class="sd">    :param stepsize: spacing between points on the path, defaults to 0.2</span>
 <span class="sd">    :type stepsize: float, optional</span>
-<span class="sd">    :param showsamples: shows vehicle polygons for all random samples, defaults to False</span>
-<span class="sd">    :type showsamples: bool, optional</span>
 <span class="sd">    :param npoints: number of vertices in random tree, defaults to 50</span>
 <span class="sd">    :type npoints: int, optional</span>
 
@@ -130,7 +133,7 @@
 <span class="sd">    the forward or backward direction.</span>
 
 <span class="sd">    Polygons are used for obstacle avoidance:</span>
-<span class="sd">    </span>
+
 <span class="sd">    - the environment is defined by a set of polygons represented by a :class:`PolygonMap`</span>
 <span class="sd">    - the vehicle is defined by a single polygon specified by the ``polygon``</span>
 <span class="sd">      argument to its constructor</span>
@@ -143,7 +146,7 @@
 
 <span class="sd">        # create polygonal obstacles</span>
 <span class="sd">        map = PolygonMap(workspace=[0, 10])</span>
-<span class="sd">        map.add([(5, 50), (5, 6), (6, 6), (6, 50)]) </span>
+<span class="sd">        map.add([(5, 50), (5, 6), (6, 6), (6, 50)])</span>
 <span class="sd">        map.add([(5, 4), (5, -50), (6, -50), (6, 4)])</span>
 
 <span class="sd">        # create outline polygon for vehicle</span>
@@ -168,22 +171,20 @@
 
 <span class="sd">    :seealso: :class:`DubinsPlanner` :class:`Vehicle` :class:`PlannerBase`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="nb">map</span><span class="p">,</span>
         <span class="n">vehicle</span><span class="p">,</span>
         <span class="n">curvature</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">stepsize</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-        <span class="n">showsamples</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">npoints</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">npoints</span> <span class="o">=</span> <span class="n">npoints</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="nb">map</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">showsamples</span> <span class="o">=</span> <span class="n">showsamples</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">DGraph</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="s2">&quot;SE2&quot;</span><span class="p">)</span>
 
@@ -200,12 +201,18 @@
         <span class="c1"># self.goal_yaw_th = np.deg2rad(1.0)</span>
         <span class="c1"># self.goal_xy_th = 0.5</span>
 
-<div class="viewcode-block" id="RRTPlanner.plan"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.RRTPlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">search_until_npoints</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="RRTPlanner.plan"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.RRTPlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="p">,</span> <span class="n">showsamples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">showvalid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plan paths to goal using RRT</span>
 
 <span class="sd">        :param goal: goal pose :math:`(x, y, \theta)`, defaults to previously set value</span>
 <span class="sd">        :type goal: array_like(3), optional</span>
+<span class="sd">        :param showsamples: display position part of configurations overlaid on the map, defaults to True</span>
+<span class="sd">        :type showsamples: bool, optional</span>
+<span class="sd">        :param showvalid: display valid configurations as vehicle polygons overlaid on the map, defaults to False</span>
+<span class="sd">        :type showvalid: bool, optional</span>
+<span class="sd">        :param animate: update the display as configurations are tested, defaults to False</span>
+<span class="sd">        :type animate: bool, optional</span>
 
 <span class="sd">        Compute a rapidly exploring random tree with its root at the ``goal``.</span>
 <span class="sd">        The tree will have ``npoints`` vertices spread uniformly randomly over</span>
@@ -214,6 +221,11 @@
 <span class="sd">        For every new point added, a Dubins path is computed to the nearest</span>
 <span class="sd">        vertex already in the graph.  Each configuration on that path, with</span>
 <span class="sd">        spacing of ``stepsize``, is tested for obstacle intersection.</span>
+
+<span class="sd">        The configurations tested are displayed (translation only) if ``showsamples`` is</span>
+<span class="sd">        True.  The valid configurations are displayed as vehicle polygones if ``showvalid``</span>
+<span class="sd">        is True.  If ``animate`` is True these points are displayed during the search</span>
+<span class="sd">        process, otherwise a single figure is displayed at the end.</span>
 
 <span class="sd">        :seealso: :meth:`query`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -225,14 +237,18 @@
         <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">add_vertex</span><span class="p">(</span><span class="n">coord</span><span class="o">=</span><span class="n">goal</span><span class="p">)</span>
         <span class="n">v</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="k">if</span> <span class="n">showsamples</span> <span class="ow">or</span> <span class="n">showvalid</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">progress_start</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npoints</span><span class="p">)</span>
         <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">npoints</span><span class="p">:</span>
-
             <span class="n">random_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qrandom_free</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">showsamples</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">showsamples</span><span class="p">:</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">random_point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">random_point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">animate</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.02</span><span class="p">)</span>
 
             <span class="n">vnearest</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">closest</span><span class="p">(</span><span class="n">random_point</span><span class="p">)</span>
 
@@ -264,12 +280,17 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">vnew</span><span class="p">,</span> <span class="n">vnearest</span><span class="p">,</span> <span class="n">cost</span><span class="o">=</span><span class="n">pstatus</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
             <span class="n">vnew</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">vehicle</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">random_point</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">showvalid</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vehicle</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">random_point</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">animate</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.02</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">showvalid</span> <span class="ow">or</span> <span class="n">showsamples</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">animate</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">progress_end</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="RRTPlanner.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.RRTPlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
+<div class="viewcode-block" id="RRTPlanner.query"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.RRTPlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find a path from start configuration</span>
 
@@ -327,7 +348,7 @@
     <span class="c1">#     dy = y - self.end.y</span>
     <span class="c1">#     return math.hypot(dx, dy)</span>
 
-<div class="viewcode-block" id="RRTPlanner.qrandom"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.RRTPlanner.qrandom">[docs]</a>    <span class="k">def</span> <span class="nf">qrandom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RRTPlanner.qrandom"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.RRTPlanner.qrandom">[docs]</a>    <span class="k">def</span> <span class="nf">qrandom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Random configuration</span>
 
@@ -344,7 +365,7 @@
             <span class="n">high</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">workspace</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="RRTPlanner.qrandom_free"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.RRTPlanner.qrandom_free">[docs]</a>    <span class="k">def</span> <span class="nf">qrandom_free</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RRTPlanner.qrandom_free"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.RRTPlanner.qrandom_free">[docs]</a>    <span class="k">def</span> <span class="nf">qrandom_free</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Random obstacle free configuration</span>
 
@@ -363,7 +384,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">iscollision</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">q</span></div>
 
-<div class="viewcode-block" id="RRTPlanner.iscollision"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.RRTPlanner.iscollision">[docs]</a>    <span class="k">def</span> <span class="nf">iscollision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<div class="viewcode-block" id="RRTPlanner.iscollision"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.RRTPlanner.iscollision">[docs]</a>    <span class="k">def</span> <span class="nf">iscollision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test if configuration is collision</span>
 
@@ -379,7 +400,6 @@
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-
     <span class="kn">from</span> <span class="nn">roboticstoolbox.mobile.Vehicle</span> <span class="kn">import</span> <span class="n">Bicycle</span>
 
     <span class="c1"># start and goal configuration</span>
@@ -414,14 +434,11 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

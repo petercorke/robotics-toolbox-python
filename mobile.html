@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mobile robots &mdash; Robotics Toolbox for Python  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -22,8 +27,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Mobile robot kinematic models" href="mobile_vehicle.html" />
-    <link rel="prev" title="Trajectories" href="arm_trajectory.html" /> 
+    <link rel="next" title="Motion models" href="mobile-vehicle.html" />
+    <link rel="prev" title="Robot.ikine_NR" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ikine_NR.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,12 +36,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -44,14 +53,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Robot Arms</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Mobile robots</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mobile_vehicle.html">Mobile robot kinematic models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_vehicle_animation.html">Mobile robot animations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_drivers.html">Mobile robot drivers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_reactive.html">Reactive navigation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_planner.html">Mobile robot path planning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_SLAM.html">Localization and Mapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle.html">Motion models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-animation.html">Animations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-drivers.html">Drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner.html">Path planning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-reactive.html">Reactive navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-SLAM.html">Localization and Mapping</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
@@ -67,18 +76,14 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Mobile robots</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/mobile.rst.txt" rel="nofollow"> View page source</a>
       </li>
-  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
-        <a href="arm_trajectory.html" class="btn btn-neutral float-left" title="Trajectories" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mobile_vehicle.html" class="btn btn-neutral float-right" title="Mobile robot kinematic models" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-  </div>
+  </ul>
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -90,39 +95,41 @@
 and state estimation.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="mobile_vehicle.html">Mobile robot kinematic models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mobile_vehicle.html#bicycle-model">Bicycle model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_vehicle.html#unicycle-model">Unicycle model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_vehicle.html#superclass">Superclass</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-vehicle.html">Motion models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-bicycle.html">Bicycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-unicycle.html">Unicycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-diffsteer.html">Differential steering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-base.html">Vehicle abstract baseclass</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="mobile_vehicle_animation.html">Mobile robot animations</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mobile_vehicle_animation.html#roboticstoolbox.mobile.VehicleAnimationBase"><code class="docutils literal notranslate"><span class="pre">VehicleAnimationBase</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_vehicle_animation.html#simple-marker">Simple marker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_vehicle_animation.html#polygon-shape">Polygon shape</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_vehicle_animation.html#image-icon">Image icon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-vehicle-animation.html">Animations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-animation.html#roboticstoolbox.mobile.VehicleAnimationBase"><code class="docutils literal notranslate"><span class="pre">VehicleAnimationBase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-animation.html#simple-marker">Simple marker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-animation.html#polygon-shape">Polygon shape</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-animation.html#image-icon">Image icon</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="mobile_drivers.html">Mobile robot drivers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mobile_drivers.html#random-path">Random Path</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_drivers.html#superclass">Superclass</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-drivers.html">Drivers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-drivers.html#random-path">Random Path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-drivers.html#superclass">Superclass</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="mobile_reactive.html">Reactive navigation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mobile_reactive.html#roboticstoolbox.mobile.Bug2"><code class="docutils literal notranslate"><span class="pre">Bug2</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-planner.html">Path planning</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-continuous.html">Continuous configuration-space planners</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-discrete.html">Discrete (Grid-based) planners</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-discrete.html#continuous-configuration-space-planners">Continuous configuration-space planners</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-map.html">Map classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-base.html">Supporting classes</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="mobile_planner.html">Mobile robot path planning</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mobile_planner.html#discrete-grid-based-planners">Discrete (Grid-based) planners</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_planner.html#continuous-configuration-space-planners">Continuous configuration-space planners</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_planner.html#map-classes">Map classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_planner.html#supporting-classes">Supporting classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-reactive.html">Reactive navigation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-reactive.html#roboticstoolbox.mobile.Bug2"><code class="docutils literal notranslate"><span class="pre">Bug2</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="mobile_SLAM.html">Localization and Mapping</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mobile_SLAM.html#state-estimation">State estimation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_SLAM.html#sensor-models">Sensor models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mobile_SLAM.html#module-roboticstoolbox.mobile.landmarkmap">Map models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-SLAM.html">Localization and Mapping</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-SLAM.html#state-estimation">State estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-SLAM.html#sensor-models">Sensor models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-SLAM.html#module-roboticstoolbox.mobile.landmarkmap">Map models</a></li>
 </ul>
 </li>
 </ul>
@@ -132,22 +139,16 @@ and state estimation.</p>
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="arm_trajectory.html" class="btn btn-neutral float-left" title="Trajectories" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mobile_vehicle.html" class="btn btn-neutral float-right" title="Mobile robot kinematic models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

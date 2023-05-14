@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animations &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Drivers" href="mobile-drivers.html" />
+    <link rel="prev" title="Vehicle abstract baseclass" href="mobile-vehicle-base.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Robot Arms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="mobile.html">Mobile robots</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle.html">Motion models</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Animations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.mobile.VehicleAnimationBase"><code class="docutils literal notranslate"><span class="pre">VehicleAnimationBase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simple-marker">Simple marker</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.VehicleMarker"><code class="docutils literal notranslate"><span class="pre">VehicleMarker</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.VehicleMarker.__init__"><code class="docutils literal notranslate"><span class="pre">VehicleMarker.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.VehicleMarker.add"><code class="docutils literal notranslate"><span class="pre">VehicleMarker.add()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.VehicleMarker.plot"><code class="docutils literal notranslate"><span class="pre">VehicleMarker.plot()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.VehicleMarker.update"><code class="docutils literal notranslate"><span class="pre">VehicleMarker.update()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#polygon-shape">Polygon shape</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.VehiclePolygon"><code class="docutils literal notranslate"><span class="pre">VehiclePolygon</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.VehiclePolygon.__init__"><code class="docutils literal notranslate"><span class="pre">VehiclePolygon.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.VehiclePolygon.add"><code class="docutils literal notranslate"><span class="pre">VehiclePolygon.add()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.VehiclePolygon.plot"><code class="docutils literal notranslate"><span class="pre">VehiclePolygon.plot()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.VehiclePolygon.update"><code class="docutils literal notranslate"><span class="pre">VehiclePolygon.update()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#image-icon">Image icon</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.VehicleIcon"><code class="docutils literal notranslate"><span class="pre">VehicleIcon</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.VehicleIcon.__init__"><code class="docutils literal notranslate"><span class="pre">VehicleIcon.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.VehicleIcon.add"><code class="docutils literal notranslate"><span class="pre">VehicleIcon.add()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.VehicleIcon.plot"><code class="docutils literal notranslate"><span class="pre">VehicleIcon.plot()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.VehicleIcon.update"><code class="docutils literal notranslate"><span class="pre">VehicleIcon.update()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-drivers.html">Drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner.html">Path planning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-reactive.html">Reactive navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-SLAM.html">Localization and Mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="mobile.html">Mobile robots</a></li>
+      <li class="breadcrumb-item active">Animations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="animations">
+<h1>Animations<a class="headerlink" href="#animations" title="Permalink to this heading"></a></h1>
+<p>These classes create a graphical object that can be animated to show vehicle
+position or pose.</p>
+<div class="graphviz"><img src="_images/inheritance-69eb6923bea01fa0cc2e65866f9effde7722a3df.png" alt="Inheritance diagram of roboticstoolbox.VehicleMarker, roboticstoolbox.VehiclePolygon, roboticstoolbox.VehicleIcon" usemap="#inheritance666068883b" class="inheritance graphviz" /></div>
+<map id="inheritance666068883b" name="inheritance666068883b">
+<area shape="rect" id="node2" href="#roboticstoolbox.mobile.VehicleAnimationBase" target="_top" title="Abstract base class to support animation of a vehicle in a Matplotlib plot" alt="" coords="125,55,293,80"/>
+<area shape="rect" id="node3" href="#roboticstoolbox.mobile.VehicleIcon" target="_top" title="VehicleIcon" alt="" coords="354,5,450,31"/>
+<area shape="rect" id="node4" href="#roboticstoolbox.mobile.VehicleMarker" target="_top" title="VehicleMarker" alt="" coords="345,55,459,80"/>
+<area shape="rect" id="node5" href="#roboticstoolbox.mobile.VehiclePolygon" target="_top" title="VehiclePolygon" alt="" coords="341,104,463,129"/>
+</map><dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleAnimationBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">VehicleAnimationBase</span></span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehicleAnimationBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleAnimationBase" title="Permalink to this definition"></a></dt>
+<dd><p>Abstract base class to support animation of a vehicle in a Matplotlib plot</p>
+<p>There are three concrete subclasses:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">VehicleMarker</span></code> animates a Matplotlib marker (shows position only)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VehiclePolygon</span></code> animates a polygon shape (outline or filled), including predefined shapes (shows position and orientation)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VehicleIcon</span></code> animates an image (shows position and orientation)</p></li>
+</ul>
+<p>An instance <code class="docutils literal notranslate"><span class="pre">a</span></code> of these classes can be used in three different ways, firstly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">VehiclePolygon</span><span class="p">(</span><span class="s2">&quot;car&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+<span class="n">a</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>adds an instance of the animation shape to the plot and subsequent calls
+to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>will animate it with the configuration given by <code class="docutils literal notranslate"><span class="pre">q</span></code>.</p>
+<p>Secondly, an instance can be passed to a Vehicle subclass object to make an animation
+during simulation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">VehiclePolygon</span><span class="p">(</span><span class="s2">&quot;car&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+<span class="n">veh</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">(</span><span class="n">animation</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Thirdly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">VehiclePolygon</span><span class="p">(</span><span class="s2">&quot;car&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+<span class="n">a</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>adds an instance of the animation shape to the plot with the specified
+configuration.  It cannot be moved, but the method does return a reference
+to the Matplotlib object added to the plot.</p>
+</dd></dl>
+
+<section id="simple-marker">
+<h2>Simple marker<a class="headerlink" href="#simple-marker" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleMarker">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">VehicleMarker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehicleMarker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.VehicleAnimationBase" title="roboticstoolbox.mobile.Animations.VehicleAnimationBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleAnimationBase</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleMarker.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehicleMarker.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Create graphical animation of vehicle as a Matplotlib marker</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – additional arguments passed to Matplotlib <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>animation object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>VehicleAnimation</p>
+</dd>
+</dl>
+<p>Creates an object that can be passed to a <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass to depict
+the moving robot as a simple Matplotlib marker during simulation.</p>
+<p>The default marker is a red filled circle with a white outline.</p>
+<p>For example, to animate a simulation with a blue square marker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">VehicleMarker</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">markerfacecolor</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>
+<span class="n">veh</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">(</span><span class="n">driver</span><span class="o">=</span><span class="n">RandomPath</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">animation</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+<span class="n">veh</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A marker can only indicate vehicle position, not orientation.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile-vehicle-vehicle.html#roboticstoolbox.mobile.Vehicle" title="roboticstoolbox.mobile.Vehicle"><code class="xref py py-func docutils literal notranslate"><span class="pre">Vehicle()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleMarker.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.add" title="Permalink to this definition"></a></dt>
+<dd><p>Add vehicle animation to the current plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>Axes</em><em>, </em><em>optional</em>) – Axis to add to, defaults to current axis</p></li>
+<li><p><strong>kwargs</strong> – additional arguments passed to Matplotlib <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a>, which
+override arguments given to the constructor.</p></li>
+</ul>
+</dd>
+</dl>
+<p>A reference to the animation object is kept, and it will be deleted
+from the plot when the <code class="docutils literal notranslate"><span class="pre">VehicleAnimation</span></code> object is garbage collected.</p>
+<p>The animation is not displayed until <a class="reference internal" href="#roboticstoolbox.mobile.VehicleMarker.update" title="roboticstoolbox.mobile.VehicleMarker.update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update()</span></code></a> is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.VehicleMarker.update" title="roboticstoolbox.mobile.VehicleMarker.update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleMarker.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Add vehicle to the current plot (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle position or configuration</p></li>
+<li><p><strong>kwargs</strong> – additional arguments passed to Matplotlib <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a>, which
+override arguments given to the constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>reference to Matplotlib object</p>
+</dd>
+</dl>
+<p>The animation object is rendered into the current axes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleMarker.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleMarker.update" title="Permalink to this definition"></a></dt>
+<dd><p>Update the vehicle animation (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle position or configuration</p>
+</dd>
+</dl>
+<p>The graphical depiction of the vehicle position or configuration is updated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.VehicleMarker.add" title="roboticstoolbox.mobile.VehicleMarker.add"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="polygon-shape">
+<h2>Polygon shape<a class="headerlink" href="#polygon-shape" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehiclePolygon">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">VehiclePolygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'car'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehiclePolygon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.VehicleAnimationBase" title="roboticstoolbox.mobile.Animations.VehicleAnimationBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleAnimationBase</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehiclePolygon.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'car'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehiclePolygon.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Create graphical animation of vehicle as a polygon</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>ndarray</em><em>(</em><em>2</em><em>,</em><em>n</em><em>) or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – polygon shape as vertices or a predefined shape, defaults to “car”</p></li>
+<li><p><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Length of the vehicle on the plot, defaults to 1</p></li>
+<li><p><strong>kwargs</strong> – additional arguments passed to Matplotlib <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.Polygon.html#matplotlib.patches.Polygon" title="(in Matplotlib v3.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a> such as
+<code class="docutils literal notranslate"><span class="pre">color</span></code> (face+edge), <code class="docutils literal notranslate"><span class="pre">alpha</span></code>, <code class="docutils literal notranslate"><span class="pre">facecolor</span></code>, <code class="docutils literal notranslate"><span class="pre">edgecolor</span></code>,
+<code class="docutils literal notranslate"><span class="pre">linewidth</span></code> etc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – unknown shape name</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.11)"><strong>TypeError</strong></a> – bad shape argument</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>animation object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.mobile.VehiclePolygon" title="roboticstoolbox.mobile.VehiclePolygon">VehiclePolygon</a></p>
+</dd>
+</dl>
+<p>Creates an object that can be passed to a <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass to
+depict the moving robot as a polygon during simulation.</p>
+<p>For example, to animate a simulation with a red filled car-shaped polygon:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">VehiclePolygon</span><span class="p">(</span><span class="s2">&quot;car&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="n">veh</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">(</span><span class="n">driver</span><span class="o">=</span><span class="n">RandomPath</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">animation</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+<span class="n">veh</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">shape</span></code> can be:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;car&quot;</span></code>  a rectangle with chamfered front corners</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;triangle&quot;</span></code> an isocles triangle pointing in the forward direction</p></li>
+<li><p>an 2xN NumPy array of vertices, does not have to be closed.</p></li>
+</ul>
+</div></blockquote>
+<p>The polygon is scaled to an image with a length of <code class="docutils literal notranslate"><span class="pre">scale</span></code> in the
+vehicle x-direction, in the units of the plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile-vehicle-vehicle.html#roboticstoolbox.mobile.Vehicle" title="roboticstoolbox.mobile.Vehicle"><code class="xref py py-func docutils literal notranslate"><span class="pre">Vehicle()</span></code></a> <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.Polygon.html#matplotlib.patches.Polygon" title="(in Matplotlib v3.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.patches.Polygon</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehiclePolygon.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.add" title="Permalink to this definition"></a></dt>
+<dd><p>Add vehicle animation to the current plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>Axes</em><em>, </em><em>optional</em>) – Axis to add to, defaults to current axis</p></li>
+<li><p><strong>kwargs</strong> – additional arguments passed to Matplotlib <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a>, which
+override arguments given to the constructor.</p></li>
+</ul>
+</dd>
+</dl>
+<p>A reference to the animation object is kept, and it will be deleted
+from the plot when the <code class="docutils literal notranslate"><span class="pre">VehicleAnimation</span></code> object is garbage collected.</p>
+<p>The animation is not displayed until <a class="reference internal" href="#roboticstoolbox.mobile.VehiclePolygon.update" title="roboticstoolbox.mobile.VehiclePolygon.update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update()</span></code></a> is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.VehiclePolygon.update" title="roboticstoolbox.mobile.VehiclePolygon.update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehiclePolygon.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Add vehicle to the current plot (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle position or configuration</p></li>
+<li><p><strong>kwargs</strong> – additional arguments passed to Matplotlib <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a>, which
+override arguments given to the constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>reference to Matplotlib object</p>
+</dd>
+</dl>
+<p>The animation object is rendered into the current axes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehiclePolygon.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehiclePolygon.update" title="Permalink to this definition"></a></dt>
+<dd><p>Update the vehicle animation (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle position or configuration</p>
+</dd>
+</dl>
+<p>The graphical depiction of the vehicle position or configuration is updated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.VehiclePolygon.add" title="roboticstoolbox.mobile.VehiclePolygon.add"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="image-icon">
+<h2>Image icon<a class="headerlink" href="#image-icon" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleIcon">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">VehicleIcon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehicleIcon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#roboticstoolbox.mobile.VehicleAnimationBase" title="roboticstoolbox.mobile.Animations.VehicleAnimationBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleAnimationBase</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleIcon.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Animations.html#VehicleIcon.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Create graphical animation of vehicle as an image icon</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Standard icon name or a path to an image</p></li>
+<li><p><strong>origin</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – Origin of the vehicle coordinate frame, defaults to centre</p></li>
+<li><p><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Length of the vehicle on the plot, defaults to 1</p></li>
+<li><p><strong>rotation</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – Vehicle icon heading in degrees, defaults to 0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – Icon file not found</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>animation object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>VehicleAnimation</p>
+</dd>
+</dl>
+<p>Creates an object that can be passed to a <code class="docutils literal notranslate"><span class="pre">Vehicle</span></code> subclass to
+depict the moving robot as an image icon during simulation.  The image
+is translated and rotated to represent the vehicle configuration.</p>
+<p>The car is scaled to an image with a horizontal length (width) of
+<code class="docutils literal notranslate"><span class="pre">scale</span></code> in the units of the plot. By default the image is assumed to
+contain a car parallel to the x-axis and facing right.  If the vehicle
+is facing upward set <code class="docutils literal notranslate"><span class="pre">rotation</span></code> to 90.</p>
+<p>The vehicle rotates about its <code class="docutils literal notranslate"><span class="pre">origin</span></code> which is expressed in terms of
+normalized coordinates in the range 0 to 1.  By default it is in the
+middle of the icon image, (0.2, 0.5) moves it toward the back of the
+vehicle, (0.8, 0.5) moves it toward the front of the vehicle.</p>
+<p><code class="docutils literal notranslate"><span class="pre">filename</span></code> can be an included image:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;greycar&quot;</span></code> a grey and white car (top view)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;redcar&quot;</span></code> a red car (top view)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;piano&quot;</span></code> a piano (top view)</p></li>
+</ul>
+</div></blockquote>
+<p>or the path to an image file, including extension.</p>
+<p>The included images are:</p>
+<a class="reference internal image-reference" href="_images/greycar.png"><img alt="&quot;greycar&quot;" class="align-center" src="_images/greycar.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="_images/redcar.png"><img alt="&quot;redcar&quot;" class="align-center" src="_images/redcar.png" style="width: 300px;" /></a>
+<a class="reference internal image-reference" href="_images/piano.png"><img alt="&quot;piano&quot;" class="align-center" src="_images/piano.png" style="width: 200px;" /></a>
+<p>For example, to animate a simulation with the red car icon:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">VehicleIcon</span><span class="p">(</span><span class="s2">&quot;redcar&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">veh</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">(</span><span class="n">driver</span><span class="o">=</span><span class="n">RandomPath</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">animation</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+<span class="n">veh</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">animation</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The standard icons are provided in the package <code class="docutils literal notranslate"><span class="pre">rtb-data</span></code></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile-vehicle-vehicle.html#roboticstoolbox.mobile.Vehicle" title="roboticstoolbox.mobile.Vehicle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vehicle</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleIcon.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.add" title="Permalink to this definition"></a></dt>
+<dd><p>Add vehicle animation to the current plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>Axes</em><em>, </em><em>optional</em>) – Axis to add to, defaults to current axis</p></li>
+<li><p><strong>kwargs</strong> – additional arguments passed to Matplotlib <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a>, which
+override arguments given to the constructor.</p></li>
+</ul>
+</dd>
+</dl>
+<p>A reference to the animation object is kept, and it will be deleted
+from the plot when the <code class="docutils literal notranslate"><span class="pre">VehicleAnimation</span></code> object is garbage collected.</p>
+<p>The animation is not displayed until <a class="reference internal" href="#roboticstoolbox.mobile.VehicleIcon.update" title="roboticstoolbox.mobile.VehicleIcon.update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update()</span></code></a> is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.VehicleIcon.update" title="roboticstoolbox.mobile.VehicleIcon.update"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleIcon.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Add vehicle to the current plot (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle position or configuration</p></li>
+<li><p><strong>kwargs</strong> – additional arguments passed to Matplotlib <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a>, which
+override arguments given to the constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>reference to Matplotlib object</p>
+</dd>
+</dl>
+<p>The animation object is rendered into the current axes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.VehicleIcon.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.VehicleIcon.update" title="Permalink to this definition"></a></dt>
+<dd><p>Update the vehicle animation (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle position or configuration</p>
+</dd>
+</dl>
+<p>The graphical depiction of the vehicle position or configuration is updated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.VehicleIcon.add" title="roboticstoolbox.mobile.VehicleIcon.add"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

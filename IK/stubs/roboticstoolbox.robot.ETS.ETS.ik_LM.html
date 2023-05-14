@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="../../_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="../../_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="../../_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="../../_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="../../_static/android-chrome-512x512.png ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ETS.ik_LM &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script>window.MathJax = {"tex": {"macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ETS.ik_GN" href="roboticstoolbox.robot.ETS.ETS.ik_GN.html" />
+    <link rel="prev" title="Inverse Kinematics" href="../ik.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../arm.html">Robot Arms</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../arm_models.html">Manipulator models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../arm_trajectory.html">Trajectories</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../ik.html">Inverse Kinematics</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../ik.html#c-solvers">C++ Solvers</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">ETS.ik_LM</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.robot.ETS.ETS.ik_LM"><code class="docutils literal notranslate"><span class="pre">ETS.ik_LM()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.ETS.ETS.ik_GN.html">ETS.ik_GN</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.ETS.ETS.ik_NR.html">ETS.ik_NR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.Robot.Robot.ik_LM.html">Robot.ik_LM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.Robot.Robot.ik_GN.html">Robot.ik_GN</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.Robot.Robot.ik_NR.html">Robot.ik_NR</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../ik.html#python-solvers">Python Solvers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../arm.html">Robot Arms</a></li>
+          <li class="breadcrumb-item"><a href="../ik.html">Inverse Kinematics</a></li>
+      <li class="breadcrumb-item active">ETS.ik_LM</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ets-ik-lm">
+<h1>ETS.ik_LM<a class="headerlink" href="#ets-ik-lm" title="Permalink to this heading"></a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.ETS.ETS.ik_LM">
+<span class="sig-prename descclassname"><span class="pre">ETS.</span></span><span class="sig-name descname"><span class="pre">ik_LM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Tep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'chan'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roboticstoolbox/robot/ETS.html#ETS.ik_LM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.ETS.ETS.ik_LM" title="Permalink to this definition"></a></dt>
+<dd><p>Fast levenberg-Marquadt Numerical Inverse Kinematics Solver</p>
+<p>A method which provides functionality to perform numerical inverse kinematics (IK)
+using the Levemberg-Marquadt method. This
+is a fast solver implemented in C++.</p>
+<p>See the <a class="reference internal" href="../ik.html#ik"><span class="std std-ref">Inverse Kinematics Docs Page</span></a> for more details and for a
+<strong>tutorial</strong> on numerical IK, see <a class="reference external" href="https://bit.ly/3ak5GDi">here</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Tep</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://petercorke.github.io/spatialmath-python/3d_pose_SE3.html#spatialmath.pose3d.SE3" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SE3</span></code></a>]) – The desired end-effector pose</p></li>
+<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]) – The initial joint coordinate vector</p></li>
+<li><p><strong>ilimit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – How many iterations are allowed within a search before a new search
+is started</p></li>
+<li><p><strong>slimit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – How many searches are allowed before being deemed unsuccessful</p></li>
+<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Maximum allowed residual error E</p></li>
+<li><p><strong>mask</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]) – A 6 vector which assigns weights to Cartesian degrees-of-freedom
+error priority</p></li>
+<li><p><strong>joint_limits</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Reject solutions with joint limit violations</p></li>
+<li><p><strong>seed</strong> – A seed for the private RNG used to generate random joint coordinate
+vectors</p></li>
+<li><p><strong>k</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Sets the gain value for the damping matrix Wn in the next iteration. See
+synopsis</p></li>
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'chan'</span></code>, <code class="docutils literal notranslate"><span class="pre">'wampler'</span></code>, <code class="docutils literal notranslate"><span class="pre">'sugihara'</span></code>]) – One of “chan”, “sugihara” or “wampler”. Defines which method is used
+to calculate the damping matrix Wn in the <code class="docutils literal notranslate"><span class="pre">step</span></code> method</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]</p>
+</dd>
+</dl>
+<p class="rubric">Synopsis</p>
+<p>The operation is defined by the choice of the <code class="docutils literal notranslate"><span class="pre">method</span></code> kwarg.</p>
+<p>The step is deined as</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\vec{q}_{k+1}
+&amp;=
+\vec{q}_k +
+\left(
+    \mat{A}_k
+\right)^{-1}
+\bf{g}_k \\
+%
+\mat{A}_k
+&amp;=
+{\mat{J}(\vec{q}_k)}^\top
+\mat{W}_e \
+{\mat{J}(\vec{q}_k)}
++
+\mat{W}_n\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mat{W}_n = \text{diag}(\vec{w_n})(\vec{w_n} \in \mathbb{R}^n_{&gt;0})\)</span> is a
+diagonal damping matrix. The damping matrix ensures that <span class="math notranslate nohighlight">\(\mat{A}_k\)</span> is
+non-singular and positive definite. The performance of the LM method largely depends
+on the choice of <span class="math notranslate nohighlight">\(\mat{W}_n\)</span>.</p>
+<p><em>Chan’s Method</em></p>
+<p>Chan proposed</p>
+<div class="math notranslate nohighlight">
+\[\mat{W}_n
+=
+λ E_k \mat{1}_n\]</div>
+<p>where λ is a constant which reportedly does not have much influence on performance.
+Use the kwarg <cite>k</cite> to adjust the weighting term λ.</p>
+<p><em>Sugihara’s Method</em></p>
+<p>Sugihara proposed</p>
+<div class="math notranslate nohighlight">
+\[\mat{W}_n
+=
+E_k \mat{1}_n + \text{diag}(\hat{\vec{w}}_n)\]</div>
+<p>where <span class="math notranslate nohighlight">\(\hat{\vec{w}}_n \in \mathbb{R}^n\)</span>, <span class="math notranslate nohighlight">\(\hat{w}_{n_i} = l^2 \sim 0.01 l^2\)</span>,
+and <span class="math notranslate nohighlight">\(l\)</span> is the length of a typical link within the manipulator. We provide the
+variable <cite>k</cite> as a kwarg to adjust the value of <span class="math notranslate nohighlight">\(w_n\)</span>.</p>
+<p><em>Wampler’s Method</em></p>
+<p>Wampler proposed <span class="math notranslate nohighlight">\(\vec{w_n}\)</span> to be a constant. This is set through the <cite>k</cite> kwarg.</p>
+<p class="rubric">Examples</p>
+<p>The following example gets the <code class="docutils literal notranslate"><span class="pre">ets</span></code> of a <code class="docutils literal notranslate"><span class="pre">panda</span></code> robot object, makes a goal
+pose <code class="docutils literal notranslate"><span class="pre">Tep</span></code>, and then solves for the joint coordinates which result in the pose
+<code class="docutils literal notranslate"><span class="pre">Tep</span></code> using the <cite>ikine_LM</cite> method.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
+<span class="go">IKSolution(q=array([-1.1159, -0.556 ,  0.9315, -2.1755,  0.4878,  1.8896,  0.4035]), success=True, iterations=10, searches=1, residual=9.74493648383957e-07, reason=&#39;Success&#39;)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The value for the <code class="docutils literal notranslate"><span class="pre">k</span></code> kwarg will depend on the <code class="docutils literal notranslate"><span class="pre">method</span></code> chosen and the arm you are
+using. Use the following as a rough guide <code class="docutils literal notranslate"><span class="pre">chan,</span> <span class="pre">k</span> <span class="pre">=</span> <span class="pre">1.0</span> <span class="pre">-</span> <span class="pre">0.01</span></code>,
+<code class="docutils literal notranslate"><span class="pre">wampler,</span> <span class="pre">k</span> <span class="pre">=</span> <span class="pre">0.01</span> <span class="pre">-</span> <span class="pre">0.0001</span></code>, and <code class="docutils literal notranslate"><span class="pre">sugihara,</span> <span class="pre">k</span> <span class="pre">=</span> <span class="pre">0.1</span> <span class="pre">-</span> <span class="pre">0.0001</span></code></p>
+<p>When using the this method, the initial joint coordinates <span class="math notranslate nohighlight">\(q_0\)</span>, should correspond
+to a non-singular manipulator pose, since it uses the manipulator Jacobian.</p>
+<p>This class supports null-space motion to assist with maximising manipulability and
+avoiding joint limits. These are enabled by setting kq and km to non-zero values.</p>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>J. Haviland, and P. Corke. “Manipulator Differential Kinematics Part I:
+Kinematics, Velocity, and Applications.” arXiv preprint arXiv:2207.01796 (2022).</p></li>
+<li><p>J. Haviland, and P. Corke. “Manipulator Differential Kinematics Part II:
+Acceleration and Advanced Applications.” arXiv preprint arXiv:2207.01794 (2022).</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="roboticstoolbox.robot.ETS.ETS.ik_nr.html#roboticstoolbox.robot.ETS.ETS.ik_NR" title="roboticstoolbox.robot.ETS.ETS.ik_NR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ik_NR</span></code></a></dt><dd><p>A fast numerical inverse kinematics solver using Newton-Raphson optimisation</p>
+</dd>
+<dt><a class="reference internal" href="roboticstoolbox.robot.ETS.ETS.ik_gn.html#roboticstoolbox.robot.ETS.ETS.ik_GN" title="roboticstoolbox.robot.ETS.ETS.ik_GN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ik_GN</span></code></a></dt><dd><p>A fast numerical inverse kinematics solver using Gauss-Newton optimisation</p>
+</dd>
+</dl>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.0.4: </span>Merged the Levemberg-Marquadt IK solvers into the ik_LM method</p>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

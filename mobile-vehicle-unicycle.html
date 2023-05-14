@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unicycle &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script>window.MathJax = {"tex": {"macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Differential steering" href="mobile-vehicle-diffsteer.html" />
+    <link rel="prev" title="Bicycle" href="mobile-vehicle-bicycle.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Robot Arms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="mobile.html">Mobile robots</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mobile-vehicle.html">Motion models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html">Bicycle</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Unicycle</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle"><code class="docutils literal notranslate"><span class="pre">Unicycle</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.__init__"><code class="docutils literal notranslate"><span class="pre">Unicycle.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.deriv"><code class="docutils literal notranslate"><span class="pre">Unicycle.deriv()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.u_limited"><code class="docutils literal notranslate"><span class="pre">Unicycle.u_limited()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.Fv"><code class="docutils literal notranslate"><span class="pre">Unicycle.Fv()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.Fx"><code class="docutils literal notranslate"><span class="pre">Unicycle.Fx()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.accel_max"><code class="docutils literal notranslate"><span class="pre">Unicycle.accel_max</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.add_driver"><code class="docutils literal notranslate"><span class="pre">Unicycle.add_driver()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.control"><code class="docutils literal notranslate"><span class="pre">Unicycle.control</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.dt"><code class="docutils literal notranslate"><span class="pre">Unicycle.dt</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.eval_control"><code class="docutils literal notranslate"><span class="pre">Unicycle.eval_control()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.f"><code class="docutils literal notranslate"><span class="pre">Unicycle.f()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.init"><code class="docutils literal notranslate"><span class="pre">Unicycle.init()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.limits_va"><code class="docutils literal notranslate"><span class="pre">Unicycle.limits_va()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.plot_xy"><code class="docutils literal notranslate"><span class="pre">Unicycle.plot_xy()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.plot_xyt"><code class="docutils literal notranslate"><span class="pre">Unicycle.plot_xyt()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.polygon"><code class="docutils literal notranslate"><span class="pre">Unicycle.polygon()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.q"><code class="docutils literal notranslate"><span class="pre">Unicycle.q</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.random"><code class="docutils literal notranslate"><span class="pre">Unicycle.random</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run"><code class="docutils literal notranslate"><span class="pre">Unicycle.run()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run_animation"><code class="docutils literal notranslate"><span class="pre">Unicycle.run_animation()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.speed_max"><code class="docutils literal notranslate"><span class="pre">Unicycle.speed_max</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.step"><code class="docutils literal notranslate"><span class="pre">Unicycle.step()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.stopsim"><code class="docutils literal notranslate"><span class="pre">Unicycle.stopsim()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.verbose"><code class="docutils literal notranslate"><span class="pre">Unicycle.verbose</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.workspace"><code class="docutils literal notranslate"><span class="pre">Unicycle.workspace</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.x"><code class="docutils literal notranslate"><span class="pre">Unicycle.x</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.x0"><code class="docutils literal notranslate"><span class="pre">Unicycle.x0</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.x_hist"><code class="docutils literal notranslate"><span class="pre">Unicycle.x_hist</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html">Differential steering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html">Vehicle abstract baseclass</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-animation.html">Animations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-drivers.html">Drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner.html">Path planning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-reactive.html">Reactive navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-SLAM.html">Localization and Mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="mobile.html">Mobile robots</a></li>
+          <li class="breadcrumb-item"><a href="mobile-vehicle.html">Motion models</a></li>
+      <li class="breadcrumb-item active">Unicycle</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="unicycle">
+<h1>Unicycle<a class="headerlink" href="#unicycle" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">Unicycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steer_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.Vehicle.VehicleBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleBase</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steer_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Create unicycle kinematic model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>W</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – vehicle width, defaults to 1</p></li>
+<li><p><strong>steer_max</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – maximum turn rate</p></li>
+<li><p><strong>kwargs</strong> – additional arguments passed to <a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleBase</span></code></a>
+constructor</p></li>
+</ul>
+</dd>
+</dl>
+<p>Model the motion of a unicycle model with equations of motion given by:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\dot{x} &amp;= v \cos \theta \\
+\dot{y} &amp;= v \sin \theta \\
+\dot{\theta} &amp;= \omega\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(v\)</span> is the velocity in body frame x-direction, and
+<span class="math notranslate nohighlight">\(\omega\)</span> is the turn rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.f" title="roboticstoolbox.mobile.Unicycle.f"><code class="xref py py-meth docutils literal notranslate"><span class="pre">f()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.deriv" title="roboticstoolbox.mobile.Unicycle.deriv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">deriv()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.Fx" title="roboticstoolbox.mobile.Unicycle.Fx"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Fx()</span></code></a> meth:<a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.Fv" title="roboticstoolbox.mobile.Unicycle.Fv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fv</span></code></a> <a class="reference internal" href="mobile-vehicle-vehicle.html#roboticstoolbox.mobile.Vehicle" title="roboticstoolbox.mobile.Vehicle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vehicle</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.deriv">
+<span class="sig-name descname"><span class="pre">deriv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle.deriv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.deriv" title="Permalink to this definition"></a></dt>
+<dd><p>Time derivative of state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>u</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – control input <span class="math notranslate nohighlight">\((v, \omega)\)</span></p></li>
+<li><p><strong>limits</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – limits are applied to input, default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>state derivative <span class="math notranslate nohighlight">\((\dot{x}, \dot{y}, \dot{\theta})\)</span></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(3)</p>
+</dd>
+</dl>
+<p>Returns the time derivative of state (3x1) at the state <code class="docutils literal notranslate"><span class="pre">x</span></code> with velocity <span class="math notranslate nohighlight">\(v\)</span>
+and turn rate <span class="math notranslate nohighlight">\(\omega\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\dot{x} &amp;= v \cos \theta \\
+\dot{y} &amp;= v \sin \theta \\
+\dot{\theta} &amp;= \omega\end{split}\]</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">limits</span></code> is True then speed, acceleration and steer-angle limits are
+applied to <code class="docutils literal notranslate"><span class="pre">u</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.f" title="roboticstoolbox.mobile.Unicycle.f"><code class="xref py py-meth docutils literal notranslate"><span class="pre">f()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.u_limited">
+<span class="sig-name descname"><span class="pre">u_limited</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Vehicle.html#Unicycle.u_limited"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.u_limited" title="Permalink to this definition"></a></dt>
+<dd><p>Apply vehicle velocity, acceleration and steering limits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>u</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – Desired vehicle inputs <span class="math notranslate nohighlight">\((v, \omega)\)</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Allowable vehicle inputs <span class="math notranslate nohighlight">\((v, \omega)\)</span></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>Velocity and acceleration limits are applied to <span class="math notranslate nohighlight">\(v\)</span> and
+turn rate limits are applied to <span class="math notranslate nohighlight">\(\omega\)</span>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.Fv">
+<span class="sig-name descname"><span class="pre">Fv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.Fv" title="Permalink to this definition"></a></dt>
+<dd><p>Jacobian of state transition function df/dv</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>odo</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – vehicle odometry <span class="math notranslate nohighlight">\((\delta_d, \delta_\theta)\)</span></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Jacobian matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(3,2)</p>
+</dd>
+</dl>
+<p>Returns the Jacobian matrix <span class="math notranslate nohighlight">\(\frac{\partial \vec{f}}{\partial \vec{v}}\)</span> for
+the given state and odometry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.f" title="roboticstoolbox.mobile.Unicycle.f"><code class="xref py py-meth docutils literal notranslate"><span class="pre">f()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.deriv" title="roboticstoolbox.mobile.Unicycle.deriv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">deriv()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.Fx" title="roboticstoolbox.mobile.Unicycle.Fx"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Fx()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.Fx">
+<span class="sig-name descname"><span class="pre">Fx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.Fx" title="Permalink to this definition"></a></dt>
+<dd><p>Jacobian of state transition function df/dx</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>odo</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – vehicle odometry <span class="math notranslate nohighlight">\((\delta_d, \delta_\theta)\)</span></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Jacobian matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(3,3)</p>
+</dd>
+</dl>
+<p>Returns the Jacobian matrix <span class="math notranslate nohighlight">\(\frac{\partial \vec{f}}{\partial \vec{x}}\)</span> for
+the given state and odometry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.f" title="roboticstoolbox.mobile.Unicycle.f"><code class="xref py py-meth docutils literal notranslate"><span class="pre">f()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.deriv" title="roboticstoolbox.mobile.Unicycle.deriv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">deriv()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.Fv" title="roboticstoolbox.mobile.Unicycle.Fv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Fv()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.accel_max">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">accel_max</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.accel_max" title="Permalink to this definition"></a></dt>
+<dd><p>Get maximum acceleration of vehicle (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>maximum acceleration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+<p>Set by <a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VehicleBase()</span></code></a> subclass constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.speed_max" title="roboticstoolbox.mobile.Unicycle.speed_max"><code class="xref py py-meth docutils literal notranslate"><span class="pre">speed_max()</span></code></a> <code class="xref py py-meth docutils literal notranslate"><span class="pre">steer_max()</span></code> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.u_limited" title="roboticstoolbox.mobile.Unicycle.u_limited"><code class="xref py py-meth docutils literal notranslate"><span class="pre">u_limited()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.add_driver">
+<span class="sig-name descname"><span class="pre">add_driver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">driver</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.add_driver" title="Permalink to this definition"></a></dt>
+<dd><p>Add a driver agent (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>driver</strong> (<em>VehicleDriverBase subclass</em>) – a driver agent object</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Deprecated.  Use <code class="docutils literal notranslate"><span class="pre">vehicle.control</span> <span class="pre">=</span> <span class="pre">driver</span></code> instead.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleDriverBase</span></code> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.control" title="roboticstoolbox.mobile.Unicycle.control"><code class="xref py py-meth docutils literal notranslate"><span class="pre">control()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.control">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">control</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.control" title="Permalink to this definition"></a></dt>
+<dd><p>Get/set vehicle control (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Getter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns vehicle’s control</p>
+</dd>
+<dt class="field-even">Setter<span class="colon">:</span></dt>
+<dd class="field-even"><p>Sets the vehicle’s control</p>
+</dd>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2-tuple, callable, interp1d or VehicleDriver</p>
+</dd>
+</dl>
+<p>This is the input to the vehicle during a simulation performed
+by <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run" title="roboticstoolbox.mobile.Unicycle.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>.  The control input can be:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>a constant tuple as the control inputs to the vehicle</p></li>
+<li><p>a function called as <code class="docutils literal notranslate"><span class="pre">f(vehicle,</span> <span class="pre">t,</span> <span class="pre">x)</span></code> that returns a tuple</p></li>
+<li><p>an interpolator called as <code class="docutils literal notranslate"><span class="pre">f(t)</span></code> that returns a tuple</p></li>
+<li><p>a driver agent, subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">driversVehicleDriverBase</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">Bicycle</span><span class="p">,</span> <span class="n">RandomPath</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">RandomPath</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">bike</span><span class="p">)</span>
+<span class="go">Bicycle: x = [ 0, 0, 0 ]</span>
+<span class="go">  L=1, steer_max=1.41372, speed_max=inf, accel_max=inf</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run" title="roboticstoolbox.mobile.Unicycle.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.eval_control" title="roboticstoolbox.mobile.Unicycle.eval_control"><code class="xref py py-meth docutils literal notranslate"><span class="pre">eval_control()</span></code></a> <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html#scipy.interpolate.interp1d" title="(in SciPy v1.10.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scipy.interpolate.interp1d</span></code></a> <a class="reference internal" href="mobile-drivers.html#roboticstoolbox.mobile.drivers.VehicleDriverBase" title="roboticstoolbox.mobile.drivers.VehicleDriverBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleDriverBase</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.dt">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.dt" title="Permalink to this definition"></a></dt>
+<dd><p>Get sample time (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>discrete time step for simulation</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+<p>Set by <a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VehicleBase()</span></code></a> subclass constructor.  Used by
+<a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.step" title="roboticstoolbox.mobile.Unicycle.step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">step()</span></code></a> to update state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run" title="roboticstoolbox.mobile.Unicycle.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.eval_control">
+<span class="sig-name descname"><span class="pre">eval_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.eval_control" title="Permalink to this definition"></a></dt>
+<dd><p>Evaluate vehicle control input (superclass method)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>control</strong> (<em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.11)"><em>type</em></a><em>]</em>) – vehicle control</p></li>
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y,   heta)\)</span></p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – bad control</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>vehicle control inputs</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>Evaluates the control for this time step and state. Control is set
+by the <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.control" title="roboticstoolbox.mobile.Unicycle.control"><code class="xref py py-meth docutils literal notranslate"><span class="pre">control()</span></code></a> property to:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>a constant tuple as the control inputs to the vehicle</p></li>
+<li><p>a function called as <code class="docutils literal notranslate"><span class="pre">f(vehicle,</span> <span class="pre">t,</span> <span class="pre">x)</span></code> that returns a tuple</p></li>
+<li><p>an interpolator called as f(t) that returns a tuple</p></li>
+<li><p>a driver agent, subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleDriverBase</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>Vehicle steering, speed and acceleration limits are applied to the
+result before being input to the vehicle model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run" title="roboticstoolbox.mobile.Unicycle.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.control" title="roboticstoolbox.mobile.Unicycle.control"><code class="xref py py-meth docutils literal notranslate"><span class="pre">control()</span></code></a> <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.interpolate.interp1d()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.f">
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.f" title="Permalink to this definition"></a></dt>
+<dd><p>State transition function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>ndarray</em><em>(</em><em>n</em><em>,</em><em>3</em><em>)</em>) – vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p></li>
+<li><p><strong>odo</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – vehicle odometry <span class="math notranslate nohighlight">\((\delta_d, \delta_\theta)\)</span></p></li>
+<li><p><strong>v</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – additive odometry noise, defaults to (0,0)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>predicted vehicle state</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(3)</p>
+</dd>
+</dl>
+<p>Predict the next state based on current state and odometry
+value.  <code class="docutils literal notranslate"><span class="pre">v</span></code> is a random variable that represents additive
+odometry noise for simulation purposes.</p>
+<div class="math notranslate nohighlight">
+\[f: \vec{x}_k, \delta_d, \delta_\theta \mapsto \vec{x}_{k+1}\]</div>
+<p>For particle filters it is useful to apply the odometry to the
+states of all particles and this can be achieved if <code class="docutils literal notranslate"><span class="pre">x</span></code> is a 2D
+array with one state per row.  <code class="docutils literal notranslate"><span class="pre">v</span></code> is ignored in this case.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is the state update equation used for EKF localization.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.deriv" title="roboticstoolbox.mobile.Unicycle.deriv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">deriv()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.Fx" title="roboticstoolbox.mobile.Unicycle.Fx"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Fx()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.Fv" title="roboticstoolbox.mobile.Unicycle.Fv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Fv()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.init">
+<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.init" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize for simulation (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x0</strong> (<em>array_like</em><em>(</em><em>3</em><em>) or </em><em>array_like</em><em>(</em><em>2</em><em>)</em>) – Initial state, defaults to value given to Vehicle constructor</p>
+</dd>
+</dl>
+<p>Performs the following initializations:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Clears the state history</p></li>
+<li><p>Set the private random number generator to initial value</p></li>
+<li><p>Sets state <span class="math notranslate nohighlight">\(x = x_0\)</span></p></li>
+<li><p>Sets previous velocity to zero</p></li>
+<li><p>If a driver is attached, initialize it</p></li>
+<li><p>If animation is enabled, initialize that</p></li>
+</ol>
+</div></blockquote>
+<p>If animation is enabled by constructor and no animation object is given,
+use a default <code class="docutils literal notranslate"><span class="pre">VehiclePolygon(&quot;car&quot;)</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="mobile-vehicle-animation.html#roboticstoolbox.mobile.VehicleAnimationBase" title="roboticstoolbox.mobile.VehicleAnimationBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleAnimationBase</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run" title="roboticstoolbox.mobile.Unicycle.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.limits_va">
+<span class="sig-name descname"><span class="pre">limits_va</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_prev</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.limits_va" title="Permalink to this definition"></a></dt>
+<dd><p>Apply velocity and acceleration limits (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – desired velocity</p></li>
+<li><p><strong>v_prev</strong> (<em>list with single element</em>) – previous velocity, reference to list</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>allowed velocity</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+<p>Determine allowable velocity given desired velocity, speed and
+acceleration limits.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function requires previous velocity, <code class="docutils literal notranslate"><span class="pre">v_prev</span></code> to enable
+acceleration limiting.  This is passed as a reference to a mutable value,
+a single-element list. This is reset to zero at the start of each simulation.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.plot_xy">
+<span class="sig-name descname"><span class="pre">plot_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.plot_xy" title="Permalink to this definition"></a></dt>
+<dd><p>Plot xy-path from history</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block until plot dismissed, defaults to None</p></li>
+<li><p><strong>args</strong> – positional arguments passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></p></li>
+<li><p><strong>kwargs</strong> – keyword arguments passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<p>The <span class="math notranslate nohighlight">\((x,y)\)</span> trajectory from the simulation history is plotted as
+<span class="math notranslate nohighlight">\(x\)</span> vs :math:<a href="#id1"><span class="problematic" id="id2">`</span></a>y.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run" title="roboticstoolbox.mobile.Unicycle.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.plot_xyt" title="roboticstoolbox.mobile.Unicycle.plot_xyt"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_xyt()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.plot_xyt">
+<span class="sig-name descname"><span class="pre">plot_xyt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.plot_xyt" title="Permalink to this definition"></a></dt>
+<dd><p>Plot configuration vs time from history</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block until plot dismissed, defaults to False</p></li>
+<li><p><strong>args</strong> – positional arguments passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></p></li>
+<li><p><strong>kwargs</strong> – keyword arguments passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="(in Matplotlib v3.7.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot()</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<p>The <span class="math notranslate nohighlight">\((x,y,        heta)\)</span> trajectory from the simulation history is plotted
+against time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run" title="roboticstoolbox.mobile.Unicycle.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.plot_xy" title="roboticstoolbox.mobile.Unicycle.plot_xy"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_xy()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.polygon">
+<span class="sig-name descname"><span class="pre">polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.polygon" title="Permalink to this definition"></a></dt>
+<dd><p>Bounding polygon at vehicle configuration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>q</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em>) – vehicle configuration <span class="math notranslate nohighlight">\((x, y,   heta)\)</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>bounding polygon of vehicle at configuration <code class="docutils literal notranslate"><span class="pre">q</span></code></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://petercorke.github.io/spatialmath-python/classes-2d.html#spatialmath.geom2d.Polygon2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code></a></p>
+</dd>
+</dl>
+<p>The bounding polygon of the vehicle is returned for the configuration
+<code class="docutils literal notranslate"><span class="pre">q</span></code>.  Can be used for collision checking using the <a class="reference external" href="https://petercorke.github.io/spatialmath-python/classes-2d.html#spatialmath.geom2d.Polygon2.intersects" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">intersects()</span></code></a>
+method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://petercorke.github.io/spatialmath-python/classes-2d.html#spatialmath.geom2d.Polygon2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.q">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.q" title="Permalink to this definition"></a></dt>
+<dd><p>Get vehicle state/configuration (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(3)</p>
+</dd>
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.x" title="roboticstoolbox.mobile.Unicycle.x"><code class="xref py py-meth docutils literal notranslate"><span class="pre">x()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.random">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.random" title="Permalink to this definition"></a></dt>
+<dd><p>Get private random number generator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy random number generator</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a></p>
+</dd>
+</dl>
+<p>Has methods including:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.integers.html#numpy.random.Generator.integers" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integers(low,</span> <span class="pre">high,</span> <span class="pre">size,</span> <span class="pre">endpoint)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.random.html#numpy.random.Generator.random" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">random(size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.uniform.html#numpy.random.Generator.uniform" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform(low,</span> <span class="pre">high,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.normal.html#numpy.random.Generator.normal" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">normal(mean,</span> <span class="pre">std,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.multivariate_normal.html#numpy.random.Generator.multivariate_normal" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">multivariate_normal(mean,</span> <span class="pre">covar,</span> <span class="pre">size)</span></code></a></p></li>
+</ul>
+</div></blockquote>
+<p>The generator is initialized with the seed provided at constructor
+time every time <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.init" title="roboticstoolbox.mobile.Unicycle.init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">init()</span></code></a> is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.init" title="roboticstoolbox.mobile.Unicycle.init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">init()</span></code></a> <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="(in NumPy v1.24)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.random.default_rng()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.run" title="Permalink to this definition"></a></dt>
+<dd><p>Simulate motion of vehicle (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – Simulation time in seconds, defaults to 10</p></li>
+<li><p><strong>x0</strong> (<em>array_like</em><em>(</em><em>3</em><em>) or </em><em>array_like</em><em>(</em><em>2</em><em>)</em>) – Initial state, defaults to value given to Vehicle constructor</p></li>
+<li><p><strong>control</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>callable</em><em>, </em><em>driving agent</em>) – vehicle control inputs, defaults to None</p></li>
+<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Enable graphical animation of vehicle, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>State trajectory, each row is <span class="math notranslate nohighlight">\((x,y,\theta)\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(n,3)</p>
+</dd>
+</dl>
+<p>Runs the vehicle simulation for <code class="docutils literal notranslate"><span class="pre">T</span></code> seconds and optionally plots
+an animation.  The method <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.step" title="roboticstoolbox.mobile.Unicycle.step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">step()</span></code></a> performs each time step.</p>
+<p>The control inputs are provided by <code class="docutils literal notranslate"><span class="pre">control</span></code> which can be:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>a constant tuple as the control inputs to the vehicle</p></li>
+<li><p>a function called as <code class="docutils literal notranslate"><span class="pre">f(vehicle,</span> <span class="pre">t,</span> <span class="pre">x)</span></code> that returns a tuple</p></li>
+<li><p>an interpolator called as <code class="docutils literal notranslate"><span class="pre">f(t)</span></code> that returns a tuple, see
+SciPy interp1d</p></li>
+<li><p>a driver agent, subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleDriverBase</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>This is evaluated by <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.eval_control" title="roboticstoolbox.mobile.Unicycle.eval_control"><code class="xref py py-meth docutils literal notranslate"><span class="pre">eval_control()</span></code></a> which applies velocity,
+acceleration and steering limits.</p>
+<p>The simulation can be stopped prematurely by the control function
+calling <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.stopsim" title="roboticstoolbox.mobile.Unicycle.stopsim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">stopsim()</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>the simulation is fixed-time step with the step given by the <code class="docutils literal notranslate"><span class="pre">dt</span></code>
+attribute set by the constructor.</p></li>
+<li><p>integration uses rectangular integration.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.init" title="roboticstoolbox.mobile.Unicycle.init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">init()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.step" title="roboticstoolbox.mobile.Unicycle.step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">step()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.control" title="roboticstoolbox.mobile.Unicycle.control"><code class="xref py py-meth docutils literal notranslate"><span class="pre">control()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run_animation" title="roboticstoolbox.mobile.Unicycle.run_animation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run_animation()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.run_animation">
+<span class="sig-name descname"><span class="pre">run_animation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.run_animation" title="Permalink to this definition"></a></dt>
+<dd><p>Simulate motion of vehicle (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – Simulation time in seconds, defaults to 10</p></li>
+<li><p><strong>x0</strong> (<em>array_like</em><em>(</em><em>3</em><em>) or </em><em>array_like</em><em>(</em><em>2</em><em>)</em>) – Initial state, defaults to value given to Vehicle constructor</p></li>
+<li><p><strong>control</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>callable</em><em>, </em><em>driving agent</em>) – vehicle control inputs, defaults to None</p></li>
+<li><p><strong>format</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – Output format</p></li>
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – File name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Matplotlib animation object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.animation.FuncAnimation()</span></code></p>
+</dd>
+</dl>
+<p>Runs the vehicle simulation for <code class="docutils literal notranslate"><span class="pre">T</span></code> seconds and returns an animation
+in various formats:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>``format``    ``file``   description
+============  =========  ============================
+``&quot;html&quot;``    str, None  return HTML5 video
+``&quot;jshtml&quot;``  str, None  return JS+HTML video
+``&quot;gif&quot;``     str        return animated GIF
+``&quot;mp4&quot;``     str        return MP4/H264 video
+``None``                 return a ``FuncAnimation`` object
+</pre></div>
+</div>
+<p>The allowables types for <code class="docutils literal notranslate"><span class="pre">file</span></code> are given in the second column.  A str
+value is the file name.  If <code class="docutils literal notranslate"><span class="pre">None</span></code> is an option then return the video as a string.</p>
+<p>For the last case, a reference to the animation object must be held if used for
+animation in a Jupyter cell:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">anim</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">run_animation</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The control inputs are provided by <code class="docutils literal notranslate"><span class="pre">control</span></code> which can be:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>a constant tuple as the control inputs to the vehicle</p></li>
+<li><p>a function called as <code class="docutils literal notranslate"><span class="pre">f(vehicle,</span> <span class="pre">t,</span> <span class="pre">x)</span></code> that returns a tuple</p></li>
+<li><p>an interpolator called as <code class="docutils literal notranslate"><span class="pre">f(t)</span></code> that returns a tuple, see
+SciPy interp1d</p></li>
+<li><p>a driver agent, subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleDriverBase</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>This is evaluated by <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.eval_control" title="roboticstoolbox.mobile.Unicycle.eval_control"><code class="xref py py-meth docutils literal notranslate"><span class="pre">eval_control()</span></code></a> which applies velocity,
+acceleration and steering limits.</p>
+<p>The simulation can be stopped prematurely by the control function
+calling <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.stopsim" title="roboticstoolbox.mobile.Unicycle.stopsim"><code class="xref py py-meth docutils literal notranslate"><span class="pre">stopsim()</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>the simulation is fixed-time step with the step given by the <code class="docutils literal notranslate"><span class="pre">dt</span></code>
+attribute set by the constructor.</p></li>
+<li><p>integration uses rectangular integration.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.init" title="roboticstoolbox.mobile.Unicycle.init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">init()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.step" title="roboticstoolbox.mobile.Unicycle.step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">step()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.control" title="roboticstoolbox.mobile.Unicycle.control"><code class="xref py py-meth docutils literal notranslate"><span class="pre">control()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run_animation" title="roboticstoolbox.mobile.Unicycle.run_animation"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run_animation()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.speed_max">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">speed_max</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.speed_max" title="Permalink to this definition"></a></dt>
+<dd><p>Get maximum speed of vehicle (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>maximum speed</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+<p>Set by <a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VehicleBase()</span></code></a> subclass constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.accel_max" title="roboticstoolbox.mobile.Unicycle.accel_max"><code class="xref py py-meth docutils literal notranslate"><span class="pre">accel_max()</span></code></a> <code class="xref py py-meth docutils literal notranslate"><span class="pre">steer_max()</span></code> <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.u_limited" title="roboticstoolbox.mobile.Unicycle.u_limited"><code class="xref py py-meth docutils literal notranslate"><span class="pre">u_limited()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pause</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.step" title="Permalink to this definition"></a></dt>
+<dd><p>Step simulator by one time step (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>odometry <span class="math notranslate nohighlight">\((\delta_d, \delta_\theta)\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2)</p>
+</dd>
+</dl>
+<ol class="arabic simple">
+<li><p>Obtain the vehicle control inputs</p></li>
+<li><p>Integrate the vehicle state forward one timestep</p></li>
+<li><p>Updates the stored state and state history</p></li>
+<li><p>Update animation if enabled.</p></li>
+<li><p>Returns the odometry</p></li>
+</ol>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">veh.step((vel,</span> <span class="pre">steer))</span></code> for a Bicycle vehicle model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">veh.step((vel,</span> <span class="pre">vel_diff))</span></code> for a Unicycle vehicle model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">veh.step()</span></code> as above but control is taken from the <code class="docutils literal notranslate"><span class="pre">control</span></code>
+attribute which might be a function or driver agent.</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">Bicycle</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">()</span>  <span class="c1"># default bicycle model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">step</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span>  <span class="c1"># one step: v=1, γ=0.2</span>
+<span class="go">array([0.1   , 0.0203])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">x</span>
+<span class="go">array([0.1   , 0.    , 0.0203])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">step</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">))</span>  <span class="c1"># another step: v=1, γ=0.2</span>
+<span class="go">array([0.1   , 0.0203])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bike</span><span class="o">.</span><span class="n">x</span>
+<span class="go">array([0.2   , 0.002 , 0.0405])</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Vehicle control input limits are applied.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.control" title="roboticstoolbox.mobile.Unicycle.control"><code class="xref py py-func docutils literal notranslate"><span class="pre">control()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">update()</span></code>, <a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run" title="roboticstoolbox.mobile.Unicycle.run"><code class="xref py py-func docutils literal notranslate"><span class="pre">run()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.stopsim">
+<span class="sig-name descname"><span class="pre">stopsim</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.stopsim" title="Permalink to this definition"></a></dt>
+<dd><p>Stop the simulation (superclass)</p>
+<p>A control function can stop the simulation initated by the <code class="docutils literal notranslate"><span class="pre">run</span></code>
+method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run" title="roboticstoolbox.mobile.Unicycle.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.verbose">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.verbose" title="Permalink to this definition"></a></dt>
+<dd><p>Get verbosity (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>verbosity level</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+<p>Set by <a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleBase</span></code></a> subclass constructor.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.workspace">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">workspace</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.workspace" title="Permalink to this definition"></a></dt>
+<dd><p>Size of robot workspace (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>workspace bounds [xmin, xmax, ymin, ymax]</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(4)</p>
+</dd>
+</dl>
+<p>Returns the bounds of the workspace as specified by constructor
+option <code class="docutils literal notranslate"><span class="pre">workspace</span></code></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.x">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.x" title="Permalink to this definition"></a></dt>
+<dd><p>Get vehicle state/configuration (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(3)</p>
+</dd>
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.q" title="roboticstoolbox.mobile.Unicycle.q"><code class="xref py py-meth docutils literal notranslate"><span class="pre">q()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.x0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x0</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.x0" title="Permalink to this definition"></a></dt>
+<dd><p>Get vehicle initial state/configuration (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Vehicle state <span class="math notranslate nohighlight">\((x, y, \theta)\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(3)</p>
+</dd>
+</dl>
+<p>Set by <a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleBase</span></code></a> subclass constructor.  The state is set to this value
+at the beginning of each simulation run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run" title="roboticstoolbox.mobile.Unicycle.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Unicycle.x_hist">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_hist</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Unicycle.x_hist" title="Permalink to this definition"></a></dt>
+<dd><p>Get vehicle state/configuration history (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Vehicle state history</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(n,3)</p>
+</dd>
+</dl>
+<p>The state <span class="math notranslate nohighlight">\((x, y,         heta)\)</span> at each time step resulting from a
+simulation run, one row per timestep.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Unicycle.run" title="roboticstoolbox.mobile.Unicycle.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

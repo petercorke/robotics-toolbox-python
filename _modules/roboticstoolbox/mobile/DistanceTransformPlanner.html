@@ -7,6 +7,7 @@
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -28,12 +29,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -41,7 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Robot Arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
 </ul>
@@ -56,10 +61,10 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">roboticstoolbox.mobile.DistanceTransformPlanner</li>
       <li class="wy-breadcrumbs-aside">
@@ -87,7 +92,7 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.mobile.PlannerBase</span> <span class="kn">import</span> <span class="n">PlannerBase</span>
 
 
-<div class="viewcode-block" id="DistanceTransformPlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner">[docs]</a><span class="k">class</span> <span class="nc">DistanceTransformPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
+<div class="viewcode-block" id="DistanceTransformPlanner"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.DistanceTransformPlanner">[docs]</a><span class="k">class</span> <span class="nc">DistanceTransformPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Distance transform path planner</span>
 
@@ -113,7 +118,7 @@
 
 <span class="sd">    The map is described by a 2D occupancy ``occgrid`` whose elements are zero</span>
 <span class="sd">    if traversable of nonzero if untraversable, ie. an obstacle.</span>
-<span class="sd">    </span>
+
 <span class="sd">    The cells are assumed to be unit squares. Crossing the cell horizontally or</span>
 <span class="sd">    vertically is a travel distance of 1, and for the Euclidean distance</span>
 <span class="sd">    measure, the crossing the cell diagonally is a distance of :math:`\sqrt{2}`.</span>
@@ -179,7 +184,7 @@
 
         <span class="k">return</span> <span class="n">s</span>
 
-<div class="viewcode-block" id="DistanceTransformPlanner.plan"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="DistanceTransformPlanner.plan"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.DistanceTransformPlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">summary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plan path using distance transform</span>
 
@@ -208,10 +213,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span>
             <span class="n">goal</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">,</span>
             <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_metric</span><span class="p">,</span>
-            <span class="n">animate</span><span class="o">=</span><span class="n">animate</span>
+            <span class="n">animate</span><span class="o">=</span><span class="n">animate</span><span class="p">,</span>
+            <span class="n">summary</span><span class="o">=</span><span class="n">summary</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DistanceTransformPlanner.next"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+<div class="viewcode-block" id="DistanceTransformPlanner.next"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.DistanceTransformPlanner.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find next point on the path</span>
 
@@ -220,7 +226,7 @@
 <span class="sd">        :raises RuntimeError: no plan has been computed</span>
 <span class="sd">        :return: next robot position</span>
 <span class="sd">        :rtype: ndarray(2)</span>
-<span class="sd">        </span>
+
 <span class="sd">        Return the robot position that is one step closer to the goal. Called</span>
 <span class="sd">        by :meth:`query` to find a path from start to goal.</span>
 
@@ -270,7 +276,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">next</span></div>
 
-<div class="viewcode-block" id="DistanceTransformPlanner.plot_3d"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DistanceTransformPlanner.plot_3d">[docs]</a>    <span class="k">def</span> <span class="nf">plot_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DistanceTransformPlanner.plot_3d"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.DistanceTransformPlanner.plot_3d">[docs]</a>    <span class="k">def</span> <span class="nf">plot_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot path on 3D cost surface</span>
 
@@ -288,7 +294,7 @@
 <span class="sd">            line/surface handling.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">gca</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
 
         <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distancemap</span>
         <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">distance</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">distance</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
@@ -346,7 +352,7 @@
     <span class="c1"># - other cells are inf</span>
     <span class="c1"># - goal is zero</span>
 
-    <span class="n">goal</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">goal</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="n">goal</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">goal</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
     <span class="n">distance</span> <span class="o">=</span> <span class="n">occgrid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     <span class="n">distance</span><span class="p">[</span><span class="n">occgrid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># assign nan to obstacle cells</span>
@@ -471,14 +477,11 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

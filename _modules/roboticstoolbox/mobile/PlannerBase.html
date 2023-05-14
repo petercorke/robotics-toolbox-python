@@ -7,6 +7,7 @@
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -28,12 +29,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -41,7 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Robot Arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
 </ul>
@@ -56,10 +61,10 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">roboticstoolbox.mobile.PlannerBase</li>
       <li class="wy-breadcrumbs-aside">
@@ -83,6 +88,8 @@
 <span class="c1"># from scipy.ndimage import interpolation</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base.transforms2d</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base.vectors</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">spatialmath.base.argcheck</span> <span class="kn">import</span> <span class="n">getvector</span>
+<span class="kn">from</span> <span class="nn">spatialmath.base.graphics</span> <span class="kn">import</span> <span class="n">axes_logic</span><span class="p">,</span> <span class="n">plotvol2</span><span class="p">,</span> <span class="n">axes_get_scale</span>
 
 <span class="c1"># from spatialmath import SE2, SE3</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span>
@@ -102,7 +109,7 @@
     <span class="n">_progress</span> <span class="o">=</span> <span class="kc">False</span>
 
 
-<div class="viewcode-block" id="PlannerBase"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase">[docs]</a><span class="k">class</span> <span class="nc">PlannerBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="PlannerBase"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase">[docs]</a><span class="k">class</span> <span class="nc">PlannerBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mobile robot motion planner (superclass)</span>
 
@@ -188,7 +195,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_endpoint</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_endpoint</span><span class="p">(</span><span class="n">goal</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PlannerBase.__str__"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase.__str__">[docs]</a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compact representation of the planner</span>
 
@@ -196,13 +203,13 @@
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: &quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_occgrid&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  Start: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  Goal: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">goal</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">return</span> <span class="n">s</span>
+        <span class="k">return</span> <span class="n">s</span></div>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -228,7 +235,7 @@
         <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isoccupied</span><span class="p">(</span><span class="n">start</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Start location inside obstacle&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">goal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -258,7 +265,7 @@
         <span class="k">if</span> <span class="n">goal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isoccupied</span><span class="p">(</span><span class="n">goal</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Goal location inside obstacle&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">goal</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">goal</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -309,7 +316,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_private_random</span>
 
-<div class="viewcode-block" id="PlannerBase.random_init"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.random_init">[docs]</a>    <span class="k">def</span> <span class="nf">random_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PlannerBase.random_init"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase.random_init">[docs]</a>    <span class="k">def</span> <span class="nf">random_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize private random number generator</span>
 
@@ -329,7 +336,7 @@
     <span class="c1">#     if self._seed is not None:</span>
     <span class="c1">#         self._private_random = np.random.default_rng(seed=self._seed)</span>
 
-<div class="viewcode-block" id="PlannerBase.plan"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PlannerBase.plan"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plan path (superclass)</span>
 
@@ -357,7 +364,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span>
 
-<div class="viewcode-block" id="PlannerBase.isoccupied"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.isoccupied">[docs]</a>    <span class="k">def</span> <span class="nf">isoccupied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<div class="viewcode-block" id="PlannerBase.isoccupied"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase.isoccupied">[docs]</a>    <span class="k">def</span> <span class="nf">isoccupied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test if point is occupied (superclass)</span>
 
@@ -379,7 +386,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="o">.</span><span class="n">isoccupied</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PlannerBase.validate_endpoint"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.validate_endpoint">[docs]</a>    <span class="k">def</span> <span class="nf">validate_endpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PlannerBase.validate_endpoint"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase.validate_endpoint">[docs]</a>    <span class="k">def</span> <span class="nf">validate_endpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate start or goal point</span>
 
@@ -396,12 +403,12 @@
 <span class="sd">        :seealso: :meth:`isoccupied` :meth:`occgrid`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">p</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ndims</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">getvector</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ndims</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isoccupied</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Point is inside obstacle&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">p</span></div>
 
-<div class="viewcode-block" id="PlannerBase.progress_start"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.progress_start">[docs]</a>    <span class="k">def</span> <span class="nf">progress_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<div class="viewcode-block" id="PlannerBase.progress_start"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase.progress_start">[docs]</a>    <span class="k">def</span> <span class="nf">progress_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize a progress bar (superclass)</span>
 
@@ -426,7 +433,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(percent).1f%%</span><span class="s2"> - </span><span class="si">%(eta)d</span><span class="s2">s&quot;</span>
             <span class="p">)</span></div>
 
-<div class="viewcode-block" id="PlannerBase.progress_next"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.progress_next">[docs]</a>    <span class="k">def</span> <span class="nf">progress_next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PlannerBase.progress_next"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase.progress_next">[docs]</a>    <span class="k">def</span> <span class="nf">progress_next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Increment a progress bar (superclass)</span>
 
@@ -446,7 +453,7 @@
         <span class="k">if</span> <span class="n">_progress</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bar</span><span class="o">.</span><span class="n">next</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="PlannerBase.progress_end"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.progress_end">[docs]</a>    <span class="k">def</span> <span class="nf">progress_end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PlannerBase.progress_end"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase.progress_end">[docs]</a>    <span class="k">def</span> <span class="nf">progress_end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finalize a progress bar  (superclass)</span>
 
@@ -466,7 +473,7 @@
         <span class="k">if</span> <span class="n">_progress</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_bar</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="PlannerBase.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span>
+<div class="viewcode-block" id="PlannerBase.query"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">next</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">movie</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
@@ -529,7 +536,7 @@
 
             <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PlannerBase.plot"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span>
+<div class="viewcode-block" id="PlannerBase.plot"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">line</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -547,7 +554,7 @@
         <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">block</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">bgargs</span><span class="o">=</span><span class="p">{},</span>
         <span class="o">**</span><span class="n">unused</span><span class="p">,</span>
     <span class="p">):</span>
@@ -658,7 +665,6 @@
 <span class="sd">        :seealso: :meth:`plot_bg` :func:`base.plot_poly`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># create default markers</span>
-
         <span class="c1"># passed to Matplotlib plot()</span>
         <span class="k">if</span> <span class="n">start_marker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">start_marker</span> <span class="o">=</span> <span class="p">{</span>
@@ -708,7 +714,7 @@
         <span class="k">if</span> <span class="n">configspace</span> <span class="ow">and</span> <span class="n">ndims</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;path should have </span><span class="si">{</span><span class="n">ndims</span><span class="si">}</span><span class="s2"> rows&quot;</span><span class="p">)</span>
 
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">axes_logic</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ndims</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">axes_logic</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">ndims</span><span class="p">)</span>
 
         <span class="c1"># plot occupancy grid background</span>
         <span class="k">if</span> <span class="n">background</span><span class="p">:</span>
@@ -807,7 +813,7 @@
 
         <span class="k">elif</span> <span class="n">ndims</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ndims</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="c1"># 2d projection of 3d plot, show start/goal configuration</span>
-            <span class="n">scale</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">axes_get_scale</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="n">axes_get_scale</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">marker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">marker</span> <span class="o">=</span> <span class="n">VehiclePolygon</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="s2">&quot;car&quot;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
@@ -837,7 +843,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\theta$&quot;</span><span class="p">)</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">block</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ax</span></div>
 
@@ -866,13 +873,14 @@
                 <span class="p">]</span>
             <span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
-<div class="viewcode-block" id="PlannerBase.plot_bg"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.plot_bg">[docs]</a>    <span class="k">def</span> <span class="nf">plot_bg</span><span class="p">(</span>
+<div class="viewcode-block" id="PlannerBase.plot_bg"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase.plot_bg">[docs]</a>    <span class="k">def</span> <span class="nf">plot_bg</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">inflated</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">block</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">unused</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -900,9 +908,9 @@
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span><span class="p">,</span> <span class="n">BaseOccupancyGrid</span><span class="p">):</span>
-            <span class="n">ax</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">plotvol2</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span><span class="o">.</span><span class="n">workspace</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plotvol2</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_occgrid</span><span class="o">.</span><span class="n">workspace</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ax</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">axes_logic</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">axes_logic</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="c1"># create color map for free space + obstacle:</span>
         <span class="c1">#   free space, color index = 1, white, alpha=0 to allow background and grid lines to show</span>
@@ -955,8 +963,8 @@
             <span class="k">if</span> <span class="n">colorbar</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span>
                     <span class="n">scalar_mappable_c_map</span><span class="p">,</span>
-                    <span class="n">shrink</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span>
-                    <span class="n">aspect</span><span class="o">=</span><span class="mi">20</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">,</span>
+                    <span class="c1"># shrink=0.75,</span>
+                    <span class="c1"># aspect=20 * 0.75,</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Distance&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -974,7 +982,7 @@
             <span class="c1"># overlay obstacles</span>
             <span class="n">c_map</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">ListedColormap</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
             <span class="c1"># self.occgrid.plot(image, cmap=c_map, zorder=1)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">c_map</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">c_map</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>  <span class="c1"># create white background</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;x (cells)&quot;</span><span class="p">)</span>
@@ -985,10 +993,11 @@
         <span class="c1"># ax.set_xlim(ax.get_xlim())</span>
         <span class="c1"># ax.set_ylim(ax.get_ylim())</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+        <span class="c1"># plt.draw()</span>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PlannerBase.message"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PlannerBase.message">[docs]</a>    <span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PlannerBase.message"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase.message">[docs]</a>    <span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print message to message channel</span>
 
@@ -1081,14 +1090,11 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

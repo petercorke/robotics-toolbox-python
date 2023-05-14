@@ -7,6 +7,7 @@
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -28,12 +29,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -41,7 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Robot Arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
 </ul>
@@ -56,10 +61,10 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">roboticstoolbox.mobile.PRMPlanner</li>
       <li class="wy-breadcrumbs-aside">
@@ -82,16 +87,18 @@
 <span class="c1"># from spatialmath.base.animate import Animate</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base.transforms2d</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base.vectors</span> <span class="kn">import</span> <span class="o">*</span>
+
 <span class="c1"># from spatialmath.pose2d import SE2</span>
 <span class="c1"># from spatialmath.base import animate</span>
 <span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span><span class="p">,</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.mobile.PlannerBase</span> <span class="kn">import</span> <span class="n">PlannerBase</span>
 <span class="kn">from</span> <span class="nn">pgraph</span> <span class="kn">import</span> <span class="n">UGraph</span>
+
 <span class="c1"># from progress.bar import FillingCirclesBar</span>
 
 
-<div class="viewcode-block" id="PRMPlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PRMPlanner">[docs]</a><span class="k">class</span> <span class="nc">PRMPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
+<div class="viewcode-block" id="PRMPlanner"><a class="viewcode-back" href="../../../mobile-planner-continuous.html#roboticstoolbox.mobile.PRMPlanner">[docs]</a><span class="k">class</span> <span class="nc">PRMPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Distance transform path planner</span>
 
@@ -134,6 +141,7 @@
 <span class="sd">    :author: Peter Corke</span>
 <span class="sd">    :seealso: :class:`PlannerBase`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">occgrid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">npoints</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">dist_thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">occgrid</span><span class="p">,</span> <span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -154,7 +162,7 @@
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">s</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">s</span>
 
     <span class="nd">@property</span>
@@ -198,7 +206,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span>
 
-
     <span class="k">def</span> <span class="nf">_create_roadmap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npoints</span><span class="p">,</span> <span class="n">dist_thresh</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># a = Animate(animate, fps=5)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">progress_start</span><span class="p">(</span><span class="n">npoints</span><span class="p">)</span>
@@ -225,17 +232,17 @@
                 <span class="c1"># skip self</span>
                 <span class="k">if</span> <span class="n">vertex</span> <span class="ow">is</span> <span class="n">othervertex</span><span class="p">:</span>
                     <span class="k">continue</span>
-                <span class="c1"># add (distance, vertex) tuples to list </span>
+                <span class="c1"># add (distance, vertex) tuples to list</span>
                 <span class="n">distances</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">vertex</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">othervertex</span><span class="p">),</span> <span class="n">othervertex</span><span class="p">))</span>
-            
+
             <span class="c1"># sort into ascending distance</span>
-            <span class="n">distances</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">distances</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
             <span class="c1"># create edges to vertex if permissible</span>
             <span class="k">for</span> <span class="n">distance</span><span class="p">,</span> <span class="n">othervertex</span> <span class="ow">in</span> <span class="n">distances</span><span class="p">:</span>
                 <span class="c1"># test if below distance threshold</span>
                 <span class="k">if</span> <span class="n">dist_thresh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">distance</span> <span class="o">&gt;</span> <span class="n">dist_thresh</span><span class="p">:</span>
-                    <span class="k">break</span> <span class="c1"># sorted into ascending order, so we are done</span>
+                    <span class="k">break</span>  <span class="c1"># sorted into ascending order, so we are done</span>
 
                 <span class="c1"># test if obstacle free path connecting them</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_path</span><span class="p">(</span><span class="n">vertex</span><span class="p">,</span> <span class="n">othervertex</span><span class="p">):</span>
@@ -244,10 +251,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">progress_next</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">progress_end</span><span class="p">()</span>
-            <span class="c1"># if animate is not None:</span>
-            <span class="c1">#     self.plot()</span>
-            <span class="c1">#     if not np.empty(movie):</span>
-            <span class="c1">#         a.add()</span>
+        <span class="c1"># if animate is not None:</span>
+        <span class="c1">#     self.plot()</span>
+        <span class="c1">#     if not np.empty(movie):</span>
+        <span class="c1">#         a.add()</span>
 
     <span class="k">def</span> <span class="nf">_test_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">,</span> <span class="n">npoints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># vector from v1 to v2</span>
@@ -265,7 +272,7 @@
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-<div class="viewcode-block" id="PRMPlanner.plan"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PRMPlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npoints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dist_thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PRMPlanner.plan"><a class="viewcode-back" href="../../../mobile-planner-continuous.html#roboticstoolbox.mobile.PRMPlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npoints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dist_thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plan PRM path</span>
 
@@ -290,7 +297,7 @@
 <span class="sd">        :seealso: :meth:`query` :meth:`graph`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s1">&#39;create the graph&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s2">&quot;create the graph&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">npoints</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">npoints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">npoints</span>
@@ -304,7 +311,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">random_init</span><span class="p">()</span>  <span class="c1"># reset the random number generator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_roadmap</span><span class="p">(</span><span class="n">npoints</span><span class="p">,</span> <span class="n">dist_thresh</span><span class="p">,</span> <span class="n">animate</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PRMPlanner.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PRMPlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="PRMPlanner.query"><a class="viewcode-back" href="../../../mobile-planner-continuous.html#roboticstoolbox.mobile.PRMPlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find a path from start to goal using planner</span>
 
@@ -325,7 +332,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;no plan computed&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;no plan computed&quot;</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="n">goal</span><span class="p">,</span> <span class="nb">next</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -336,7 +343,7 @@
         <span class="c1"># find A* path through the roadmap</span>
         <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">path_Astar</span><span class="p">(</span><span class="n">vstart</span><span class="p">,</span> <span class="n">vgoal</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;no path found&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;no path found&quot;</span><span class="p">)</span>
         <span class="n">path</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">coord</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
 
         <span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>  <span class="c1"># insert start at head of path</span>
@@ -344,7 +351,7 @@
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PRMPlanner.plot"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PRMPlanner.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">vertex</span><span class="o">=</span><span class="p">{},</span> <span class="n">edge</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="PRMPlanner.plot"><a class="viewcode-back" href="../../../mobile-planner-continuous.html#roboticstoolbox.mobile.PRMPlanner.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">vertex</span><span class="o">=</span><span class="p">{},</span> <span class="n">edge</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot PRM path</span>
 
@@ -354,7 +361,7 @@
 <span class="sd">        :type edge: dict, optional</span>
 
 <span class="sd">        Displays:</span>
-<span class="sd">        </span>
+
 <span class="sd">        - the planner background (obstacles)</span>
 <span class="sd">        - the roadmap graph</span>
 <span class="sd">        - the path</span>
@@ -362,32 +369,48 @@
 <span class="sd">        :seealso: :meth:`UGraph.plot`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># plot the obstacles and path</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;plotted background&quot;</span><span class="p">)</span>
         <span class="n">vertex</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="nb">dict</span><span class="p">(</span><span class="n">markersize</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="o">**</span><span class="n">vertex</span><span class="p">}</span>
         <span class="n">edge</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="nb">dict</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span> <span class="o">**</span><span class="n">edge</span><span class="p">}</span>
 
         <span class="c1"># add the roadmap graph</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">vopt</span><span class="o">=</span><span class="n">vertex</span><span class="p">,</span> <span class="n">eopt</span><span class="o">=</span><span class="n">edge</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">vopt</span><span class="o">=</span><span class="n">vertex</span><span class="p">,</span> <span class="n">eopt</span><span class="o">=</span><span class="n">edge</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;plotted roadmap&quot;</span><span class="p">)</span></div></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="o">*</span>
+
+    <span class="n">house</span> <span class="o">=</span> <span class="n">rtb_load_matfile</span><span class="p">(</span><span class="s2">&quot;data/house.mat&quot;</span><span class="p">)</span>
+    <span class="n">floorplan</span> <span class="o">=</span> <span class="n">house</span><span class="p">[</span><span class="s2">&quot;floorplan&quot;</span><span class="p">]</span>
+    <span class="n">places</span> <span class="o">=</span> <span class="n">house</span><span class="p">[</span><span class="s2">&quot;places&quot;</span><span class="p">]</span>
+
+    <span class="n">occgrid</span> <span class="o">=</span> <span class="n">floorplan</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">prm</span> <span class="o">=</span> <span class="n">PRMPlanner</span><span class="p">(</span><span class="n">occgrid</span><span class="o">=</span><span class="n">floorplan</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">prm</span><span class="o">.</span><span class="n">plan</span><span class="p">(</span><span class="n">npoints</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">prm</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 
     <span class="c1"># start and goal position</span>
-    <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-    <span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="c1"># start = (10, 10)</span>
+    <span class="c1"># goal = (50, 50)</span>
 
-    <span class="n">occgrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
-    <span class="n">occgrid</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">40</span><span class="p">,</span> <span class="mi">15</span><span class="p">:</span><span class="mi">30</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c1"># occgrid = np.zeros((100, 100))</span>
+    <span class="c1"># occgrid[20:40, 15:30] = 1</span>
 
-    <span class="n">prm</span> <span class="o">=</span> <span class="n">PRMPlanner</span><span class="p">(</span><span class="n">occgrid</span><span class="o">=</span><span class="n">occgrid</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># prm = PRMPlanner(occgrid=occgrid, verbose=True)</span>
 
-    <span class="n">prm</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">prm</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">goal</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="c1"># prm.plan()</span>
 
-    <span class="n">prm</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">path_marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">zorder</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">))</span>
-    <span class="n">prm</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span> <span class="n">text</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">vertex</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">markersize</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">edge</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
+    <span class="c1"># prm.plot()</span>
+
+    <span class="c1"># path = prm.query(start, goal)</span>
+    <span class="c1"># print(path)</span>
+
+    <span class="c1"># prm.plot(path, path_marker=dict(zorder=8, linewidth=2, markersize=6, color=&#39;k&#39;))</span>
+    <span class="c1"># prm.plot(ax=plt.gca(), text=False, vertex=dict(markersize=4), edge=dict(linewidth=0.5))</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
@@ -398,14 +421,11 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

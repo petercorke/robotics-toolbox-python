@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="../../_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="../../_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="../../_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="../../_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="../../_static/android-chrome-512x512.png ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IKSolver._check_jl &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="IKSolution - as IK Solution dataclass" href="../iksolution.html" />
+    <link rel="prev" title="IKSolver._random_q" href="roboticstoolbox.robot.IK.IKSolver._random_q.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../arm.html">Robot Arms</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../arm_models.html">Manipulator models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../arm_trajectory.html">Trajectories</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../ik.html">Inverse Kinematics</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../ik.html#c-solvers">C++ Solvers</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../ik.html#python-solvers">Python Solvers</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../iksolver.html">IKSolver - IK Solver Abstract Base Class</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="../iksolver.html#roboticstoolbox.robot.IK.IKSolver"><code class="docutils literal notranslate"><span class="pre">IKSolver</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="roboticstoolbox.robot.IK.IKSolver.step.html">IKSolver.step</a></li>
+<li class="toctree-l5"><a class="reference internal" href="roboticstoolbox.robot.IK.IKSolver.solve.html">IKSolver.solve</a></li>
+<li class="toctree-l5"><a class="reference internal" href="roboticstoolbox.robot.IK.IKSolver.error.html">IKSolver.error</a></li>
+<li class="toctree-l5"><a class="reference internal" href="roboticstoolbox.robot.IK.IKSolver._random_q.html">IKSolver._random_q</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">IKSolver._check_jl</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../iksolution.html">IKSolution - as IK Solution dataclass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ik_lm.html">IK_LM - Levemberg-Marquadt Numerical IK</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ik_qp.html">IK_QP - Numerical IK with Quadratic Programming</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ik_gn.html">IK_GN - Gauss-Newton Numerical IK</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ik_nr.html">IK_NR - Newton-Raphson Numerical IK</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.ETS.ETS.ikine_LM.html">ETS.ikine_LM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.ETS.ETS.ikine_QP.html">ETS.ikine_QP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.ETS.ETS.ikine_GN.html">ETS.ikine_GN</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.ETS.ETS.ikine_NR.html">ETS.ikine_NR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.Robot.Robot.ikine_LM.html">Robot.ikine_LM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.Robot.Robot.ikine_QP.html">Robot.ikine_QP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.Robot.Robot.ikine_GN.html">Robot.ikine_GN</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roboticstoolbox.robot.Robot.Robot.ikine_NR.html">Robot.ikine_NR</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../arm.html">Robot Arms</a></li>
+          <li class="breadcrumb-item"><a href="../ik.html">Inverse Kinematics</a></li>
+          <li class="breadcrumb-item"><a href="../iksolver.html">IKSolver - IK Solver Abstract Base Class</a></li>
+      <li class="breadcrumb-item active">IKSolver._check_jl</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="iksolver-check-jl">
+<h1>IKSolver._check_jl<a class="headerlink" href="#iksolver-check-jl" title="Permalink to this heading"></a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.IK.IKSolver._check_jl">
+<span class="sig-prename descclassname"><span class="pre">IKSolver.</span></span><span class="sig-name descname"><span class="pre">_check_jl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/roboticstoolbox/robot/IK.html#IKSolver._check_jl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.IK.IKSolver._check_jl" title="Permalink to this definition"></a></dt>
+<dd><p>Checks if the joints are within their respective limits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ets</strong> (<a class="reference internal" href="../../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a>) – the ETS</p></li>
+<li><p><strong>q</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – the current joint coordinate vector</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if joints within feasible limits otherwise False</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

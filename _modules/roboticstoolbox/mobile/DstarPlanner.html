@@ -7,6 +7,7 @@
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -28,12 +29,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -41,7 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Robot Arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
 </ul>
@@ -56,10 +61,10 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">roboticstoolbox.mobile.DstarPlanner</li>
       <li class="wy-breadcrumbs-aside">
@@ -101,13 +106,13 @@
 <span class="c1"># D* grid planning</span>
 <span class="c1"># Author: Nirnay Roy</span>
 <span class="c1"># Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors</span>
-<span class="c1"># Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE </span>
+<span class="c1"># Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE</span>
 
 <span class="c1"># for performance reasons there are some important differences compared to</span>
 <span class="c1"># the version from Python Robotics:</span>
 <span class="c1">#</span>
 <span class="c1"># 1. replace the classic D* functions min__State(), get_kmin(), insert(), remove()</span>
-<span class="c1">#    with heapq.heappush() and heapq.heappop(). The open_list is now a list of </span>
+<span class="c1">#    with heapq.heappush() and heapq.heappop(). The open_list is now a list of</span>
 <span class="c1">#    tuples (k, _State) maintained by heapq, rather than a set</span>
 <span class="c1">#</span>
 <span class="c1"># 2. use enums rather than strings for cell state</span>
@@ -117,22 +122,24 @@
 <span class="c1">#    - replace equality tests with math.isclose() which is faster than np.isclose()</span>
 <span class="c1">#    - add an offset to inequality tests, X &gt; Y becomes X &gt; Y + tol</span>
 
+
 <span class="k">class</span> <span class="nc">_Tag</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
     <span class="n">NEW</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
     <span class="n">OPEN</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
     <span class="n">CLOSED</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
-<span class="k">class</span> <span class="nc">_State</span><span class="p">:</span>
 
+
+<span class="k">class</span> <span class="nc">_State</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># &#39;back pointer&#39; to next _State</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># &#39;back pointer&#39; to next _State</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">NEW</span>  <span class="c1"># open closed new</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># cost to goal</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># estimate of shortest path cost</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="c1">#[{self.h:.1f}, {self.k:.1f}]&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span>  <span class="c1"># [{self.h:.1f}, {self.k:.1f}]&quot;</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
@@ -140,8 +147,8 @@
     <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-<span class="k">class</span> <span class="nc">_Map</span><span class="p">:</span>
 
+<span class="k">class</span> <span class="nc">_Map</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">row</span> <span class="o">=</span> <span class="n">row</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">col</span> <span class="o">=</span> <span class="n">col</span>
@@ -154,7 +161,7 @@
             <span class="n">tmp</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">col</span><span class="p">):</span>
                 <span class="n">tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_State</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>  <span class="c1"># append column to the row</span>
-            <span class="n">_Map_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="c1"># append row to _Map</span>
+            <span class="n">_Map_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>  <span class="c1"># append row to _Map</span>
         <span class="k">return</span> <span class="n">_Map_list</span>
 
     <span class="n">_neighbours</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
@@ -173,7 +180,9 @@
     <span class="n">_root2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_State1</span><span class="p">,</span> <span class="n">_State2</span><span class="p">):</span>
-        <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">costmap</span><span class="p">[</span><span class="n">_State1</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">_State1</span><span class="o">.</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">costmap</span><span class="p">[</span><span class="n">_State2</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">_State2</span><span class="o">.</span><span class="n">x</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">costmap</span><span class="p">[</span><span class="n">_State1</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">_State1</span><span class="o">.</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">costmap</span><span class="p">[</span><span class="n">_State2</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">_State2</span><span class="o">.</span><span class="n">x</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 
         <span class="n">dx</span> <span class="o">=</span> <span class="n">_State1</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">_State2</span><span class="o">.</span><span class="n">x</span>
         <span class="n">dy</span> <span class="o">=</span> <span class="n">_State1</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">_State2</span><span class="o">.</span><span class="n">y</span>
@@ -205,12 +214,14 @@
 
     <span class="k">def</span> <span class="nf">process__State</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;FRONTIER &#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_list</span><span class="p">]))</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;FRONTIER &quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_list</span><span class="p">])</span>
+            <span class="p">)</span>
 
         <span class="c1"># get _State from frontier</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  x is None &#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  x is None &quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
         <span class="n">k_old</span><span class="p">,</span> <span class="n">x</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">heappop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_list</span><span class="p">)</span>
         <span class="n">x</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">CLOSED</span>
@@ -223,24 +234,35 @@
         <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">k_old</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">:</span>
             <span class="c1"># RAISE _State</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  raise&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  raise&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">get_neighbors</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">NEW</span> <span class="ow">and</span>
-                        <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">&lt;=</span> <span class="n">k_old</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="ow">and</span> 
-                        <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">y</span><span class="o">.</span><span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">NEW</span>
+                    <span class="ow">and</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">&lt;=</span> <span class="n">k_old</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span>
+                    <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span>
+                <span class="p">):</span>
                     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2"> cost from </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">h</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">h</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">; parent from </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2"> cost from </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">h</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">h</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">; parent from </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
                     <span class="n">x</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">y</span>
                     <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">k_old</span><span class="p">,</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">):</span>
             <span class="c1"># normal _State</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  normal&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  normal&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">get_neighbors</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">t</span> <span class="ow">is</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">NEW</span> \
-                   <span class="ow">or</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">x</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">))</span> \
-                   <span class="ow">or</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">y</span><span class="o">.</span><span class="n">t</span> <span class="ow">is</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">NEW</span>
+                    <span class="ow">or</span> <span class="p">(</span>
+                        <span class="n">y</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">x</span>
+                        <span class="ow">and</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span>
+                            <span class="n">y</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="ow">or</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)</span>
+                <span class="p">):</span>
                     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  reparent </span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="n">y</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">x</span>
@@ -248,21 +270,36 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># RAISE or LOWER _State</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  raise/lower&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  raise/lower&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">get_neighbors</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">t</span> <span class="ow">is</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">NEW</span> <span class="ow">or</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">x</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">t</span> <span class="ow">is</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">NEW</span> <span class="ow">or</span> <span class="p">(</span>
+                    <span class="n">y</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">x</span>
+                    <span class="ow">and</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span>
+                        <span class="n">y</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span>
+                    <span class="p">)</span>
+                <span class="p">):</span>
                     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2"> cost from </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">h</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">h</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">; parent from </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">; add to frontier&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2"> cost from </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">h</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">h</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">; parent from </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">; add to frontier&quot;</span>
+                        <span class="p">)</span>
                     <span class="n">y</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">x</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">t</span> <span class="ow">is</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">CLOSED</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">y</span><span class="o">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="n">x</span>
+                        <span class="ow">and</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span>
+                        <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">t</span> <span class="ow">is</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">CLOSED</span>
+                    <span class="p">):</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">h</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> add to frontier&quot;</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> \
-                                <span class="ow">and</span> <span class="n">y</span><span class="o">.</span><span class="n">t</span> <span class="ow">is</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">CLOSED</span> <span class="ow">and</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">k_old</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span>
+                            <span class="n">y</span><span class="o">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="n">x</span>
+                            <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span>
+                            <span class="ow">and</span> <span class="n">y</span><span class="o">.</span><span class="n">t</span> <span class="ow">is</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">CLOSED</span>
+                            <span class="ow">and</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">k_old</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span>
+                        <span class="p">):</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">h</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">y</span><span class="o">.</span><span class="n">h</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> add to frontier&quot;</span><span class="p">)</span>
@@ -309,7 +346,7 @@
             <span class="c1"># for i, item in enumerate(self.open_list):</span>
             <span class="c1">#     if item[1] is _State:</span>
             <span class="c1">#         del self.open_list[i]</span>
-            <span class="c1">#         break  </span>
+            <span class="c1">#         break</span>
 
         <span class="k">elif</span> <span class="n">_State</span><span class="o">.</span><span class="n">t</span> <span class="ow">is</span> <span class="n">_Tag</span><span class="o">.</span><span class="n">CLOSED</span><span class="p">:</span>
             <span class="n">_State</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">_State</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">h_new</span><span class="p">)</span>
@@ -331,28 +368,29 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">showparents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">row</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">row</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">col</span><span class="p">):</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">   &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">   &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">: &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">: &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">col</span><span class="p">):</span>
                 <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">_Map</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span>
                 <span class="n">par</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">parent</span>
                 <span class="k">if</span> <span class="n">par</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  G   &#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  G   &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">par</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">par</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">) &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">par</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">par</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">) &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">()</span>
+
 
 <span class="c1"># ====================== RTB wrapper ============================= #</span>
 
 <span class="c1"># Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python</span>
-<span class="c1"># Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE </span>
-<div class="viewcode-block" id="DstarPlanner"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DstarPlanner">[docs]</a><span class="k">class</span> <span class="nc">DstarPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
+<span class="c1"># Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE</span>
+<div class="viewcode-block" id="DstarPlanner"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.DstarPlanner">[docs]</a><span class="k">class</span> <span class="nc">DstarPlanner</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    D* path planner</span>
 
@@ -395,6 +433,7 @@
 <span class="sd">    :thanks: based on D* grid planning included from `Python Robotics &lt;https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning&gt;`_</span>
 <span class="sd">    :seealso: :class:`PlannerBase`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">costmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -405,12 +444,12 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">costmap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">occgrid</span><span class="o">.</span><span class="n">grid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;unknown type of map&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;unknown type of map&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span> <span class="o">=</span> <span class="n">_Map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">costmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">costmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">costmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">costmap</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_Dstar</span> <span class="o">=</span> <span class="n">_Dstar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="p">)</span> <span class="c1">#, tol=0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Dstar</span> <span class="o">=</span> <span class="n">_Dstar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Map</span><span class="p">)</span>  <span class="c1"># , tol=0)</span>
 
-<div class="viewcode-block" id="DstarPlanner.plan"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DstarPlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">summary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="DstarPlanner.plan"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.DstarPlanner.plan">[docs]</a>    <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">summary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plan D* path</span>
 
@@ -444,7 +483,7 @@
 
             <span class="k">if</span> <span class="n">ret</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">break</span>
-        
+
         <span class="k">if</span> <span class="n">summary</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Dstar</span><span class="o">.</span><span class="n">ninsert</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Dstar</span><span class="o">.</span><span class="n">nin</span><span class="p">)</span></div>
 
@@ -461,7 +500,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Dstar</span><span class="o">.</span><span class="n">nexpand</span>
 
-<div class="viewcode-block" id="DstarPlanner.query"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.DstarPlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">sensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="DstarPlanner.query"><a class="viewcode-back" href="../../../mobile-planner-discrete.html#roboticstoolbox.mobile.DstarPlanner.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">sensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find path with replanning</span>
 
@@ -499,8 +538,8 @@
         <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">parent</span>
         <span class="n">tmp</span> <span class="o">=</span> <span class="n">start_State</span>
 
-        <span class="k">if</span> <span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">sensor</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;sensor must be callable&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">sensor</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sensor must be callable&quot;</span><span class="p">)</span>
 
         <span class="n">cost</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">h</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">goal_State</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="mi">0</span>
@@ -510,7 +549,7 @@
             <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">tmp</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">tmp</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">tmp</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">goal_State</span><span class="p">:</span>
                 <span class="k">break</span>
-            
+
             <span class="c1"># x, y = tmp.parent.x, tmp.parent.y</span>
 
             <span class="k">if</span> <span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -522,18 +561,23 @@
                         <span class="c1"># print(f&quot;change cost at ({x}, {y}) to {newcost}&quot;)</span>
                         <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Dstar</span><span class="o">.</span><span class="n">modify_cost</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">newcost</span><span class="p">)</span>
                     <span class="c1"># propagate the changes to plan</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;propagate&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;propagate&quot;</span><span class="p">)</span>
                     <span class="c1"># self._Dstar.showparents()</span>
                     <span class="k">while</span> <span class="n">val</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">&lt;</span> <span class="n">tmp</span><span class="o">.</span><span class="n">h</span><span class="p">:</span>
                         <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Dstar</span><span class="o">.</span><span class="n">process__State</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
                         <span class="c1"># print(&#39;open set&#39;, len(self._Dstar.open_list))</span>
                     <span class="c1"># self._Dstar.showparents()</span>
-                    
+
             <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">parent</span>
             <span class="c1"># print(&#39;move to &#39;, tmp)</span>
 
-        <span class="n">status</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;_DstarStatus&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;cost&#39;</span><span class="p">,])</span>
-        
+        <span class="n">status</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span>
+            <span class="s2">&quot;_DstarStatus&quot;</span><span class="p">,</span>
+            <span class="p">[</span>
+                <span class="s2">&quot;cost&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
+
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">status</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span></div></div>
 
     <span class="c1"># # Just feed self._h into plot function from parent as p</span>
@@ -552,17 +596,18 @@
     <span class="c1">#         x = np.unravel_index((i), self._costmap.shape)</span>
     <span class="c1">#         return x[1], x[0]</span>
 
+
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
-    <span class="n">og</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">og</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
     <span class="n">og</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">og</span><span class="p">)</span>
 
     <span class="n">ds</span> <span class="o">=</span> <span class="n">DstarPlanner</span><span class="p">(</span><span class="n">occgrid</span><span class="o">=</span><span class="n">og</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">costmap</span><span class="p">)</span>
 
-    <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">goal</span> <span class="o">=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
 
     <span class="n">ds</span><span class="o">.</span><span class="n">plan</span><span class="p">(</span><span class="n">goal</span><span class="o">=</span><span class="n">goal</span><span class="p">)</span>
     <span class="n">ds</span><span class="o">.</span><span class="n">_Map</span><span class="o">.</span><span class="n">show_h</span><span class="p">()</span>
@@ -572,7 +617,6 @@
     <span class="c1"># print(status)</span>
 
     <span class="c1"># ds.plot(path=path)</span>
-
 
     <span class="k">def</span> <span class="nf">sensorfunc</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">pos</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
@@ -622,7 +666,6 @@
     <span class="c1"># _Dstar.replan()</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
 </pre></div>
 
            </div>
@@ -632,14 +675,11 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

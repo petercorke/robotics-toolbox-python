@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Map classes &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Supporting classes" href="mobile-planner-base.html" />
+    <link rel="prev" title="Discrete (Grid-based) planners" href="mobile-planner-discrete.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Robot Arms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="mobile.html">Mobile robots</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle.html">Motion models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-animation.html">Animations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-drivers.html">Drivers</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="mobile-planner.html">Path planning</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="mobile-planner-continuous.html">Continuous configuration-space planners</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-planner-discrete.html">Discrete (Grid-based) planners</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-planner-discrete.html#continuous-configuration-space-planners">Continuous configuration-space planners</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Map classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#occupancy-grid-classes">Occupancy grid classes</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#binary-occupancy-grid">Binary Occupancy grid</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#occupancy-grid">Occupancy grid</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#polygon-map">Polygon map</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.mobile.PolygonMap"><code class="docutils literal notranslate"><span class="pre">PolygonMap</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-planner-base.html">Supporting classes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-reactive.html">Reactive navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-SLAM.html">Localization and Mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="mobile.html">Mobile robots</a></li>
+          <li class="breadcrumb-item"><a href="mobile-planner.html">Path planning</a></li>
+      <li class="breadcrumb-item active">Map classes</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="map-classes">
+<h1>Map classes<a class="headerlink" href="#map-classes" title="Permalink to this heading"></a></h1>
+<section id="occupancy-grid-classes">
+<h2>Occupancy grid classes<a class="headerlink" href="#occupancy-grid-classes" title="Permalink to this heading"></a></h2>
+<section id="binary-occupancy-grid">
+<h3>Binary Occupancy grid<a class="headerlink" href="#binary-occupancy-grid" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">BinaryOccupancyGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#BinaryOccupancyGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid" title="roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOccupancyGrid</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#BinaryOccupancyGrid.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Create a binary occupancy grid instance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em>) – occupancy grid as a NumPy array</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – cell size, defaults to 1</p></li>
+<li><p><strong>origin</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – world coordinates of the grid element [0,0], defaults to (0, 0)</p></li>
+<li><p><strong>kwargs</strong> – options passed to <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMap</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<p>The array is kept internally as a bool array. Cells are set to True
+(occupied) corresponding to input values &gt; 0.</p>
+<p>This object supports a user-defined coordinate system and grid size.
+World coordinates are converted to grid coordinates to lookup the
+occupancy status.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">BinaryOccupancyGrid</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">og</span> <span class="o">=</span> <span class="n">BinaryOccupancyGrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">og</span><span class="p">)</span>
+<span class="go">BinaryOccupancyGrid: 5 x 5, cell size=1, x = [0.0, 4.0], y = [0.0, 4.0], 0.0% occupied</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">og</span> <span class="o">=</span> <span class="n">BinaryOccupancyGrid</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span> <span class="n">cellsize</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">og</span><span class="p">)</span>
+<span class="go">BinaryOccupancyGrid: 101 x 101, cell size=0.1, x = [-5.0, 5.0], y = [-5.0, 5.0], 0.0% occupied</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.OccupancyGrid" title="roboticstoolbox.mobile.OccupancyGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">OccupancyGrid</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.isoccupied">
+<span class="sig-name descname"><span class="pre">isoccupied</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#BinaryOccupancyGrid.isoccupied"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.isoccupied" title="Permalink to this definition"></a></dt>
+<dd><p>Test if coordinate is occupied</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – world coordinate (x, y)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>occupancy status of corresponding grid cell</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+<p>The grid cell size and offset are used to convert <code class="docutils literal notranslate"><span class="pre">p</span></code> to an occupancy
+grid coordinate.  The grid coordinate is rounded and cast to integer
+value.  If the coordinate is outside the bounds of the occupancy grid
+it is considered to be occupied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.w2g" title="roboticstoolbox.mobile.BinaryOccupancyGrid.w2g"><code class="xref py py-meth docutils literal notranslate"><span class="pre">w2g()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.inflate">
+<span class="sig-name descname"><span class="pre">inflate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#BinaryOccupancyGrid.inflate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.inflate" title="Permalink to this definition"></a></dt>
+<dd><p>Inflate obstales</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>radius</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – radius of circular structuring element in world units</p>
+</dd>
+</dl>
+<p>A circular structuring element is created and used to dilate the
+stored occupancy grid.</p>
+<p>Successive calls to <code class="docutils literal notranslate"><span class="pre">inflate</span></code> will compound the inflation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.binary_dilation.html#scipy.ndimage.binary_dilation" title="(in SciPy v1.10.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.binary_dilation()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.copy" title="Permalink to this definition"></a></dt>
+<dd><p>Copy an occupancy grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>copy of the ocupancy grid</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>OccGrid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.g2w">
+<span class="sig-name descname"><span class="pre">g2w</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.g2w" title="Permalink to this definition"></a></dt>
+<dd><p>Convert grid coordinate to world coordinate (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – grid coordinate (column, row)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>world coordinate (x, y)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>The grid cell size and offset are used to convert occupancy grid
+coordinate <code class="docutils literal notranslate"><span class="pre">p</span></code> to a world coordinate.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.grid">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">grid</span></span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.grid" title="Permalink to this definition"></a></dt>
+<dd><p>Occupancy grid as a NumPy array (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>binary occupancy grid</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(N,M) of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+<p>If <a class="reference internal" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.inflate" title="roboticstoolbox.mobile.BinaryOccupancyGrid.inflate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">inflate()</span></code></a> has been called, this will return the inflated
+occupancy grid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.line_w">
+<span class="sig-name descname"><span class="pre">line_w</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.line_w" title="Permalink to this definition"></a></dt>
+<dd><p>Get index of cells along a line segment (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p1</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – start</p></li>
+<li><p><strong>p2</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – end</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>index into grid</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(N)</p>
+</dd>
+</dl>
+<p>Get the indices of cells along a line segment defined by the end
+points given in world coordinates.</p>
+<p>The returned indices can be applied to a raveled view of the grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.ravel" title="roboticstoolbox.mobile.BinaryOccupancyGrid.ravel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ravel()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.w2g" title="roboticstoolbox.mobile.BinaryOccupancyGrid.w2g"><code class="xref py py-meth docutils literal notranslate"><span class="pre">w2g()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.maxdim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maxdim</span></span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.maxdim" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum dimension of grid in world coordinates (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>maximum side length of the occupancy grid</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.name" title="Permalink to this definition"></a></dt>
+<dd><p>Occupancy grid name (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>name of the occupancy grid</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the occupancy grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>map</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em><em>, </em><em>optional</em>) – array which is plotted instead of the grid, must be same
+size as the occupancy grid,defaults to None</p></li>
+<li><p><strong>ax</strong> (<em>Axes2D</em><em>, </em><em>optional</em>) – matplotlib axes to plot into, defaults to None</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block until plot is dismissed, defaults to None</p></li>
+<li><p><strong>kwargs</strong> – arguments passed to <code class="docutils literal notranslate"><span class="pre">imshow</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<p>The grid is plotted as an image but with axes in world coordinates.</p>
+<p>The grid is a NumPy boolean array which has values 0 (false=unoccupied)
+and 1 (true=occupied).  Passing a <code class="xref py py-obj docutils literal notranslate"><span class="pre">cmap</span></code> option to imshow can be used
+to control the displayed color of free space and obstacles.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.ravel">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ravel</span></span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.ravel" title="Permalink to this definition"></a></dt>
+<dd><p>Ravel the grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1D view of the occupancy grid</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(N)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.set" title="Permalink to this definition"></a></dt>
+<dd><p>Set region of map (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>region</strong> (<em>array_like</em><em>(</em><em>4</em><em>)</em>) – The region [xmin, ymin, xmax, ymax]</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – value to set cells to</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.shape" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the occupancy grid array (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>shape of the occupancy grid array</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>2-tuple</p>
+</dd>
+</dl>
+<p>This is the shape of the NumPy array that holds the occupancy grid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.w2g">
+<span class="sig-name descname"><span class="pre">w2g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.w2g" title="Permalink to this definition"></a></dt>
+<dd><p>Convert world coordinate to grid coordinate (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – world coordinate (x, y)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>grid coordinate (column, row)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>The grid cell size and offset are used to convert <code class="docutils literal notranslate"><span class="pre">p</span></code> to an occupancy
+grid coordinate.  The grid coordinate is rounded and cast to integer
+value. No check is made on the validity of the coordinate.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.workspace">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">workspace</span></span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.workspace" title="Permalink to this definition"></a></dt>
+<dd><p>Bounds of the occupancy grid in world coordinates (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>workspace bounds [xmin, xmax, ymin, ymax]</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(4)</p>
+</dd>
+</dl>
+<p>Returns the bounds of the occupancy grid in world coordinates.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.xmax">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xmax</span></span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.xmax" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum x-coordinate of this grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>maximum world x-coordinate</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.xmin">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xmin</span></span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.xmin" title="Permalink to this definition"></a></dt>
+<dd><p>Minimum x-coordinate of this grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>minimum world x-coordinate</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.ymax">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ymax</span></span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.ymax" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum y-coordinate of this grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>maximum world y-coordinate</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.BinaryOccupancyGrid.ymin">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ymin</span></span><a class="headerlink" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.ymin" title="Permalink to this definition"></a></dt>
+<dd><p>Minimum y-coordinate of this grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>minimum world y-coordinate</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="occupancy-grid">
+<h3>Occupancy grid<a class="headerlink" href="#occupancy-grid" title="Permalink to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">OccupancyGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cellsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#OccupancyGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid" title="roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOccupancyGrid</span></code></a></p>
+<p>General occupancy grid</p>
+<p>The elements of the array are floats and can represent occupancy
+probability or traversal cost.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">OccupancyGrid</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">og</span> <span class="o">=</span> <span class="n">OccupancyGrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">og</span><span class="p">)</span>
+<span class="go">OccupancyGrid: 5 x 5, cell size=1, x = [0.0, 4.0], y = [0.0, 4.0], dtype float64, min 0.0, max 0.0, mean 0.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">og</span> <span class="o">=</span> <span class="n">OccupancyGrid</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span> <span class="n">cellsize</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">og</span><span class="p">)</span>
+<span class="go">OccupancyGrid: 101 x 101, cell size=0.1, x = [-5.0, 5.0], y = [-5.0, 5.0], dtype float64, min 0.5, max 0.5, mean 0.5</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.BinaryOccupancyGrid" title="roboticstoolbox.mobile.BinaryOccupancyGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryOccupancyGrid</span></code></a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cellsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Occupancy grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em>) – occupancy grid as a NumPy array</p></li>
+<li><p><strong>value</strong> (<em>any</em><em>, </em><em>optional</em>) – initial value of cells</p></li>
+<li><p><strong>origin</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – world coordinates of the grid element [0,0], defaults to (0, 0)</p></li>
+<li><p><strong>cellsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – cell size, defaults to 1</p></li>
+<li><p><strong>kwargs</strong> – options passed to <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseMap" title="roboticstoolbox.mobile.OccGrid.BaseMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMap</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+<p>This object supports a user-defined coordinate system and grid size.
+World coordinates are converted to grid coordinates to lookup the
+occupancy status.</p>
+<p>The grid can be initialized by:</p>
+<ul class="simple">
+<li><p>a 2D NumPy array</p></li>
+<li><p>specifying <code class="docutils literal notranslate"><span class="pre">workspace</span></code> and <code class="docutils literal notranslate"><span class="pre">value</span></code> arguments</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.copy" title="Permalink to this definition"></a></dt>
+<dd><p>Copy an occupancy grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>copy of the ocupancy grid</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>OccGrid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.g2w">
+<span class="sig-name descname"><span class="pre">g2w</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.g2w" title="Permalink to this definition"></a></dt>
+<dd><p>Convert grid coordinate to world coordinate (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – grid coordinate (column, row)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>world coordinate (x, y)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>The grid cell size and offset are used to convert occupancy grid
+coordinate <code class="docutils literal notranslate"><span class="pre">p</span></code> to a world coordinate.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.grid">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">grid</span></span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.grid" title="Permalink to this definition"></a></dt>
+<dd><p>Occupancy grid as a NumPy array (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>binary occupancy grid</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(N,M) of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+<p>If <code class="xref py py-meth docutils literal notranslate"><span class="pre">inflate()</span></code> has been called, this will return the inflated
+occupancy grid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.line_w">
+<span class="sig-name descname"><span class="pre">line_w</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.line_w" title="Permalink to this definition"></a></dt>
+<dd><p>Get index of cells along a line segment (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p1</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – start</p></li>
+<li><p><strong>p2</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – end</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>index into grid</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(N)</p>
+</dd>
+</dl>
+<p>Get the indices of cells along a line segment defined by the end
+points given in world coordinates.</p>
+<p>The returned indices can be applied to a raveled view of the grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.OccupancyGrid.ravel" title="roboticstoolbox.mobile.OccupancyGrid.ravel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ravel()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.OccupancyGrid.w2g" title="roboticstoolbox.mobile.OccupancyGrid.w2g"><code class="xref py py-meth docutils literal notranslate"><span class="pre">w2g()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.maxdim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maxdim</span></span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.maxdim" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum dimension of grid in world coordinates (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>maximum side length of the occupancy grid</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.name" title="Permalink to this definition"></a></dt>
+<dd><p>Occupancy grid name (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>name of the occupancy grid</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the occupancy grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>map</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em><em>, </em><em>optional</em>) – array which is plotted instead of the grid, must be same
+size as the occupancy grid,defaults to None</p></li>
+<li><p><strong>ax</strong> (<em>Axes2D</em><em>, </em><em>optional</em>) – matplotlib axes to plot into, defaults to None</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block until plot is dismissed, defaults to None</p></li>
+<li><p><strong>kwargs</strong> – arguments passed to <code class="docutils literal notranslate"><span class="pre">imshow</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<p>The grid is plotted as an image but with axes in world coordinates.</p>
+<p>The grid is a NumPy boolean array which has values 0 (false=unoccupied)
+and 1 (true=occupied).  Passing a <code class="xref py py-obj docutils literal notranslate"><span class="pre">cmap</span></code> option to imshow can be used
+to control the displayed color of free space and obstacles.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.ravel">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ravel</span></span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.ravel" title="Permalink to this definition"></a></dt>
+<dd><p>Ravel the grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1D view of the occupancy grid</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(N)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.set" title="Permalink to this definition"></a></dt>
+<dd><p>Set region of map (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>region</strong> (<em>array_like</em><em>(</em><em>4</em><em>)</em>) – The region [xmin, ymin, xmax, ymax]</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – value to set cells to</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.shape" title="Permalink to this definition"></a></dt>
+<dd><p>Shape of the occupancy grid array (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>shape of the occupancy grid array</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>2-tuple</p>
+</dd>
+</dl>
+<p>This is the shape of the NumPy array that holds the occupancy grid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.w2g">
+<span class="sig-name descname"><span class="pre">w2g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.w2g" title="Permalink to this definition"></a></dt>
+<dd><p>Convert world coordinate to grid coordinate (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – world coordinate (x, y)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>grid coordinate (column, row)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>The grid cell size and offset are used to convert <code class="docutils literal notranslate"><span class="pre">p</span></code> to an occupancy
+grid coordinate.  The grid coordinate is rounded and cast to integer
+value. No check is made on the validity of the coordinate.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.workspace">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">workspace</span></span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.workspace" title="Permalink to this definition"></a></dt>
+<dd><p>Bounds of the occupancy grid in world coordinates (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>workspace bounds [xmin, xmax, ymin, ymax]</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(4)</p>
+</dd>
+</dl>
+<p>Returns the bounds of the occupancy grid in world coordinates.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.xmax">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xmax</span></span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.xmax" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum x-coordinate of this grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>maximum world x-coordinate</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.xmin">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xmin</span></span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.xmin" title="Permalink to this definition"></a></dt>
+<dd><p>Minimum x-coordinate of this grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>minimum world x-coordinate</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.ymax">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ymax</span></span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.ymax" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum y-coordinate of this grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>maximum world y-coordinate</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.OccupancyGrid.ymin">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ymin</span></span><a class="headerlink" href="#roboticstoolbox.mobile.OccupancyGrid.ymin" title="Permalink to this definition"></a></dt>
+<dd><p>Minimum y-coordinate of this grid (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>minimum world y-coordinate</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="polygon-map">
+<h2>Polygon map<a class="headerlink" href="#polygon-map" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.PolygonMap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">PolygonMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygons</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#PolygonMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PolygonMap" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseMap" title="roboticstoolbox.mobile.OccGrid.BaseMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMap</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.PolygonMap.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygons</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#PolygonMap.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PolygonMap.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Polygonal obstacle map</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>workspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>array_like</em><em>(</em><em>4</em><em>)</em>) – dimensions of 2D plot area, defaults to (-10:10) x (-10:10),
+see <a class="reference external" href="https://petercorke.github.io/spatialmath-python/func_2d_graphics.html#spatialmath.base.graphics.plotvol2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plotvol2()</span></code></a></p></li>
+<li><p><strong>polygons</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>, </em><em>optional</em>) – obstacle polygons, defaults to []</p></li>
+</ul>
+</dd>
+</dl>
+<p>The obstacle polygons are specified as instances of <a class="reference external" href="https://petercorke.github.io/spatialmath-python/classes-2d.html#spatialmath.geom2d.Polygon2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code></a>
+or ndarray(2,N).</p>
+<p>The workspace can be specified in several ways:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">workspace</span></code></p></th>
+<th class="head"><p>x-range</p></th>
+<th class="head"><p>y-range</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A (scalar)</p></td>
+<td><p>-A:A</p></td>
+<td><p>-A:A</p></td>
+</tr>
+<tr class="row-odd"><td><p>[A, B]</p></td>
+<td><p>A:B</p></td>
+<td><p>A:B</p></td>
+</tr>
+<tr class="row-even"><td><p>[A, B, C, D]</p></td>
+<td><p>A:B</p></td>
+<td><p>C:D</p></td>
+</tr>
+</tbody>
+</table>
+<p>Workspace is used only to set plot bounds.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.PolygonMap.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polygon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#PolygonMap.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PolygonMap.add" title="Permalink to this definition"></a></dt>
+<dd><p>Add a polygon to map</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>polygon</strong> (<a class="reference external" href="https://petercorke.github.io/spatialmath-python/classes-2d.html#spatialmath.geom2d.Polygon2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code></a> or ndarray(2,N)) – a polygon</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.PolygonMap.iscollision">
+<span class="sig-name descname"><span class="pre">iscollision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polygon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#PolygonMap.iscollision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PolygonMap.iscollision" title="Permalink to this definition"></a></dt>
+<dd><p>Test for collision</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>polygon</strong> (<a class="reference external" href="https://petercorke.github.io/spatialmath-python/classes-2d.html#spatialmath.geom2d.Polygon2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code></a> or ndarray(2,N)) – a polygon</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>collision</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+<p>The <code class="docutils literal notranslate"><span class="pre">polygon</span></code> is tested against polygons in the map, and returns True
+on the first collision.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.PolygonMap.add" title="roboticstoolbox.mobile.PolygonMap.add"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add()</span></code></a> <a class="reference external" href="https://petercorke.github.io/spatialmath-python/classes-2d.html#spatialmath.geom2d.Polygon2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.PolygonMap.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#PolygonMap.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PolygonMap.plot" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.PolygonMap.isoccupied">
+<span class="sig-name descname"><span class="pre">isoccupied</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#PolygonMap.isoccupied"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PolygonMap.isoccupied" title="Permalink to this definition"></a></dt>
+<dd><p>Test if point lies inside an obstacle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – a 2D point</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>enclosure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+<p>The point is tested for enclosure by polygons in the map, and returns True
+on the first enclosure.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.PolygonMap.workspace">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">workspace</span></span><a class="headerlink" href="#roboticstoolbox.mobile.PolygonMap.workspace" title="Permalink to this definition"></a></dt>
+<dd><p>Bounds of the occupancy grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>workspace bounds [xmin, xmax, ymin, ymax]</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(4)</p>
+</dd>
+</dl>
+<p>Returns the bounds of the occupancy grid.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

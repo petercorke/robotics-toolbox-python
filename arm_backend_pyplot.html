@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PyPlot (matplotlib) &mdash; Robotics Toolbox for Python  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -21,9 +26,7 @@
         <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="VPython" href="arm_backend_vpython.html" />
-    <link rel="prev" title="Backends" href="arm_backend.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,34 +34,24 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="arm.html">Manipulator arms</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="arm_models.html">Manipulator models</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="arm_backend.html">Backends</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">PyPlot (matplotlib)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.backends.PyPlot.PyPlot"><code class="docutils literal notranslate"><span class="pre">PyPlot</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.backends.PyPlot.PyPlot2"><code class="docutils literal notranslate"><span class="pre">PyPlot2</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="arm_backend_vpython.html">VPython</a></li>
-<li class="toctree-l3"><a class="reference internal" href="arm_backend_swift.html">Swift</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html">Trajectories</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Robot Arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
 </ul>
@@ -73,20 +66,14 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="arm.html">Manipulator arms</a></li>
-          <li class="breadcrumb-item"><a href="arm_backend.html">Backends</a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">PyPlot (matplotlib)</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/arm_backend_pyplot.rst.txt" rel="nofollow"> View page source</a>
       </li>
-  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
-        <a href="arm_backend.html" class="btn btn-neutral float-left" title="Backends" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="arm_backend_vpython.html" class="btn btn-neutral float-right" title="VPython" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-  </div>
+  </ul>
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -130,8 +117,8 @@ a reference to the backend.</p>
 <span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.step" title="Permalink to this definition"></a></dt>
 <dd><p>Update the graphical scene</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dt</strong> (<em>int</em><em>, </em><em>optional</em>) – time step in seconds, defaults to 50 (0.05 s)</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – time step in seconds, defaults to 50 (0.05 s)</p>
 </dd>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">env.step(args)</span></code> triggers an update of the 3D scene in the matplotlib
@@ -180,19 +167,19 @@ referenced by <code class="docutils literal notranslate"><span class="pre">env</
 <span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ob</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readonly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jointaxes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jointlabels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eeframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shadow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.add" title="Permalink to this definition"></a></dt>
 <dd><p>Add a robot to the graphical scene</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ob</strong> (<a class="reference internal" href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><em>DHRobot</em></a><em> or </em><em>EllipsePlot</em>) – The object to add to the plot (robot or ellipse)</p></li>
-<li><p><strong>readonly</strong> (<em>bool</em><em>, </em><em>optional</em>) – Do not update the state of the object
+<li><p><strong>readonly</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Do not update the state of the object
 (i.e. display not simulate), defaults to False</p></li>
-<li><p><strong>display</strong> (<em>bool</em><em>, </em><em>optional</em>) – Display the object, defaults to True</p></li>
-<li><p><strong>jointaxes</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show the joint axes of the robot with arrows,
+<li><p><strong>display</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Display the object, defaults to True</p></li>
+<li><p><strong>jointaxes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Show the joint axes of the robot with arrows,
 defaults to True</p></li>
-<li><p><strong>eeframe</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show the end-effector frame of the robot,
+<li><p><strong>eeframe</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Show the end-effector frame of the robot,
 defaults to True</p></li>
-<li><p><strong>shadow</strong> (<em>bool</em><em>, </em><em>optional</em>) – Display a shadow of the robot on the x-y gound plane,
+<li><p><strong>shadow</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Display a shadow of the robot on the x-y gound plane,
 defaults to True</p></li>
-<li><p><strong>name</strong> (<em>bool</em><em>, </em><em>optional</em>) – Display the name of the robot, defaults to True</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Display the name of the robot, defaults to True</p></li>
 </ul>
 </dd>
 </dl>
@@ -215,20 +202,20 @@ when the <code class="docutils literal notranslate"><span class="pre">step()</sp
 <span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/backends/PyPlot/PyPlot.html#PyPlot.remove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.backends.PyPlot.PyPlot.remove" title="Permalink to this definition"></a></dt>
 <dd><p>Remove a robot or shape from the graphical scene</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>id</strong> (class:<cite>~roboticstoolbox.robot.DHRobot.DHRobot</cite>,
-class:<cite>roboticstoolbox.backends.VPython.graphics_robot.GraphicalRobot</cite>) – The id of the robot to remove. Can be either the DHLink or
+<li><p><strong>id</strong> (class:<a class="reference internal" href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot" title="roboticstoolbox.robot.DHRobot.DHRobot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DHRobot</span></code></a>,
+class:<code class="xref py py-obj docutils literal notranslate"><span class="pre">roboticstoolbox.backends.VPython.graphics_robot.GraphicalRobot</span></code>) – The id of the robot to remove. Can be either the DHLink or
 GraphicalRobot</p></li>
-<li><p><strong>fig_num</strong> (<em>int</em><em>, </em><em>optional</em>) – The canvas index to delete the robot from, defaults to
+<li><p><strong>fig_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – The canvas index to delete the robot from, defaults to
 the initial one</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>ValueError</strong> – Figure number must be between 0 and total number
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – Figure number must be between 0 and total number
 of canvases</p></li>
-<li><p><strong>TypeError</strong> – Input must be a DHLink or GraphicalRobot</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.11)"><strong>TypeError</strong></a> – Input must be a DHLink or GraphicalRobot</p></li>
 </ul>
 </dd>
 </dl>
@@ -324,22 +311,16 @@ the main script has finished.</p>
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="arm_backend.html" class="btn btn-neutral float-left" title="Backends" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="arm_backend_vpython.html" class="btn btn-neutral float-right" title="VPython" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

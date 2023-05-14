@@ -7,6 +7,7 @@
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -28,12 +29,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -41,7 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Robot Arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
 </ul>
@@ -56,10 +61,10 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">roboticstoolbox.mobile.EKF</li>
       <li class="wy-breadcrumbs-aside">
@@ -83,6 +88,7 @@
 <span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">sqrtm</span><span class="p">,</span> <span class="n">block_diag</span>
 <span class="kn">from</span> <span class="nn">scipy.stats.distributions</span> <span class="kn">import</span> <span class="n">chi2</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">animation</span>
 
 <span class="kn">from</span> <span class="nn">spatialmath.base.animate</span> <span class="kn">import</span> <span class="n">Animate</span>
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span><span class="p">,</span> <span class="n">SE2</span>
@@ -91,12 +97,21 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.mobile.sensors</span> <span class="kn">import</span> <span class="n">SensorBase</span>
 
 
-<div class="viewcode-block" id="EKF"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF">[docs]</a><span class="k">class</span> <span class="nc">EKF</span><span class="p">:</span>
-
-<div class="viewcode-block" id="EKF.__init__"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">,</span>  <span class="n">sensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-            <span class="n">P0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_est</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">joseph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF">[docs]</a><span class="k">class</span> <span class="nc">EKF</span><span class="p">:</span>
+<div class="viewcode-block" id="EKF.__init__"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">robot</span><span class="p">,</span>
+        <span class="n">sensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="nb">map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">P0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">x_est</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">joseph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">history</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extended Kalman filter</span>
 
@@ -239,8 +254,8 @@
 <span class="sd">        time a new landmark is observed.</span>
 
 <span class="sd">        Create a vehicle with perfect odometry (no covariance), add a driver to it,</span>
-<span class="sd">        create a sensor that uses the map and vehicle state to estimate landmark range </span>
-<span class="sd">        and bearing with covariance ``W``, the Kalman filter with estimated sensor </span>
+<span class="sd">        create a sensor that uses the map and vehicle state to estimate landmark range</span>
+<span class="sd">        and bearing with covariance ``W``, the Kalman filter with estimated sensor</span>
 <span class="sd">        covariance ``W``, then run the filter for N time steps::</span>
 
 <span class="sd">            robot = Bicycle()</span>
@@ -281,7 +296,7 @@
 
 <span class="sd">            W = np.diag([0.1, np.radians(1)]) ** 2</span>
 <span class="sd">            sensor = RangeBearingSensor(robot=robot, map=map, covar=W, angle=[-np.pi/2, np.pi/2], range=4, animate=True)</span>
-<span class="sd">            </span>
+
 <span class="sd">            ekf = EKF(robot=(robot, V), P0=P0, sensor=(sensor, W))</span>
 
 <span class="sd">            ekf.run(T=20)  # run the simulation for 20 seconds</span>
@@ -302,16 +317,22 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">robot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> \
-                <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">robot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">VehicleBase</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;robot must be tuple (vehicle, V_est)&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span>
+                <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">robot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">VehicleBase</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;robot must be tuple (vehicle, V_est)&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span> <span class="o">=</span> <span class="n">robot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># reference to the robot vehicle</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_V_est</span> <span class="o">=</span> <span class="n">robot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># estimate of vehicle state covariance V</span>
 
         <span class="k">if</span> <span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sensor</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">sensor</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> \
-                <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sensor</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">SensorBase</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;sensor must be tuple (sensor, W_est)&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sensor</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">sensor</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span>
+                <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sensor</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">SensorBase</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;sensor must be tuple (sensor, W_est)&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_sensor</span> <span class="o">=</span> <span class="n">sensor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># reference to the sensor</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_W_est</span> <span class="o">=</span> <span class="n">sensor</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># estimate of sensor covariance W</span>
         <span class="k">else</span><span class="p">:</span>
@@ -319,7 +340,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_W_est</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="nb">map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="n">LandmarkMap</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;map must be LandmarkMap instance&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;map must be LandmarkMap instance&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ekf_map</span> <span class="o">=</span> <span class="nb">map</span>  <span class="c1"># prior map for localization</span>
 
         <span class="k">if</span> <span class="n">animate</span><span class="p">:</span>
@@ -330,15 +351,15 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span> <span class="o">=</span> <span class="n">sensor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">workspace</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">_workspace</span> <span class="o">=</span> <span class="n">sensor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">workspace</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">workspace</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;for animation robot must have a defined workspace&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;for animation robot must have a defined workspace&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">animate</span> <span class="o">=</span> <span class="n">animate</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_P0</span> <span class="o">=</span> <span class="n">P0</span>  <span class="c1">#  initial system covariance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="n">x0</span>  <span class="c1"># initial vehicle state</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span> <span class="o">=</span> <span class="n">x_est</span>           <span class="c1">#  estimated state</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1">#  ekf_map state</span>
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span> <span class="o">=</span> <span class="n">x_est</span>  <span class="c1">#  estimated state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#  ekf_map state</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_est_vehicle</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_est_ekf_map</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_V_est</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -351,11 +372,11 @@
         <span class="k">if</span> <span class="nb">map</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># estimating ekf_map</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_est_ekf_map</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_joseph</span> <span class="o">=</span> <span class="n">joseph</span>          <span class="c1">#  flag: use Joseph form to compute p</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_joseph</span> <span class="o">=</span> <span class="n">joseph</span>  <span class="c1">#  flag: use Joseph form to compute p</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_keep_history</span> <span class="o">=</span> <span class="n">history</span>     <span class="c1">#  keep history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_keep_history</span> <span class="o">=</span> <span class="n">history</span>  <span class="c1">#  keep history</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_htuple</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;EKFlog&quot;</span><span class="p">,</span> <span class="s2">&quot;t xest odo P innov S K lm z&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -379,14 +400,14 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># noisy odometry case</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">V_est</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;vehicle state covariance V_est must be 2x2&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;vehicle state covariance V_est must be 2x2&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">x</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_P_est</span> <span class="o">=</span> <span class="n">P0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_est_vehicle</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">W_est</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">W_est</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;sensor covariance W_est must be 2x2&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sensor covariance W_est must be 2x2&quot;</span><span class="p">)</span>
 
         <span class="c1"># if np.any(self._sensor):</span>
         <span class="c1">#     self._landmarks = None*np.zeros(2, self._sensor.ekf_map.nlandmarks)</span>
@@ -398,7 +419,7 @@
         <span class="c1"># if np.any(sensor) and not isinstance(sensor, &#39;Sensor&#39;):</span>
         <span class="c1">#     raise ValueError(&#39;expecting Sensor object&#39;)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_init</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">xxdata</span> <span class="o">=</span> <span class="p">([],</span> <span class="p">[])</span></div>
 
@@ -406,28 +427,28 @@
         <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;EKF object: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span><span class="p">)</span><span class="si">}</span><span class="s2"> states&quot;</span>
 
         <span class="k">def</span> <span class="nf">indent</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-            <span class="n">spaces</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">n</span>
-            <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">spaces</span><span class="p">)</span> 
+            <span class="n">spaces</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">n</span>
+            <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">spaces</span><span class="p">)</span>
 
         <span class="n">estimating</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_vehicle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">estimating</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;vehicle pose&#39;</span><span class="p">)</span>
+            <span class="n">estimating</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;vehicle pose&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_ekf_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">estimating</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;map&#39;</span><span class="p">)</span>
+            <span class="n">estimating</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;map&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">estimating</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;, estimating: &#39;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">estimating</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot;, estimating: &quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">estimating</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">+=</span> <span class="n">indent</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">robot: &quot;</span>  <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="p">))</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="n">indent</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">robot: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="p">))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">V_est</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">+=</span> <span class="n">indent</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">V_est:  &#39;</span> <span class="o">+</span> <span class="n">base</span><span class="o">.</span><span class="n">array2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V_est</span><span class="p">))</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="n">indent</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">V_est:  &quot;</span> <span class="o">+</span> <span class="n">base</span><span class="o">.</span><span class="n">array2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V_est</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="n">indent</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">sensor: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="p">))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">W_est</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">+=</span> <span class="n">indent</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">W_est:  &#39;</span> <span class="o">+</span> <span class="n">base</span><span class="o">.</span><span class="n">array2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_est</span><span class="p">))</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="n">indent</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">W_est:  &quot;</span> <span class="o">+</span> <span class="n">base</span><span class="o">.</span><span class="n">array2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_est</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">s</span>
-    
+
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
@@ -443,7 +464,7 @@
 <span class="sd">        simulation. The dimensions depend on the problem being solved.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">P_est</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -468,7 +489,7 @@
 <span class="sd">        Returns the value of the covariance matrix passed to the constructor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_P0</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">V_est</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -494,7 +515,7 @@
 <span class="sd">        the constructor</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_W_est</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">robot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -504,7 +525,7 @@
 <span class="sd">        :rtype: :class:`VehicleBase` subclass</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -524,7 +545,7 @@
 <span class="sd">        :rtype: :class:`LandmarkMap` subclass</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -534,7 +555,7 @@
 <span class="sd">        :rtype: bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">history</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -547,11 +568,11 @@
 <span class="sd">        list.  It contains, for that time step, estimated state and covariance,</span>
 <span class="sd">        and sensor observation.</span>
 
-<span class="sd">        :seealso: :meth:`get_t` :meth:`get_xyt` :meth:`get_map` :meth:`get_P` </span>
-<span class="sd">            :meth:`get_Pnorm` </span>
+<span class="sd">        :seealso: :meth:`get_t` :meth:`get_xyt` :meth:`get_map` :meth:`get_P`</span>
+<span class="sd">            :meth:`get_Pnorm`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -565,7 +586,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span>
 
-    
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">landmarks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -578,7 +598,7 @@
 
 <span class="sd">        - order in which landmark was seen</span>
 <span class="sd">        - number of times seen</span>
-<span class="sd">        </span>
+
 <span class="sd">        The order in which the landmark was first seen.  The first observed</span>
 <span class="sd">        landmark has order 0 and so on.</span>
 
@@ -586,7 +606,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span>
 
-<div class="viewcode-block" id="EKF.landmark"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.landmark">[docs]</a>    <span class="k">def</span> <span class="nf">landmark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.landmark"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.landmark">[docs]</a>    <span class="k">def</span> <span class="nf">landmark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Landmark information</span>
 
@@ -603,9 +623,9 @@
             <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown landmark </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown landmark </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="EKF.landmark_index"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.landmark_index">[docs]</a>    <span class="k">def</span> <span class="nf">landmark_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.landmark_index"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.landmark_index">[docs]</a>    <span class="k">def</span> <span class="nf">landmark_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Landmark index in complete state vector</span>
 
@@ -625,9 +645,9 @@
                 <span class="n">jx</span> <span class="o">+=</span> <span class="mi">3</span>
             <span class="k">return</span> <span class="n">jx</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown landmark </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown landmark </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="EKF.landmark_mindex"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.landmark_mindex">[docs]</a>    <span class="k">def</span> <span class="nf">landmark_mindex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.landmark_mindex"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.landmark_mindex">[docs]</a>    <span class="k">def</span> <span class="nf">landmark_mindex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Landmark index in map state vector</span>
 
@@ -644,9 +664,9 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span><span class="p">[</span><span class="nb">id</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown landmark </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown landmark </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="EKF.landmark_x"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.landmark_x">[docs]</a>    <span class="k">def</span> <span class="nf">landmark_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.landmark_x"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.landmark_x">[docs]</a>    <span class="k">def</span> <span class="nf">landmark_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Landmark position</span>
 
@@ -658,19 +678,19 @@
 <span class="sd">        Returns the landmark position from the current state vector.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">jx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">landmark_index</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span><span class="p">[</span><span class="n">jx</span><span class="p">:</span> <span class="n">jx</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span><span class="p">[</span><span class="n">jx</span> <span class="p">:</span> <span class="n">jx</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span></div>
 
-    <span class="k">def</span> <span class="nf">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1">#EKF.init Reset the filter</span>
+<div class="viewcode-block" id="EKF.init"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># EKF.init Reset the filter</span>
         <span class="c1">#</span>
         <span class="c1"># E.init() resets the filter state and clears landmarks and history.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 
-        <span class="c1">#clear the history</span>
+        <span class="c1"># clear the history</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="o">=</span> <span class="p">[]</span>
-        
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_V_est</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># perfect vehicle case</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_estVehicle</span> <span class="o">=</span> <span class="kc">False</span>
@@ -681,14 +701,14 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_P_est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_P0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_estVehicle</span> <span class="o">=</span> <span class="kc">True</span>
-        
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># landmark dictionary maps lm_id to list[index, nseen]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span> <span class="o">=</span> <span class="p">{}</span></div>
 
             <span class="c1"># np.full((2, len(self.sensor.map)), -1, dtype=int)</span>
 
-<div class="viewcode-block" id="EKF.run"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">movie</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.run"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the EKF simulation</span>
 
@@ -696,8 +716,6 @@
 <span class="sd">        :type T: float</span>
 <span class="sd">        :param animate: animate motion of vehicle, defaults to False</span>
 <span class="sd">        :type animate: bool, optional</span>
-<span class="sd">        :param movie: name of movie file to create, defaults to None</span>
-<span class="sd">        :type movie: str, optional</span>
 
 <span class="sd">        Simulates the motion of a vehicle (under the control of a driving agent)</span>
 <span class="sd">        and the EKF estimator.  The steps are:</span>
@@ -710,57 +728,134 @@
 <span class="sd">            - execute the EKF</span>
 <span class="sd">            - save information as a namedtuple to the history list for later display</span>
 
-<span class="sd">        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks` </span>
+<span class="sd">        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks`</span>
 <span class="sd">            :meth:`get_xyt` :meth:`get_t` :meth:`get_map` :meth:`get_P` :meth:`get_Pnorm`</span>
 <span class="sd">            :meth:`plot_xy` :meth:`plot_ellipse` :meth:`plot_error` :meth:`plot_map`</span>
+<span class="sd">            :meth:`run_animation`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_init</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">animate</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">Iterable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dim</span><span class="p">):</span>
-                    <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span>
-                    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">])</span>
-                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dim</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-                    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="o">-</span><span class="n">w</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="n">h</span><span class="p">])</span>
-                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dim</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dim</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">animate</span> <span class="o">=</span> <span class="kc">False</span>
 
-            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Y&quot;</span><span class="p">)</span>
 
-        <span class="c1"># anim = Animate(movie)</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">dt</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">animate</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">()</span></div>
-        <span class="c1">#     anim.add()</span>
+                <span class="c1"># self.robot.plot()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">_animation</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span></div>
 
-        <span class="c1"># anim.close()</span>
+<div class="viewcode-block" id="EKF.run_animation"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.run_animation">[docs]</a>    <span class="k">def</span> <span class="nf">run_animation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the EKF simulation</span>
 
+<span class="sd">        :param T: maximum simulation time in seconds</span>
+<span class="sd">        :type T: float</span>
+<span class="sd">        :param format: Output format</span>
+<span class="sd">        :type format: str, optional</span>
+<span class="sd">        :param file: File name</span>
+<span class="sd">        :type file: str, optional</span>
+<span class="sd">        :return: Matplotlib animation object</span>
+<span class="sd">        :rtype: :meth:`matplotlib.animation.FuncAnimation`</span>
 
-    <span class="c1"># TODO: Make the following methods private.</span>
-    <span class="k">def</span> <span class="nf">_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z_pred</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="sd">        Simulates the motion of a vehicle (under the control of a driving agent)</span>
+<span class="sd">        and the EKF estimator for ``T`` seconds and returns an animation</span>
+<span class="sd">        in various formats::</span>
+
+<span class="sd">            ``format``    ``file``   description</span>
+<span class="sd">            ============  =========  ============================</span>
+<span class="sd">            ``&quot;html&quot;``    str, None  return HTML5 video</span>
+<span class="sd">            ``&quot;jshtml&quot;``  str, None  return JS+HTML video</span>
+<span class="sd">            ``&quot;gif&quot;``     str        return animated GIF</span>
+<span class="sd">            ``&quot;mp4&quot;``     str        return MP4/H264 video</span>
+<span class="sd">            ``None``                 return a ``FuncAnimation`` object</span>
+
+<span class="sd">        If ``file`` can be ``None`` then return the video as a string, otherwise it</span>
+<span class="sd">        must be a filename.</span>
+
+<span class="sd">        The simulation steps are:</span>
+
+<span class="sd">        - initialize the filter, vehicle and vehicle driver agent, sensor</span>
+<span class="sd">        - for each time step:</span>
+
+<span class="sd">            - step the vehicle and its driver agent, obtain odometry</span>
+<span class="sd">            - take a sensor reading</span>
+<span class="sd">            - execute the EKF</span>
+<span class="sd">            - save information as a namedtuple to the history list for later display</span>
+
+<span class="sd">        :seealso: :meth:`history` :meth:`landmark` :meth:`landmarks`</span>
+<span class="sd">            :meth:`get_xyt` :meth:`get_t` :meth:`get_map` :meth:`get_P` :meth:`get_Pnorm`</span>
+<span class="sd">            :meth:`plot_xy` :meth:`plot_ellipse` :meth:`plot_error` :meth:`plot_map`</span>
+<span class="sd">            :meth:`run_animation`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">init</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Y&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">animate</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">_animation</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">pause</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">nframes</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">_dt</span><span class="p">)</span>
+        <span class="n">anim</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FuncAnimation</span><span class="p">(</span>
+            <span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span>
+            <span class="n">func</span><span class="o">=</span><span class="n">animate</span><span class="p">,</span>
+            <span class="n">init_func</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
+            <span class="n">frames</span><span class="o">=</span><span class="n">nframes</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">dt</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="n">blit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">repeat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;html&quot;</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">anim</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">()</span>  <span class="c1"># convert to embeddable HTML5 animation</span>
+        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;jshtml&quot;</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">anim</span><span class="o">.</span><span class="n">to_jshtml</span><span class="p">()</span>  <span class="c1"># convert to embeddable Javascript/HTML animation</span>
+        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;gif&quot;</span><span class="p">:</span>
+            <span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+                <span class="n">file</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="n">animation</span><span class="o">.</span><span class="n">PillowWriter</span><span class="p">(</span><span class="n">fps</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
+            <span class="p">)</span>  <span class="c1"># convert to GIF</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;mp4&quot;</span><span class="p">:</span>
+            <span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+                <span class="n">file</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="n">animation</span><span class="o">.</span><span class="n">FFMpegWriter</span><span class="p">(</span><span class="n">fps</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
+            <span class="p">)</span>  <span class="c1"># convert to mp4/H264</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># return the anim object</span>
+            <span class="k">return</span> <span class="n">anim</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;unknown format&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ret</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="EKF.step"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pause</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute one timestep of the simulation</span>
-
-<span class="sd">        :param z_pred: _description_, defaults to None</span>
-<span class="sd">        :type z_pred: _type_, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># move the robot</span>
-        <span class="n">odo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="n">odo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">pause</span><span class="o">=</span><span class="n">pause</span><span class="p">)</span>
 
         <span class="c1"># =================================================================</span>
         <span class="c1"># P R E D I C T I O N</span>
         <span class="c1"># =================================================================</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_vehicle</span><span class="p">:</span>
-            <span class="c1"># split the state vector and covariance into chunks for </span>
+            <span class="c1"># split the state vector and covariance into chunks for</span>
             <span class="c1"># vehicle and map</span>
             <span class="n">xv_est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
             <span class="n">xm_est</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
@@ -795,7 +890,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_vehicle</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_ekf_map</span><span class="p">:</span>
             <span class="c1"># vehicle only</span>
             <span class="n">x_pred</span> <span class="o">=</span> <span class="n">xv_pred</span>
-            <span class="n">P_pred</span> <span class="o">=</span>  <span class="n">Pvv_pred</span>
+            <span class="n">P_pred</span> <span class="o">=</span> <span class="n">Pvv_pred</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_vehicle</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_ekf_map</span><span class="p">:</span>
             <span class="c1"># map only</span>
             <span class="n">x_pred</span> <span class="o">=</span> <span class="n">xm_pred</span>
@@ -811,7 +906,7 @@
             <span class="c1"># fmt: on</span>
 
         <span class="c1"># at this point we have:</span>
-        <span class="c1">#   xv_pred the state of the vehicle to use to </span>
+        <span class="c1">#   xv_pred the state of the vehicle to use to</span>
         <span class="c1">#           predict observations</span>
         <span class="c1">#   xm_pred the state of the map</span>
         <span class="c1">#   x_pred  the full predicted state vector</span>
@@ -828,7 +923,6 @@
         <span class="c1"># P R O C E S S    O B S E R V A T I O N S</span>
         <span class="c1"># =================================================================</span>
 
-        
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1">#  read the sensor</span>
             <span class="n">z</span><span class="p">,</span> <span class="n">lm_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">reading</span><span class="p">()</span>
@@ -843,33 +937,29 @@
 
             <span class="c1"># compute the innovation</span>
             <span class="n">z_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="n">xv_pred</span><span class="p">,</span> <span class="n">lm_id</span><span class="p">)</span>
-            <span class="n">innov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-                <span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">z_pred</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="n">base</span><span class="o">.</span><span class="n">angdiff</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">z_pred</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="p">])</span>
+            <span class="n">innov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">z_pred</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_mpi_pi</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">z_pred</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_ekf_map</span><span class="p">:</span>
                 <span class="c1"># the ekf_map is estimated MM or SLAM case</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isseenbefore</span><span class="p">(</span><span class="n">lm_id</span><span class="p">):</span>
                     <span class="c1"># landmark is previously seen</span>
-                    
+
                     <span class="c1"># get previous estimate of its state</span>
                     <span class="n">jx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">landmark_mindex</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span>
-                    <span class="n">xf</span> <span class="o">=</span> <span class="n">xm_pred</span><span class="p">[</span><span class="n">jx</span><span class="p">:</span> <span class="n">jx</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="n">xf</span> <span class="o">=</span> <span class="n">xm_pred</span><span class="p">[</span><span class="n">jx</span> <span class="p">:</span> <span class="n">jx</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
 
                     <span class="c1"># compute Jacobian for this particular landmark</span>
                     <span class="c1"># xf = self.sensor.g(xv_pred, z) # HACK</span>
                     <span class="n">Hx_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">Hp</span><span class="p">(</span><span class="n">xv_pred</span><span class="p">,</span> <span class="n">xf</span><span class="p">)</span>
 
                     <span class="n">z_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="n">xv_pred</span><span class="p">,</span> <span class="n">xf</span><span class="p">)</span>
-                    <span class="n">innov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-                        <span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">z_pred</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                        <span class="n">base</span><span class="o">.</span><span class="n">angdiff</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">z_pred</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="p">])</span>
+                    <span class="n">innov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">z_pred</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_mpi_pi</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">z_pred</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+                    <span class="p">)</span>
 
                     <span class="c1">#  create the Jacobian for all landmarks</span>
                     <span class="n">Hx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">xm_pred</span><span class="p">)))</span>
-                    <span class="n">Hx</span><span class="p">[:,</span> <span class="n">jx</span><span class="p">:</span><span class="n">jx</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Hx_k</span>
+                    <span class="n">Hx</span><span class="p">[:,</span> <span class="n">jx</span> <span class="p">:</span> <span class="n">jx</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Hx_k</span>
 
                     <span class="n">Hw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">Hw</span><span class="p">(</span><span class="n">xv_pred</span><span class="p">,</span> <span class="n">xf</span><span class="p">)</span>
 
@@ -880,28 +970,37 @@
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">_landmark_increment</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span>  <span class="c1"># update the count</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;landmark </span><span class="si">{</span><span class="n">lm_id</span><span class="si">}</span><span class="s2"> seen </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_landmark_count</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span><span class="si">}</span><span class="s2"> times, state_idx=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">landmark_index</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;landmark </span><span class="si">{</span><span class="n">lm_id</span><span class="si">}</span><span class="s2"> seen&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_landmark_count</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span><span class="si">}</span><span class="s2"> times,&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot; state_idx=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">landmark_index</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
                     <span class="n">doUpdatePhase</span> <span class="o">=</span> <span class="kc">True</span>
 
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># new landmark, seen for the first time</span>
 
                     <span class="c1"># extend the state vector and covariance</span>
-                    <span class="n">x_pred</span><span class="p">,</span> <span class="n">P_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extend_map</span><span class="p">(</span><span class="n">P_pred</span><span class="p">,</span> <span class="n">xv_pred</span><span class="p">,</span> <span class="n">xm_pred</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">lm_id</span><span class="p">)</span>
+                    <span class="n">x_pred</span><span class="p">,</span> <span class="n">P_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extend_map</span><span class="p">(</span>
+                        <span class="n">P_pred</span><span class="p">,</span> <span class="n">xv_pred</span><span class="p">,</span> <span class="n">xm_pred</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">lm_id</span>
+                    <span class="p">)</span>
                     <span class="c1"># if lm_id == 17:</span>
                     <span class="c1">#     print(P_pred)</span>
                     <span class="c1">#     # print(x_pred[-2:], self._sensor._map.landmark(17), base.norm(x_pred[-2:] - self._sensor._map.landmark(17)))</span>
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">_landmark_add</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;landmark </span><span class="si">{</span><span class="n">lm_id</span><span class="si">}</span><span class="s2"> seen for first time, state_idx=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">landmark_index</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;landmark </span><span class="si">{</span><span class="n">lm_id</span><span class="si">}</span><span class="s2"> seen for first time,&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot; state_idx=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">landmark_index</span><span class="p">(</span><span class="n">lm_id</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
                     <span class="n">doUpdatePhase</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># LBL</span>
-                    <span class="n">Hx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">Hx</span><span class="p">(</span><span class="n">xv_pred</span><span class="p">,</span> <span class="n">lm_id</span><span class="p">)</span>
-                    <span class="n">Hw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">Hw</span><span class="p">(</span><span class="n">xv_pred</span><span class="p">,</span> <span class="n">lm_id</span><span class="p">)</span>
-                    <span class="n">doUpdatePhase</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># LBL</span>
+                <span class="n">Hx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">Hx</span><span class="p">(</span><span class="n">xv_pred</span><span class="p">,</span> <span class="n">lm_id</span><span class="p">)</span>
+                <span class="n">Hw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">Hw</span><span class="p">(</span><span class="n">xv_pred</span><span class="p">,</span> <span class="n">lm_id</span><span class="p">)</span>
+                <span class="n">doUpdatePhase</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">innov</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -931,14 +1030,13 @@
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_vehicle</span><span class="p">:</span>
                 <span class="c1">#  wrap heading state for a vehicle</span>
-                <span class="n">x_est</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">angdiff</span><span class="p">(</span><span class="n">x_est</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">x_est</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_mpi_pi</span><span class="p">(</span><span class="n">x_est</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
             <span class="c1"># update the covariance</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_joseph</span><span class="p">:</span>
                 <span class="c1">#  we use the Joseph form</span>
                 <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">P_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">P_est</span> <span class="o">=</span> <span class="p">(</span><span class="n">I</span> <span class="o">-</span> <span class="n">K</span> <span class="o">@</span> <span class="n">Hx</span><span class="p">)</span> <span class="o">@</span> <span class="n">P_pred</span> <span class="o">@</span> <span class="p">(</span><span class="n">I</span> <span class="o">-</span> <span class="n">K</span> <span class="o">@</span> <span class="n">Hx</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> \
-                    <span class="o">+</span> <span class="n">K</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_W_est</span> <span class="o">@</span> <span class="n">K</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">P_est</span> <span class="o">=</span> <span class="p">(</span><span class="n">I</span> <span class="o">-</span> <span class="n">K</span> <span class="o">@</span> <span class="n">Hx</span><span class="p">)</span> <span class="o">@</span> <span class="n">P_pred</span> <span class="o">@</span> <span class="p">(</span><span class="n">I</span> <span class="o">-</span> <span class="n">K</span> <span class="o">@</span> <span class="n">Hx</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">K</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_W_est</span> <span class="o">@</span> <span class="n">K</span><span class="o">.</span><span class="n">T</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">P_est</span> <span class="o">=</span> <span class="n">P_pred</span> <span class="o">-</span> <span class="n">K</span> <span class="o">@</span> <span class="n">S</span> <span class="o">@</span> <span class="n">K</span><span class="o">.</span><span class="n">T</span>
                 <span class="c1"># enforce P to be symmetric</span>
@@ -965,7 +1063,7 @@
                 <span class="n">lm_id</span> <span class="k">if</span> <span class="n">lm_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                 <span class="n">z</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span></div>
 
     <span class="c1">## landmark management</span>
 
@@ -983,24 +1081,24 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span><span class="p">[</span><span class="n">lm_id</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_landmark_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lm_id</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span><span class="p">[</span><span class="n">lm_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span><span class="p">)</span> <span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-    
+        <span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span><span class="p">[</span><span class="n">lm_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_landmarks</span><span class="p">),</span> <span class="mi">1</span><span class="p">]</span>
+
     <span class="k">def</span> <span class="nf">_extend_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">xv</span><span class="p">,</span> <span class="n">xm</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">lm_id</span><span class="p">):</span>
-            <span class="c1"># this is a new landmark, we haven&#39;t seen it before</span>
-            <span class="c1"># estimate position of landmark in the world based on </span>
-            <span class="c1"># noisy sensor reading and current vehicle pose</span>
+        <span class="c1"># this is a new landmark, we haven&#39;t seen it before</span>
+        <span class="c1"># estimate position of landmark in the world based on</span>
+        <span class="c1"># noisy sensor reading and current vehicle pose</span>
 
         <span class="c1"># M = None</span>
 
         <span class="c1"># estimate its position based on observation and vehicle state</span>
         <span class="n">xf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">xv</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
-        
+
         <span class="c1"># append this estimate to the state vector</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_vehicle</span><span class="p">:</span>
             <span class="n">x_ext</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">xv</span><span class="p">,</span> <span class="n">xm</span><span class="p">,</span> <span class="n">xf</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">x_ext</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">xm</span><span class="p">,</span> <span class="n">xf</span><span class="p">]</span>
-        
+
         <span class="c1"># get the Jacobian for the new landmark</span>
         <span class="n">Gz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor</span><span class="o">.</span><span class="n">Gz</span><span class="p">(</span><span class="n">xv</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
 
@@ -1017,7 +1115,7 @@
             <span class="c1"># fmt: on</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># estimating landmarks only</span>
-            <span class="c1">#P_ext = block_diag(P, Gz @ self._W_est @ Gz.T)</span>
+            <span class="c1"># P_ext = block_diag(P, Gz @ self._W_est @ Gz.T)</span>
             <span class="c1"># fmt: off</span>
             <span class="n">Yz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">block</span><span class="p">([</span>
                 <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>        <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>    <span class="p">],</span>
@@ -1028,8 +1126,7 @@
 
         <span class="k">return</span> <span class="n">x_ext</span><span class="p">,</span> <span class="n">P_ext</span>
 
-
-<div class="viewcode-block" id="EKF.get_t"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.get_t">[docs]</a>    <span class="k">def</span> <span class="nf">get_t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.get_t"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.get_t">[docs]</a>    <span class="k">def</span> <span class="nf">get_t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get time from simulation</span>
 
@@ -1043,7 +1140,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">t</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EKF.get_xyt"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.get_xyt">[docs]</a>    <span class="k">def</span> <span class="nf">get_xyt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.get_xyt"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.get_xyt">[docs]</a>    <span class="k">def</span> <span class="nf">get_xyt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get estimated vehicle trajectory</span>
 
@@ -1058,13 +1155,13 @@
             <span class="n">xyt</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">xyt</span></div>
 
-<div class="viewcode-block" id="EKF.plot_xy"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.plot_xy">[docs]</a>    <span class="k">def</span> <span class="nf">plot_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.plot_xy"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.plot_xy">[docs]</a>    <span class="k">def</span> <span class="nf">plot_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot estimated vehicle position</span>
 
 <span class="sd">        :param args: position arguments passed to :meth:`~matplotlib.axes.Axes.plot`</span>
 <span class="sd">        :param kwargs: keywords arguments passed to :meth:`~matplotlib.axes.Axes.plot`</span>
-<span class="sd">        :param block: hold plot until figure is closed, defaults to False</span>
+<span class="sd">        :param block: hold plot until figure is closed, defaults to None</span>
 <span class="sd">        :type block: bool, optional</span>
 
 <span class="sd">        Plot the estimated vehicle path in the xy-plane.</span>
@@ -1072,13 +1169,14 @@
 <span class="sd">        :seealso: :meth:`get_xyt` :meth:`plot_error` :meth:`plot_ellipse` :meth:`plot_P`</span>
 <span class="sd">            :meth:`run` :meth:`history`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;color&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;color&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;r&quot;</span>
         <span class="n">xyt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_xyt</span><span class="p">()</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xyt</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xyt</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-        <span class="c1"># plt.show(block=block)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xyt</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xyt</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EKF.plot_ellipse"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.plot_ellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_ellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.plot_ellipse"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.plot_ellipse">[docs]</a>    <span class="k">def</span> <span class="nf">plot_ellipse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot uncertainty ellipses</span>
 
@@ -1086,6 +1184,8 @@
 <span class="sd">        :type confidence: float, optional</span>
 <span class="sd">        :param N: number of ellipses to plot, defaults to 10</span>
 <span class="sd">        :type N: int, optional</span>
+<span class="sd">        :param block: hold plot until figure is closed, defaults to None</span>
+<span class="sd">        :type block: bool, optional</span>
 <span class="sd">        :param kwargs: arguments passed to :meth:`spatialmath.base.graphics.plot_ellipse`</span>
 
 <span class="sd">        Plot ``N`` uncertainty ellipses spaced evenly along the trajectory.</span>
@@ -1099,17 +1199,31 @@
             <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">confidence</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">% confidence&quot;</span>
-        
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nhist</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nhist</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
             <span class="n">k</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
             <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">base</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">P</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">centre</span><span class="o">=</span><span class="n">h</span><span class="o">.</span><span class="n">xest</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">confidence</span><span class="o">=</span><span class="n">confidence</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">inverted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">base</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span>
+                    <span class="n">h</span><span class="o">.</span><span class="n">P</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="n">centre</span><span class="o">=</span><span class="n">h</span><span class="o">.</span><span class="n">xest</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="n">confidence</span><span class="o">=</span><span class="n">confidence</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                    <span class="n">inverted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">base</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">P</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">centre</span><span class="o">=</span><span class="n">h</span><span class="o">.</span><span class="n">xest</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">confidence</span><span class="o">=</span><span class="n">confidence</span><span class="p">,</span> <span class="n">inverted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+                <span class="n">base</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span>
+                    <span class="n">h</span><span class="o">.</span><span class="n">P</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="n">centre</span><span class="o">=</span><span class="n">h</span><span class="o">.</span><span class="n">xest</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="n">confidence</span><span class="o">=</span><span class="n">confidence</span><span class="p">,</span>
+                    <span class="n">inverted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="EKF.plot_error"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.plot_error">[docs]</a>    <span class="k">def</span> <span class="nf">plot_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.plot_error"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.plot_error">[docs]</a>    <span class="k">def</span> <span class="nf">plot_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot error with uncertainty bounds</span>
 
@@ -1117,13 +1231,15 @@
 <span class="sd">        :type bgcolor: str, optional</span>
 <span class="sd">        :param confidence: confidence interval, defaults to 0.95</span>
 <span class="sd">        :type confidence: float, optional</span>
+<span class="sd">        :param block: hold plot until figure is closed, defaults to None</span>
+<span class="sd">        :type block: bool, optional</span>
 
-<span class="sd">        Plot the error between actual and estimated vehicle </span>
+<span class="sd">        Plot the error between actual and estimated vehicle</span>
 <span class="sd">        path :math:`(x, y, \theta)`` versus time as three stacked plots.</span>
 <span class="sd">        Heading error is wrapped into the range :math:`[-\pi,\pi)`</span>
 
 
-<span class="sd">        Behind each line draw a shaded polygon ``bgcolor`` showing the specified </span>
+<span class="sd">        Behind each line draw a shaded polygon ``bgcolor`` showing the specified</span>
 <span class="sd">        ``confidence`` bounds based on the covariance at each time step.</span>
 <span class="sd">        Ideally the lines should be within the shaded polygon ``confidence``</span>
 <span class="sd">        of the time.</span>
@@ -1133,7 +1249,7 @@
 <span class="sd">        :seealso: :meth:`get_P` :meth:`run` :meth:`history`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">error</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span> 
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ppf</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">confidence</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="n">x_gt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">x_hist</span>
@@ -1141,7 +1257,7 @@
             <span class="n">hk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
             <span class="c1"># error is true - estimated</span>
             <span class="n">e</span> <span class="o">=</span> <span class="n">x_gt</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">hk</span><span class="o">.</span><span class="n">xest</span>
-            <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">angdiff</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">wrap_mpi_pi</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
             <span class="n">error</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
             <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
@@ -1159,17 +1275,24 @@
 
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axes</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">confidence</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">edge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="n">t</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">bounds</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="o">-</span><span class="n">bounds</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">]],</span>
-                    <span class="p">])</span>
-                <span class="n">polygon</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+                <span class="n">edge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="n">t</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">bounds</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="o">-</span><span class="n">bounds</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">]],</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">polygon</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+                    <span class="n">edge</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span>
+                <span class="p">)</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">error</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">);</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">error</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; error&quot;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
-        
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
+
         <span class="c1"># subplot(opt.nplots*100+12)</span>
         <span class="c1"># if opt.confidence</span>
         <span class="c1">#     edge = [pxy(:,2); -pxy(end:-1:1,2)];</span>
@@ -1181,7 +1304,7 @@
         <span class="c1"># hold off</span>
         <span class="c1"># grid</span>
         <span class="c1"># ylabel(&#39;y error&#39;)</span>
-        
+
         <span class="c1"># subplot(opt.nplots*100+13)</span>
         <span class="c1"># if opt.confidence</span>
         <span class="c1">#     edge = [pxy(:,3); -pxy(end:-1:1,3)];</span>
@@ -1195,7 +1318,7 @@
         <span class="c1"># xlabel(&#39;Time step&#39;)</span>
         <span class="c1"># ylabel(&#39;\theta error&#39;)</span>
 
-<div class="viewcode-block" id="EKF.get_map"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.get_map">[docs]</a>    <span class="k">def</span> <span class="nf">get_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.get_map"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.get_map">[docs]</a>    <span class="k">def</span> <span class="nf">get_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get estimated map</span>
 
@@ -1214,11 +1337,11 @@
             <span class="c1">#  state if we are estimating vehicle as well</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_vehicle</span><span class="p">:</span>
                 <span class="n">jx</span> <span class="o">+=</span> <span class="mi">3</span>
-            <span class="n">xf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span><span class="p">[</span><span class="n">jx</span><span class="p">:</span> <span class="n">jx</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">xf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span><span class="p">[</span><span class="n">jx</span> <span class="p">:</span> <span class="n">jx</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
             <span class="n">xy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xf</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xy</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EKF.plot_map"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.plot_map">[docs]</a>    <span class="k">def</span> <span class="nf">plot_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">confidence</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.plot_map"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.plot_map">[docs]</a>    <span class="k">def</span> <span class="nf">plot_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot estimated landmarks</span>
 
@@ -1228,6 +1351,8 @@
 <span class="sd">        :type ellipse: dict, optional</span>
 <span class="sd">        :param confidence: ellipse confidence interval, defaults to 0.95</span>
 <span class="sd">        :type confidence: float, optional</span>
+<span class="sd">        :param block: hold plot until figure is closed, defaults to None</span>
+<span class="sd">        :type block: bool, optional</span>
 
 <span class="sd">        Plot a marker  and covariance ellipses for each estimated landmark.</span>
 
@@ -1235,12 +1360,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">marker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">marker</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;markersize&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> 
-                <span class="s1">&#39;markerfacecolor&#39;</span><span class="p">:</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;linewidth&#39;</span><span class="p">:</span> <span class="mi">0</span>
+                <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="s2">&quot;+&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;markersize&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="s2">&quot;markerfacecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
             <span class="p">}</span>
-        
+
         <span class="n">xm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x_est</span>
         <span class="n">P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_P_est</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_vehicle</span><span class="p">:</span>
@@ -1249,21 +1374,35 @@
 
         <span class="c1"># mark the estimate as a point</span>
         <span class="n">xm</span> <span class="o">=</span> <span class="n">xm</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># arrange as Nx2</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xm</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xm</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;estimated landmark&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">marker</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xm</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xm</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;estimated landmark&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">marker</span><span class="p">)</span>
 
         <span class="c1"># add an ellipse</span>
         <span class="k">if</span> <span class="n">ellipse</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="n">Pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">P_est</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">Pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">P_est</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
                 <span class="c1"># put ellipse in the legend only once</span>
                 <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">base</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span><span class="n">Pi</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">xm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">confidence</span><span class="o">=</span><span class="n">confidence</span><span class="p">,</span>
-                        <span class="n">inverted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">confidence</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">% confidence&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">ellipse</span><span class="p">)</span>
+                    <span class="n">base</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span>
+                        <span class="n">Pi</span><span class="p">,</span>
+                        <span class="n">centre</span><span class="o">=</span><span class="n">xm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span>
+                        <span class="n">confidence</span><span class="o">=</span><span class="n">confidence</span><span class="p">,</span>
+                        <span class="n">inverted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">confidence</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">% confidence&quot;</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">ellipse</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">base</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span><span class="n">Pi</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="n">xm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">confidence</span><span class="o">=</span><span class="n">confidence</span><span class="p">,</span> <span class="n">inverted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">ellipse</span><span class="p">)</span></div>
+                    <span class="n">base</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span>
+                        <span class="n">Pi</span><span class="p">,</span>
+                        <span class="n">centre</span><span class="o">=</span><span class="n">xm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span>
+                        <span class="n">confidence</span><span class="o">=</span><span class="n">confidence</span><span class="p">,</span>
+                        <span class="n">inverted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">ellipse</span><span class="p">,</span>
+                    <span class="p">)</span>
         <span class="c1"># plot_ellipse( P * chi2inv_rtb(opt.confidence, 2), xf, args{:});</span>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EKF.get_P"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.get_P">[docs]</a>    <span class="k">def</span> <span class="nf">get_P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.get_P"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.get_P">[docs]</a>    <span class="k">def</span> <span class="nf">get_P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get covariance matrices from simulation</span>
 
@@ -1282,7 +1421,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">P</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EKF.get_Pnorm"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.get_Pnorm">[docs]</a>    <span class="k">def</span> <span class="nf">get_Pnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.get_Pnorm"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.get_Pnorm">[docs]</a>    <span class="k">def</span> <span class="nf">get_Pnorm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get covariance norm from simulation</span>
 
@@ -1302,8 +1441,7 @@
             <span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">P</span><span class="p">))</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="EKF.disp_P"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.disp_P">[docs]</a>    <span class="k">def</span> <span class="nf">disp_P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.disp_P"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.disp_P">[docs]</a>    <span class="k">def</span> <span class="nf">disp_P</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Display covariance matrix</span>
 
@@ -1324,16 +1462,16 @@
         <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">P</span><span class="p">))</span>
         <span class="n">mn</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">z</span><span class="p">)])</span>
         <span class="n">z</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">z</span><span class="p">)]</span> <span class="o">=</span> <span class="n">mn</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;State&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;State&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;State&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;State&quot;</span><span class="p">)</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Reds&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Reds&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">colorbar</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;log covariance&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;log covariance&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">colorbar</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="o">**</span><span class="n">colorbar</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EKF.get_transform"><a class="viewcode-back" href="../../../mobile_SLAM.html#roboticstoolbox.mobile.EKF.get_transform">[docs]</a>    <span class="k">def</span> <span class="nf">get_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">map</span><span class="p">):</span>
+<div class="viewcode-block" id="EKF.get_transform"><a class="viewcode-back" href="../../../mobile-SLAM.html#roboticstoolbox.mobile.EKF.get_transform">[docs]</a>    <span class="k">def</span> <span class="nf">get_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">map</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transformation from estimated map to true map frame</span>
 
@@ -1355,27 +1493,29 @@
             <span class="n">p</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">map</span><span class="p">[</span><span class="n">lm_id</span><span class="p">])</span>
             <span class="n">q</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">landmark_x</span><span class="p">(</span><span class="n">lm_id</span><span class="p">))</span>
 
-        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-        <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
         <span class="n">T</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">points2tr2</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">SE2</span><span class="p">(</span><span class="n">T</span><span class="p">)</span></div></div>
 
+
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
     <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="o">*</span>
-    <span class="n">robot</span><span class="o">=</span><span class="n">Bicycle</span><span class="p">()</span>
-    <span class="n">robot</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">RandomPath</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-    <span class="n">P0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">V</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">ekf</span> <span class="o">=</span> <span class="n">EKF</span><span class="p">(</span><span class="n">robot</span><span class="o">=</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">V</span><span class="p">),</span> <span class="n">P0</span><span class="o">=</span><span class="n">P0</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">ekf</span><span class="p">)</span>
 
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)])</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">robot</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">(</span><span class="n">covar</span><span class="o">=</span><span class="n">V</span><span class="p">,</span> <span class="n">animation</span><span class="o">=</span><span class="s2">&quot;car&quot;</span><span class="p">)</span>
+    <span class="n">robot</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">RandomPath</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">P0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">ekf</span> <span class="o">=</span> <span class="n">EKF</span><span class="p">(</span><span class="n">robot</span><span class="o">=</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span> <span class="n">V</span><span class="p">),</span> <span class="n">P0</span><span class="o">=</span><span class="n">P0</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">ekf</span><span class="p">)</span>
+    <span class="n">ekf</span><span class="o">.</span><span class="n">run_animation</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;mp4&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;ekf.mp4&quot;</span><span class="p">)</span>
 
     <span class="c1"># from roboticstoolbox import Bicycle</span>
 
     <span class="c1"># ### RVC2: Chapter 6</span>
-
 
     <span class="c1"># ##  6.1 Dead reckoning</span>
 
@@ -1423,7 +1563,6 @@
 
     <span class="c1"># # sensor = RangeBearingSensor(veh, map, &#39;covar&#39;, W)</span>
 
-
     <span class="c1"># # [z,i] = sensor.reading()</span>
 
     <span class="c1"># # map.landmark(17)</span>
@@ -1456,7 +1595,6 @@
     <span class="c1"># # map.plot();</span>
     <span class="c1"># # ekf.plot_map(&#39;g&#39;);</span>
     <span class="c1"># # veh.plot_xy(&#39;b&#39;);</span>
-
 
     <span class="c1"># # ekf.landmarks(:,6)</span>
 
@@ -1531,7 +1669,6 @@
     <span class="c1"># # clf</span>
     <span class="c1"># # pf.plot_pdf()</span>
 
-
     <span class="c1"># # 6.8  Application: Scanning laser rangefinder</span>
 
     <span class="c1"># # Laser odometry</span>
@@ -1554,7 +1691,6 @@
 
     <span class="c1"># # pg.time(2581)-pg.time(2580)</span>
 
-
     <span class="c1"># # Laser-based map building</span>
     <span class="c1"># # map = pg.scanmap();</span>
     <span class="c1"># # pg.plot_occgrid(map)</span>
@@ -1567,14 +1703,11 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Motion models &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Bicycle" href="mobile-vehicle-bicycle.html" />
+    <link rel="prev" title="Mobile robots" href="mobile.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Robot Arms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="mobile.html">Mobile robots</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Motion models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html">Bicycle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html">Unicycle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html">Differential steering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html">Vehicle abstract baseclass</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-animation.html">Animations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-drivers.html">Drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner.html">Path planning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-reactive.html">Reactive navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-SLAM.html">Localization and Mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="mobile.html">Mobile robots</a></li>
+      <li class="breadcrumb-item active">Motion models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="motion-models">
+<h1>Motion models<a class="headerlink" href="#motion-models" title="Permalink to this heading"></a></h1>
+<p>These classes describe vehicle motion models, sometimes referred to as
+kinematic or kino-dynamic models.  They provide methods to:</p>
+<ul class="simple">
+<li><p>predict new configuration based on odometry</p></li>
+<li><p>compute configuration derivative</p></li>
+<li><p>simulate and animate motion</p></li>
+<li><p>compute Jacobians</p></li>
+</ul>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mobile-vehicle-bicycle.html">Bicycle</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle"><code class="docutils literal notranslate"><span class="pre">Bicycle</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.__init__"><code class="docutils literal notranslate"><span class="pre">Bicycle.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.l"><code class="docutils literal notranslate"><span class="pre">Bicycle.l</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.radius_min"><code class="docutils literal notranslate"><span class="pre">Bicycle.radius_min</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.curvature_max"><code class="docutils literal notranslate"><span class="pre">Bicycle.curvature_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.steer_max"><code class="docutils literal notranslate"><span class="pre">Bicycle.steer_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.deriv"><code class="docutils literal notranslate"><span class="pre">Bicycle.deriv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.u_limited"><code class="docutils literal notranslate"><span class="pre">Bicycle.u_limited()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.Fv"><code class="docutils literal notranslate"><span class="pre">Bicycle.Fv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.Fx"><code class="docutils literal notranslate"><span class="pre">Bicycle.Fx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.accel_max"><code class="docutils literal notranslate"><span class="pre">Bicycle.accel_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.add_driver"><code class="docutils literal notranslate"><span class="pre">Bicycle.add_driver()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.control"><code class="docutils literal notranslate"><span class="pre">Bicycle.control</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.dt"><code class="docutils literal notranslate"><span class="pre">Bicycle.dt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.eval_control"><code class="docutils literal notranslate"><span class="pre">Bicycle.eval_control()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.f"><code class="docutils literal notranslate"><span class="pre">Bicycle.f()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.init"><code class="docutils literal notranslate"><span class="pre">Bicycle.init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.limits_va"><code class="docutils literal notranslate"><span class="pre">Bicycle.limits_va()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.plot_xy"><code class="docutils literal notranslate"><span class="pre">Bicycle.plot_xy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.plot_xyt"><code class="docutils literal notranslate"><span class="pre">Bicycle.plot_xyt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.polygon"><code class="docutils literal notranslate"><span class="pre">Bicycle.polygon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.q"><code class="docutils literal notranslate"><span class="pre">Bicycle.q</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.random"><code class="docutils literal notranslate"><span class="pre">Bicycle.random</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.run"><code class="docutils literal notranslate"><span class="pre">Bicycle.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.run_animation"><code class="docutils literal notranslate"><span class="pre">Bicycle.run_animation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.speed_max"><code class="docutils literal notranslate"><span class="pre">Bicycle.speed_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.step"><code class="docutils literal notranslate"><span class="pre">Bicycle.step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.stopsim"><code class="docutils literal notranslate"><span class="pre">Bicycle.stopsim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.verbose"><code class="docutils literal notranslate"><span class="pre">Bicycle.verbose</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.workspace"><code class="docutils literal notranslate"><span class="pre">Bicycle.workspace</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.x"><code class="docutils literal notranslate"><span class="pre">Bicycle.x</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.x0"><code class="docutils literal notranslate"><span class="pre">Bicycle.x0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.x_hist"><code class="docutils literal notranslate"><span class="pre">Bicycle.x_hist</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-vehicle-unicycle.html">Unicycle</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle"><code class="docutils literal notranslate"><span class="pre">Unicycle</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.__init__"><code class="docutils literal notranslate"><span class="pre">Unicycle.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.deriv"><code class="docutils literal notranslate"><span class="pre">Unicycle.deriv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.u_limited"><code class="docutils literal notranslate"><span class="pre">Unicycle.u_limited()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.Fv"><code class="docutils literal notranslate"><span class="pre">Unicycle.Fv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.Fx"><code class="docutils literal notranslate"><span class="pre">Unicycle.Fx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.accel_max"><code class="docutils literal notranslate"><span class="pre">Unicycle.accel_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.add_driver"><code class="docutils literal notranslate"><span class="pre">Unicycle.add_driver()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.control"><code class="docutils literal notranslate"><span class="pre">Unicycle.control</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.dt"><code class="docutils literal notranslate"><span class="pre">Unicycle.dt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.eval_control"><code class="docutils literal notranslate"><span class="pre">Unicycle.eval_control()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.f"><code class="docutils literal notranslate"><span class="pre">Unicycle.f()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.init"><code class="docutils literal notranslate"><span class="pre">Unicycle.init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.limits_va"><code class="docutils literal notranslate"><span class="pre">Unicycle.limits_va()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.plot_xy"><code class="docutils literal notranslate"><span class="pre">Unicycle.plot_xy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.plot_xyt"><code class="docutils literal notranslate"><span class="pre">Unicycle.plot_xyt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.polygon"><code class="docutils literal notranslate"><span class="pre">Unicycle.polygon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.q"><code class="docutils literal notranslate"><span class="pre">Unicycle.q</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.random"><code class="docutils literal notranslate"><span class="pre">Unicycle.random</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.run"><code class="docutils literal notranslate"><span class="pre">Unicycle.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.run_animation"><code class="docutils literal notranslate"><span class="pre">Unicycle.run_animation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.speed_max"><code class="docutils literal notranslate"><span class="pre">Unicycle.speed_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.step"><code class="docutils literal notranslate"><span class="pre">Unicycle.step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.stopsim"><code class="docutils literal notranslate"><span class="pre">Unicycle.stopsim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.verbose"><code class="docutils literal notranslate"><span class="pre">Unicycle.verbose</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.workspace"><code class="docutils literal notranslate"><span class="pre">Unicycle.workspace</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.x"><code class="docutils literal notranslate"><span class="pre">Unicycle.x</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.x0"><code class="docutils literal notranslate"><span class="pre">Unicycle.x0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.x_hist"><code class="docutils literal notranslate"><span class="pre">Unicycle.x_hist</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-vehicle-diffsteer.html">Differential steering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer"><code class="docutils literal notranslate"><span class="pre">DiffSteer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.__init__"><code class="docutils literal notranslate"><span class="pre">DiffSteer.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.init"><code class="docutils literal notranslate"><span class="pre">DiffSteer.init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.u_limited"><code class="docutils literal notranslate"><span class="pre">DiffSteer.u_limited()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.Fv"><code class="docutils literal notranslate"><span class="pre">DiffSteer.Fv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.Fx"><code class="docutils literal notranslate"><span class="pre">DiffSteer.Fx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.accel_max"><code class="docutils literal notranslate"><span class="pre">DiffSteer.accel_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.add_driver"><code class="docutils literal notranslate"><span class="pre">DiffSteer.add_driver()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.control"><code class="docutils literal notranslate"><span class="pre">DiffSteer.control</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.deriv"><code class="docutils literal notranslate"><span class="pre">DiffSteer.deriv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.dt"><code class="docutils literal notranslate"><span class="pre">DiffSteer.dt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.eval_control"><code class="docutils literal notranslate"><span class="pre">DiffSteer.eval_control()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.f"><code class="docutils literal notranslate"><span class="pre">DiffSteer.f()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.limits_va"><code class="docutils literal notranslate"><span class="pre">DiffSteer.limits_va()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.plot_xy"><code class="docutils literal notranslate"><span class="pre">DiffSteer.plot_xy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.plot_xyt"><code class="docutils literal notranslate"><span class="pre">DiffSteer.plot_xyt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.polygon"><code class="docutils literal notranslate"><span class="pre">DiffSteer.polygon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.q"><code class="docutils literal notranslate"><span class="pre">DiffSteer.q</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.random"><code class="docutils literal notranslate"><span class="pre">DiffSteer.random</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.run"><code class="docutils literal notranslate"><span class="pre">DiffSteer.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.run_animation"><code class="docutils literal notranslate"><span class="pre">DiffSteer.run_animation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.speed_max"><code class="docutils literal notranslate"><span class="pre">DiffSteer.speed_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.step"><code class="docutils literal notranslate"><span class="pre">DiffSteer.step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.stopsim"><code class="docutils literal notranslate"><span class="pre">DiffSteer.stopsim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.verbose"><code class="docutils literal notranslate"><span class="pre">DiffSteer.verbose</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.workspace"><code class="docutils literal notranslate"><span class="pre">DiffSteer.workspace</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.x"><code class="docutils literal notranslate"><span class="pre">DiffSteer.x</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.x0"><code class="docutils literal notranslate"><span class="pre">DiffSteer.x0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.x_hist"><code class="docutils literal notranslate"><span class="pre">DiffSteer.x_hist</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-vehicle-base.html">Vehicle abstract baseclass</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase"><code class="docutils literal notranslate"><span class="pre">VehicleBase</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.__init__"><code class="docutils literal notranslate"><span class="pre">VehicleBase.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.__str__"><code class="docutils literal notranslate"><span class="pre">VehicleBase.__str__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.f"><code class="docutils literal notranslate"><span class="pre">VehicleBase.f()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.Fx"><code class="docutils literal notranslate"><span class="pre">VehicleBase.Fx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.Fv"><code class="docutils literal notranslate"><span class="pre">VehicleBase.Fv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.control"><code class="docutils literal notranslate"><span class="pre">VehicleBase.control</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.eval_control"><code class="docutils literal notranslate"><span class="pre">VehicleBase.eval_control()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.limits_va"><code class="docutils literal notranslate"><span class="pre">VehicleBase.limits_va()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.polygon"><code class="docutils literal notranslate"><span class="pre">VehicleBase.polygon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.deriv"><code class="docutils literal notranslate"><span class="pre">VehicleBase.deriv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.add_driver"><code class="docutils literal notranslate"><span class="pre">VehicleBase.add_driver()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.run"><code class="docutils literal notranslate"><span class="pre">VehicleBase.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.run_animation"><code class="docutils literal notranslate"><span class="pre">VehicleBase.run_animation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.init"><code class="docutils literal notranslate"><span class="pre">VehicleBase.init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.step"><code class="docutils literal notranslate"><span class="pre">VehicleBase.step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.workspace"><code class="docutils literal notranslate"><span class="pre">VehicleBase.workspace</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.x"><code class="docutils literal notranslate"><span class="pre">VehicleBase.x</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.q"><code class="docutils literal notranslate"><span class="pre">VehicleBase.q</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.x0"><code class="docutils literal notranslate"><span class="pre">VehicleBase.x0</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.random"><code class="docutils literal notranslate"><span class="pre">VehicleBase.random</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.x_hist"><code class="docutils literal notranslate"><span class="pre">VehicleBase.x_hist</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.speed_max"><code class="docutils literal notranslate"><span class="pre">VehicleBase.speed_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.accel_max"><code class="docutils literal notranslate"><span class="pre">VehicleBase.accel_max</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.dt"><code class="docutils literal notranslate"><span class="pre">VehicleBase.dt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.verbose"><code class="docutils literal notranslate"><span class="pre">VehicleBase.verbose</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.stopsim"><code class="docutils literal notranslate"><span class="pre">VehicleBase.stopsim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.plot_xy"><code class="docutils literal notranslate"><span class="pre">VehicleBase.plot_xy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.plot_xyt"><code class="docutils literal notranslate"><span class="pre">VehicleBase.plot_xyt()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

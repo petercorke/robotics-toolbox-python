@@ -7,6 +7,7 @@
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -28,12 +29,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -41,7 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Robot Arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
 </ul>
@@ -56,10 +61,10 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">roboticstoolbox.mobile.Vehicle</li>
       <li class="wy-breadcrumbs-aside">
@@ -83,6 +88,8 @@
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">animation</span>
+
 <span class="c1"># from matplotlib import patches</span>
 <span class="c1"># import matplotlib.transforms as mtransforms</span>
 
@@ -91,11 +98,22 @@
 <span class="kn">from</span> <span class="nn">roboticstoolbox.mobile.Animations</span> <span class="kn">import</span> <span class="n">VehiclePolygon</span>
 
 
-<div class="viewcode-block" id="VehicleBase"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase">[docs]</a><span class="k">class</span> <span class="nc">VehicleBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-
-<div class="viewcode-block" id="VehicleBase.__init__"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">covar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">speed_max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">accel_max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-                 <span class="n">control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">animation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">polygon</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase">[docs]</a><span class="k">class</span> <span class="nc">VehicleBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.__init__"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">covar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">speed_max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+        <span class="n">accel_max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+        <span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="n">dt</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">animation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">polygon</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Superclass for vehicle kinematic models</span>
 
@@ -137,6 +155,9 @@
 <span class="sd">        [A, B, C, D]     A:B      C:D</span>
 <span class="sd">        ==============  =======  =======</span>
 
+<span class="sd">        :note: Set ``seed=None`` to have it randomly initialized from the</span>
+<span class="sd">            operating system.</span>
+
 <span class="sd">        :seealso: :class:`Bicycle` :class:`Unicycle` :class:`VehicleAnimationBase`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -146,8 +167,8 @@
             <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">x0</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;x0 must be length 2 or 3&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;x0 must be length 2 or 3&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="n">x0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">x0</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
@@ -155,7 +176,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_speed_max</span> <span class="o">=</span> <span class="n">speed_max</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_accel_max</span> <span class="o">=</span> <span class="n">accel_max</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_polygon</span> <span class="o">=</span> <span class="n">polygon</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">animation</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -184,7 +205,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.__str__"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.__str__">[docs]</a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        String representation of vehicle (superclass)</span>
 
@@ -193,12 +214,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: &quot;</span>
         <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;x = </span><span class="si">{</span><span class="n">base</span><span class="o">.</span><span class="n">array2str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">return</span> <span class="n">s</span>
+        <span class="k">return</span> <span class="n">s</span></div>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-<div class="viewcode-block" id="VehicleBase.f"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">odo</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.f"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">odo</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        State transition function</span>
 
@@ -211,7 +232,7 @@
 <span class="sd">        :return: predicted vehicle state</span>
 <span class="sd">        :rtype: ndarray(3)</span>
 
-<span class="sd">        Predict the next state based on current state and odometry </span>
+<span class="sd">        Predict the next state based on current state and odometry</span>
 <span class="sd">        value.  ``v`` is a random variable that represents additive</span>
 <span class="sd">        odometry noise for simulation purposes.</span>
 
@@ -234,7 +255,12 @@
             <span class="c1"># used by particle filter</span>
             <span class="n">dd</span><span class="p">,</span> <span class="n">dth</span> <span class="o">=</span> <span class="n">odo</span>
             <span class="n">theta</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">dd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">dd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">theta</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dth</span><span class="p">)]</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span>
+                    <span class="n">dd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">dd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">theta</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dth</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># x is a vector</span>
             <span class="n">x</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
@@ -248,7 +274,7 @@
 
             <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">dd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">dd</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">dth</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="VehicleBase.Fx"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.Fx">[docs]</a>    <span class="k">def</span> <span class="nf">Fx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">odo</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.Fx"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.Fx">[docs]</a>    <span class="k">def</span> <span class="nf">Fx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">odo</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jacobian of state transition function df/dx</span>
 
@@ -258,7 +284,7 @@
 <span class="sd">        :type odo: array_like(2)</span>
 <span class="sd">        :return: Jacobian matrix</span>
 <span class="sd">        :rtype: ndarray(3,3)</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns the Jacobian matrix :math:`\frac{\partial \vec{f}}{\partial \vec{x}}` for</span>
 <span class="sd">        the given state and odometry.</span>
 
@@ -276,7 +302,7 @@
         <span class="c1"># fmt: on</span>
         <span class="k">return</span> <span class="n">J</span></div>
 
-<div class="viewcode-block" id="VehicleBase.Fv"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.Fv">[docs]</a>    <span class="k">def</span> <span class="nf">Fv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">odo</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.Fv"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.Fv">[docs]</a>    <span class="k">def</span> <span class="nf">Fv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">odo</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Jacobian of state transition function df/dv</span>
 
@@ -286,7 +312,7 @@
 <span class="sd">        :type odo: array_like(2)</span>
 <span class="sd">        :return: Jacobian matrix</span>
 <span class="sd">        :rtype: ndarray(3,2)</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns the Jacobian matrix :math:`\frac{\partial \vec{f}}{\partial \vec{v}}` for</span>
 <span class="sd">        the given state and odometry.</span>
 
@@ -303,7 +329,7 @@
             <span class="p">])</span>
         <span class="c1"># fmt: on</span>
         <span class="k">return</span> <span class="n">J</span></div>
-        
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">control</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -330,7 +356,7 @@
 <span class="sd">            &gt;&gt;&gt; bike.control = RandomPath(10)</span>
 <span class="sd">            &gt;&gt;&gt; print(bike)</span>
 
-<span class="sd">        :seealso: :meth:`run` :meth:`eval_control` :obj:`scipy.interpolate.interp1d` :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase` </span>
+<span class="sd">        :seealso: :meth:`run` :meth:`eval_control` :obj:`scipy.interpolate.interp1d` :class:`~roboticstoolbox.mobile.drivers.VehicleDriverBase`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control</span>
 
@@ -346,8 +372,7 @@
             <span class="c1"># if this is a driver agent, connect it to the vehicle</span>
             <span class="n">control</span><span class="o">.</span><span class="n">vehicle</span> <span class="o">=</span> <span class="bp">self</span>
 
-
-<div class="viewcode-block" id="VehicleBase.eval_control"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.eval_control">[docs]</a>    <span class="k">def</span> <span class="nf">eval_control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.eval_control"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.eval_control">[docs]</a>    <span class="k">def</span> <span class="nf">eval_control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate vehicle control input (superclass method)</span>
 
@@ -377,7 +402,7 @@
         <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="n">isvector</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
             <span class="c1"># control is a constant</span>
             <span class="n">u</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        
+
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="n">VehicleDriverBase</span><span class="p">):</span>
             <span class="c1"># vehicle has a driver object</span>
             <span class="n">u</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">demand</span><span class="p">()</span>
@@ -386,48 +411,50 @@
             <span class="c1"># control is an interp1d object</span>
             <span class="n">u</span> <span class="o">=</span> <span class="n">control</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">control</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">callable</span><span class="p">(</span><span class="n">control</span><span class="p">):</span>
             <span class="c1"># control is a user function of time and state</span>
             <span class="n">u</span> <span class="o">=</span> <span class="n">control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;bad control specified&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;bad control specified&quot;</span><span class="p">)</span>
 
         <span class="c1"># apply limits</span>
         <span class="n">ulim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_limited</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ulim</span></div>
 
-<div class="viewcode-block" id="VehicleBase.limits_va"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.limits_va">[docs]</a>    <span class="k">def</span> <span class="nf">limits_va</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.limits_va"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.limits_va">[docs]</a>    <span class="k">def</span> <span class="nf">limits_va</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">v_prev</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply velocity and acceleration limits (superclass)</span>
 
 <span class="sd">        :param v: desired velocity</span>
 <span class="sd">        :type v: float</span>
+<span class="sd">        :param v_prev: previous velocity, reference to list</span>
+<span class="sd">        :type v_prev: list with single element</span>
 <span class="sd">        :return: allowed velocity</span>
 <span class="sd">        :rtype: float</span>
 
 <span class="sd">        Determine allowable velocity given desired velocity, speed and</span>
 <span class="sd">        acceleration limits.</span>
 
-<span class="sd">        .. note:: This function is stateful, requires previous velocity,</span>
-<span class="sd">            ``_v_prev`` attribute, to enable acceleration limiting.  This</span>
-<span class="sd">            is reset to zero at the start of each simulation.</span>
+<span class="sd">        .. note:: This function requires previous velocity, ``v_prev`` to enable</span>
+<span class="sd">            acceleration limiting.  This is passed as a reference to a mutable value,</span>
+<span class="sd">            a single-element list. This is reset to zero at the start of each simulation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># acceleration limit</span>
+        <span class="n">vp</span> <span class="o">=</span> <span class="n">v_prev</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accel_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accel_max</span><span class="p">:</span>
-                <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accelmax</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span><span class="p">;</span>
-            <span class="k">elif</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">&lt;</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_accel_max</span><span class="p">:</span>
-                <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accel_max</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span><span class="p">;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev</span> <span class="o">=</span> <span class="n">v</span>
-        
+            <span class="k">if</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">vp</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accel_max</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">vp</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accelmax</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">vp</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">&lt;</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_accel_max</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">vp</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accel_max</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span>
+        <span class="n">v_prev</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
         <span class="c1"># speed limit</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_speed_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_speed_max</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_speed_max</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v</span></div>
 
-
-<div class="viewcode-block" id="VehicleBase.polygon"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.polygon">[docs]</a>    <span class="k">def</span> <span class="nf">polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.polygon"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.polygon">[docs]</a>    <span class="k">def</span> <span class="nf">polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Bounding polygon at vehicle configuration</span>
 
@@ -445,11 +472,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polygon</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">SE2</span><span class="p">(</span><span class="n">q</span><span class="p">))</span></div>
 
     <span class="c1"># This function is overridden by the child class</span>
-<div class="viewcode-block" id="VehicleBase.deriv"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.deriv">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="VehicleBase.deriv"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.deriv">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">deriv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="VehicleBase.add_driver"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.add_driver">[docs]</a>    <span class="k">def</span> <span class="nf">add_driver</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">driver</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.add_driver"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.add_driver">[docs]</a>    <span class="k">def</span> <span class="nf">add_driver</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">driver</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a driver agent (superclass)</span>
 
@@ -461,30 +488,29 @@
 <span class="sd">        :seealso: :class:`VehicleDriverBase` :meth:`control`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;add_driver is deprecated, use veh.control=driver instead&#39;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;add_driver is deprecated, use veh.control=driver instead&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_control</span> <span class="o">=</span> <span class="n">driver</span>
         <span class="n">driver</span><span class="o">.</span><span class="n">_veh</span> <span class="o">=</span> <span class="bp">self</span></div>
 
-
-<div class="viewcode-block" id="VehicleBase.run"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.run"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Simulate motion of vehicle (superclass)</span>
 
-<span class="sd">        :param N: Number of simulation steps, defaults to 1000</span>
-<span class="sd">        :type N: int, optional</span>
+<span class="sd">        :param T: Simulation time in seconds, defaults to 10</span>
+<span class="sd">        :type T: float, optional</span>
 <span class="sd">        :param x0: Initial state, defaults to value given to Vehicle constructor</span>
 <span class="sd">        :type x0: array_like(3) or array_like(2)</span>
-<span class="sd">        :param animation: vehicle animation object, defaults to None</span>
-<span class="sd">        :type animation: VehicleAnimation subclass, optional</span>
-<span class="sd">        :param plot: Enable plotting, defaults to False</span>
-<span class="sd">        :type plot: bool, optional</span>
+<span class="sd">        :param control: vehicle control inputs, defaults to None</span>
+<span class="sd">        :type control: array_like(2), callable, driving agent</span>
+<span class="sd">        :param animate: Enable graphical animation of vehicle, defaults to False</span>
+<span class="sd">        :type animate: bool, optional</span>
 <span class="sd">        :return: State trajectory, each row is :math:`(x,y,\theta)`.</span>
 <span class="sd">        :rtype: ndarray(n,3)</span>
 
-<span class="sd">        Runs the vehicle simulation for ``N`` timesteps and optionally plots</span>
+<span class="sd">        Runs the vehicle simulation for ``T`` seconds and optionally plots</span>
 <span class="sd">        an animation.  The method :meth:`step` performs each time step.</span>
 
-<span class="sd">        The control inputs are providd by ``control`` which can be:</span>
+<span class="sd">        The control inputs are provided by ``control`` which can be:</span>
 
 <span class="sd">            * a constant tuple as the control inputs to the vehicle</span>
 <span class="sd">            * a function called as ``f(vehicle, t, x)`` that returns a tuple</span>
@@ -496,24 +522,129 @@
 <span class="sd">        acceleration and steering limits.</span>
 
 <span class="sd">        The simulation can be stopped prematurely by the control function</span>
-<span class="sd">        calling :meth:`stopif`.</span>
-<span class="sd">        </span>
-<span class="sd">        :seealso: :meth:`init` :meth:`step` :meth:`control`</span>
+<span class="sd">        calling :meth:`stopsim`.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            * the simulation is fixed-time step with the step given by the ``dt``</span>
+<span class="sd">              attribute set by the constructor.</span>
+<span class="sd">            * integration uses rectangular integration.</span>
+
+<span class="sd">        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">control</span><span class="o">=</span><span class="n">control</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">)</span>
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">control</span><span class="o">=</span><span class="n">control</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="n">animate</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">)</span>
+
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">animate</span><span class="o">=</span><span class="n">animate</span><span class="p">)</span>
 
             <span class="c1"># check for user requested stop</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopsim</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;USER REEQUESTED STOP AT time&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;USER REEQUESTED STOP AT time&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">)</span>
                 <span class="k">break</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_hist</span></div>
 
-<div class="viewcode-block" id="VehicleBase.init"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">control</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.run_animation"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.run_animation">[docs]</a>    <span class="k">def</span> <span class="nf">run_animation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Simulate motion of vehicle (superclass)</span>
+
+<span class="sd">        :param T: Simulation time in seconds, defaults to 10</span>
+<span class="sd">        :type T: float, optional</span>
+<span class="sd">        :param x0: Initial state, defaults to value given to Vehicle constructor</span>
+<span class="sd">        :type x0: array_like(3) or array_like(2)</span>
+<span class="sd">        :param control: vehicle control inputs, defaults to None</span>
+<span class="sd">        :type control: array_like(2), callable, driving agent</span>
+<span class="sd">        :param format: Output format</span>
+<span class="sd">        :type format: str, optional</span>
+<span class="sd">        :param file: File name</span>
+<span class="sd">        :type file: str, optional</span>
+<span class="sd">        :return: Matplotlib animation object</span>
+<span class="sd">        :rtype: :meth:`matplotlib.animation.FuncAnimation`</span>
+
+<span class="sd">        Runs the vehicle simulation for ``T`` seconds and returns an animation</span>
+<span class="sd">        in various formats::</span>
+
+<span class="sd">            ``format``    ``file``   description</span>
+<span class="sd">            ============  =========  ============================</span>
+<span class="sd">            ``&quot;html&quot;``    str, None  return HTML5 video</span>
+<span class="sd">            ``&quot;jshtml&quot;``  str, None  return JS+HTML video</span>
+<span class="sd">            ``&quot;gif&quot;``     str        return animated GIF</span>
+<span class="sd">            ``&quot;mp4&quot;``     str        return MP4/H264 video</span>
+<span class="sd">            ``None``                 return a ``FuncAnimation`` object</span>
+
+<span class="sd">        The allowables types for ``file`` are given in the second column.  A str</span>
+<span class="sd">        value is the file name.  If ``None`` is an option then return the video as a string.</span>
+
+<span class="sd">        For the last case, a reference to the animation object must be held if used for</span>
+<span class="sd">        animation in a Jupyter cell::</span>
+
+<span class="sd">            anim = robot.run_animation(T=20)</span>
+
+<span class="sd">        The control inputs are provided by ``control`` which can be:</span>
+
+<span class="sd">            * a constant tuple as the control inputs to the vehicle</span>
+<span class="sd">            * a function called as ``f(vehicle, t, x)`` that returns a tuple</span>
+<span class="sd">            * an interpolator called as ``f(t)`` that returns a tuple, see</span>
+<span class="sd">              SciPy interp1d</span>
+<span class="sd">            * a driver agent, subclass of :class:`VehicleDriverBase`</span>
+
+<span class="sd">        This is evaluated by :meth:`eval_control` which applies velocity,</span>
+<span class="sd">        acceleration and steering limits.</span>
+
+<span class="sd">        The simulation can be stopped prematurely by the control function</span>
+<span class="sd">        calling :meth:`stopsim`.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            * the simulation is fixed-time step with the step given by the ``dt``</span>
+<span class="sd">              attribute set by the constructor.</span>
+<span class="sd">            * integration uses rectangular integration.</span>
+
+<span class="sd">        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+        <span class="n">nframes</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
+        <span class="n">anim</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FuncAnimation</span><span class="p">(</span>
+            <span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span>
+            <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pause</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="n">init_func</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">frames</span><span class="o">=</span><span class="n">nframes</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="n">blit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">repeat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># anim._interval = self.dt*1000/2</span>
+        <span class="c1"># anim._repeat = True</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;html&quot;</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">anim</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">()</span>  <span class="c1"># convert to embeddable HTML5 animation</span>
+        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;jshtml&quot;</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">anim</span><span class="o">.</span><span class="n">to_jshtml</span><span class="p">()</span>  <span class="c1"># convert to embeddable Javascript/HTML animation</span>
+        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;gif&quot;</span><span class="p">:</span>
+            <span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+                <span class="n">file</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="n">animation</span><span class="o">.</span><span class="n">PillowWriter</span><span class="p">(</span><span class="n">fps</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
+            <span class="p">)</span>  <span class="c1"># convert to GIF</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;mp4&quot;</span><span class="p">:</span>
+            <span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+                <span class="n">file</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="n">animation</span><span class="o">.</span><span class="n">FFMpegWriter</span><span class="p">(</span><span class="n">fps</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
+            <span class="p">)</span>  <span class="c1"># convert to mp4/H264</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># return the anim object</span>
+            <span class="k">return</span> <span class="n">anim</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;unknown format&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ret</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="VehicleBase.init"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize for simulation (superclass)</span>
 
@@ -548,32 +679,37 @@
         <span class="k">if</span> <span class="n">control</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># override control</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_control</span> <span class="o">=</span> <span class="n">control</span>
-        
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_control</span><span class="p">,</span> <span class="n">VehicleDriverBase</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_control</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_t</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># initialize the graphics</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_animation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">animate</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_animation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
             <span class="c1"># setup the plot</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">plotvol2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
-        
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Robotics Toolbox for Python (Figure </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Robotics Toolbox for Python (Figure </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_animation</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="p">)</span>  <span class="c1"># add vehicle animation to axis</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figtext</span><span class="p">(</span><span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>  <span class="c1"># display time counter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figtext</span><span class="p">(</span><span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># display time counter</span>
 
         <span class="c1"># initialize the driver</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_control</span><span class="p">,</span> <span class="n">VehicleDriverBase</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_control</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ax</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="VehicleBase.step"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.step"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pause</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Step simulator by one time step (superclass)</span>
 
@@ -631,15 +767,21 @@
         <span class="c1"># do the graphics</span>
         <span class="k">if</span> <span class="n">animate</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_animation</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_animation</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;t = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dt</span><span class="p">)</span>
+            <span class="c1"># if self._timer is not None:</span>
+            <span class="c1">#     self._timer.set_text(f&quot;t = {self._t:.2f}&quot;)</span>
+            <span class="k">if</span> <span class="n">pause</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dt</span><span class="p">)</span>
+            <span class="c1"># plt.show(block=False)</span>
+            <span class="c1"># pass</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_t</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span>
 
         <span class="c1"># be verbose</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">: u=(</span><span class="si">{</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">), x=(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">: u=(</span><span class="si">{</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">), x=(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">,&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">8.2f</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">odo</span></div>
 
@@ -658,7 +800,7 @@
         <span class="c1"># get workspace specified for Vehicle or from its driver</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_control</span><span class="p">,</span> <span class="s2">&quot;_workspace&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control</span><span class="o">.</span><span class="n">_workspace</span>
 
     <span class="nd">@property</span>
@@ -820,7 +962,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
-<div class="viewcode-block" id="VehicleBase.stopsim"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.stopsim">[docs]</a>    <span class="k">def</span> <span class="nf">stopsim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.stopsim"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.stopsim">[docs]</a>    <span class="k">def</span> <span class="nf">stopsim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Stop the simulation (superclass)</span>
 
@@ -831,42 +973,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stopsim</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-    <span class="c1"># def plot(self, x=None, shape=&#39;box&#39;, block=False, size=True, **kwargs):</span>
-    <span class="c1">#     r&quot;&quot;&quot;</span>
-    <span class="c1">#     Plot vehicle configuration (superclass)</span>
-
-    <span class="c1">#     :param x: configuration :math:`(x, y, \theta)`, defaults to None</span>
-    <span class="c1">#     :type x: array_like(3), optional</span>
-    <span class="c1">#     :param shape: [description], defaults to &#39;box&#39;</span>
-    <span class="c1">#     :type shape: str, optional</span>
-    <span class="c1">#     :param block: [description], defaults to False</span>
-    <span class="c1">#     :type block: bool, optional</span>
-    <span class="c1">#     :param size: [description], defaults to True</span>
-    <span class="c1">#     :type size: bool, optional</span>
-    <span class="c1">#     :raises ValueError: [description]</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     if shape == &#39;triangle&#39;:</span>
-    <span class="c1">#         L = size</span>
-    <span class="c1">#         W = 0.6 * size</span>
-    <span class="c1">#         vertices = [(L, 0), (-L, -W), (-L, W)]</span>
-    <span class="c1">#     elif shape == &#39;box&#39;:</span>
-    <span class="c1">#         L1 = size</span>
-    <span class="c1">#         L2 = size</span>
-    <span class="c1">#         W = 0.6 * size</span>
-    <span class="c1">#         vertices = [(-L1, W), (0.6*L2, W), (L2, 0.5*W), (L2, -0.5*W), (0.6*L2, -W), (-L1, -W)]</span>
-    <span class="c1">#     elif isinstance(shape, np.ndarray):</span>
-    <span class="c1">#         vertices = shape</span>
-    <span class="c1">#     else:</span>
-    <span class="c1">#         raise ValueError(&#39;bad vehicle shape specified&#39;)</span>
-
-    <span class="c1">#     vertices = np.array(vertices).T</span>
-    <span class="c1">#     base.plot_poly(SE2(x) * vertices, close=True, **kwargs)</span>
-
-<div class="viewcode-block" id="VehicleBase.plot_xy"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.plot_xy">[docs]</a>    <span class="k">def</span> <span class="nf">plot_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.plot_xy"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.plot_xy">[docs]</a>    <span class="k">def</span> <span class="nf">plot_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot xy-path from history</span>
 
-<span class="sd">        :param block: block until plot dismissed, defaults to False</span>
+<span class="sd">        :param block: block until plot dismissed, defaults to None</span>
 <span class="sd">        :type block: bool, optional</span>
 <span class="sd">        :param args: positional arguments passed to :meth:`~matplotlib.axes.Axes.plot`</span>
 <span class="sd">        :param kwargs: keyword arguments passed to :meth:`~matplotlib.axes.Axes.plot`</span>
@@ -877,13 +988,14 @@
 
 <span class="sd">        :seealso: :meth:`run` :meth:`plot_xyt`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">&#39;color&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;color&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;b&quot;</span>
         <span class="n">xyt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_hist</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xyt</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xyt</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="VehicleBase.plot_xyt"><a class="viewcode-back" href="../../../mobile_vehicle.html#roboticstoolbox.mobile.VehicleBase.plot_xyt">[docs]</a>    <span class="k">def</span> <span class="nf">plot_xyt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="VehicleBase.plot_xyt"><a class="viewcode-back" href="../../../mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase.plot_xyt">[docs]</a>    <span class="k">def</span> <span class="nf">plot_xyt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot configuration vs time from history</span>
 
@@ -899,79 +1011,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">xyt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_hist</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xyt</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xyt</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">xyt</span><span class="p">[:,</span> <span class="p">:],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">theta$&#39;</span><span class="p">])</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div></div>
-
-
-    <span class="c1"># def path(self, t=10, u=None, x0=None):</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     Compute path by integration (superclass)</span>
-
-    <span class="c1">#     :param t: integration time in seconds, defaults to 10</span>
-    <span class="c1">#     :type t: float, optional</span>
-    <span class="c1">#     :param u: vehicle command, defaults to None</span>
-    <span class="c1">#     :type u: array_like(2), optional</span>
-    <span class="c1">#     :param x0: initial state, defaults to (0,0,0)</span>
-    <span class="c1">#     :type x0: array_like(3), optional</span>
-    <span class="c1">#     :return: time vector and state history</span>
-    <span class="c1">#     :rtype: ndarray(1), ndarray(n,3)</span>
-
-    <span class="c1">#     XF = V.path(TF, U) is the final state of the vehicle (3x1) from the initial</span>
-    <span class="c1">#     state (0,0,0) with the control inputs U (vehicle specific).  TF is  a scalar to </span>
-    <span class="c1">#     specify the total integration time.</span>
-
-    <span class="c1">#     XP = V.path(TV, U) is the trajectory of the vehicle (Nx3) from the initial</span>
-    <span class="c1">#     state (0,0,0) with the control inputs U (vehicle specific).  T is a vector (N) of </span>
-    <span class="c1">#     times for which elements of the trajectory will be computed.</span>
-
-    <span class="c1">#     XP = V.path(T, U, X0) as above but specify the initial state.</span>
-
-    <span class="c1">#     .. note::</span>
-    <span class="c1">#         - Integration is performed using ODE45.</span>
-    <span class="c1">#         - The ODE being integrated is given by the deriv method of the vehicle object.</span>
-
-    <span class="c1">#     :seealso: :obj:`scipy.integrate.solve_ivp`</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-
-    <span class="c1">#     # t, x = veh.path(5, u=control)</span>
-    <span class="c1">#     # print(t)</span>
-    <span class="c1">#     if x0 is None:</span>
-    <span class="c1">#         x0 = np.zeros(3)</span>
-
-    <span class="c1">#     def xdot(t, x, vehicle, u):</span>
-    <span class="c1">#         # u = vehicle.control(demand, x)</span>
-    <span class="c1">#         return vehicle.deriv(x, u)</span>
-
-    <span class="c1">#     if base.isscalar(t):</span>
-    <span class="c1">#         t_span = (0, t)</span>
-    <span class="c1">#         t_eval = np.linspace(0, t, 100)</span>
-    <span class="c1">#     elif isinstance(t, np.ndarray):</span>
-    <span class="c1">#         t_span = (t[0], t[-1])</span>
-    <span class="c1">#         t_eval = t</span>
-    <span class="c1">#     else:</span>
-    <span class="c1">#         raise ValueError(&#39;bad time argument&#39;)</span>
-    <span class="c1">#     sol = integrate.solve_ivp(xdot, t_span, x0, t_eval=t_eval, method=&quot;RK45&quot;, args=(self, u))</span>
-
-    <span class="c1">#     return (sol.t, sol.y.T)</span>
-
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xyt</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xyt</span><span class="p">[:,</span> <span class="p">:],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;$</span><span class="se">\\</span><span class="s2">theta$&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div></div>
 
 
 <span class="c1"># ========================================================================= #</span>
 
-<div class="viewcode-block" id="Bicycle"><a class="viewcode-back" href="../../../mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle">[docs]</a><span class="k">class</span> <span class="nc">Bicycle</span><span class="p">(</span><span class="n">VehicleBase</span><span class="p">):</span>
 
-<div class="viewcode-block" id="Bicycle.__init__"><a class="viewcode-back" href="../../../mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                <span class="n">L</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                <span class="n">steer_max</span><span class="o">=</span><span class="mf">0.45</span> <span class="o">*</span> <span class="n">pi</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span>
-                <span class="p">):</span>
+<div class="viewcode-block" id="Bicycle"><a class="viewcode-back" href="../../../mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle">[docs]</a><span class="k">class</span> <span class="nc">Bicycle</span><span class="p">(</span><span class="n">VehicleBase</span><span class="p">):</span>
+<div class="viewcode-block" id="Bicycle.__init__"><a class="viewcode-back" href="../../../mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">steer_max</span><span class="o">=</span><span class="mf">0.45</span> <span class="o">*</span> <span class="n">pi</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create bicycle kinematic model</span>
 
 <span class="sd">        :param L: wheel base, defaults to 1</span>
 <span class="sd">        :type L: float, optional</span>
-<span class="sd">        :param steer_max: [description], defaults to :math:`0.45\pi`</span>
+<span class="sd">        :param steer_max: maximum steering angle, defaults to :math:`0.45\pi`</span>
 <span class="sd">        :type steer_max: float, optional</span>
 <span class="sd">        :param kwargs: additional arguments passed to :class:`VehicleBase`</span>
 <span class="sd">            constructor</span>
@@ -997,7 +1053,10 @@
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">s</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
-        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  L=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_l</span><span class="si">}</span><span class="s2">, steer_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_steer_max</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">, speed_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_speed_max</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">, accel_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_accel_max</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  L=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_l</span><span class="si">}</span><span class="s2">, steer_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_steer_max</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; speed_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_speed_max</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">, accel_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_accel_max</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">s</span>
 
     <span class="nd">@property</span>
@@ -1054,7 +1113,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steer_max</span>
 
-<div class="viewcode-block" id="Bicycle.deriv"><a class="viewcode-back" href="../../../mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.deriv">[docs]</a>    <span class="k">def</span> <span class="nf">deriv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Bicycle.deriv"><a class="viewcode-back" href="../../../mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.deriv">[docs]</a>    <span class="k">def</span> <span class="nf">deriv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Time derivative of state</span>
 
@@ -1062,6 +1121,8 @@
 <span class="sd">        :type x: array_like(3)</span>
 <span class="sd">        :param u: control input :math:`(v, \gamma)`</span>
 <span class="sd">        :type u: array_like(2)</span>
+<span class="sd">        :param limits: limits are applied to input, default True</span>
+<span class="sd">        :type limits: bool</span>
 <span class="sd">        :return: state derivative :math:`(\dot{x}, \dot{y}, \dot{\theta})`</span>
 <span class="sd">        :rtype: ndarray(3)</span>
 
@@ -1073,9 +1134,12 @@
 <span class="sd">                    \dot{y} &amp;= v \sin \theta \\</span>
 <span class="sd">                    \dot{\theta} &amp;= \frac{v}{L} \tan \gamma</span>
 
+<span class="sd">        If ``limits`` is True then speed, acceleration and steer-angle limits are</span>
+<span class="sd">        applied to ``u``.</span>
+
 <span class="sd">        :seealso: :meth:`f`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="c1"># unpack some variables</span>
         <span class="n">theta</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
@@ -1083,14 +1147,10 @@
             <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_limited</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
         <span class="n">v</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">gamma</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            
-        <span class="k">return</span> <span class="n">v</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span>
-                <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> 
-                <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> 
-                <span class="n">tan</span><span class="p">(</span><span class="n">gamma</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">l</span>
-                    <span class="p">]</span></div>
 
-<div class="viewcode-block" id="Bicycle.u_limited"><a class="viewcode-back" href="../../../mobile_vehicle_bicycle.html#roboticstoolbox.mobile.Bicycle.u_limited">[docs]</a>    <span class="k">def</span> <span class="nf">u_limited</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">v</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">tan</span><span class="p">(</span><span class="n">gamma</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">l</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Bicycle.u_limited"><a class="viewcode-back" href="../../../mobile-vehicle-bicycle.html#roboticstoolbox.mobile.Bicycle.u_limited">[docs]</a>    <span class="k">def</span> <span class="nf">u_limited</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply vehicle velocity, acceleration and steering limits</span>
 
@@ -1099,24 +1159,22 @@
 <span class="sd">        :return: Allowable vehicle inputs :math:`(v, \gamma)`</span>
 <span class="sd">        :rtype: ndarray(2)</span>
 
-<span class="sd">        Velocity and acceleration limits are applied to :math:`v` and </span>
+<span class="sd">        Velocity and acceleration limits are applied to :math:`v` and</span>
 <span class="sd">        steered wheel angle limits are applied to :math:`\gamma`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># limit speed and steer angle</span>
         <span class="n">ulim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
-        <span class="n">ulim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits_va</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ulim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits_va</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev</span><span class="p">)</span>
         <span class="n">ulim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_steer_max</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steer_max</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ulim</span></div></div>
 
+
 <span class="c1"># ========================================================================= #</span>
 
-<div class="viewcode-block" id="Unicycle"><a class="viewcode-back" href="../../../mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle">[docs]</a><span class="k">class</span> <span class="nc">Unicycle</span><span class="p">(</span><span class="n">VehicleBase</span><span class="p">):</span>
 
-<div class="viewcode-block" id="Unicycle.__init__"><a class="viewcode-back" href="../../../mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                <span class="n">W</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                <span class="n">steer_max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Unicycle"><a class="viewcode-back" href="../../../mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle">[docs]</a><span class="k">class</span> <span class="nc">Unicycle</span><span class="p">(</span><span class="n">VehicleBase</span><span class="p">):</span>
+<div class="viewcode-block" id="Unicycle.__init__"><a class="viewcode-back" href="../../../mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">steer_max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create unicycle kinematic model</span>
 
@@ -1141,16 +1199,19 @@
 <span class="sd">        :seealso: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`Vehicle`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_w</span> <span class="o">=</span> <span class="n">W</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_W</span> <span class="o">=</span> <span class="n">W</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_steer_max</span> <span class="o">=</span> <span class="n">steer_max</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="n">s</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
-        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  W=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="si">}</span><span class="s2">, steer_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_steer_max</span><span class="si">}</span><span class="s2">, vel_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_vel_max</span><span class="si">}</span><span class="s2">, accel_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">accel_max</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  W=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_W</span><span class="si">}</span><span class="s2">, steer_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_steer_max</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; vel_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_speed_max</span><span class="si">}</span><span class="s2">, accel_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_accel_max</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">s</span>
 
-
-<div class="viewcode-block" id="Unicycle.deriv"><a class="viewcode-back" href="../../../mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.deriv">[docs]</a>    <span class="k">def</span> <span class="nf">deriv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<div class="viewcode-block" id="Unicycle.deriv"><a class="viewcode-back" href="../../../mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.deriv">[docs]</a>    <span class="k">def</span> <span class="nf">deriv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Time derivative of state</span>
 
@@ -1158,6 +1219,8 @@
 <span class="sd">        :type x: array_like(3)</span>
 <span class="sd">        :param u: control input :math:`(v, \omega)`</span>
 <span class="sd">        :type u: array_like(2)</span>
+<span class="sd">        :param limits: limits are applied to input, default True</span>
+<span class="sd">        :type limits: bool</span>
 <span class="sd">        :return: state derivative :math:`(\dot{x}, \dot{y}, \dot{\theta})`</span>
 <span class="sd">        :rtype: ndarray(3)</span>
 
@@ -1169,23 +1232,21 @@
 <span class="sd">                    \dot{y} &amp;= v \sin \theta \\</span>
 <span class="sd">                    \dot{\theta} &amp;= \omega</span>
 
-<span class="sd">        :seealso: :meth:`f`</span>
+<span class="sd">        If ``limits`` is True then speed, acceleration and steer-angle limits are</span>
+<span class="sd">        applied to ``u``.</span>
 
-<span class="sd">        .. note:: Vehicle speed and steering limits are not applied here</span>
+<span class="sd">        :seealso: :meth:`f`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+        <span class="k">if</span> <span class="n">limits</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_limited</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
         <span class="c1"># unpack some variables</span>
         <span class="n">theta</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="n">v</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">vdiff</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span>
-                <span class="n">v</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> 
-                <span class="n">v</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> 
-                <span class="n">vdiff</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span>
-                    <span class="p">]</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">v</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">v</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">vdiff</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_W</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Unicycle.u_limited"><a class="viewcode-back" href="../../../mobile_vehicle_unicycle.html#roboticstoolbox.mobile.Unicycle.u_limited">[docs]</a>    <span class="k">def</span> <span class="nf">u_limited</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<div class="viewcode-block" id="Unicycle.u_limited"><a class="viewcode-back" href="../../../mobile-vehicle-unicycle.html#roboticstoolbox.mobile.Unicycle.u_limited">[docs]</a>    <span class="k">def</span> <span class="nf">u_limited</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply vehicle velocity, acceleration and steering limits</span>
 
@@ -1194,31 +1255,147 @@
 <span class="sd">        :return: Allowable vehicle inputs :math:`(v, \omega)`</span>
 <span class="sd">        :rtype: ndarray(2)</span>
 
-<span class="sd">        Velocity and acceleration limits are applied to :math:`v` and </span>
+<span class="sd">        Velocity and acceleration limits are applied to :math:`v` and</span>
 <span class="sd">        turn rate limits are applied to :math:`\omega`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># limit speed and steer angle</span>
         <span class="n">ulim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
-        <span class="n">ulim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits_va</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ulim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits_va</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev</span><span class="p">)</span>
         <span class="n">ulim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_steer_max</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_steer_max</span><span class="p">,</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
         <span class="k">return</span> <span class="n">ulim</span></div></div>
 
-<span class="k">class</span> <span class="nc">DiffSteer</span><span class="p">(</span><span class="n">Unicycle</span><span class="p">):</span>
-    <span class="k">pass</span>
 
+<div class="viewcode-block" id="DiffSteer"><a class="viewcode-back" href="../../../mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer">[docs]</a><span class="k">class</span> <span class="nc">DiffSteer</span><span class="p">(</span><span class="n">Unicycle</span><span class="p">):</span>
+<div class="viewcode-block" id="DiffSteer.__init__"><a class="viewcode-back" href="../../../mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create differential steering kinematic model</span>
+
+<span class="sd">        :param W: vehicle width, defaults to 1</span>
+<span class="sd">        :type W: float, optional</span>
+<span class="sd">        :param kwargs: additional arguments passed to :class:`VehicleBase`</span>
+<span class="sd">            constructor</span>
+
+<span class="sd">        Model the motion of a unicycle model with equations of motion given by:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \dot{x} &amp;= v \cos \theta \\</span>
+<span class="sd">            \dot{y} &amp;= v \sin \theta \\</span>
+<span class="sd">            \dot{\theta} &amp;= \omega</span>
+
+<span class="sd">        where :math:`v = (v_R + v_L)/2` is the velocity in body frame x-direction, and </span>
+<span class="sd">        :math:`\omega = (v_R - v_L)/W` is the turn rate.</span>
+
+<span class="sd">        :seealso: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`Vehicle`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_W</span> <span class="o">=</span> <span class="n">W</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev_L</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev_R</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+<div class="viewcode-block" id="DiffSteer.init"><a class="viewcode-back" href="../../../mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev_L</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev_R</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="DiffSteer.u_limited"><a class="viewcode-back" href="../../../mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.u_limited">[docs]</a>    <span class="k">def</span> <span class="nf">u_limited</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply vehicle velocity and acceleration limits</span>
+
+<span class="sd">        :param u: Desired vehicle inputs :math:`(v_L, v_R)`</span>
+<span class="sd">        :type u: array_like(2)</span>
+<span class="sd">        :return: Allowable vehicle inputs :math:`(v_L, v_R)`</span>
+<span class="sd">        :rtype: ndarray(2)</span>
+
+<span class="sd">        Velocity and acceleration limits are applied to :math:`v` and</span>
+<span class="sd">        turn rate limits are applied to :math:`\omega`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># limit speed and acceleration of each wheel/track</span>
+        <span class="n">ulim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+        <span class="n">ulim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits_va</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev_L</span><span class="p">)</span>
+        <span class="n">ulim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">limits_va</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v_prev_R</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ulim</span></div>
+    
+<div class="viewcode-block" id="DiffSteer.deriv"><a class="viewcode-back" href="../../../mobile-vehicle-diffsteer.html#roboticstoolbox.mobile.DiffSteer.deriv">[docs]</a>    <span class="k">def</span> <span class="nf">deriv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">limits</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Time derivative of state</span>
+
+<span class="sd">        :param x: vehicle state :math:`(x, y, \theta)`</span>
+<span class="sd">        :type x: array_like(3)</span>
+<span class="sd">        :param u: Desired vehicle inputs :math:`(v_L, v_R)`</span>
+<span class="sd">        :type u: array_like(2)</span>
+<span class="sd">        :param limits: limits are applied to input, default True</span>
+<span class="sd">        :type limits: bool</span>
+<span class="sd">        :return: state derivative :math:`(\dot{x}, \dot{y}, \dot{\theta})`</span>
+<span class="sd">        :rtype: ndarray(3)</span>
+
+<span class="sd">        Returns the time derivative of state (3x1) at the state ``x`` with left and</span>
+<span class="sd">        right wheel speeds ``u``.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \dot{x} &amp;= v \cos \theta \\</span>
+<span class="sd">            \dot{y} &amp;= v \sin \theta \\</span>
+<span class="sd">            \dot{\theta} &amp;= \omega</span>
+
+<span class="sd">        where :math:`v = (v_R + v_L)/2` is the velocity in body frame x-direction, and </span>
+<span class="sd">        :math:`\omega = (v_R - v_L)/W` is the turn rate.</span>
+
+<span class="sd">        If ``limits`` is True then speed and acceleration limits are applied to the</span>
+<span class="sd">        wheel speeds ``u``.</span>
+
+<span class="sd">        :seealso: :meth:`f`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">limits</span><span class="p">:</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_limited</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+        <span class="c1"># unpack some variables</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">vleft</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">vright</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># convert wheel speeds to forward and differential velocity</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="p">(</span><span class="n">vright</span> <span class="o">+</span> <span class="n">vleft</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">vdiff</span> <span class="o">=</span> <span class="n">vright</span> <span class="o">-</span> <span class="n">vleft</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">v</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">v</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">vdiff</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_W</span><span class="p">]</span></div></div>
+
+
+    
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
     <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">RandomPath</span>
 
-    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.001</span>
-    <span class="n">robot</span> <span class="o">=</span> <span class="n">Bicycle</span><span class="p">(</span><span class="n">covar</span><span class="o">=</span><span class="n">V</span><span class="p">,</span> <span class="n">animation</span><span class="o">=</span><span class="s2">&quot;car&quot;</span><span class="p">)</span>
-    <span class="n">odo</span> <span class="o">=</span> <span class="n">robot</span><span class="o">.</span><span class="n">step</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
 
-    <span class="n">robot</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="n">RandomPath</span><span class="p">(</span><span class="n">workspace</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">VehicleMarker</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">markerfacecolor</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>
+    <span class="n">veh</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">Bicycle</span><span class="p">(</span><span class="n">animation</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">veh</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">veh</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
 
-    <span class="n">robot</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="c1"># V = np.eye(2) * 0.001</span>
+    <span class="c1"># robot = Bicycle(covar=V, animation=&quot;car&quot;)</span>
+    <span class="c1"># odo = robot.step((1, 0.3), animate=False)</span>
+
+    <span class="c1"># robot.control = RandomPath(workspace=10)</span>
+
+    <span class="c1"># # robot.run(T=10, animate=True)</span>
+    <span class="c1"># # plt.show(block=True)</span>
+
+    <span class="c1"># anim = robot.run_animation(T=10, format=&quot;html&quot;, file=&quot;veh.html&quot;)</span>
+
+    <span class="c1"># anim.save(&quot;veh.mp4&quot;, writer=animation.FFMpegWriter(fps=1/robot.dt))  # convert to mp4/H264</span>
+    <span class="c1"># with open(&quot;veh.html&quot;, &quot;w&quot;) as f:</span>
+    <span class="c1">#     f.write(anim.to_html5_video())</span>
 
     <span class="c1"># from math import pi</span>
 
@@ -1261,7 +1438,6 @@
     <span class="c1"># ax.set_xlim(-5, 5)</span>
     <span class="c1"># ax.set_ylim(-5, 5)</span>
 
-
     <span class="c1"># v = VehicleAnimation.Polygon(shape=&#39;triangle&#39;, maxdim=0.1, color=&#39;r&#39;)</span>
     <span class="c1"># v = VehicleAnimation.Icon(&#39;car3.png&#39;, maxdim=2, centre=[0.3, 0.5])</span>
     <span class="c1"># v = VehicleAnimation.Icon(&#39;/Users/corkep/Dropbox/code/robotics-toolbox-python/roboticstoolbox/data/car1.png&#39;, maxdim=2, centre=[0.3, 0.5])</span>
@@ -1283,14 +1459,11 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

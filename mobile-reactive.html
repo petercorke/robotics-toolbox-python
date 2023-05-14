@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reactive navigation &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script>window.MathJax = {"tex": {"macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Localization and Mapping" href="mobile-SLAM.html" />
+    <link rel="prev" title="Supporting classes" href="mobile-planner-base.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Robot Arms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="mobile.html">Mobile robots</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle.html">Motion models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-animation.html">Animations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-drivers.html">Drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner.html">Path planning</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Reactive navigation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2"><code class="docutils literal notranslate"><span class="pre">Bug2</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.m_line"><code class="docutils literal notranslate"><span class="pre">Bug2.m_line</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.run"><code class="docutils literal notranslate"><span class="pre">Bug2.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.plot_m_line"><code class="docutils literal notranslate"><span class="pre">Bug2.plot_m_line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.__str__"><code class="docutils literal notranslate"><span class="pre">Bug2.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.goal"><code class="docutils literal notranslate"><span class="pre">Bug2.goal</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.isoccupied"><code class="docutils literal notranslate"><span class="pre">Bug2.isoccupied()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.message"><code class="docutils literal notranslate"><span class="pre">Bug2.message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.occgrid"><code class="docutils literal notranslate"><span class="pre">Bug2.occgrid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.plot"><code class="docutils literal notranslate"><span class="pre">Bug2.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.plot_bg"><code class="docutils literal notranslate"><span class="pre">Bug2.plot_bg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.progress_end"><code class="docutils literal notranslate"><span class="pre">Bug2.progress_end()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.progress_next"><code class="docutils literal notranslate"><span class="pre">Bug2.progress_next()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.progress_start"><code class="docutils literal notranslate"><span class="pre">Bug2.progress_start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.random"><code class="docutils literal notranslate"><span class="pre">Bug2.random</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.random_init"><code class="docutils literal notranslate"><span class="pre">Bug2.random_init()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.start"><code class="docutils literal notranslate"><span class="pre">Bug2.start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.validate_endpoint"><code class="docutils literal notranslate"><span class="pre">Bug2.validate_endpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.verbose"><code class="docutils literal notranslate"><span class="pre">Bug2.verbose</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-SLAM.html">Localization and Mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="mobile.html">Mobile robots</a></li>
+      <li class="breadcrumb-item active">Reactive navigation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="reactive-navigation">
+<h1>Reactive navigation<a class="headerlink" href="#reactive-navigation" title="Permalink to this heading"></a></h1>
+<p>These algorithms work with an occupancy grid representation of the world.  Start
+and goal are specified by 2D <span class="math notranslate nohighlight">\((x, y)\)</span> coordinates in the plane.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">Bug2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Bug2.html#Bug2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bug2" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
+<p>Construct a Bug2 reactive navigator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>occgrid</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">OccGrid</span></code> instance or ndarray(N,M)) – occupancy grid</p></li>
+<li><p><strong>kwargs</strong> – common arguments for <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a> superclass</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Bug2 reactive navigator</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Bug2 instance</p>
+</dd>
+</dl>
+<p>Creates an object which simulates an automaton, capable of omnidirectional
+motion, finding a path across an occupancy grid using only a bump sensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Reference<span class="colon">:</span></dt>
+<dd class="field-odd"><p>“Path-Planning Strategies for a Point Mobile Automaton Moving
+Amidst Unknown Obstacles of Arbitrary Shape”, Lumelsky and Stepanov,
+Algorithmica (1987)2, pp.403-430</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This class is not a planner, even though it subclasses
+<a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a>. It can produce very inefficient paths.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Kristian Gibson and Peter Corke, based on MATLAB version by Peter Corke</p>
+</dd>
+<dt class="field-even">Seealso<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" title="roboticstoolbox.mobile.PlannerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code></a></p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.m_line">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m_line</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.m_line" title="Permalink to this definition"></a></dt>
+<dd><p>Get m-line</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>m-line in homogeneous form</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(3)</p>
+</dd>
+</dl>
+<p>This is the m-line computed for the last <a class="reference internal" href="#roboticstoolbox.mobile.Bug2.run" title="roboticstoolbox.mobile.Bug2.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pause</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trail</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">movie</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Bug2.html#Bug2.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.run" title="Permalink to this definition"></a></dt>
+<dd><p>Find a path using Bug2 reactive navigation algorithm</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – starting position</p></li>
+<li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – goal position</p></li>
+<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – show animation of robot moving over the map,
+defaults to False</p></li>
+<li><p><strong>movie</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><em>tuple</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – save animation as a movie, defaults to None. Is either
+name of movie or a tuple (filename, frame interval)</p></li>
+<li><p><strong>trail</strong> – show the path followed by the robot, defaults to True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>path from <code class="docutils literal notranslate"><span class="pre">start</span></code> to <code class="docutils literal notranslate"><span class="pre">goal</span></code></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndarray(2,N)</p>
+</dd>
+</dl>
+<p>Compute the path from <code class="docutils literal notranslate"><span class="pre">start</span></code> to <code class="docutils literal notranslate"><span class="pre">goal</span></code> assuming the robot is capable
+of 8-way motion from its current cell to the next.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">goal</span></code> are given as (x,y) coordinates in the
+occupancy grid map, not as matrix row and column coordinates.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.plot" title="roboticstoolbox.mobile.Bug2.plot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Bug2.plot()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.plot_m_line">
+<span class="sig-name descname"><span class="pre">plot_m_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/Bug2.html#Bug2.plot_m_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.plot_m_line" title="Permalink to this definition"></a></dt>
+<dd><p>Plot m-line</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ls</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – linestyle, defaults to <code class="docutils literal notranslate"><span class="pre">&quot;k--&quot;</span></code></p>
+</dd>
+</dl>
+<p>Plots the m-line on the current axes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.__str__" title="Permalink to this definition"></a></dt>
+<dd><p>Compact representation of the planner</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pretty printed representation</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.goal">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">goal</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.goal" title="Permalink to this definition"></a></dt>
+<dd><p>Set/get goal point or configuration (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Getter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Return goal pointor configuration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2) or ndarray(3)</p>
+</dd>
+<dt class="field-odd">Setter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set goal point or configuration</p>
+</dd>
+<dt class="field-even">Param<span class="colon">:</span></dt>
+<dd class="field-even"><p>array_like(2) or array_like(3)</p>
+</dd>
+</dl>
+<p>The goal is either a point <span class="math notranslate nohighlight">\((x, y)\)</span> or a configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.goal" title="roboticstoolbox.mobile.Bug2.goal"><code class="xref py py-meth docutils literal notranslate"><span class="pre">goal()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.isoccupied">
+<span class="sig-name descname"><span class="pre">isoccupied</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.isoccupied" title="Permalink to this definition"></a></dt>
+<dd><p>Test if point is occupied (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – world coordinate (x, y)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>occupancy status of corresponding grid cell</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+<p>The world coordinate is transformed and the status of the occupancy
+grid cell is returned.  If the point lies outside the bounds of
+the occupancy grid return True (obstacle)</p>
+<p>If there is no occupancy grid this function always returns False (free).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.occgrid" title="roboticstoolbox.mobile.Bug2.occgrid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">occgrid()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Bug2.validate_endpoint" title="roboticstoolbox.mobile.Bug2.validate_endpoint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate_endpoint()</span></code></a> <code class="xref py py-meth docutils literal notranslate"><span class="pre">BinaryOccGrid.isoccupied()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.message">
+<span class="sig-name descname"><span class="pre">message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.message" title="Permalink to this definition"></a></dt>
+<dd><p>Print message to message channel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – message to print</p></li>
+<li><p><strong>color</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – color to print it, defaults to color specified at
+constructor time.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.occgrid">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">occgrid</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.occgrid" title="Permalink to this definition"></a></dt>
+<dd><p>Occupancy grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>occupancy grid used for planning</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">OccGrid</span></code> or subclass or None</p>
+</dd>
+</dl>
+<p>Returns the occupancy grid that was optionally inflated at constructor time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.validate_endpoint" title="roboticstoolbox.mobile.Bug2.validate_endpoint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">validate_endpoint()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Bug2.isoccupied" title="roboticstoolbox.mobile.Bug2.isoccupied"><code class="xref py py-meth docutils literal notranslate"><span class="pre">isoccupied()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unwrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_marker_reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_vehicle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_vehicle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bgargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">unused</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Plot vehicle path (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>(</em><em>N</em><em>, </em><em>2</em><em>) or </em><em>ndarray</em><em>(</em><em>N</em><em>, </em><em>3</em><em>)</em>) – path, defaults to None</p></li>
+<li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
+<li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
+<li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
+<li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <a class="reference internal" href="#roboticstoolbox.mobile.Bug2.plot_bg" title="roboticstoolbox.mobile.Bug2.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a>, defaults to None</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+</ul>
+</dd>
+</dl>
+<p>Plots the start and goal location/pose if they are specified by
+<code class="docutils literal notranslate"><span class="pre">start</span></code> or <code class="docutils literal notranslate"><span class="pre">goal</span></code> or were set by the object constructor or
+<code class="docutils literal notranslate"><span class="pre">plan</span></code> or <code class="docutils literal notranslate"><span class="pre">query</span></code> method.</p>
+<p>If the <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">goal</span></code> have length 2, planning in
+<span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span>, then markers are drawn using styles specified by
+<code class="docutils literal notranslate"><span class="pre">start_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">end_marker</span></code> which are dicts using Matplotlib
+keywords, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">planner</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>If the <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">goal</span></code> have length 3, planning in <span class="math notranslate nohighlight">\(\SE{2}\)</span>,
+and <code class="docutils literal notranslate"><span class="pre">configspace</span></code> is False, then direction-indicating markers are used
+to display start and goal configuration. These are also given as dicts
+but have two items: <code class="docutils literal notranslate"><span class="pre">'shape'</span></code> which is the shape of the polygonal
+marker and is either <code class="docutils literal notranslate"><span class="pre">'triangle'</span></code> or <code class="docutils literal notranslate"><span class="pre">'car'</span></code>.  The second item
+<code class="docutils literal notranslate"><span class="pre">'args'</span></code> is passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">base.plot_poly()</span></code> and Matplotlib and could
+have values such as <code class="docutils literal notranslate"><span class="pre">filled=True</span></code> or <code class="docutils literal notranslate"><span class="pre">color</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">configspace</span></code> is False then a 3D plot is created and the start and
+goal are indicated by Matplotlib markers specified by the dicts
+<code class="docutils literal notranslate"><span class="pre">start_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">end_marker</span></code></p>
+<p>Default values are provided for all markers:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the start point is a circle</p></li>
+<li><p>the goal point is a star</p></li>
+<li><p>the start vehicle style is a <code class="docutils literal notranslate"><span class="pre">VehiclePolygon(shape='car')</span></code> as
+an unfilled outline</p></li>
+<li><p>the goal vehicle style is a <code class="docutils literal notranslate"><span class="pre">VehiclePolygon(shape='car')</span></code> as
+a transparent filled shape</p></li>
+</ul>
+</div></blockquote>
+<p>If <code class="docutils literal notranslate"><span class="pre">background</span></code> is True then the background of the plot is either or
+both of:</p>
+<ul class="simple">
+<li><p>the occupancy grid</p></li>
+<li><p>the distance field of the planner</p></li>
+</ul>
+<p>Additional arguments <code class="docutils literal notranslate"><span class="pre">bgargs</span></code> can be passed through to <a class="reference internal" href="#roboticstoolbox.mobile.Bug2.plot_bg" title="roboticstoolbox.mobile.Bug2.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a></p>
+<p>If <code class="docutils literal notranslate"><span class="pre">path</span></code> is specified it has one column per point and either 2 or 3 rows:</p>
+<ul class="simple">
+<li><p>2 rows describes motion in the <span class="math notranslate nohighlight">\(xy\)</span>-plane and a 2D plot  is created</p></li>
+<li><p>3 rows describes motion in the <span class="math notranslate nohighlight">\(xy\theta\)</span>-configuration space. By
+default only the <span class="math notranslate nohighlight">\(xy\)</span>-plane is plotted unless <code class="docutils literal notranslate"><span class="pre">configspace</span></code>
+is True in which case motion in <span class="math notranslate nohighlight">\(xy\theta\)</span>-configuration space
+is shown as a 3D plot.</p></li>
+</ul>
+<p>If the planner supports bi-directional motion then the <code class="docutils literal notranslate"><span class="pre">direction</span></code>
+option gives the direction for each point on the path.</p>
+<p>Forward motion segments are drawn using style information from <code class="docutils literal notranslate"><span class="pre">line</span></code>
+while reverse motion segments are drawn using style information from
+<code class="docutils literal notranslate"><span class="pre">line_r</span></code>. These are each a sequence of dicts of Matplotlib plot
+options which can draw an arbitrary number of lines on top of each
+other.  The default:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">line</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">{</span><span class="n">color</span><span class="p">:</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">:</span><span class="mi">4</span><span class="p">},</span>
+        <span class="p">{</span><span class="n">color</span><span class="p">:</span><span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="n">dashes</span><span class="p">:(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">)}</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>will draw a blackline of width 4 with a dashed yellow line of width 3
+plotted on top, giving a line of alternating black and yellow dashes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.plot_bg" title="roboticstoolbox.mobile.Bug2.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a> <code class="xref py py-func docutils literal notranslate"><span class="pre">base.plot_poly()</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.plot_bg">
+<span class="sig-name descname"><span class="pre">plot_bg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gray'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inflated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">unused</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.plot_bg" title="Permalink to this definition"></a></dt>
+<dd><p>Plot background (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distance</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em><em>, </em><em>optional</em>) – override distance field, defaults to None</p></li>
+<li><p><strong>cmap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><em>Colormap</em><em>, </em><em>optional</em>) – Specify a colormap for the distance field, defaults to ‘gray’</p></li>
+</ul>
+</dd>
+</dl>
+<p>Displays the background which is either the occupancy grid or a distance
+field.  The distance field encodes the distance of a point from the goal, small
+distance is dark, a large distance is bright.</p>
+<dl class="simple">
+<dt>If the planner has an occupancy grid then that will be displayed with:</dt><dd><ul class="simple">
+<li><p>free cells in white</p></li>
+<li><p>occupied cells in red</p></li>
+<li><p>inflated occupied cells in pink</p></li>
+</ul>
+</dd>
+</dl>
+<p>If distance is provided, or the planner has a distancemap attribute
+the the distance field will be used as the background and obstacle cells
+(actual or inflated) will be shown in red. A colorbar is added.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.progress_end">
+<span class="sig-name descname"><span class="pre">progress_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.progress_end" title="Permalink to this definition"></a></dt>
+<dd><p>Finalize a progress bar  (superclass)</p>
+<p>Remove/cleanip a progress bar, for
+example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">planner</span><span class="o">.</span><span class="n">progress_start</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="n">planner</span><span class="o">.</span><span class="n">progress_next</span><span class="p">()</span>
+<span class="n">planner</span><span class="o">.</span><span class="n">progress_end</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.progress_start" title="roboticstoolbox.mobile.Bug2.progress_start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">progress_start()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Bug2.progress_next" title="roboticstoolbox.mobile.Bug2.progress_next"><code class="xref py py-meth docutils literal notranslate"><span class="pre">progress_next()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.progress_next">
+<span class="sig-name descname"><span class="pre">progress_next</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.progress_next" title="Permalink to this definition"></a></dt>
+<dd><p>Increment a progress bar (superclass)</p>
+<p>Create a progress bar for an operation that has <code class="docutils literal notranslate"><span class="pre">n</span></code> steps, for
+example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">planner</span><span class="o">.</span><span class="n">progress_start</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="n">planner</span><span class="o">.</span><span class="n">progress_next</span><span class="p">()</span>
+<span class="n">planner</span><span class="o">.</span><span class="n">progress_end</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.progress_start" title="roboticstoolbox.mobile.Bug2.progress_start"><code class="xref py py-meth docutils literal notranslate"><span class="pre">progress_start()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Bug2.progress_end" title="roboticstoolbox.mobile.Bug2.progress_end"><code class="xref py py-meth docutils literal notranslate"><span class="pre">progress_end()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.progress_start">
+<span class="sig-name descname"><span class="pre">progress_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.progress_start" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize a progress bar (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – Number of iterations in the operation</p>
+</dd>
+</dl>
+<p>Create a progress bar for an operation that has <code class="docutils literal notranslate"><span class="pre">n</span></code> steps, for
+example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">planner</span><span class="o">.</span><span class="n">progress_start</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="n">planner</span><span class="o">.</span><span class="n">progress_next</span><span class="p">()</span>
+<span class="n">planner</span><span class="o">.</span><span class="n">progress_end</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.progress_next" title="roboticstoolbox.mobile.Bug2.progress_next"><code class="xref py py-meth docutils literal notranslate"><span class="pre">progress_next()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Bug2.progress_end" title="roboticstoolbox.mobile.Bug2.progress_end"><code class="xref py py-meth docutils literal notranslate"><span class="pre">progress_end()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.random">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.random" title="Permalink to this definition"></a></dt>
+<dd><p>Get private random number generator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy random number generator</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a></p>
+</dd>
+</dl>
+<p>Has methods including:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.integers.html#numpy.random.Generator.integers" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integers(low,</span> <span class="pre">high,</span> <span class="pre">size,</span> <span class="pre">endpoint)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.random.html#numpy.random.Generator.random" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">random(size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.uniform.html#numpy.random.Generator.uniform" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform(low,</span> <span class="pre">high,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.normal.html#numpy.random.Generator.normal" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">normal(mean,</span> <span class="pre">std,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.multivariate_normal.html#numpy.random.Generator.multivariate_normal" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">multivariate_normal(mean,</span> <span class="pre">covar,</span> <span class="pre">size)</span></code></a></p></li>
+</ul>
+<p>The generator is initialized with the seed provided at constructor
+time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="(in NumPy v1.24)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.random.default_rng()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.random_init">
+<span class="sig-name descname"><span class="pre">random_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.random_init" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize private random number generator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – random number seed, defaults to value given to constructor</p>
+</dd>
+</dl>
+<p>The private random number generator is initialized.  The seed is <code class="docutils literal notranslate"><span class="pre">seed</span></code>
+or the value given to the constructor.  If None, the generator will
+be randomly seeded using a seed from the operating system.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.start">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.start" title="Permalink to this definition"></a></dt>
+<dd><p>Set/get start point or configuration (superclass)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Getter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Return start point or configuration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2) or ndarray(3)</p>
+</dd>
+<dt class="field-odd">Setter<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set start point or configuration</p>
+</dd>
+<dt class="field-even">Param<span class="colon">:</span></dt>
+<dd class="field-even"><p>array_like(2) or array_like(3)</p>
+</dd>
+</dl>
+<p>The start is either a point <span class="math notranslate nohighlight">\((x, y)\)</span> or a configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.goal" title="roboticstoolbox.mobile.Bug2.goal"><code class="xref py py-meth docutils literal notranslate"><span class="pre">goal()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.validate_endpoint">
+<span class="sig-name descname"><span class="pre">validate_endpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.validate_endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>Validate start or goal point</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray(2)</p>
+</dd>
+</dl>
+<p>The coordinate is tested to be a free cell in the occupancy grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.Bug2.isoccupied" title="roboticstoolbox.mobile.Bug2.isoccupied"><code class="xref py py-meth docutils literal notranslate"><span class="pre">isoccupied()</span></code></a> <a class="reference internal" href="#roboticstoolbox.mobile.Bug2.occgrid" title="roboticstoolbox.mobile.Bug2.occgrid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">occgrid()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="roboticstoolbox.mobile.Bug2.verbose">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#roboticstoolbox.mobile.Bug2.verbose" title="Permalink to this definition"></a></dt>
+<dd><p>Get verbosity</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>verbosity</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+</dd>
+</dl>
+<p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
+message channel.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

@@ -7,6 +7,7 @@
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -28,12 +29,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -41,7 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Robot Arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
 </ul>
@@ -56,10 +61,10 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">roboticstoolbox.mobile.OccGrid</li>
       <li class="wy-breadcrumbs-aside">
@@ -76,12 +81,12 @@
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
 <span class="kn">import</span> <span class="nn">scipy.ndimage</span> <span class="k">as</span> <span class="nn">sp</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
-<span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
+<span class="kn">import</span> <span class="nn">spatialmath.base</span> <span class="k">as</span> <span class="nn">smb</span>
 
 <span class="kn">from</span> <span class="nn">spatialmath.geom2d</span> <span class="kn">import</span> <span class="n">Polygon2</span>
 
 
-<div class="viewcode-block" id="BaseMap"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseMap">[docs]</a><span class="k">class</span> <span class="nc">BaseMap</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseMap"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseMap">[docs]</a><span class="k">class</span> <span class="nc">BaseMap</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">unused</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Abstract base class for maps</span>
@@ -103,14 +108,14 @@
 <span class="sd">        ==============  =======  =======</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">workspace</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
+            <span class="n">workspace</span> <span class="o">=</span> <span class="n">smb</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span> <span class="o">=</span> <span class="n">workspace</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="n">workspace</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">workspace</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="n">workspace</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">workspace</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span></div>
 
 
-<div class="viewcode-block" id="BaseOccupancyGrid"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid">[docs]</a><span class="k">class</span> <span class="nc">BaseOccupancyGrid</span><span class="p">(</span><span class="n">BaseMap</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseOccupancyGrid"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid">[docs]</a><span class="k">class</span> <span class="nc">BaseOccupancyGrid</span><span class="p">(</span><span class="n">BaseMap</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cellsize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Occupancy grid (superclass)</span>
@@ -139,7 +144,7 @@
 
         <span class="k">if</span> <span class="n">grid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">grid</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span> <span class="o">=</span> <span class="n">smb</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
@@ -149,7 +154,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_cellsize</span> <span class="o">=</span> <span class="n">cellsize</span>
 
-<div class="viewcode-block" id="BaseOccupancyGrid.copy"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseOccupancyGrid.copy"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Copy an occupancy grid (superclass)</span>
 
@@ -166,7 +171,7 @@
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseOccupancyGrid.__str__"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid.__str__">[docs]</a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compact string description of occupancy grid (superclass)</span>
 
@@ -179,7 +184,7 @@
         <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> x </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, cell size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_cellsize</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, x = [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">xmin</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">xmax</span><span class="si">}</span><span class="s2">], y = [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ymin</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ymax</span><span class="si">}</span><span class="s2">]&quot;</span>
-        <span class="k">return</span> <span class="n">s</span>
+        <span class="k">return</span> <span class="n">s</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">grid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -288,7 +293,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
 
-<div class="viewcode-block" id="BaseOccupancyGrid.set"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseOccupancyGrid.set"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set region of map (superclass)</span>
 
@@ -301,7 +306,7 @@
         <span class="n">tr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">w2g</span><span class="p">([</span><span class="n">region</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">region</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">[</span><span class="n">bl</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="n">tr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">tr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
 
-<div class="viewcode-block" id="BaseOccupancyGrid.g2w"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid.g2w">[docs]</a>    <span class="k">def</span> <span class="nf">g2w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseOccupancyGrid.g2w"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid.g2w">[docs]</a>    <span class="k">def</span> <span class="nf">g2w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert grid coordinate to world coordinate (superclass)</span>
 
@@ -313,10 +318,10 @@
 <span class="sd">        The grid cell size and offset are used to convert occupancy grid</span>
 <span class="sd">        coordinate ``p`` to a world coordinate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">smb</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">p</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cellsize</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span></div>
 
-<div class="viewcode-block" id="BaseOccupancyGrid.w2g"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid.w2g">[docs]</a>    <span class="k">def</span> <span class="nf">w2g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseOccupancyGrid.w2g"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid.w2g">[docs]</a>    <span class="k">def</span> <span class="nf">w2g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert world coordinate to grid coordinate (superclass)</span>
 
@@ -331,7 +336,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">p</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cellsize</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseOccupancyGrid.plot"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseOccupancyGrid.plot"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the occupancy grid (superclass)</span>
 
@@ -340,7 +345,7 @@
 <span class="sd">        :type map: ndarray(N,M), optional</span>
 <span class="sd">        :param ax: matplotlib axes to plot into, defaults to None</span>
 <span class="sd">        :type ax: Axes2D, optional</span>
-<span class="sd">        :param block: block until plot is dismissed, defaults to False</span>
+<span class="sd">        :param block: block until plot is dismissed, defaults to None</span>
 <span class="sd">        :type block: bool, optional</span>
 <span class="sd">        :param kwargs: arguments passed to ``imshow``</span>
 
@@ -352,7 +357,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">axes_logic</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">smb</span><span class="o">.</span><span class="n">axes_logic</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">map</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span>
@@ -361,9 +366,10 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseOccupancyGrid.line_w"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BaseOccupancyGrid.line_w">[docs]</a>    <span class="k">def</span> <span class="nf">line_w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseOccupancyGrid.line_w"><a class="viewcode-back" href="../../../mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseOccupancyGrid.line_w">[docs]</a>    <span class="k">def</span> <span class="nf">line_w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get index of cells along a line segment (superclass)</span>
 
@@ -389,7 +395,7 @@
 
     <span class="k">def</span> <span class="nf">_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
 
-        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">bresenham</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">smb</span><span class="o">.</span><span class="n">bresenham</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
         <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ravel_multi_index</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">z</span>
 
@@ -404,8 +410,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="BinaryOccupancyGrid"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BinaryOccupancyGrid">[docs]</a><span class="k">class</span> <span class="nc">BinaryOccupancyGrid</span><span class="p">(</span><span class="n">BaseOccupancyGrid</span><span class="p">):</span>
-<div class="viewcode-block" id="BinaryOccupancyGrid.__init__"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BinaryOccupancyGrid.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryOccupancyGrid"><a class="viewcode-back" href="../../../mobile-planner-map.html#roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid">[docs]</a><span class="k">class</span> <span class="nc">BinaryOccupancyGrid</span><span class="p">(</span><span class="n">BaseOccupancyGrid</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryOccupancyGrid.__init__"><a class="viewcode-back" href="../../../mobile-planner-map.html#roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a binary occupancy grid instance</span>
 
@@ -456,7 +462,7 @@
         <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, </span><span class="si">{</span><span class="n">nobs</span><span class="o">/</span><span class="n">ncells</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% occupied&quot;</span>
         <span class="k">return</span> <span class="n">s</span>
 
-<div class="viewcode-block" id="BinaryOccupancyGrid.isoccupied"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BinaryOccupancyGrid.isoccupied">[docs]</a>    <span class="k">def</span> <span class="nf">isoccupied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryOccupancyGrid.isoccupied"><a class="viewcode-back" href="../../../mobile-planner-map.html#roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid.isoccupied">[docs]</a>    <span class="k">def</span> <span class="nf">isoccupied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test if coordinate is occupied</span>
 
@@ -478,7 +484,7 @@
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="BinaryOccupancyGrid.inflate"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.BinaryOccupancyGrid.inflate">[docs]</a>    <span class="k">def</span> <span class="nf">inflate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryOccupancyGrid.inflate"><a class="viewcode-back" href="../../../mobile-planner-map.html#roboticstoolbox.mobile.OccGrid.BinaryOccupancyGrid.inflate">[docs]</a>    <span class="k">def</span> <span class="nf">inflate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Inflate obstales</span>
 
@@ -502,7 +508,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">binary_dilation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="n">SE</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="OccupancyGrid"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.OccupancyGrid">[docs]</a><span class="k">class</span> <span class="nc">OccupancyGrid</span><span class="p">(</span><span class="n">BaseOccupancyGrid</span><span class="p">):</span>
+<div class="viewcode-block" id="OccupancyGrid"><a class="viewcode-back" href="../../../mobile-planner-map.html#roboticstoolbox.mobile.OccGrid.OccupancyGrid">[docs]</a><span class="k">class</span> <span class="nc">OccupancyGrid</span><span class="p">(</span><span class="n">BaseOccupancyGrid</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    General occupancy grid</span>
 
@@ -533,16 +539,19 @@
         <span class="k">return</span> <span class="n">s</span></div>
 
 
-<div class="viewcode-block" id="PolygonMap"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PolygonMap">[docs]</a><span class="k">class</span> <span class="nc">PolygonMap</span><span class="p">(</span><span class="n">BaseMap</span><span class="p">):</span>
-<div class="viewcode-block" id="PolygonMap.__init__"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PolygonMap.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">polygons</span><span class="o">=</span><span class="p">[]):</span>
+<div class="viewcode-block" id="PolygonMap"><a class="viewcode-back" href="../../../mobile-planner-map.html#roboticstoolbox.mobile.OccGrid.PolygonMap">[docs]</a><span class="k">class</span> <span class="nc">PolygonMap</span><span class="p">(</span><span class="n">BaseMap</span><span class="p">):</span>
+<div class="viewcode-block" id="PolygonMap.__init__"><a class="viewcode-back" href="../../../mobile-planner-map.html#roboticstoolbox.mobile.OccGrid.PolygonMap.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">polygons</span><span class="o">=</span><span class="p">[]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Polygonal obstacle map</span>
 
 <span class="sd">        :param workspace: dimensions of 2D plot area, defaults to (-10:10) x (-10:10),</span>
 <span class="sd">            see :func:`~spatialmath.base.graphics.plotvol2`</span>
 <span class="sd">        :type workspace: float, array_like(2), array_like(4)</span>
-<span class="sd">        :param polygons: _description_, defaults to []</span>
+<span class="sd">        :param polygons: obstacle polygons, defaults to []</span>
 <span class="sd">        :type polygons: list, optional</span>
+
+<span class="sd">        The obstacle polygons are specified as instances of :class:`~spatialmath.geom2d.Polygon2`</span>
+<span class="sd">        or ndarray(2,N).</span>
 
 <span class="sd">        The workspace can be specified in several ways:</span>
 
@@ -560,7 +569,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span> <span class="o">=</span> <span class="n">polygons</span></div>
 
-<div class="viewcode-block" id="PolygonMap.add"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PolygonMap.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon</span><span class="p">):</span>
+<div class="viewcode-block" id="PolygonMap.add"><a class="viewcode-back" href="../../../mobile-planner-map.html#roboticstoolbox.mobile.OccGrid.PolygonMap.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a polygon to map</span>
 
@@ -575,7 +584,7 @@
                 <span class="n">Polygon2</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
             <span class="p">)</span>  <span class="c1"># lgtm [py/modification-of-default-value]</span></div>
 
-<div class="viewcode-block" id="PolygonMap.iscollision"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PolygonMap.iscollision">[docs]</a>    <span class="k">def</span> <span class="nf">iscollision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon</span><span class="p">):</span>
+<div class="viewcode-block" id="PolygonMap.iscollision"><a class="viewcode-back" href="../../../mobile-planner-map.html#roboticstoolbox.mobile.OccGrid.PolygonMap.iscollision">[docs]</a>    <span class="k">def</span> <span class="nf">iscollision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test for collision</span>
 
@@ -591,15 +600,16 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">polygon</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PolygonMap.plot"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PolygonMap.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="n">base</span><span class="o">.</span><span class="n">plotvol2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+<div class="viewcode-block" id="PolygonMap.plot"><a class="viewcode-back" href="../../../mobile-planner-map.html#roboticstoolbox.mobile.OccGrid.PolygonMap.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">smb</span><span class="o">.</span><span class="n">plotvol2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">:</span>
             <span class="n">polygon</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">block</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PolygonMap.isoccupied"><a class="viewcode-back" href="../../../mobile_planner.html#roboticstoolbox.mobile.PolygonMap.isoccupied">[docs]</a>    <span class="k">def</span> <span class="nf">isoccupied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<div class="viewcode-block" id="PolygonMap.isoccupied"><a class="viewcode-back" href="../../../mobile-planner-map.html#roboticstoolbox.mobile.OccGrid.PolygonMap.isoccupied">[docs]</a>    <span class="k">def</span> <span class="nf">isoccupied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Test if point lies inside an obstacle</span>
 
@@ -689,14 +699,11 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

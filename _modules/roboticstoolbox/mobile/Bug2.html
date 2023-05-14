@@ -7,6 +7,7 @@
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -28,12 +29,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../../../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -41,7 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Manipulator arms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../arm.html">Robot Arms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mobile.html">Mobile robots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../blocks.html">bdsim blocks</a></li>
 </ul>
@@ -56,10 +61,10 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">roboticstoolbox.mobile.Bug2</li>
       <li class="wy-breadcrumbs-aside">
@@ -83,12 +88,15 @@
 <span class="kn">from</span> <span class="nn">spatialmath</span> <span class="kn">import</span> <span class="n">base</span>
 <span class="kn">from</span> <span class="nn">spatialmath.base.animate</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="o">*</span>
+
 <span class="c1"># from matplotlib import cm</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
 <span class="c1"># from matplotlib import animation</span>
 <span class="kn">from</span> <span class="nn">roboticstoolbox.mobile.PlannerBase</span> <span class="kn">import</span> <span class="n">PlannerBase</span>
 
-<div class="viewcode-block" id="Bug2"><a class="viewcode-back" href="../../../mobile_reactive.html#roboticstoolbox.mobile.Bug2">[docs]</a><span class="k">class</span> <span class="nc">Bug2</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Bug2"><a class="viewcode-back" href="../../../mobile-reactive.html#roboticstoolbox.mobile.Bug2">[docs]</a><span class="k">class</span> <span class="nc">Bug2</span><span class="p">(</span><span class="n">PlannerBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct a Bug2 reactive navigator</span>
 
@@ -111,8 +119,8 @@
 <span class="sd">    :author: Kristian Gibson and Peter Corke, based on MATLAB version by Peter Corke</span>
 <span class="sd">    :seealso: :class:`PlannerBase`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># hit points</span>
@@ -121,7 +129,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_edge</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">=</span> <span class="kc">None</span>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">m_line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -136,15 +143,24 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span>
 
     <span class="c1"># override query method of base class</span>
-<div class="viewcode-block" id="Bug2.run"><a class="viewcode-back" href="../../../mobile_reactive.html#roboticstoolbox.mobile.Bug2.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pause</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">trail</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">movie</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Bug2.run"><a class="viewcode-back" href="../../../mobile-reactive.html#roboticstoolbox.mobile.Bug2.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">goal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">pause</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+        <span class="n">trail</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">movie</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find a path using Bug2 reactive navigation algorithm</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param start: starting position</span>
 <span class="sd">        :type start: array_like(2)</span>
 <span class="sd">        :param goal: goal position</span>
 <span class="sd">        :type goal: array_like(2)</span>
-<span class="sd">        :param animate: show animation of robot moving over the map, </span>
+<span class="sd">        :param animate: show animation of robot moving over the map,</span>
 <span class="sd">            defaults to False</span>
 <span class="sd">        :type animate: bool, optional</span>
 <span class="sd">        :param movie: save animation as a movie, defaults to None. Is either</span>
@@ -157,7 +173,7 @@
 
 <span class="sd">        Compute the path from ``start`` to ``goal`` assuming the robot is capable</span>
 <span class="sd">        of 8-way motion from its current cell to the next.</span>
-<span class="sd">        </span>
+
 <span class="sd">        .. note:: ``start`` and ``goal`` are given as (x,y) coordinates in the</span>
 <span class="sd">              occupancy grid map, not as matrix row and column coordinates.</span>
 
@@ -190,8 +206,8 @@
         <span class="n">path</span> <span class="o">=</span> <span class="n">robot</span>
         <span class="n">h</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="n">trail_line</span><span class="p">,</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;y.&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;robot path&#39;</span><span class="p">)</span>
-        <span class="n">trailHead</span><span class="p">,</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">trail_line</span><span class="p">,)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;y.&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;robot path&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">trailHead</span><span class="p">,)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;ko&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 
         <span class="c1"># iterate using the next() method until we reach the goal</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
@@ -227,7 +243,7 @@
 
         <span class="k">return</span> <span class="n">path</span></div>
 
-<div class="viewcode-block" id="Bug2.plot_m_line"><a class="viewcode-back" href="../../../mobile_reactive.html#roboticstoolbox.mobile.Bug2.plot_m_line">[docs]</a>    <span class="k">def</span> <span class="nf">plot_m_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Bug2.plot_m_line"><a class="viewcode-back" href="../../../mobile-reactive.html#roboticstoolbox.mobile.Bug2.plot_m_line">[docs]</a>    <span class="k">def</span> <span class="nf">plot_m_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot m-line</span>
 
@@ -237,22 +253,21 @@
 <span class="sd">        Plots the m-line on the current axes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ls</span> <span class="o">=</span> <span class="s1">&#39;k--&#39;</span>
+            <span class="n">ls</span> <span class="o">=</span> <span class="s2">&quot;k--&quot;</span>
 
         <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
         <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># handle the case that the line is vertical</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
-                     <span class="p">[</span><span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">],</span> <span class="s1">&#39;k--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;m-line&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">],</span> <span class="s2">&quot;k--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;m-line&quot;</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># regular line</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-                <span class="p">[</span><span class="n">x_min</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                <span class="p">[</span><span class="n">x_max</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="p">])</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">x_min</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">x_max</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
             <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">],</span> <span class="n">y</span><span class="p">,</span> <span class="n">ls</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;m-line&#39;</span><span class="p">)</span></div>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">],</span> <span class="n">y</span><span class="p">,</span> <span class="n">ls</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;m-line&quot;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -313,14 +328,16 @@
                 <span class="c1"># we are at the end of the list of edge points, we</span>
                 <span class="c1"># are back where we started.  Step 2.c test.</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;robot is trapped&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;robot is trapped&quot;</span><span class="p">)</span>
 
             <span class="c1"># are we on the M-line now ?</span>
             <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">position</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_m_line</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mf">0.5</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">: crossed the M-line&quot;</span><span class="p">)</span>
 
                 <span class="c1"># are we closer than when we encountered the obstacle?</span>
-                <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">position</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">base</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">position</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">base</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal</span>
+                <span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_step</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># transition to step 1</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">: change to step 1&quot;</span><span class="p">)</span>
                     <span class="k">return</span> <span class="n">n</span>
@@ -331,13 +348,15 @@
         <span class="k">return</span> <span class="n">n</span>
 
     <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;This class has no query method&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This class has no query method&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;This class has no plan method&#39;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This class has no plan method&quot;</span><span class="p">)</span></div>
+
 
 <span class="c1"># Ported from Peter Corke&#39;s edgelist function found:</span>
 <span class="c1"># https://github.com/petercorke/toolbox-common-matlab/blob/master/edgelist.m</span>
+
 
 <span class="c1">#  these are directions of 8-neighbours in a clockwise direction</span>
 <span class="c1"># fmt: off</span>
@@ -382,7 +401,7 @@
 
 <span class="sd">    - Coordinates are given and returned assuming the matrix is an image, so the</span>
 <span class="sd">      indices are always in the form (x,y) or (column,row).</span>
-<span class="sd">    - ``im` is a binary image where 0 is assumed to be background, non-zero </span>
+<span class="sd">    - ``im` is a binary image where 0 is assumed to be background, non-zero</span>
 <span class="sd">      is an object.</span>
 <span class="sd">    - ``p`` must be a point on the edge of the region.</span>
 <span class="sd">    - The initial point is always the first and last element of the returned edgelist.</span>
@@ -397,7 +416,6 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">getvector</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-    
     <span class="k">if</span> <span class="n">direction</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">neighbours</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -406,22 +424,20 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">pix0</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>  <span class="c1"># color of pixel we start at</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;specified coordinate is not within image&#39;</span><span class="p">)</span>
-
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;specified coordinate is not within image&quot;</span><span class="p">)</span>
 
     <span class="n">q</span> <span class="o">=</span> <span class="n">adjacent_point</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">pix0</span><span class="p">)</span>
 
     <span class="c1"># find an adjacent point outside the blob</span>
     <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;no neighbour outside the blob&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;no neighbour outside the blob&quot;</span><span class="p">)</span>
 
     <span class="n">d</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">e</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">]</span>  <span class="c1"># initialize the edge list</span>
-    <span class="nb">dir</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># initialize the direction list</span>
+    <span class="nb">dir</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># initialize the direction list</span>
     <span class="n">p0</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-
         <span class="c1"># find which direction is Q</span>
         <span class="n">dq</span> <span class="o">=</span> <span class="n">q</span> <span class="o">-</span> <span class="n">p</span>
         <span class="k">for</span> <span class="n">kq</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
@@ -435,7 +451,6 @@
             <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="n">kq</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span>
             <span class="c1"># if k &gt; 7:</span>
             <span class="c1">#     k = k - 7</span>
-            
 
             <span class="c1"># compute coordinate of the k&#39;th neighbour</span>
             <span class="n">nk</span> <span class="o">=</span> <span class="n">p</span> <span class="o">+</span> <span class="n">_dirs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
@@ -453,18 +468,20 @@
         <span class="nb">dir</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
         <span class="c1"># check if we are back where we started</span>
         <span class="k">if</span> <span class="n">p0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">p0</span> <span class="o">=</span> <span class="n">p</span>  <span class="c1"># make a note of where we started</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="n">p</span>  <span class="c1"># make a note of where we started</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">p</span> <span class="o">==</span> <span class="n">p0</span><span class="p">):</span>
                 <span class="k">break</span>
 
         <span class="c1"># keep going, add this point to the edgelist</span>
         <span class="n">e</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-    
+
     <span class="k">return</span> <span class="n">e</span><span class="p">,</span> <span class="nb">dir</span>
+
 
 <span class="c1"># Ported from Peter Corke&#39;s adjacent_point function found:</span>
 <span class="c1"># https://github.com/petercorke/toolbox-common-matlab/blob/master/edgelist.m</span>
+
 
 <span class="k">def</span> <span class="nf">adjacent_point</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">pix0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Find adjacent point</span>
@@ -490,7 +507,7 @@
             <span class="k">if</span> <span class="n">im</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">pix0</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">p</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">pass</span> 
+            <span class="k">pass</span>
 
     <span class="k">return</span> <span class="kc">None</span>
 
@@ -506,11 +523,10 @@
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-
     <span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">rtb_load_matfile</span>
 
     <span class="nb">vars</span> <span class="o">=</span> <span class="n">rtb_load_matfile</span><span class="p">(</span><span class="s2">&quot;data/map1.mat&quot;</span><span class="p">)</span>
-    <span class="nb">map</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">[</span><span class="s1">&#39;map&#39;</span><span class="p">]</span>
+    <span class="nb">map</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">[</span><span class="s2">&quot;map&quot;</span><span class="p">]</span>
 
     <span class="n">bug2</span> <span class="o">=</span> <span class="n">Bug2</span><span class="p">(</span><span class="n">occgrid</span><span class="o">=</span><span class="nb">map</span><span class="p">)</span>
     <span class="c1"># bug.plan()</span>
@@ -524,14 +540,11 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

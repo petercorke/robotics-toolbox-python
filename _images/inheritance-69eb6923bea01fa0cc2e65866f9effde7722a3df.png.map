@@ -1,0 +1,7 @@
+<map id="inheritance666068883b" name="inheritance666068883b">
+<area shape="rect" id="node1" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,55,77,80"/>
+<area shape="rect" id="node2" href="#roboticstoolbox.mobile.VehicleAnimationBase" target="_top" title="Abstract base class to support animation of a vehicle in a Matplotlib plot" alt="" coords="125,55,293,80"/>
+<area shape="rect" id="node3" href="#roboticstoolbox.mobile.VehicleIcon" target="_top" title="VehicleIcon" alt="" coords="354,5,450,31"/>
+<area shape="rect" id="node4" href="#roboticstoolbox.mobile.VehicleMarker" target="_top" title="VehicleMarker" alt="" coords="345,55,459,80"/>
+<area shape="rect" id="node5" href="#roboticstoolbox.mobile.VehiclePolygon" target="_top" title="VehiclePolygon" alt="" coords="341,104,463,129"/>
+</map>

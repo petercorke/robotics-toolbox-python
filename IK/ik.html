@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="../_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="../_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="../_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="../_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="../_static/android-chrome-512x512.png ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inverse Kinematics &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script>window.MathJax = {"tex": {"macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ETS.ik_LM" href="stubs/roboticstoolbox.robot.ETS.ETS.ik_LM.html" />
+    <link rel="prev" title="Trajectories" href="../arm_trajectory.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../arm.html">Robot Arms</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../arm_models.html">Manipulator models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arm_trajectory.html">Trajectories</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Inverse Kinematics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#c-solvers">C++ Solvers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ik_LM.html">ETS.ik_LM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ik_GN.html">ETS.ik_GN</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ik_NR.html">ETS.ik_NR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.Robot.Robot.ik_LM.html">Robot.ik_LM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.Robot.Robot.ik_GN.html">Robot.ik_GN</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.Robot.Robot.ik_NR.html">Robot.ik_NR</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#python-solvers">Python Solvers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="iksolver.html">IKSolver - IK Solver Abstract Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iksolution.html">IKSolution - as IK Solution dataclass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ik_lm.html">IK_LM - Levemberg-Marquadt Numerical IK</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ik_qp.html">IK_QP - Numerical IK with Quadratic Programming</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ik_gn.html">IK_GN - Gauss-Newton Numerical IK</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ik_nr.html">IK_NR - Newton-Raphson Numerical IK</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ikine_LM.html">ETS.ikine_LM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ikine_QP.html">ETS.ikine_QP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ikine_GN.html">ETS.ikine_GN</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ikine_NR.html">ETS.ikine_NR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.Robot.Robot.ikine_LM.html">Robot.ikine_LM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.Robot.Robot.ikine_QP.html">Robot.ikine_QP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.Robot.Robot.ikine_GN.html">Robot.ikine_GN</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.Robot.Robot.ikine_NR.html">Robot.ikine_NR</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../arm.html">Robot Arms</a></li>
+      <li class="breadcrumb-item active">Inverse Kinematics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="inverse-kinematics">
+<span id="ik"></span><h1>Inverse Kinematics<a class="headerlink" href="#inverse-kinematics" title="Permalink to this heading"></a></h1>
+<p>The Robotics Toolbox supports an extensive set of numerical inverse kinematics (IK) tools and we will demonstrate the different ways these IK tools can be interacted with in this document.</p>
+<p>For a <strong>tutorial</strong> on numerical IK, see <a class="reference external" href="https://bit.ly/3ak5GDi">here</a>.</p>
+<p>Within the Toolbox, we have two sets of solvers: solvers written in C++ and solvers written in Python. However, within all of our solvers there are several common arguments:</p>
+<p class="rubric">Tep</p>
+<p><code class="docutils literal notranslate"><span class="pre">Tep</span></code> represent the desired end-effector pose.</p>
+<p>A note on the semantics of the above variable:</p>
+<ul class="simple">
+<li><p><strong>T</strong> represents an SE(3) (a homogeneous tranformation matrix in 3 dimensions, a 4x4 matrix)</p></li>
+<li><p><em>e</em> is short for end-effector referring to the end of the kinematic chain</p></li>
+<li><p><em>p</em> is short for prime or desired</p></li>
+<li><p>Since there is no letter to the left of the <strong>T</strong>, the world or base reference frame is implied</p></li>
+</ul>
+<p>Therefore, <code class="docutils literal notranslate"><span class="pre">Tep</span></code> refers to the desired end-effector pose in the base robot frame represented as an SE(3).</p>
+<p class="rubric">ilimit</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">ilimit</span></code> specifies how many iterations are allowed within a single search. After <code class="docutils literal notranslate"><span class="pre">ilimit</span></code> is reached, either, a new attempt is made or the IK solution has failed depending on <code class="docutils literal notranslate"><span class="pre">slimit</span></code></p>
+<p class="rubric">slimit</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">slimit</span></code> specifies how many searches are allowed before the problem is deemed unsolvable. The maximum number of iterations allowed is therefore <code class="docutils literal notranslate"><span class="pre">ilimit</span></code> x <code class="docutils literal notranslate"><span class="pre">slimit</span></code>. By having <code class="docutils literal notranslate"><span class="pre">slimit</span></code> &gt; 1, a global search is performed. Since finding a solution with numerical IK heavily depends on the initial choice of <code class="docutils literal notranslate"><span class="pre">q0</span></code>, performing a global search where <code class="docutils literal notranslate"><span class="pre">slimit</span></code> &gt;&gt; 1 will provide a far greater chance of success.</p>
+<p class="rubric">q0</p>
+<p><code class="docutils literal notranslate"><span class="pre">q0</span></code> is the inital joint coordinate vector. If <code class="docutils literal notranslate"><span class="pre">q0</span></code> is 1 dimensional (, <code class="docutils literal notranslate"><span class="pre">n</span></code>), then <code class="docutils literal notranslate"><span class="pre">q0</span></code> is only used for the first attempt, after which a new random valid initial joint coordinate vector will be generated. If <code class="docutils literal notranslate"><span class="pre">q0</span></code> is 2 dimensional (<code class="docutils literal notranslate"><span class="pre">slimit</span></code>, <code class="docutils literal notranslate"><span class="pre">n</span></code>), then the next vector within <code class="docutils literal notranslate"><span class="pre">q0</span></code> will be used for the next search.</p>
+<p class="rubric">tol</p>
+<p><code class="docutils literal notranslate"><span class="pre">tol</span></code> sets the error tolerance before the solution is deemed successful. The error is typically set by some quadratic error function</p>
+<div class="math notranslate nohighlight">
+\[E = \frac{1}{2} \vec{e}^{\top} \mat{W}_e \vec{e}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\vec{e} \in \mathbb{R}^6\)</span> is the angle-axis error, and <span class="math notranslate nohighlight">\(\mat{W}_e\)</span> assigns weights to Cartesian degrees-of-freedom</p>
+<p class="rubric">mask</p>
+<p><code class="docutils literal notranslate"><span class="pre">mask</span></code> is a (,6) array that sets <span class="math notranslate nohighlight">\(\mat{W}_e\)</span> in error equation above. The vector has six elements that correspond to translation in X, Y and Z, and rotation about X, Y and Z respectively. The value can be 0 (for ignore) or above to assign a priority relative to other Cartesian DoF.</p>
+<p>For the case where the manipulator has fewer than 6 DoF the solution space has more dimensions than can be spanned by the manipulator joint coordinates.</p>
+<p>In this case we use the <code class="docutils literal notranslate"><span class="pre">mask</span></code> option where the <code class="docutils literal notranslate"><span class="pre">mask</span></code> vector specifies the Cartesian DOF that will be ignored in reaching a solution. The number of non-zero elements must equal the number of manipulator DOF.</p>
+<p>For example when using a 3 DOF manipulator tool orientation might be unimportant, in which case use the option <code class="docutils literal notranslate"><span class="pre">mask=[1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0]</span></code>.</p>
+<p class="rubric">joint_limits</p>
+<p>setting <code class="docutils literal notranslate"><span class="pre">joint_limits</span> <span class="pre">=</span> <span class="pre">True</span></code> will reject solutions with joint limit violations. Note that finding a solution with valid joint coordinates is likely to take longer than without.</p>
+<p class="rubric">Others</p>
+<p>There are other arguments which may be unique to the solver, so check the documentation of the solver you wish to use for a complete list and explanation of arguments.</p>
+<section id="c-solvers">
+<h2>C++ Solvers<a class="headerlink" href="#c-solvers" title="Permalink to this heading"></a></h2>
+<p>These solvers are written in high performance C++ and wrapped in Python methods. The methods are made available within the <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> and <a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot" title="roboticstoolbox.robot.Robot.Robot"><code class="xref py py-class docutils literal notranslate"><span class="pre">Robot</span></code></a> classes. Being written in C++, these solvers are extraordinarily fast and typically take 30 to 90 µs. However, these solvers are hard to extend or modify.</p>
+<p>These methods have been written purely for speed so they do not contain the niceties of the Python alternative. For example, if you give the incorrect length for the <code class="docutils literal notranslate"><span class="pre">q0</span></code> vector, you could end up with a <code class="docutils literal notranslate"><span class="pre">seg-fault</span></code> or other undetermined behaviour. Therefore, when using these methods it is very important that you understand each of the parameters and the parameters passed are of the correct type and length.</p>
+<p>The C++ solvers return a tuple with the following members:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">q</span></code></p></td>
+<td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></p></td>
+<td><p>The joint coordinates of the solution. Note that these will not be valid if failed to find a solution</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">success</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a></p></td>
+<td><p>True if a valid solution was found</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">iterations</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p>How many iterations were performed</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">searches</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p>How many searches were performed</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">residual</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a></p></td>
+<td><p>The final error value from the cost function</p></td>
+</tr>
+</tbody>
+</table>
+<p>The C++ solvers can be identified as methods which start with <code class="docutils literal notranslate"><span class="pre">ik_</span></code>.</p>
+<p class="rubric">ETS C++ IK Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ik_LM.html#roboticstoolbox.robot.ETS.ETS.ik_LM" title="roboticstoolbox.robot.ETS.ETS.ik_LM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ik_LM</span></code></a>(Tep[, q0, ilimit, slimit, tol, mask, ...])</p></td>
+<td><p>Fast levenberg-Marquadt Numerical Inverse Kinematics Solver</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ik_gn.html#roboticstoolbox.robot.ETS.ETS.ik_GN" title="roboticstoolbox.robot.ETS.ETS.ik_GN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ik_GN</span></code></a>(Tep[, q0, ilimit, slimit, tol, mask, ...])</p></td>
+<td><p>Fast numerical inverse kinematics by Gauss-Newton optimization</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ik_nr.html#roboticstoolbox.robot.ETS.ETS.ik_NR" title="roboticstoolbox.robot.ETS.ETS.ik_NR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ik_NR</span></code></a>(Tep[, q0, ilimit, slimit, tol, mask, ...])</p></td>
+<td><p>Fast numerical inverse kinematics using Newton-Raphson optimization</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Robot C++ IK Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.ik_LM" title="roboticstoolbox.robot.Robot.Robot.ik_LM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ik_LM</span></code></a>(Tep[, end, start, q0, ilimit, slimit, ...])</p></td>
+<td><p>Fast levenberg-Marquadt Numerical Inverse Kinematics Solver</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.ik_GN" title="roboticstoolbox.robot.Robot.Robot.ik_GN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ik_GN</span></code></a>(Tep[, end, start, q0, ilimit, slimit, ...])</p></td>
+<td><p>Fast numerical inverse kinematics by Gauss-Newton optimization</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.ik_NR" title="roboticstoolbox.robot.Robot.Robot.ik_NR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ik_NR</span></code></a>(Tep[, end, start, q0, ilimit, slimit, ...])</p></td>
+<td><p>Fast numerical inverse kinematics using Newton-Raphson optimization</p></td>
+</tr>
+</tbody>
+</table>
+<p>In the following example, we create a <a class="reference internal" href="../arm_erobot.html#roboticstoolbox.models.URDF.Panda" title="roboticstoolbox.models.URDF.Panda"><code class="xref py py-class docutils literal notranslate"><span class="pre">Panda</span></code></a> robot and one of the fast IK solvers available within the <a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot" title="roboticstoolbox.robot.Robot.Robot"><code class="xref py py-class docutils literal notranslate"><span class="pre">Robot</span></code></a> class.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make a Panda robot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make a goal pose</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Solve the IK problem</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">ik_LM</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
+<span class="go">(array([ 0.5007, -0.3356, -0.4457, -2.1972, -0.1636,  1.9881,  0.9144]), 1, 16, 2, 9.976484070621097e-11)</span>
+</pre></div>
+</div>
+<p>In the following example, we create a <a class="reference internal" href="../arm_erobot.html#roboticstoolbox.models.URDF.Panda" title="roboticstoolbox.models.URDF.Panda"><code class="xref py py-class docutils literal notranslate"><span class="pre">Panda</span></code></a> robot and and then get the <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> representation. Subsequently, we use one of the fast IK solvers available within the <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> class.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make a Panda robot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get the ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ets</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make a goal pose</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Solve the IK problem</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ets</span><span class="o">.</span><span class="n">ik_LM</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
+<span class="go">(array([ 0.5007, -0.3356, -0.4457, -2.1972, -0.1636,  1.9881,  0.9144]), 1, 16, 2, 9.976484070621097e-11)</span>
+</pre></div>
+</div>
+</section>
+<section id="python-solvers">
+<h2>Python Solvers<a class="headerlink" href="#python-solvers" title="Permalink to this heading"></a></h2>
+<p>These solvers are Python classes which extend the abstract base class <a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IKSolver.html#roboticstoolbox.robot.IK.IKSolver" title="roboticstoolbox.robot.IK.IKSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">IKSolver</span></code></a> and the <a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IKSolver.solve.html#roboticstoolbox.robot.IK.IKSolver.solve" title="roboticstoolbox.robot.IK.IKSolver.solve"><code class="xref py py-meth docutils literal notranslate"><span class="pre">solve()</span></code></a> method returns an <a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IKSolution.html#roboticstoolbox.robot.IK.IKSolution" title="roboticstoolbox.robot.IK.IKSolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">IKSolution</span></code></a>. These solvers are slow and will typically take 100 - 1000 ms.  However, these solvers are easy to extend and modify.</p>
+<p class="rubric">The Abstract Base Class</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="iksolver.html">IKSolver - IK Solver Abstract Base Class</a></li>
+</ul>
+</div>
+<p>The <a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IKSolver.html#roboticstoolbox.robot.IK.IKSolver" title="roboticstoolbox.robot.IK.IKSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">IKSolver</span></code></a> provides basic functionality for performing numerical IK. Superclasses can inherit this class and must implement the <a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IKSolver.solve.html#roboticstoolbox.robot.IK.IKSolver.solve" title="roboticstoolbox.robot.IK.IKSolver.solve"><code class="xref py py-meth docutils literal notranslate"><span class="pre">solve()</span></code></a> method. Additionally a superclass redefine any other methods necessary such as <a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IKSolver.error.html#roboticstoolbox.robot.IK.IKSolver.error" title="roboticstoolbox.robot.IK.IKSolver.error"><code class="xref py py-meth docutils literal notranslate"><span class="pre">error()</span></code></a> to provide a custom error function.</p>
+<p class="rubric">The Solution DataClass</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="iksolution.html">IKSolution - as IK Solution dataclass</a></li>
+</ul>
+</div>
+<p>The <a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IKSolution.html#roboticstoolbox.robot.IK.IKSolution" title="roboticstoolbox.robot.IK.IKSolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">IKSolution</span></code></a> is a <code class="xref py py-class docutils literal notranslate"><span class="pre">dataclasses.dataclass</span></code> instance with the following members.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">q</span></code></p></td>
+<td><p><cite>ndarray</cite></p></td>
+<td><p>The joint coordinates of the solution. Note that these will not be valid if failed to find a solution</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">success</span></code></p></td>
+<td><p><cite>bool</cite></p></td>
+<td><p>True if a valid solution was found</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">iterations</span></code></p></td>
+<td><p><cite>int</cite></p></td>
+<td><p>How many iterations were performed</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">searches</span></code></p></td>
+<td><p><cite>int</cite></p></td>
+<td><p>How many searches were performed</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">residual</span></code></p></td>
+<td><p><cite>float</cite></p></td>
+<td><p>The final error value from the cost function</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reason</span></code></p></td>
+<td><p><cite>str</cite></p></td>
+<td><p>The reason the IK problem failed if applicable</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">The Implemented IK Solvers</p>
+<p>These solvers can be identified as a <code class="xref py py-class docutils literal notranslate"><span class="pre">Class</span></code> starting with <code class="docutils literal notranslate"><span class="pre">IK_</span></code>.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ik_lm.html">IK_LM - Levemberg-Marquadt Numerical IK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ik_qp.html">IK_QP - Numerical IK with Quadratic Programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ik_gn.html">IK_GN - Gauss-Newton Numerical IK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ik_nr.html">IK_NR - Newton-Raphson Numerical IK</a></li>
+</ul>
+</div>
+<p class="rubric">Example</p>
+<p>In the following example, we create an IK Solver class and pass an <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> to it to solve the problem. This style may be preferable to experiments where you wish to compare the same solver on different robots.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make a Panda robot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get the ETS of the Panda</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ets</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make an IK solver</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">IK_LM</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make a goal pose</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Solve the IK problem</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">Tep</span><span class="p">)</span>
+<span class="go">IKSolution(q=array([ 1.9957, -1.6621, -0.8488, -2.0646, -1.3725,  0.9561,  1.7139]), success=True, iterations=13, searches=1, residual=1.7262755398299195e-07, reason=&#39;Success&#39;)</span>
+</pre></div>
+</div>
+<p>Additionally, these <code class="xref py py-class docutils literal notranslate"><span class="pre">Class</span></code> based solvers have been implemented as methods within the <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> and <a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot" title="roboticstoolbox.robot.Robot.Robot"><code class="xref py py-class docutils literal notranslate"><span class="pre">Robot</span></code></a> classes. The method names start with <code class="docutils literal notranslate"><span class="pre">ikine_</span></code>.</p>
+<p class="rubric">ETS Python IK Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ikine_LM.html#roboticstoolbox.robot.ETS.ETS.ikine_LM" title="roboticstoolbox.robot.ETS.ETS.ikine_LM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ikine_LM</span></code></a>(Tep[, q0, ilimit, slimit, tol, ...])</p></td>
+<td><p>Levemberg-Marquadt Numerical Inverse Kinematics Solver</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ikine_QP.html#roboticstoolbox.robot.ETS.ETS.ikine_QP" title="roboticstoolbox.robot.ETS.ETS.ikine_QP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ikine_QP</span></code></a>(Tep[, q0, ilimit, slimit, tol, ...])</p></td>
+<td><p>Quadratic Programming Numerical Inverse Kinematics Solver</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ikine_GN.html#roboticstoolbox.robot.ETS.ETS.ikine_GN" title="roboticstoolbox.robot.ETS.ETS.ikine_GN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ikine_GN</span></code></a>(Tep[, q0, ilimit, slimit, tol, ...])</p></td>
+<td><p>Gauss-Newton Numerical Inverse Kinematics Solver</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ikine_NR.html#roboticstoolbox.robot.ETS.ETS.ikine_NR" title="roboticstoolbox.robot.ETS.ETS.ikine_NR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ikine_NR</span></code></a>(Tep[, q0, ilimit, slimit, tol, ...])</p></td>
+<td><p>Newton-Raphson Numerical Inverse Kinematics Solver</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Robot Python IK Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.ikine_LM" title="roboticstoolbox.robot.Robot.Robot.ikine_LM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ikine_LM</span></code></a>(Tep[, end, start, q0, ilimit, ...])</p></td>
+<td><p>Levenberg-Marquadt Numerical Inverse Kinematics Solver</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.ikine_QP" title="roboticstoolbox.robot.Robot.Robot.ikine_QP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ikine_QP</span></code></a>(Tep[, end, start, q0, ilimit, ...])</p></td>
+<td><p>Quadratic Programming Numerical Inverse Kinematics Solver</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.ikine_GN" title="roboticstoolbox.robot.Robot.Robot.ikine_GN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ikine_GN</span></code></a>(Tep[, end, start, q0, ilimit, ...])</p></td>
+<td><p>Gauss-Newton Numerical Inverse Kinematics Solver</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot.ikine_NR" title="roboticstoolbox.robot.Robot.Robot.ikine_NR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ikine_NR</span></code></a>(Tep[, end, start, q0, ilimit, ...])</p></td>
+<td><p>Newton-Raphson Numerical Inverse Kinematics Solver</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<p>In the following example, we create a <a class="reference internal" href="../arm_erobot.html#roboticstoolbox.models.URDF.Panda" title="roboticstoolbox.models.URDF.Panda"><code class="xref py py-class docutils literal notranslate"><span class="pre">Panda</span></code></a> robot and one of the IK solvers available within the <a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot" title="roboticstoolbox.robot.Robot.Robot"><code class="xref py py-class docutils literal notranslate"><span class="pre">Robot</span></code></a> class. This style is far more convenient than the above example.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make a Panda robot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make a goal pose</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Solve the IK problem</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
+<span class="go">IKSolution(q=array([-2.0589, -1.7288,  0.8001, -2.061 ,  1.4258,  0.8776, -0.1566]), success=True, iterations=12, searches=1, residual=5.16019573148789e-10, reason=&#39;Success&#39;)</span>
+</pre></div>
+</div>
+<p>In the following example, we create a <a class="reference internal" href="../arm_erobot.html#roboticstoolbox.models.URDF.Panda" title="roboticstoolbox.models.URDF.Panda"><code class="xref py py-class docutils literal notranslate"><span class="pre">Panda</span></code></a> robot and and then get the <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> representation. Subsequently, we use one of the IK solvers available within the <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> class.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">roboticstoolbox</span> <span class="k">as</span> <span class="nn">rtb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make a Panda robot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get the ETS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ets</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">ets</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make a goal pose</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Solve the IK problem</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ets</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
+<span class="go">IKSolution(q=array([ 1.1045, -0.5483, -0.9243, -2.1764, -0.479 ,  1.8937,  1.1606]), success=True, iterations=7, searches=1, residual=3.135104129596967e-07, reason=&#39;Success&#39;)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

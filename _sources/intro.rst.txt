@@ -359,25 +359,25 @@ or pure rotation -- each with either a constant parameter or a free parameter wh
 .. runblock:: pycon
     :linenos:
 
-    >>> from roboticstoolbox import ETS as ET
+    >>> from roboticstoolbox import ET
     >>> import roboticstoolbox as rtb
     >>> # Puma dimensions (m), see RVC2 Fig. 7.4 for details
     >>> l1 = 0.672; l2 = -0.2337; l3 = 0.4318; l4 = 0.0203; l5 = 0.0837; l6 = 0.4318
-    >>> e = ET.tz(l1) * ET.rz() * ET.ty(l2) * ET.ry() * ET.tz(l3) * ET.tx(l4) * ET.ty(l5) * ET.ry() * ET.tz(l6) * ET.rz() * ET.ry() * ET.rz()
+    >>> e = ET.tz(l1) * ET.Rz() * ET.ty(l2) * ET.Ry() * ET.tz(l3) * ET.tx(l4) * ET.ty(l5) * ET.Ry() * ET.tz(l6) * ET.Rz() * ET.Ry() * ET.Rz()
     >>> print(e)
-    >>> robot = rtb.ERobot(e)
+    >>> robot = rtb.Robot(e)
     >>> print(robot)
 
 Line 3 defines the unique lengths of the Puma robot, and line 4 defines the kinematic chain in
 terms of elementary transforms.
-In line 7 we pass this to the constructor for an ``ERobot`` which partitions the
+In line 7 we pass this to the constructor for a ``Robot`` which partitions the
 elementary transform sequence into a series of links and joints -- link frames are declared
 after each joint variable as well as the start and end of the sequence.
-The ``ERobot`` can represent single-branched robots with any combination of revolute and prismatic joints, but
+The ``Robot`` can represent single-branched robots with any combination of revolute and prismatic joints, but
 can also represent more general branched mechanisms.
 
 
-ERobot: rigid-body tree and URDF import
+Robot: rigid-body tree and URDF import
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The final approach to manipulator modeling is to an import a URDF file.  The Toolbox includes a parser with built-in xacro processor
@@ -458,20 +458,20 @@ function::
 Straight line (Cartesian) paths can be generated in a similar way between
 two points specified by a pair of poses in :math:`\SE{3}`
 
-.. runblock:: pycon
-    :linenos:
+.. .. runblock:: pycon
+..     :linenos:
 
-    >>> import numpy as np
-    >>> from spatialmath import SE3
-    >>> import roboticstoolbox as rtb
-    >>> puma = rtb.models.DH.Puma560()
-    >>> t = np.arange(0, 2, 0.010)
-    >>> T0 = SE3(0.6, -0.5, 0.0)
-    >>> T1 = SE3(0.4, 0.5, 0.2)
-    >>> Ts = rtb.tools.trajectory.ctraj(T0, T1, len(t))
-    >>> len(Ts)
-    >>> sol = puma.ikine_LM(Ts)       # named tuple of arrays
-    >>> sol.q.shape
+..     >>> import numpy as np
+..     >>> from spatialmath import SE3
+..     >>> import roboticstoolbox as rtb
+..     >>> puma = rtb.models.DH.Puma560()
+..     >>> t = np.arange(0, 2, 0.010)
+..     >>> T0 = SE3(0.6, -0.5, 0.0)
+..     >>> T1 = SE3(0.4, 0.5, 0.2)
+..     >>> Ts = rtb.tools.trajectory.ctraj(T0, T1, len(t))
+..     >>> len(Ts)
+..     >>> sol = puma.ikine_LM(Ts)       # named tuple of arrays
+..     >>> sol.q.shape
 
 At line 9 we see that the resulting trajectory, ``Ts``, is an ``SE3`` instance with 200 values.
 
@@ -539,7 +539,7 @@ At a singular configuration
 
 Jacobians can also be computed for symbolic joint variables as for forward kinematics above.
 
-For ``ERobot`` instances we can also compute the Hessians::
+For ``Robot`` instances we can also compute the Hessians::
 
     >>> H = puma.hessian0(q)
     >>> H = puma.hessiane(q)
@@ -568,7 +568,7 @@ for the Yoshikawa and Asada measures respectively, and
 
 is the Yoshikawa measure computed for just the task space translational degrees
 of freedom.
-For ``ERobot`` instances we can also compute the manipulability
+For ``Robot`` instances we can also compute the manipulability
 Jacobian::
 
     >>> Jm = puma.manipm(q, J, H)
@@ -626,7 +626,7 @@ Python version takes 1.5ms (:math:`65\times` slower).  With symbolic operands it
 takes 170ms (:math:`113\times` slower) to produce the unsimplified torque
 expressions.
 
-For ``ERobot`` subclasses there is also an implementation of Featherstone's spatial vector
+For ``Robot`` subclasses there is also an implementation of Featherstone's spatial vector
 method, ``rne()``, and SMTB-P provides a set of classes for spatial
 velocity, acceleration, momentum, force and inertia.
 

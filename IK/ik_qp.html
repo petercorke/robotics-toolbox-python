@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="../_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="../_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="../_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="../_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="../_static/android-chrome-512x512.png ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IK_QP - Numerical IK with Quadratic Programming &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script>window.MathJax = {"tex": {"macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="IK_QP.step" href="stubs/roboticstoolbox.robot.IK.IK_QP.step.html" />
+    <link rel="prev" title="IK_LM._check_jl" href="stubs/roboticstoolbox.robot.IK.IK_LM._check_jl.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="../_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../arm.html">Robot Arms</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../arm_models.html">Manipulator models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../arm_trajectory.html">Trajectories</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="ik.html">Inverse Kinematics</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ik.html#c-solvers">C++ Solvers</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="ik.html#python-solvers">Python Solvers</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="iksolver.html">IKSolver - IK Solver Abstract Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="iksolution.html">IKSolution - as IK Solution dataclass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ik_lm.html">IK_LM - Levemberg-Marquadt Numerical IK</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">IK_QP - Numerical IK with Quadratic Programming</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#roboticstoolbox.robot.IK.IK_QP"><code class="docutils literal notranslate"><span class="pre">IK_QP</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_QP.step.html">IK_QP.step</a></li>
+<li class="toctree-l5"><a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_QP.solve.html">IK_QP.solve</a></li>
+<li class="toctree-l5"><a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_QP.error.html">IK_QP.error</a></li>
+<li class="toctree-l5"><a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_QP._random_q.html">IK_QP._random_q</a></li>
+<li class="toctree-l5"><a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_QP._check_jl.html">IK_QP._check_jl</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="ik_gn.html">IK_GN - Gauss-Newton Numerical IK</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ik_nr.html">IK_NR - Newton-Raphson Numerical IK</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ikine_LM.html">ETS.ikine_LM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ikine_QP.html">ETS.ikine_QP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ikine_GN.html">ETS.ikine_GN</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.ETS.ETS.ikine_NR.html">ETS.ikine_NR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.Robot.Robot.ikine_LM.html">Robot.ikine_LM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.Robot.Robot.ikine_QP.html">Robot.ikine_QP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.Robot.Robot.ikine_GN.html">Robot.ikine_GN</a></li>
+<li class="toctree-l4"><a class="reference internal" href="stubs/roboticstoolbox.robot.Robot.Robot.ikine_NR.html">Robot.ikine_NR</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../mobile.html">Mobile robots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../arm.html">Robot Arms</a></li>
+          <li class="breadcrumb-item"><a href="ik.html">Inverse Kinematics</a></li>
+      <li class="breadcrumb-item active">IK_QP - Numerical IK with Quadratic Programming</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ik-qp-numerical-ik-with-quadratic-programming">
+<h1>IK_QP - Numerical IK with Quadratic Programming<a class="headerlink" href="#ik-qp-numerical-ik-with-quadratic-programming" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="roboticstoolbox.robot.IK.IK_QP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.robot.IK.</span></span><span class="sig-name descname"><span class="pre">IK_QP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'IK</span> <span class="pre">Solver'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ilimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">km</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/roboticstoolbox/robot/IK.html#IK_QP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.robot.IK.IK_QP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IKSolver.html#roboticstoolbox.robot.IK.IKSolver" title="roboticstoolbox.robot.IK.IKSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">IKSolver</span></code></a></p>
+<p>Quadratic Progamming Numerical Inverse Kinematics Solver</p>
+<p>A class which provides functionality to perform numerical inverse kinematics (IK)
+using a quadratic progamming approach. See <a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_QP.step.html#roboticstoolbox.robot.IK.IK_QP.step" title="roboticstoolbox.robot.IK.IK_QP.step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">step</span></code></a> method for mathematical
+description.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – The name of the IK algorithm</p></li>
+<li><p><strong>ilimit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – How many iterations are allowed within a search before a new search
+is started</p></li>
+<li><p><strong>slimit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – How many searches are allowed before being deemed unsuccessful</p></li>
+<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Maximum allowed residual error E</p></li>
+<li><p><strong>mask</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – A 6 vector which assigns weights to Cartesian degrees-of-freedom
+error priority</p></li>
+<li><p><strong>joint_limits</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Reject solutions with joint limit violations</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – A seed for the private RNG used to generate random joint coordinate
+vectors</p></li>
+<li><p><strong>kj</strong> – A gain for joint velocity norm minimisation</p></li>
+<li><p><strong>ks</strong> – A gain which adjusts the cost of slack (intentional error)</p></li>
+<li><p><strong>kq</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – The gain for joint limit avoidance. Setting to 0.0 will remove this
+completely from the solution</p></li>
+<li><p><strong>km</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – The gain for maximisation. Setting to 0.0 will remove this completely
+from the solution</p></li>
+<li><p><strong>ps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – The minimum angle/distance (in radians or metres) in which the joint is
+allowed to approach to its limit</p></li>
+<li><p><strong>pi</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]) – The influence angle/distance (in radians or metres) in null space motion
+becomes active</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ImportError" title="(in Python v3.11)"><strong>ImportError</strong></a> – If the package <code class="docutils literal notranslate"><span class="pre">qpsolvers</span></code> is not installed</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>The following example gets the <code class="docutils literal notranslate"><span class="pre">ets</span></code> of a <code class="docutils literal notranslate"><span class="pre">panda</span></code> robot object, instantiates
+the <a class="reference internal" href="#roboticstoolbox.robot.IK.IK_QP" title="roboticstoolbox.robot.IK.IK_QP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IK_QP</span></code></a> solver class using default parameters, makes a goal pose <code class="docutils literal notranslate"><span class="pre">Tep</span></code>,
+and then solves for the joint coordinates which result in the pose <code class="docutils literal notranslate"><span class="pre">Tep</span></code>
+using the <a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_QP.solve.html#roboticstoolbox.robot.IK.IK_QP.solve" title="roboticstoolbox.robot.IK.IK_QP.solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve</span></code></a> method.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;input&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">NameError</span>: <span class="n">name &#39;solver&#39; is not defined</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>When using the this method, the initial joint coordinates <span class="math notranslate nohighlight">\(q_0\)</span>, should correspond
+to a non-singular manipulator pose, since it uses the manipulator Jacobian. When the
+the problem is solvable, it converges very quickly.</p>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p>J. Haviland, and P. Corke. “Manipulator Differential Kinematics Part II:
+Acceleration and Advanced Applications.” arXiv preprint arXiv:2207.01794 (2022).</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IKSolver.html#roboticstoolbox.robot.IK.IKSolver" title="roboticstoolbox.robot.IK.IKSolver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IKSolver</span></code></a></dt><dd><p>An abstract super class for numerical IK solvers</p>
+</dd>
+<dt><a class="reference internal" href="ik_nr.html#roboticstoolbox.robot.IK.IK_NR" title="roboticstoolbox.robot.IK.IK_NR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IK_NR</span></code></a></dt><dd><p>Implements IKSolver class using the Newton-Raphson method</p>
+</dd>
+<dt><a class="reference internal" href="ik_gn.html#roboticstoolbox.robot.IK.IK_GN" title="roboticstoolbox.robot.IK.IK_GN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IK_GN</span></code></a></dt><dd><p>Implements IKSolver class using the Gauss-Newton method</p>
+</dd>
+<dt><a class="reference internal" href="ik_lm.html#roboticstoolbox.robot.IK.IK_LM" title="roboticstoolbox.robot.IK.IK_LM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IK_LM</span></code></a></dt><dd><p>Implements IKSolver class using the Levemberg-Marquadt method</p>
+</dd>
+</dl>
+</div>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.0.3: </span>Added the Quadratic Programming IK solver class</p>
+</div>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_QP.step.html#roboticstoolbox.robot.IK.IK_QP.step" title="roboticstoolbox.robot.IK.IK_QP.step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">step</span></code></a>(ets, Tep, q)</p></td>
+<td><p>Performs a single iteration of the Gauss-Newton optimisation method</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_QP.solve.html#roboticstoolbox.robot.IK.IK_QP.solve" title="roboticstoolbox.robot.IK.IK_QP.solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve</span></code></a>(ets, Tep[, q0])</p></td>
+<td><p>Solves the IK problem</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_QP.error.html#roboticstoolbox.robot.IK.IK_QP.error" title="roboticstoolbox.robot.IK.IK_QP.error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">error</span></code></a>(Te, Tep)</p></td>
+<td><p>Calculates the error between Te and Tep</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Private Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_QP._random_q.html#roboticstoolbox.robot.IK.IK_QP._random_q" title="roboticstoolbox.robot.IK.IK_QP._random_q"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_random_q</span></code></a>(ets[, i])</p></td>
+<td><p>Generate a random valid joint configuration using a private RNG</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_QP._check_jl.html#roboticstoolbox.robot.IK.IK_QP._check_jl" title="roboticstoolbox.robot.IK.IK_QP._check_jl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_check_jl</span></code></a>(ets, q)</p></td>
+<td><p>Checks if the joints are within their respective limits</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

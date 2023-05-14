@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manipulator arms &mdash; Robotics Toolbox for Python  documentation</title>
+  <title>Robot Arms &mdash; Robotics Toolbox for Python  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -31,12 +36,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -44,10 +53,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Manipulator arms</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Robot Arms</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="arm_models.html">Manipulator models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_backend.html">Backends</a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html">Trajectories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IK/ik.html">Inverse Kinematics</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
@@ -64,52 +73,250 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Manipulator arms</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Robot Arms</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/arm.rst.txt" rel="nofollow"> View page source</a>
       </li>
-  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
-        <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="arm_models.html" class="btn btn-neutral float-right" title="Manipulator models" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-  </div>
+  </ul>
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="manipulator-arms">
-<h1>Manipulator arms<a class="headerlink" href="#manipulator-arms" title="Permalink to this heading"></a></h1>
+  <section id="robot-arms">
+<h1>Robot Arms<a class="headerlink" href="#robot-arms" title="Permalink to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="arm_models.html">Manipulator models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="arm_dh.html">Denavit-Hartenberg models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_ets.html">Elementary transform sequence (ETS) models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_erobot.html">ERobot models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_superclass.html">Superclasses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_dh.html">Denavit-Hartenberg models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="arm_dh.html#dhrobot">DHRobot</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.robot.DHRobot.DHRobot"><code class="docutils literal notranslate"><span class="pre">DHRobot</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="arm_backend.html">Backends</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="arm_backend_pyplot.html">PyPlot (matplotlib)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_backend_vpython.html">VPython</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_backend_swift.html">Swift</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_dh.html#dhlink">DHLink</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.robot.DHLink"><code class="docutils literal notranslate"><span class="pre">DHLink</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#revolute-standard-dh">Revolute - standard DH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#prismatic-standard-dh">Prismatic - standard DH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#revolute-modified-dh">Revolute - modified DH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#prismatic-modified-dh">Prismatic - modified DH</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="arm_dh.html#models">Models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Panda"><code class="docutils literal notranslate"><span class="pre">Panda</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Puma560"><code class="docutils literal notranslate"><span class="pre">Puma560</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Stanford"><code class="docutils literal notranslate"><span class="pre">Stanford</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Ball"><code class="docutils literal notranslate"><span class="pre">Ball</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Coil"><code class="docutils literal notranslate"><span class="pre">Coil</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Hyper"><code class="docutils literal notranslate"><span class="pre">Hyper</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Hyper3d"><code class="docutils literal notranslate"><span class="pre">Hyper3d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Cobra600"><code class="docutils literal notranslate"><span class="pre">Cobra600</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.IRB140"><code class="docutils literal notranslate"><span class="pre">IRB140</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.KR5"><code class="docutils literal notranslate"><span class="pre">KR5</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Orion5"><code class="docutils literal notranslate"><span class="pre">Orion5</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Planar3"><code class="docutils literal notranslate"><span class="pre">Planar3</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Planar2"><code class="docutils literal notranslate"><span class="pre">Planar2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.LWR4"><code class="docutils literal notranslate"><span class="pre">LWR4</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.UR3"><code class="docutils literal notranslate"><span class="pre">UR3</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.UR5"><code class="docutils literal notranslate"><span class="pre">UR5</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.UR10"><code class="docutils literal notranslate"><span class="pre">UR10</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Sawyer"><code class="docutils literal notranslate"><span class="pre">Sawyer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Mico"><code class="docutils literal notranslate"><span class="pre">Mico</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Jaco"><code class="docutils literal notranslate"><span class="pre">Jaco</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.Baxter"><code class="docutils literal notranslate"><span class="pre">Baxter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.TwoLink"><code class="docutils literal notranslate"><span class="pre">TwoLink</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.P8"><code class="docutils literal notranslate"><span class="pre">P8</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_dh.html#roboticstoolbox.models.DH.AL5D"><code class="docutils literal notranslate"><span class="pre">AL5D</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="arm_ets.html">Elementary transform sequence (ETS) models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="arm_ets.html#ets-3d">ETS - 3D</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="arm_ets.html#roboticstoolbox.robot.ETS.ETS"><code class="docutils literal notranslate"><span class="pre">ETS</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="arm_ets.html#ets-2d">ETS - 2D</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="arm_ets.html#roboticstoolbox.robot.ETS.ETS2"><code class="docutils literal notranslate"><span class="pre">ETS2</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="arm_erobot.html">ERobot models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="arm_erobot.html#erobot">ERobot</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot"><code class="docutils literal notranslate"><span class="pre">ERobot</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot2"><code class="docutils literal notranslate"><span class="pre">ERobot2</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="arm_erobot.html#elink">ELink</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="arm_erobot.html#roboticstoolbox.robot.ELink.ELink"><code class="docutils literal notranslate"><span class="pre">ELink</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_erobot.html#roboticstoolbox.robot.ELink.ELink2"><code class="docutils literal notranslate"><span class="pre">ELink2</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="arm_erobot.html#e-models">ERobot models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="arm_erobot.html#defined-using-ets">Defined using ETS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_erobot.html#defined-from-urdf">Defined from URDF</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="arm_superclass.html">Superclasses</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="arm_superclass.html#robot">Robot</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot"><code class="docutils literal notranslate"><span class="pre">Robot</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Robot.Robot2"><code class="docutils literal notranslate"><span class="pre">Robot2</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="arm_superclass.html#kinematic-cache">Kinematic cache</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_superclass.html#link">Link</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Link.BaseLink"><code class="docutils literal notranslate"><span class="pre">BaseLink</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Link.Link"><code class="docutils literal notranslate"><span class="pre">Link</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="arm_superclass.html#roboticstoolbox.robot.Link.Link2"><code class="docutils literal notranslate"><span class="pre">Link2</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="arm_trajectory.html">Trajectories</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory"><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory"><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.__init__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.__str__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__str__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.__repr__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__repr__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.__len__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__len__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.q"><code class="docutils literal notranslate"><span class="pre">Trajectory.q</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.qd"><code class="docutils literal notranslate"><span class="pre">Trajectory.qd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.qdd"><code class="docutils literal notranslate"><span class="pre">Trajectory.qdd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.naxes"><code class="docutils literal notranslate"><span class="pre">Trajectory.naxes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.plot"><code class="docutils literal notranslate"><span class="pre">Trajectory.plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.Trajectory.qplot"><code class="docutils literal notranslate"><span class="pre">Trajectory.qplot()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.quintic"><code class="docutils literal notranslate"><span class="pre">quintic()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.quintic_func"><code class="docutils literal notranslate"><span class="pre">quintic_func()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.lspb"><code class="docutils literal notranslate"><span class="pre">lspb()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.trapezoidal"><code class="docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.trapezoidal_func"><code class="docutils literal notranslate"><span class="pre">trapezoidal_func()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.jtraj"><code class="docutils literal notranslate"><span class="pre">jtraj()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.mtraj"><code class="docutils literal notranslate"><span class="pre">mtraj()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.jtraj"><code class="docutils literal notranslate"><span class="pre">jtraj()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.ctraj"><code class="docutils literal notranslate"><span class="pre">ctraj()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.cmstraj"><code class="docutils literal notranslate"><span class="pre">cmstraj()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="arm_trajectory.html#roboticstoolbox.tools.trajectory.mstraj"><code class="docutils literal notranslate"><span class="pre">mstraj()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="IK/ik.html">Inverse Kinematics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="IK/ik.html#c-solvers">C++ Solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ik_LM.html">ETS.ik_LM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ik_LM.html#roboticstoolbox.robot.ETS.ETS.ik_LM"><code class="docutils literal notranslate"><span class="pre">ETS.ik_LM()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ik_GN.html">ETS.ik_GN</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ik_GN.html#roboticstoolbox.robot.ETS.ETS.ik_GN"><code class="docutils literal notranslate"><span class="pre">ETS.ik_GN()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ik_NR.html">ETS.ik_NR</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ik_NR.html#roboticstoolbox.robot.ETS.ETS.ik_NR"><code class="docutils literal notranslate"><span class="pre">ETS.ik_NR()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ik_LM.html">Robot.ik_LM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ik_LM.html#roboticstoolbox.robot.Robot.Robot.ik_LM"><code class="docutils literal notranslate"><span class="pre">Robot.ik_LM()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ik_GN.html">Robot.ik_GN</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ik_GN.html#roboticstoolbox.robot.Robot.Robot.ik_GN"><code class="docutils literal notranslate"><span class="pre">Robot.ik_GN()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ik_NR.html">Robot.ik_NR</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ik_NR.html#roboticstoolbox.robot.Robot.Robot.ik_NR"><code class="docutils literal notranslate"><span class="pre">Robot.ik_NR()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="IK/ik.html#python-solvers">Python Solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="IK/iksolver.html">IKSolver - IK Solver Abstract Base Class</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/iksolver.html#roboticstoolbox.robot.IK.IKSolver"><code class="docutils literal notranslate"><span class="pre">IKSolver</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IKSolver.step.html">IKSolver.step</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IKSolver.solve.html">IKSolver.solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IKSolver.error.html">IKSolver.error</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IKSolver._random_q.html">IKSolver._random_q</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IKSolver._check_jl.html">IKSolver._check_jl</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/iksolution.html">IKSolution - as IK Solution dataclass</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/iksolution.html#roboticstoolbox.robot.IK.IKSolution"><code class="docutils literal notranslate"><span class="pre">IKSolution</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/ik_lm.html">IK_LM - Levemberg-Marquadt Numerical IK</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/ik_lm.html#roboticstoolbox.robot.IK.IK_LM"><code class="docutils literal notranslate"><span class="pre">IK_LM</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_LM.step.html">IK_LM.step</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_LM.solve.html">IK_LM.solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_LM.error.html">IK_LM.error</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_LM._random_q.html">IK_LM._random_q</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_LM._check_jl.html">IK_LM._check_jl</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/ik_qp.html">IK_QP - Numerical IK with Quadratic Programming</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/ik_qp.html#roboticstoolbox.robot.IK.IK_QP"><code class="docutils literal notranslate"><span class="pre">IK_QP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_QP.step.html">IK_QP.step</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_QP.solve.html">IK_QP.solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_QP.error.html">IK_QP.error</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_QP._random_q.html">IK_QP._random_q</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_QP._check_jl.html">IK_QP._check_jl</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/ik_gn.html">IK_GN - Gauss-Newton Numerical IK</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/ik_gn.html#roboticstoolbox.robot.IK.IK_GN"><code class="docutils literal notranslate"><span class="pre">IK_GN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_GN.step.html">IK_GN.step</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_GN.solve.html">IK_GN.solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_GN.error.html">IK_GN.error</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_GN._random_q.html">IK_GN._random_q</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_GN._check_jl.html">IK_GN._check_jl</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/ik_nr.html">IK_NR - Newton-Raphson Numerical IK</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/ik_nr.html#roboticstoolbox.robot.IK.IK_NR"><code class="docutils literal notranslate"><span class="pre">IK_NR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_NR.step.html">IK_NR.step</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_NR.solve.html">IK_NR.solve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_NR.error.html">IK_NR.error</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_NR._random_q.html">IK_NR._random_q</a></li>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.IK.IK_NR._check_jl.html">IK_NR._check_jl</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ikine_LM.html">ETS.ikine_LM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ikine_LM.html#roboticstoolbox.robot.ETS.ETS.ikine_LM"><code class="docutils literal notranslate"><span class="pre">ETS.ikine_LM()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ikine_QP.html">ETS.ikine_QP</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ikine_QP.html#roboticstoolbox.robot.ETS.ETS.ikine_QP"><code class="docutils literal notranslate"><span class="pre">ETS.ikine_QP()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ikine_GN.html">ETS.ikine_GN</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ikine_GN.html#roboticstoolbox.robot.ETS.ETS.ikine_GN"><code class="docutils literal notranslate"><span class="pre">ETS.ikine_GN()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ikine_NR.html">ETS.ikine_NR</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.ETS.ETS.ikine_NR.html#roboticstoolbox.robot.ETS.ETS.ikine_NR"><code class="docutils literal notranslate"><span class="pre">ETS.ikine_NR()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ikine_LM.html">Robot.ikine_LM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ikine_LM.html#roboticstoolbox.robot.Robot.Robot.ikine_LM"><code class="docutils literal notranslate"><span class="pre">Robot.ikine_LM()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ikine_QP.html">Robot.ikine_QP</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ikine_QP.html#roboticstoolbox.robot.Robot.Robot.ikine_QP"><code class="docutils literal notranslate"><span class="pre">Robot.ikine_QP()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ikine_GN.html">Robot.ikine_GN</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ikine_GN.html#roboticstoolbox.robot.Robot.Robot.ikine_GN"><code class="docutils literal notranslate"><span class="pre">Robot.ikine_GN()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ikine_NR.html">Robot.ikine_NR</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="IK/stubs/roboticstoolbox.robot.Robot.Robot.ikine_NR.html#roboticstoolbox.robot.Robot.Robot.ikine_NR"><code class="docutils literal notranslate"><span class="pre">Robot.ikine_NR()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -119,22 +326,16 @@
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="arm_models.html" class="btn btn-neutral float-right" title="Manipulator models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

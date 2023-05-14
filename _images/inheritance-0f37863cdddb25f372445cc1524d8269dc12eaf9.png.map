@@ -1,0 +1,7 @@
+<map id="inheritanced41b53372b" name="inheritanced41b53372b">
+<area shape="rect" id="node7" href="#roboticstoolbox.robot.Robot.Robot" target="_top" title="Robot.Robot" alt="" coords="520,50,613,73"/>
+<area shape="rect" id="node4" title="Helper class that provides a standard way to create an ABC using" alt="" coords="57,94,126,117"/>
+<area shape="rect" id="node5" title="Abstract base class for generic types." alt="" coords="38,138,144,161"/>
+<area shape="rect" id="node6" href="arm_erobot.html#roboticstoolbox.robot.ERobot.ERobot" target="_top" title="ERobot.ERobot" alt="" coords="656,50,763,73"/>
+<area shape="rect" id="node8" title="The Robot Kinematics Mixin class" alt="" coords="221,28,477,50"/>
+</map>

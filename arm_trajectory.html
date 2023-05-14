@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trajectories &mdash; Robotics Toolbox for Python  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -19,13 +24,13 @@
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"TeX": {"Macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}})</script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Mobile robots" href="mobile.html" />
-    <link rel="prev" title="Swift" href="arm_backend_swift.html" /> 
+    <link rel="next" title="Inverse Kinematics" href="IK/ik.html" />
+    <link rel="prev" title="Superclasses" href="arm_superclass.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -33,12 +38,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Robotics Toolbox for Python
-            <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -46,9 +55,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="arm.html">Manipulator arms</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="arm.html">Robot Arms</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="arm_models.html">Manipulator models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="arm_backend.html">Backends</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Trajectories</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory"><code class="docutils literal notranslate"><span class="pre">Trajectory</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.__init__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__init__()</span></code></a></li>
@@ -61,9 +69,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.naxes"><code class="docutils literal notranslate"><span class="pre">Trajectory.naxes</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.plot"><code class="docutils literal notranslate"><span class="pre">Trajectory.plot()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.qplot"><code class="docutils literal notranslate"><span class="pre">Trajectory.qplot()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.__dict__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__dict__</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.__module__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__module__</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.__weakref__"><code class="docutils literal notranslate"><span class="pre">Trajectory.__weakref__</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.quintic"><code class="docutils literal notranslate"><span class="pre">quintic()</span></code></a></li>
@@ -71,13 +76,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.lspb"><code class="docutils literal notranslate"><span class="pre">lspb()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal"><code class="docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal_func"><code class="docutils literal notranslate"><span class="pre">trapezoidal_func()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.jtraj"><code class="docutils literal notranslate"><span class="pre">jtraj()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.mtraj"><code class="docutils literal notranslate"><span class="pre">mtraj()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.jtraj"><code class="docutils literal notranslate"><span class="pre">jtraj()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.ctraj"><code class="docutils literal notranslate"><span class="pre">ctraj()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.cmstraj"><code class="docutils literal notranslate"><span class="pre">cmstraj()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#roboticstoolbox.tools.trajectory.mstraj"><code class="docutils literal notranslate"><span class="pre">mstraj()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="IK/ik.html">Inverse Kinematics</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mobile.html">Mobile robots</a></li>
@@ -94,19 +100,15 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content style-external-links">
+        <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="arm.html">Manipulator arms</a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="arm.html">Robot Arms</a></li>
       <li class="breadcrumb-item active">Trajectories</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/arm_trajectory.rst.txt" rel="nofollow"> View page source</a>
       </li>
-  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
-        <a href="arm_backend_swift.html" class="btn btn-neutral float-left" title="Swift" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mobile.html" class="btn btn-neutral float-right" title="Mobile robots" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-  </div>
+  </ul>
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -117,21 +119,21 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">Trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">istime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A container class for trajectory data.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">istime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Construct a new trajectory instance</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – name of the function that created the trajectory</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – name of the function that created the trajectory</p></li>
 <li><p><strong>t</strong> (<em>ndarray</em><em>(</em><em>m</em><em>)</em>) – independent variable, eg. time or step</p></li>
 <li><p><strong>s</strong> (<em>ndarray</em><em>(</em><em>m</em><em>) or </em><em>ndarray</em><em>(</em><em>m</em><em>,</em><em>n</em><em>)</em>) – position</p></li>
 <li><p><strong>sd</strong> (<em>ndarray</em><em>(</em><em>m</em><em>) or </em><em>ndarray</em><em>(</em><em>m</em><em>,</em><em>n</em><em>)</em>) – velocity</p></li>
 <li><p><strong>sdd</strong> (<em>ndarray</em><em>(</em><em>m</em><em>) or </em><em>ndarray</em><em>(</em><em>m</em><em>,</em><em>n</em><em>)</em>) – acceleration</p></li>
-<li><p><strong>istime</strong> (<em>float</em>) – <code class="docutils literal notranslate"><span class="pre">t</span></code> is time, otherwise step number</p></li>
+<li><p><strong>istime</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – <code class="docutils literal notranslate"><span class="pre">t</span></code> is time, otherwise step number</p></li>
 <li><p><strong>tblend</strong> – blend duration (<code class="docutils literal notranslate"><span class="pre">trapezoidal</span></code> only)</p></li>
 </ul>
 </dd>
@@ -150,6 +152,13 @@ with respect to <code class="docutils literal notranslate"><span class="pre">t</
 <p class="admonition-title">Note</p>
 <p>Data is stored with timesteps as rows and axes as columns.</p>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">References<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Robotics, Vision &amp; Control in Python, 3e, P. Corke, Springer 2023, Chap 3.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -169,11 +178,11 @@ with respect to <code class="docutils literal notranslate"><span class="pre">t</
 <span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__len__" title="Permalink to this definition"></a></dt>
 <dd><p>Length of trajectory</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>number of steps in the trajectory</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>int</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -183,10 +192,10 @@ with respect to <code class="docutils literal notranslate"><span class="pre">t</
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.q" title="Permalink to this definition"></a></dt>
 <dd><p>Position trajectory</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>trajectory with one row per timestep, one column per axis</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>ndarray(n,m)</p>
 </dd>
 </dl>
@@ -202,10 +211,10 @@ applications.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qd</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.qd" title="Permalink to this definition"></a></dt>
 <dd><p>Velocity trajectory</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>trajectory velocity with one row per timestep, one column per axis</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>ndarray(n,m)</p>
 </dd>
 </dl>
@@ -221,10 +230,10 @@ applications.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qdd</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.qdd" title="Permalink to this definition"></a></dt>
 <dd><p>Acceleration trajectory</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>trajectory acceleration with one row per timestep, one column per axis</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>ndarray(n,m)</p>
 </dd>
 </dl>
@@ -240,11 +249,11 @@ applications.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">naxes</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.naxes" title="Permalink to this definition"></a></dt>
 <dd><p>Number of axes in the trajectory</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>number of axes or dimensions</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>int</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -254,8 +263,8 @@ applications.</p>
 <span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">textargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.plot" title="Permalink to this definition"></a></dt>
 <dd><p>Plot trajectory</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>block</strong> (<em>bool</em>) – wait till plot is dismissed</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – wait till plot is dismissed</p>
 </dd>
 </dl>
 <p>Plot the position, velocity and acceleration data.  The format of the
@@ -266,7 +275,7 @@ plot depends on the function that created it.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">jtraj</span></code> general m-axis trajectory, show legend</p></li>
 </ul>
 <dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.quintic" title="roboticstoolbox.tools.trajectory.quintic"><code class="xref py py-func docutils literal notranslate"><span class="pre">quintic()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal" title="roboticstoolbox.tools.trajectory.trapezoidal"><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a></p>
 </dd>
 </dl>
@@ -277,33 +286,17 @@ plot depends on the function that created it.</p>
 <span class="sig-name descname"><span class="pre">qplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory.qplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.qplot" title="Permalink to this definition"></a></dt>
 <dd><p>Plot multi-axis trajectory</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>**kwargs</strong> – <p>optional arguments passed to <code class="docutils literal notranslate"><span class="pre">qplot</span></code></p>
 </p>
 </dd>
 </dl>
 <p>Plots a multi-axis trajectory, held within the object, as position against time.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory.qplot" title="roboticstoolbox.tools.trajectory.Trajectory.qplot"><code class="xref py py-func docutils literal notranslate"><span class="pre">qplot()</span></code></a></p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.__dict__">
-<span class="sig-name descname"><span class="pre">__dict__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">mappingproxy({'__module__':</span> <span class="pre">'roboticstoolbox.tools.trajectory',</span> <span class="pre">'__doc__':</span> <span class="pre">'\n</span>&#160;&#160;&#160; <span class="pre">A</span> <span class="pre">container</span> <span class="pre">class</span> <span class="pre">for</span> <span class="pre">trajectory</span> <span class="pre">data.\n</span>&#160;&#160;&#160; <span class="pre">',</span> <span class="pre">'__init__':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.__init__&gt;,</span> <span class="pre">'__str__':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.__str__&gt;,</span> <span class="pre">'__repr__':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.__repr__&gt;,</span> <span class="pre">'__len__':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.__len__&gt;,</span> <span class="pre">'q':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'qd':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'qdd':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'naxes':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'plot':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.plot&gt;,</span> <span class="pre">'qplot':</span> <span class="pre">&lt;function</span> <span class="pre">Trajectory.qplot&gt;,</span> <span class="pre">'__dict__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__dict__'</span> <span class="pre">of</span> <span class="pre">'Trajectory'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__weakref__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__weakref__'</span> <span class="pre">of</span> <span class="pre">'Trajectory'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__annotations__':</span> <span class="pre">{}})</span></em><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__dict__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.__module__">
-<span class="sig-name descname"><span class="pre">__module__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'roboticstoolbox.tools.trajectory'</span></em><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__module__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.__weakref__">
-<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory.__weakref__" title="Permalink to this definition"></a></dt>
-<dd><p>list of weak references to the object (if defined)</p>
 </dd></dl>
 
 </dd></dl>
@@ -313,20 +306,20 @@ plot depends on the function that created it.</p>
 <span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">quintic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#quintic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.quintic" title="Permalink to this definition"></a></dt>
 <dd><p>Generate scalar polynomial trajectory</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>q0</strong> (<em>float</em>) – initial value</p></li>
-<li><p><strong>qf</strong> (<em>float</em>) – final value</p></li>
-<li><p><strong>t</strong> (<em>int</em><em> or </em><em>array_like</em><em>(</em><em>m</em><em>)</em>) – time</p></li>
+<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – initial value</p></li>
+<li><p><strong>qf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – final value</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> or </em><em>array_like</em><em>(</em><em>m</em><em>)</em>) – time</p></li>
 <li><p><strong>qd0</strong> – initial velocity, optional</p></li>
 <li><p><strong>qdf</strong> – final velocity, optional</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>trajectory</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Trajectory instance</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory" title="roboticstoolbox.tools.trajectory.Trajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trajectory</span></code></a> instance</p>
 </dd>
 </dl>
 <ul>
@@ -355,19 +348,36 @@ vector</p>
 </ul>
 <p>The return value is an object that contains position, velocity and
 acceleration data.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">quintic</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tg</span> <span class="o">=</span> <span class="n">quintic</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tg</span>
+<span class="go">Trajectory created by quintic: 10 time steps x 1 axes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">tg</span><span class="p">)</span>
+<span class="go">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tg</span><span class="o">.</span><span class="n">q</span>
+<span class="go">array([1.    , 1.0115, 1.0764, 1.2099, 1.3967, 1.6033, 1.7901, 1.9236,</span>
+<span class="go">       1.9885, 2.    ])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tg</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href=".//arm_trajectory-1.py">Source code</a>, <a class="reference external" href=".//arm_trajectory-1.png">png</a>, <a class="reference external" href=".//arm_trajectory-1.hires.png">hires.png</a>, <a class="reference external" href=".//arm_trajectory-1.pdf">pdf</a>)</p>
+<figure class="align-default">
+<img alt="_images/arm_trajectory-1.png" class="plot-directive" src="_images/arm_trajectory-1.png" />
+</figure>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The time vector T is assumed to be monotonically increasing, and
 time scaling is based on the first and last element.</p>
 </div>
-<p>References:</p>
-<ul class="simple">
-<li><p>Robotics, Vision &amp; Control, Chap 3,
-P. Corke, Springer 2011.</p></li>
-</ul>
 <dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal" title="roboticstoolbox.tools.trajectory.trapezoidal"><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.mtraj" title="roboticstoolbox.tools.trajectory.mtraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">mtraj()</span></code></a>.</p>
+<dt class="field-odd">References<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Robotics, Vision &amp; Control in Python, 3e, P. Corke, Springer 2023, Chap 3.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Seealso<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal" title="roboticstoolbox.tools.trajectory.trapezoidal"><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.mtraj" title="roboticstoolbox.tools.trajectory.mtraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">mtraj()</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -375,31 +385,71 @@ P. Corke, Springer 2011.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.quintic_func">
 <span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">quintic_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#quintic_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.quintic_func" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Quintic scalar polynomial as a function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – initial value</p></li>
+<li><p><strong>qf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – final value</p></li>
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – trajectory time</p></li>
+<li><p><strong>qd0</strong> – initial velocity, defaults to 0</p></li>
+<li><p><strong>qdf</strong> – final velocity, defaults to 0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>polynomial function <span class="math notranslate nohighlight">\(f: t \mapsto (q(t), \dot{q}(t), \ddot{q}(t))\)</span></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+<p>Returns a function which computes the specific quintic polynomial, and its
+derivatives, as described by the parameters.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">quintic_func</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">quintic_func</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">(1.000000000000001, 2.782740400955608e-16, -8.565197162635485e-18)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="go">(2.000000000000005, -3.233998897671231e-15, -7.225014857226153e-15)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="go">(1.5000000000000029, 0.37500000000000167, 8.241020713062319e-16)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Seealso<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.quintic" title="roboticstoolbox.tools.trajectory.quintic"><code class="xref py py-func docutils literal notranslate"><span class="pre">quintic()</span></code></a> <a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal_func" title="roboticstoolbox.tools.trajectory.trapezoidal_func"><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal_func()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.lspb">
 <span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">lspb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#lspb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.lspb" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Deprecated, use <code class="docutils literal notranslate"><span class="pre">trapezoidal</span></code> instead.</p>
+</div>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.trapezoidal">
 <span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">trapezoidal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#trapezoidal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.trapezoidal" title="Permalink to this definition"></a></dt>
 <dd><p>Scalar trapezoidal trajectory</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>q0</strong> (<em>float</em>) – initial value</p></li>
-<li><p><strong>qf</strong> (<em>float</em>) – final value</p></li>
-<li><p><strong>t</strong> (<em>float</em><em> or </em><em>array_like</em>) – time</p></li>
-<li><p><strong>V</strong> (<em>float</em>) – velocity of linear segment, optional</p></li>
+<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – initial value</p></li>
+<li><p><strong>qf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – final value</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em> or </em><em>array_like</em>) – time</p></li>
+<li><p><strong>V</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – velocity of linear segment, optional</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>trajectory</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Trajectory instance</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory" title="roboticstoolbox.tools.trajectory.Trajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trajectory</span></code></a> instance</p>
 </dd>
 </dl>
 <p>Computes a trapezoidal trajectory, which has a linear motion segment with
@@ -435,52 +485,155 @@ linear segment which is normally computed automatically.</p></li>
 </ul>
 <p>The return value is an object that contains position, velocity and
 acceleration data.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">trapezoidal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tg</span> <span class="o">=</span> <span class="n">trapezoidal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tg</span>
+<span class="go">Trajectory created by trapezoidal: 10 time steps x 1 axes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">tg</span><span class="p">)</span>
+<span class="go">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tg</span><span class="o">.</span><span class="n">q</span>
+<span class="go">array([1.    , 1.0278, 1.1111, 1.25  , 1.4167, 1.5833, 1.75  , 1.8889,</span>
+<span class="go">       1.9722, 2.    ])</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href=".//arm_trajectory-2.py">Source code</a>, <a class="reference external" href=".//arm_trajectory-2.png">png</a>, <a class="reference external" href=".//arm_trajectory-2.hires.png">hires.png</a>, <a class="reference external" href=".//arm_trajectory-2.pdf">pdf</a>)</p>
+<figure class="align-default">
+<img alt="_images/arm_trajectory-2.png" class="plot-directive" src="_images/arm_trajectory-2.png" />
+</figure>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>For some values of V no solution is possible and an error is flagged.</p></li>
+<li><p>For some values of <code class="docutils literal notranslate"><span class="pre">V</span></code> no solution is possible and an error is flagged.</p></li>
 <li><p>The time vector, if given, is assumed to be monotonically increasing,
 and time scaling is based on the first and last element.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tg</span></code> has an extra attribute <code class="docutils literal notranslate"><span class="pre">xblend</span></code> which is the blend duration.</p></li>
 </ul>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">References</dt>
+<dt class="field-odd">References<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p>Robotics, Vision &amp; Control, Chap 3,
-P. Corke, Springer 2011.</p></li>
+<li><p>Robotics, Vision &amp; Control in Python, 3e, P. Corke, Springer 2023, Chap 3.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Seealso</dt>
-<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.quintic" title="roboticstoolbox.tools.trajectory.quintic"><code class="xref py py-func docutils literal notranslate"><span class="pre">quintic()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.mtraj" title="roboticstoolbox.tools.trajectory.mtraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">mtraj()</span></code></a>.</p>
+<dt class="field-even">Seealso<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.quintic" title="roboticstoolbox.tools.trajectory.quintic"><code class="xref py py-func docutils literal notranslate"><span class="pre">quintic()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal_func" title="roboticstoolbox.tools.trajectory.trapezoidal_func"><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal_func()</span></code></a> <a class="reference internal" href="#roboticstoolbox.tools.trajectory.mtraj" title="roboticstoolbox.tools.trajectory.mtraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">mtraj()</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.trapezoidal_func">
-<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">trapezoidal_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#trapezoidal_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.trapezoidal_func" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">trapezoidal_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#trapezoidal_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.trapezoidal_func" title="Permalink to this definition"></a></dt>
+<dd><p>Trapezoidal scalar profile as a function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – initial value</p></li>
+<li><p><strong>qf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – final value</p></li>
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – maximum time</p></li>
+<li><p><strong>V</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – velocity of linear segment</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>trapezoidal profile function <span class="math notranslate nohighlight">\(f: t \mapsto (q(t), \dot{q}(t), \ddot{q}(t))\)</span></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+<p>Returns a function which computes the specific trapezoidal profile, and its
+derivatives, as described by the parameters.</p>
+<p>Example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">trapezoidal_func</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">trapezoidal_func</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">(array([1.]), array([0.]), array([0.18]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="go">(array([2.]), array([0.]), array([-0.18]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="go">(array([1.5]), array([0.3]), array([0]))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.mtraj">
+<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">mtraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tfunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#mtraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.mtraj" title="Permalink to this definition"></a></dt>
+<dd><p>Multi-axis trajectory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tfunc</strong> (<em>callable</em>) – a 1D trajectory function, eg. <a class="reference internal" href="#roboticstoolbox.tools.trajectory.quintic" title="roboticstoolbox.tools.trajectory.quintic"><code class="xref py py-func docutils literal notranslate"><span class="pre">quintic()</span></code></a> or <a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal" title="roboticstoolbox.tools.trajectory.trapezoidal"><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a></p></li>
+<li><p><strong>q0</strong> (<em>ndarray</em><em>(</em><em>m</em><em>)</em>) – initial configuration</p></li>
+<li><p><strong>qf</strong> (<em>ndarray</em><em>(</em><em>m</em><em>)</em>) – final configuration</p></li>
+<li><p><strong>t</strong> (<em>array_like</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – time vector or number of steps</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.11)"><strong>TypeError</strong></a> – <code class="docutils literal notranslate"><span class="pre">tfunc</span></code> is not callable</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – length of <code class="docutils literal notranslate"><span class="pre">q0</span></code> and <code class="docutils literal notranslate"><span class="pre">qf</span></code> are different</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>trajectory</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory" title="roboticstoolbox.tools.trajectory.Trajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trajectory</span></code></a> instance</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">mtraj(func,</span> <span class="pre">q0,</span> <span class="pre">qf,</span> <span class="pre">n)</span></code> is a multi-axis trajectory varying
+from configuration <code class="docutils literal notranslate"><span class="pre">q0</span></code> (M) to <code class="docutils literal notranslate"><span class="pre">qf</span></code> (M) according to the scalar trajectory
+function <code class="docutils literal notranslate"><span class="pre">tfunc</span></code> in <code class="docutils literal notranslate"><span class="pre">n</span></code> steps.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">mtraj(func,</span> <span class="pre">q0,</span> <span class="pre">qf,</span> <span class="pre">t)</span></code> as above but <code class="docutils literal notranslate"><span class="pre">t</span></code> is a uniformly-spaced time
+vector</p></li>
+</ul>
+<p>The scalar trajectory function is applied to each axis:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tg</span> <span class="o">=</span> <span class="n">tfunc</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">sF</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and possible values of <code class="docutils literal notranslate"><span class="pre">tfunc</span></code> include <code class="docutils literal notranslate"><span class="pre">trapezoidal</span></code> for a trapezoidal trajectory, or
+<code class="docutils literal notranslate"><span class="pre">quintic</span></code> for a polynomial trajectory.</p>
+<p>The return value is an object that contains position, velocity and
+acceleration data.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The time vector, if given, is assumed to be monotonically increasing, and
+time scaling is based on the first and last element.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">References<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Robotics, Vision &amp; Control in Python, 3e, P. Corke, Springer 2023, Chap 3.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Seealso<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.quintic" title="roboticstoolbox.tools.trajectory.quintic"><code class="xref py py-func docutils literal notranslate"><span class="pre">quintic()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal" title="roboticstoolbox.tools.trajectory.trapezoidal"><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.jtraj">
 <span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">jtraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#jtraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.jtraj" title="Permalink to this definition"></a></dt>
 <dd><p>Compute a joint-space trajectory</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>q0</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em>) – initial joint coordinate</p></li>
 <li><p><strong>qf</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em>) – final joint coordinate</p></li>
-<li><p><strong>t</strong> (<em>array_like</em><em> or </em><em>int</em>) – time vector or number of steps</p></li>
+<li><p><strong>t</strong> (<em>array_like</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – time vector or number of steps</p></li>
 <li><p><strong>qd0</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – initial velocity, defaults to zero</p></li>
 <li><p><strong>qd1</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – final velocity, defaults to zero</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>trajectory</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Trajectory instance</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory" title="roboticstoolbox.tools.trajectory.Trajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trajectory</span></code></a> instance</p>
 </dd>
 </dl>
 <ul class="simple">
@@ -493,68 +646,19 @@ vector</p></li>
 </ul>
 <p>The return value is an object that contains position, velocity and
 acceleration data.</p>
-<p>Notes:</p>
-<ul class="simple">
-<li><p>The time vector, if given, scales the velocity and acceleration outputs
-assuming that the time vector starts at zero and increases
-linearly.</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.ctraj" title="roboticstoolbox.tools.trajectory.ctraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">ctraj()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">qplot()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">jtraj()</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.mtraj">
-<span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">mtraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tfunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#mtraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.mtraj" title="Permalink to this definition"></a></dt>
-<dd><p>Multi-axis trajectory</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tfunc</strong> (<em>callable</em>) – a 1D trajectory function, eg. <a class="reference internal" href="#roboticstoolbox.tools.trajectory.quintic" title="roboticstoolbox.tools.trajectory.quintic"><code class="xref py py-func docutils literal notranslate"><span class="pre">quintic()</span></code></a> or <a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal" title="roboticstoolbox.tools.trajectory.trapezoidal"><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a></p></li>
-<li><p><strong>q0</strong> (<em>ndarray</em><em>(</em><em>m</em><em>)</em>) – initial configuration</p></li>
-<li><p><strong>qf</strong> (<em>ndarray</em><em>(</em><em>m</em><em>)</em>) – final configuration</p></li>
-<li><p><strong>t</strong> (<em>array_like</em><em> or </em><em>int</em>) – time vector or number of steps</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>TypeError</strong> – <code class="docutils literal notranslate"><span class="pre">tfunc</span></code> is not callable</p></li>
-<li><p><strong>ValueError</strong> – length of <code class="docutils literal notranslate"><span class="pre">q0</span></code> and <code class="docutils literal notranslate"><span class="pre">qf</span></code> are different</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>trajectory</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Trajectory instance</p>
-</dd>
-</dl>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">mtraj(func,</span> <span class="pre">q0,</span> <span class="pre">qf,</span> <span class="pre">n)</span></code> is a multi-axis trajectory varying
-from configuration <code class="docutils literal notranslate"><span class="pre">q0</span></code> (M) to <code class="docutils literal notranslate"><span class="pre">qf</span></code> (M) according to the scalar trajectory
-function <code class="docutils literal notranslate"><span class="pre">tfunc</span></code> in <code class="docutils literal notranslate"><span class="pre">n`</span></code> steps.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">tg</span> <span class="pre">=</span> <span class="pre">mtraj(func,</span> <span class="pre">q0,</span> <span class="pre">qf,</span> <span class="pre">t)</span></code> as above but <code class="docutils literal notranslate"><span class="pre">t</span></code> is a uniformly-spaced time
-vector</p></li>
-</ul>
-<p>The scalar trajectory function is applied to each axis:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tg</span> <span class="o">=</span> <span class="n">tfunc</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">sF</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>and possible values of TFUNC include <code class="docutils literal notranslate"><span class="pre">trapezoidal</span></code> for a trapezoidal trajectory, or
-<code class="docutils literal notranslate"><span class="pre">quintic</span></code> for a polynomial trajectory.</p>
-<p>The return value is an object that contains position, velocity and
-acceleration data.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The time vector, if given, is assumed to be monotonically increasing, and
-time scaling is based on the first and last element.</p>
+<p>The time vector, if given, scales the velocity and acceleration outputs
+assuming that the time vector starts at zero and increases linearly.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.quintic" title="roboticstoolbox.tools.trajectory.quintic"><code class="xref py py-func docutils literal notranslate"><span class="pre">quintic()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal" title="roboticstoolbox.tools.trajectory.trapezoidal"><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a></p>
+<dt class="field-odd">References<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Robotics, Vision &amp; Control in Python, 3e, P. Corke, Springer 2023, Chap 3.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Seealso<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.ctraj" title="roboticstoolbox.tools.trajectory.ctraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">ctraj()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">qplot()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">jtraj()</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -564,18 +668,18 @@ time scaling is based on the first and last element.</p>
 <span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">ctraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#ctraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.ctraj" title="Permalink to this definition"></a></dt>
 <dd><p>Cartesian trajectory between two poses</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>T0</strong> (<em>SE3</em>) – initial pose</p></li>
 <li><p><strong>T1</strong> (<em>SE3</em>) – final pose</p></li>
-<li><p><strong>t</strong> (<em>int</em><em> or </em><em>ndarray</em><em>(</em><em>n</em><em>)</em>) – number of samples or time vector</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> or </em><em>ndarray</em><em>(</em><em>n</em><em>)</em>) – number of samples or time vector</p></li>
 <li><p><strong>s</strong> (<em>ndarray</em><em>(</em><em>s</em><em>)</em>) – array of distance along the path, in the interval [0, 1]</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return T0</dt>
+<dt class="field-even">Return T0<span class="colon">:</span></dt>
 <dd class="field-even"><p>smooth path from <code class="docutils literal notranslate"><span class="pre">T0</span></code> to <code class="docutils literal notranslate"><span class="pre">T1</span></code></p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>SE3</p>
 </dd>
 </dl>
@@ -595,21 +699,23 @@ the path.</p>
 <span class="go">20</span>
 </pre></div>
 </div>
-<p>Notes:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>In the second case <code class="docutils literal notranslate"><span class="pre">s</span></code> could be generated by a scalar trajectory
-generator such as <code class="docutils literal notranslate"><span class="pre">quintic</span></code> or <code class="docutils literal notranslate"><span class="pre">trapezoidal</span></code> (default).</p></li>
-<li><p>Orientation interpolation is performed using unit-quaternion
-interpolation.</p></li>
+<li><p>In the second case <code class="docutils literal notranslate"><span class="pre">s</span></code> could be generated by a scalar trajectory</p></li>
 </ul>
-<p>Reference:</p>
-<ul class="simple">
-<li><p>Robotics, Vision &amp; Control, Sec 3.1.5,
-Peter Corke, Springer 2011</p></li>
-</ul>
+<p>generator such as <code class="docutils literal notranslate"><span class="pre">quintic</span></code> or <code class="docutils literal notranslate"><span class="pre">trapezoidal</span></code> (default).
+- Orientation interpolation is performed using unit-quaternion
+interpolation.</p>
+</div>
 <dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal()</span></code>,
+<dt class="field-odd">References<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Robotics, Vision &amp; Control in Python, 3e, P. Corke, Springer 2023, Chap 3.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Seealso<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal()</span></code>,
 <code class="xref py py-func docutils literal notranslate"><span class="pre">interp()</span></code></p>
 </dd>
 </dl>
@@ -625,25 +731,25 @@ Peter Corke, Springer 2011</p></li>
 <span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">mstraj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">viapoints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tacc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tsegment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qd0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#mstraj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.mstraj" title="Permalink to this definition"></a></dt>
 <dd><p>Multi-segment multi-axis trajectory</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>viapoints</strong> (<em>ndarray</em><em>(</em><em>m</em><em>,</em><em>n</em><em>)</em>) – A set of viapoints, one per row</p></li>
-<li><p><strong>dt</strong> (<em>float</em><em> (</em><em>seconds</em><em>)</em>) – time step</p></li>
-<li><p><strong>tacc</strong> (<em>float</em>) – acceleration time (seconds)</p></li>
-<li><p><strong>qdmax</strong> (<em>array_like</em><em>(</em><em>n</em><em>) or </em><em>float</em><em>, </em><em>optional</em>) – maximum speed, defaults to None</p></li>
+<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em> (</em><em>seconds</em><em>)</em>) – time step</p></li>
+<li><p><strong>tacc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – acceleration time (seconds)</p></li>
+<li><p><strong>qdmax</strong> (<em>array_like</em><em>(</em><em>n</em><em>) or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – maximum speed, defaults to None</p></li>
 <li><p><strong>tsegment</strong> (<em>array_like</em><em>, </em><em>optional</em>) – maximum time of each motion segment (seconds), defaults
 to None</p></li>
 <li><p><strong>q0</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – initial coordinates, defaults to first row of viapoints</p></li>
 <li><p><strong>qd0</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – inital  velocity, defaults to zero</p></li>
 <li><p><strong>qdf</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – final  velocity, defaults to zero</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – print debug information, defaults to False</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – print debug information, defaults to False</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>trajectory</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Trajectory instance</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.Trajectory" title="roboticstoolbox.tools.trajectory.Trajectory"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trajectory</span></code></a> instance</p>
 </dd>
 </dl>
 <p>Computes a trajectory for N axes moving smoothly through a set of
@@ -662,7 +768,7 @@ coordinated across axes</p></li>
 <ol class="arabic">
 <li><p>In terms of segment time where <code class="docutils literal notranslate"><span class="pre">tsegment</span></code> is an array of segment times
 which is the number of via points minus one:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>``traj = mstraj(viapoints, dt, tacc, tsegment=TS)``
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">traj</span> <span class="o">=</span> <span class="n">mstraj</span><span class="p">(</span><span class="n">viapoints</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tacc</span><span class="p">,</span> <span class="n">tsegment</span><span class="o">=</span><span class="n">TS</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>
@@ -687,8 +793,8 @@ slowest axis, segment time,  and time stamp</p></li>
 </div></blockquote>
 <p>The  trajectory proper is (<code class="docutils literal notranslate"><span class="pre">traj.t</span></code>, <code class="docutils literal notranslate"><span class="pre">traj.q</span></code>).  The trajectory is a
 matrix has one row per time step, and one column per axis.</p>
-<blockquote>
-<div><p>Notes:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>Only one of <code class="docutils literal notranslate"><span class="pre">qdmag</span></code> or <code class="docutils literal notranslate"><span class="pre">tsegment</span></code> can be specified</p></li>
 <li><p>If <code class="docutils literal notranslate"><span class="pre">tacc</span></code> is greater than zero then the path smoothly accelerates
@@ -702,14 +808,17 @@ joint coordinate.</p></li>
 correspond to translation and orientation in RPY or Euler angle form.</p></li>
 <li><p>If <code class="docutils literal notranslate"><span class="pre">qdmax</span></code> is a scalar then all axes are assumed to have the same
 maximum speed.</p></li>
-</ul>
-</div></blockquote>
-<ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">tg</span></code> has extra attributes <code class="docutils literal notranslate"><span class="pre">arrive</span></code>, <code class="docutils literal notranslate"><span class="pre">info</span></code> and <code class="docutils literal notranslate"><span class="pre">via</span></code></p></li>
 </ul>
+</div>
 <dl class="field-list simple">
-<dt class="field-odd">Seealso</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal" title="roboticstoolbox.tools.trajectory.trapezoidal"><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.ctraj" title="roboticstoolbox.tools.trajectory.ctraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">ctraj()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.mtraj" title="roboticstoolbox.tools.trajectory.mtraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">mtraj()</span></code></a></p>
+<dt class="field-odd">References<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>Robotics, Vision &amp; Control in Python, 3e, P. Corke, Springer 2023, Chap 3.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Seealso<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal" title="roboticstoolbox.tools.trajectory.trapezoidal"><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.ctraj" title="roboticstoolbox.tools.trajectory.ctraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">ctraj()</span></code></a>, <a class="reference internal" href="#roboticstoolbox.tools.trajectory.mtraj" title="roboticstoolbox.tools.trajectory.mtraj"><code class="xref py py-func docutils literal notranslate"><span class="pre">mtraj()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -719,22 +828,16 @@ maximum speed.</p></li>
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="arm_backend_swift.html" class="btn btn-neutral float-left" title="Swift" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mobile.html" class="btn btn-neutral float-right" title="Mobile robots" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 25-Jan-2023.
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
       </span></p>
   </div>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
    
 
 </footer>

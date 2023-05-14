@@ -1,0 +1,11 @@
+<map id="inheritance56e53037eb" name="inheritance56e53037eb">
+<area shape="rect" id="node1" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,153,77,179"/>
+<area shape="rect" id="node3" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" target="_top" title="Mobile robot motion planner (superclass)" alt="" coords="125,153,228,179"/>
+<area shape="rect" id="node2" href="mobile-planner-discrete.html#roboticstoolbox.mobile.CurvaturePolyPlanner" target="_top" title="CurvaturePolyPlanner" alt="" coords="291,5,454,31"/>
+<area shape="rect" id="node4" href="mobile-planner-discrete.html#roboticstoolbox.mobile.DistanceTransformPlanner" target="_top" title="Distance transform path planner" alt="" coords="276,55,469,80"/>
+<area shape="rect" id="node5" href="mobile-planner-discrete.html#roboticstoolbox.mobile.DstarPlanner" target="_top" title="D* path planner" alt="" coords="319,104,426,129"/>
+<area shape="rect" id="node6" href="mobile-planner-discrete.html#roboticstoolbox.mobile.DubinsPlanner" target="_top" title="Dubins path planner" alt="" coords="315,153,431,179"/>
+<area shape="rect" id="node7" href="mobile-planner-discrete.html#roboticstoolbox.mobile.QuinticPolyPlanner" target="_top" title="Quintic polynomial path planner" alt="" coords="300,203,445,228"/>
+<area shape="rect" id="node8" href="mobile-planner-discrete.html#roboticstoolbox.mobile.RRTPlanner" target="_top" title="Rapidly exploring tree planner" alt="" coords="325,252,421,277"/>
+<area shape="rect" id="node9" href="mobile-planner-discrete.html#roboticstoolbox.mobile.ReedsSheppPlanner" target="_top" title="Reeds&#45;Shepp path planner" alt="" coords="297,301,448,327"/>
+</map>

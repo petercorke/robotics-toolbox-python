@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
+    <link rel="android-chrome" sizes="192x192" type="image/png" href="_static/android-chrome-192x192.png ">
+    <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Path planning &mdash; Robotics Toolbox for Python  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script>window.MathJax = {"tex": {"macros": {"presup": ["\\,{}^{\\scriptscriptstyle #1}\\!", 1], "SE": ["\\mathbf{SE}(#1)", 1], "SO": ["\\mathbf{SO}(#1)", 1], "se": ["\\mathbf{se}(#1)", 1], "so": ["\\mathbf{so}(#1)", 1], "vec": ["\\boldsymbol{#1}", 1], "dvec": ["\\dot{\\boldsymbol{#1}}", 1], "ddvec": ["\\ddot{\\boldsymbol{#1}}", 1], "fvec": ["\\presup{#1}\\boldsymbol{#2}", 2], "fdvec": ["\\presup{#1}\\dot{\\boldsymbol{#2}}", 2], "fddvec": ["\\presup{#1}\\ddot{\\boldsymbol{#2}}", 2], "norm": ["\\Vert #1 \\Vert", 1], "mat": ["\\mathbf{#1}", 1], "dmat": ["\\dot{\\mathbf{#1}}", 1], "fmat": ["\\presup{#1}\\mathbf{#2}", 2], "sk": ["\\left[#1\\right]", 1], "skx": ["\\left[#1\\right]_{\\times}", 1], "vex": ["\\vee\\left( #1\\right)", 1], "vexx": ["\\vee_{\\times}\\left( #1\\right)", 1], "q": "\\mathring{q}", "fq": ["\\presup{#1}\\mathring{q}", 1]}}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Continuous configuration-space planners" href="mobile-planner-continuous.html" />
+    <link rel="prev" title="Drivers" href="mobile-drivers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Robotics Toolbox for Python
+              <img src="_static/RobToolBox_RoundLogoB.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arm.html">Robot Arms</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="mobile.html">Mobile robots</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle.html">Motion models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-vehicle-animation.html">Animations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-drivers.html">Drivers</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Path planning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mobile-planner-continuous.html">Continuous configuration-space planners</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-planner-discrete.html">Discrete (Grid-based) planners</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-planner-discrete.html#continuous-configuration-space-planners">Continuous configuration-space planners</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-planner-map.html">Map classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mobile-planner-base.html">Supporting classes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-reactive.html">Reactive navigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-SLAM.html">Localization and Mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="blocks.html">bdsim blocks</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Robotics Toolbox for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="mobile.html">Mobile robots</a></li>
+      <li class="breadcrumb-item active">Path planning</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="path-planning">
+<h1>Path planning<a class="headerlink" href="#path-planning" title="Permalink to this heading"></a></h1>
+<p>A set of path planners for robots operating in planar environments with
+configuration <span class="math notranslate nohighlight">\(\vec{q} \in \mathbb{R}^2\)</span> or <span class="math notranslate nohighlight">\(\vec{q} \in \mathbb{R}^2 \times S^1 \sim \SE{2}\)</span>.
+All inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">PlannerBase</span></code>.</p>
+<p>Some planners are based on code from the PathPlanning category of
+<a class="reference external" href="https://github.com/AtsushiSakai/PythonRobotics">PythonRobotics</a> by Atsushi Sakai.</p>
+<div class="graphviz"><img src="_images/inheritance-694e9854245418d2b0f60f121fc0018f38bc6119.png" alt="Inheritance diagram of roboticstoolbox.mobile.DistanceTransformPlanner, roboticstoolbox.mobile.DstarPlanner, roboticstoolbox.mobile.DubinsPlanner, roboticstoolbox.mobile.ReedsSheppPlanner, roboticstoolbox.mobile.QuinticPolyPlanner, roboticstoolbox.mobile.CurvaturePolyPlanner, roboticstoolbox.mobile.RRTPlanner" usemap="#inheritance56e53037eb" class="inheritance graphviz" /></div>
+<map id="inheritance56e53037eb" name="inheritance56e53037eb">
+<area shape="rect" id="node3" href="mobile-planner-base.html#roboticstoolbox.mobile.PlannerBase" target="_top" title="Mobile robot motion planner (superclass)" alt="" coords="125,153,228,179"/>
+<area shape="rect" id="node2" href="mobile-planner-discrete.html#roboticstoolbox.mobile.CurvaturePolyPlanner" target="_top" title="CurvaturePolyPlanner" alt="" coords="291,5,454,31"/>
+<area shape="rect" id="node4" href="mobile-planner-discrete.html#roboticstoolbox.mobile.DistanceTransformPlanner" target="_top" title="Distance transform path planner" alt="" coords="276,55,469,80"/>
+<area shape="rect" id="node5" href="mobile-planner-discrete.html#roboticstoolbox.mobile.DstarPlanner" target="_top" title="D* path planner" alt="" coords="319,104,426,129"/>
+<area shape="rect" id="node6" href="mobile-planner-discrete.html#roboticstoolbox.mobile.DubinsPlanner" target="_top" title="Dubins path planner" alt="" coords="315,153,431,179"/>
+<area shape="rect" id="node7" href="mobile-planner-discrete.html#roboticstoolbox.mobile.QuinticPolyPlanner" target="_top" title="Quintic polynomial path planner" alt="" coords="300,203,445,228"/>
+<area shape="rect" id="node8" href="mobile-planner-discrete.html#roboticstoolbox.mobile.RRTPlanner" target="_top" title="Rapidly exploring tree planner" alt="" coords="325,252,421,277"/>
+<area shape="rect" id="node9" href="mobile-planner-discrete.html#roboticstoolbox.mobile.ReedsSheppPlanner" target="_top" title="Reeds&#45;Shepp path planner" alt="" coords="297,301,448,327"/>
+</map><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Planner</p></th>
+<th class="head"><p>Plans in</p></th>
+<th class="head"><p>Discrete/Continuous</p></th>
+<th class="head"><p>Obstacle avoidance</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="mobile-reactive.html#roboticstoolbox.mobile.Bug2" title="roboticstoolbox.mobile.Bug2"><code class="xref py py-class docutils literal notranslate"><span class="pre">Bug2</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span></p></td>
+<td><p>discrete</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="mobile-planner-discrete.html#roboticstoolbox.mobile.DistanceTransformPlanner" title="roboticstoolbox.mobile.DistanceTransformPlanner"><code class="xref py py-class docutils literal notranslate"><span class="pre">DistanceTransformPlanner</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span></p></td>
+<td><p>discrete</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="mobile-planner-discrete.html#roboticstoolbox.mobile.DstarPlanner" title="roboticstoolbox.mobile.DstarPlanner"><code class="xref py py-class docutils literal notranslate"><span class="pre">DstarPlanner</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span></p></td>
+<td><p>discrete</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="mobile-planner-continuous.html#roboticstoolbox.mobile.PRMPlanner" title="roboticstoolbox.mobile.PRMPlanner"><code class="xref py py-class docutils literal notranslate"><span class="pre">PRMPlanner</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span></p></td>
+<td><p>continuous</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="mobile-planner-discrete.html#roboticstoolbox.mobile.LatticePlanner" title="roboticstoolbox.mobile.LatticePlanner"><code class="xref py py-class docutils literal notranslate"><span class="pre">LatticePlanner</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\SE{2}\)</span></p></td>
+<td><p>discrete</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="mobile-planner-discrete.html#roboticstoolbox.mobile.DubinsPlanner" title="roboticstoolbox.mobile.DubinsPlanner"><code class="xref py py-class docutils literal notranslate"><span class="pre">DubinsPlanner</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\SE{2}\)</span></p></td>
+<td><p>continuous</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="mobile-planner-discrete.html#roboticstoolbox.mobile.ReedsSheppPlanner" title="roboticstoolbox.mobile.ReedsSheppPlanner"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReedsSheppPlanner</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\SE{2}\)</span></p></td>
+<td><p>continuous</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="mobile-planner-discrete.html#roboticstoolbox.mobile.CurvaturePolyPlanner" title="roboticstoolbox.mobile.CurvaturePolyPlanner"><code class="xref py py-class docutils literal notranslate"><span class="pre">CurvaturePolyPlanner</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\SE{2}\)</span></p></td>
+<td><p>continuous</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="mobile-planner-discrete.html#roboticstoolbox.mobile.QuinticPolyPlanner" title="roboticstoolbox.mobile.QuinticPolyPlanner"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuinticPolyPlanner</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\SE{2}\)</span></p></td>
+<td><p>continuous</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="mobile-planner-discrete.html#roboticstoolbox.mobile.RRTPlanner" title="roboticstoolbox.mobile.RRTPlanner"><code class="xref py py-class docutils literal notranslate"><span class="pre">RRTPlanner</span></code></a></p></td>
+<td><p><span class="math notranslate nohighlight">\(\SE{2}\)</span></p></td>
+<td><p>continuous</p></td>
+<td><p>yes</p></td>
+</tr>
+</tbody>
+</table>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mobile-planner-continuous.html">Continuous configuration-space planners</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-continuous.html#prm-planner">PRM planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-continuous.html#dubins-path-planner">Dubins path planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-continuous.html#reeds-shepp-path-planner">Reeds-Shepp path planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-continuous.html#curvature-polynomial-planner">Curvature-polynomial planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-continuous.html#quintic-polynomial-planner">Quintic-polynomial planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-continuous.html#rrt-planner">RRT planner</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-planner-discrete.html">Discrete (Grid-based) planners</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-discrete.html#distance-transform-planner">Distance transform planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-discrete.html#d-planner">D* planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-discrete.html#lattice-planner">Lattice planner</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-planner-discrete.html#continuous-configuration-space-planners">Continuous configuration-space planners</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-discrete.html#dubins-path-planner">Dubins path planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-discrete.html#reeds-shepp-path-planner">Reeds-Shepp path planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-discrete.html#curvature-polynomial-planner">Curvature-polynomial planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-discrete.html#quintic-polynomial-planner">Quintic-polynomial planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-discrete.html#rrt-planner">RRT planner</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-planner-map.html">Map classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-map.html#occupancy-grid-classes">Occupancy grid classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-map.html#polygon-map">Polygon map</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mobile-planner-base.html">Supporting classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-base.html#planner-superclass">Planner superclass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mobile-planner-base.html#occupancy-grid-base-classes">Occupancy grid base classes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
+      <span class="lastupdated">Last updated on 14-May-2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-11Q6WJM565"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-11Q6WJM565', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>
