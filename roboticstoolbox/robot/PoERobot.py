@@ -33,20 +33,8 @@ class PoELink(Link):
         s += "]"
         return s
 
-    def _repr_pretty_(self, p, cycle):
-        """
-        Pretty string for IPython (superclass method)
-
-        :param p: pretty printer handle (ignored)
-        :param cycle: pretty printer flag (ignored)
-
-        """
-        # see https://ipython.org/ipython-doc/stable/api/generated/IPython.lib.pretty.html
-
-        p.text(f"{i}:\n{str(x)}")
 
 class PoERevolute(PoELink):
-
     def __init__(self, axis, point, **kwargs):
         """
         Construct revolute product of exponential link
@@ -62,9 +50,9 @@ class PoERevolute(PoELink):
         """
 
         super().__init__(Twist3.UnitRevolute(axis, point), **kwargs)
+
+
 class PoEPrismatic(PoELink):
-
-
     def __init__(self, axis, **kwargs):
         """
         Construct prismatic product of exponential link
@@ -77,8 +65,9 @@ class PoEPrismatic(PoELink):
         :seealso: :class:`Link` :class:`Robot`
         """
         super().__init__(Twist3.UnitPrismatic(axis), **kwargs)
-class PoERobot(Robot):
 
+
+class PoERobot(Robot):
     def __init__(self, links, T0, **kwargs):
         """
         Product of exponential robot class
@@ -99,7 +88,6 @@ class PoERobot(Robot):
         super().__init__(links, **kwargs)
         self.T0 = T0
 
-
     def __str__(self):
         """
         Pretty prints the PoE Model of the robot.
@@ -114,27 +102,15 @@ class PoERobot(Robot):
         return s
 
     def __repr__(self):
-        s = "PoERobot([\n    "
-        for j, link in enumerate(self):
-            s += repr(link) + ","
-        s += "],\n"
+        s = "PoERobot([\n"
+        s += "\n".join(["    " + repr(link) + "," for link in self])
+        s += "\n    ],\n"
         s += f"    T0=SE3({np.array_repr(self.T0.A)}),\n"
-        s += f"    name={self.name},\n"
+        s += f"    name=\"{self.name}\",\n"
         s += ")"
         return s
 
-    def _repr_pretty_(self, p, cycle):
-        """
-        Pretty string for IPython (superclass method)
 
-        :param p: pretty printer handle (ignored)
-        :param cycle: pretty printer flag (ignored)
-
-        """
-        # see https://ipython.org/ipython-doc/stable/api/generated/IPython.lib.pretty.html
-
-        p.text(f"{i}:\n{str(x)}")
-        
     def nbranches(self):
         return 0
 
@@ -204,12 +180,13 @@ class PoERobot(Robot):
     def ets(self):
         return NotImplemented
 
+
 if __name__ == "__main__":  # pragma nocover
 
     T0 = SE3.Trans(2, 0, 0)
 
     # rotate about z-axis, through (0,0,0)
-    link1 = PoERevolute([0, 0, 1], [0, 0, 0], name='foo')
+    link1 = PoERevolute([0, 0, 1], [0, 0, 0], name="foo")
     # rotate about z-axis, through (1,0,0)
     link2 = PoERevolute([0, 0, 1], [1, 0, 0])
     # end-effector pose when q=[0,0]
@@ -220,7 +197,7 @@ if __name__ == "__main__":  # pragma nocover
 
     robot = PoERobot([link1, link2], T0)
 
-    q = [0, np.pi/2]
+    q = [0, np.pi / 2]
     # q = [0, 0]
 
     # robot.fkine(q).printline()

@@ -1,4 +1,6 @@
+.DS_Store
 
+.pyodide*/**
 *.doctree
 
 # Vim

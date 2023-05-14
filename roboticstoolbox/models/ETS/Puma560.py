@@ -1,9 +1,9 @@
 from roboticstoolbox import ET as ET
-from roboticstoolbox import ERobot
+from roboticstoolbox import Robot
 import numpy as np
 
 
-class Puma560(ERobot):
+class Puma560(Robot):
     """
     Create model of Franka-Emika Panda manipulator
 

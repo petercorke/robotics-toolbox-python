@@ -33,7 +33,7 @@ class VehicleDriverBase(ABC):
 
         :return: speed and steering for :class:`VehicleBase`
 
-        When an instance of a :class:`VehicleDriverBase` class is attached as 
+        When an instance of a :class:`VehicleDriverBase` class is attached as
         the control for an instance of a :class:`VehicleBase` class, this method
         is called at each time step to provide the control input.
 
@@ -71,11 +71,21 @@ class VehicleDriverBase(ABC):
 
     def __repr__(self):
         return str(self)
+
+
 # ========================================================================= #
 
-class RandomPath(VehicleDriverBase):
 
-    def __init__(self, workspace, speed=1, dthresh=0.05, seed=0, headinggain=0.3, goalmarkerstyle=None):
+class RandomPath(VehicleDriverBase):
+    def __init__(
+        self,
+        workspace,
+        speed=1,
+        dthresh=0.05,
+        seed=0,
+        headinggain=0.3,
+        goalmarkerstyle=None,
+    ):
         """
         Driving agent for random path
 
@@ -86,20 +96,20 @@ class RandomPath(VehicleDriverBase):
         :param dthresh: distance threshold, defaults to 0.05
         :type dthresh: float, optional
 
-        :raises ValueError: [description]
+        :raises ValueError: bad workspace specified
 
-        Returns a *driver* object that drives the attached vehicle to a 
+        Returns a *driver* object that drives the attached vehicle to a
         sequence of random waypoints.
 
         The driver is connected to the vehicle by::
 
             Vehicle(control=driver)
-        
+
         or::
 
             veh = Vehicle()
             veh.control = driver
-        
+
         The waypoints are positioned inside a rectangular region defined by
         the vehicle that is specified by  (see ``plotvol2``):
 
@@ -119,14 +129,15 @@ class RandomPath(VehicleDriverBase):
             - The vehicle chooses a new waypoint when it is closer than ``dthresh``
               to the current waypoint.
             - Uses its own random number generator so as to not influence the performance
-              of other randomized algorithms such as path planning.
+              of other randomized algorithms such as path planning. Set ``seed=None`` to have it randomly initialized from the
+              operating system.
 
         :seealso: :class:`Bicycle` :class:`Unicycle` :func:`~spatialmath.base.graphics.plotvol2`
         """
-        
+
         # TODO options to specify region, maybe accept a Map object?
-        
-        if hasattr(workspace, 'workspace'):
+
+        if hasattr(workspace, "workspace"):
             # workspace can be defined by an object with a workspace attribute
             self._workspace = base.expand_dims(workspace.workspace)
         else:
@@ -137,35 +148,38 @@ class RandomPath(VehicleDriverBase):
         self._goal_marker = None
         if goalmarkerstyle is None:
             self._goal_marker_style = {
-                'marker': 'D',
-                'markersize': 6, 
-                'color': 'r',
-                'linestyle': 'None',
-                }
+                "marker": "D",
+                "markersize": 6,
+                "color": "r",
+                "linestyle": "None",
+            }
         else:
             self._goal_marker_style = goalmarkerstyle
         self._headinggain = headinggain
-        
+
         self._d_prev = np.inf
         self._random = np.random.default_rng(seed)
         self._seed = seed
         self.verbose = True
         self._goal = None
         self._dthresh = dthresh * max(
-                self._workspace[1] - self._workspace[0], 
-                self._workspace[3] - self._workspace[2]
-                                    )
+            self._workspace[1] - self._workspace[0],
+            self._workspace[3] - self._workspace[2],
+        )
 
         self._veh = None
 
     def __str__(self):
         """%RandomPath.char Convert to string
         %
-        % s = R.char() is a string showing driver parameters and state in in 
-        % a compact human readable format. """
+        % s = R.char() is a string showing driver parameters and state in in
+        % a compact human readable format."""
 
-        s = 'RandomPath driver object\n'
-        s += f"  X {self._workspace[0]} : {self._workspace[1]}; Y {self._workspace[0]} : {self._workspace[1]}, dthresh={self._dthresh}\n"
+        s = "RandomPath driver object\n"
+        s += (
+            f"  X {self._workspace[0]} : {self._workspace[1]}; Y {self._workspace[0]} :"
+            f" {self._workspace[1]}, dthresh={self._dthresh}\n"
+        )
         s += f"  current goal={self._goal}"
         return s
 
@@ -189,19 +203,21 @@ class RandomPath(VehicleDriverBase):
         :param ax: axes in which to draw via points, defaults to None
         :type ax: Axes, optional
 
-        Called at the start of a simulation run.  Ensures that the 
-        random number generated is reseeded to ensure that 
+        Called at the start of a simulation run.  Ensures that the
+        random number generated is reseeded to ensure that
         the sequence of random waypoints is repeatable.
         """
 
         if self._seed is not None:
             self._random = np.random.default_rng(self._seed)
-            
+
         self._goal = None
         # delete(driver.h_goal);   % delete the goal
         # driver.h_goal = [];
         if ax is not None:
-            self._goal_marker = plt.plot(np.nan, np.nan, **self._goal_marker_style, label='random waypoint')[0]
+            self._goal_marker = plt.plot(
+                np.nan, np.nan, **self._goal_marker_style, label="random waypoint"
+            )[0]
 
     def demand(self):
         """
@@ -227,24 +243,23 @@ class RandomPath(VehicleDriverBase):
         speed = self._speed
 
         goal_heading = atan2(
-            self._goal[1] - self._veh._x[1], 
-            self._goal[0] - self._veh._x[0]
-                )
+            self._goal[1] - self._veh._x[1], self._goal[0] - self._veh._x[0]
+        )
         delta_heading = base.angdiff(goal_heading, self._veh._x[2])
 
         return np.r_[speed, self._headinggain * delta_heading]
 
     ## private method, invoked from demand() to compute a new waypoint
-    
+
     def _new_goal(self):
-        
+
         # choose a uniform random goal within inner 80% of driving area
         while True:
             r = self._random.uniform(0.1, 0.9)
-            gx = self._workspace[0:2] @ np.r_[r, 1-r]
+            gx = self._workspace[0:2] @ np.r_[r, 1 - r]
 
             r = self._random.uniform(0.1, 0.9)
-            gy = self._workspace[2:4] @ np.r_[r, 1-r]
+            gy = self._workspace[2:4] @ np.r_[r, 1 - r]
 
             self._goal = np.r_[gx, gy]
 
@@ -260,10 +275,11 @@ class RandomPath(VehicleDriverBase):
             self._goal_marker.set_xdata(self._goal[0])
             self._goal_marker.set_ydata(self._goal[1])
 
+
 # ========================================================================= #
 
-class PurePursuit(VehicleDriverBase):
 
+class PurePursuit(VehicleDriverBase):
     def __init__(self, speed=1, radius=1):
         pass
 
@@ -276,10 +292,9 @@ class PurePursuit(VehicleDriverBase):
     def demand(self):
         pass
 
+
 # ========================================================================= #
 
 if __name__ == "__main__":
 
     import unittest
-
-

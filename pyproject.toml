@@ -4,7 +4,7 @@ name = "roboticstoolbox-python"
 
 description = "A Python library for robotics education and research"
 
-version = "1.0.3"
+version = "1.1.0"
 
 authors = [
     { name = "Jesse Haviland", email = "j.haviland@qut.edu.au" },
@@ -13,37 +13,52 @@ authors = [
 
 dependencies = [
     "numpy>=1.17.4",
-    "spatialmath-python~=1.0.0",
-    "spatialgeometry~=1.0.0",
+    "spatialmath-python>=1.1.5",
+    "spatialgeometry>=1.0.0",
     "pgraph-python",
     "scipy",
     "matplotlib",
     "ansitable",
-    "swift-sim~=1.0.0",
+    "swift-sim>=1.0.0",
     "rtb-data",
     "progress",
+    "typing_extensions",
 ]
 
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 
 readme = "README.md"
 
 requires-python = ">=3.7"
 
-keywords = ["python", "robotics", "robotics-toolbox", "kinematics", "dynamics", "motion-planning", "trajectory-generation", "jacobian", "hessian", "control", "simulation", "robot-manipulator", "mobile-robot"]
+keywords = [
+    "python",
+    "robotics",
+    "robotics-toolbox",
+    "kinematics",
+    "dynamics",
+    "motion-planning",
+    "trajectory-generation",
+    "jacobian",
+    "hessian",
+    "control",
+    "simulation",
+    "robot-manipulator",
+    "mobile-robot",
+]
 
 classifiers = [
-        "Development Status :: 5 - Production/Stable",
-        # Indicate who your project is intended for
-        "Intended Audience :: Developers",
-        # Pick your license as you wish (should match "license" above)
-        "License :: OSI Approved :: MIT License",
-        # Specify the Python versions you support here.
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
+    "Development Status :: 5 - Production/Stable",
+    # Indicate who your project is intended for
+    "Intended Audience :: Developers",
+    # Pick your license as you wish (should match "license" above)
+    "License :: OSI Approved :: MIT License",
+    # Specify the Python versions you support here.
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 
 
@@ -53,12 +68,9 @@ documentation = "https://petercorke.github.io/robotics-toolbox-python/"
 repository = "https://github.com/petercorke/robotics-toolbox-python"
 
 
-
 [project.optional-dependencies]
 
-collision = [
-    "pybullet"
-]
+collision = ["pybullet"]
 
 dev = [
     "black",
@@ -67,14 +79,18 @@ dev = [
     "flake8",
     "pyyaml",
     "sympy",
+    "qpsolvers",
+    "quadprog",
+    "pybullet",
+    "bdsim",
 ]
 
 docs = [
     "sphinx",
     "sphinx_rtd_theme",
-    "sphinx-autorun", 
+    "sphinx-autorun",
+    "sphinx_autodoc_typehints",
 ]
-
 
 
 [project.scripts]
@@ -87,12 +103,8 @@ rtbtool = "roboticstoolbox.bin.rtbtool:main"
 
 [build-system]
 
-requires = [
-    "setuptools",
-    "oldest-supported-numpy"
-]
+requires = ["setuptools", "oldest-supported-numpy"]
 build-backend = "setuptools.build_meta"
-
 
 
 [tool.setuptools]
@@ -102,7 +114,6 @@ packages = [
     "roboticstoolbox.backends",
     "roboticstoolbox.backends.PyPlot",
     "roboticstoolbox.backends.swift",
-    "roboticstoolbox.backends.VPython",
     "roboticstoolbox.bin",
     "roboticstoolbox.blocks",
     "roboticstoolbox.examples",
@@ -119,11 +130,12 @@ packages = [
 ]
 
 
-
 [tool.black]
 
 line-length = 88
 target_version = ['py37']
+args = '--experimental-string-processing'
+
 include = '\.pyi?$'
 exclude = '''
 
@@ -146,9 +158,9 @@ exclude = '''
 '''
 
 
-
 [tool.flake8]
 
+ignore = ['F821', 'W503', 'E741']
 max-line-length = 88
 extend-ignore = 'E203'
 
@@ -187,4 +199,5 @@ archs = ["x86_64", "aarch64"]
 archs = ["AMD64", "x86"]
 
 
-
+[tool.coverage.run]
+omit = ["roboticstoolbox/examples/*", "test_*.py"]

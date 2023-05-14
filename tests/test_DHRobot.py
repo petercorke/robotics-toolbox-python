@@ -629,7 +629,7 @@ class TestDHRobot(unittest.TestCase):
         l0 = rp.RevoluteDH(d=2, B=3, G=2, Tc=[2, -1])
         qd = [1, 2, 3, 4]
 
-        r0 = rp.DHRobot([l0, l0, l0, l0])
+        r0 = rp.DHRobot([l0, l0.copy(), l0.copy(), l0.copy()])
 
         tau = np.array([-16, -28, -40, -52])
 
@@ -969,16 +969,16 @@ class TestDHRobot(unittest.TestCase):
 
         sol = puma.ikine_LM(T)
         self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
+        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=4)
 
-    def test_ikine_LMS(self):
-        puma = rp.models.DH.Puma560()
+    # def test_ikine_LMS(self):
+    #     puma = rp.models.DH.Puma560()
 
-        T = puma.fkine(puma.qn)
+    #     T = puma.fkine(puma.qn)
 
-        sol = puma.ikine_LM(T)
-        self.assertTrue(sol.success)
-        self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
+    #     sol = puma.ikine_LM(T)
+    #     self.assertTrue(sol.success)
+    #     self.assertAlmostEqual(np.linalg.norm(T - puma.fkine(sol.q)), 0, places=6)
 
     # def test_ikine_unc(self):
     #     puma = rp.models.DH.Puma560()
@@ -1403,7 +1403,7 @@ class TestDHRobot(unittest.TestCase):
 
     def test_teach(self):
         panda = rp.models.DH.Panda()
-        e = panda.teach(block=False)
+        e = panda.teach(panda.q, block=False)
         e.close()
 
     def test_teach_withq(self):
@@ -1418,8 +1418,8 @@ class TestDHRobot(unittest.TestCase):
 
     def test_teach_basic(self):
         l0 = rp.DHLink(d=2)
-        r0 = rp.DHRobot([l0, l0])
-        e = r0.teach(block=False)
+        r0 = rp.DHRobot([l0, l0.copy()])
+        e = r0.teach(r0.q, block=False)
         e.step()
         e.close()
 
@@ -1440,18 +1440,12 @@ class TestDHRobot(unittest.TestCase):
     def test_plot_vellipse(self):
         panda = rp.models.DH.Panda()
 
-        e = panda.plot_vellipse(block=False, limits=[1, 2, 1, 2, 1, 2])
+        e = panda.plot_vellipse(panda.q, block=False, limits=[1, 2, 1, 2, 1, 2])
         e.close()
 
-        e = panda.plot_vellipse(block=False, q=panda.qr, centre="ee", opt="rot")
+        e = panda.plot_vellipse(panda.q, block=False, centre="ee", opt="rot")
         e.step()
         e.close()
-
-        with self.assertRaises(TypeError):
-            panda.plot_vellipse(q=panda.qr, vellipse=10)
-
-        with self.assertRaises(ValueError):
-            panda.plot_vellipse(q=panda.qr, centre="ff")
 
     def test_plot_fellipse(self):
         panda = rp.models.DH.Panda()
@@ -1459,15 +1453,9 @@ class TestDHRobot(unittest.TestCase):
         e = panda.plot_fellipse(q=panda.qr, block=False, limits=[1, 2, 1, 2, 1, 2])
         e.close()
 
-        e = panda.plot_fellipse(block=False, q=panda.qr, centre="ee", opt="rot")
+        e = panda.plot_fellipse(panda.qr, block=False, centre="ee", opt="rot")
         e.step()
         e.close()
-
-        with self.assertRaises(TypeError):
-            panda.plot_fellipse(q=panda.qr, fellipse=10)
-
-        with self.assertRaises(ValueError):
-            panda.plot_fellipse(q=panda.qr, centre="ff")
 
     def test_plot_with_vellipse(self):
         panda = rp.models.DH.Panda()

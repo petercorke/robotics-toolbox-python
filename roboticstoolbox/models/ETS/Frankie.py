@@ -3,11 +3,11 @@
 import numpy as np
 from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Link import Link
 
 
-class Frankie(ERobot):
+class Frankie(Robot):
     """
     A class representing the Franka Emika Panda robot arm. ETS taken from [1]
     based on https://frankaemika.github.io/docs/control_parameters.html

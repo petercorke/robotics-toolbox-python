@@ -10,6 +10,8 @@ from abc import ABC
 # from scipy.ndimage import interpolation
 from spatialmath.base.transforms2d import *
 from spatialmath.base.vectors import *
+from spatialmath.base.argcheck import getvector
+from spatialmath.base.graphics import axes_logic, plotvol2, axes_get_scale
 
 # from spatialmath import SE2, SE3
 from matplotlib import cm
@@ -123,8 +125,8 @@ class PlannerBase(ABC):
         :rtype: str
         """
         s = f"{self.__class__.__name__}: "
-        if self._occgrid0 is not None:
-            s += "\n  " + str(self.occgrid)
+        if hasattr(self, "_occgrid") and self._occgrid is not None:
+            s += "\n  " + str(self._occgrid)
         if self._start is not None:
             s += f"\n  Start: {self.start}"
         if self._goal is not None:
@@ -155,7 +157,7 @@ class PlannerBase(ABC):
         if start is not None:
             if self.isoccupied(start):
                 raise ValueError("Start location inside obstacle")
-            self._start = base.getvector(start)
+            self._start = getvector(start)
 
     @property
     def goal(self):
@@ -185,7 +187,7 @@ class PlannerBase(ABC):
         if goal is not None:
             if self.isoccupied(goal):
                 raise ValueError("Goal location inside obstacle")
-            self._goal = base.getvector(goal)
+            self._goal = getvector(goal)
 
     @property
     def verbose(self):
@@ -323,7 +325,7 @@ class PlannerBase(ABC):
         :seealso: :meth:`isoccupied` :meth:`occgrid`
         """
         if p is not None:
-            p = base.getvector(p, self._ndims, dtype=dtype)
+            p = getvector(p, self._ndims, dtype=dtype)
             if self.isoccupied(p):
                 raise ValueError("Point is inside obstacle")
         return p
@@ -474,7 +476,7 @@ class PlannerBase(ABC):
         start=None,
         goal=None,
         ax=None,
-        block=False,
+        block=None,
         bgargs={},
         **unused,
     ):
@@ -585,7 +587,6 @@ class PlannerBase(ABC):
         :seealso: :meth:`plot_bg` :func:`base.plot_poly`
         """
         # create default markers
-
         # passed to Matplotlib plot()
         if start_marker is None:
             start_marker = {
@@ -635,7 +636,7 @@ class PlannerBase(ABC):
         if configspace and ndims < 3 and path is not None:
             raise ValueError(f"path should have {ndims} rows")
 
-        ax = base.axes_logic(ax, ndims)
+        ax = axes_logic(ax, ndims)
 
         # plot occupancy grid background
         if background:
@@ -734,7 +735,7 @@ class PlannerBase(ABC):
 
         elif ndims == 2 and self._ndims == 3:
             # 2d projection of 3d plot, show start/goal configuration
-            scale = base.axes_get_scale(ax) / 10
+            scale = axes_get_scale(ax) / 10
 
             if self.marker is None:
                 self.marker = VehiclePolygon(shape="car", scale=scale)
@@ -764,7 +765,8 @@ class PlannerBase(ABC):
         else:
             ax.set_zlabel(r"$\theta$")
 
-        plt.show(block=block)
+        if block:
+            plt.show(block=block)
 
         return ax
 
@@ -800,6 +802,7 @@ class PlannerBase(ABC):
         ax=None,
         inflated=True,
         colorbar=True,
+        block=None,
         **unused,
     ):
         """
@@ -827,9 +830,9 @@ class PlannerBase(ABC):
             return
 
         if isinstance(self._occgrid, BaseOccupancyGrid):
-            ax = base.plotvol2(dim=self._occgrid.workspace, ax=ax)
+            ax = plotvol2(dim=self._occgrid.workspace, ax=ax)
         else:
-            ax = base.axes_logic(ax, 2)
+            ax = axes_logic(ax, 2)
 
         # create color map for free space + obstacle:
         #   free space, color index = 1, white, alpha=0 to allow background and grid lines to show
@@ -882,8 +885,8 @@ class PlannerBase(ABC):
             if colorbar is True:
                 plt.colorbar(
                     scalar_mappable_c_map,
-                    shrink=0.75,
-                    aspect=20 * 0.75,
+                    # shrink=0.75,
+                    # aspect=20 * 0.75,
                     label="Distance",
                 )
 
@@ -901,7 +904,7 @@ class PlannerBase(ABC):
             # overlay obstacles
             c_map = mpl.colors.ListedColormap(colors)
             # self.occgrid.plot(image, cmap=c_map, zorder=1)
-            self.occgrid.plot(cmap=c_map, zorder=1)
+            self.occgrid.plot(cmap=c_map, zorder=1, ax=ax)
 
         ax.set_facecolor((1, 1, 1))  # create white background
         ax.set_xlabel("x (cells)")
@@ -912,8 +915,9 @@ class PlannerBase(ABC):
         # ax.set_xlim(ax.get_xlim())
         # ax.set_ylim(ax.get_ylim())
 
-        plt.draw()
-        plt.show(block=False)
+        # plt.draw()
+        if block is not None:
+            plt.show(block=block)
 
     def message(self, s, color=None):
         """
