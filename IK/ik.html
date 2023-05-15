@@ -315,7 +315,7 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Solve the IK problem</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">Tep</span><span class="p">)</span>
-<span class="go">IKSolution(q=array([ 1.9957, -1.6621, -0.8488, -2.0646, -1.3725,  0.9561,  1.7139]), success=True, iterations=13, searches=1, residual=1.7262755398299195e-07, reason=&#39;Success&#39;)</span>
+<span class="go">IKSolution(q=array([ 2.3771,  0.3934, -2.4717, -2.1921,  0.2739,  1.9663,  0.5696]), success=True, iterations=19, searches=2, residual=2.8603174257209933e-09, reason=&#39;Success&#39;)</span>
 </pre></div>
 </div>
 <p>Additionally, these <code class="xref py py-class docutils literal notranslate"><span class="pre">Class</span></code> based solvers have been implemented as methods within the <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> and <a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot" title="roboticstoolbox.robot.Robot.Robot"><code class="xref py py-class docutils literal notranslate"><span class="pre">Robot</span></code></a> classes. The method names start with <code class="docutils literal notranslate"><span class="pre">ikine_</span></code>.</p>
@@ -362,7 +362,7 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Solve the IK problem</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
-<span class="go">IKSolution(q=array([-2.0589, -1.7288,  0.8001, -2.061 ,  1.4258,  0.8776, -0.1566]), success=True, iterations=12, searches=1, residual=5.16019573148789e-10, reason=&#39;Success&#39;)</span>
+<span class="go">IKSolution(q=array([-1.6401,  0.964 ,  2.0703, -2.1286, -0.8673,  1.6178,  1.4467]), success=True, iterations=7, searches=1, residual=1.965372155773842e-09, reason=&#39;Success&#39;)</span>
 </pre></div>
 </div>
 <p>In the following example, we create a <a class="reference internal" href="../arm_erobot.html#roboticstoolbox.models.URDF.Panda" title="roboticstoolbox.models.URDF.Panda"><code class="xref py py-class docutils literal notranslate"><span class="pre">Panda</span></code></a> robot and and then get the <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> representation. Subsequently, we use one of the IK solvers available within the <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> class.</p>
@@ -375,7 +375,7 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Solve the IK problem</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ets</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
-<span class="go">IKSolution(q=array([ 1.1045, -0.5483, -0.9243, -2.1764, -0.479 ,  1.8937,  1.1606]), success=True, iterations=7, searches=1, residual=3.135104129596967e-07, reason=&#39;Success&#39;)</span>
+<span class="go">IKSolution(q=array([ 1.6785, -1.2316, -1.0374, -2.1001, -1.0663,  1.3923,  1.5745]), success=True, iterations=26, searches=3, residual=2.2716147009536956e-10, reason=&#39;Success&#39;)</span>
 </pre></div>
 </div>
 </section>
@@ -390,7 +390,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 14-May-2023.
+      <span class="lastupdated">Last updated on 15-May-2023.
       </span></p>
   </div>
 

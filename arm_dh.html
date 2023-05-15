@@ -1728,7 +1728,7 @@ pose <code class="docutils literal notranslate"><span class="pre">Tep</span></co
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
-<span class="go">IKSolution(q=array([-1.9495,  0.613 ,  2.1648, -2.1692, -0.55  ,  1.8579,  1.2149]), success=True, iterations=36, searches=3, residual=1.288595558525883e-10, reason=&#39;Success&#39;)</span>
+<span class="go">IKSolution(q=array([ 0.8881, -0.4359, -0.7688, -2.1881, -0.3378,  1.9483,  1.0511]), success=True, iterations=45, searches=4, residual=3.189457284991687e-10, reason=&#39;Success&#39;)</span>
 </pre></div>
 </div>
 <p class="rubric">Notes</p>
@@ -3376,7 +3376,7 @@ pose <code class="docutils literal notranslate"><span class="pre">Tep</span></co
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
-<span class="go">IKSolution(q=array([ 1.5432,  1.1084, -2.0807, -2.1128,  0.9775,  1.5002,  0.0509]), success=True, iterations=17, searches=2, residual=6.615989703929907e-09, reason=&#39;Success&#39;)</span>
+<span class="go">IKSolution(q=array([-2.1782,  0.4686,  2.3155, -2.1848, -0.3821,  1.9335,  1.0856]), success=True, iterations=19, searches=2, residual=9.895910644036726e-07, reason=&#39;Success&#39;)</span>
 </pre></div>
 </div>
 <p class="rubric">Notes</p>
@@ -3569,7 +3569,7 @@ pose <code class="docutils literal notranslate"><span class="pre">Tep</span></co
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">ikine_GN</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
-<span class="go">IKSolution(q=array([ 2.6113,  0.4313, -1.8225, -1.4857,  1.1979,  0.3771, -2.8859]), success=False, iterations=100, searches=100, residual=0.0, reason=&#39;iteration and search limit reached, 100 numpy.LinAlgError encountered&#39;)</span>
+<span class="go">IKSolution(q=array([ 0.4745, -1.3723, -1.762 , -2.2835,  0.3675,  2.662 ,  0.7965]), success=False, iterations=100, searches=100, residual=0.0, reason=&#39;iteration and search limit reached, 100 numpy.LinAlgError encountered&#39;)</span>
 </pre></div>
 </div>
 <p class="rubric">Notes</p>
@@ -3655,7 +3655,7 @@ pose <code class="docutils literal notranslate"><span class="pre">Tep</span></co
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Panda</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">ikine_NR</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
-<span class="go">IKSolution(q=array([-1.9254,  0.3867,  0.604 , -2.4905, -1.4262,  2.5205, -1.9991]), success=False, iterations=100, searches=100, residual=0.0, reason=&#39;iteration and search limit reached, 100 numpy.LinAlgError encountered&#39;)</span>
+<span class="go">IKSolution(q=array([-1.8456, -1.0608,  1.4576, -1.8577, -2.4503,  0.3706, -1.8934]), success=False, iterations=100, searches=100, residual=0.0, reason=&#39;iteration and search limit reached, 100 numpy.LinAlgError encountered&#39;)</span>
 </pre></div>
 </div>
 <p class="rubric">Notes</p>
@@ -10249,7 +10249,7 @@ conventions.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 14-May-2023.
+      <span class="lastupdated">Last updated on 15-May-2023.
       </span></p>
   </div>
 

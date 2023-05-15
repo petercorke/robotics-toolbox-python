@@ -167,7 +167,7 @@ using the <a class="reference internal" href="stubs/roboticstoolbox.robot.IK.IK_
 <span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span> <span class="o">=</span> <span class="n">rtb</span><span class="o">.</span><span class="n">IK_GN</span><span class="p">(</span><span class="n">pinv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">panda</span><span class="p">,</span> <span class="n">Tep</span><span class="p">)</span>
-<span class="go">IKSolution(q=array([ 0.6376, -0.3609, -0.5637, -2.195 , -0.2173,  1.9789,  0.9567]), success=True, iterations=26, searches=2, residual=1.031268297080749e-11, reason=&#39;Success&#39;)</span>
+<span class="go">IKSolution(q=array([ 1.4918,  1.1875, -2.0943, -2.1045,  1.0349,  1.4317,  0.0151]), success=True, iterations=56, searches=5, residual=2.026766647907238e-09, reason=&#39;Success&#39;)</span>
 </pre></div>
 </div>
 <p class="rubric">Notes</p>
@@ -237,7 +237,7 @@ Acceleration and Advanced Applications.” arXiv preprint arXiv:2207.01794 (2022
 
   <div role="contentinfo">
     <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 14-May-2023.
+      <span class="lastupdated">Last updated on 15-May-2023.
       </span></p>
   </div>
 
