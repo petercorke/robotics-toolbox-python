@@ -1,0 +1,58 @@
+<!--
+ * COPYRIGHT (C) 2010
+ * RE2, INC.
+ *
+ * Author: RE2
+ *
+ * This file is a part of RobotModel, which was developed for the
+ * DARPA ARM ROBOT Track C project.
+ *
+ * RobotModel is free software:
+ * you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License as published by the Free Software Foundation, either version
+ * 3 of the License, or (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this package.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * RE2, INC. disclaims all warranties with regard to this software, including
+ * all implied warranties of merchantability and fitness, in no event shall
+ * RE2, INC. be liable for any special, indirect or consequential damages or
+ * any damages whatsoever resulting from loss of use, data or profits, whether
+ * in an action of contract, negligence or other tortious action, arising out
+ * of or in connection with the use or performance of this software.
+-->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find barrett_model)/models/common.urdf.xacro"/>
+  <xacro:include filename="$(find barrett_model)/models/components.urdf.xacro"/>
+
+  <xacro:macro name="wam_7dof" params="prefix xyz rpy">
+    <xacro:wam prefix="${prefix}" xyz="${xyz}" rpy="${rpy}"/>
+    <xacro:wam_wrist prefix="${prefix}"/>
+    <xacro:wam_wrist_palm_stump prefix="${prefix}"/>
+  </xacro:macro>
+
+  <xacro:macro name="wam_4dof" params="prefix parent_link xyz rpy">
+    <xacro:wam prefix="${prefix}" parent_link="${parent_link}" xyz="${xyz}" rpy="${rpy}"/>
+    <xacro:wam_stump prefix="${prefix}"/>
+  </xacro:macro>
+
+  <!-- upper arm only -->
+  <xacro:macro name="wam" params="prefix xyz rpy">
+    <!--<xacro:wam_base prefix="${prefix}" parent_link="${parent_link}" xyz="${xyz}" rpy="${rpy}"/>-->
+    <xacro:wam_shoulder_yaw prefix="${prefix}"/>
+    <xacro:wam_shoulder_pitch prefix="${prefix}"/>
+    <xacro:wam_upper_arm prefix="${prefix}"/>
+  </xacro:macro>
+
+  <!-- forearm with actuation "wrist" -->
+  <xacro:macro name="wam_wrist" params="prefix">
+    <xacro:wam_forearm prefix="${prefix}"/>
+    <xacro:wam_wrist_yaw prefix="${prefix}"/>
+    <xacro:wam_wrist_pitch prefix="${prefix}"/>
+    <xacro:wam_palm prefix="${prefix}"/>
+  </xacro:macro>
+
+</robot>

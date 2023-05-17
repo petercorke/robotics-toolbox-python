@@ -1,0 +1,57 @@
+<!--
+ * COPYRIGHT (C) 2010
+ * RE2, INC.
+ *
+ * Author: RE2
+ *
+ * This file is a part of RobotModel, which was developed for the
+ * DARPA ARM ROBOT Track C project.
+ *
+ * RobotModel is free software:
+ * you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License as published by the Free Software Foundation, either version
+ * 3 of the License, or (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this package.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * RE2, INC. disclaims all warranties with regard to this software, including
+ * all implied warranties of merchantability and fitness, in no event shall
+ * RE2, INC. be liable for any special, indirect or consequential damages or
+ * any damages whatsoever resulting from loss of use, data or profits, whether
+ * in an action of contract, negligence or other tortious action, arising out
+ * of or in connection with the use or performance of this software.
+-->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Directories -->
+  <xacro:property name="models_path" value="package://barrett_model/models" />
+  <xacro:property name="highResModelDirectory" value="${models_path}/meshes/splitModels" />
+
+  <!-- Constants -->
+  <xacro:property name="PI" value="3.1415926535897931" />
+
+  <!-- Gazebo macros -->
+  <xacro:macro name="gazebo_reference" params="name">
+    <gazebo reference="${name}">
+      <turnGravityOff>
+        false
+      </turnGravityOff>
+      <selfCollide>
+        true
+      </selfCollide>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Gazebo joint configuration -->
+  <xacro:macro name="gz_joint">
+    <provideFeedback>true</provideFeedback>
+    <implicitSpringDamper>true</implicitSpringDamper>
+    <!--<kp>0.0</kp>[> CFM <]-->
+    <!--<kd>0.0</kd>[> ERP <]-->
+    <!--<cfmDamping>true</cfmDamping>-->
+    <!--<dynamics damping="5.5" friction="1"/>-->
+  </xacro:macro>
+
+</robot>
