@@ -1119,6 +1119,9 @@ def mstraj(
 
     infolist.append(info(None, tseg, clock))
 
+    # make a variable called sd equals to tg
+    # sd=tg[1:,:]-tg[:-1, : ]
+    # sd=np.vertcat(sd,sd[-1,:])
     traj = Trajectory("mstraj", dt * np.arange(0, tg.shape[0]), tg)
     traj.arrive = arrive
     traj.info = infolist
@@ -1149,6 +1152,7 @@ if __name__ == "__main__":
     # traj.plot(block=True)
 
     via = SO2(30, unit="deg") * np.array([[-1, 1, 1, -1, -1], [1, 1, -1, -1, 1]])
+    # print(via)
     traj0 = mstraj(via.T, dt=0.2, tacc=0.5, qdmax=[2, 1])
     xplot(traj0.q[:, 0], traj0.q[:, 1], color="red")
     traj0.plot(block=True)
