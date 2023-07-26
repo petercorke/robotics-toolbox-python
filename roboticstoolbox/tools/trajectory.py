@@ -1003,6 +1003,7 @@ def mstraj(
     clock = 0  # keep track of time
     arrive = np.zeros((ns,))  # record planned time of arrival at via points
     tg = np.zeros((0, nj))
+    # sd_qd = np.zeros((0, nj))
     infolist = []
     info = namedtuple("mstraj_info", "slowest segtime clock")
 
@@ -1097,6 +1098,8 @@ def mstraj(
             if verbose:  # pragma nocover
                 print(qb)
             tg = np.vstack([tg, qb[1:, :]])
+            # it didn't work on calculating the speed by simply stacking the qd
+            # sd_qd = np.vstack((sd_qd, qd))
 
         clock = clock + taccx  # update the clock
 
@@ -1107,6 +1110,7 @@ def mstraj(
             if verbose:  # pragma nocover
                 print(t, s, q0)
             tg = np.vstack([tg, q0])
+            # sd_qd = np.vstack([sd_qd, (q_next-q_prev)/dt])
             clock += dt
 
         q_prev = q_next  # next target becomes previous target
@@ -1116,25 +1120,19 @@ def mstraj(
     if tacc2 > 0:
         qb = jtraj(q0, q_next, mrange(0, tacc2, dt), qd0=qd_prev, qd1=qdf).s
         tg = np.vstack([tg, qb[1:, :]])
+        # sd_qd = np.vstack([sd_qd, qdf])
 
     infolist.append(info(None, tseg, clock))
 
-    from scipy.interpolate import CubicSpline
 
     # make a variable called sd equals to tg
     timestamps = dt * np.arange(0, tg.shape[0])
-    tgx = tg[:, 0]
-    tgy = tg[:, 1]
-    # use scipy.interpolate.CubicSpline to fit the traj
-    splinex = CubicSpline(timestamps, tgx)
-    spliney = CubicSpline(timestamps, tgy)
-    sdx = np.diff(tgx) / np.diff(timestamps)
-    sdy = np.diff(tgy) / np.diff(timestamps)
-    sdx_square = np.square(sdx)
-    sdy_square = np.square(sdy)
-    lenth = len(sdx)
-    sd = np.sqrt(sdx_square + sdy_square).reshape([lenth, 1])
+    sd = np.diff(tg, axis=0) / np.diff(timestamps)[:, np.newaxis]
     sd = np.vstack((sd, sd[-1, :]))
+    # qdmax check
+    for i in range(0, nj):
+        sd[sd[:, i] < -qdmax[None, i], i] = -qdmax[None, i]
+        sd[sd[:, i] > qdmax[None, i], i] = qdmax[None, i]
     traj = Trajectory("mstraj", dt * np.arange(0, tg.shape[0]), tg, sd)
     traj.arrive = arrive
     traj.info = infolist
