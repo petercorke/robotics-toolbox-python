@@ -1003,6 +1003,7 @@ def mstraj(
     clock = 0  # keep track of time
     arrive = np.zeros((ns,))  # record planned time of arrival at via points
     tg = np.zeros((0, nj))
+    # sd_qd = np.zeros((0, nj))
     infolist = []
     info = namedtuple("mstraj_info", "slowest segtime clock")
 
@@ -1097,6 +1098,8 @@ def mstraj(
             if verbose:  # pragma nocover
                 print(qb)
             tg = np.vstack([tg, qb[1:, :]])
+            # it didn't work on calculating the speed by simply stacking the qd
+            # sd_qd = np.vstack((sd_qd, qd))
 
         clock = clock + taccx  # update the clock
 
@@ -1107,6 +1110,7 @@ def mstraj(
             if verbose:  # pragma nocover
                 print(t, s, q0)
             tg = np.vstack([tg, q0])
+            # sd_qd = np.vstack([sd_qd, (q_next-q_prev)/dt])
             clock += dt
 
         q_prev = q_next  # next target becomes previous target
@@ -1116,10 +1120,20 @@ def mstraj(
     if tacc2 > 0:
         qb = jtraj(q0, q_next, mrange(0, tacc2, dt), qd0=qd_prev, qd1=qdf).s
         tg = np.vstack([tg, qb[1:, :]])
+        # sd_qd = np.vstack([sd_qd, qdf])
 
     infolist.append(info(None, tseg, clock))
 
-    traj = Trajectory("mstraj", dt * np.arange(0, tg.shape[0]), tg)
+
+    # make a variable called sd equals to tg
+    timestamps = dt * np.arange(0, tg.shape[0])
+    sd = np.diff(tg, axis=0) / np.diff(timestamps)[:, np.newaxis]
+    sd = np.vstack((sd, sd[-1, :]))
+    # qdmax check
+    for i in range(0, nj):
+        sd[sd[:, i] < -qdmax[None, i], i] = -qdmax[None, i]
+        sd[sd[:, i] > qdmax[None, i], i] = qdmax[None, i]
+    traj = Trajectory("mstraj", dt * np.arange(0, tg.shape[0]), tg, sd)
     traj.arrive = arrive
     traj.info = infolist
     traj.via = viapoints
@@ -1149,6 +1163,7 @@ if __name__ == "__main__":
     # traj.plot(block=True)
 
     via = SO2(30, unit="deg") * np.array([[-1, 1, 1, -1, -1], [1, 1, -1, -1, 1]])
+    # print(via)
     traj0 = mstraj(via.T, dt=0.2, tacc=0.5, qdmax=[2, 1])
     xplot(traj0.q[:, 0], traj0.q[:, 1], color="red")
     traj0.plot(block=True)
