@@ -1119,8 +1119,21 @@ def mstraj(
 
     infolist.append(info(None, tseg, clock))
 
+    from scipy.interpolate import CubicSpline
+
     # make a variable called sd equals to tg
-    sd=tg[1:,:]-tg[:-1, : ]
+    timestamps = dt * np.arange(0, tg.shape[0])
+    tgx = tg[:, 0]
+    tgy = tg[:, 1]
+    # use scipy.interpolate.CubicSpline to fit the traj
+    splinex = CubicSpline(timestamps, tgx)
+    spliney = CubicSpline(timestamps, tgy)
+    sdx = np.diff(tgx) / np.diff(timestamps)
+    sdy = np.diff(tgy) / np.diff(timestamps)
+    sdx_square = np.square(sdx)
+    sdy_square = np.square(sdy)
+    lenth = len(sdx)
+    sd = np.sqrt(sdx_square + sdy_square).reshape([lenth, 1])
     sd = np.vstack((sd, sd[-1, :]))
     traj = Trajectory("mstraj", dt * np.arange(0, tg.shape[0]), tg, sd)
     traj.arrive = arrive
