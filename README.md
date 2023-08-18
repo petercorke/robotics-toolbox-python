@@ -284,6 +284,11 @@ The toolbox is incredibly useful for developing and prototyping algorithms for r
 
 ### Publication List
 
+K. He, R. Newbury, T. Tran, J. Haviland, B. Burgess-Limerick, D. Kulić, P. Corke, A. Cosgun, "**Visibility Maximization Controller for Robotic Manipulation**", in _IEEE Robotics and Automation Letters_, doi: 10.1109/LRA.2022.3188430. In the video, the robot is controlled using the Robotics toolbox for Python and features a recording from the [Swift](https://github.com/jhavl/swift) Simulator.
+
+[[Arxiv Paper](https://arxiv.org/abs/2202.12557)] [[IEEE Xplore](https://ieeexplore.ieee.org/abstract/document/9815144)] [[Project Website](https://rhys-newbury.github.io/projects/vmc/)] [[Video](https://youtu.be/vobLvg4E3kM)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/roboticstoolbox/examples/fetch_vision.py)]
+
+
 J. Haviland, N. Sünderhauf and P. Corke, "**A Holistic Approach to Reactive Mobile Manipulation**," in _IEEE Robotics and Automation Letters_, doi: 10.1109/LRA.2022.3146554. In the video, the robot is controlled using the Robotics toolbox for Python and features a recording from the [Swift](https://github.com/jhavl/swift) Simulator.
 
 [[Arxiv Paper](https://arxiv.org/abs/2109.04749)] [[IEEE Xplore](https://ieeexplore.ieee.org/abstract/document/9695298)] [[Project Website](https://jhavl.github.io/holistic/)] [[Video](https://youtu.be/-DXBQPeLIV4)] [[Code Example](https://github.com/petercorke/robotics-toolbox-python/blob/master/roboticstoolbox/examples/holistic_mm_non_holonomic.py)]
