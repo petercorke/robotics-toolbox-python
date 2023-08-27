@@ -16,11 +16,14 @@ extern "C"
 #endif /* __cplusplus */
 
     // forward defines
+    static PyObject *Angle_Axis(PyObject *self, PyObject *args);
+
     static PyObject *IK_GN_c(PyObject *self, PyObject *args);
     static PyObject *IK_NR_c(PyObject *self, PyObject *args);
-    static PyObject *IK_LM_Chan_c(PyObject *self, PyObject *args);
-    static PyObject *IK_LM_Wampler_c(PyObject *self, PyObject *args);
-    static PyObject *IK_LM_Sugihara_c(PyObject *self, PyObject *args);
+    static PyObject *IK_LM_c(PyObject *self, PyObject *args);
+    // static PyObject *IK_LM_Chan_c(PyObject *self, PyObject *args);
+    // static PyObject *IK_LM_Wampler_c(PyObject *self, PyObject *args);
+    // static PyObject *IK_LM_Sugihara_c(PyObject *self, PyObject *args);
 
     static PyObject *Robot_link_T(PyObject *self, PyObject *args);
 

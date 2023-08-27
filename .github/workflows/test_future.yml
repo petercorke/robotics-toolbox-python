@@ -23,7 +23,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: future
-        path: rtb
+        path: robotics-toolbox-python
         
     - name: Checkout Swift
       uses: actions/checkout@v2
@@ -48,18 +48,25 @@ jobs:
         
     - name: Install dependencies
       run: |
+        echo "Update pip"
         python -m pip install --upgrade pip
+        pip install -U build
         cd sm
-        python -m pip install .
+        echo "Install sm"
+        pip install .
         cd ../sg
-        python -m pip install .
+        echo "Install sg"
+        pip install .
         cd ../swift
-        python -m pip install .
-        cd ../rtb/rtb-data
-        python -m pip install .
+        echo "Install swift"
+        pip install .
+        cd ../robotics-toolbox-python/rtb-data
+        pip install .
     - name: Test with pytest
       run: |
-        cd rtb
-        pip install .[dev,collision]
+        cd robotics-toolbox-python
+        pip install -e .[dev,collision]
         pip install pytest-timeout
-        pytest --timeout=50 --timeout_method thread -s
+        python -c "import spatialgeometry"
+        python -c "import roboticstoolbox"
+        pytest --ignore=roboticstoolbox/blocks --timeout=50 --timeout_method thread -s

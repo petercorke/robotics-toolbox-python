@@ -10,6 +10,7 @@ import roboticstoolbox as rtb
 import spatialgeometry as gm
 import unittest
 import spatialmath as sm
+from roboticstoolbox.robot.Link import BaseLink
 
 
 class TestLink(unittest.TestCase):
@@ -86,6 +87,13 @@ class TestLink(unittest.TestCase):
         nt.assert_array_almost_equal(l1.Tc, Tc1)
         nt.assert_array_almost_equal(l2.Tc, Tc2)
 
+    def test_B(self):
+        l0 = rtb.Link(B=1.0)
+        l1 = rtb.Link(B=None)
+
+        nt.assert_array_almost_equal(l0.B, 1.0)
+        nt.assert_array_almost_equal(l1.B, 0.0)
+
     def test_I(self):
         l0 = rtb.Link(I=[1, 2, 3])
         l1 = rtb.Link(I=[0, 1, 2, 3, 4, 5])
@@ -147,7 +155,7 @@ Jm    =         0
 B     =         0 
 Tc    =       0.4(+)    -0.43(-) 
 G     =       -63 
-qlim  =      -2.8 to      2.8""",
+qlim  =      -2.8 to      2.8""",  # noqa
         )
 
     def test_properties(self):
@@ -158,7 +166,6 @@ qlim  =      -2.8 to      2.8""",
         self.assertEqual(l0.Jm, 0.0)
 
     def test_fail_parent(self):
-
         with self.assertRaises(TypeError):
             rtb.Link(parent=1)
 
@@ -231,7 +238,116 @@ qlim  =      -2.8 to      2.8""",
         self.assertTrue(c0)
         self.assertFalse(c1)
 
+    def test_init_ets2(self):
+        e1 = rtb.ET2.R()
+        link = BaseLink(e1)
+
+        self.assertEqual(link.Ts, None)
+
+    def test_get_ets(self):
+        e1 = rtb.ETS(rtb.ET.Ry())
+        link = rtb.Link(e1)
+
+        self.assertEqual(link.ets, e1)
+
+    def test_set_ets_fail(self):
+        e1 = rtb.ETS(rtb.ET.Ry())
+        e2 = rtb.ET.Ry() * rtb.ET.Rx(1.0)
+        link = rtb.Link(e1)
+
+        with self.assertRaises(ValueError):
+            link.ets = e2
+
+    def test_set_robot(self):
+        e1 = rtb.ETS(rtb.ET.Ry())
+        link = rtb.Link(e1)
+
+        robot = rtb.models.Panda()
+
+        link.robot = robot
+
+        self.assertEqual(link.robot, robot)
+
+    def test_set_qlim_fail(self):
+        e1 = rtb.ETS(rtb.ET.Ry(1.0))
+        link = rtb.Link(e1)
+
+        with self.assertRaises(ValueError):
+            link.qlim = [1.0, 2.0]
+
+    def test_set_collision(self):
+        e1 = rtb.ETS(rtb.ET.Ry())
+        link = rtb.Link(e1)
+
+        s1 = gm.Cuboid([1.0, 1.0, 1.0])
+
+        link.collision = s1
+
+        self.assertEqual(link.collision[0], s1)
+
+    def test_set_collision2(self):
+        e1 = rtb.ETS(rtb.ET.Ry())
+        link = rtb.Link(e1)
+
+        s1 = gm.Cuboid([1.0, 1.0, 1.0])
+
+        sg = gm.SceneGroup()
+        sg.append(s1)
+
+        link.collision = sg
+
+        self.assertEqual(link.collision[0], sg[0])
+
+    def test_set_geometry(self):
+        e1 = rtb.ETS(rtb.ET.Ry())
+        link = rtb.Link(e1)
+
+        s1 = gm.Cuboid([1.0, 1.0, 1.0])
+
+        link.geometry = s1
+
+        self.assertEqual(link.geometry[0], s1)
+
+    def test_set_geometry2(self):
+        e1 = rtb.ETS(rtb.ET.Ry())
+        link = rtb.Link(e1)
+
+        s1 = gm.Cuboid([1.0, 1.0, 1.0])
+
+        sg = gm.SceneGroup()
+        sg.append(s1)
+
+        link.geometry = sg
+
+        self.assertEqual(link.geometry[0], sg[0])
+
+    def test_dyn2list(self):
+        l1 = rtb.Link(I=[0, 1, 2, 3, 4, 5])
+
+        s = l1._dyn2list()
+
+        print(s)
+
+        ans = [" 0", " 0,  0,  0", " 0,  1,  2,  3,  4,  5", " 0", " 0", " 0,  0", " 0"]
+
+        self.assertEqual(s, ans)
+
+    def test_init_fail4(self):
+        with self.assertRaises(TypeError):
+            rtb.Link(2.0)  # type: ignore
+
+    def test_ets2_A(self):
+        e1 = rtb.ETS2(rtb.ET2.R())
+        link = rtb.Link2(e1)
+
+        nt.assert_almost_equal(link.A(1.0).A, sm.SE2(0.0, 0.0, 1.0).A)
+
+    def test_ets2_A2(self):
+        e1 = rtb.ETS2(rtb.ET2.R(1.0))
+        link = rtb.Link2(e1)
+
+        nt.assert_almost_equal(link.A().A, sm.SE2(0.0, 0.0, 1.0).A)
+
 
 if __name__ == "__main__":
-
     unittest.main()

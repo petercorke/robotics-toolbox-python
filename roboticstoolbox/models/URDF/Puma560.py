@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Robot import Robot
 from math import pi
 
 
-class Puma560(ERobot):
+class Puma560(Robot):
     """
     Class that imports a Puma 560 URDF model
 
@@ -94,3 +94,5 @@ if __name__ == "__main__":  # pragma nocover
 
     robot = Puma560()
     print(robot)
+
+    print(robot.ee_links)

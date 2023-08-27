@@ -18,8 +18,13 @@
 #include <math.h>
 #include <Eigen/Dense>
 #include <iostream>
+#include <string.h>
 
 static PyMethodDef fknmMethods[] = {
+    {"Angle_Axis",
+     (PyCFunction)Angle_Axis,
+     METH_VARARGS,
+     "Link"},
     {"IK_GN_c",
      (PyCFunction)IK_GN_c,
      METH_VARARGS,
@@ -28,18 +33,18 @@ static PyMethodDef fknmMethods[] = {
      (PyCFunction)IK_NR_c,
      METH_VARARGS,
      "Link"},
-    {"IK_LM_Chan_c",
-     (PyCFunction)IK_LM_Chan_c,
+    {"IK_LM_c",
+     (PyCFunction)IK_LM_c,
      METH_VARARGS,
      "Link"},
-    {"IK_LM_Wampler_c",
-     (PyCFunction)IK_LM_Wampler_c,
-     METH_VARARGS,
-     "Link"},
-    {"IK_LM_Sugihara_c",
-     (PyCFunction)IK_LM_Sugihara_c,
-     METH_VARARGS,
-     "Link"},
+    // {"IK_LM_Wampler_c",
+    //  (PyCFunction)IK_LM_Wampler_c,
+    //  METH_VARARGS,
+    //  "Link"},
+    // {"IK_LM_Sugihara_c",
+    //  (PyCFunction)IK_LM_Sugihara_c,
+    //  METH_VARARGS,
+    //  "Link"},
     {"Robot_link_T",
      (PyCFunction)Robot_link_T,
      METH_VARARGS,
@@ -103,6 +108,58 @@ PyMODINIT_FUNC PyInit_fknm(void)
 
 extern "C"
 {
+
+    static PyObject *Angle_Axis(PyObject *self, PyObject *args)
+    {
+        npy_float64 *np_Te, *np_Tep, *np_ret;
+        PyObject *py_Te, *py_Tep;
+        PyArrayObject *py_np_Te, *py_np_Tep;
+
+        if (!PyArg_ParseTuple(
+                args, "OO",
+                &py_Te,
+                &py_Tep))
+            return NULL;
+
+        // Inputs can be:
+        // Te, Tep can be SE3s or 4x4 numpy array
+
+        // Make sure Te, Tep is number array
+        // Cast to numpy array
+        // Get data out
+        if (!_check_array_type(py_Te))
+            return NULL;
+        py_np_Te = (PyArrayObject *)PyArray_FROMANY(py_Te, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        np_Te = (npy_float64 *)PyArray_DATA(py_np_Te);
+
+        if (!_check_array_type(py_Tep))
+            return NULL;
+        py_np_Tep = (PyArrayObject *)PyArray_FROMANY(py_Tep, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
+        np_Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
+
+        // Make our empty error vector
+        npy_intp dims[1] = {6};
+        PyObject *py_ret = PyArray_EMPTY(1, dims, NPY_DOUBLE, 0);
+        np_ret = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_ret);
+        MapVectorX ret(np_ret, 6);
+
+        // Get eigen matrices
+        // Tep in row major from Python
+        MapMatrix4dr row_Tep(np_Tep);
+        MapMatrix4dr row_Te(np_Te);
+
+        // Convert to col major here
+        Matrix4dc Tep = row_Tep;
+        Matrix4dc Te = row_Te;
+
+        // Get map matrix
+        MapMatrix4dc map_Te(&Te(0));
+
+        // Do the job
+        _angle_axis(map_Te, Tep, ret);
+
+        return py_ret;
+    }
 
     static PyObject *IK_GN_c(PyObject *self, PyObject *args)
     {
@@ -334,7 +391,7 @@ extern "C"
         return py_tup;
     }
 
-    static PyObject *IK_LM_Chan_c(PyObject *self, PyObject *args)
+    static PyObject *IK_LM_c(PyObject *self, PyObject *args)
     {
         ETS *ets;
         npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
@@ -344,11 +401,12 @@ extern "C"
         npy_intp dim[1] = {1};
         int ilimit, slimit, q0_used = 0, we_used = 0, reject_jl;
         double tol, E, lambda;
+        const char *method;
 
         int it = 0, search = 1, solution = 0;
 
         if (!PyArg_ParseTuple(
-                args, "OOOiidiOd",
+                args, "OOOiidiOds",
                 &py_ets,
                 &py_Tep,
                 &py_q0,
@@ -357,7 +415,8 @@ extern "C"
                 &tol,
                 &reject_jl,
                 &py_we,
-                &lambda))
+                &lambda,
+                &method))
             return NULL;
 
         if (!_check_array_type(py_Tep))
@@ -419,241 +478,21 @@ extern "C"
         // std::cout << Tep << std::endl;
         // std::cout << ret << std::endl;
 
-        _IK_LM_Chan(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E, lambda, we);
-
-        // Free the memory
-        Py_DECREF(py_np_Tep);
-
-        if (q0_used)
+        if (method[0] == 's')
         {
-            Py_DECREF(py_np_q0);
+            // std::cout << "sugi" << std::endl;
+            _IK_LM_Sugihara(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E, lambda, we);
         }
-
-        if (we_used)
+        else if (method[0] == 'w')
         {
-            Py_DECREF(py_np_we);
+            // std::cout << "wampl" << std::endl;
+            _IK_LM_Wampler(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E, lambda, we);
         }
-
-        // Build the return tuple
-        py_it = Py_BuildValue("i", it);
-        py_search = Py_BuildValue("i", search);
-        py_solution = Py_BuildValue("i", solution);
-        py_E = Py_BuildValue("d", E);
-
-        py_tup = PyTuple_Pack(5, py_ret, py_solution, py_it, py_search, py_E);
-
-        Py_DECREF(py_it);
-        Py_DECREF(py_search);
-        Py_DECREF(py_solution);
-        Py_DECREF(py_E);
-        Py_DECREF(py_ret);
-
-        return py_tup;
-    }
-
-    static PyObject *IK_LM_Wampler_c(PyObject *self, PyObject *args)
-    {
-        ETS *ets;
-        npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
-        PyArrayObject *py_np_Tep;
-        PyObject *py_ets, *py_ret, *py_Tep, *py_q0, *py_np_q0, *py_we, *py_np_we;
-        PyObject *py_tup, *py_it, *py_search, *py_solution, *py_E;
-        npy_intp dim[1] = {1};
-        int ilimit, slimit, q0_used = 0, we_used = 0, reject_jl;
-        double tol, E, lambda;
-
-        int it = 0, search = 1, solution = 0;
-
-        if (!PyArg_ParseTuple(
-                args, "OOOiidiOd",
-                &py_ets,
-                &py_Tep,
-                &py_q0,
-                &ilimit,
-                &slimit,
-                &tol,
-                &reject_jl,
-                &py_we,
-                &lambda))
-            return NULL;
-
-        if (!_check_array_type(py_Tep))
-            return NULL;
-
-        // Extract the ETS object from the python object
-        if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
-            return NULL;
-
-        // Assign empty q0 and we
-        MapVectorX q0(NULL, 0);
-        MapVectorX we(NULL, 0);
-
-        // Check if q0 is None
-        if (py_q0 != Py_None)
+        else
         {
-            // Make sure q is number array
-            // Cast to numpy array
-            // Get data out
-            if (!_check_array_type(py_q0))
-                return NULL;
-            q0_used = 1;
-            py_np_q0 = (PyObject *)PyArray_FROMANY(py_q0, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
-            np_q0 = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q0);
-            // MapVectorX q0(np_q0, ets->n);
-            new (&q0) MapVectorX(np_q0, ets->n);
+            // std::cout << "chan" << std::endl;
+            _IK_LM_Chan(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E, lambda, we);
         }
-
-        // Check if we is None
-        if (py_we != Py_None)
-        {
-            // Make sure we is number array
-            // Cast to numpy array
-            // Get data out
-            if (!_check_array_type(py_we))
-                return NULL;
-            we_used = 1;
-            py_np_we = (PyObject *)PyArray_FROMANY(py_we, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
-            np_we = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_we);
-            new (&we) MapVectorX(np_we, 6);
-        }
-
-        // Set the dimension of the returned array to match the number of joints
-        dim[0] = ets->n;
-
-        py_np_Tep = (PyArrayObject *)PyArray_FROMANY(py_Tep, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
-        np_Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
-
-        // Tep in row major from Python
-        MapMatrix4dr row_Tep(np_Tep);
-
-        // Convert to col major here
-        Matrix4dc Tep = row_Tep;
-
-        py_ret = PyArray_EMPTY(1, dim, NPY_DOUBLE, 0);
-        np_ret = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_ret);
-        MapVectorX ret(np_ret, ets->n);
-
-        // std::cout << Tep << std::endl;
-        // std::cout << ret << std::endl;
-
-        _IK_LM_Wampler(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E, lambda, we);
-
-        // Free the memory
-        Py_DECREF(py_np_Tep);
-
-        if (q0_used)
-        {
-            Py_DECREF(py_np_q0);
-        }
-
-        if (we_used)
-        {
-            Py_DECREF(py_np_we);
-        }
-
-        // Build the return tuple
-        py_it = Py_BuildValue("i", it);
-        py_search = Py_BuildValue("i", search);
-        py_solution = Py_BuildValue("i", solution);
-        py_E = Py_BuildValue("d", E);
-
-        py_tup = PyTuple_Pack(5, py_ret, py_solution, py_it, py_search, py_E);
-
-        Py_DECREF(py_it);
-        Py_DECREF(py_search);
-        Py_DECREF(py_solution);
-        Py_DECREF(py_E);
-        Py_DECREF(py_ret);
-
-        return py_tup;
-    }
-
-    static PyObject *IK_LM_Sugihara_c(PyObject *self, PyObject *args)
-    {
-        ETS *ets;
-        npy_float64 *np_Tep, *np_ret, *np_q0, *np_we;
-        PyArrayObject *py_np_Tep;
-        PyObject *py_ets, *py_ret, *py_Tep, *py_q0, *py_np_q0, *py_we, *py_np_we;
-        PyObject *py_tup, *py_it, *py_search, *py_solution, *py_E;
-        npy_intp dim[1] = {1};
-        int ilimit, slimit, q0_used = 0, we_used = 0, reject_jl;
-        double tol, E, lambda;
-
-        int it = 0, search = 1, solution = 0;
-
-        if (!PyArg_ParseTuple(
-                args, "OOOiidiOd",
-                &py_ets,
-                &py_Tep,
-                &py_q0,
-                &ilimit,
-                &slimit,
-                &tol,
-                &reject_jl,
-                &py_we,
-                &lambda))
-            return NULL;
-
-        if (!_check_array_type(py_Tep))
-            return NULL;
-
-        // Extract the ETS object from the python object
-        if (!(ets = (ETS *)PyCapsule_GetPointer(py_ets, "ETS")))
-            return NULL;
-
-        // Assign empty q0 and we
-        MapVectorX q0(NULL, 0);
-        MapVectorX we(NULL, 0);
-
-        // Check if q0 is None
-        if (py_q0 != Py_None)
-        {
-            // Make sure q is number array
-            // Cast to numpy array
-            // Get data out
-            if (!_check_array_type(py_q0))
-                return NULL;
-            q0_used = 1;
-            py_np_q0 = (PyObject *)PyArray_FROMANY(py_q0, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
-            np_q0 = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q0);
-            // MapVectorX q0(np_q0, ets->n);
-            new (&q0) MapVectorX(np_q0, ets->n);
-        }
-
-        // Check if we is None
-        if (py_we != Py_None)
-        {
-            // Make sure we is number array
-            // Cast to numpy array
-            // Get data out
-            if (!_check_array_type(py_we))
-                return NULL;
-            we_used = 1;
-            py_np_we = (PyObject *)PyArray_FROMANY(py_we, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
-            np_we = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_we);
-            new (&we) MapVectorX(np_we, 6);
-        }
-
-        // Set the dimension of the returned array to match the number of joints
-        dim[0] = ets->n;
-
-        py_np_Tep = (PyArrayObject *)PyArray_FROMANY(py_Tep, NPY_DOUBLE, 1, 2, NPY_ARRAY_DEFAULT);
-        np_Tep = (npy_float64 *)PyArray_DATA(py_np_Tep);
-
-        // Tep in row major from Python
-        MapMatrix4dr row_Tep(np_Tep);
-
-        // Convert to col major here
-        Matrix4dc Tep = row_Tep;
-
-        py_ret = PyArray_EMPTY(1, dim, NPY_DOUBLE, 0);
-        np_ret = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_ret);
-        MapVectorX ret(np_ret, ets->n);
-
-        // std::cout << Tep << std::endl;
-        // std::cout << ret << std::endl;
-
-        _IK_LM_Sugihara(ets, Tep, q0, ilimit, slimit, tol, reject_jl, ret, &it, &search, &solution, &E, lambda, we);
 
         // Free the memory
         Py_DECREF(py_np_Tep);
@@ -1116,8 +955,10 @@ extern "C"
         // Get data out
         if (!_check_array_type(py_q))
             return NULL;
-        py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_F_CONTIGUOUS);
+        py_np_q = (PyObject *)PyArray_FROMANY(py_q, NPY_DOUBLE, 1, 2, NPY_ARRAY_C_CONTIGUOUS);
         q = (npy_float64 *)PyArray_DATA((PyArrayObject *)py_np_q);
+
+        // std::cout << "q: " << q[0] << ", " << q[1] << ", " << q[2] << ", " << q[3] << ", " << q[4] << ", " << q[5] << std::endl;
 
         // Check the dimesnions of q
         q_nd = PyArray_NDIM((PyArrayObject *)py_np_q);
@@ -1153,8 +994,15 @@ extern "C"
         }
         else
         {
+            // if using a trajectory, make a duplicate of ret as we will need to
+            // extreme reshape it due to Fortran ordering
+            // Fortran ordering of 3D array wants (4, 4, n) while numpy looping
+            // typically likes to have (n, 4, 4)
+
+            // therefore we make the returned python array (n, 4, 4) and row-major
+            // and later on we transpose each (4, 4) component
             dim3[0] = trajn;
-            py_ret = PyArray_EMPTY(3, dim3, NPY_DOUBLE, 1);
+            py_ret = PyArray_EMPTY(3, dim3, NPY_DOUBLE, 0);
         }
 
         // Get numpy reference to return array
@@ -1189,11 +1037,18 @@ extern "C"
         // Do the actual job
         for (int i = 0; i < trajn; i++)
         {
-            // Get pointers to the new section of return array and q array
             retp = ret + (4 * 4 * i);
+
             MapMatrix4dc e_retp(retp);
             qp = q + (n * i);
             _ETS_fkine(ets, qp, base, tool, e_retp);
+
+            // Transpose if we have a trajectory
+            // as the returned trajectory is row-major
+            if (trajn > 1)
+            {
+                e_retp.transposeInPlace();
+            }
         }
 
         // Free memory
@@ -1269,8 +1124,9 @@ extern "C"
 
         et = (ET *)PyMem_RawMalloc(sizeof(ET));
 
-        if (!PyArg_ParseTuple(args, "OiiiiO!O!",
+        if (!PyArg_ParseTuple(args, "OiiiiiO!O!",
                               &py_et,
+                              &et->isstaticsym,
                               &isjoint,
                               &isflip,
                               &jindex,
@@ -1333,7 +1189,8 @@ extern "C"
 
         et = (ET *)PyMem_RawMalloc(sizeof(ET));
 
-        if (!PyArg_ParseTuple(args, "iiiiO!O!",
+        if (!PyArg_ParseTuple(args, "iiiiiO!O!",
+                              &et->isstaticsym,
                               &et->isjoint,
                               &et->isflip,
                               &et->jindex,
@@ -1396,6 +1253,12 @@ extern "C"
 
         if (!(et = (ET *)PyCapsule_GetPointer(py_et, "ET")))
             return NULL;
+
+        if (et->isstaticsym)
+        {
+            PyErr_SetString(PyExc_TypeError, "Symbolic value");
+            return NULL;
+        }
 
         if (py_eta != Py_None)
         {

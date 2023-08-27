@@ -3,11 +3,11 @@
 import numpy as np
 from roboticstoolbox.robot.ET import ET2
 from roboticstoolbox.robot.ETS import ETS2
-from roboticstoolbox.robot.ERobot import ERobot2
+from roboticstoolbox.robot.Robot import Robot2
 from roboticstoolbox.robot.Link import Link2
 
 
-class Planar2(ERobot2):
+class Planar2(Robot2):
     """
     Create model of a branched planar manipulator::
 
@@ -35,11 +35,11 @@ class Planar2(ERobot2):
 
         super().__init__([l0, l1, l2], name="Planar2", comment="Planar 2D manipulator")
 
-        self.qr = np.array([0, 0])
+        self.qb = np.array([0, np.pi/2])
         self.qz = np.zeros(2)
 
-        self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)
+        self.addconfiguration("qb", self.qb)
 
 
 if __name__ == "__main__":  # pragma nocover

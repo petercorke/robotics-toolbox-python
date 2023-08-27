@@ -69,15 +69,13 @@ class DHRobot(Robot):
 
     :reference:
 
-        - Robotics, Vision & Control, Chaps 7-9,
-          P. Corke, Springer 2011.
+        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7-9.
         - Robot, Modeling & Control,
           M.Spong, S. Hutchinson & M. Vidyasagar, Wiley 2006.
 
     """
 
     def __init__(self, links, meshdir=None, **kwargs):
-
         # Verify L
         if not isinstance(links, list):
             raise TypeError("The links must be stored in a list.")
@@ -115,9 +113,15 @@ class DHRobot(Robot):
             else:
                 raise TypeError("Input can be only DHLink or DHRobot")
 
+        for i, link in enumerate(all_links):
+            if i > 0:
+                link.parent = all_links[i - 1]
+            else:
+                link.parent = None
+
         super().__init__(all_links, **kwargs)
 
-        self.ee_links = [self.links[-1]]
+        self._ee_links = [self.links[-1]]
 
         # Check the DH convention
         self._mdh = self.links[0].mdh
@@ -201,6 +205,12 @@ class DHRobot(Robot):
                 else:
                     return str(theta * deg) + "\u00b0"
 
+        def format_attr(attr) -> str:
+            if isinstance(attr, float):
+                return f"{attr:.4g}"
+            else:
+                return str(attr)
+
         has_qlim = any([link.qlim is not None for link in self])
         if has_qlim:
             qlim_columns = [
@@ -245,6 +255,7 @@ class DHRobot(Robot):
                 *qlim_columns,
                 border=border,
             )
+
             for j, L in enumerate(self):
                 if has_qlim:
                     if L.isprismatic:
@@ -255,11 +266,19 @@ class DHRobot(Robot):
                     ql = []
                 if L.isprismatic:
                     table.row(
-                        angle(L.theta), qstr(j, L), f"{L.a:.4g}", angle(L.alpha), *ql
+                        angle(L.theta),
+                        qstr(j, L),
+                        format_attr(L.a),
+                        angle(L.alpha),
+                        *ql,
                     )
                 else:
                     table.row(
-                        qstr(j, L), f"{L.d:.4g}", f"{L.a:.4g}", angle(L.alpha), *ql
+                        qstr(j, L),
+                        format_attr(L.d),
+                        format_attr(L.a),
+                        angle(L.alpha),
+                        *ql,
                     )
 
         s += str(table)
@@ -280,7 +299,7 @@ class DHRobot(Robot):
             if tool is not None:
                 table.row(
                     "tool",
-                    tool.printline(orient="rpy/xyz", fmt="{:.2g}", file=None),
+                    tool.strline(orient="rpy/xyz", fmt="{:.2g}"),
                 )
             s += "\n" + str(table)
 
@@ -304,9 +323,7 @@ class DHRobot(Robot):
             for j in range(L.n):
                 nlinks.append(L.links[j])
         else:
-            raise TypeError(
-                "Can only combine DHRobots with other " "DHRobots or DHLinks"
-            )
+            raise TypeError("Can only combine DHRobots with other DHRobots or DHLinks")
 
         return DHRobot(
             nlinks,
@@ -318,7 +335,6 @@ class DHRobot(Robot):
         )
 
     def __deepcopy__(self, memo):
-
         links = []
 
         for link in self.links:
@@ -420,7 +436,6 @@ class DHRobot(Robot):
         tall = self.fkine_all(q, old=True)
 
         for i, link in enumerate(self.links):
-
             # Update the link model transforms
             for col in link.collision:
                 col.wT = tall[i]
@@ -722,7 +737,8 @@ class DHRobot(Robot):
             >>> robot.islimit([0, 0, -4, 4, 0, 0])
 
         """
-        q = self._getq(q)
+        if q is None:
+            q = self.q
 
         return [link.islimit(qk) for (link, qk) in zip(self, q)]
 
@@ -946,7 +962,6 @@ class DHRobot(Robot):
 
         T = SE3.Empty()
         for qr in getmatrix(q, (None, self.n)):
-
             first = True
             for q, L in zip(qr, self.links):
                 if first:
@@ -996,7 +1011,6 @@ class DHRobot(Robot):
         return T
 
     def segments(self):
-
         segments = [None]
         segments.extend(self.links)
         return [segments]
@@ -1037,7 +1051,9 @@ class DHRobot(Robot):
             - Joint offsets, if defined, are added to q before the forward
               kinematics are computed.
         """
-        q = self._getq(q)
+
+        if q is None:
+            q = self.q
 
         Tj = self.base.copy()
         Tall = Tj
@@ -1610,7 +1626,6 @@ class DHRobot(Robot):
             # -----------------  the forward recursion -------------------- #
 
             for j, link in enumerate(self.links):
-
                 Rt = Rm[j].T  # transpose!!
                 pstar = pstarm[:, j]
                 r = link.r
@@ -1742,7 +1757,8 @@ class DHRobot(Robot):
                 )
                 if debug:
                     print(
-                        f"j={j:}, G={link.G:}, Jm={link.Jm:}, friction={link.friction(qd_k[j], coulomb=False):}"
+                        f"j={j:}, G={link.G:}, Jm={link.Jm:},"
+                        f" friction={link.friction(qd_k[j], coulomb=False):}"
                     )  # noqa
                     print()
 
@@ -2435,7 +2451,6 @@ class DHRobot(Robot):
             Tep, q0, ilimit, slimit, tol, reject_jl, we, use_pinv, pinv_damping
         )
 
-
     def ikine_LM(
         self,
         Tep: Union[np.ndarray, SE3],
@@ -2474,7 +2489,6 @@ def _cross(a, b):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     import roboticstoolbox as rtb
 
     # import spatialmath.base.symbolic as sym

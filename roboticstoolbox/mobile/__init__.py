@@ -16,13 +16,22 @@ from roboticstoolbox.mobile.RRTPlanner import RRTPlanner
 
 from roboticstoolbox.mobile.Bug2 import Bug2
 
-from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid, OccupancyGrid, PolygonMap
+from roboticstoolbox.mobile.OccGrid import (
+    BinaryOccupancyGrid,
+    OccupancyGrid,
+    PolygonMap,
+)
 
 # localization and state estimation
 from roboticstoolbox.mobile.landmarkmap import LandmarkMap
 from roboticstoolbox.mobile.sensors import RangeBearingSensor
 from roboticstoolbox.mobile.drivers import *
-from roboticstoolbox.mobile.Animations import VehicleAnimationBase, VehicleMarker, VehiclePolygon, VehicleIcon
+from roboticstoolbox.mobile.Animations import (
+    VehicleAnimationBase,
+    VehicleMarker,
+    VehiclePolygon,
+    VehicleIcon,
+)
 
 from roboticstoolbox.mobile.PoseGraph import *
 from roboticstoolbox.mobile.EKF import EKF

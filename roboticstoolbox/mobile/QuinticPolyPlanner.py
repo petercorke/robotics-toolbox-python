@@ -15,12 +15,12 @@ show_animation = True
 # The following code is modified from Python Robotics
 # https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning
 # Quintic Polynomial Planner
-# Author: Atsushi Sakai 
+# Author: Atsushi Sakai
 # Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
-# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
+
 
 class _QuinticPolynomial:
-
     def __init__(self, xs, vxs, axs, xe, vxe, axe, time):
         # calc coefficient of quintic polynomial
         # See jupyter notebook document for derivation of this equation.
@@ -28,12 +28,20 @@ class _QuinticPolynomial:
         self.a1 = vxs
         self.a2 = axs / 2.0
 
-        A = np.array([[time ** 3, time ** 4, time ** 5],
-                      [3 * time ** 2, 4 * time ** 3, 5 * time ** 4],
-                      [6 * time, 12 * time ** 2, 20 * time ** 3]])
-        b = np.array([xe - self.a0 - self.a1 * time - self.a2 * time ** 2,
-                      vxe - self.a1 - 2 * self.a2 * time,
-                      axe - 2 * self.a2])
+        A = np.array(
+            [
+                [time**3, time**4, time**5],
+                [3 * time**2, 4 * time**3, 5 * time**4],
+                [6 * time, 12 * time**2, 20 * time**3],
+            ]
+        )
+        b = np.array(
+            [
+                xe - self.a0 - self.a1 * time - self.a2 * time**2,
+                vxe - self.a1 - 2 * self.a2 * time,
+                axe - 2 * self.a2,
+            ]
+        )
         x = np.linalg.solve(A, b)
 
         self.a3 = x[0]
@@ -41,29 +49,47 @@ class _QuinticPolynomial:
         self.a5 = x[2]
 
     def calc_point(self, t):
-        xt = self.a0 + self.a1 * t + self.a2 * t ** 2 + \
-             self.a3 * t ** 3 + self.a4 * t ** 4 + self.a5 * t ** 5
+        xt = (
+            self.a0
+            + self.a1 * t
+            + self.a2 * t**2
+            + self.a3 * t**3
+            + self.a4 * t**4
+            + self.a5 * t**5
+        )
 
         return xt
 
     def calc_first_derivative(self, t):
-        xt = self.a1 + 2 * self.a2 * t + \
-             3 * self.a3 * t ** 2 + 4 * self.a4 * t ** 3 + 5 * self.a5 * t ** 4
+        xt = (
+            self.a1
+            + 2 * self.a2 * t
+            + 3 * self.a3 * t**2
+            + 4 * self.a4 * t**3
+            + 5 * self.a5 * t**4
+        )
 
         return xt
 
     def calc_second_derivative(self, t):
-        xt = 2 * self.a2 + 6 * self.a3 * t + 12 * self.a4 * t ** 2 + 20 * self.a5 * t ** 3
+        xt = (
+            2 * self.a2
+            + 6 * self.a3 * t
+            + 12 * self.a4 * t**2
+            + 20 * self.a5 * t**3
+        )
 
         return xt
 
     def calc_third_derivative(self, t):
-        xt = 6 * self.a3 + 24 * self.a4 * t + 60 * self.a5 * t ** 2
+        xt = 6 * self.a3 + 24 * self.a4 * t + 60 * self.a5 * t**2
 
         return xt
 
 
-def quintic_polynomials_planner(sx, sy, syaw, sv, sa, gx, gy, gyaw, gv, ga, max_accel, max_jerk, dt, MIN_T, MAX_T):
+def quintic_polynomials_planner(
+    sx, sy, syaw, sv, sa, gx, gy, gyaw, gv, ga, max_accel, max_jerk, dt, MIN_T, MAX_T
+):
     """
     quintic polynomial planner
 
@@ -134,16 +160,20 @@ def quintic_polynomials_planner(sx, sy, syaw, sv, sa, gx, gy, gyaw, gv, ga, max_
                 j *= -1
             rj.append(j)
 
-        if max([abs(i) for i in ra]) <= max_accel and max([abs(i) for i in rj]) <= max_jerk:
+        if (
+            max([abs(i) for i in ra]) <= max_accel
+            and max([abs(i) for i in rj]) <= max_jerk
+        ):
             print("find path!!")
             break
 
     return time, np.c_[rx, ry, ryaw], rv, ra, rj
 
+
 # ====================== RTB wrapper ============================= #
 
 # Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
-# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
 class QuinticPolyPlanner(PlannerBase):
     r"""
     Quintic polynomial path planner
@@ -158,7 +188,7 @@ class QuinticPolyPlanner(PlannerBase):
     :type goal_vel: float, optional
     :param goal_acc: goal acceleration, defaults to 0
     :type goal_acc: float, optional
-    :param max_acc: [description], defaults to 1
+    :param max_acc: maximum acceleration, defaults to 1
     :type max_acc: int, optional
     :param max_jerk: maximum jerk, defaults to 0.5
     :type min_t: float, optional
@@ -187,6 +217,8 @@ class QuinticPolyPlanner(PlannerBase):
             x(t) &= a_0 + a_1 t + a_2 t^2 + a_3 t^3 + a_4 t^4 + a_5 t^5 \\
             y(t) &= b_0 + b_1 t + b_2 t^2 + b_3 t^3 + b_4 t^4 + b_5 t^5
 
+    that meets the given constraints.  Trajectory time is given as a range.
+    
     :reference: "Local Path Planning And Motion Control For AGV In
         Positioning",  Takahashi, T. Hongo, Y. Ninomiya and G.
         Sugimoto; Proceedings. IEEE/RSJ International Workshop on
@@ -212,8 +244,19 @@ class QuinticPolyPlanner(PlannerBase):
 
     :seealso: :class:`Planner`
     """
-    def __init__(self, dt=0.1, start_vel=0, start_acc=0, goal_vel=0, goal_acc=0,
-            max_acc=1, max_jerk=0.5, min_t=5, max_t=100):
+
+    def __init__(
+        self,
+        dt=0.1,
+        start_vel=0,
+        start_acc=0,
+        goal_vel=0,
+        goal_acc=0,
+        max_acc=1,
+        max_jerk=0.5,
+        min_t=5,
+        max_t=100,
+    ):
 
         super().__init__(ndims=3)
         self.dt = dt
@@ -225,7 +268,6 @@ class QuinticPolyPlanner(PlannerBase):
         self.max_jerk = max_jerk
         self.min_t = min_t
         self.max_t = max_t
-
 
     def query(self, start, goal):
         r"""
@@ -248,23 +290,38 @@ class QuinticPolyPlanner(PlannerBase):
         ``accel``   acceleration profile along the path
         ``jerk``    jerk profile along the path
         ==========  ===================================================
-    
+
         :seealso: :meth:`Planner.query`
         """
         self._start = start
         self._goal = goal
 
         time, path, v, a, j = quintic_polynomials_planner(
-            start[0], start[1], start[2], self.start_vel, self.start_acc,
-            goal[0], goal[1], goal[2], self.start_vel, self.start_acc, 
-            self.max_acc, self.max_jerk, dt=self.dt, MIN_T=self.min_t, MAX_T=self.max_t)
+            start[0],
+            start[1],
+            start[2],
+            self.start_vel,
+            self.start_acc,
+            goal[0],
+            goal[1],
+            goal[2],
+            self.start_vel,
+            self.start_acc,
+            self.max_acc,
+            self.max_jerk,
+            dt=self.dt,
+            MIN_T=self.min_t,
+            MAX_T=self.max_t,
+        )
 
-        status = namedtuple('QuinticPolyStatus', ['t', 'vel', 'acc', 'jerk'])(
-                time, v, a, j)
-        
+        status = namedtuple("QuinticPolyStatus", ["t", "vel", "acc", "jerk"])(
+            time, v, a, j
+        )
+
         return path, status
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     from math import pi
 
     start = (10, 10, np.deg2rad(10.0))
@@ -294,5 +351,3 @@ if __name__ == '__main__':
     plt.grid(True)
 
     plt.show(block=True)
-
-

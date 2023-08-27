@@ -22,7 +22,6 @@ class RobotPlot:
         name=True,
         options=None,
     ):
-
         super(RobotPlot, self).__init__()
 
         # Readonly - True for this robot is for displaying only
@@ -129,7 +128,7 @@ class RobotPlot:
 
             # add new ee coordinate frame
             for link in self.robot.ee_links:
-                Te = T[link.number]
+                Te = T[link.number] * self.robot.tool
 
                 # ee axes arrows
                 Tex = Te * Tjx
@@ -156,11 +155,15 @@ class RobotPlot:
         if self.jointaxes:
             # Plot joint z coordinates
             for link in self.robot:
-
                 direction = None
                 if isinstance(self.robot, rp.DHRobot):
                     # should test MDH I think
-                    Tj = T[link.number - 1]
+
+                    if self.robot.mdh:
+                        Tj = T[link.number]
+                    else:
+                        Tj = T[link.number - 1]
+
                     R = Tj.R
                     direction = R[:, 2]  # z direction
                 elif link.isjoint:
@@ -178,7 +181,6 @@ class RobotPlot:
                     self.joints.extend(arrow)
 
     def init(self):
-
         self.drawn = True
 
         if self.env.limits is None:
@@ -203,7 +205,6 @@ class RobotPlot:
         self.links = []
         self.sh_links = []
         for i in range(len(self.segments)):
-
             # Plot the shadow of the robot links, draw first so robot is always
             # in front
             if self.shadow:

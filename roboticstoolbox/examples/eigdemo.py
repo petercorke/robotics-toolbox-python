@@ -39,15 +39,20 @@ def eigdemo(A):
     plt.ylim(-s, s)
     ax.set_aspect('equal')
 
-    l1, = plt.plot([0, 0], [0, 0], color='r', linewidth=1.5)  # input vector
-    l2, = plt.plot([0, 0], [0, 0], color='b', linewidth=1.5)  # transformed vector
+    l1, = plt.plot([0, 0], [0, 0], color='r', linewidth=3)  # input vector
+    l2, = plt.plot([0, 0], [0, 0], color='b', linewidth=3)  # transformed vector
 
-    plt.legend(['$x$', r'${\bf A} x$'])
+    plt.plot([0, x[0, 0]], [0, x[1, 0]], color='k', linewidth=1)
+    plt.plot([0, x[0, 1]], [0, x[1, 1]], color='k', linewidth=1)
+    
 
+    plt.legend(['$x$', r'${\bf A} x$', r'$x_1$', r'$x_2$'])
+
+    print("\nto exit: type q, or close the window")
 
     def animate(theta):
 
-        x = np.r_[cos(theta), sin(theta)]
+        x = np.r_[cos(-theta), sin(-theta)]
         y = A @ x
 
         l1.set_xdata([0, x[0]])
@@ -68,10 +73,13 @@ def eigdemo(A):
 def main():
 
     def help():
-        print("eigdemo          uses default matrix [1 2; 3 4]")
-        print("eigdemo a b c d  uses matrix [a b; c d]")
+        print("eigdemo          # uses default matrix [1 2; 3 4]")
+        print("eigdemo a b c d  # uses matrix [a b; c d]")
         sys.exit(0)
-        
+    
+    if sys.argv in ("-h", "--help", "help"):
+        help()
+
     if len(sys.argv) == 5:
 
         try:
@@ -80,14 +88,15 @@ def main():
         except:
             help()
 
-    elif sys.argv == 1:
+    elif len(sys.argv) == 1:
         A = np.array([
             [1, 2],
             [3, 3]
         ])
-
+    
     else:
         help()
+
 
     eigdemo(A)
 

@@ -58,7 +58,7 @@ class Sawyer(DHRobot):
 
         links = []
 
-        for j in range(6):
+        for j in range(7):
             link = RevoluteDH(d=d[j], a=a[j], alpha=alpha[j])
             links.append(link)
 
@@ -73,8 +73,8 @@ class Sawyer(DHRobot):
             symbolic=symbolic,
         )
 
-        self.qr = np.zeros(6)
-        self.qz = np.zeros(6)
+        self.qr = np.zeros(7)
+        self.qz = np.zeros(7)
 
         self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)

@@ -9,12 +9,14 @@ Python PRM
 # from spatialmath.base.animate import Animate
 from spatialmath.base.transforms2d import *
 from spatialmath.base.vectors import *
+
 # from spatialmath.pose2d import SE2
 # from spatialmath.base import animate
 from scipy.ndimage import *
 from matplotlib import cm, pyplot as plt
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from pgraph import UGraph
+
 # from progress.bar import FillingCirclesBar
 
 
@@ -61,6 +63,7 @@ class PRMPlanner(PlannerBase):
     :author: Peter Corke
     :seealso: :class:`PlannerBase`
     """
+
     def __init__(self, occgrid=None, npoints=100, dist_thresh=None, **kwargs):
         super().__init__(occgrid, ndims=2, **kwargs)
 
@@ -81,7 +84,7 @@ class PRMPlanner(PlannerBase):
     def __str__(self):
         s = super().__str__()
         if self.graph is not None:
-            s += '\n  ' + str(self.graph)
+            s += "\n  " + str(self.graph)
         return s
 
     @property
@@ -125,7 +128,6 @@ class PRMPlanner(PlannerBase):
         """
         return self._graph
 
-
     def _create_roadmap(self, npoints, dist_thresh, animate=None):
         # a = Animate(animate, fps=5)
         self.progress_start(npoints)
@@ -152,17 +154,17 @@ class PRMPlanner(PlannerBase):
                 # skip self
                 if vertex is othervertex:
                     continue
-                # add (distance, vertex) tuples to list 
+                # add (distance, vertex) tuples to list
                 distances.append((vertex.distance(othervertex), othervertex))
-            
+
             # sort into ascending distance
-            distances.sort(key=lambda x:x[0])
+            distances.sort(key=lambda x: x[0])
 
             # create edges to vertex if permissible
             for distance, othervertex in distances:
                 # test if below distance threshold
                 if dist_thresh is not None and distance > dist_thresh:
-                    break # sorted into ascending order, so we are done
+                    break  # sorted into ascending order, so we are done
 
                 # test if obstacle free path connecting them
                 if self._test_path(vertex, othervertex):
@@ -171,10 +173,10 @@ class PRMPlanner(PlannerBase):
             self.progress_next()
 
         self.progress_end()
-            # if animate is not None:
-            #     self.plot()
-            #     if not np.empty(movie):
-            #         a.add()
+        # if animate is not None:
+        #     self.plot()
+        #     if not np.empty(movie):
+        #         a.add()
 
     def _test_path(self, v1, v2, npoints=None):
         # vector from v1 to v2
@@ -217,7 +219,7 @@ class PRMPlanner(PlannerBase):
         :seealso: :meth:`query` :meth:`graph`
         """
 
-        self.message('create the graph')
+        self.message("create the graph")
 
         if npoints is None:
             npoints = self.npoints
@@ -252,7 +254,7 @@ class PRMPlanner(PlannerBase):
 
         """
         if self.graph.n == 0:
-            raise RuntimeError('no plan computed')
+            raise RuntimeError("no plan computed")
 
         super().query(start=start, goal=goal, next=False, **kwargs)
 
@@ -263,7 +265,7 @@ class PRMPlanner(PlannerBase):
         # find A* path through the roadmap
         out = self.graph.path_Astar(vstart, vgoal)
         if out is None:
-            raise RuntimeError('no path found')
+            raise RuntimeError("no path found")
         path = [v.coord for v in out[0]]
 
         path.insert(0, start)  # insert start at head of path
@@ -281,7 +283,7 @@ class PRMPlanner(PlannerBase):
         :type edge: dict, optional
 
         Displays:
-        
+
         - the planner background (obstacles)
         - the roadmap graph
         - the path
@@ -289,30 +291,46 @@ class PRMPlanner(PlannerBase):
         :seealso: :meth:`UGraph.plot`
         """
         # plot the obstacles and path
-        super().plot(*args, **kwargs)
+        ax = super().plot(*args, **kwargs)
+        print("plotted background")
         vertex = {**dict(markersize=4), **vertex}
         edge = {**dict(linewidth=0.5), **edge}
 
         # add the roadmap graph
-        self.graph.plot(text=False, vopt=vertex, eopt=edge)
+        self.graph.plot(text=False, vopt=vertex, eopt=edge, ax=ax)
+        print("plotted roadmap")
 
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
+    from roboticstoolbox import *
+
+    house = rtb_load_matfile("data/house.mat")
+    floorplan = house["floorplan"]
+    places = house["places"]
+
+    occgrid = floorplan.copy()
+
+    prm = PRMPlanner(occgrid=floorplan, seed=0)
+    prm.plan(npoints=50)
+    prm.plot()
 
     # start and goal position
-    start = (10, 10)
-    goal = (50, 50)
+    # start = (10, 10)
+    # goal = (50, 50)
 
-    occgrid = np.zeros((100, 100))
-    occgrid[20:40, 15:30] = 1
+    # occgrid = np.zeros((100, 100))
+    # occgrid[20:40, 15:30] = 1
 
-    prm = PRMPlanner(occgrid=occgrid, verbose=True)
+    # prm = PRMPlanner(occgrid=occgrid, verbose=True)
 
-    prm.plan()
-    path = prm.query(start, goal)
-    print(path)
+    # prm.plan()
 
-    prm.plot(path, path_marker=dict(zorder=8, linewidth=2, markersize=6, color='k'))
-    prm.plot(ax=plt.gca(), text=False, vertex=dict(markersize=4), edge=dict(linewidth=0.5))
+    # prm.plot()
+
+    # path = prm.query(start, goal)
+    # print(path)
+
+    # prm.plot(path, path_marker=dict(zorder=8, linewidth=2, markersize=6, color='k'))
+    # prm.plot(ax=plt.gca(), text=False, vertex=dict(markersize=4), edge=dict(linewidth=0.5))
     plt.show(block=True)

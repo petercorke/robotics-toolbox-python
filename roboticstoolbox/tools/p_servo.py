@@ -4,11 +4,22 @@ import numpy as np
 from spatialmath import SE3, base
 import math
 from typing import Union
+from roboticstoolbox.fknm import Angle_Axis
 
 ArrayLike = Union[list, np.ndarray, tuple, set]
 
 
 def angle_axis(T, Td):
+
+    try:
+        e = Angle_Axis(T, Td)
+    except BaseException:
+        e = angle_axis_python(T, Td)
+
+    return e
+
+
+def angle_axis_python(T, Td):
     e = np.empty(6)
     e[:3] = Td[:3, -1] - T[:3, -1]
     R = Td[:3, :3] @ T[:3, :3].T
