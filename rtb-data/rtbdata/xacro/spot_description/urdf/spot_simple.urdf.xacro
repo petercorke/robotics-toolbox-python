@@ -1,0 +1,361 @@
+<?xml version="1.0" ?>
+<robot name="spot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <link name="body">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/body.obj"/>
+      </geometry>
+      <material name="body"> <color rgba="1 0.8431 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/body.stl" />
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="body_inertia">
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.006394396536052227 -9.812158532440662e-05 0.0009113792330026627"/>
+      <mass value="32.86"/>
+      <inertia ixx="0.13143999874591827" ixy="0.0" ixz="0.0" iyy="0.13143999874591827" iyz="0.0" izz="0.13143999874591827"/>
+    </inertial>
+  </link>
+  <joint name="body_inertia_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="body_inertia" />
+  </joint>
+
+  <link name="fl_hip">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/fl_hip.obj"/>
+      </geometry>
+      <material name="fl_hip"> <color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/fl_hip.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="-0.716521349312305 0.02956473059648479 0.03655230014702582" xyz="-0.005374345928430557 0.012841847725212574 9.875232353806496e-05"/>
+      <mass value="1.68"/>
+      <inertia ixx="0.0021147398873455382" ixy="0.0" ixz="0.0" iyy="0.0018129577956607131" iyz="0.0" izz="0.002265435737304666"/>
+    </inertial>
+  </link>
+  <joint name="fl_hx" type="revolute">
+    <origin xyz="0.29785 0.05500 0.00000" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <parent link="body"/>
+    <child link="fl_hip"/>
+    <limit effort="1000" velocity="1000.00" lower="-0.78539816339744827899" upper="0.78539816339744827899"/>
+  </joint>
+
+  <link name="fl_uleg">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/fl_uleg.obj"/>
+      </geometry>
+      <material name="fl_uleg"> <color rgba="1 0.8431 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/fl_uleg.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="-0.26437828203369795 -0.04853174570753804 0.024046963096353124" xyz="0.005142373498529196 -0.0024323679972440004 -0.12100915610790253"/>
+      <mass value="2.34"/>
+      <inertia ixx="0.02755964961185679" ixy="0.0" ixz="0.0" iyy="0.027354914287651046" iyz="0.0" izz="0.002848145546743553"/>
+    </inertial>
+  </link>
+  <joint name="fl_hy" type="revolute">
+    <origin xyz="0.0 0.11080 0.0" rpy="0 0 0"/>
+    <axis xyz="0 1      0"/>
+    <parent link="fl_hip"/>
+    <child link="fl_uleg"/>
+    <limit effort="1000" velocity="1000.00" lower="-0.89884456477707963539" upper="2.2951079663725435509"/>
+  </joint>
+
+  <link name="fl_lleg">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/fl_lleg.obj"/>
+      </geometry>
+      <material name="fl_lleg"> <color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/fl_lleg.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="-0.007266925694167092 -0.009591807116834161 0.00035255970529224356" xyz="0.00225794012658298 4.607596201822162e-05 -0.1800822913646698"/>
+      <mass value="0.35"/>
+      <inertia ixx="0.003999022654901177" ixy="0.0" ixz="0.0" iyy="0.0040503157598010785" iyz="0.0" izz="0.0001493402097647426"/>
+    </inertial>
+  </link>
+  <joint name="fl_kn" type="revolute">
+    <origin xyz="0.025 0.000 -0.3200" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="fl_uleg"/>
+    <child link="fl_lleg"/>
+    <limit effort="1000" velocity="1000.00" lower="-2.7929" upper="-0.254402"/>
+  </joint>
+
+  <link name="fr_hip">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/fr_hip.obj"/>
+      </geometry>
+      <material name="fr_hip"> <color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/fr_hip.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.7165213493123055 -0.02956473059648479 0.03655230014702582" xyz="-0.005374345928430557 -0.012841847725212574 -9.875232353806496e-05"/>
+      <mass value="1.68"/>
+      <inertia ixx="0.0021147398873455382" ixy="0.0" ixz="0.0" iyy="0.0018129577956607131" iyz="0.0" izz="0.002265435737304666"/>
+    </inertial>
+  </link>
+  <joint name="fr_hx" type="revolute">
+    <origin xyz="0.29785 -0.05500 0.00000" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <parent link="body"/>
+    <child link="fr_hip"/>
+    <limit effort="1000" velocity="1000.00" lower="-0.78539816339744827899" upper="0.78539816339744827899"/>
+  </joint>
+
+  <link name="fr_uleg">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/fr_uleg.obj"/>
+      </geometry>
+      <material name="fr_uleg"> <color rgba="1 0.8431 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/fr_uleg.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.2643905306958363 -0.04853174688302708 -0.024046943559834943" xyz="0.005142373498529196 0.0024323677644133568 -0.12100915610790253"/>
+      <mass value="2.34"/>
+      <inertia ixx="0.02755964678927691" ixy="0.0" ixz="0.0" iyy="0.02735491706466737" iyz="0.0" izz="0.0028481453594764797"/>
+    </inertial>
+  </link>
+  <joint name="fr_hy" type="revolute">
+    <origin xyz="0.0 -0.11080 0.0" rpy="0 0 0"/>
+    <axis xyz="0  1      0"/>
+    <parent link="fr_hip"/>
+    <child link="fr_uleg"/>
+    <limit effort="1000" velocity="1000.00" lower="-0.898845" upper="2.24363"/>
+  </joint>
+
+  <link name="fr_lleg">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/fr_lleg.obj"/>
+      </geometry>
+      <material name="fr_lleg"> <color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/fr_lleg.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="-0.007266925694167092 -0.009591807116834161 0.00035255970529224356" xyz="0.00225794012658298 4.607596201822162e-05 -0.1800822913646698"/>
+      <mass value="0.35"/>
+      <inertia ixx="0.003999022654901177" ixy="0.0" ixz="0.0" iyy="0.0040503157598010785" iyz="0.0" izz="0.0001493402097647426"/>
+    </inertial>
+  </link>
+  <joint name="fr_kn" type="revolute">
+    <origin xyz="0.025 0.000 -0.3200" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="fr_uleg"/>
+    <child link="fr_lleg"/>
+    <limit effort="1000" velocity="1000.00" lower="-2.7929" upper="-0.255648"/>
+  </joint>
+
+  <link name="hl_hip">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/hl_hip.obj"/>
+      </geometry>
+      <material name="hl_hip"> <color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/hl_hip.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.7165213493123055 0.02956473059648479 -0.03655230014702582" xyz="0.005374345928430557 0.012841847725212574 -9.875232353806496e-05"/>
+      <mass value="1.68"/>
+      <inertia ixx="0.0021147398873455382" ixy="0.0" ixz="0.0" iyy="0.0018129577956607131" iyz="0.0" izz="0.002265435737304666"/>
+    </inertial>
+  </link>
+  <joint name="hl_hx" type="revolute">
+    <origin xyz="-0.29785 0.05500 0.00000" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <parent link="body"/>
+    <child link="hl_hip"/>
+    <limit effort="1000" velocity="1000.00" lower="-0.78539816339744827899" upper="0.78539816339744827899"/>
+  </joint>
+
+  <link name="hl_uleg">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/hl_uleg.obj"/>
+      </geometry>
+      <material name="hl_uleg"> <color rgba="1 0.8431 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/hl_uleg.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="-0.26437828203369795 -0.04853174570753804 0.024046963096353124" xyz="0.005142373498529196 -0.0024323679972440004 -0.12100915610790253"/>
+      <mass value="2.34"/>
+      <inertia ixx="0.02755964961185679" ixy="0.0" ixz="0.0" iyy="0.027354914287651046" iyz="0.0" izz="0.002848145546743553"/>
+    </inertial>
+  </link>
+  <joint name="hl_hy" type="revolute">
+    <origin xyz="0.0 0.11080 0.0" rpy="0 0 0"/>
+    <axis xyz="0 1      0"/>
+    <parent link="hl_hip"/>
+    <child link="hl_uleg"/>
+    <limit effort="1000" velocity="1000.00" lower="-0.89884456477707963539" upper="2.2951079663725435509"/>
+  </joint>
+
+  <link name="hl_lleg">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/hl_lleg.obj"/>
+      </geometry>
+      <material name="hl_lleg"> <color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/hl_lleg.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="-0.007266925694167092 -0.009591807116834161 0.00035255970529224356" xyz="0.00225794012658298 4.607596201822162e-05 -0.1800822913646698"/>
+      <mass value="0.35"/>
+      <inertia ixx="0.003999022654901177" ixy="0.0" ixz="0.0" iyy="0.0040503157598010785" iyz="0.0" izz="0.0001493402097647426"/>
+    </inertial>
+  </link>
+  <joint name="hl_kn" type="revolute">
+    <origin xyz="0.025 0.000 -0.3200" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="hl_uleg"/>
+    <child link="hl_lleg"/>
+    <limit effort="1000" velocity="1000.00" lower="-2.7929" upper="-0.247067"/>
+  </joint>
+
+  <link name="hr_hip">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/hr_hip.obj"/>
+      </geometry>
+      <material name="hr_hip"> <color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/hr_hip.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="-0.716521349312305 -0.02956473059648479 -0.03655230014702582" xyz="0.005374345928430557 -0.012841847725212574 9.875232353806496e-05"/>
+      <mass value="1.68"/>
+      <inertia ixx="0.0021147398873455382" ixy="0.0" ixz="0.0" iyy="0.0018129577956607131" iyz="0.0" izz="0.002265435737304666"/>
+    </inertial>
+
+  </link>
+  <joint name="hr_hx" type="revolute">
+    <origin xyz="-0.29785 -0.05500 0.00000" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <parent link="body"/>
+    <child link="hr_hip"/>
+    <limit effort="1000" velocity="1000.00" lower="-0.78539816339744827899" upper="0.78539816339744827899"/>
+  </joint>
+
+  <link name="hr_uleg">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/hr_uleg.obj"/>
+      </geometry>
+      <material name="hr_uleg"> <color rgba="1 0.8431 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/hr_uleg.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0.2643905306958363 -0.04853174688302708 -0.024046943559834943" xyz="0.005142373498529196 0.0024323677644133568 -0.12100915610790253"/>
+      <mass value="2.34"/>
+      <inertia ixx="0.02755964678927691" ixy="0.0" ixz="0.0" iyy="0.02735491706466737" iyz="0.0" izz="0.0028481453594764797"/>
+    </inertial>
+  </link>
+  <joint name="hr_hy" type="revolute">
+    <origin xyz="0.0 -0.11080 0.0" rpy="0 0 0"/>
+    <axis xyz="0  1      0"/>
+    <parent link="hr_hip"/>
+    <child link="hr_uleg"/>
+    <limit effort="1000" velocity="1000.00" lower="-0.89884456477707963539" upper="2.2951079663725435509"/>
+  </joint>
+
+  <link name="hr_lleg">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/visual/hr_lleg.obj"/>
+      </geometry>
+      <material name="hr_lleg"> <color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://spot_description/meshes/base_simple/collision/hr_lleg.stl" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="-0.007266925694167092 -0.009591807116834161 0.00035255970529224356" xyz="0.00225794012658298 4.607596201822162e-05 -0.1800822913646698"/>
+      <mass value="0.35"/>
+      <inertia ixx="0.003999022654901177" ixy="0.0" ixz="0.0" iyy="0.0040503157598010785" iyz="0.0" izz="0.0001493402097647426"/>
+    </inertial>
+  </link>
+  <joint name="hr_kn" type="revolute">
+    <origin xyz="0.025 0.000 -0.3200" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="hr_uleg"/>
+    <child link="hr_lleg"/>
+    <limit effort="1000" velocity="1000.00" lower="-2.7929" upper="-0.248282"/>
+  </joint>
+
+  <!-- Standard accessories. -->
+  <!-- <xacro:include filename="$(find spot_description)/urdf/accessories.urdf.xacro" /> -->
+
+  <!-- Optional custom includes. -->
+  <!-- <xacro:include filename="$(optenv SPOT_URDF_EXTRAS empty.urdf)" /> -->
+</robot>

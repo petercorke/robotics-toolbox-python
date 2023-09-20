@@ -1,0 +1,6 @@
+<robot>
+  <!-- This file is a placeholder which is included by default from
+       spot.urdf.xacro. If a robot is being customized and requires
+       additional URDF, set the SPOT_URDF_EXTRAS environment variable
+       to the full path of the file you would like included. -->
+</robot>

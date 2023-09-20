@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<robot name="spot_with_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Spot base -->
+  <xacro:include filename="$(find spot_description)/urdf/spot.urdf.xacro" />
+
+  <!-- Spot arm -->
+  <xacro:include filename="$(find spot_description)/urdf/spot_arm.urdf" />
+</robot>
