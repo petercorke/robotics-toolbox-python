@@ -341,6 +341,8 @@ If the toolbox helped you in your research, please cite
 
 <a id='7'></a>
 
+
+
 ## Using the Toolbox in your Open Source Code?
 
 If you are using the Toolbox in your open source code, feel free to add our badge to your readme!
@@ -372,3 +374,11 @@ copy the following
 ## Common Issues and Solutions
 
 See the common issues with fixes [here](https://github.com/petercorke/robotics-toolbox-python/wiki/Common-Issues).
+
+### Using the Toolbox with Windows?
+
+Graphical visualsaion via swift is currently not supported under Windows. However there is a hotfix, by changing in ```SwiftRoute.py```
+
+```self.path[9:]``` to  ```self.path[10:]```
+
+
