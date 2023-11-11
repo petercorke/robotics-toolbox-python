@@ -147,8 +147,8 @@ class IKine(FunctionBlock):
         :type q0: array_like(n), optional
         :param useprevious: Use previous IK solution as q0, defaults to True
         :type useprevious: bool, optional
-        :param ik: Specify an IK function, defaults to ``Robot.ikine_LM``
-        :type ik: callable
+        :param ik: Specify an IK function, defaults to "LM"
+        :type ik: str
         :param args: Options passed to IK function
         :type args: dict
         :param seed: random seed for solution
