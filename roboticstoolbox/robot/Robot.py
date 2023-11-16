@@ -1784,7 +1784,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 vJ = SpatialVelocity(s[j] * qdk[j])
 
                 # transform from parent(j) to j
-                Xup[j] = SE3(self.links[j].A(qk[j])).inv()
+                if self.links[j].jindex is not None:
+                    Xup[j] = SE3(self.links[j].A(qk[self.links[j].jindex])).inv()
+                else:
+                    Xup[j] = SE3(self.links[j].A()).inv()
 
                 if self.links[j].parent is None:
                     v[j] = vJ
