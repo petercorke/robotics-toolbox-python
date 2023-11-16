@@ -1719,7 +1719,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         # allocate intermediate variables
         Xup = SE3.Alloc(n)
-        Xtree = SE3.Alloc(n)
 
         v = SpatialVelocity.Alloc(n)
         a = SpatialAcceleration.Alloc(n)
@@ -1738,41 +1737,21 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         else:
             Q = np.empty((l, n))  # joint torque/force
 
-        # TODO Should the dynamic parameters of static links preceding joint be
-        # somehow merged with the joint?
-
-        # A temp variable to handle static joints
-        Ts = SE3()
-
-        # A counter through joints
-        j = 0
-
         for k in range(l):
             qk = q[k, :]
             qdk = qd[k, :]
             qddk = qdd[k, :]
 
             # initialize intermediate variables
-            for link in self.links:
+            for j, link in enumerate(self.links):
                 if link.isjoint:
                     I[j] = SpatialInertia(m=link.m, r=link.r)
-                    if symbolic and link.Ts is None:  # pragma: nocover
-                        Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
-                    elif link.Ts is not None:
-                        Xtree[j] = Ts * SE3(link.Ts, check=False)
 
                     if link.v is not None:
                         s.append(link.v.s)
 
                     # Increment the joint counter
                     j += 1
-
-                    # Reset the Ts tracker
-                    Ts = SE3()
-                else:  # pragma nocover
-                    # TODO Keep track of inertia and transform???
-                    if link.Ts is not None:
-                        Ts *= SE3(link.Ts, check=False)
 
             if gravity is None:
                 a_grav = -SpatialAcceleration(self.gravity)
@@ -1787,6 +1766,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 if self.links[j].jindex is not None:
                     Xup[j] = SE3(self.links[j].A(qk[self.links[j].jindex])).inv()
                 else:
+                    # If fixed link between parent and child
                     Xup[j] = SE3(self.links[j].A()).inv()
 
                 if self.links[j].parent is None:
@@ -1794,6 +1774,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qddk[j])
                 else:
                     jp = self.links[j].parent.jindex  # type: ignore
+                    breakpoint()
                     v[j] = Xup[j] * v[jp] + vJ
                     a[j] = (
                         Xup[j] * a[jp] + SpatialAcceleration(s[j] * qddk[j]) + v[j] @ vJ
