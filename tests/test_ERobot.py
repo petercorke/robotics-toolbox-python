@@ -152,6 +152,13 @@ class TestERobot(unittest.TestCase):
         tau = robot.rne(q, z, np.array([1, 1]))
         nt.assert_array_almost_equal(tau, np.r_[d11 + d12, d21 + d22])
 
+    def test_URDF_inertia(self):
+        robot = rtb.models.URDF.UR10()
+        try:
+            robot.inertia(robot.q)
+        except TypeError:
+            self.fail("inertia() with a robot containing fixed links raised an error")
+
 
 class TestERobot2(unittest.TestCase):
     def test_plot(self):
