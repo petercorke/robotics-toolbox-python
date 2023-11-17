@@ -1747,7 +1747,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
                 # Find closest joint
                 reference_link = link
+                transform_matrix = SE3()
                 while reference_link is not None and reference_link.jindex is None:
+                    transform_matrix = transform_matrix * SE3(reference_link.A())
                     reference_link = reference_link.parent
 
                 # This means we are linked to the base link w/o joints inbetween
@@ -1755,9 +1757,11 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 if reference_link is None or reference_link.jindex is None:
                     continue
 
-                # TODO: Stack static link inertias
+                # Adding inertia of fixed links
                 joint_idx = reference_link.jindex
-                I[joint_idx] = SpatialInertia(m=link.m, r=link.r)
+                I[joint_idx] = I[joint_idx] + SpatialInertia(m=link.m,
+                                                             r=transform_matrix * link.r,
+                                                             I=link.I)
 
                 # Get joint subspace
                 if link.v is not None:
