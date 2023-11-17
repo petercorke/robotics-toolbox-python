@@ -1759,9 +1759,17 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
                 # Adding inertia of fixed links
                 joint_idx = reference_link.jindex
-                I[joint_idx] = I[joint_idx] + SpatialInertia(m=link.m,
-                                                             r=transform_matrix * link.r,
-                                                             I=link.I)
+
+                # Trick to initialize empty I slots that don't have I components,
+                # leading to an error on addition
+                try:
+                    I[joint_idx] = I[joint_idx] + SpatialInertia(m=link.m,
+                                                                r=transform_matrix * link.r,
+                                                                I=link.I)
+                except AttributeError:
+                    I[joint_idx] = SpatialInertia(m=link.m,
+                                                  r=transform_matrix * link.r,
+                                                  I=link.I)
 
                 # Get joint subspace
                 if link.v is not None:
@@ -1776,23 +1784,39 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             for j in range(0, n):
                 vJ = SpatialVelocity(s[j] * qdk[j])
 
-                # transform from parent(j) to j
-                if self.links[j].jindex is not None:
-                    Xup[j] = SE3(self.links[j].A(qk[self.links[j].jindex])).inv()
-                else:
-                    # If fixed link between parent and child
-                    Xup[j] = SE3(self.links[j].A()).inv()
+                # Find link attached to joint n
+                current_link = None
+                for current_link in self.links:
+                    # We have already added the inertia of all fixed
+                    # links connected to this joint so we can consider
+                    # only the link closest to the joint
+                    if current_link.jindex == j:
+                        break
+                if j is None:
+                    raise ValueError(f"Joint index {j} not found in "
+                                     f"robot {self.name}, is the model correct?")
 
-                if self.links[j].parent is None:
+                # Find previous joint
+                previous_link = current_link.parent
+                j_previous = None
+
+                while j_previous is None:
+                    if previous_link is None:
+                        break
+                    j_previous = previous_link.jindex
+                    previous_link = previous_link.parent
+
+                # transform from parent(j) to j
+                Xup[j] = SE3(current_link.A(qk[current_link.jindex])).inv()
+
+                # compute velocity and acceleration
+                if j_previous is None:
                     v[j] = vJ
                     a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qddk[j])
                 else:
-                    jp = self.links[j].parent.jindex  # type: ignore
-                    v[j] = Xup[j] * v[jp] + vJ
-                    a[j] = (
-                        Xup[j] * a[jp] + SpatialAcceleration(s[j] * qddk[j]) + v[j] @ vJ
-                    )
-
+                    v[j] = Xup[j] * v[j_previous] + vJ
+                    a[j] = Xup[j] * a[j_previous] + \
+                           SpatialAcceleration(s[j] * qddk[j]) + v[j] @ vJ
                 f[j] = I[j] * a[j] + v[j] @ (I[j] * v[j])
 
             # backward recursion
