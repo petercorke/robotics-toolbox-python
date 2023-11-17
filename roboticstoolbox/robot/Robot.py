@@ -1784,7 +1784,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             for j in range(0, n):
                 vJ = SpatialVelocity(s[j] * qdk[j])
 
-                # Find link attached to joint n
+                # Find link attached to joint j
                 current_link = None
                 for current_link in self.links:
                     # We have already added the inertia of all fixed
@@ -1792,14 +1792,13 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     # only the link closest to the joint
                     if current_link.jindex == j:
                         break
-                if j is None:
+                if current_link is None:
                     raise ValueError(f"Joint index {j} not found in "
                                      f"robot {self.name}, is the model correct?")
 
                 # Find previous joint
                 previous_link = current_link.parent
                 j_previous = None
-
                 while j_previous is None:
                     if previous_link is None:
                         break
@@ -1824,9 +1823,27 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 # next line could be dot(), but fails for symbolic arguments
                 Q[k, j] = sum(f[j].A * s[j])
 
-                if self.links[j].parent is not None:
-                    jp = self.links[j].parent.jindex  # type: ignore
-                    f[jp] = f[jp] + Xup[j] * f[j]
+                # Find link attached to joint j
+                current_link = None
+                for current_link in self.links:
+                    if current_link.jindex == j:
+                        break
+                if current_link is None:
+                    raise ValueError(f"Joint index {j} not found in "
+                                     f"robot {self.name}, is the model correct?")
+
+                # Find previous joint
+                previous_link = current_link.parent
+                j_previous = None
+                while j_previous is None:
+                    if previous_link is None:
+                        break
+                    j_previous = previous_link.jindex
+                    previous_link = previous_link.parent
+
+                # Compute backward pass
+                if j_previous is not None:
+                    f[j_previous] = f[j_previous] + Xup[j] * f[j]
 
         if l == 1:
             return Q[0]
