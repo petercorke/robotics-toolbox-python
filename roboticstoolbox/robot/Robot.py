@@ -1724,7 +1724,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         a = SpatialAcceleration.Alloc(n)
         f = SpatialForce.Alloc(n)
         I = SpatialInertia.Alloc(n)  # noqa
-        s = []  # joint motion subspace
+        s = [[]] * n  # joint motion subspace
 
         # Handle trajectory case
         q = getmatrix(q, (None, None))
@@ -1743,15 +1743,25 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
             qddk = qdd[k, :]
 
             # initialize intermediate variables
-            for j, link in enumerate(self.links):
-                if link.isjoint:
-                    I[j] = SpatialInertia(m=link.m, r=link.r)
+            for link in self.links:
 
-                    if link.v is not None:
-                        s.append(link.v.s)
+                # Find closest joint
+                reference_link = link
+                while reference_link is not None and reference_link.jindex is None:
+                    reference_link = reference_link.parent
 
-                    # Increment the joint counter
-                    j += 1
+                # This means we are linked to the base link w/o joints inbetween
+                # Meaning no inertia to be computed
+                if reference_link is None or reference_link.jindex is None:
+                    continue
+
+                # TODO: Stack static link inertias
+                joint_idx = reference_link.jindex
+                I[joint_idx] = SpatialInertia(m=link.m, r=link.r)
+
+                # Get joint subspace
+                if link.v is not None:
+                    s[link.jindex] = link.v.s
 
             if gravity is None:
                 a_grav = -SpatialAcceleration(self.gravity)
@@ -1774,7 +1784,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qddk[j])
                 else:
                     jp = self.links[j].parent.jindex  # type: ignore
-                    breakpoint()
                     v[j] = Xup[j] * v[jp] + vJ
                     a[j] = (
                         Xup[j] * a[jp] + SpatialAcceleration(s[j] * qddk[j]) + v[j] @ vJ
