@@ -154,7 +154,7 @@ class TestERobot(unittest.TestCase):
         nt.assert_array_almost_equal(tau, np.r_[d11 + d12, d21 + d22])
 
     def test_URDF_inertia(self):
-        robot = rtb.models.URDF.Panda()
+        robot = rtb.models.URDF.UR10()
         try:
             robot.inertia(robot.q)
         except TypeError:
