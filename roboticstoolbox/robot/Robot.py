@@ -1759,17 +1759,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
                 # Adding inertia of fixed links
                 joint_idx = reference_link.jindex
-
-                # Trick to initialize empty I slots that don't have I components,
-                # leading to an error on addition
-                try:
-                    I[joint_idx] = I[joint_idx] + SpatialInertia(m=link.m,
-                                                                r=transform_matrix * link.r,
-                                                                I=link.I)
-                except AttributeError:
-                    I[joint_idx] = SpatialInertia(m=link.m,
-                                                  r=transform_matrix * link.r,
-                                                  I=link.I)
+                
+                # Adding inertia. This is the way found to circumvent a bug in the library
+                I.data[joint_idx] = I[joint_idx].A + \
+                                    (SpatialInertia(m=link.m, r=transform_matrix * link.r, I=link.I).data[0])
 
                 # Get joint subspace
                 if link.v is not None:
