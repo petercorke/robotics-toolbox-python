@@ -5,14 +5,11 @@ Python EKF Planner
 """
 from collections import namedtuple
 import numpy as np
-from math import pi
-from scipy import integrate, randn
-from scipy.linalg import sqrtm, block_diag
+from scipy.linalg import block_diag
 from scipy.stats.distributions import chi2
 import matplotlib.pyplot as plt
 from matplotlib import animation
 
-from spatialmath.base.animate import Animate
 from spatialmath import base, SE2
 from roboticstoolbox.mobile import VehicleBase
 from roboticstoolbox.mobile.landmarkmap import LandmarkMap
