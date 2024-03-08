@@ -366,7 +366,7 @@ class VehicleBase(ABC):
         vp = v_prev[0]
         if self._accel_max is not None:
             if (v - vp) / self._dt > self._accel_max:
-                v = vp + self._accelmax * self._dt
+                v = vp + self._accel_max * self._dt
             elif (v - vp) / self._dt < -self._accel_max:
                 v = vp - self._accel_max * self._dt
         v_prev[0] = v
