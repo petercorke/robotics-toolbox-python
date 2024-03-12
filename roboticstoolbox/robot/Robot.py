@@ -1331,6 +1331,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def joint_velocity_damper(
         self,
+        q=None,
         ps: float = 0.05,
         pi: float = 0.1,
         n: Union[int, None] = None,
@@ -1368,16 +1369,19 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         if n is None:
             n = self.n
+        
+        if q is None:
+            q = np.copy(self.q)
 
         Ain = np.zeros((n, n))
         Bin = np.zeros(n)
 
         for i in range(n):
             if self.q[i] - self.qlim[0, i] <= pi:
-                Bin[i] = -gain * (((self.qlim[0, i] - self.q[i]) + ps) / (pi - ps))
+                Bin[i] = -gain * (((self.qlim[0, i] - q[i]) + ps) / (pi - ps))
                 Ain[i, i] = -1
             if self.qlim[1, i] - self.q[i] <= pi:
-                Bin[i] = gain * ((self.qlim[1, i] - self.q[i]) - ps) / (pi - ps)
+                Bin[i] = gain * ((self.qlim[1, i] - q[i]) - ps) / (pi - ps)
                 Ain[i, i] = 1
 
         return Ain, Bin
