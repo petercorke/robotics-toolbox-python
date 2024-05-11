@@ -3,6 +3,7 @@ Python Vehicle
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
+
 from abc import ABC, abstractmethod
 import warnings
 from math import pi, sin, cos, tan, atan2
@@ -25,6 +26,57 @@ class VehicleDriverBase(ABC):
 
     :seealso: :class:`RandomPath`
     """
+
+    def __init__(
+        self,
+        workspace=None,
+        speed=1,
+        headinggain=0.3,
+        goalmarkerstyle=None,
+        verbose=False,
+    ):
+        """
+        _summary_
+
+        :param workspace: dimension of workspace, see :func:`spatialmath.base.exand_dims`
+        :type workspace: scalar, array_like(2), array_like(4)
+        :param speed: forward speed, defaults to 1
+        :type speed: float, optional
+        :param headinggain: _description_, defaults to 0.3
+        :type headinggain: float, optional
+        :param verbose: _description_, defaults to False
+        :type verbose: bool, optional
+
+        The workspace of the robot is a rectangular region defined by `workspace`
+        that is specified by  (see ``plotvol2``):
+
+        ==============  =======  =======
+        ``workspace``   x-range  y-range
+        ==============  =======  =======
+        A (scalar)      -A:A     -A:A
+        [A, B]           A:B      A:B
+        [A, B, C, D]     A:B      C:D
+        ==============  =======  =======
+        """
+        if hasattr(workspace, "workspace"):
+            # workspace can be defined by an object with a workspace attribute
+            self._workspace = base.expand_dims(workspace.workspace)
+        else:
+            self._workspace = base.expand_dims(workspace)
+
+        self._speed = speed
+        self._headinggain = headinggain
+        self._verbose = verbose
+
+        if goalmarkerstyle is None:
+            self._goal_marker_style = {
+                "marker": "D",
+                "markersize": 6,
+                "color": "r",
+                "linestyle": "None",
+            }
+        else:
+            self._goal_marker_style = goalmarkerstyle
 
     @abstractmethod
     def demand(self):
@@ -72,27 +124,40 @@ class VehicleDriverBase(ABC):
     def __repr__(self):
         return str(self)
 
+    @property
+    def workspace(self):
+        """
+        Size of robot driving workspace
+
+        :return: workspace bounds [xmin, xmax, ymin, ymax]
+        :rtype: ndarray(4)
+
+        Returns the bounds of the workspace as specified by constructor
+        option ``workspace``
+        """
+        return self._workspace
+
+    def driveto(self, goal):
+
+        goal_heading = atan2(goal[1] - self._veh._x[1], goal[0] - self._veh._x[0])
+        delta_heading = base.angdiff(goal_heading, self._veh._x[2])
+        print(
+            f"t={self._veh._t:.1f}, pos=({self._veh._x[0]:.1f}, {self._veh._x[1]:.1f}), ",
+            f"goal_heading={goal_heading*180/pi:.1f}, delta_heading={delta_heading*180/pi:.1f}",
+        )
+
+        return np.r_[self._speed, self._headinggain * delta_heading]
+
 
 # ========================================================================= #
 
 
 class RandomPath(VehicleDriverBase):
-    def __init__(
-        self,
-        workspace,
-        speed=1,
-        dthresh=0.05,
-        seed=0,
-        headinggain=0.3,
-        goalmarkerstyle=None,
-    ):
+    def __init__(self, dthresh=0.05, seed=0, **kwargs):
         """
         Driving agent for random path
 
-        :param workspace: dimension of workspace, see :func:`spatialmath.base.exand_dims`
-        :type workspace: scalar, array_like(2), array_like(4)
-        :param speed: forward speed, defaults to 1
-        :type speed: float, optional
+
         :param dthresh: distance threshold, defaults to 0.05
         :type dthresh: float, optional
 
