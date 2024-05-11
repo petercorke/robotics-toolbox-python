@@ -301,21 +301,91 @@ class RandomPath(VehicleDriverBase):
 
 
 class PurePursuit(VehicleDriverBase):
-    def __init__(self, speed=1, radius=1):
-        pass
+    def __init__(self, path, lookahead=1, linemarkerstyle=None, **kwargs):
+        """
+        Driving agent for pure pursuit
+
+        :param path: path as a set of waypoints
+        :type path: array_like(2,n) one column per point, optional
+        :param lookahead: lookahead distance, defaults to 1
+        :type lookahead: float, optional
+        """
+        super().__init__(**kwargs)
+        self._path = path
+        self._lookahead = lookahead
+        self._linemarkerstyle = linemarkerstyle
 
     def __str__(self):
-        pass
+        """Convert to string
 
-    def init(self):
-        pass
+        :return: driver parameters and state in in a compact human readable format
+        :rtype: str
+        """
+
+        s = "PurePursuit driver object\n"
+        s += (
+            f"  X {self._workspace[0]} : {self._workspace[1]}; Y {self._workspace[0]} :"
+            f" {self._workspace[1]}, lookahead={self._lookahead}\n"
+        )
+        return s
+
+    def init(self, ax=None):
+        if ax is not None:
+            h = plt.plot(
+                self._path[0, :],
+                self._path[1, :],
+                **self._linemarkerstyle,
+                label="waypoints",
+            )[0]
+        self._current_waypint = None
 
     def demand(self):
-        pass
+
+        cp = self._veh._x[0:2]  # current point
+
+        # find closest point on the path to current point
+        d = np.linalg.norm(self._path.T - cp, axis=1)  # rely on implicit expansion
+        i = np.argmin(d)
+
+        # find all points on the path at least lookahead distance away
+        (k,) = np.where(d[i + 1 :] >= self._lookahead)  # find all points beyond horizon
+        if len(k) == 0:
+            # no such points, we must be near the end, goal is the end
+            goal = self._path[:, -1]
+            k = -1
+        else:
+            # many such points, take the first one
+            k = k[0] + 1  # first point beyond look ahead distance
+            goal = self._path[:, k + i]
+            k += i
+
+        if self._waypoint_marker is not None:
+            pass
+            for marker in self._waypoint_marker:
+                marker.set_color("blue")
+            self._waypoint_marker[k].set_color("red")
+
+        return self.driveto(goal)
 
 
 # ========================================================================= #
 
 if __name__ == "__main__":
 
-    import unittest
+    # import unittest
+
+    import roboticstoolbox as rtb
+
+    # veh = rtb.Bicycle(control=rtb.RandomPath(workspace=10), animation="car")
+    # print(veh.control)
+    # veh.run(20, animate=True)
+
+    # create the path
+    path = np.array([[10.0, 10], [10, 60], [80, 80], [50, 10]]).T
+    veh = rtb.Bicycle(
+        control=rtb.PurePursuit(path, speed=4, lookahead=5, workspace=[0, 100]),
+        animation="car",
+    )
+    print(veh)
+    print(veh.control)
+    veh.run(60, animate=True)
