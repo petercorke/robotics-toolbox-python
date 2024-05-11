@@ -2,6 +2,7 @@
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
+
 from abc import ABC
 from math import pi, atan2
 import numpy as np
@@ -194,6 +195,7 @@ class VehiclePolygon(VehicleAnimationBase):
         ``shape`` can be:
 
             * ``"car"``  a rectangle with chamfered front corners
+            * ``"box"``  a rectangle
             * ``"triangle"`` an isocles triangle pointing in the forward direction
             * an 2xN NumPy array of vertices, does not have to be closed.
 
@@ -205,6 +207,7 @@ class VehiclePolygon(VehicleAnimationBase):
         super().__init__()
         if isinstance(shape, str):
 
+            # consider vehicle at origin, pointing along +ve x-axis
             h = 0.3
             t = 0.8  # start of head taper
             c = 0.5  # centre x coordinate
@@ -218,6 +221,15 @@ class VehiclePolygon(VehicleAnimationBase):
                         [t - c, h],
                         [w - c, 0],
                         [t - c, -h],
+                        [-c, -h],
+                    ]
+                ).T
+            elif shape == "box":
+                self._coords = np.array(
+                    [
+                        [-c, h],
+                        [w - c, h],
+                        [w - c, -h],
                         [-c, -h],
                     ]
                 ).T
