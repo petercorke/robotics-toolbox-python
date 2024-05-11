@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
     <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
     <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
@@ -9,11 +9,13 @@
     <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Drivers &mdash; Robotics Toolbox for Python  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -132,12 +134,12 @@ useful for testing localization algorithms.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>workspace</strong> (<em>scalar</em><em>, </em><em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>array_like</em><em>(</em><em>4</em><em>)</em>) – dimension of workspace, see <code class="xref py py-func docutils literal notranslate"><span class="pre">spatialmath.base.exand_dims()</span></code></p></li>
-<li><p><strong>speed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – forward speed, defaults to 1</p></li>
-<li><p><strong>dthresh</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – distance threshold, defaults to 0.05</p></li>
+<li><p><strong>speed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – forward speed, defaults to 1</p></li>
+<li><p><strong>dthresh</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – distance threshold, defaults to 0.05</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – bad workspace specified</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – bad workspace specified</p>
 </dd>
 </dl>
 <p>Returns a <em>driver</em> object that drives the attached vehicle to a
@@ -190,7 +192,7 @@ operating system.</p></li>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Bicycle</span></code> <code class="xref py py-class docutils literal notranslate"><span class="pre">Unicycle</span></code> <a class="reference external" href="https://petercorke.github.io/spatialmath-python/func_2d_graphics.html#spatialmath.base.graphics.plotvol2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plotvol2()</span></code></a></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Bicycle</span></code> <code class="xref py py-class docutils literal notranslate"><span class="pre">Unicycle</span></code> <code class="xref py py-func docutils literal notranslate"><span class="pre">plotvol2()</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -276,7 +278,7 @@ the sequence of random waypoints is repeatable.</p>
 <div><dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.drivers.VehicleDriverBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.drivers.</span></span><span class="sig-name descname"><span class="pre">VehicleDriverBase</span></span><a class="reference internal" href="_modules/roboticstoolbox/mobile/drivers.html#VehicleDriverBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.drivers.VehicleDriverBase" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <p>Abstract Vehicle driver class</p>
 <p>Abtract class that can drive a mobile robot.</p>
 <dl class="field-list simple">
@@ -341,7 +343,7 @@ including random number generator state.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 15-May-2023.
+      <span class="lastupdated">Last updated on 11-May-2024.
       </span></p>
   </div>
 

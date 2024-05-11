@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
     <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
     <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
@@ -9,11 +9,13 @@
     <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Discrete (Grid-based) planners &mdash; Robotics Toolbox for Python  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -245,7 +247,7 @@ be slow for very large occupancy grids.</p>
 <dd class="field-odd"><p>Get the metric, either “euclidean” or “manhattan”</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -295,7 +297,7 @@ metric.</p>
 <dd class="field-odd"><p><strong>position</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – current robot position</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.11)"><strong>RuntimeError</strong></a> – no plan has been computed</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.12)"><strong>RuntimeError</strong></a> – no plan has been computed</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>next robot position</p>
@@ -321,7 +323,7 @@ by <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransform
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – robot path, defaults to None</p></li>
-<li><p><strong>ls</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – dictionary of Matplotlib linestyle options, defaults to None</p></li>
+<li><p><strong>ls</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – dictionary of Matplotlib linestyle options, defaults to None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -378,7 +380,7 @@ line/surface handling.</p>
 <dd class="field-even"><p>occupancy status of corresponding grid cell</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>The world coordinate is transformed and the status of the occupancy
@@ -423,20 +425,20 @@ the occupancy grid return True (obstacle)</p>
 <li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
 <li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
 <li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
-<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
 Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
-<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
 there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
-<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
-<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
-<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
-<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
-<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
-<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plot_bg" title="roboticstoolbox.mobile.DistanceTransformPlanner.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a>, defaults to None</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.plot_bg" title="roboticstoolbox.mobile.DistanceTransformPlanner.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a>, defaults to None</p></li>
 <li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
-<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
 </ul>
 </dd>
 </dl>
@@ -516,7 +518,7 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>distance</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em><em>, </em><em>optional</em>) – override distance field, defaults to None</p></li>
-<li><p><strong>cmap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><em>Colormap</em><em>, </em><em>optional</em>) – Specify a colormap for the distance field, defaults to ‘gray’</p></li>
+<li><p><strong>cmap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><em>Colormap</em><em>, </em><em>optional</em>) – Specify a colormap for the distance field, defaults to ‘gray’</p></li>
 </ul>
 </dd>
 </dl>
@@ -545,9 +547,9 @@ the the distance field will be used as the background and obstacle cells
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value specified to constructor</p></li>
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value specified to constructor</p></li>
-<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
-<li><p><strong>next</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – invoke <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.next" title="roboticstoolbox.mobile.DistanceTransformPlanner.next"><code class="xref py py-meth docutils literal notranslate"><span class="pre">next()</span></code></a> method of class, defaults to True</p></li>
-<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – show the vehicle path, defaults to False</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+<li><p><strong>next</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – invoke <a class="reference internal" href="#roboticstoolbox.mobile.DistanceTransformPlanner.next" title="roboticstoolbox.mobile.DistanceTransformPlanner.next"><code class="xref py py-meth docutils literal notranslate"><span class="pre">next()</span></code></a> method of class, defaults to True</p></li>
+<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – show the vehicle path, defaults to False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -609,11 +611,11 @@ achieved, and if <code class="docutils literal notranslate"><span class="pre">an
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
-<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – point is inside obstacle</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
@@ -639,7 +641,7 @@ achieved, and if <code class="docutils literal notranslate"><span class="pre">an
 <dd class="field-odd"><p>verbosity</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
@@ -723,8 +725,8 @@ or obstacle.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span>, defaults to previously set value</p></li>
-<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – animate the planning algorithm iterations, defaults to False</p></li>
-<li><p><strong>progress</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – show progress bar, defaults to True</p></li>
+<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – animate the planning algorithm iterations, defaults to False</p></li>
+<li><p><strong>progress</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – show progress bar, defaults to True</p></li>
 </ul>
 </dd>
 </dl>
@@ -741,7 +743,7 @@ points in the grid.</p>
 <dd class="field-odd"><p>number of expansions</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a></p>
 </dd>
 </dl>
 <p>This number will increase during initial planning, and also if
@@ -757,8 +759,8 @@ replanning is invoked during the <a class="reference internal" href="#roboticsto
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – start position <span class="math notranslate nohighlight">\((x,y)\)</span></p></li>
 <li><p><strong>sensor</strong> (<em>callable</em><em>, </em><em>optional</em>) – sensor function, defaults to None</p></li>
-<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – animate the motion of the robot, defaults to False</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – display detailed diagnostic information about D* operations, defaults to False</p></li>
+<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – animate the motion of the robot, defaults to False</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – display detailed diagnostic information about D* operations, defaults to False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -797,7 +799,7 @@ increase, according to the severity of the replanning.</p>
 <dd class="field-odd"><p>pretty printed representation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -859,20 +861,20 @@ increase, according to the severity of the replanning.</p>
 <li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
 <li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
 <li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
-<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
 Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
-<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
 there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
-<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
-<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
-<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
-<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
-<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
-<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner.plot_bg" title="roboticstoolbox.mobile.DstarPlanner.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a>, defaults to None</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <a class="reference internal" href="#roboticstoolbox.mobile.DstarPlanner.plot_bg" title="roboticstoolbox.mobile.DstarPlanner.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a>, defaults to None</p></li>
 <li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
-<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
 </ul>
 </dd>
 </dl>
@@ -952,7 +954,7 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>distance</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em><em>, </em><em>optional</em>) – override distance field, defaults to None</p></li>
-<li><p><strong>cmap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><em>Colormap</em><em>, </em><em>optional</em>) – Specify a colormap for the distance field, defaults to ‘gray’</p></li>
+<li><p><strong>cmap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><em>Colormap</em><em>, </em><em>optional</em>) – Specify a colormap for the distance field, defaults to ‘gray’</p></li>
 </ul>
 </dd>
 </dl>
@@ -1006,11 +1008,11 @@ the the distance field will be used as the background and obstacle cells
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
-<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – point is inside obstacle</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
@@ -1036,7 +1038,7 @@ the the distance field will be used as the background and obstacle cells
 <dd class="field-odd"><p>verbosity</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
@@ -1139,8 +1141,8 @@ changes the weighting for path costs at query time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>iterations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – number of iterations, defaults to None</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – show frontier and added vertices/edges at each iteration, defaults to False</p></li>
+<li><p><strong>iterations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><em>optional</em>) – number of iterations, defaults to None</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – show frontier and added vertices/edges at each iteration, defaults to False</p></li>
 </ul>
 </dd>
 </dl>
@@ -1208,20 +1210,20 @@ left turn, right turn or straight line respectively.</p></td>
 <li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
 <li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
 <li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
-<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
 Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
-<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
 there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
-<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
-<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
-<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
-<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
-<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
-<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
 <li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
-<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
 </ul>
 </dd>
 </dl>
@@ -1373,11 +1375,11 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
-<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – point is inside obstacle</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
@@ -1403,7 +1405,7 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dd class="field-odd"><p>verbosity</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
@@ -1428,8 +1430,8 @@ start and goal configuration <span class="math notranslate nohighlight">\((x, y,
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>curvature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – maximum path curvature, defaults to 1.0</p></li>
-<li><p><strong>stepsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – spacing between points on the path, defaults to 0.1</p></li>
+<li><p><strong>curvature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – maximum path curvature, defaults to 1.0</p></li>
+<li><p><strong>stepsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – spacing between points on the path, defaults to 0.1</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1616,20 +1618,20 @@ no planning phase.  The plan may also depend on just the start or goal.</p>
 <li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
 <li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
 <li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
-<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
 Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
-<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
 there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
-<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
-<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
-<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
-<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
-<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
-<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
 <li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
-<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
 </ul>
 </dd>
 </dl>
@@ -1735,11 +1737,11 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
-<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – point is inside obstacle</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
@@ -1765,7 +1767,7 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dd class="field-odd"><p>verbosity</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
@@ -1785,8 +1787,8 @@ message channel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>curvature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – maximum path curvature, defaults to 1.0</p></li>
-<li><p><strong>stepsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – spacing between points on the path, defaults to 0.1</p></li>
+<li><p><strong>curvature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – maximum path curvature, defaults to 1.0</p></li>
+<li><p><strong>stepsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – spacing between points on the path, defaults to 0.1</p></li>
 <li><p><strong>Planner</strong> (<em>ReedsSheppPlanner instance</em>) – Reeds-Shepp path planner</p></li>
 </ul>
 </dd>
@@ -1966,20 +1968,20 @@ no planning phase.  The plan may also depend on just the start or goal.</p>
 <li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
 <li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
 <li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
-<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
 Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
-<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
 there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
-<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
-<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
-<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
-<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
-<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
-<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
 <li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
-<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
 </ul>
 </dd>
 </dl>
@@ -2085,11 +2087,11 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
-<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – point is inside obstacle</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
@@ -2115,7 +2117,7 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dd class="field-odd"><p>verbosity</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
@@ -2178,7 +2180,7 @@ message channel.</p>
 <dd class="field-odd"><p>pretty printed representation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2256,20 +2258,20 @@ no planning phase.  The plan may also depend on just the start or goal.</p>
 <li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
 <li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
 <li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
-<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
 Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
-<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
 there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
-<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
-<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
-<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
-<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
-<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
-<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
 <li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
-<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
 </ul>
 </dd>
 </dl>
@@ -2375,11 +2377,11 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
-<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – point is inside obstacle</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
@@ -2405,7 +2407,7 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dd class="field-odd"><p>verbosity</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
@@ -2425,15 +2427,15 @@ message channel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – time step, defaults to 0.1</p></li>
-<li><p><strong>start_vel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – initial velocity, defaults to 0</p></li>
-<li><p><strong>start_acc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – initial acceleration, defaults to 0</p></li>
-<li><p><strong>goal_vel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – goal velocity, defaults to 0</p></li>
-<li><p><strong>goal_acc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – goal acceleration, defaults to 0</p></li>
-<li><p><strong>max_acc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – maximum acceleration, defaults to 1</p></li>
-<li><p><strong>max_jerk</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – maximum jerk, defaults to 0.5</p></li>
-<li><p><strong>min_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – minimum path time, defaults to 5</p></li>
-<li><p><strong>max_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – maximum path time, defaults to 100</p></li>
+<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – time step, defaults to 0.1</p></li>
+<li><p><strong>start_vel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – initial velocity, defaults to 0</p></li>
+<li><p><strong>start_acc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – initial acceleration, defaults to 0</p></li>
+<li><p><strong>goal_vel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – goal velocity, defaults to 0</p></li>
+<li><p><strong>goal_acc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – goal acceleration, defaults to 0</p></li>
+<li><p><strong>max_acc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><em>optional</em>) – maximum acceleration, defaults to 1</p></li>
+<li><p><strong>max_jerk</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – maximum jerk, defaults to 0.5</p></li>
+<li><p><strong>min_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – minimum path time, defaults to 5</p></li>
+<li><p><strong>max_t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – maximum path time, defaults to 100</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -2564,7 +2566,7 @@ of <code class="docutils literal notranslate"><span class="pre">min_t</span></co
 <dd class="field-odd"><p>pretty printed representation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2642,20 +2644,20 @@ no planning phase.  The plan may also depend on just the start or goal.</p>
 <li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
 <li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
 <li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
-<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
 Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
-<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
 there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
-<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
-<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
-<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
-<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
-<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
-<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
 <li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
-<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
 </ul>
 </dd>
 </dl>
@@ -2761,11 +2763,11 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
-<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – point is inside obstacle</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
@@ -2791,7 +2793,7 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dd class="field-odd"><p>verbosity</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
@@ -2813,9 +2815,9 @@ message channel.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>map</strong> (<a class="reference internal" href="mobile-planner-map.html#roboticstoolbox.mobile.PolygonMap" title="roboticstoolbox.mobile.PolygonMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolygonMap</span></code></a>) – occupancy grid</p></li>
 <li><p><strong>vehicle</strong> (<a class="reference internal" href="mobile-vehicle-base.html#roboticstoolbox.mobile.VehicleBase" title="roboticstoolbox.mobile.VehicleBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">VehicleBase</span></code></a> subclass) – vehicle kinematic model</p></li>
-<li><p><strong>curvature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – maximum path curvature, defaults to 1.0</p></li>
-<li><p><strong>stepsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – spacing between points on the path, defaults to 0.2</p></li>
-<li><p><strong>npoints</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – number of vertices in random tree, defaults to 50</p></li>
+<li><p><strong>curvature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – maximum path curvature, defaults to 1.0</p></li>
+<li><p><strong>stepsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – spacing between points on the path, defaults to 0.2</p></li>
+<li><p><strong>npoints</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><em>optional</em>) – number of vertices in random tree, defaults to 50</p></li>
 </ul>
 </dd>
 </dl>
@@ -2894,9 +2896,9 @@ argument to its constructor</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal pose <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to previously set value</p></li>
-<li><p><strong>showsamples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – display position part of configurations overlaid on the map, defaults to True</p></li>
-<li><p><strong>showvalid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – display valid configurations as vehicle polygons overlaid on the map, defaults to False</p></li>
-<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – update the display as configurations are tested, defaults to False</p></li>
+<li><p><strong>showsamples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – display position part of configurations overlaid on the map, defaults to True</p></li>
+<li><p><strong>showvalid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – display valid configurations as vehicle polygons overlaid on the map, defaults to False</p></li>
+<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – update the display as configurations are tested, defaults to False</p></li>
 </ul>
 </dd>
 </dl>
@@ -3005,7 +3007,7 @@ Iterates on <a class="reference internal" href="#roboticstoolbox.mobile.RRTPlann
 <dd class="field-even"><p>collision status</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>Transforms the vehicle polygon and tests for intersection against
@@ -3021,7 +3023,7 @@ the polygonal obstacle map.</p>
 <dd class="field-odd"><p>pretty printed representation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -3083,20 +3085,20 @@ the polygonal obstacle map.</p>
 <li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
 <li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
 <li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
-<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
 Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
-<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
 there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
-<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
-<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
-<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
-<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
-<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
-<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code>, defaults to None</p></li>
 <li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
-<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
 </ul>
 </dd>
 </dl>
@@ -3202,11 +3204,11 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
-<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – point is inside obstacle</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
@@ -3232,7 +3234,7 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dd class="field-odd"><p>verbosity</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
@@ -3253,7 +3255,7 @@ message channel.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 15-May-2023.
+      <span class="lastupdated">Last updated on 11-May-2024.
       </span></p>
   </div>
 

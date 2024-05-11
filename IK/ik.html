@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
     <link rel="icon" sizes="16x16" type="image/png" href="../_static/favicon-16x16.png">
     <link rel="icon" sizes="32x32" type="image/png" href="../_static/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="../_static/apple-touch-icon.png">
@@ -9,11 +9,13 @@
     <link rel="android-chrome" sizes="512x512" type="image/png" href="../_static/android-chrome-512x512.png ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inverse Kinematics &mdash; Robotics Toolbox for Python  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -170,19 +172,19 @@
 <td><p>The joint coordinates of the solution. Note that these will not be valid if failed to find a solution</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">success</span></code></p></td>
-<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a></p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a></p></td>
 <td><p>True if a valid solution was found</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">iterations</span></code></p></td>
-<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
 <td><p>How many iterations were performed</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">searches</span></code></p></td>
-<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
 <td><p>How many searches were performed</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">residual</span></code></p></td>
-<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a></p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a></p></td>
 <td><p>The final error value from the cost function</p></td>
 </tr>
 </tbody>
@@ -315,7 +317,7 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Solve the IK problem</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">ets</span><span class="p">,</span> <span class="n">Tep</span><span class="p">)</span>
-<span class="go">IKSolution(q=array([ 0.9887, -0.481 , -0.8447, -2.1835, -0.3981,  1.9276,  1.098 ]), success=True, iterations=21, searches=2, residual=6.922823943814753e-08, reason=&#39;Success&#39;)</span>
+<span class="go">IKSolution(q=array([-2.006 ,  0.5697,  2.1978, -2.174 , -0.5032,  1.8822,  1.1792]), success=True, iterations=10, searches=1, residual=2.3488721776519882e-07, reason=&#39;Success&#39;)</span>
 </pre></div>
 </div>
 <p>Additionally, these <code class="xref py py-class docutils literal notranslate"><span class="pre">Class</span></code> based solvers have been implemented as methods within the <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> and <a class="reference internal" href="../arm_superclass.html#roboticstoolbox.robot.Robot.Robot" title="roboticstoolbox.robot.Robot.Robot"><code class="xref py py-class docutils literal notranslate"><span class="pre">Robot</span></code></a> classes. The method names start with <code class="docutils literal notranslate"><span class="pre">ikine_</span></code>.</p>
@@ -362,7 +364,7 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">panda</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Solve the IK problem</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">panda</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
-<span class="go">IKSolution(q=array([ 1.9906,  0.5809, -2.1885, -2.1728,  0.5155,  1.876 ,  0.3822]), success=True, iterations=11, searches=1, residual=1.4253858343640573e-09, reason=&#39;Success&#39;)</span>
+<span class="go">IKSolution(q=array([-0.617 , -0.3565,  0.5461, -2.1954,  0.2088,  1.9805,  0.6208]), success=True, iterations=10, searches=1, residual=3.31895442979262e-07, reason=&#39;Success&#39;)</span>
 </pre></div>
 </div>
 <p>In the following example, we create a <a class="reference internal" href="../arm_erobot.html#roboticstoolbox.models.URDF.Panda" title="roboticstoolbox.models.URDF.Panda"><code class="xref py py-class docutils literal notranslate"><span class="pre">Panda</span></code></a> robot and and then get the <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> representation. Subsequently, we use one of the IK solvers available within the <a class="reference internal" href="../arm_ets.html#roboticstoolbox.robot.ETS.ETS" title="roboticstoolbox.robot.ETS.ETS"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETS</span></code></a> class.</p>
@@ -375,7 +377,7 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Tep</span> <span class="o">=</span> <span class="n">ets</span><span class="o">.</span><span class="n">fkine</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.7854</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Solve the IK problem</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ets</span><span class="o">.</span><span class="n">ikine_LM</span><span class="p">(</span><span class="n">Tep</span><span class="p">)</span>
-<span class="go">IKSolution(q=array([ 1.1206, -0.5592, -0.9345, -2.1752, -0.4914,  1.8878,  1.1702]), success=True, iterations=9, searches=1, residual=1.0625988477272362e-08, reason=&#39;Success&#39;)</span>
+<span class="go">IKSolution(q=array([-1.396 , -0.8222,  1.0591, -2.1449,  0.7496,  1.7232,  0.2073]), success=True, iterations=11, searches=1, residual=7.265959113355526e-10, reason=&#39;Success&#39;)</span>
 </pre></div>
 </div>
 </section>
@@ -390,7 +392,7 @@
 
   <div role="contentinfo">
     <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 15-May-2023.
+      <span class="lastupdated">Last updated on 11-May-2024.
       </span></p>
   </div>
 

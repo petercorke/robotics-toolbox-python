@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
     <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
     <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
@@ -9,11 +9,13 @@
     <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Supporting classes &mdash; Robotics Toolbox for Python  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -118,7 +120,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.PlannerBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.</span></span><span class="sig-name descname"><span class="pre">PlannerBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occgrid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inflate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msgcolor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'yellow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">unused</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/PlannerBase.html#PlannerBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.PlannerBase" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <p>Mobile robot motion planner (superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -126,13 +128,13 @@
 <li><p><strong>occgrid</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">OccGrid</span></code> instance of ndarray(N,M), optional) – occupancy grid, defaults to None</p></li>
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to None</p></li>
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to None</p></li>
-<li><p><strong>inflate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – obstacle inflation, defaults to 0</p></li>
+<li><p><strong>inflate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – obstacle inflation, defaults to 0</p></li>
 <li><p><strong>ndims</strong> – dimensionality of the planning, either 2 for <span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span> or
 3 for <span class="math notranslate nohighlight">\(\SE{2}\)</span></p></li>
 <li><p><strong>ndims</strong> – int, optional</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – verbosity, defaults to False</p></li>
-<li><p><strong>msgcolor</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>defaults to yellow</em>) – color for message channel printing</p></li>
-<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – seed provided to private random number generator, defaults to None</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – verbosity, defaults to False</p></li>
+<li><p><strong>msgcolor</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>defaults to yellow</em>) – color for message channel printing</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><em>optional</em>) – seed provided to private random number generator, defaults to None</p></li>
 </ul>
 </dd>
 </dl>
@@ -166,7 +168,7 @@ includes:</p>
 <dd class="field-odd"><p>pretty printed representation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -232,7 +234,7 @@ includes:</p>
 <dd class="field-odd"><p>verbosity</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>If <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> print more diagnostic messages to the planner’s
@@ -248,22 +250,22 @@ message channel.</p>
 <dd class="field-odd"><p>NumPy random number generator</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v1.26)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a></p>
 </dd>
 </dl>
 <p>Has methods including:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.integers.html#numpy.random.Generator.integers" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integers(low,</span> <span class="pre">high,</span> <span class="pre">size,</span> <span class="pre">endpoint)</span></code></a></p></li>
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.random.html#numpy.random.Generator.random" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">random(size)</span></code></a></p></li>
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.uniform.html#numpy.random.Generator.uniform" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform(low,</span> <span class="pre">high,</span> <span class="pre">size)</span></code></a></p></li>
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.normal.html#numpy.random.Generator.normal" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">normal(mean,</span> <span class="pre">std,</span> <span class="pre">size)</span></code></a></p></li>
-<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.multivariate_normal.html#numpy.random.Generator.multivariate_normal" title="(in NumPy v1.24)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">multivariate_normal(mean,</span> <span class="pre">covar,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.integers.html#numpy.random.Generator.integers" title="(in NumPy v1.26)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integers(low,</span> <span class="pre">high,</span> <span class="pre">size,</span> <span class="pre">endpoint)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.random.html#numpy.random.Generator.random" title="(in NumPy v1.26)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">random(size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.uniform.html#numpy.random.Generator.uniform" title="(in NumPy v1.26)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform(low,</span> <span class="pre">high,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.normal.html#numpy.random.Generator.normal" title="(in NumPy v1.26)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">normal(mean,</span> <span class="pre">std,</span> <span class="pre">size)</span></code></a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.multivariate_normal.html#numpy.random.Generator.multivariate_normal" title="(in NumPy v1.26)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">multivariate_normal(mean,</span> <span class="pre">covar,</span> <span class="pre">size)</span></code></a></p></li>
 </ul>
 <p>The generator is initialized with the seed provided at constructor
 time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="(in NumPy v1.24)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.random.default_rng()</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.default_rng" title="(in NumPy v1.26)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.random.default_rng()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -274,7 +276,7 @@ time.</p>
 <dd><p>Initialize private random number generator</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – random number seed, defaults to value given to constructor</p>
+<dd class="field-odd"><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – random number seed, defaults to value given to constructor</p>
 </dd>
 </dl>
 <p>The private random number generator is initialized.  The seed is <code class="docutils literal notranslate"><span class="pre">seed</span></code>
@@ -330,7 +332,7 @@ no planning phase.  The plan may also depend on just the start or goal.</p>
 <dd class="field-even"><p>occupancy status of corresponding grid cell</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>The world coordinate is transformed and the status of the occupancy
@@ -352,11 +354,11 @@ the occupancy grid return True (obstacle)</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>p</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em>) – the point</p></li>
-<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – point is inside obstacle</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – point is inside obstacle</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>point as a NumPy array of specified dtype</p>
@@ -379,7 +381,7 @@ the occupancy grid return True (obstacle)</p>
 <dd><p>Initialize a progress bar (superclass)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – Number of iterations in the operation</p>
+<dd class="field-odd"><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Number of iterations in the operation</p>
 </dd>
 </dl>
 <p>Create a progress bar for an operation that has <code class="docutils literal notranslate"><span class="pre">n</span></code> steps, for
@@ -447,9 +449,9 @@ example:</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value specified to constructor</p></li>
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value specified to constructor</p></li>
-<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
-<li><p><strong>next</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – invoke <code class="xref py py-meth docutils literal notranslate"><span class="pre">next()</span></code> method of class, defaults to True</p></li>
-<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – show the vehicle path, defaults to False</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – data type for point coordinates, defaults to None</p></li>
+<li><p><strong>next</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – invoke <code class="xref py py-meth docutils literal notranslate"><span class="pre">next()</span></code> method of class, defaults to True</p></li>
+<li><p><strong>animate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – show the vehicle path, defaults to False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -488,20 +490,20 @@ achieved, and if <code class="docutils literal notranslate"><span class="pre">an
 <li><p><strong>direction</strong> (<em>array_like</em><em>(</em><em>N</em><em>)</em><em>, </em><em>optional</em>) – travel direction associated with each point on path, is either &gt;0 or &lt;0, defaults to None</p></li>
 <li><p><strong>line</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for forward motion, default is striped yellow on black</p></li>
 <li><p><strong>line_r</strong> (sequence of dict of arguments for <code class="docutils literal notranslate"><span class="pre">plot</span></code>) – line style for reverse motion, default is striped red on black</p></li>
-<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
+<li><p><strong>configspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot the path in 3D configuration space, input must be 3xN.
 Start and goal style will be given by <code class="docutils literal notranslate"><span class="pre">qstart_marker</span></code> and <code class="docutils literal notranslate"><span class="pre">qgoal_marker</span></code>, defaults to False</p></li>
-<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
+<li><p><strong>unwrap</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – for configuration space plot unwrap <span class="math notranslate nohighlight">\(\theta\)</span> so
 there are no discontinuities at <span class="math notranslate nohighlight">\(\pm \pi\)</span>, defaults to True</p></li>
-<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
-<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
-<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
-<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
-<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
+<li><p><strong>background</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – plot occupancy grid if present, default True</p></li>
+<li><p><strong>start_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking start point</p></li>
+<li><p><strong>goal_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – style for marking goal point</p></li>
+<li><p><strong>start_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at start configuration</p></li>
+<li><p><strong>goal_vehicle</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – style for vehicle animation object at goal configuration</p></li>
 <li><p><strong>start</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – start position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
 <li><p><strong>goal</strong> (<em>array_like</em><em>(</em><em>2</em><em>) or </em><em>array_like</em><em>(</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – goal position <span class="math notranslate nohighlight">\((x, y)\)</span> or configuration <span class="math notranslate nohighlight">\((x, y, \theta)\)</span>, defaults to value previously set</p></li>
-<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase.plot_bg" title="roboticstoolbox.mobile.PlannerBase.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a>, defaults to None</p></li>
+<li><p><strong>bgargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><em>optional</em>) – arguments passed to <a class="reference internal" href="#roboticstoolbox.mobile.PlannerBase.plot_bg" title="roboticstoolbox.mobile.PlannerBase.plot_bg"><code class="xref py py-meth docutils literal notranslate"><span class="pre">plot_bg()</span></code></a>, defaults to None</p></li>
 <li><p><strong>ax</strong> (<em>matplotlib axes</em>) – axes to plot into</p></li>
-<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – block after displaying the plot</p></li>
 </ul>
 </dd>
 </dl>
@@ -581,7 +583,7 @@ plotted on top, giving a line of alternating black and yellow dashes.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>distance</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em><em>, </em><em>optional</em>) – override distance field, defaults to None</p></li>
-<li><p><strong>cmap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><em>Colormap</em><em>, </em><em>optional</em>) – Specify a colormap for the distance field, defaults to ‘gray’</p></li>
+<li><p><strong>cmap</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><em>Colormap</em><em>, </em><em>optional</em>) – Specify a colormap for the distance field, defaults to ‘gray’</p></li>
 </ul>
 </dd>
 </dl>
@@ -608,8 +610,8 @@ the the distance field will be used as the background and obstacle cells
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>s</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – message to print</p></li>
-<li><p><strong>color</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – color to print it, defaults to color specified at
+<li><p><strong>s</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – message to print</p></li>
+<li><p><strong>color</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – color to print it, defaults to color specified at
 constructor time.</p></li>
 </ul>
 </dd>
@@ -624,7 +626,7 @@ constructor time.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.mobile.OccGrid.BaseMap">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.mobile.OccGrid.</span></span><span class="sig-name descname"><span class="pre">BaseMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">workspace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">unused</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/mobile/OccGrid.html#BaseMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.mobile.OccGrid.BaseMap" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 </dd></dl>
 
 <dl class="py class">
@@ -654,7 +656,7 @@ constructor time.</p></li>
 <dd class="field-odd"><p>summary of occupancy grid characteristics</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -668,7 +670,7 @@ constructor time.</p></li>
 <dd class="field-odd"><p>binary occupancy grid</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>ndarray(N,M) of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-even"><p>ndarray(N,M) of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>If <code class="xref py py-meth docutils literal notranslate"><span class="pre">inflate()</span></code> has been called, this will return the inflated
@@ -684,7 +686,7 @@ occupancy grid.</p>
 <dd class="field-odd"><p>minimum world x-coordinate</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -698,7 +700,7 @@ occupancy grid.</p>
 <dd class="field-odd"><p>maximum world x-coordinate</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -712,7 +714,7 @@ occupancy grid.</p>
 <dd class="field-odd"><p>minimum world y-coordinate</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -726,7 +728,7 @@ occupancy grid.</p>
 <dd class="field-odd"><p>maximum world y-coordinate</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -755,7 +757,7 @@ occupancy grid.</p>
 <dd class="field-odd"><p>maximum side length of the occupancy grid</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -784,7 +786,7 @@ occupancy grid.</p>
 <dd class="field-odd"><p>name of the occupancy grid</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -797,7 +799,7 @@ occupancy grid.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>region</strong> (<em>array_like</em><em>(</em><em>4</em><em>)</em>) – The region [xmin, ymin, xmax, ymax]</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – value to set cells to</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – value to set cells to</p></li>
 </ul>
 </dd>
 </dl>
@@ -852,7 +854,7 @@ value. No check is made on the validity of the coordinate.</p>
 <li><p><strong>map</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em><em>, </em><em>optional</em>) – array which is plotted instead of the grid, must be same
 size as the occupancy grid,defaults to None</p></li>
 <li><p><strong>ax</strong> (<em>Axes2D</em><em>, </em><em>optional</em>) – matplotlib axes to plot into, defaults to None</p></li>
-<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block until plot is dismissed, defaults to None</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – block until plot is dismissed, defaults to None</p></li>
 <li><p><strong>kwargs</strong> – arguments passed to <code class="docutils literal notranslate"><span class="pre">imshow</span></code></p></li>
 </ul>
 </dd>
@@ -919,7 +921,7 @@ points given in world coordinates.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 15-May-2023.
+      <span class="lastupdated">Last updated on 11-May-2024.
       </span></p>
   </div>
 

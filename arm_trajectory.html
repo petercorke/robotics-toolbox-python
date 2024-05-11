@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
     <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
     <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
@@ -9,11 +9,13 @@
     <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trajectories &mdash; Robotics Toolbox for Python  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -119,7 +121,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">roboticstoolbox.tools.trajectory.</span></span><span class="sig-name descname"><span class="pre">Trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">istime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/roboticstoolbox/tools/trajectory.html#Trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#roboticstoolbox.tools.trajectory.Trajectory" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A container class for trajectory data.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="roboticstoolbox.tools.trajectory.Trajectory.__init__">
@@ -128,12 +130,12 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – name of the function that created the trajectory</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – name of the function that created the trajectory</p></li>
 <li><p><strong>t</strong> (<em>ndarray</em><em>(</em><em>m</em><em>)</em>) – independent variable, eg. time or step</p></li>
 <li><p><strong>s</strong> (<em>ndarray</em><em>(</em><em>m</em><em>) or </em><em>ndarray</em><em>(</em><em>m</em><em>,</em><em>n</em><em>)</em>) – position</p></li>
 <li><p><strong>sd</strong> (<em>ndarray</em><em>(</em><em>m</em><em>) or </em><em>ndarray</em><em>(</em><em>m</em><em>,</em><em>n</em><em>)</em>) – velocity</p></li>
 <li><p><strong>sdd</strong> (<em>ndarray</em><em>(</em><em>m</em><em>) or </em><em>ndarray</em><em>(</em><em>m</em><em>,</em><em>n</em><em>)</em>) – acceleration</p></li>
-<li><p><strong>istime</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – <code class="docutils literal notranslate"><span class="pre">t</span></code> is time, otherwise step number</p></li>
+<li><p><strong>istime</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – <code class="docutils literal notranslate"><span class="pre">t</span></code> is time, otherwise step number</p></li>
 <li><p><strong>tblend</strong> – blend duration (<code class="docutils literal notranslate"><span class="pre">trapezoidal</span></code> only)</p></li>
 </ul>
 </dd>
@@ -182,7 +184,7 @@ with respect to <code class="docutils literal notranslate"><span class="pre">t</
 <dd class="field-odd"><p>number of steps in the trajectory</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -253,7 +255,7 @@ applications.</p>
 <dd class="field-odd"><p>number of axes or dimensions</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -264,7 +266,7 @@ applications.</p>
 <dd><p>Plot trajectory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – wait till plot is dismissed</p>
+<dd class="field-odd"><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – wait till plot is dismissed</p>
 </dd>
 </dl>
 <p>Plot the position, velocity and acceleration data.  The format of the
@@ -308,9 +310,9 @@ plot depends on the function that created it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – initial value</p></li>
-<li><p><strong>qf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – final value</p></li>
-<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> or </em><em>array_like</em><em>(</em><em>m</em><em>)</em>) – time</p></li>
+<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – initial value</p></li>
+<li><p><strong>qf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – final value</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> or </em><em>array_like</em><em>(</em><em>m</em><em>)</em>) – time</p></li>
 <li><p><strong>qd0</strong> – initial velocity, optional</p></li>
 <li><p><strong>qdf</strong> – final velocity, optional</p></li>
 </ul>
@@ -389,9 +391,9 @@ time scaling is based on the first and last element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – initial value</p></li>
-<li><p><strong>qf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – final value</p></li>
-<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – trajectory time</p></li>
+<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – initial value</p></li>
+<li><p><strong>qf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – final value</p></li>
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – trajectory time</p></li>
 <li><p><strong>qd0</strong> – initial velocity, defaults to 0</p></li>
 <li><p><strong>qdf</strong> – final velocity, defaults to 0</p></li>
 </ul>
@@ -409,11 +411,11 @@ derivatives, as described by the parameters.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">roboticstoolbox</span> <span class="kn">import</span> <span class="n">quintic_func</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">quintic_func</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="go">(0.9999999999999998, -6.209928342373865e-17, 4.072476536753782e-17)</span>
+<span class="go">(1.000000000000001, 2.782740400955608e-16, -8.565197162635485e-18)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-<span class="go">(2.0000000000000115, 4.304860885758288e-15, -3.567500064664221e-15)</span>
+<span class="go">(2.000000000000005, -3.233998897671231e-15, -7.225014857226153e-15)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">(</span><span class="mf">2.5</span><span class="p">)</span>
-<span class="go">(1.5000000000000009, 0.3750000000000019, 1.844837180383417e-15)</span>
+<span class="go">(1.5000000000000029, 0.37500000000000167, 8.241020713062319e-16)</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -439,10 +441,10 @@ derivatives, as described by the parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – initial value</p></li>
-<li><p><strong>qf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – final value</p></li>
-<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em> or </em><em>array_like</em>) – time</p></li>
-<li><p><strong>V</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – velocity of linear segment, optional</p></li>
+<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – initial value</p></li>
+<li><p><strong>qf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – final value</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em> or </em><em>array_like</em>) – time</p></li>
+<li><p><strong>V</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – velocity of linear segment, optional</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -529,10 +531,10 @@ and time scaling is based on the first and last element.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – initial value</p></li>
-<li><p><strong>qf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – final value</p></li>
-<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – maximum time</p></li>
-<li><p><strong>V</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – velocity of linear segment</p></li>
+<li><p><strong>q0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – initial value</p></li>
+<li><p><strong>qf</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – final value</p></li>
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – maximum time</p></li>
+<li><p><strong>V</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – velocity of linear segment</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -567,13 +569,13 @@ derivatives, as described by the parameters.</p>
 <li><p><strong>tfunc</strong> (<em>callable</em>) – a 1D trajectory function, eg. <a class="reference internal" href="#roboticstoolbox.tools.trajectory.quintic" title="roboticstoolbox.tools.trajectory.quintic"><code class="xref py py-func docutils literal notranslate"><span class="pre">quintic()</span></code></a> or <a class="reference internal" href="#roboticstoolbox.tools.trajectory.trapezoidal" title="roboticstoolbox.tools.trajectory.trapezoidal"><code class="xref py py-func docutils literal notranslate"><span class="pre">trapezoidal()</span></code></a></p></li>
 <li><p><strong>q0</strong> (<em>ndarray</em><em>(</em><em>m</em><em>)</em>) – initial configuration</p></li>
 <li><p><strong>qf</strong> (<em>ndarray</em><em>(</em><em>m</em><em>)</em>) – final configuration</p></li>
-<li><p><strong>t</strong> (<em>array_like</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – time vector or number of steps</p></li>
+<li><p><strong>t</strong> (<em>array_like</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – time vector or number of steps</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.11)"><strong>TypeError</strong></a> – <code class="docutils literal notranslate"><span class="pre">tfunc</span></code> is not callable</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – length of <code class="docutils literal notranslate"><span class="pre">q0</span></code> and <code class="docutils literal notranslate"><span class="pre">qf</span></code> are different</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.12)"><strong>TypeError</strong></a> – <code class="docutils literal notranslate"><span class="pre">tfunc</span></code> is not callable</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – length of <code class="docutils literal notranslate"><span class="pre">q0</span></code> and <code class="docutils literal notranslate"><span class="pre">qf</span></code> are different</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -624,7 +626,7 @@ time scaling is based on the first and last element.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>q0</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em>) – initial joint coordinate</p></li>
 <li><p><strong>qf</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em>) – final joint coordinate</p></li>
-<li><p><strong>t</strong> (<em>array_like</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – time vector or number of steps</p></li>
+<li><p><strong>t</strong> (<em>array_like</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – time vector or number of steps</p></li>
 <li><p><strong>qd0</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – initial velocity, defaults to zero</p></li>
 <li><p><strong>qd1</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – final velocity, defaults to zero</p></li>
 </ul>
@@ -672,7 +674,7 @@ assuming that the time vector starts at zero and increases linearly.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>T0</strong> (<em>SE3</em>) – initial pose</p></li>
 <li><p><strong>T1</strong> (<em>SE3</em>) – final pose</p></li>
-<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> or </em><em>ndarray</em><em>(</em><em>n</em><em>)</em>) – number of samples or time vector</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> or </em><em>ndarray</em><em>(</em><em>n</em><em>)</em>) – number of samples or time vector</p></li>
 <li><p><strong>s</strong> (<em>ndarray</em><em>(</em><em>s</em><em>)</em>) – array of distance along the path, in the interval [0, 1]</p></li>
 </ul>
 </dd>
@@ -734,15 +736,15 @@ interpolation.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>viapoints</strong> (<em>ndarray</em><em>(</em><em>m</em><em>,</em><em>n</em><em>)</em>) – A set of viapoints, one per row</p></li>
-<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em> (</em><em>seconds</em><em>)</em>) – time step</p></li>
-<li><p><strong>tacc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – acceleration time (seconds)</p></li>
-<li><p><strong>qdmax</strong> (<em>array_like</em><em>(</em><em>n</em><em>) or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – maximum speed, defaults to None</p></li>
+<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em> (</em><em>seconds</em><em>)</em>) – time step</p></li>
+<li><p><strong>tacc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – acceleration time (seconds)</p></li>
+<li><p><strong>qdmax</strong> (<em>array_like</em><em>(</em><em>n</em><em>) or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – maximum speed, defaults to None</p></li>
 <li><p><strong>tsegment</strong> (<em>array_like</em><em>, </em><em>optional</em>) – maximum time of each motion segment (seconds), defaults
 to None</p></li>
 <li><p><strong>q0</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – initial coordinates, defaults to first row of viapoints</p></li>
 <li><p><strong>qd0</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – inital  velocity, defaults to zero</p></li>
 <li><p><strong>qdf</strong> (<em>array_like</em><em>(</em><em>n</em><em>)</em><em>, </em><em>optional</em>) – final  velocity, defaults to zero</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – print debug information, defaults to False</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – print debug information, defaults to False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -834,7 +836,7 @@ maximum speed.</p></li>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 15-May-2023.
+      <span class="lastupdated">Last updated on 11-May-2024.
       </span></p>
   </div>
 

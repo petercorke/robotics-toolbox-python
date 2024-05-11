@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
     <link rel="icon" sizes="16x16" type="image/png" href="_static/favicon-16x16.png">
     <link rel="icon" sizes="32x32" type="image/png" href="_static/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" type="image/png" href="_static/apple-touch-icon.png">
@@ -9,11 +9,13 @@
     <link rel="android-chrome" sizes="512x512" type="image/png" href="_static/android-chrome-512x512.png ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Map classes &mdash; Robotics Toolbox for Python  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -127,7 +129,7 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grid</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em>) – occupancy grid as a NumPy array</p></li>
-<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – cell size, defaults to 1</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – cell size, defaults to 1</p></li>
 <li><p><strong>origin</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – world coordinates of the grid element [0,0], defaults to (0, 0)</p></li>
 <li><p><strong>kwargs</strong> – options passed to <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMap</span></code></p></li>
 </ul>
@@ -168,7 +170,7 @@ occupancy status.</p>
 <dd class="field-even"><p>occupancy status of corresponding grid cell</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>The grid cell size and offset are used to convert <code class="docutils literal notranslate"><span class="pre">p</span></code> to an occupancy
@@ -188,7 +190,7 @@ it is considered to be occupied.</p>
 <dd><p>Inflate obstales</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>radius</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – radius of circular structuring element in world units</p>
+<dd class="field-odd"><p><strong>radius</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – radius of circular structuring element in world units</p>
 </dd>
 </dl>
 <p>A circular structuring element is created and used to dilate the
@@ -196,7 +198,7 @@ stored occupancy grid.</p>
 <p>Successive calls to <code class="docutils literal notranslate"><span class="pre">inflate</span></code> will compound the inflation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.binary_dilation.html#scipy.ndimage.binary_dilation" title="(in SciPy v1.10.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.binary_dilation()</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.binary_dilation.html#scipy.ndimage.binary_dilation" title="(in SciPy v1.13.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.ndimage.binary_dilation()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -243,7 +245,7 @@ coordinate <code class="docutils literal notranslate"><span class="pre">p</span>
 <dd class="field-odd"><p>binary occupancy grid</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>ndarray(N,M) of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-even"><p>ndarray(N,M) of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>If <a class="reference internal" href="#roboticstoolbox.mobile.BinaryOccupancyGrid.inflate" title="roboticstoolbox.mobile.BinaryOccupancyGrid.inflate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">inflate()</span></code></a> has been called, this will return the inflated
@@ -287,7 +289,7 @@ points given in world coordinates.</p>
 <dd class="field-odd"><p>maximum side length of the occupancy grid</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -301,7 +303,7 @@ points given in world coordinates.</p>
 <dd class="field-odd"><p>name of the occupancy grid</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -316,7 +318,7 @@ points given in world coordinates.</p>
 <li><p><strong>map</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em><em>, </em><em>optional</em>) – array which is plotted instead of the grid, must be same
 size as the occupancy grid,defaults to None</p></li>
 <li><p><strong>ax</strong> (<em>Axes2D</em><em>, </em><em>optional</em>) – matplotlib axes to plot into, defaults to None</p></li>
-<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block until plot is dismissed, defaults to None</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – block until plot is dismissed, defaults to None</p></li>
 <li><p><strong>kwargs</strong> – arguments passed to <code class="docutils literal notranslate"><span class="pre">imshow</span></code></p></li>
 </ul>
 </dd>
@@ -349,7 +351,7 @@ to control the displayed color of free space and obstacles.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>region</strong> (<em>array_like</em><em>(</em><em>4</em><em>)</em>) – The region [xmin, ymin, xmax, ymax]</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – value to set cells to</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – value to set cells to</p></li>
 </ul>
 </dd>
 </dl>
@@ -414,7 +416,7 @@ value. No check is made on the validity of the coordinate.</p>
 <dd class="field-odd"><p>maximum world x-coordinate</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -428,7 +430,7 @@ value. No check is made on the validity of the coordinate.</p>
 <dd class="field-odd"><p>minimum world x-coordinate</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -442,7 +444,7 @@ value. No check is made on the validity of the coordinate.</p>
 <dd class="field-odd"><p>maximum world y-coordinate</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -456,7 +458,7 @@ value. No check is made on the validity of the coordinate.</p>
 <dd class="field-odd"><p>minimum world y-coordinate</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -499,7 +501,7 @@ probability or traversal cost.</p>
 <li><p><strong>grid</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em>) – occupancy grid as a NumPy array</p></li>
 <li><p><strong>value</strong> (<em>any</em><em>, </em><em>optional</em>) – initial value of cells</p></li>
 <li><p><strong>origin</strong> (<em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>optional</em>) – world coordinates of the grid element [0,0], defaults to (0, 0)</p></li>
-<li><p><strong>cellsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – cell size, defaults to 1</p></li>
+<li><p><strong>cellsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>optional</em>) – cell size, defaults to 1</p></li>
 <li><p><strong>kwargs</strong> – options passed to <a class="reference internal" href="mobile-planner-base.html#roboticstoolbox.mobile.OccGrid.BaseMap" title="roboticstoolbox.mobile.OccGrid.BaseMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMap</span></code></a></p></li>
 </ul>
 </dd>
@@ -556,7 +558,7 @@ coordinate <code class="docutils literal notranslate"><span class="pre">p</span>
 <dd class="field-odd"><p>binary occupancy grid</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>ndarray(N,M) of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-even"><p>ndarray(N,M) of <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>If <code class="xref py py-meth docutils literal notranslate"><span class="pre">inflate()</span></code> has been called, this will return the inflated
@@ -600,7 +602,7 @@ points given in world coordinates.</p>
 <dd class="field-odd"><p>maximum side length of the occupancy grid</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -614,7 +616,7 @@ points given in world coordinates.</p>
 <dd class="field-odd"><p>name of the occupancy grid</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -629,7 +631,7 @@ points given in world coordinates.</p>
 <li><p><strong>map</strong> (<em>ndarray</em><em>(</em><em>N</em><em>,</em><em>M</em><em>)</em><em>, </em><em>optional</em>) – array which is plotted instead of the grid, must be same
 size as the occupancy grid,defaults to None</p></li>
 <li><p><strong>ax</strong> (<em>Axes2D</em><em>, </em><em>optional</em>) – matplotlib axes to plot into, defaults to None</p></li>
-<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – block until plot is dismissed, defaults to None</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – block until plot is dismissed, defaults to None</p></li>
 <li><p><strong>kwargs</strong> – arguments passed to <code class="docutils literal notranslate"><span class="pre">imshow</span></code></p></li>
 </ul>
 </dd>
@@ -662,7 +664,7 @@ to control the displayed color of free space and obstacles.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>region</strong> (<em>array_like</em><em>(</em><em>4</em><em>)</em>) – The region [xmin, ymin, xmax, ymax]</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – value to set cells to</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – value to set cells to</p></li>
 </ul>
 </dd>
 </dl>
@@ -727,7 +729,7 @@ value. No check is made on the validity of the coordinate.</p>
 <dd class="field-odd"><p>maximum world x-coordinate</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -741,7 +743,7 @@ value. No check is made on the validity of the coordinate.</p>
 <dd class="field-odd"><p>minimum world x-coordinate</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -755,7 +757,7 @@ value. No check is made on the validity of the coordinate.</p>
 <dd class="field-odd"><p>maximum world y-coordinate</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -769,7 +771,7 @@ value. No check is made on the validity of the coordinate.</p>
 <dd class="field-odd"><p>minimum world y-coordinate</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -791,13 +793,13 @@ value. No check is made on the validity of the coordinate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>workspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>array_like</em><em>(</em><em>4</em><em>)</em>) – dimensions of 2D plot area, defaults to (-10:10) x (-10:10),
-see <a class="reference external" href="https://petercorke.github.io/spatialmath-python/func_2d_graphics.html#spatialmath.base.graphics.plotvol2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">plotvol2()</span></code></a></p></li>
-<li><p><strong>polygons</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>, </em><em>optional</em>) – obstacle polygons, defaults to []</p></li>
+<li><p><strong>workspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em>, </em><em>array_like</em><em>(</em><em>2</em><em>)</em><em>, </em><em>array_like</em><em>(</em><em>4</em><em>)</em>) – dimensions of 2D plot area, defaults to (-10:10) x (-10:10),
+see <code class="xref py py-func docutils literal notranslate"><span class="pre">plotvol2()</span></code></p></li>
+<li><p><strong>polygons</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>, </em><em>optional</em>) – obstacle polygons, defaults to []</p></li>
 </ul>
 </dd>
 </dl>
-<p>The obstacle polygons are specified as instances of <a class="reference external" href="https://petercorke.github.io/spatialmath-python/classes-2d.html#spatialmath.geom2d.Polygon2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code></a>
+<p>The obstacle polygons are specified as instances of <code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code>
 or ndarray(2,N).</p>
 <p>The workspace can be specified in several ways:</p>
 <table class="docutils align-default">
@@ -831,7 +833,7 @@ or ndarray(2,N).</p>
 <dd><p>Add a polygon to map</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>polygon</strong> (<a class="reference external" href="https://petercorke.github.io/spatialmath-python/classes-2d.html#spatialmath.geom2d.Polygon2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code></a> or ndarray(2,N)) – a polygon</p>
+<dd class="field-odd"><p><strong>polygon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code> or ndarray(2,N)) – a polygon</p>
 </dd>
 </dl>
 </dd></dl>
@@ -842,20 +844,20 @@ or ndarray(2,N).</p>
 <dd><p>Test for collision</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>polygon</strong> (<a class="reference external" href="https://petercorke.github.io/spatialmath-python/classes-2d.html#spatialmath.geom2d.Polygon2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code></a> or ndarray(2,N)) – a polygon</p>
+<dd class="field-odd"><p><strong>polygon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code> or ndarray(2,N)) – a polygon</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>collision</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>The <code class="docutils literal notranslate"><span class="pre">polygon</span></code> is tested against polygons in the map, and returns True
 on the first collision.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Seealso<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.PolygonMap.add" title="roboticstoolbox.mobile.PolygonMap.add"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add()</span></code></a> <a class="reference external" href="https://petercorke.github.io/spatialmath-python/classes-2d.html#spatialmath.geom2d.Polygon2" title="(in Spatial Maths package v1.1.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#roboticstoolbox.mobile.PolygonMap.add" title="roboticstoolbox.mobile.PolygonMap.add"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add()</span></code></a> <code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon2</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -877,7 +879,7 @@ on the first collision.</p>
 <dd class="field-even"><p>enclosure</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 <p>The point is tested for enclosure by polygons in the map, and returns True
@@ -913,7 +915,7 @@ on the first enclosure.</p>
 
   <div role="contentinfo">
     <p>&#169; Copyright 2023, Jesse Haviland and Peter Corke.
-      <span class="lastupdated">Last updated on 15-May-2023.
+      <span class="lastupdated">Last updated on 11-May-2024.
       </span></p>
   </div>
 
