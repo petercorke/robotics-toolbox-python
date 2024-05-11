@@ -176,16 +176,7 @@ class RandomPath(VehicleDriverBase):
             veh.control = driver
 
         The waypoints are positioned inside a rectangular region defined by
-        the vehicle that is specified by  (see ``plotvol2``):
-
-        ==============  =======  =======
-        ``workspace``   x-range  y-range
-        ==============  =======  =======
-        A (scalar)      -A:A     -A:A
-        [A, B]           A:B      A:B
-        [A, B, C, D]     A:B      C:D
-        ==============  =======  =======
-
+        the `workspace`
 
         .. note::
             - It is possible in some cases for the vehicle to move outside the desired
@@ -202,30 +193,14 @@ class RandomPath(VehicleDriverBase):
 
         # TODO options to specify region, maybe accept a Map object?
 
-        if hasattr(workspace, "workspace"):
-            # workspace can be defined by an object with a workspace attribute
-            self._workspace = base.expand_dims(workspace.workspace)
-        else:
-            self._workspace = base.expand_dims(workspace)
+        super().__init__(**kwargs)
 
-        self._speed = speed
         self._dthresh = dthresh * np.diff(self._workspace[0:2])
         self._goal_marker = None
-        if goalmarkerstyle is None:
-            self._goal_marker_style = {
-                "marker": "D",
-                "markersize": 6,
-                "color": "r",
-                "linestyle": "None",
-            }
-        else:
-            self._goal_marker_style = goalmarkerstyle
-        self._headinggain = headinggain
 
         self._d_prev = np.inf
         self._random = np.random.default_rng(seed)
         self._seed = seed
-        self.verbose = True
         self._goal = None
         self._dthresh = dthresh * max(
             self._workspace[1] - self._workspace[0],
@@ -235,10 +210,11 @@ class RandomPath(VehicleDriverBase):
         self._veh = None
 
     def __str__(self):
-        """%RandomPath.char Convert to string
-        %
-        % s = R.char() is a string showing driver parameters and state in in
-        % a compact human readable format."""
+        """Convert to string
+
+        :return: driver parameters and state in in a compact human readable format
+        :rtype: str
+        """
 
         s = "RandomPath driver object\n"
         s += (
@@ -247,19 +223,6 @@ class RandomPath(VehicleDriverBase):
         )
         s += f"  current goal={self._goal}"
         return s
-
-    @property
-    def workspace(self):
-        """
-        Size of robot driving workspace
-
-        :return: workspace bounds [xmin, xmax, ymin, ymax]
-        :rtype: ndarray(4)
-
-        Returns the bounds of the workspace as specified by constructor
-        option ``workspace``
-        """
-        return self._workspace
 
     def init(self, ax=None):
         """
@@ -305,14 +268,7 @@ class RandomPath(VehicleDriverBase):
         #     self.choose_goal()
         self._d_prev = d
 
-        speed = self._speed
-
-        goal_heading = atan2(
-            self._goal[1] - self._veh._x[1], self._goal[0] - self._veh._x[0]
-        )
-        delta_heading = base.angdiff(goal_heading, self._veh._x[2])
-
-        return np.r_[speed, self._headinggain * delta_heading]
+        return self.driveto(self._goal)
 
     ## private method, invoked from demand() to compute a new waypoint
 
@@ -332,7 +288,7 @@ class RandomPath(VehicleDriverBase):
             if np.linalg.norm(self._goal - self._veh._x[0:2]) > 2 * self._dthresh:
                 break
 
-        if self._veh.verbose:
+        if self._veh.verbose or self._verbose:
             print(f"set goal: {self._goal}")
 
         # update the goal marker
