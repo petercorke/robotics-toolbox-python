@@ -4,7 +4,7 @@ name = "roboticstoolbox-python"
 
 description = "A Python library for robotics education and research"
 
-version = "1.1.0"
+version = "1.1.1"
 
 authors = [
     { name = "Jesse Haviland", email = "j.haviland@qut.edu.au" },
@@ -90,7 +90,7 @@ docs = [
     "sphinx_rtd_theme",
     "sphinx-autorun",
     "sphinx_autodoc_typehints",
-    "sphinx-favicon"
+    "sphinx-favicon",
 ]
 
 
