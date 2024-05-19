@@ -23,6 +23,56 @@ from .utils import parse_origin, configure_origin
 # Global variable for the base path of the robot meshes
 _base_path = None
 
+def _find_standard_joint(joint: "Joint") -> "rtb.ET | None":
+    """
+    Finds a pure rtb.ET joint corresponding to the URDF joint axis.
+
+    If urdf joint is fixed, returns an empty rtb.ET.SE3.
+    If none exists (axis is not +- 1 over x, y or z) returns None.
+
+    Attributes
+    ----------
+    joint
+       joint object read from the urdf.
+
+    Returns
+    -------
+    std_joint: rtb.ET or None
+        if a rtb.ET joint exists:
+            Returns rtb.ET of type joint. This is rtb.ET.[SE(), Rx(), Ry(), ..., tz].
+        else:
+            Returns None.
+    """
+    std_joint = None
+    if joint.joint_type in ("revolute", "continuous"):  # pragma nocover # noqa
+        if joint.axis[0] == 1:
+            std_joint = rtb.ET.Rx()
+        elif joint.axis[0] == -1:
+            std_joint = rtb.ET.Rx(flip=True)
+        elif joint.axis[1] == 1:
+            std_joint = rtb.ET.Ry()
+        elif joint.axis[1] == -1:
+            std_joint = rtb.ET.Ry(flip=True)
+        elif joint.axis[2] == 1:
+            std_joint = rtb.ET.Rz()
+        elif joint.axis[2] == -1:
+            std_joint = rtb.ET.Rz(flip=True)
+    elif joint.joint_type == "prismatic":  # pragma nocover
+        if joint.axis[0] == 1:
+            std_joint = rtb.ET.tx()
+        elif joint.axis[0] == -1:
+            std_joint = rtb.ET.tx(flip=True)
+        elif joint.axis[1] == 1:
+            std_joint = rtb.ET.ty()
+        elif joint.axis[1] == -1:
+            std_joint = rtb.ET.ty(flip=True)
+        elif joint.axis[2] == 1:
+            std_joint = rtb.ET.tz()
+        elif joint.axis[2] == -1:
+            std_joint = rtb.ET.tz(flip=True)
+    elif joint.joint_type == "fixed":
+        std_joint = rtb.ET.SE3(SE3())
+    return std_joint
 
 class URDFType(object):
     """Abstract base class for all URDF types.
@@ -1718,38 +1768,10 @@ class URDF(URDFType):
 
                 joint.axis = [0, 0, 1]
 
-            # variable part of link transform
-            var = None
-            if joint.joint_type in ("revolute", "continuous"):  # pragma nocover # noqa
-                if joint.axis[0] == 1:
-                    var = rtb.ET.Rx()
-                elif joint.axis[0] == -1:
-                    var = rtb.ET.Rx(flip=True)
-                elif joint.axis[1] == 1:
-                    var = rtb.ET.Ry()
-                elif joint.axis[1] == -1:
-                    var = rtb.ET.Ry(flip=True)
-                elif joint.axis[2] == 1:
-                    var = rtb.ET.Rz()
-                elif joint.axis[2] == -1:
-                    var = rtb.ET.Rz(flip=True)
-            elif joint.joint_type == "prismatic":  # pragma nocover
-                if joint.axis[0] == 1:
-                    var = rtb.ET.tx()
-                elif joint.axis[0] == -1:
-                    var = rtb.ET.tx(flip=True)
-                elif joint.axis[1] == 1:
-                    var = rtb.ET.ty()
-                elif joint.axis[1] == -1:
-                    var = rtb.ET.ty(flip=True)
-                elif joint.axis[2] == 1:
-                    var = rtb.ET.tz()
-                elif joint.axis[2] == -1:
-                    var = rtb.ET.tz(flip=True)
-            elif joint.joint_type == "fixed":
-                var = None
+            var = _find_standard_joint(joint)
 
-            if var is not None:
+            is_not_fixed = joint.joint_type != "fixed"
+            if var is not None and is_not_fixed:
                 ets = ets * var
 
             if isinstance(ets, rtb.ET):
