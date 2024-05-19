@@ -10,8 +10,8 @@ import spatialgeometry as gm
 import copy
 import os
 import xml.etree.ElementTree as ETT
-from spatialmath import SE3
-from spatialmath.base import unitvec_norm, angvec2r, tr2rpy
+from spatialmath import SE3, SO3
+from spatialmath.base import ArrayLike3, getvector, unitvec, unitvec_norm, angvec2r, tr2rpy
 
 from io import BytesIO
 from roboticstoolbox.tools.data import rtb_path_to_datafile
@@ -22,6 +22,53 @@ from .utils import parse_origin, configure_origin
 
 # Global variable for the base path of the robot meshes
 _base_path = None
+
+def rotation_fromVec_toVec(
+    from_this_vector: ArrayLike3, to_this_vector: ArrayLike3
+) -> SO3:
+    """
+    Computes the rotation matrix from the first to the second vector.
+
+    Attributes
+    ----------
+        from_this_vector: ArrayLike3
+        to_this_vector: ArrayLike3
+
+    Returns
+    -------
+        rotation_from_to: SO3
+            Rotation matrix
+
+    Notes
+    -----
+        Vector length is irrelevant.
+    """
+    from_this_vector = getvector(from_this_vector)
+    to_this_vector = getvector(to_this_vector)
+
+    is_zero = np.all(np.isclose(from_this_vector, 0))
+    if is_zero:
+        target_axis = to_this_vector
+    else:
+        target_axis = unitvec(from_this_vector)
+
+    dt = np.dot(target_axis, to_this_vector)
+    crss = np.cross(target_axis, to_this_vector)
+
+    is_parallel = np.all(np.isclose(crss, 0))
+    if is_parallel:
+        rotation_plane = unitvec(
+            np.cross(target_axis, to_this_vector + np.array([1, 1, 1]))
+        )
+    else:
+        rotation_plane = unitvec(crss)
+
+    x = dt
+    y = np.linalg.norm(crss)
+    rotation_angle = np.arctan2(y, x)
+
+    rotation_from_to = SO3.AngVec(rotation_angle, rotation_plane)
+    return rotation_from_to
 
 def _find_standard_joint(joint: "Joint") -> "rtb.ET | None":
     """
