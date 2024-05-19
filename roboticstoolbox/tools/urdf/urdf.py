@@ -1871,50 +1871,18 @@ class URDF(URDFType):
         # connect the links using joint info
         for joint in self._joints:
             # get references to joint's parent and child
-            childlink = elinkdict[joint.child]
+            childlink: "rtb.Link" = elinkdict[joint.child]
             parentlink = elinkdict[joint.parent]
 
             childlink._parent = parentlink  # connect child link to parent
             childlink._joint_name = joint.name
+            # Link precise definition will be done recursively later
+        self.elinks = elinks
 
-            # constant part of link transform
-            trans = SE3(joint.origin).t
-            rot = joint.rpy
+        # TODO, why did you put the base_link on the end?
+        # easy to do it here
 
-            # childlink.ets will be set later.
-            # This is because the fully defined parent link is required
-            # and this loop does not follow the parent-child order.
-
-            # joint limit
-            try:
-                if childlink.isjoint:
-                    childlink.qlim = [joint.limit.lower, joint.limit.upper]
-            except AttributeError:
-                # no joint limits provided
-                pass
-
-            # joint friction
-            try:
-                if joint.dynamics.friction is not None:
-                    childlink.B = joint.dynamics.friction
-
-                # TODO Add damping
-                # joint.dynamics.damping
-            except AttributeError:
-                pass
-
-            # joint gear ratio
-            # TODO, not sure if t.joint.name is a thing
-            for t in self.transmissions:  # pragma nocover
-                if t.name == joint.name:
-                    childlink.G = t.actuators[0].mechanicalReduction
-
-            self.elinks = elinks
-
-            # TODO, why did you put the base_link on the end?
-            # easy to do it here
-
-        # the childlink.ets will be set in there
+        # the childlink.ets and other info is set recursively here
         self._recursive_axis_definition()
         return
 
@@ -1963,15 +1931,54 @@ class URDF(URDFType):
 
             ets, from_Rx_to_axis = _find_joint_ets(joint, parent_from_Rx_to_axis)
 
-            for child in self.elinks:  # search all link with identical child
-                is_child = joint.child == child.name
+            for childlink in self.elinks:  # search all link with identical child
+                is_child = joint.child == childlink.name
                 if not is_child:
                     continue  # skips to next link
 
-                child.ets = ets  # sets the ets of the joint
+                childlink.ets = ets  # sets the ets of the joint
+                self.finalize_linking(childlink, joint)
+
                 self._recursive_axis_definition(
-                    parentname=child.name, parent_from_Rx_to_axis=from_Rx_to_axis
+                    parentname=childlink.name, parent_from_Rx_to_axis=from_Rx_to_axis
                 )
+
+    def finalize_linking(self, childlink: "rtb.Link", joint: "Joint"):
+        """
+        Finalize the linking process after the link ets is set.
+
+        This directly changes childlink in place.
+        The ets of childlink must be defined prior to this.
+
+        Attributes
+        ----------
+            childlink: rtb.Link
+                Link to finalize the definition of.
+            joint: Joint
+                Joint used to define the link.
+        """
+        try:
+            if childlink.isjoint:
+                childlink.qlim = [joint.limit.lower, joint.limit.upper]
+        except AttributeError:
+            # no joint limits provided
+            pass
+
+        # joint friction
+        try:
+            if joint.dynamics.friction is not None:
+                childlink.B = joint.dynamics.friction
+
+            # TODO Add damping
+            # joint.dynamics.damping
+        except AttributeError:
+            pass
+
+        # joint gear ratio
+        # TODO, not sure if t.joint.name is a thing
+        for t in self.transmissions:  # pragma nocover
+            if t.name == joint.name:
+                childlink.G = t.actuators[0].mechanicalReduction
 
     @property
     def name(self):
