@@ -12,7 +12,14 @@ import copy
 import os
 import xml.etree.ElementTree as ETT
 from spatialmath import SE3, SO3
-from spatialmath.base import ArrayLike3, getvector, unitvec, unitvec_norm, angvec2r, tr2rpy
+from spatialmath.base import (
+    ArrayLike3,
+    getvector,
+    unitvec,
+    unitvec_norm,
+    angvec2r,
+    tr2rpy,
+)
 
 from io import BytesIO
 from roboticstoolbox.tools.data import rtb_path_to_datafile
@@ -23,6 +30,7 @@ from .utils import parse_origin, configure_origin
 
 # Global variable for the base path of the robot meshes
 _base_path = None
+
 
 def rotation_fromVec_toVec(
     from_this_vector: ArrayLike3, to_this_vector: ArrayLike3
@@ -70,6 +78,7 @@ def rotation_fromVec_toVec(
 
     rotation_from_to = SO3.AngVec(rotation_angle, rotation_plane)
     return rotation_from_to
+
 
 def _find_standard_joint(joint: "Joint") -> "rtb.ET | None":
     """
@@ -122,6 +131,7 @@ def _find_standard_joint(joint: "Joint") -> "rtb.ET | None":
         std_joint = rtb.ET.SE3(SE3())
     return std_joint
 
+
 def _find_joint_ets(
     joint: "Joint",
     parent_from_Rx_to_axis: Optional[SE3] = None,
@@ -136,7 +146,7 @@ def _find_joint_ets(
     Attributes
     ----------
         joint: Joint
-            Joint from the urdf. 
+            Joint from the urdf.
             Used to deduce: transl(N), rot(N), axis(N), [Rx]
         parent_from_Rx_to_axis: Optional[SE3]
             SE3 resulting from the axis orientation of the parent joint
@@ -157,7 +167,7 @@ def _find_joint_ets(
     joint_without_axis = SE3(joint_trans) * SE3.RPY(joint_rot)
 
     std_joint = _find_standard_joint(joint)
-    is_simple_joint = std_joint is not None 
+    is_simple_joint = std_joint is not None
 
     if is_simple_joint:
         from_Rx_to_axis = SE3()
@@ -173,7 +183,7 @@ def _find_joint_ets(
 
         if joint.joint_type in ("revolute", "continuous"):
             pure_joint = rtb.ET.Rx(flip=0)
-        elif joint.joint_type == "prismatic": # I cannot test this case
+        elif joint.joint_type == "prismatic":  # I cannot test this case
             pure_joint = rtb.ET.tx(flip=0)
         else:
             pure_joint = rtb.ET.SE3(SE3())
@@ -193,6 +203,7 @@ def _find_joint_ets(
     ets = rtb.ETS(listET)
 
     return ets, from_Rx_to_axis
+
 
 class URDFType(object):
     """Abstract base class for all URDF types.
@@ -1836,9 +1847,11 @@ class URDF(URDFType):
             elink = rtb.Link(
                 name=link.name,
                 m=link.inertial.mass,
-                r=link.inertial.origin[:3, 3]
-                if link.inertial.origin is not None
-                else None,
+                r=(
+                    link.inertial.origin[:3, 3]
+                    if link.inertial.origin is not None
+                    else None
+                ),
                 I=link.inertial.inertia,
             )
             elinks.append(elink)
@@ -1870,8 +1883,8 @@ class URDF(URDFType):
             # constant part of link transform
             trans = SE3(joint.origin).t
             rot = joint.rpy
-            
-            # childlink.ets will be set later. 
+
+            # childlink.ets will be set later.
             # This is because the fully defined parent link is required
             # and this loop does not follow the parent-child order.
 
