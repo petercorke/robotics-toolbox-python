@@ -4,6 +4,7 @@
 @author (Adapted by) Jesse Haviland
 """
 
+from typing import Optional, Tuple
 import numpy as np
 import roboticstoolbox as rtb
 import spatialgeometry as gm
@@ -120,6 +121,78 @@ def _find_standard_joint(joint: "Joint") -> "rtb.ET | None":
     elif joint.joint_type == "fixed":
         std_joint = rtb.ET.SE3(SE3())
     return std_joint
+
+def _find_joint_ets(
+    joint: "Joint",
+    parent_from_Rx_to_axis: Optional[SE3] = None,
+) -> Tuple["rtb.ETS", SE3]:
+    """
+    Finds the ETS of a urdf joint object to be used by a Link.
+
+    This is based on the following fomula:
+        ets(N) = axis(N-1).inv() * transl(N) * rot(N) * axis(N) * [Rx]
+    where N is the current joint, and (N-1) the parent joint.
+
+    Attributes
+    ----------
+        joint: Joint
+            Joint from the urdf. 
+            Used to deduce: transl(N), rot(N), axis(N), [Rx]
+        parent_from_Rx_to_axis: Optional[SE3]
+            SE3 resulting from the axis orientation of the parent joint
+            Used to deduce: axis(N-1)
+
+    Returns
+    -------
+        ets: ETS
+            ETS representing the joint. It ends with a joint.
+        from_Rx_to_axis: SE3
+            SE3 representing the rotation of the axis attribute of the joint.
+    """
+    joint_trans = SE3(joint.origin).t
+    joint_rot = joint.rpy
+    if parent_from_Rx_to_axis is None:
+        parent_from_Rx_to_axis = SE3()
+
+    joint_without_axis = SE3(joint_trans) * SE3.RPY(joint_rot)
+
+    std_joint = _find_standard_joint(joint)
+    is_simple_joint = std_joint is not None 
+
+    if is_simple_joint:
+        from_Rx_to_axis = SE3()
+        pure_joint = std_joint
+    else:  # rotates a Rx joint onto right axis
+        joint_axis = joint.axis
+        axis_of_Rx = np.array([1, 0, 0], dtype=float)
+
+        rotation_from_Rx_to_axis = rotation_fromVec_toVec(
+            from_this_vector=axis_of_Rx, to_this_vector=joint_axis
+        )
+        from_Rx_to_axis = SE3(rotation_from_Rx_to_axis)
+
+        if joint.joint_type in ("revolute", "continuous"):
+            pure_joint = rtb.ET.Rx(flip=0)
+        elif joint.joint_type == "prismatic": # I cannot test this case
+            pure_joint = rtb.ET.tx(flip=0)
+        else:
+            pure_joint = rtb.ET.SE3(SE3())
+
+    listET = []
+    emptySE3 = SE3()
+
+    # skips empty SE3
+    if not parent_from_Rx_to_axis == emptySE3:
+        listET.append(rtb.ET.SE3(parent_from_Rx_to_axis.inv()))
+    listET.append(rtb.ET.SE3(joint_without_axis))
+    if not from_Rx_to_axis == emptySE3:
+        listET.append(rtb.ET.SE3(from_Rx_to_axis))
+    if not joint.joint_type == "fixed":
+        listET.append(pure_joint)
+
+    ets = rtb.ETS(listET)
+
+    return ets, from_Rx_to_axis
 
 class URDFType(object):
     """Abstract base class for all URDF types.
@@ -1797,34 +1870,10 @@ class URDF(URDFType):
             # constant part of link transform
             trans = SE3(joint.origin).t
             rot = joint.rpy
-
-            # Check if axis of rotation/tanslation is not 1
-            if np.count_nonzero(joint.axis) < 2:
-                ets = rtb.ET.SE3(SE3(trans) * SE3.RPY(rot))
-            else:
-                # Normalise the joint axis to be along or about z axis
-                # Convert rest to static ETS
-                v = joint.axis
-                u, n = unitvec_norm(v)
-                R = angvec2r(n, u)
-
-                R_total = SE3.RPY(joint.rpy) * R
-                rpy = tr2rpy(R_total)
-
-                ets = rtb.ET.SE3(SE3(trans) * SE3.RPY(rpy))
-
-                joint.axis = [0, 0, 1]
-
-            var = _find_standard_joint(joint)
-
-            is_not_fixed = joint.joint_type != "fixed"
-            if var is not None and is_not_fixed:
-                ets = ets * var
-
-            if isinstance(ets, rtb.ET):
-                ets = rtb.ETS(ets)
-
-            childlink.ets = ets
+            
+            # childlink.ets will be set later. 
+            # This is because the fully defined parent link is required
+            # and this loop does not follow the parent-child order.
 
             # joint limit
             try:
@@ -1854,6 +1903,64 @@ class URDF(URDFType):
 
             # TODO, why did you put the base_link on the end?
             # easy to do it here
+
+        # the childlink.ets will be set in there
+        self._recursive_axis_definition()
+        return
+
+    def _recursive_axis_definition(
+        self,
+        parentname: Optional[str] = None,
+        parent_from_Rx_to_axis: Optional[SE3] = None,
+    ) -> None:
+        """
+        Recursively sets the ets of all elinks (in place).
+
+        The ets of a link depends on the previous joint axis orientation.
+        In a URDF a joint is defined as the following ets:
+            ets = translation * rotation * axis * [Rx] * axis.inv()
+        where Rx is the variable joint ets, and "axis" rotates the variable joint
+        axis, BUT NOT the next link. Hence why Rx is rotated onto the axis, then
+        the rotation is canceled by axis.inv().
+
+        A Link is requiered to end with a variable ets -- this is our [Rx].
+        The previous formula must therefore be changed and requires recursion:
+            ets(N) = axis(N-1).inv() * transl(N) * rot(N) * axis(N) * [Rx]
+        where N is the current joint, and (N-1) the parent joint.
+        Chaining the ets of the second formula is equivalent to the first formula.
+
+        Attributes
+        ----------
+            parentname: Optional[str]
+                Name of the parent link.
+            parent_from_Rx_to_axis: Optional[SE3]
+                SE3 resulting from the axis orientation of the parent joint
+        """
+        if parentname is None:
+            base_link_exists = "base_link" in [j.name for j in self.elinks]
+            if base_link_exists:
+                parentname = "base_link"
+            else:
+                parentname = self.elinks[0].name
+        if parent_from_Rx_to_axis is None:
+            parent_from_Rx_to_axis = SE3()
+
+        for joint in self._joints:  # search  all joint with identical parent
+            is_parent = joint.parent == parentname
+            if not is_parent:
+                continue  # skips to next joint
+
+            ets, from_Rx_to_axis = _find_joint_ets(joint, parent_from_Rx_to_axis)
+
+            for child in self.elinks:  # search all link with identical child
+                is_child = joint.child == child.name
+                if not is_child:
+                    continue  # skips to next link
+
+                child.ets = ets  # sets the ets of the joint
+                self._recursive_axis_definition(
+                    parentname=child.name, parent_from_Rx_to_axis=from_Rx_to_axis
+                )
 
     @property
     def name(self):
