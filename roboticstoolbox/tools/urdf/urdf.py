@@ -16,9 +16,6 @@ from spatialmath.base import (
     ArrayLike3,
     getvector,
     unitvec,
-    unitvec_norm,
-    angvec2r,
-    tr2rpy,
 )
 
 from io import BytesIO
@@ -1950,11 +1947,12 @@ class URDF(URDFType):
                 SE3 resulting from the axis orientation of the parent joint
         """
         if parentname is None:
-            base_link_exists = "base_link" in [j.name for j in self.elinks]
-            if base_link_exists:
-                parentname = "base_link"
-            else:
-                parentname = self.elinks[0].name
+            # starts again with all orphan links
+            for link in self.elinks:
+                if link.parent is None:
+                    self._recursive_axis_definition(
+                        parentname=link.name, parent_from_Rx_to_axis=None
+                    )
         if parent_from_Rx_to_axis is None:
             parent_from_Rx_to_axis = SE3()
 
