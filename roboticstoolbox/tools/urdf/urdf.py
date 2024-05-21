@@ -302,8 +302,7 @@ class Mesh(URDFType):
 
         if value.startswith("package://"):
             value = value.replace("package://", "")
-
-        if value.startswith("file://"):
+        elif value.startswith("file://"):
             value = value.replace("file://", "")
 
         if _base_path is None:
