@@ -302,6 +302,8 @@ class Mesh(URDFType):
 
         if value.startswith("package://"):
             value = value.replace("package://", "")
+        elif value.startswith("file://"):
+            value = value.replace("file://", "")
 
         if _base_path is None:
             value = rtb_path_to_datafile("xacro", value)
