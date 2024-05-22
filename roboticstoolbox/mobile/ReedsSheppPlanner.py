@@ -40,7 +40,7 @@ def plot_arrow(x, y, yaw, length=1.0, width=0.5, fc="r", ec="k"):
     """
 
     if not isinstance(x, float):
-        for (ix, iy, iyaw) in zip(x, y, yaw):
+        for ix, iy, iyaw in zip(x, y, yaw):
             plot_arrow(ix, iy, iyaw)
     else:
         plt.arrow(
@@ -316,7 +316,7 @@ def generate_local_course(total_length, lengths, mode, max_curvature, step_size)
 
     ll = 0.0
 
-    for (m, l, i) in zip(mode, lengths, range(len(mode))):
+    for m, l, i in zip(mode, lengths, range(len(mode))):
         if l > 0.0:
             d = step_size
         else:
@@ -412,6 +412,7 @@ def reeds_shepp_path_planning(start, goal, maxc, step_size):
 
 # ====================== RTB wrapper ============================= #
 
+
 # Copyright (c) 2022 Peter Corke: https://github.com/petercorke/robotics-toolbox-python
 # Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
 class ReedsSheppPlanner(PlannerBase):
@@ -464,9 +465,9 @@ class ReedsSheppPlanner(PlannerBase):
         self._stepsize = stepsize
 
     def __str__(self):
-        s = (
+        return (
             super().__str__()
-            + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
+            + f"\n  curvature={self._curvature}, stepsize={self._stepsize}"
         )
 
     def query(self, start, goal, **kwargs):
@@ -536,6 +537,7 @@ if __name__ == "__main__":
     goal = (0, 0, pi)
 
     reedsshepp = ReedsSheppPlanner(curvature=1.0, stepsize=0.1)
+    print(reedsshepp)
     path, status = reedsshepp.query(start, goal)
     print(status)
 
