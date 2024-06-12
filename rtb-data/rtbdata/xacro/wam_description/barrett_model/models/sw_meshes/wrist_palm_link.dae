@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 2.71.0 commit date:2014-06-12, commit time:18:39, hash:169c95b</authoring_tool>
+    </contributor>
+    <created>2014-12-11T17:55:27</created>
+    <modified>2014-12-11T17:55:27</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Y_UP</up_axis>
+  </asset>
+  <library_images/>
+  <library_geometries>
+    <geometry id="Wrist_Palm_Link-mesh" name="Wrist Palm Link">
+      <mesh>
+        <source id="Wrist_Palm_Link-mesh-positions">
+          <float_array id="Wrist_Palm_Link-mesh-positions-array" count="0"/>
+          <technique_common>
+            <accessor source="#Wrist_Palm_Link-mesh-positions-array" count="0" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Wrist_Palm_Link-mesh-normals">
+          <float_array id="Wrist_Palm_Link-mesh-normals-array" count="0"/>
+          <technique_common>
+            <accessor source="#Wrist_Palm_Link-mesh-normals-array" count="0" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Wrist_Palm_Link-mesh-vertices">
+          <input semantic="POSITION" source="#Wrist_Palm_Link-mesh-positions"/>
+        </vertices>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="Wrist_Palm_Link" name="Wrist_Palm_Link" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#Wrist_Palm_Link-mesh"/>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

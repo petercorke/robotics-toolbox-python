@@ -1,0 +1,531 @@
+<!--
+ * COPYRIGHT (C) 2010
+ * RE2, INC.
+ *
+ * Author: RE2
+ *
+ * This file is a part of RobotModel, which was developed for the
+ * DARPA ARM ROBOT Track C project.
+ *
+ * RobotModel is free software:
+ * you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License as published by the Free Software Foundation, either version
+ * 3 of the License, or (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this package.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * RE2, INC. disclaims all warranties with regard to this software, including
+ * all implied warranties of merchantability and fitness, in no event shall
+ * RE2, INC. be liable for any special, indirect or consequential damages or
+ * any damages whatsoever resulting from loss of use, data or profits, whether
+ * in an action of contract, negligence or other tortious action, arising out
+ * of or in connection with the use or performance of this software.
+-->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find barrett_model)/models/hand.urdf.xacro"/>
+  <xacro:include filename="$(find barrett_model)/models/common.urdf.xacro"/>
+  <xacro:property name="b" value="0.5"/>
+
+  <!-- Upper arm macros 
+  <xacro:macro name="wam_base" params="prefix parent_link xyz rpy">
+    <joint name="${prefix}/wam_fixed_joint" type="fixed">
+      <parent link="${parent_link}"/>
+      <child link="${prefix}/base_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+
+    <link name = "${prefix}/base_link">
+      <inertial>
+        <origin xyz="0 0 0" />
+        <mass value="1" />
+        <inertia
+          ixx="0.1" ixy="0"   ixz="0"
+                  iyy="0.1"   iyz="0"
+                            izz="0.1" />
+      </inertial>
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.7 0.7 0.7 0.0"/>
+        </material>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/base_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/base_link_convex.dae"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+-->
+  <xacro:macro name="wam_shoulder_yaw" params="prefix">
+    <link name = "${prefix}/base_link">
+      <inertial>
+        <origin xyz="0 0 0" />
+        <mass value="1" />
+        <inertia
+          ixx="0.1" ixy="0"   ixz="0"
+                  iyy="0.1"   iyz="0"
+                            izz="0.1" />
+      </inertial>
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.7 0.7 0.7 0.0"/>
+        </material>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/base_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/base_link_convex.dae"/>
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${prefix}/base_yaw_joint" type="revolute">
+      <parent link="${prefix}/base_link"/>
+      <child link="${prefix}/shoulder_yaw_link"/>
+      <origin xyz="0 0 0.346" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="60" lower="-2.6" upper="2.6" velocity="2.0"/>
+      <dynamics damping="${1.8*b}" friction="0"/>
+    </joint>
+    <gazebo reference="${prefix}/base_yaw_joint">
+      <xacro:gz_joint/>
+    </gazebo>
+
+    <link name="${prefix}/shoulder_yaw_link" >
+      <inertial>
+        <origin xyz="-.00443422 -.00066489 -0.1289039 " />
+        <mass value="5.0" />
+        <inertia
+          ixx=".13488033"  ixy="-0.00012485"   ixz="0.00213041"
+                           iyy=".09046330"    iyz="-.00068555"
+                                              izz=".11328369" />
+      </inertial>
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.7 0.7 0.7 1.0"/>
+        </material>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/shoulder_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/shoulder_link_convex_decomposition.dae"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="wam_shoulder_pitch" params="prefix">
+    <joint name="${prefix}/shoulder_pitch_joint" type="revolute">
+      <parent link="${prefix}/shoulder_yaw_link"/>
+      <child link="${prefix}/shoulder_pitch_link"/>
+      <origin xyz="0 0 0" rpy="${-PI/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="60" lower="-1.985" upper="1.985" velocity="2.0"/>
+      <dynamics damping="${0.5*b}" friction="0"/>
+    </joint>
+    <gazebo reference="${prefix}/shoulder_pitch_joint">
+      <xacro:gz_joint/>
+    </gazebo>
+
+    <link name="${prefix}/shoulder_pitch_link" >
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.7 0.7 0.7 1.0"/>
+        </material>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/shoulder_pitch_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <inertial>
+        <origin xyz="-.00236981 -.01542114 .03105614 " />
+        <mass value="3.87493756" />
+        <inertia
+          ixx="0.02140958"  ixy="-0.00002461"  ixz="0.00027172"
+                            iyy="0.015589060"  iyz="0.0018192"
+                                               izz="0.01377875" />
+      </inertial>
+      <collision>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/shoulder_pitch_link_convex.dae"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="wam_upper_arm" params="prefix">
+    <joint name="${prefix}/shoulder_yaw_joint" type="revolute">
+      <parent link="${prefix}/shoulder_pitch_link"/>
+      <child link="${prefix}/upper_arm_link"/>
+      <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="45" lower="-2.8" upper="2.8" velocity="2.0"/>
+      <dynamics damping="${1.5*b}" friction="0"/>
+    </joint>
+    <gazebo reference="${prefix}/shoulder_yaw_joint">
+      <xacro:gz_joint/>
+    </gazebo>
+
+    <link name="${prefix}/upper_arm_link" >
+      <inertial>
+        <origin xyz="0.00683258580000000 0.000033090000000 0.392492300000000" />
+        <mass value="2.20228141" />
+        <inertia
+          ixx=".05911077"  ixy="-0.00000738"  ixz="-0.00249612"
+                           iyy="0.05927043"   iyz="0.00001767"
+                                              izz="0.0032455" />
+      </inertial>
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.7 0.7 0.7 1.0"/>
+        </material>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/upper_arm_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/upper_arm_link_convex_decomposition.dae"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <!-- Forearm macros -->
+  <xacro:macro name="wam_forearm" params="prefix">
+    <joint name="${prefix}/elbow_pitch_joint" type="revolute">
+      <parent link="${prefix}/upper_arm_link"/>
+      <child link="${prefix}/forearm_link"/>
+      <origin xyz="0.045 0 0.55" rpy="${-PI/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="30" lower="-0.9" upper="${PI}" velocity="2.00"/>
+      <dynamics damping="${0.8*b}" friction="0"/>
+    </joint>
+    <gazebo reference="${prefix}/elbow_pitch_joint">
+      <xacro:gz_joint/>
+    </gazebo>
+    <link name="${prefix}/forearm_link" >
+      <inertial>
+        <mass value="0.50016804" />
+        <origin xyz="-0.04001488 -.14271662 -.00022942 " rpy="0 0 0" />
+        <inertia
+          ixx="0.01491672" ixy="0.001506040000000" ixz="0.000017410000000"
+                           iyy="0.002944630000000" iyz="0.000021090000000"
+                                                   izz="0.014829880000000" />
+      </inertial>
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.7 0.7 0.7 1.0"/>
+        </material>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/elbow_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/elbow_link_convex.dae"/>
+        </geometry>
+      </collision>
+
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.7 0.7 0.7 1.0"/>
+        </material>
+        <origin xyz="-0.045 -0.0730 0" rpy="${PI/2} 0 0" />
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/forearm_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="-0.045 -0.0730 0" rpy="${PI/2} 0 0" />
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/forearm_link_convex_decomposition.dae"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="wam_wrist_yaw" params="prefix">
+    <joint name="${prefix}/wrist_yaw_joint" type="revolute">
+      <parent link="${prefix}/forearm_link"/>
+      <child link="${prefix}/wrist_yaw_link"/>
+      <origin xyz="-0.045 -0.3 0" rpy="${PI/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="10" lower="-4.55" upper="1.25" velocity="2.0"/>
+      <dynamics damping="${0.5*b}" friction="0"/>
+    </joint>
+    <gazebo reference="${prefix}/wrist_yaw_joint">
+      <xacro:gz_joint/>
+    </gazebo>
+    <link name="${prefix}/wrist_yaw_link" >
+      <inertial>
+        <origin xyz="0.00008921 0.00435824 -0.00511217 " />
+        <mass value="1.05376019" />
+        <inertia  ixx="0.00005029" ixy="0.00000020"  ixz="0.00007582"
+          iyy="0.00007582"  iyz="-0.00000359"
+          izz="0.00006270" />
+      </inertial>
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.7 0.7 0.7 1.0"/>
+        </material>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/wrist_yaw_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/wrist_yaw_link_convex_decomposition.dae"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="wam_wrist_pitch" params="prefix">
+    <joint name="${prefix}/wrist_pitch_joint" type="revolute">
+      <parent link="${prefix}/wrist_yaw_link"/>
+      <child link="${prefix}/wrist_pitch_link"/>
+      <origin xyz="0 0 0" rpy="${-PI/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="10" lower="-1.5707" upper="1.5707" velocity="2.00"/>
+      <dynamics damping="${0.1*b}" friction="0"/>
+    </joint>
+    <gazebo reference="${prefix}/wrist_pitch_joint">
+      <xacro:gz_joint/>
+    </gazebo>
+    <link name="${prefix}/wrist_pitch_link" >
+      <inertial>
+        <origin xyz="-0.00012262 -0.02468336 -0.01703194 " rpy="0 0 0" />
+        <mass value="0.51797364" />
+        <inertia
+          ixx="0.00055516"  ixy="0.00000061"  ixz="-0.00000074"
+          iyy="0.00024367"  iyz="-0.00004590"
+          izz="0.00045358" />
+      </inertial>
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.7 0.7 0.7 1.0"/>
+        </material>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/wrist_pitch_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/wrist_pitch_link_convex_decomposition.dae"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <!-- Palm without force-torque sensor -->
+  <xacro:macro name="wam_palm" params="prefix">
+    <joint name="${prefix}/palm_yaw_joint" type="revolute">
+      <parent link="${prefix}/wrist_pitch_link"/>
+      <child link="${prefix}/wrist_palm_link"/>
+      <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="10" lower="-3.0" upper="3.0" velocity="2.00"/><!-- 2.95 is a limit taken in from 3 due to saftey and differences between arms. -->
+      <dynamics damping="${0.1*b}" friction="0"/>
+    </joint>
+    <gazebo reference="${prefix}/palm_yaw_joint">
+      <xacro:gz_joint/>
+    </gazebo>
+    <link name="${prefix}/wrist_palm_link" >
+      <inertial>
+        <origin xyz="0.0 0.0 0.055" rpy="0 0 0" />
+        <mass value="0.08286134" />
+        <inertia  ixx="0.00010859" ixy="0.00000000"  ixz="-0.00000000"
+          iyy="0.00020683"  iyz="-0.0000000"
+          izz="0.00010851" />
+      </inertial>
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.7 0.7 0.7 1.0"/>
+        </material>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/wrist_palm_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/wrist_palm_link_convex.dae"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="wam_wrist_palm_stump" params="prefix">
+    <joint name="${prefix}/wrist_palm_stump_joint" type="fixed">
+      <parent link="${prefix}/wrist_palm_link"/>
+      <child link="${prefix}/wrist_palm_stump_link"/>
+      <origin xyz="0 0 0.06" rpy="0 0 0"/>
+    </joint>
+    <link name="${prefix}/wrist_palm_stump_link" >
+      <inertial>
+        <mass value="0.000001" />
+        <inertia
+          ixx="0.0000001" ixy="0.0" ixz="0.0"
+          iyy="0.0000001" iyz="0.0"
+          izz="0.0000001" />
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <!-- Hollow forearm macros -->
+  <!--<xacro:macro name="wam_hollow_forearm" params="prefix">-->
+    <!--<joint name="${prefix}/elbow_joint" type="revolute">-->
+      <!--<parent link="${prefix}/upper_arm_link"/>-->
+      <!--<child link="${prefix}/forearm_link"/>-->
+      <!--<origin xyz="0.045 -0.55 0" rpy="${0.5 * PI} 0 0"/>-->
+      <!--<axis xyz="0 1 0"/>-->
+      <!--<limit effort="15" lower="-0.9" upper="${PI}" velocity="0.50"/>-->
+      <!--[> <safety_controller k_position="100" k_velocity="3" soft_lower_limit="-100.0" soft_upper_limit="100.0" /> <]-->
+      <!--<dynamics damping="0.1" friction="100.0"/>-->
+    <!--</joint>-->
+    <!--<link name="${prefix}/forearm_link" >-->
+      <!--<inertial>-->
+        <!--<origin xyz="0 0 0" />-->
+        <!--<mass value="3.20016804" />-->
+        <!--<origin xyz="-0.04001488 -.00022942 .13271662" rpy="0 0 0" />-->
+        <!--<inertia  ixx="0.01491672" ixy="0.00001741"   ixz="-0.00150604"-->
+          <!--iyy="0.01482988"   iyz="-0.00002109"-->
+          <!--izz="0.00294463" />-->
+      <!--</inertial>-->
+      <!--<visual>-->
+        <!--<material name="WAMGrey">-->
+          <!--<color rgba="0.7 0.7 0.7 1.0"/>-->
+        <!--</material>-->
+        <!--<origin xyz="0 0 0" rpy="-${PI} 0 0" />-->
+        <!--<geometry>-->
+          <!--<mesh filename="${models_path}/meshes/wamForeArmLink4.DAE"/>-->
+        <!--</geometry>-->
+      <!--</visual>-->
+      <!--<collision>-->
+        <!--<origin xyz="0 0 0" rpy="-${PI} 0 0" />-->
+        <!--<geometry>-->
+          <!--<mesh filename="${models_path}/meshes/wamForeArmLink4.stl"/>-->
+        <!--</geometry>-->
+      <!--</collision>-->
+    <!--</link>-->
+  <!--</xacro:macro>-->
+
+  <!--<xacro:macro name="wam_hollow_wrist" params="prefix">-->
+    <!--<joint name="${prefix}/UpperWristJoint" type="fixed">-->
+      <!--<parent link="${prefix}/ForeArmLink"/>-->
+      <!--<child link="${prefix}/LowerWristPalmLink"/>-->
+      <!--<origin xyz="-0.045 0 .35" rpy="-${0.5 * PI} 0 ${0.5 * PI}"/>-->
+      <!--<axis xyz="0 -1 0"/>-->
+      <!--<limit effort="5" lower="-4.8" upper="1.3" velocity="0.20"/>-->
+      <!--[> <safety_controller k_position="100" k_velocity="3" soft_lower_limit="-100.0" soft_upper_limit="100.0" /> <]-->
+      <!--<dynamics damping="0.1" friction="100.0"/>-->
+    <!--</joint>-->
+    <!--<link name="${prefix}/LowerWristPalmLink" >-->
+      <!--<inertial>-->
+        <!--<origin xyz="0.00008921 0.00511217 0.00435824" />-->
+        <!--<mass value="1.12376019" />-->
+        <!--<inertia  ixx="0.00005029" ixy="0.00000020"  ixz="0.00007582"-->
+          <!--iyy="0.00007582"  iyz="-0.00000359"-->
+          <!--izz="0.00006270" />-->
+      <!--</inertial>-->
+      <!--<visual>-->
+        <!--<material name="WAMGrey">-->
+          <!--<color rgba="0.7 0.7 0.7 1.0"/>-->
+        <!--</material>-->
+        <!--<origin xyz="0 0.02711 0" rpy="${PI} 0 0" />-->
+        <!--<geometry>-->
+          <!--<mesh filename="${models_path}/meshes/wamUpperWristYawLink.DAE"/>-->
+        <!--</geometry>-->
+      <!--</visual>-->
+      <!--<collision>-->
+        <!--<origin xyz="0 0.02711 0" rpy="${PI} 0 0" />-->
+        <!--<geometry>-->
+          <!--<mesh filename="${models_path}/meshes/wamUpperWristYawLink5.stl"/>-->
+        <!--</geometry>-->
+      <!--</collision>-->
+    <!--</link>-->
+  <!--</xacro:macro>-->
+
+  <!-- Palm with ForceTorque macros -->
+  <!--<xacro:macro name="LowerWristFT" params="prefix">-->
+    <!--<joint name="${prefix}/LowerWristYawJoint" type="revolute">-->
+      <!--<parent link="${prefix}/UpperWristPitchLink"/>-->
+      <!--<child link="${prefix}/LowerWristYawLink"/>-->
+      <!--<origin xyz="0 0 0.06713340" rpy="0 0 0"/>-->
+      <!--<axis xyz="0 0 1"/>-->
+      <!--<limit effort="5" lower="-2.95" upper="2.95" velocity="0.20"/>[> 2.95 is a limit taken in from 3 due to saftey and differences between arms. <]-->
+      <!--[> <safety_controller k_position="100" k_velocity="3" soft_lower_limit="-100.0" soft_upper_limit="100.0" /> <]-->
+      <!--<dynamics damping="0.1" friction="100.0"/>-->
+    <!--</joint>-->
+    <!--<link name="${prefix}/LowerWristYawLink" >-->
+      <!--<inertial>-->
+        <!--<origin xyz="-0.00000134 -0.00228167 -0.00000141" rpy="0 0 0" />-->
+        <!--<mass value="0.17286134" />-->
+        <!--<inertia  ixx="0.00010859" ixy="0.00000000"  ixz="-0.00000000"-->
+          <!--iyy="0.00020683"  iyz="-0.0000000"-->
+          <!--izz="0.00010851" />-->
+      <!--</inertial>-->
+      <!--<visual>-->
+        <!--<material name="WAMGrey">-->
+          <!--<color rgba="0.7 0.7 0.7 1.0"/>-->
+        <!--</material>-->
+        <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+        <!--<geometry>-->
+          <!--<mesh filename="${models_path}/meshes/forceTorqueSensor.DAE"/>-->
+        <!--</geometry>-->
+      <!--</visual>-->
+      <!--<collision>-->
+        <!--<origin xyz="0 0 0" rpy="0 0 0" />-->
+        <!--<geometry>-->
+          <!--<mesh filename="${models_path}/meshes/forceTorqueSensor.stl"/>-->
+        <!--</geometry>-->
+      <!--</collision>-->
+    <!--</link>-->
+  <!--</xacro:macro>-->
+
+  <xacro:macro name="wam_stump" params="prefix">
+    <joint name="${prefix}/elbow_pitch_joint" type="revolute">
+      <parent link="${prefix}/upper_arm_link"/>
+      <child link="${prefix}/stump_link"/>
+      <origin xyz="0.045 0 0.55" rpy="${-PI/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="15" lower="-0.9" upper="${PI}" velocity="2.0"/>
+      <dynamics damping="${0.1*b}" friction="0"/>
+    </joint>
+    <link name="${prefix}/stump_link" >
+      <inertial>
+        <mass value="0.408" />
+        <origin xyz="-0.0195 -.02566 -.00022942 " rpy="0 0 0" />
+        <inertia
+          ixx="0.01491672" ixy="0.001506040000000" ixz="0.000017410000000"
+                           iyy="0.002944630000000" iyz="0.000021090000000"
+                                                   izz="0.014829880000000" />
+      </inertial>
+      <visual>
+        <material name="WAMGrey">
+          <color rgba="0.7 0.7 0.7 1.0"/>
+        </material>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/elbow_link_fine.stl"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="${models_path}/sw_meshes/elbow_link_convex.dae"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+</robot>
