@@ -661,9 +661,9 @@ whole robots, discrete links, and objects in the world. For example a :math:`1
 just one link, of the robot by::
 
     >>> panda = rtb.models.Panda()
-    >>> obstacle = rtb.Box([1, 1, 1], SE3(1, 0, 0)) 
-    >>> iscollision = panda.collided(obstacle) # boolean
-    >>> iscollision = panda.links[0].collided(obstacle)
+    >>> obstacle = Cuboid([1, 1, 1], pose = SE3(1, 0, 0)) 
+    >>> iscollision = panda.iscollided(panda.q, obstacle) # boolean
+    >>> iscollision = panda.links[0].iscollided(obstacle)
 
 
 Additionally, we can compute the minimum Euclidean distance between whole
