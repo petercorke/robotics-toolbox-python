@@ -486,7 +486,7 @@ def trapezoidal(q0, qf, t, V=None):
         - For some values of ``V`` no solution is possible and an error is flagged.
         - The time vector, if given, is assumed to be monotonically increasing,
           and time scaling is based on the first and last element.
-        - ``tg`` has an extra attribute ``xblend`` which is the blend duration.
+        - ``tg`` has an extra attribute ``tblend`` which is the blend duration.
 
     :References:
 
