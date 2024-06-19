@@ -29,7 +29,7 @@ from roboticstoolbox.tools.types import ArrayLike, NDArray
 if TYPE_CHECKING:  # pragma: nocover
     import sympy
 
-    Sym = sympy.core.symbol.Symbol
+    Sym = sympy.core.symbol.Symbol  # type: ignore
 else:  # pragma: nocover
     Sym = None
 
