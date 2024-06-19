@@ -3,6 +3,7 @@ Python Vehicle
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
+
 from abc import ABC, abstractmethod
 import warnings
 from math import pi, sin, cos, tan
@@ -20,6 +21,34 @@ from roboticstoolbox.mobile.drivers import VehicleDriverBase
 from roboticstoolbox.mobile.Animations import VehiclePolygon
 
 
+class Trailer:
+    def __init__(self, L1=1, L2=1, animation=None, polygon=None, **kwargs):
+        """
+        _summary_
+
+        :param L1: _description_, defaults to 1
+        :type L1: int, optional
+        :param L2: _description_, defaults to 1
+        :type L2: int, optional
+        :param animation: _description_, defaults to None
+        :type animation: _type_, optional
+        :param polygon: bounding polygon of vehicle
+        :type polygon: :class:`~spatialmath.geom2d.Polygon2`
+        """
+        self._L1 = L1
+        self._L2 = L2
+
+        self._polygon = polygon
+        if animation is not None:
+            if isinstance(animation, str):
+                animation = VehiclePolygon(animation)
+            self._animation = animation
+        elif polygon is not None:
+            self._animation = VehiclePolygon(polygon)
+
+        self._kwargs = kwargs
+
+
 class VehicleBase(ABC):
     def __init__(
         self,
@@ -35,6 +64,7 @@ class VehicleBase(ABC):
         plot=False,
         workspace=None,
         polygon=None,
+        trailers=None,
     ):
         r"""
         Superclass for vehicle kinematic models
@@ -99,11 +129,15 @@ class VehicleBase(ABC):
         self._speed_max = speed_max
         self._accel_max = accel_max
         self._v_prev = [0]
-        self._polygon = polygon
 
-        if isinstance(animation, str):
-            animation = VehiclePolygon(animation)
-        self._animation = animation
+        self._polygon = polygon
+        if animation is not None:
+            if isinstance(animation, str):
+                animation = VehiclePolygon(animation)
+            self._animation = animation
+        elif polygon is not None:
+            self._animation = VehiclePolygon(polygon)
+
         self._ax = None
 
         if control is not None:
@@ -116,7 +150,7 @@ class VehicleBase(ABC):
         self._verbose = verbose
         self._plot = False
 
-        self._control = None
+        self._control = control
         self._x_hist = []
 
         if workspace:
@@ -631,6 +665,9 @@ class VehicleBase(ABC):
         if isinstance(self._control, VehicleDriverBase):
             self._control.init(ax=self._ax)
 
+    def plot(self, x):
+        self._animation.update(x)
+
     def step(self, u=None, animate=True, pause=True):
         r"""
         Step simulator by one time step (superclass)
@@ -688,7 +725,7 @@ class VehicleBase(ABC):
 
         # do the graphics
         if animate and self._animation:
-            self._animation.update(self._x)
+            self.plot(self._x)
             # if self._timer is not None:
             #     self._timer.set_text(f"t = {self._t:.2f}")
             if pause:
@@ -1189,6 +1226,9 @@ class Unicycle(VehicleBase):
         return ulim
 
 
+# ========================================================================= #
+
+
 class DiffSteer(Unicycle):
     def __init__(self, W=1, **kwargs):
         r"""
@@ -1222,11 +1262,10 @@ class DiffSteer(Unicycle):
         s = super().__str__()
         return s
 
-    def init(self):
-        super().init()
+    def init(self, **kwargs):
+        super().init(**kwargs)
         self._v_prev_L = [0]
         self._v_prev_R = [0]
-
 
     def u_limited(self, u):
         """
@@ -1247,7 +1286,7 @@ class DiffSteer(Unicycle):
         ulim[1] = self.limits_va(u[1], self._v_prev_R)
 
         return ulim
-    
+
     def deriv(self, x, u, limits=True):
         r"""
         Time derivative of state
@@ -1292,17 +1331,451 @@ class DiffSteer(Unicycle):
         return np.r_[v * cos(theta), v * sin(theta), vdiff / self._W]
 
 
-    
+# ========================================================================= #
+
+
+class DiffSteerTrailer(Unicycle):
+    def __init__(self, W=1, L1=1, L2=1, x0=[0.0, 0, 0, 0], trailer=None, **kwargs):
+        r"""
+        Create differential steering kinematic model with trailer
+
+        :param W: vehicle width, defaults to 1
+        :type W: float, optional
+        :param L1: distance from rear axle to trailer hitch, defaults to 1
+        :type L1: float, optional
+        :param L2: distance from trailer hitch to trailer axle, defaults to 1
+        :type L2: float, optional
+        :param kwargs: additional arguments passed to :class:`VehicleBase`
+            constructor
+
+        Model the motion of a unicycle model with equations of motion given by:
+
+        .. math::
+
+            \dot{x} &= v \cos \theta \\
+            \dot{y} &= v \sin \theta \\
+            \dot{\theta} &= \omega \\
+            \dot{\delta} &= \frac{v}{L_1} \sin(\theta - \delta)
+
+        where :math:`v = (v_R + v_L)/2` is the velocity in body frame x-direction, 
+        :math:`\omega = (v_R - v_L)/W` is the turn rate, and :math:`\delta` is the
+        hitch angle.
+
+        :seealso: :meth:`f` :meth:`deriv` :meth:`Fx` meth:`Fv` :class:`Vehicle`
+        """
+        super().__init__(**kwargs)
+        self._x0 = np.r_[x0]
+        self._x = x0.copy()
+        self._W = W
+        self._L1 = L1
+        self._L2 = L2
+        self._animation_trailer = trailer
+        self._v_prev_L = [0]
+        self._v_prev_R = [0]
+
+    def __str__(self):
+
+        s = super().__str__()
+        return s
+
+    def init(self, **kwargs):
+        super().init(**kwargs)
+        self._animation_trailer.add(ax=self._ax)  # add trailer animation to axis
+
+    def plot(self, x):
+        self._animation.update(x[:3])  # show robot
+
+        theta = x[2]
+        eta = theta + x[3]
+        Q = (
+            x[:2]
+            - self._L1 * np.r_[cos(theta), sin(theta)]
+            - self._L2 * np.r_[cos(eta), sin(eta)]
+        )
+        self._animation_trailer.update(np.concatenate((Q, [eta])))  # show trailer
+
+    def deriv(self, x, u, limits=True):
+        r"""
+        Time derivative of state
+
+        :param x: vehicle state :math:`(x, y, \theta, \delta)`
+        :type x: array_like(3)
+        :param u: Desired vehicle inputs :math:`(v_L, v_R)`
+        :type u: array_like(2)
+        :param limits: limits are applied to input, default True
+        :type limits: bool
+        :return: state derivative :math:`(\dot{x}, \dot{y}, \dot{\theta})`
+        :rtype: ndarray(3)
+
+        Returns the time derivative of state (4x1) at the state ``x`` with left and
+        right wheel speeds ``u``.
+
+        .. math::
+
+            \dot{x} &= v \cos \theta \\
+            \dot{y} &= v \sin \theta \\
+            \dot{\theta} &= \omega \\
+            \dot{\delta} &= \frac{v}{L_1} \sin(\theta - \delta)
+
+        where :math:`v = (v_R + v_L)/2` is the velocity in body frame x-direction, and 
+        :math:`\omega = (v_R - v_L)/W` is the turn rate.
+
+        If ``limits`` is True then speed and acceleration limits are applied to the
+        wheel speeds ``u``.
+
+        :seealso: :meth:`f`
+        """
+        if limits:
+            u = self.u_limited(u)
+        # unpack some variables
+        theta = x[2]
+        delta = x[3]
+        vleft = u[0]
+        vright = u[1]
+
+        # convert wheel speeds to forward and differential velocity
+        v = (vright + vleft) / 2.0
+        vdiff = vright - vleft
+
+        # xd yd thetad
+        X = np.r_[v * cos(theta), v * sin(theta), vdiff / self._W, 0]
+
+        hx = X[0] + self._L1 * X[2] * sin(theta)
+        hy = X[1] - self._L1 * X[2] * cos(theta)
+
+        # trailer kino-dynamics
+        if X[2] > 0.01:
+            pass
+        eta = theta + delta
+        etad = (hy * cos(eta) - hx * sin(eta)) / self._L2
+        X[3] = etad - X[2]  # deltad = etad - thetad
+        print(X[2], eta, etad)
+
+        return X
+
+
+# composite of vehicle + trailers
+class VehicleTrailer(VehicleBase):
+    def __init__(self, vehicle, trailers, x0=None, verbose=False):
+        r"""
+        Create a kinematic system with a vehicle with one or more trailers
+
+        :param vehicle: vehicle model
+        :type vehicle: :class:`VehicleBase` such as `Bicycle`, `Unicycle` or `DiffSteer`
+        :param trailers: trailer model or list of trailer models
+        :type trailers: :class:`Trailer` or list of :class:`Trailer`
+        :param x0: initial state, defaults to [0, 0, 0, 0, ...]
+        :type x0: array_like(3+m) where `m` is the number of trailers
+        :param kwargs: additional arguments passed to :class:`VehicleBase`
+            constructor
+
+        The vehicle motion model is defined by `vehicle`.  The trailers have car-like
+        kinematics with a lateral non-sliding constraint.  Each trailer is connected to
+        the preceding one (vehicle or trailer) by a hitch defined by two lengths `L1` and `L2`.
+
+        The state of the system is :math:`(x, y, \theta, \delta_i, \cdots)` where
+        :math:`(x,y)` is the position of the centre of vehicle, :math:`\theta` is the
+        heading angle, and :math:`\delta_i` is the hitch angle for the `i`-th trailer.
+
+        :seealso: :class:`VehicleBase` :class:`Trailer`
+        """
+        self.vehicle = vehicle
+        if isinstance(trailers, Trailer):
+            self.trailers = [trailers]
+        else:
+            self.trailers = trailers
+
+        if x0 is None:
+            x0 = np.zeros((3 + len(self.trailers),))
+        self._x0 = x0
+        self._verbose = verbose
+
+    def __str__(self):
+        """
+        Pretty print the vehicle and trailers
+        """
+
+        s = str(self.vehicle)
+        for k, trailer in enumerate(self.trailers):
+            s += f"\n  + trailer {k}: L1={trailer._L1}, L2={trailer._L2}"
+        return s
+
+    def polygon(self, q):
+        """
+        Bounding polygons at vehicle configuration
+
+        :param q: vehicle configuration :math:`(x, y, \theta, \delta_i, \cdots)`
+        :type q: array_like(3+m) where `m` is the number of trailers
+        :return: list of bounding polygons of vehicle at configuration ``q``
+        :rtype: :class:`~spatialmath.geom2d.Polygon2`
+
+        The bounding polygon of the vehicle is returned for the configuration
+        ``q``.  Can be used for collision checking using the :meth:`~spatialmath.geom2d.Polygon2.intersects`
+        method.
+
+        :seealso: :class:`~spatialmath.geom2d.Polygon2`
+        """
+        polygons = [self.vehicle._polygon.transformed(SE2(q))]
+
+        for trailer, delta in zip(self.trailers, q[3:]):
+            polygons.append(trailer._polygon.transformed(SE2(delta)))
+
+        return polygons
+
+    def init(self, **kwargs):
+        self.vehicle.init(**kwargs)
+        self._x = self._x0
+        self._t = 0
+        self._x_hist = []
+
+        for trailer in self.trailers:
+            if trailer._animation is not None:
+                trailer._animation.add(
+                    ax=self.vehicle._ax
+                )  # add trailer animation to axis
+
+    @property
+    def dt(self):
+        return self.vehicle.dt
+
+    def run(self, T=10, x0=None, control=None, animate=True):
+        r"""
+        Simulate motion of vehicle and m trailers
+
+        :param T: Simulation time in seconds, defaults to 10
+        :type T: float, optional
+        :param x0: Initial state, defaults to value given to :class:`VehicleTrailer` constructor
+        :type x0: array_like(3+m) where `m` is the number of trailers, optional
+        :param control: vehicle control inputs, defaults to None
+        :type control: array_like(2), callable, driving agent
+        :param animate: Enable graphical animation of vehicle, defaults to False
+        :type animate: bool, optional
+        :return: State trajectory, each row is :math:`(x,y,\theta, \delta_i, \cdots)`.
+        :rtype: ndarray(n,3)
+
+        Runs the vehicle and trailer simulation for ``T`` seconds and optionally plots
+        an animation.  The method :meth:`step` performs each time step.
+
+        The control inputs to the vehicle are provided by ``control`` which can be:
+
+            * a constant tuple as the control inputs to the vehicle
+            * a function called as ``f(vehicle, t, x)`` that returns a tuple
+            * an interpolator called as ``f(t)`` that returns a tuple, see
+              SciPy interp1d
+            * a driver agent, subclass of :class:`VehicleDriverBase`
+
+        This is evaluated by :meth:`eval_control` which applies velocity,
+        acceleration and steering limits.
+
+        The simulation can be stopped prematurely by the control function
+        calling :meth:`stopsim`.
+
+        .. note::
+            * the simulation is fixed-time step with the step given by the ``dt``
+              attribute set by the constructor.
+            * integration uses rectangular integration.
+
+        :seealso: :meth:`init` :meth:`step` :meth:`control` :meth:`run_animation`
+        """
+
+        self.init(control=control, animate=animate, x0=x0)
+
+        for i in range(round(T / self.dt)):
+            self.step(animate=animate)
+
+            # check for user requested stop
+            if self.vehicle._stopsim:
+                print("USER REEQUESTED STOP AT time", self._t)
+                break
+
+        return self.x_hist
+
+    def step(self, u=None, animate=True, pause=True):
+        r"""
+        Step simulator by one time step
+
+        #. Obtain the vehicle control inputs
+        #. Integrate the vehicle state forward one timestep
+        #. Updates the stored state and state history
+        #. Update animation if enabled.
+
+        Example:
+
+        .. runblock:: pycon
+
+            >>> from roboticstoolbox import Bicycle
+            >>> vt = VehicleTrailer(Bicycle(), Trailer())  # default bicycle model
+            >>> vt.step((1, 0.2))  # one step: v=1, γ=0.2
+            >>> vt.x
+            >>> vt.run(5)  # run simulatin for 5 seconds
+
+        .. note:: Vehicle control input limits are applied.
+
+        :seealso: :func:`control`, :func:`update`, :func:`run`
+        """
+        # determine vehicle control
+        if u is not None:
+            u = self.eval_control(u, self._x)
+        else:
+            u = self.vehicle.eval_control(self.vehicle._control, self._x)
+
+        # update state (used to be function control() in MATLAB version)
+        xd = self.dt * self.deriv(self._x, u)  # delta state
+
+        # update state vector
+        self._x += xd
+        self.vehicle._x = self._x[:3]
+        self._x_hist.append(tuple(self._x))
+
+        # print('VEH', u, self.x)
+
+        # do the graphics
+        if animate and self.vehicle._animation:
+            x = self._x[:3].copy()
+            self.vehicle._animation.update(x)  # show robot
+
+            for trailer, delta in zip(self.trailers, self._x[3:]):
+                x[:2] -= (
+                    trailer._L1 * np.r_[cos(x[2]), sin(x[2])]
+                    + trailer._L2 * np.r_[cos(x[2] + delta), sin(x[2] + delta)]
+                )
+                x[2] += delta
+                trailer._animation.update(x)  # show trailer
+            # if self._timer is not None:
+            #     self._timer.set_text(f"t = {self._t:.2f}")
+            if pause:
+                plt.pause(self.dt)
+            # plt.show(block=False)
+            # pass
+
+        self._t += self.dt
+        self.vehicle._t = self._t
+
+        # be verbose
+        if self._verbose:
+            print(
+                f"{self._t:8.2f}: u=({u[0]:8.2f}, {u[1]:8.2f}), x=({self._x[0]:8.2f},"
+                f" {self._x[1]:8.2f}, {self._x[2]:8.2f})"
+            )
+
+    def plot(self, x):
+        self._animation.update(x[:3])  # show robot
+
+        theta = x[2]
+        eta = theta + x[3]
+        Q = (
+            x[:2]
+            - self._L1 * (cos(theta), sin(theta))
+            - self._L2 * (cos(eta), sin(eta))
+        )
+        self._animation_trailer.update(np.concatenate((Q, [eta])))  # show trailer
+
+    def deriv(self, x, u, limits=True):
+        r"""
+        Time derivative of state
+
+        :param x: vehicle + trailer state :math:`(x, y, \theta, \delta_i, \cdots)`
+        :type x: array_like(3+m) where `m` is the number of trailers
+        :param u: Desired vehicle inputs, meaning depends on vehicle type
+        :type u: array_like()
+        :param limits: limits are applied to input, default True
+        :type limits: bool
+        :return: state derivative :math:`(\dot{x}, \dot{y}, \dot{\theta}, \dot{\delta}_i, \cdots)`
+        :rtype: ndarray(3)
+
+        Returns the time derivative of state (3+m) at the state ``x`` with left and
+        right wheel speeds ``u``.
+
+        If the velocity of the lead vehicle is :math:`(\dot{x}_l, \dot{y}_l, \dot{\theta}_l)`
+        then the velocity of the hitch point is:
+
+        .. math::
+
+            \dot{x}_h &= \dot{x}_l + \ell_1 \dot{theta}_l \sin \theta_l \\
+            \dot{y}_h &= \dot{y}_l - \ell_1 \dot{theta}_l \cos \theta_l \\
+
+        and the change of heading angle of the follower is:
+
+        .. math::
+
+            \dot{theta}_f = \frac{\dot{y}_h \cos(\theta_f - \delta_f) - \dot{x}_h \sin(\theta_f - \delta_f)}{\ell_2}
+
+        and the change of the hitch angle is
+
+        .. math::
+
+            \dot{\delta} = \dot{theta}_f - \dot{theta}_l
+
+        If ``limits`` is True then speed and acceleration limits are applied to the
+        wheel speeds ``u``.
+
+        :seealso: :meth:`VehicleBas.f`
+        """
+        dx = self.vehicle.deriv(x[:3], u, limits)
+
+        # velocity and orientation of vehicle/trailer before
+        xd = dx[0]
+        yd = dx[1]
+        thetad = dx[2]
+        theta = x[2]
+
+        for trailer, delta in zip(self.trailers, x[3:]):
+            # hitch point velocity
+            hx = xd + trailer._L1 * thetad * sin(theta)
+            hy = yd - trailer._L1 * thetad * cos(theta)
+
+            eta = theta + delta
+            etad = (hy * cos(eta) - hx * sin(eta)) / trailer._L2
+            deltad = etad - thetad  # hitch angle velocity
+
+            # print(X[2], eta, etad)
+            dx = np.concatenate((dx, [deltad]))  # append to derivative vector
+
+            # compute velocity of trailer's rear axle midpoint
+            xd = hx + etad * trailer._L2 * sin(eta)
+            yd = hy - etad * trailer._L2 * cos(eta)
+            thetad = etad
+
+        return dx
+
+
 if __name__ == "__main__":
 
     from roboticstoolbox import RandomPath
 
     import roboticstoolbox as rtb
+    import time
 
-    a = rtb.VehicleMarker(marker="s", markerfacecolor="b")
-    veh = rtb.Bicycle(animation=a, workspace=10)
-    veh.control = (4, 0.5)
-    veh.run(20)
+    def steering(v, t, x):
+        speed = (0.5, 0.5)
+        if 3 <= t < 5:
+            speed = (0.4, 0.6)
+        elif 5 <= t < 7:
+            speed = (0.6, 0.4)
+
+        return speed
+
+    a = rtb.VehiclePolygon(shape="car", color="blue")
+    t = rtb.VehiclePolygon(shape="box", color="red")
+    veh = DiffSteer(animation=a, control=steering, workspace=10)
+    vt = VehicleTrailer(veh, Trailer(L1=1, L2=2, animation=t))
+    print(vt)
+    print(vt.deriv([0, 0, 0, 0], [1, 1]))
+    vt.run(10)
+    print(veh.x_hist)
+
+    # a = rtb.VehiclePolygon(shape="car", color="blue")
+    # t = rtb.VehiclePolygon(shape="car", color="red")
+    # veh = DiffSteerTrailer(animation=a, trailer=t, workspace=10)
+    # veh.control = control
+    # time.sleep(5)
+    # veh.run(10)
+    # print(veh.x_hist)
+
+    # a = rtb.VehicleMarker(marker="s", markerfacecolor="b")
+    # veh = rtb.Bicycle(animation=a, workspace=10)
+    # veh.control = (4, 0.5)
+    # veh.run(20)
 
     # V = np.eye(2) * 0.001
     # robot = Bicycle(covar=V, animation="car")

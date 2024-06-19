@@ -3,6 +3,7 @@ Python Vehicle
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
+
 from abc import ABC, abstractmethod
 import warnings
 from math import pi, sin, cos, tan, atan2
@@ -25,6 +26,57 @@ class VehicleDriverBase(ABC):
 
     :seealso: :class:`RandomPath`
     """
+
+    def __init__(
+        self,
+        workspace=None,
+        speed=1,
+        headinggain=0.3,
+        goalmarkerstyle=None,
+        verbose=False,
+    ):
+        """
+        _summary_
+
+        :param workspace: dimension of workspace, see :func:`spatialmath.base.exand_dims`
+        :type workspace: scalar, array_like(2), array_like(4)
+        :param speed: forward speed, defaults to 1
+        :type speed: float, optional
+        :param headinggain: _description_, defaults to 0.3
+        :type headinggain: float, optional
+        :param verbose: _description_, defaults to False
+        :type verbose: bool, optional
+
+        The workspace of the robot is a rectangular region defined by `workspace`
+        that is specified by  (see ``plotvol2``):
+
+        ==============  =======  =======
+        ``workspace``   x-range  y-range
+        ==============  =======  =======
+        A (scalar)      -A:A     -A:A
+        [A, B]           A:B      A:B
+        [A, B, C, D]     A:B      C:D
+        ==============  =======  =======
+        """
+        if hasattr(workspace, "workspace"):
+            # workspace can be defined by an object with a workspace attribute
+            self._workspace = base.expand_dims(workspace.workspace)
+        else:
+            self._workspace = base.expand_dims(workspace)
+
+        self._speed = speed
+        self._headinggain = headinggain
+        self._verbose = verbose
+
+        if goalmarkerstyle is None:
+            self._goal_marker_style = {
+                "marker": "D",
+                "markersize": 6,
+                "color": "r",
+                "linestyle": "None",
+            }
+        else:
+            self._goal_marker_style = goalmarkerstyle
 
     @abstractmethod
     def demand(self):
@@ -72,27 +124,40 @@ class VehicleDriverBase(ABC):
     def __repr__(self):
         return str(self)
 
+    @property
+    def workspace(self):
+        """
+        Size of robot driving workspace
+
+        :return: workspace bounds [xmin, xmax, ymin, ymax]
+        :rtype: ndarray(4)
+
+        Returns the bounds of the workspace as specified by constructor
+        option ``workspace``
+        """
+        return self._workspace
+
+    def driveto(self, goal):
+
+        goal_heading = atan2(goal[1] - self._veh._x[1], goal[0] - self._veh._x[0])
+        delta_heading = base.angdiff(goal_heading, self._veh._x[2])
+        print(
+            f"t={self._veh._t:.1f}, pos=({self._veh._x[0]:.1f}, {self._veh._x[1]:.1f}), ",
+            f"goal_heading={goal_heading*180/pi:.1f}, delta_heading={delta_heading*180/pi:.1f}",
+        )
+
+        return np.r_[self._speed, self._headinggain * delta_heading]
+
 
 # ========================================================================= #
 
 
 class RandomPath(VehicleDriverBase):
-    def __init__(
-        self,
-        workspace,
-        speed=1,
-        dthresh=0.05,
-        seed=0,
-        headinggain=0.3,
-        goalmarkerstyle=None,
-    ):
+    def __init__(self, dthresh=0.05, seed=0, **kwargs):
         """
         Driving agent for random path
 
-        :param workspace: dimension of workspace, see :func:`spatialmath.base.exand_dims`
-        :type workspace: scalar, array_like(2), array_like(4)
-        :param speed: forward speed, defaults to 1
-        :type speed: float, optional
+
         :param dthresh: distance threshold, defaults to 0.05
         :type dthresh: float, optional
 
@@ -111,16 +176,7 @@ class RandomPath(VehicleDriverBase):
             veh.control = driver
 
         The waypoints are positioned inside a rectangular region defined by
-        the vehicle that is specified by  (see ``plotvol2``):
-
-        ==============  =======  =======
-        ``workspace``   x-range  y-range
-        ==============  =======  =======
-        A (scalar)      -A:A     -A:A
-        [A, B]           A:B      A:B
-        [A, B, C, D]     A:B      C:D
-        ==============  =======  =======
-
+        the `workspace`
 
         .. note::
             - It is possible in some cases for the vehicle to move outside the desired
@@ -137,30 +193,14 @@ class RandomPath(VehicleDriverBase):
 
         # TODO options to specify region, maybe accept a Map object?
 
-        if hasattr(workspace, "workspace"):
-            # workspace can be defined by an object with a workspace attribute
-            self._workspace = base.expand_dims(workspace.workspace)
-        else:
-            self._workspace = base.expand_dims(workspace)
+        super().__init__(**kwargs)
 
-        self._speed = speed
         self._dthresh = dthresh * np.diff(self._workspace[0:2])
         self._goal_marker = None
-        if goalmarkerstyle is None:
-            self._goal_marker_style = {
-                "marker": "D",
-                "markersize": 6,
-                "color": "r",
-                "linestyle": "None",
-            }
-        else:
-            self._goal_marker_style = goalmarkerstyle
-        self._headinggain = headinggain
 
         self._d_prev = np.inf
         self._random = np.random.default_rng(seed)
         self._seed = seed
-        self.verbose = True
         self._goal = None
         self._dthresh = dthresh * max(
             self._workspace[1] - self._workspace[0],
@@ -170,10 +210,11 @@ class RandomPath(VehicleDriverBase):
         self._veh = None
 
     def __str__(self):
-        """%RandomPath.char Convert to string
-        %
-        % s = R.char() is a string showing driver parameters and state in in
-        % a compact human readable format."""
+        """Convert to string
+
+        :return: driver parameters and state in in a compact human readable format
+        :rtype: str
+        """
 
         s = "RandomPath driver object\n"
         s += (
@@ -182,19 +223,6 @@ class RandomPath(VehicleDriverBase):
         )
         s += f"  current goal={self._goal}"
         return s
-
-    @property
-    def workspace(self):
-        """
-        Size of robot driving workspace
-
-        :return: workspace bounds [xmin, xmax, ymin, ymax]
-        :rtype: ndarray(4)
-
-        Returns the bounds of the workspace as specified by constructor
-        option ``workspace``
-        """
-        return self._workspace
 
     def init(self, ax=None):
         """
@@ -240,14 +268,7 @@ class RandomPath(VehicleDriverBase):
         #     self.choose_goal()
         self._d_prev = d
 
-        speed = self._speed
-
-        goal_heading = atan2(
-            self._goal[1] - self._veh._x[1], self._goal[0] - self._veh._x[0]
-        )
-        delta_heading = base.angdiff(goal_heading, self._veh._x[2])
-
-        return np.r_[speed, self._headinggain * delta_heading]
+        return self.driveto(self._goal)
 
     ## private method, invoked from demand() to compute a new waypoint
 
@@ -267,7 +288,7 @@ class RandomPath(VehicleDriverBase):
             if np.linalg.norm(self._goal - self._veh._x[0:2]) > 2 * self._dthresh:
                 break
 
-        if self._veh.verbose:
+        if self._veh.verbose or self._verbose:
             print(f"set goal: {self._goal}")
 
         # update the goal marker
@@ -280,21 +301,91 @@ class RandomPath(VehicleDriverBase):
 
 
 class PurePursuit(VehicleDriverBase):
-    def __init__(self, speed=1, radius=1):
-        pass
+    def __init__(self, path, lookahead=1, linemarkerstyle=None, **kwargs):
+        """
+        Driving agent for pure pursuit
+
+        :param path: path as a set of waypoints
+        :type path: array_like(2,n) one column per point, optional
+        :param lookahead: lookahead distance, defaults to 1
+        :type lookahead: float, optional
+        """
+        super().__init__(**kwargs)
+        self._path = path
+        self._lookahead = lookahead
+        self._linemarkerstyle = linemarkerstyle
 
     def __str__(self):
-        pass
+        """Convert to string
 
-    def init(self):
-        pass
+        :return: driver parameters and state in in a compact human readable format
+        :rtype: str
+        """
+
+        s = "PurePursuit driver object\n"
+        s += (
+            f"  X {self._workspace[0]} : {self._workspace[1]}; Y {self._workspace[0]} :"
+            f" {self._workspace[1]}, lookahead={self._lookahead}\n"
+        )
+        return s
+
+    def init(self, ax=None):
+        if ax is not None:
+            h = plt.plot(
+                self._path[0, :],
+                self._path[1, :],
+                **self._linemarkerstyle,
+                label="waypoints",
+            )[0]
+        self._current_waypint = None
 
     def demand(self):
-        pass
+
+        cp = self._veh._x[0:2]  # current point
+
+        # find closest point on the path to current point
+        d = np.linalg.norm(self._path.T - cp, axis=1)  # rely on implicit expansion
+        i = np.argmin(d)
+
+        # find all points on the path at least lookahead distance away
+        (k,) = np.where(d[i + 1 :] >= self._lookahead)  # find all points beyond horizon
+        if len(k) == 0:
+            # no such points, we must be near the end, goal is the end
+            goal = self._path[:, -1]
+            k = -1
+        else:
+            # many such points, take the first one
+            k = k[0] + 1  # first point beyond look ahead distance
+            goal = self._path[:, k + i]
+            k += i
+
+        if self._waypoint_marker is not None:
+            pass
+            for marker in self._waypoint_marker:
+                marker.set_color("blue")
+            self._waypoint_marker[k].set_color("red")
+
+        return self.driveto(goal)
 
 
 # ========================================================================= #
 
 if __name__ == "__main__":
 
-    import unittest
+    # import unittest
+
+    import roboticstoolbox as rtb
+
+    # veh = rtb.Bicycle(control=rtb.RandomPath(workspace=10), animation="car")
+    # print(veh.control)
+    # veh.run(20, animate=True)
+
+    # create the path
+    path = np.array([[10.0, 10], [10, 60], [80, 80], [50, 10]]).T
+    veh = rtb.Bicycle(
+        control=rtb.PurePursuit(path, speed=4, lookahead=5, workspace=[0, 100]),
+        animation="car",
+    )
+    print(veh)
+    print(veh.control)
+    veh.run(60, animate=True)
