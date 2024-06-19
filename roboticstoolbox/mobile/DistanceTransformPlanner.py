@@ -2,8 +2,7 @@
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
-from numpy import disp
-from scipy import integrate
+
 from spatialmath.base.transforms2d import *
 from spatialmath.base.vectors import *
 from spatialmath.pose2d import SE2
