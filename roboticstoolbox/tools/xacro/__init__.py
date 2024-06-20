@@ -927,7 +927,10 @@ def eval_all(node, macros, symbols):
 
         # TODO: Also evaluate content of COMMENT_NODEs?
         elif node.nodeType == xml.dom.Node.TEXT_NODE:
-            node.data = unicode(eval_text(node.data, symbols))
+            try:
+                node.data = unicode(eval_text(node.data, symbols))
+            except AttributeError as e:
+                raise
 
         node = next
 
@@ -1067,24 +1070,24 @@ def main(filename, tld_other=None):   # pragma: no cover
     else:
         tld = tld_other
 
-    try:
-        # open and process file
-        doc = process_file(filename, **opts)
-        # open the output file
-        out = open_output(opts["output"])
+    # try:
+    # open and process file
+    doc = process_file(filename, **opts)
+    # open the output file
+    out = open_output(opts["output"])
 
-    except Exception as e:
-        msg = unicode(e)
-        if not msg:
-            msg = repr(e)
-        error(msg)
-        if verbosity > 0:
-            print_location(filestack, e)
-        if verbosity > 1:
-            print(file=sys.stderr)  # add empty separator line before error
-            raise  # create stack trace
-        else:
-            sys.exit(2)  # gracefully exit with error condition
+    # except Exception as e:
+    #     msg = unicode(e)
+    #     if not msg:
+    #         msg = repr(e)
+    #     error(msg)
+    #     if verbosity > 0:
+    #         print_location(filestack, e)
+    #     if verbosity > 1:
+    #         print(file=sys.stderr)  # add empty separator line before error
+    #         raise  # create stack trace
+    #     else:
+    #         sys.exit(2)  # gracefully exit with error condition
 
     # special output mode
     if opts["just_deps"]:
