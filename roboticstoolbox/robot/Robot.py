@@ -704,8 +704,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         J: None = None,
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
-        method: L["yoshikawa", "asada", "minsingular", "invcondition"] = "yoshikawa",
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+        method: L[
+            "yoshikawa", "asada", "minsingular", "invcondition"  # noqa
+        ] = "yoshikawa",
+        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
         **kwargs,
     ) -> Union[float, NDArray]:  # pragma nocover
         ...
@@ -717,8 +719,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         J: NDArray = ...,
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
-        method: L["yoshikawa", "asada", "minsingular", "invcondition"] = "yoshikawa",
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+        method: L[
+            "yoshikawa", "asada", "minsingular", "invcondition"  # noqa
+        ] = "yoshikawa",
+        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
         **kwargs,
     ) -> Union[float, NDArray]:  # pragma nocover
         ...
@@ -729,8 +733,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         J=None,
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
-        method: L["yoshikawa", "asada", "minsingular", "invcondition"] = "yoshikawa",
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+        method: L[
+            "yoshikawa", "asada", "minsingular", "invcondition"  # noqa
+        ] = "yoshikawa",
+        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
         **kwargs,
     ):
         """
@@ -893,6 +899,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         # Otherwise use the q vector/matrix
         else:
+            if q is None:
+                raise ValueError("Either J or q must be supplied")
+
+            q = getmatrix(q, (None, self.n))
             q = np.array(getmatrix(q, (None, self.n)))
             w = np.zeros(q.shape[0])
 
@@ -957,7 +967,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q: ArrayLike,
         qd: ArrayLike,
         J0: None = None,
-        representation: Union[L["rpy/xyz", "rpy/zyx", "eul", "exp"], None] = None,
+        representation: Union[
+            L["rpy/xyz", "rpy/zyx", "eul", "exp"], None  # noqa
+        ] = None,
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -967,7 +979,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q: None,
         qd: ArrayLike,
         J0: NDArray = ...,
-        representation: Union[L["rpy/xyz", "rpy/zyx", "eul", "exp"], None] = None,
+        representation: Union[
+            L["rpy/xyz", "rpy/zyx", "eul", "exp"], None  # noqa
+        ] = None,
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -976,7 +990,9 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q,
         qd: ArrayLike,
         J0=None,
-        representation: Union[L["rpy/xyz", "rpy/zyx", "eul", "exp"], None] = None,
+        representation: Union[
+            L["rpy/xyz", "rpy/zyx", "eul", "exp"], None  # noqa
+        ] = None,
     ):
         r"""
         Derivative of Jacobian
@@ -1083,7 +1099,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         H: None = None,
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -1095,7 +1111,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         H: NDArray = ...,
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
     ) -> NDArray:  # pragma no cover
         ...
 
@@ -1106,7 +1122,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         H=None,
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
     ) -> NDArray:
         r"""
         The manipulability Jacobian
@@ -1184,8 +1200,12 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         if H is None:
             H = self.hessian0(J0=J, start=start, end=end)
-        else:
-            verifymatrix(H, (6, self.n, self.n))
+        # else:
+        #     verifymatrix(H, (6, self.n, self.n))
+        elif not isinstance(H, np.ndarray):
+            raise TypeError("Hessian must be numpy array of shape 6xnxn")
+        elif H.shape != (6, self.n, self.n):
+            raise ValueError("Hessian must be numpy array of shape 6xnxn")
 
         manipulability = self.manipulability(
             q, J=J, start=start, end=end, axes=axes  # type: ignore
@@ -1209,7 +1229,11 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
     def closest_point(
         self, q: ArrayLike, shape: Shape, inf_dist: float = 1.0, skip: bool = False
-    ) -> Tuple[Union[int, None], Union[NDArray, None], Union[NDArray, None],]:
+    ) -> Tuple[
+        Union[int, None],
+        Union[NDArray, None],
+        Union[NDArray, None],
+    ]:
         """
         Find the closest point between robot and shape
 
