@@ -41,7 +41,7 @@ class KinovaGen3(Robot):
             manufacturer="Kinova",
             urdf_string=urdf_string,
             urdf_filepath=urdf_filepath,
-            # gripper_links=elinks[9]
+            gripper_links=links[10],
         )
 
         # self.qdlim = np.array([
@@ -58,3 +58,14 @@ if __name__ == "__main__":  # pragma nocover
 
     robot = KinovaGen3()
     print(robot)
+
+    from swift import Swift
+
+    env = Swift()
+    env.launch()
+    env.add(robot)
+    env.hold()
+
+    for link in robot.links:
+        print("\n")
+        print(link.isjoint)
