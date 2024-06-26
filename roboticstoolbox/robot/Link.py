@@ -271,12 +271,10 @@ class BaseLink(SceneNode, ABC):
         return self._Ts
 
     @overload
-    def ets(self: "Link") -> ETS:
-        ...  # pragma: nocover
+    def ets(self: "Link") -> ETS: ...  # pragma: nocover
 
     @overload
-    def ets(self: "Link2") -> ETS2:
-        ...  # pragma: nocover
+    def ets(self: "Link2") -> ETS2: ...  # pragma: nocover
 
     @property
     def ets(self) -> ETS:
@@ -302,13 +300,11 @@ class BaseLink(SceneNode, ABC):
 
     @ets.setter
     @overload
-    def ets(self: "Link", new_ets: ETS):
-        ...  # pragma: nocover
+    def ets(self: "Link", new_ets: ETS): ...  # pragma: nocover
 
     @ets.setter
     @overload
-    def ets(self: "Link2", new_ets: ETS2):
-        ...  # pragma: nocover
+    def ets(self: "Link2", new_ets: ETS2): ...  # pragma: nocover
 
     @ets.setter
     def ets(self, new_ets):
@@ -394,15 +390,7 @@ class BaseLink(SceneNode, ABC):
 
     # -------------------------------------------------------------------------- #
 
-    @overload
-    def copy(self: "Link") -> "Link":
-        ...  # pragma: nocover
-
-    @overload
-    def copy(self: "Link2") -> "Link2":
-        ...  # pragma: nocover
-
-    def copy(self):
+    def copy(self: Self) -> Self:
         """
         Copy of link object
 
@@ -428,7 +416,7 @@ class BaseLink(SceneNode, ABC):
         joint_name = deepcopy(self._joint_name)
         m = deepcopy(self.m)
         r = deepcopy(self.r)
-        I = deepcopy(self.I)
+        I = deepcopy(self.I)  # noqa
         Jm = deepcopy(self.Jm)
         B = deepcopy(self.B)
         Tc = deepcopy(self.Tc)
@@ -466,12 +454,10 @@ class BaseLink(SceneNode, ABC):
     # -------------------------------------------------------------------------- #
 
     @overload
-    def v(self: "Link") -> Union["ET", None]:
-        ...  # pragma: nocover
+    def v(self: "Link") -> Union["ET", None]: ...  # pragma: nocover
 
     @overload
-    def v(self: "Link2") -> Union["ET2", None]:
-        ...  # pragma: nocover
+    def v(self: "Link2") -> Union["ET2", None]: ...  # pragma: nocover
 
     @property
     def v(self):
@@ -1130,7 +1116,11 @@ class BaseLink(SceneNode, ABC):
 
     def closest_point(
         self, shape: Shape, inf_dist: float = 1.0, skip: bool = False
-    ) -> Tuple[Union[int, None], Union[NDArray, None], Union[NDArray, None],]:
+    ) -> Tuple[
+        Union[int, None],
+        Union[NDArray, None],
+        Union[NDArray, None],
+    ]:
         """
         Finds the closest point to a shape
 
@@ -1368,7 +1358,7 @@ class BaseLink(SceneNode, ABC):
         return dyn
 
     def _format_param(
-        self, l, name, symbol=None, ignorevalue=None, indices=None
+        self, l, name, symbol=None, ignorevalue=None, indices=None  # noqa
     ):  # noqa  # pragma nocover
         # if value == ignorevalue then don't display it
 
