@@ -5,6 +5,7 @@
 @author: Peter Corke
 """
 
+from __future__ import annotations
 from collections import UserList
 import numpy as np
 from numpy.random import uniform
@@ -36,7 +37,7 @@ from roboticstoolbox.fknm import (
     IK_LM_c,
 )
 from copy import deepcopy
-from roboticstoolbox.robot.ET import ET, ET2
+from roboticstoolbox.robot.ET import ET, ET2, BaseET
 from typing import Union, overload, List, Set, Tuple, TypeVar
 from typing_extensions import Literal as L
 from sys import version_info
@@ -575,6 +576,9 @@ class BaseETS(UserList):
         return self.__class__([et.inv() for et in reversed(self.data)])
 
     @overload
+    def __getitem__(self: "BaseETS", i: int) -> BaseET: ...
+
+    @overload
     def __getitem__(self: "ETS", i: int) -> ET: ...
 
     @overload
@@ -611,6 +615,9 @@ class BaseETS(UserList):
 
         """
         return self.data[i]  # can be [2] or slice, eg. [3:5]
+
+    @overload
+    def __setitem__(self: "BaseETS", i: int, value: BaseET): ...
 
     @overload
     def __setitem__(self: "ETS", i: int, value: ET): ...
@@ -1411,6 +1418,9 @@ class ETS(BaseETS):
         n = self.n
 
         if J0 is None:
+            if q is None:
+                raise ValueError("Either J0 or q must be provided")
+
             q = getvector(q, None)
             J0 = self.jacob0(q, tool=tool)
         else:
@@ -1515,6 +1525,9 @@ class ETS(BaseETS):
         n = self.n
 
         if Je is None:
+            if q is None:
+                raise ValueError("Either Je or q must be provided")
+
             q = getvector(q, None)
             Je = self.jacobe(q, tool=tool)
         else:
@@ -1586,7 +1599,8 @@ class ETS(BaseETS):
 
         T = self.eval(q, tool=tool)
         J = self.jacob0(q, tool=tool)
-        A = rotvelxform(t2r(T), full=True, inverse=True, representation=representation)
+        gamma = t2r(T)[:3, :3]
+        A = rotvelxform(gamma, full=True, inverse=True, representation=representation)
         return A @ J
 
     def jacobm(self, q: ArrayLike) -> NDArray:
@@ -1651,8 +1665,8 @@ class ETS(BaseETS):
     def manipulability(
         self,
         q,
-        method: L["yoshikawa", "minsingular", "invcondition"] = "yoshikawa",
-        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",
+        method: L["yoshikawa", "minsingular", "invcondition"] = "yoshikawa",  # noqa
+        axes: Union[L["all", "trans", "rot"], List[bool]] = "all",  # noqa
     ):
         """
         Manipulability measure
@@ -1985,7 +1999,7 @@ class ETS(BaseETS):
         mask: Union[NDArray, None] = None,
         joint_limits: bool = True,
         k: float = 1.0,
-        method: L["chan", "wampler", "sugihara"] = "chan",
+        method: L["chan", "wampler", "sugihara"] = "chan",  # noqa
     ) -> Tuple[NDArray, int, int, int, float]:
         r"""
         Fast levenberg-Marquadt Numerical Inverse Kinematics Solver
@@ -2415,7 +2429,7 @@ class ETS(BaseETS):
         joint_limits: bool = True,
         seed: Union[int, None] = None,
         k: float = 1.0,
-        method: L["chan", "wampler", "sugihara"] = "chan",
+        method: L["chan", "wampler", "sugihara"] = "chan",  # noqa
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
