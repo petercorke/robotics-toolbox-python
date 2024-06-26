@@ -2173,7 +2173,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     # --------------------------------------------------------------------- #
 
     def _get_graphical_backend(
-        self, backend: Union[L["swift", "pyplot", "pyplot2"], None] = None
+        self, backend: Union[L["swift", "pyplot", "pyplot2"], None] = None  # noqa
     ) -> Union[Swift, PyPlot, PyPlot2]:
         default = self.default_backend
 
@@ -2234,7 +2234,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     def plot(
         self,
         q: ArrayLike,
-        backend: Union[L["swift", "pyplot", "pyplot2"], None] = None,
+        backend: Union[L["swift", "pyplot", "pyplot2"], None] = None,  # noqa
         block: bool = False,
         dt: float = 0.050,
         limits: Union[ArrayLike, None] = None,
@@ -2393,9 +2393,9 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     def fellipse(
         self,
         q: ArrayLike,
-        opt: L["trans", "rot"] = "trans",
-        unit: L["rad", "deg"] = "rad",
-        centre: Union[L["ee"], ArrayLike] = [0, 0, 0],
+        opt: L["trans", "rot"] = "trans",  # noqa
+        unit: L["rad", "deg"] = "rad",  # noqa
+        centre: Union[L["ee"], ArrayLike] = [0, 0, 0],  # noqa
     ) -> EllipsePlot:
         """
         Create a force ellipsoid object for plotting with PyPlot
@@ -2444,9 +2444,9 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     def vellipse(
         self,
         q: ArrayLike,
-        opt: L["trans", "rot"] = "trans",
-        unit: L["rad", "deg"] = "rad",
-        centre: Union[L["ee"], ArrayLike] = [0, 0, 0],
+        opt: L["trans", "rot"] = "trans",  # noqa
+        unit: L["rad", "deg"] = "rad",  # noqa
+        centre: Union[L["ee"], ArrayLike] = [0, 0, 0],  # noqa
         scale: float = 0.1,
     ) -> EllipsePlot:
         """
@@ -2565,8 +2565,8 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         block: bool = True,
         fellipse: Union[EllipsePlot, None] = None,
         limits: Union[ArrayLike, None] = None,
-        opt: L["trans", "rot"] = "trans",
-        centre: Union[L["ee"], ArrayLike] = [0, 0, 0],
+        opt: L["trans", "rot"] = "trans",  # noqa
+        centre: Union[L["ee"], ArrayLike] = [0, 0, 0],  # noqa
         jointaxes: bool = True,
         eeframe: bool = True,
         shadow: bool = True,
@@ -2661,8 +2661,8 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         block: bool = True,
         vellipse: Union[EllipsePlot, None] = None,
         limits: Union[ArrayLike, None] = None,
-        opt: L["trans", "rot"] = "trans",
-        centre: Union[L["ee"], ArrayLike] = [0, 0, 0],
+        opt: L["trans", "rot"] = "trans",  # noqa
+        centre: Union[L["ee"], ArrayLike] = [0, 0, 0],  # noqa
         jointaxes: bool = True,
         eeframe: bool = True,
         shadow: bool = True,
@@ -2756,7 +2756,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         limits: Union[ArrayLike, None] = None,
         vellipse: bool = False,
         fellipse: bool = False,
-        backend: Union[L["pyplot", "pyplot2"], None] = None,
+        backend: Union[L["pyplot", "pyplot2"], None] = None,  # noqa
     ) -> Union[PyPlot, PyPlot2]:
         """
         Graphical teach pendant
@@ -2923,7 +2923,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         self,
         filename: Union[str, IO[str]],
         etsbox: bool = False,
-        ets: L["full", "brief"] = "full",
+        ets: L["full", "brief"] = "full",  # noqa
         jtype: bool = False,
         static: bool = True,
     ):
