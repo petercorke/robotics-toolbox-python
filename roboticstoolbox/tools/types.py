@@ -3,11 +3,11 @@
 @author Jesse Haviland
 """
 
-from typing import Tuple, Union, List, Set
+from typing import Tuple, Union, List
 from numpy import ndarray
 
 NDArray = ndarray
 
-PyArrayLike = Union[List[float], Tuple[float], Set[float]]
+PyArrayLike = Union[List[float], Tuple[float, ...]]
 
 ArrayLike = Union[NDArray, PyArrayLike]
