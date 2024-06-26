@@ -480,7 +480,7 @@ class RobotKinematicsMixin:
     def jacob0_analytical(
         self: KinematicsProtocol,
         q: ArrayLike,
-        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] = "rpy/xyz",
+        representation: L["rpy/xyz", "rpy/zyx", "eul", "exp"] = "rpy/xyz",  # noqa
         end: Union[str, Link, Gripper, None] = None,
         start: Union[str, Link, Gripper, None] = None,
         tool: Union[NDArray, SE3, None] = None,
@@ -556,7 +556,7 @@ class RobotKinematicsMixin:
         mask: Union[NDArray, None] = None,
         joint_limits: bool = True,
         k: float = 1.0,
-        method: L["chan", "wampler", "sugihara"] = "chan",
+        method: L["chan", "wampler", "sugihara"] = "chan",  # noqa
     ) -> Tuple[NDArray, int, int, int, float]:
         r"""
         Fast levenberg-Marquadt Numerical Inverse Kinematics Solver
@@ -1010,7 +1010,7 @@ class RobotKinematicsMixin:
         joint_limits: bool = True,
         seed: Union[int, None] = None,
         k: float = 1.0,
-        method: L["chan", "wampler", "sugihara"] = "chan",
+        method: L["chan", "wampler", "sugihara"] = "chan",  # noqa
         kq: float = 0.0,
         km: float = 0.0,
         ps: float = 0.0,
