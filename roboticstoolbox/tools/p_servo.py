@@ -5,14 +5,15 @@ from spatialmath import SE3, base
 import math
 from typing import Union
 from roboticstoolbox.fknm import Angle_Axis
+from roboticstoolbox.tools.types import NDArray, ArrayLike
 
-ArrayLike = Union[list, np.ndarray, tuple, set]
+# ArrayLike = Union[list, np.ndarray, tuple, set]
 
 
-def angle_axis(T, Td):
+def angle_axis(T, Td) -> NDArray:
 
     try:
-        e = Angle_Axis(T, Td)
+        e: NDArray = Angle_Axis(T, Td)
     except BaseException:
         e = angle_axis_python(T, Td)
 

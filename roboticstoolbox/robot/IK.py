@@ -10,7 +10,8 @@ from typing import Tuple, Union
 import roboticstoolbox as rtb
 from dataclasses import dataclass
 from spatialmath import SE3
-from roboticstoolbox.tools.types import ArrayLike
+from roboticstoolbox.tools.types import ArrayLike, NDArray
+
 
 try:
     import qpsolvers as qp
@@ -395,7 +396,7 @@ class IKSolver(ABC):
 
         """
         e = rtb.angle_axis(Te, Tep)
-        E = 0.5 * e @ self.We @ e
+        E = float(0.5 * e @ self.We @ e)
 
         return e, E
 
@@ -503,7 +504,7 @@ class IKSolver(ABC):
         return True
 
 
-def _null_Σ(ets: "rtb.ETS", q: np.ndarray, ps: float, pi: Union[np.ndarray, float]):
+def _null_Σ(ets: "rtb.ETS", q: NDArray, ps: float, pi: Union[NDArray, float]):
     """
     Formulates a relationship between joint limits and the joint velocity.
     When this is projected into the null-space of the differential kinematics
@@ -518,7 +519,7 @@ def _null_Σ(ets: "rtb.ETS", q: np.ndarray, ps: float, pi: Union[np.ndarray, flo
     :return: Σ
     """
 
-    if isinstance(pi, float):
+    if isinstance(pi, float) or isinstance(pi, int):
         pi = pi * np.ones(ets.n)
 
     # Add cost to going in the direction of joint limits, if they are within
@@ -1451,7 +1452,7 @@ class IK_QP(IKSolver):
         e, E = self.error(Te, Tep)
         J = ets.jacob0(q)
 
-        if isinstance(self.pi, float):
+        if isinstance(self.pi, float) or isinstance(self.pi, int):
             self.pi = self.pi * np.ones(ets.n)
 
         # Quadratic component of objective function
