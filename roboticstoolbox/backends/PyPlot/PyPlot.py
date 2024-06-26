@@ -572,11 +572,21 @@ class PyPlot(Connector):
 
             if robot.isrevolute(j):
                 slider = Slider(
-                    ax, "q" + str(j), qlim[0, j], qlim[1, j], np.degrees(q[j]), "% .1f°"
+                    ax=ax,
+                    label="q" + str(j),
+                    valmin=qlim[0, j],
+                    valmax=qlim[1, j],
+                    valinit=np.degrees(q[j]),
+                    valfmt="% .1f°",
                 )
             else:
                 slider = Slider(
-                    ax, "q" + str(j), qlim[0, j], qlim[1, j], robot.q[j], "% .1f"
+                    ax=ax,
+                    label="q" + str(j),
+                    valmin=qlim[0, j],
+                    valmax=qlim[1, j],
+                    valinit=robot.q[j],
+                    valfmt="% .1f",
                 )
 
             slider.on_changed(lambda x: update(x, text, robot))
