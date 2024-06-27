@@ -47,7 +47,7 @@ class KinovaGen3(Robot):
         # self.qdlim = np.array([
         # 2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0])
 
-        self.qr = np.array([np.pi, -0.3, 0, -1.6, 0, -1.0, np.pi / 2])
+        self.qr = np.deg2rad([0.0, 15.0, 180.0, 230.0, 0.0, 55.0, 90.0])
         self.qz = np.zeros(7)
 
         self.addconfiguration("qr", self.qr)
@@ -57,6 +57,7 @@ class KinovaGen3(Robot):
 if __name__ == "__main__":  # pragma nocover
 
     robot = KinovaGen3()
+    robot.q = robot.qr
     print(robot)
 
     from swift import Swift
