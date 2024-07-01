@@ -1740,10 +1740,10 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         """
 
         n = self.n
+        # n = len(self.links)
 
         # allocate intermediate variables
         Xup = SE3.Alloc(n)
-        Xtree = SE3.Alloc(n)
 
         v = SpatialVelocity.Alloc(n)
         a = SpatialAcceleration.Alloc(n)
@@ -1755,81 +1755,133 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         q = getmatrix(q, (None, None))
         qd = getmatrix(qd, (None, None))
         qdd = getmatrix(qdd, (None, None))
-        l, _ = q.shape  # type: ignore
+        l, _ = q.shape
 
         if symbolic:  # pragma: nocover
             Q = np.empty((l, n), dtype="O")  # joint torque/force
         else:
             Q = np.empty((l, n))  # joint torque/force
 
-        # TODO Should the dynamic parameters of static links preceding joint be
-        # somehow merged with the joint?
+        qn = np.empty((l, n))
+        qdn = np.empty((l, n))
+        qddn = np.empty((l, n))
 
-        # A temp variable to handle static joints
-        Ts = SE3()
+        link_groups: List[List[int]] = []
 
-        # A counter through joints
-        j = 0
+        # Group links together based on whether they are joints or not
+        # Static links are grouped with the first joint encountered
+        current_group = []
+        for i, link in enumerate(self.links):
+            current_group.append(i)
+
+            # Break after adding the first link
+            if link.isjoint:
+                link_groups.append(current_group)
+                current_group = []
+
+        # Make some intermediate variables
+        for i, group in enumerate(link_groups):
+            I_int = SpatialInertia()
+
+            for idx in group:
+                link = self.links[idx]
+
+                I_int = I_int + SpatialInertia(m=link.m, r=link.r)
+
+                if link.v is not None:
+                    s.append(link.v.s)
+
+            I[i] = I_int
+
+        if gravity is None:
+            a_grav = -SpatialAcceleration(self.gravity)
+        else:  # pragma nocover
+            a_grav = -SpatialAcceleration(gravity)
+
+        # For the following, v, a, f, I, s, Xup are all lists of length n
+        # where the indices correspond to the index of the group within
+        # link_groups
+        # As always, q, qd, qdd are lists of length n, where indices correspond
+        # to the jindex of the joint, which will be the last link in the group
+        # within link_groups
 
         for k in range(l):
             qk = q[k, :]
             qdk = qd[k, :]
             qddk = qdd[k, :]
 
-            # initialize intermediate variables
-            for link in self.links:
-                if link.isjoint:
-                    I[j] = SpatialInertia(m=link.m, r=link.r)
-                    if symbolic and link.Ts is None:  # pragma: nocover
-                        Xtree[j] = SE3(np.eye(4, dtype="O"), check=False)
-                    elif link.Ts is not None:
-                        Xtree[j] = Ts * SE3(link.Ts, check=False)
-
-                    if link.v is not None:
-                        s.append(link.v.s)
-
-                    # Increment the joint counter
-                    j += 1
-
-                    # Reset the Ts tracker
-                    Ts = SE3()
-                else:  # pragma nocover
-                    # TODO Keep track of inertia and transform???
-                    if link.Ts is not None:
-                        Ts *= SE3(link.Ts, check=False)
-
-            if gravity is None:
-                a_grav = -SpatialAcceleration(self.gravity)
-            else:  # pragma nocover
-                a_grav = -SpatialAcceleration(gravity)
-
             # forward recursion
-            for j in range(0, n):
-                vJ = SpatialVelocity(s[j] * qdk[j])
+            for j, group in enumerate(link_groups):
+
+                # The joint is the last link in the group
+                joint = self.links[group[-1]]
+                jindex = joint.jindex
+
+                vJ = SpatialVelocity(s[j] * qdk[jindex])
 
                 # transform from parent(j) to j
-                Xup[j] = SE3(self.links[j].A(qk[j])).inv()
+                Xup_int = SE3()
+                for idx in group:
+                    link = self.links[idx]
 
-                if self.links[j].parent is None:
+                    if link.isjoint and link.jindex is not None:
+                        Xup_int = Xup_int * SE3(link.A(qk[link.jindex]))
+                    else:
+                        Xup_int = Xup_int * SE3(link.A())
+
+                Xup[j] = Xup_int.inv()
+
+                # The first link in the group
+                first_link = self.links[group[0]]
+
+                if first_link.parent is None:
                     v[j] = vJ
-                    a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qddk[j])
+                    a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qddk[jindex])
                 else:
-                    jp = self.links[j].parent.jindex  # type: ignore
-                    v[j] = Xup[j] * v[jp] + vJ
+                    # The index of `link`s parent within self.links
+                    parent_idx = self.links.index(first_link.parent)
+
+                    # The index of the group that the parent link is in
+                    group_idx = [
+                        i for i, group in enumerate(link_groups) if parent_idx in group
+                    ][0]
+
+                    v[j] = Xup[j] * v[group_idx] + vJ
                     a[j] = (
-                        Xup[j] * a[jp] + SpatialAcceleration(s[j] * qddk[j]) + v[j] @ vJ
+                        Xup[j] * a[group_idx]
+                        + SpatialAcceleration(s[j] * qddk[jindex])
+                        + v[j] @ vJ
                     )
 
                 f[j] = I[j] * a[j] + v[j] @ (I[j] * v[j])
 
-            # backward recursion
-            for j in reversed(range(0, n)):
+            # Backward recursion
+            for j in reversed(range(n)):
+
+                group = link_groups[j]
+                joint = self.links[group[-1]]
+                first_link = self.links[group[0]]
+                # link = self.links[j]
+
                 # next line could be dot(), but fails for symbolic arguments
                 Q[k, j] = sum(f[j].A * s[j])
 
-                if self.links[j].parent is not None:
-                    jp = self.links[j].parent.jindex  # type: ignore
-                    f[jp] = f[jp] + Xup[j] * f[j]
+                if first_link.parent is not None:
+
+                    # The index of `link`s parent within self.links
+                    parent_idx = self.links.index(first_link.parent)
+
+                    # The index of the group that the parent link is in
+                    group_idx = [
+                        i for i, group in enumerate(link_groups) if parent_idx in group
+                    ][0]
+
+                    f[group_idx] = f[group_idx] + Xup[j] * f[j]
+
+        # The current Q has the length equal to the number of links within the robot
+        # rather than the number of joints. We need to remove the static links
+        # from the Q array
+        # joint_idx = [i for i, link in enumerate(self.links) if link.isjoint]
 
         if l == 1:
             return Q[0]
