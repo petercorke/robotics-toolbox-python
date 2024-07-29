@@ -90,6 +90,7 @@ docs = [
     "sphinx_rtd_theme",
     "sphinx-autorun",
     "sphinx_autodoc_typehints",
+    "sphinx-favicon",
 ]
 
 

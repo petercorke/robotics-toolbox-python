@@ -197,7 +197,7 @@ orientation parallel to y-axis (O=+Y)).
 from spatialmath import SE3
 
 Tep = SE3.Trans(0.6, -0.3, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-sol = robot.ik_lm_chan(Tep)         # solve IK
+sol = robot.ik_LM(Tep)         # solve IK
 print(sol)
 
 	(array([ 0.20592815,  0.86609481, -0.79473206, -1.68254794,  0.74872915,
@@ -239,14 +239,14 @@ We can also experiment with velocity controllers in Swift. Here is a resolved-ra
 
 ```python
 import swift
-import roboticstoolbox as rp
+import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
 
 env = swift.Swift()
 env.launch(realtime=True)
 
-panda = rp.models.Panda()
+panda = rtb.models.Panda()
 panda.q = panda.qr
 
 Tep = panda.fkine(panda.q) * sm.SE3.Trans(0.2, 0.2, 0.45)
@@ -258,7 +258,7 @@ dt = 0.05
 
 while not arrived:
 
-    v, arrived = rp.p_servo(panda.fkine(panda.q), Tep, 1)
+    v, arrived = rtb.p_servo(panda.fkine(panda.q), Tep, 1)
     panda.qd = np.linalg.pinv(panda.jacobe(panda.q)) @ v
     env.step(dt)
 
