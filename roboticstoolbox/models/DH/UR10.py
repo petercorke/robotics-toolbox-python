@@ -93,7 +93,13 @@ class UR10(DHRobot):
 
         for j in range(6):
             link = RevoluteDH(
-                d=d[j], a=a[j], alpha=alpha[j], m=mass[j], r=center_of_mass[j], G=1
+                d=d[j],
+                a=a[j],
+                alpha=alpha[j],
+                m=mass[j],
+                r=center_of_mass[j],
+                G=1,
+                I=inertia[j],
             )
             links.append(link)
 
