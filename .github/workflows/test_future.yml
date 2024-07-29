@@ -67,7 +67,7 @@ jobs:
         pip install .
 
     - name: Specific numpy version for Ubuntu (pybullet dep)
-      if: runner.os == "ubuntu-latest"
+      if: runner.os == 'ubuntu-latest'
       run: pip install numpy==1.26.4
         
     - name: Test with pytest
