@@ -1762,10 +1762,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         else:
             Q = np.empty((l, n))  # joint torque/force
 
-        qn = np.empty((l, n))
-        qdn = np.empty((l, n))
-        qddn = np.empty((l, n))
-
         link_groups: List[List[int]] = []
 
         # Group links together based on whether they are joints or not
@@ -1820,14 +1816,23 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 vJ = SpatialVelocity(s[j] * qdk[jindex])
 
                 # transform from parent(j) to j
-                Xup_int = SE3()
+                # Xup_int = SE3()
+                first_element = True
                 for idx in group:
                     link = self.links[idx]
 
                     if link.isjoint and link.jindex is not None:
-                        Xup_int = Xup_int * SE3(link.A(qk[link.jindex]))
+                        if first_element:
+                            Xup_int = SE3(link.A(qk[link.jindex]))
+                            first_element = False
+                        else:
+                            Xup_int = Xup_int * SE3(link.A(qk[link.jindex]))
                     else:
-                        Xup_int = Xup_int * SE3(link.A())
+                        if first_element:
+                            Xup_int = SE3(link.A())
+                            first_element = False
+                        else:
+                            Xup_int = Xup_int * SE3(link.A())
 
                 Xup[j] = Xup_int.inv()
 
