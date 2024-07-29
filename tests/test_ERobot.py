@@ -152,6 +152,122 @@ class TestERobot(unittest.TestCase):
         tau = robot.rne(q, z, np.array([1, 1]))
         nt.assert_array_almost_equal(tau, np.r_[d11 + d12, d21 + d22])
 
+    def test_invdyn_static(self):
+        # create a 2 link robot
+        # Example from Spong etal. 2nd edition, p. 260
+        l1 = Link(ets=ETS(ET.Ry()), m=1, r=[0.5, 0, 0], name="l1")
+        l2 = Link(ets=ETS(), m=0, r=[0, 0, 0], parent=l1, name="l2")
+        l3 = Link(ets=ETS(ET.tx(1)) * ET.Ry(), m=1, r=[0.5, 0, 0], parent=l2, name="l3")
+        robot = ERobot([l1, l2, l3], name="simple 3 link")
+        z = np.zeros(robot.n)
+
+        # check gravity load
+        tau = robot.rne(z, z, z) / 9.81
+        nt.assert_array_almost_equal(tau, np.r_[-2, -0.5])
+
+        tau = robot.rne(np.array([0.0, -pi / 2.0]), z, z) / 9.81
+        nt.assert_array_almost_equal(tau, np.r_[-1.5, 0])
+
+        tau = robot.rne(np.array([-pi / 2, pi / 2]), z, z) / 9.81
+        nt.assert_array_almost_equal(tau, np.r_[-0.5, -0.5])
+
+        tau = robot.rne(np.array([-pi / 2, 0]), z, z) / 9.81
+        nt.assert_array_almost_equal(tau, np.r_[0, 0])
+
+        # check velocity terms
+        robot.gravity = [0, 0, 0]
+        q = np.array([0, -pi / 2])
+        h = -0.5 * sin(q[1])
+
+        tau = robot.rne(q, np.array([0, 0]), z)
+        nt.assert_array_almost_equal(tau, np.r_[0, 0] * h)
+
+        tau = robot.rne(q, np.array([1, 0]), z)
+        nt.assert_array_almost_equal(tau, np.r_[0, -1] * h)
+
+        tau = robot.rne(q, np.array([0, 1]), z)
+        nt.assert_array_almost_equal(tau, np.r_[1, 0] * h)
+
+        tau = robot.rne(q, np.array([1, 1]), z)
+        nt.assert_array_almost_equal(tau, np.r_[3, -1] * h)
+
+        # check inertial terms
+
+        d11 = 1.5 + cos(q[1])
+        d12 = 0.25 + 0.5 * cos(q[1])
+        d21 = d12
+        d22 = 0.25
+
+        tau = robot.rne(q, z, np.array([0, 0]))
+        nt.assert_array_almost_equal(tau, np.r_[0, 0])
+
+        tau = robot.rne(q, z, np.array([1, 0]))
+        nt.assert_array_almost_equal(tau, np.r_[d11, d21])
+
+        tau = robot.rne(q, z, np.array([0, 1]))
+        nt.assert_array_almost_equal(tau, np.r_[d12, d22])
+
+        tau = robot.rne(q, z, np.array([1, 1]))
+        nt.assert_array_almost_equal(tau, np.r_[d11 + d12, d21 + d22])
+
+    def test_invdyn_static2(self):
+        # create a 2 link robot
+        # Example from Spong etal. 2nd edition, p. 260
+        l1 = Link(ets=ETS(ET.Ry()), m=1, r=[0.5, 0, 0], name="l1")
+        l2 = Link(ets=ETS(ET.tx(1)), m=1, r=[0.5, 0, 0], parent=l1, name="l2")
+        l3 = Link(ets=ETS(ET.Ry()), m=0, r=[0, 0, 0], parent=l2, name="l3")
+        robot = ERobot([l1, l2, l3], name="simple 3 link")
+        z = np.zeros(robot.n)
+
+        # check gravity load
+        tau = robot.rne(z, z, z) / 9.81
+        nt.assert_array_almost_equal(tau, np.r_[-2, -0.5])
+
+        tau = robot.rne(np.array([0.0, -pi / 2.0]), z, z) / 9.81
+        nt.assert_array_almost_equal(tau, np.r_[-1.5, 0])
+
+        tau = robot.rne(np.array([-pi / 2, pi / 2]), z, z) / 9.81
+        nt.assert_array_almost_equal(tau, np.r_[-0.5, -0.5])
+
+        tau = robot.rne(np.array([-pi / 2, 0]), z, z) / 9.81
+        nt.assert_array_almost_equal(tau, np.r_[0, 0])
+
+        # check velocity terms
+        robot.gravity = [0, 0, 0]
+        q = np.array([0, -pi / 2])
+        h = -0.5 * sin(q[1])
+
+        tau = robot.rne(q, np.array([0, 0]), z)
+        nt.assert_array_almost_equal(tau, np.r_[0, 0] * h)
+
+        tau = robot.rne(q, np.array([1, 0]), z)
+        nt.assert_array_almost_equal(tau, np.r_[0, -1] * h)
+
+        tau = robot.rne(q, np.array([0, 1]), z)
+        nt.assert_array_almost_equal(tau, np.r_[1, 0] * h)
+
+        tau = robot.rne(q, np.array([1, 1]), z)
+        nt.assert_array_almost_equal(tau, np.r_[3, -1] * h)
+
+        # check inertial terms
+
+        d11 = 1.5 + cos(q[1])
+        d12 = 0.25 + 0.5 * cos(q[1])
+        d21 = d12
+        d22 = 0.25
+
+        tau = robot.rne(q, z, np.array([0, 0]))
+        nt.assert_array_almost_equal(tau, np.r_[0, 0])
+
+        tau = robot.rne(q, z, np.array([1, 0]))
+        nt.assert_array_almost_equal(tau, np.r_[d11, d21])
+
+        tau = robot.rne(q, z, np.array([0, 1]))
+        nt.assert_array_almost_equal(tau, np.r_[d12, d22])
+
+        tau = robot.rne(q, z, np.array([1, 1]))
+        nt.assert_array_almost_equal(tau, np.r_[d11 + d12, d21 + d22])
+
 
 class TestERobot2(unittest.TestCase):
     def test_plot(self):
