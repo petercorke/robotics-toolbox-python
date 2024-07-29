@@ -248,7 +248,7 @@ class LandMarkTest(unittest.TestCase):
 class DriversTest(unittest.TestCase):
     def test_init(self):
 
-        rp = rtb.RandomPath(10)
+        rp = rtb.RandomPath(workspace=10)
 
         self.assertIsInstance(str(rp), str)
 
