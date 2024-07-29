@@ -9,7 +9,7 @@ import unittest
 from roboticstoolbox import Robot
 from spatialmath import SE3
 from roboticstoolbox.tools.data import rtb_path_to_datafile
-from distutils.dir_util import copy_tree
+from shutil import copytree
 from os import mkdir, path
 import tempfile as tf
 
@@ -52,7 +52,7 @@ class TestCustomXacro(unittest.TestCase):
         panda_xacro = xacro_path / "franka_description"
 
         # Copy into temp franka directory
-        copy_tree(panda_xacro, franka_dir)
+        copytree(panda_xacro, franka_dir, dirs_exist_ok=True)
 
         # Make our custom robot
         robot = CustomPanda(xacro_dir)
