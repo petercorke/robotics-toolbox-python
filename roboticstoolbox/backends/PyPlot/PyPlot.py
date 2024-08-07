@@ -416,9 +416,9 @@ class PyPlot(Connector):
                 )
 
         # make the background white, looks better than grey stipple
-        self.ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-        self.ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-        self.ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        self.ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        self.ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        self.ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
         plt.gcf().canvas.draw()
 
         # render the frame and save as a PIL image in the list
