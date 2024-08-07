@@ -377,7 +377,7 @@ See the common issues with fixes [here](https://github.com/petercorke/robotics-t
 
 ### Using the Toolbox with Windows?
 
-Graphical visualsaion via swift is currently not supported under Windows. However there is a hotfix, by changing in ```SwiftRoute.py```
+Graphical visualisation via swift is currently not supported under Windows. However there is a hotfix, by changing in ```SwiftRoute.py```
 
 ```self.path[9:]``` to  ```self.path[10:]```
 
