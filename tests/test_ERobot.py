@@ -16,8 +16,9 @@ import spatialgeometry as gm
 from math import pi, sin, cos
 
 try:
-    from sympy import symbols
-
+    from sympy import symbols, simplify
+    from sympy import sin as ssin
+    from sympy import cos as scos
     _sympy = True
 except ModuleNotFoundError:
     _sympy = False
@@ -152,6 +153,13 @@ class TestERobot(unittest.TestCase):
         tau = robot.rne(q, z, np.array([1, 1]))
         nt.assert_array_almost_equal(tau, np.r_[d11 + d12, d21 + d22])
 
+    def test_URDF_inertia(self):
+        robot = rtb.models.URDF.UR10()
+        try:
+            robot.inertia(robot.q)
+        except TypeError:
+            self.fail("inertia() with a robot containing fixed links raised an error")
+
 
 class TestERobot2(unittest.TestCase):
     def test_plot(self):
@@ -203,19 +211,33 @@ class TestERobot2(unittest.TestCase):
         link2 = Link(ET.tx(a1) * ET.Ry(flip=True), m=m2, r=[r2, 0, 0], name="link1")
         robot = ERobot([link1, link2])
 
+        # Define symbols
         q = symbols("q:2")
         qd = symbols("qd:2")
         qdd = symbols("qdd:2")
+        q0, q1 = q
+        qd0, qd1 = qd
+        qdd0, qdd1 = qdd
+
         Q = robot.rne(q, qd, qdd, gravity=[0, 0, g], symbolic=True)
 
-        self.assertEqual(
-            str(Q[0]),
-            "a1**2*m2*qd0**2*sin(q1)*cos(q1) + a1*qd0*(-a1*m2*qd0*cos(q1) - m2*r2*(qd0 + qd1))*sin(q1) - a1*(m2*(a1*qd0*qd1*cos(q1) - a1*qdd0*sin(q1) - g*sin(q0)*cos(q1) - g*sin(q1)*cos(q0)) + (qd0 + qd1)*(-a1*m2*qd0*cos(q1) - m2*r2*(qd0 + qd1)))*sin(q1) - a1*(-a1*m2*qd0*(-qd0 - qd1)*sin(q1) - m2*r2*(qdd0 + qdd1) + m2*(-a1*qd0*qd1*sin(q1) - a1*qdd0*cos(q1) + g*sin(q0)*sin(q1) - g*cos(q0)*cos(q1)))*cos(q1) + g*m1*r1*cos(q0) + m1*qdd0*r1**2 + m2*r2**2*(qdd0 + qdd1) - m2*r2*(-a1*qd0*qd1*sin(q1) - a1*qdd0*cos(q1) + g*sin(q0)*sin(q1) - g*cos(q0)*cos(q1))",
-        )
-        self.assertEqual(
-            str(Q[1]),
-            "a1**2*m2*qd0**2*sin(q1)*cos(q1) + a1*qd0*(-a1*m2*qd0*cos(q1) - m2*r2*(qd0 + qd1))*sin(q1) + m2*r2**2*(qdd0 + qdd1) - m2*r2*(-a1*qd0*qd1*sin(q1) - a1*qdd0*cos(q1) + g*sin(q0)*sin(q1) - g*cos(q0)*cos(q1))",
-        )
+        solution_0 = a1**2*m2*qd0**2*ssin(q1)*scos(q1) + a1*qd0*(-a1*m2*qd0*scos(q1) - \
+                     m2*r2*(qd0 + qd1))*ssin(q1) - a1*(m2*(a1*qd0*qd1*scos(q1) - \
+                     a1*qdd0*ssin(q1) - g*ssin(q0)*scos(q1) - g*ssin(q1)*scos(q0)) + \
+                     (qd0 + qd1)*(-a1*m2*qd0*scos(q1) - m2*r2*(qd0 + qd1)))*ssin(q1) - \
+                     a1*(-a1*m2*qd0*(-qd0 - qd1)*ssin(q1) - m2*r2*(qdd0 + qdd1) + \
+                     m2*(-a1*qd0*qd1*ssin(q1) - a1*qdd0*scos(q1) + g*ssin(q0)*ssin(q1) - \
+                     g*scos(q0)*scos(q1)))*scos(q1) + g*m1*r1*scos(q0) + m1*qdd0*r1**2 + \
+                     m2*r2**2*(qdd0 + qdd1) - m2*r2*(-a1*qd0*qd1*ssin(q1) - \
+                     a1*qdd0*scos(q1) + g*ssin(q0)*ssin(q1) - g*scos(q0)*scos(q1))
+
+        solution_1 = a1**2*m2*qd0**2*ssin(q1)*scos(q1) + a1*qd0*(-a1*m2*qd0*scos(q1) - \
+                     m2*r2*(qd0 + qd1))*ssin(q1) + m2*r2**2*(qdd0 + qdd1) - \
+                     m2*r2*(-a1*qd0*qd1*ssin(q1) - a1*qdd0*scos(q1) + g*ssin(q0)*ssin(q1) - \
+                     g*scos(q0)*scos(q1))
+
+        self.assertEqual(simplify(Q[0]-solution_0), 0)
+        self.assertEqual(simplify(Q[1]-solution_1), 0)
 
 
 if __name__ == "__main__":  # pragma nocover
