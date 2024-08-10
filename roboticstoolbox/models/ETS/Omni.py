@@ -3,13 +3,13 @@
 import numpy as np
 from roboticstoolbox.robot.ET import ET
 from roboticstoolbox.robot.ETS import ETS
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Link import Link
 import spatialgeometry as sg
 import spatialmath as sm
 
 
-class Omni(ERobot):
+class Omni(Robot):
     """
     A class an omnidirectional mobile robot.
 

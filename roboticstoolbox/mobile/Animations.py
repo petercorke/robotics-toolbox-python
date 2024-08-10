@@ -2,9 +2,11 @@
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
+
 from abc import ABC
 from math import pi, atan2
 import numpy as np
+
 # from scipy import integrate, linalg, interpolate
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -14,15 +16,16 @@ import matplotlib.transforms as mtransforms
 from spatialmath import SE2, base
 from roboticstoolbox import rtb_load_data
 
+
 class VehicleAnimationBase(ABC):
     """
-    Abstract base class to support animation of a vehicle on Matplotlib plot
+    Abstract base class to support animation of a vehicle in a Matplotlib plot
 
     There are three concrete subclasses:
 
-    - ``VehicleMarker`` animates a Matplotlib marker
-    - ``VehiclePolygon`` animates a polygon shape (outline or filled), including predefined shapes
-    - ``VehicleIcon`` animates an image
+    - ``VehicleMarker`` animates a Matplotlib marker (shows position only)
+    - ``VehiclePolygon`` animates a polygon shape (outline or filled), including predefined shapes (shows position and orientation)
+    - ``VehicleIcon`` animates an image (shows position and orientation)
 
     An instance ``a`` of these classes can be used in three different ways, firstly::
 
@@ -34,7 +37,7 @@ class VehicleAnimationBase(ABC):
 
         a.update(q)
 
-    will animate it.
+    will animate it with the configuration given by ``q``.
 
     Secondly, an instance can be passed to a Vehicle subclass object to make an animation
     during simulation::
@@ -114,6 +117,7 @@ class VehicleAnimationBase(ABC):
         if self._object is not None:
             self._object.remove()
 
+
 # ========================================================================= #
 class VehicleMarker(VehicleAnimationBase):
     def __init__(self, **kwargs):
@@ -161,6 +165,7 @@ class VehicleMarker(VehicleAnimationBase):
 
 # ========================================================================= #
 
+
 class VehiclePolygon(VehicleAnimationBase):
     def __init__(self, shape="car", scale=1, **kwargs):
         """
@@ -190,6 +195,7 @@ class VehiclePolygon(VehicleAnimationBase):
         ``shape`` can be:
 
             * ``"car"``  a rectangle with chamfered front corners
+            * ``"box"``  a rectangle
             * ``"triangle"`` an isocles triangle pointing in the forward direction
             * an 2xN NumPy array of vertices, does not have to be closed.
 
@@ -201,6 +207,7 @@ class VehiclePolygon(VehicleAnimationBase):
         super().__init__()
         if isinstance(shape, str):
 
+            # consider vehicle at origin, pointing along +ve x-axis
             h = 0.3
             t = 0.8  # start of head taper
             c = 0.5  # centre x coordinate
@@ -214,6 +221,15 @@ class VehiclePolygon(VehicleAnimationBase):
                         [t - c, h],
                         [w - c, 0],
                         [t - c, -h],
+                        [-c, -h],
+                    ]
+                ).T
+            elif shape == "box":
+                self._coords = np.array(
+                    [
+                        [-c, h],
+                        [w - c, h],
+                        [w - c, -h],
                         [-c, -h],
                     ]
                 ).T
@@ -272,7 +288,7 @@ class VehicleIcon(VehicleAnimationBase):
 
         Creates an object that can be passed to a ``Vehicle`` subclass to
         depict the moving robot as an image icon during simulation.  The image
-        is translated and rotated to represent the vehicle configuration. 
+        is translated and rotated to represent the vehicle configuration.
 
         The car is scaled to an image with a horizontal length (width) of
         ``scale`` in the units of the plot. By default the image is assumed to
@@ -416,7 +432,7 @@ if __name__ == "__main__":
 
     V = np.diag(np.r_[0.02, 0.5 * pi / 180] ** 2)
 
-    v = VehiclePolygon(facecolor='None', edgecolor='k')
+    v = VehiclePolygon(facecolor="None", edgecolor="k")
     # v = VehicleIcon('greycar2', scale=2, rotation=90)
 
     veh = Bicycle(covar=V, animation=v, control=RandomPath(10), verbose=False)

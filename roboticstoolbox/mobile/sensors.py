@@ -31,22 +31,32 @@ See also RangeBearingSensor, EKF, Vehicle, Landmarkself.
 
 """
 
+
 class SensorBase(ABC):
     # TODO, pose option, wrt vehicle
 
     # robot
     # map
-    
+
     # verbose
-    
+
     # ls
     # animate     # animate sensor measurements
     # interval    # measurement return subsample factor
     # fail
     # delay
-        
 
-    def __init__(self, robot, map, every=1, fail=[], animate=False, delay=0.1, seed=0, verbose=False):
+    def __init__(
+        self,
+        robot,
+        map,
+        every=1,
+        fail=[],
+        plot=False,
+        delay=0.1,
+        seed=0,
+        verbose=False,
+    ):
         """Sensor.Sensor Sensor object constructor
         %
         # S = Sensor(VEHICLE, MAP, OPTIONS) is a sensor mounted on a vehicle
@@ -66,13 +76,13 @@ class SensorBase(ABC):
         self._robot = robot
         self._map = map
         self._every = every
-        self._fail =  fail
-        
+        self._fail = fail
+
         self._verbose = verbose
 
         self.delay = 0.1
 
-        self._animate = animate
+        self._animate = plot
 
         self._seed = seed
         self.init()
@@ -84,8 +94,7 @@ class SensorBase(ABC):
         - reseed the random number generator
         - reset the counter for handling the ``every`` and ``fail`` options
         """
-        if self._seed is not None:
-            self._random = np.random.default_rng(self._seed)
+        self._random = np.random.default_rng(self._seed)
         self._count = 0
 
     def __str__(self):
@@ -163,7 +172,7 @@ class SensorBase(ABC):
         :type id: int
 
         Draws a line from the robot to landmark ``id``.
-        
+
         .. note::
             - The line is drawn using the ``line_style`` given at constructor time
 
@@ -173,15 +182,15 @@ class SensorBase(ABC):
         # if isempty(self.ls)
         #     return
         # end
-        
+
         # h = findobj(gca, 'tag', 'sensor')
         # if isempty(h)
         #     # no sensor line, create one
         #     h = plot(0, 0, self.ls, 'tag', 'sensor')
         # end
-        
+
         # # there is a sensor line animate it
-        
+
         # if lm_id == 0
         #     set(h, 'Visible', 'off')
         # else
@@ -199,20 +208,22 @@ class SensorBase(ABC):
 # covar can be 2x2 or (2,)
 # .W property
 class RangeBearingSensor(SensorBase):
-
-
-    def __init__(self, robot, map, 
-            line_style=None,
-            poly_style=None,
-            covar=None, 
-            range=None,
-            angle=None,
-            plot=False,
-            seed=0,
-            **kwargs):
+    def __init__(
+        self,
+        robot,
+        map,
+        line_style=None,
+        poly_style=None,
+        covar=None,
+        range=None,
+        angle=None,
+        plot=False,
+        seed=0,
+        **kwargs,
+    ):
 
         r"""
-        Range and bearing angke sensor
+        Range and bearing angle sensor
 
         :param robot: model of robot carrying the sensor
         :type robot: :class:`VehicleBase` subclass
@@ -226,7 +237,7 @@ class RangeBearingSensor(SensorBase):
         :type range: float or array_like(2), optional
         :param angle: angular field of view, from :math:`[-\theta, \theta]` defaults to None
         :type angle: float, optional
-        :param plot: [description], defaults to False
+        :param plot: animate the sensor beams, defaults to False
         :type plot: bool, optional
         :param seed: random number seed, defaults to 0
         :type seed: int, optional
@@ -257,6 +268,8 @@ class RangeBearingSensor(SensorBase):
         :seealso: :class:`~roboticstoolbox.mobile.LandmarkMap` :class:`~roboticstoolbox.mobile.EKF`
         """
 
+        # TODO change plot option to animate, but RVC3 uses plot
+
         # call the superclass constructor
         super().__init__(robot, map, **kwargs)
 
@@ -264,14 +277,14 @@ class RangeBearingSensor(SensorBase):
         self._poly_style = poly_style
 
         if covar is None:
-            self._W = np.zeros((2,2))
+            self._W = np.zeros((2, 2))
         elif base.isvector(covar, 2):
             self._W = np.diag(covar)
         elif base.ismatrix(covar, (2, 2)):
             self._W = covar
         else:
-            raise ValueError('bad value for covar, must have shape (2,) or (2,2)')
-        
+            raise ValueError("bad value for covar, must have shape (2,) or (2,2)")
+
         if range is None:
             self._r_range = None
         elif isinstance(range, Iterable):
@@ -290,7 +303,7 @@ class RangeBearingSensor(SensorBase):
         self._landmarklog = []
 
         self._random = np.random.default_rng(seed)
-        
+
     def __str__(self):
         s = super().__str__()
         s += f"\n  W = {base.array2str(self._W)}\n"
@@ -331,7 +344,6 @@ class RangeBearingSensor(SensorBase):
         the constructor.
         """
         return self._covar
-    
 
     def reading(self):
         r"""
@@ -344,7 +356,7 @@ class RangeBearingSensor(SensorBase):
         the ``id`` of that landmark. The landmark is chosen randomly from the
         set of all visible landmarks, those within the angular field of view and
         range limit.
-        
+
         If constructor argument ``every`` is set then only return a valid
         reading on every ``every`` calls.
 
@@ -361,7 +373,7 @@ class RangeBearingSensor(SensorBase):
             >>> map = LandmarkMap(20)
             >>> sensor = RangeBearingSensor(robot, map, range=(0.5, 20), angle=pi/4)
             >>> print(sensor.reading())
-    
+
         .. note::
 
             - Noise with covariance ``W`` (set by constructor) is added to the
@@ -373,9 +385,9 @@ class RangeBearingSensor(SensorBase):
 
         :seealso: :meth:`h`
         """
-        
+
         # TODO probably should return K=0 to indicated invalid
-        
+
         # model a sensor that emits readings every interval samples
         self._count += 1
 
@@ -393,12 +405,12 @@ class RangeBearingSensor(SensorBase):
             if any([start <= self._count < end for start, end in self._fail]):
                 self._landmarklog.append(lm_id)
                 return (None, None)
-        
+
         # create a polygon to indicate the active sensing area based on range+angle limits
         # if self.animate && ~isempty(self.theta_range) && ~isempty(self.r_range)
         #     h = findobj(gca, 'tag', 'sensor-area')
         #     if isempty(h)
-                
+
         #         th=linspace(self.theta_range[0], self.theta_range[1], 20)
         #         x = self.r_range[1] * cos(th)
         #         y = self.r_range[1] * sin(th)
@@ -415,7 +427,7 @@ class RangeBearingSensor(SensorBase):
         #     else
         #         hg = get(h, 'Parent')
         #         plot_poly(h, self.robot.x)
-        
+
         zk = self.visible()
         if len(zk) > 1:
             # more than 1 visible landmark, pick a random one
@@ -432,22 +444,22 @@ class RangeBearingSensor(SensorBase):
                 print(f"Sensor:: feature {lm_id}: ({z[0]}, {z[1]})")
         else:
             if self.verbose:
-                print('Sensor:: no features\n')
+                print("Sensor:: no features\n")
             self._landmarklog.append(lm_id)
             return (None, None)
 
         # compute the range and bearing from robot to feature
-        # z = self.h(self.robot.x, lm_id)  
-        
+        # z = self.h(self.robot.x, lm_id)
+
         if self._animate:
             self.plot(lm_id)
-        
+
         # add the reading to the landmark log
         self._landmarklog.append(lm_id)
 
         # add noise with covariance W
         z += self._random.multivariate_normal((0, 0), self._W)
-    
+
         return z, lm_id
 
     def visible(self):
@@ -467,14 +479,16 @@ class RangeBearingSensor(SensorBase):
         z = self.h(self.robot.x)
         zk = [(z, k) for k, z in enumerate(z)]
         # a list of tuples, each tuple is ((range, bearing), k)
-        
+
         if self._r_range is not None:
             zk = filter(lambda zk: self._r_range[0] <= zk[0][0] <= self._r_range[1], zk)
 
         if self._theta_range is not None:
             # find all within angular range as well
-            zk = filter(lambda zk: self._theta_range[0] <= zk[0][1] <= self._theta_range[1], zk)
-        
+            zk = filter(
+                lambda zk: self._theta_range[0] <= zk[0][1] <= self._theta_range[1], zk
+            )
+
         return list(zk)
 
     def isvisible(self, id):
@@ -492,10 +506,13 @@ class RangeBearingSensor(SensorBase):
         :seealso: :meth:`visible` :meth:`h`
         """
         z = self.h(self.robot.x, id)
-        
-        return ((self._r_range is None) or self._r_range[0] <= z[0] <= self._r_range[1]) and \
-        ((self._theta_range is None) or self._theta_range[0] <= z[1] <= self._theta_range[1])
 
+        return (
+            (self._r_range is None) or self._r_range[0] <= z[0] <= self._r_range[1]
+        ) and (
+            (self._theta_range is None)
+            or self._theta_range[0] <= z[1] <= self._theta_range[1]
+        )
 
     def h(self, x, landmark=None):
         r"""
@@ -513,7 +530,7 @@ class RangeBearingSensor(SensorBase):
         - ``.h(x)`` is range and bearing to all landmarks, one row per landmark
         - ``.h(x, id)`` is range and bearing to landmark ``id``
         - ``.h(x, p)`` is range and bearing to landmark with coordinates ``p``
-        
+
         .. runblock:: pycon
 
             >>> from roboticstoolbox import Bicycle, LandmarkMap, RangeBearingSensor
@@ -561,9 +578,8 @@ class RangeBearingSensor(SensorBase):
         # compute range and bearing (Vectorized code)
 
         z = np.c_[
-                np.sqrt(dx**2 + dy**2), 
-                base.angdiff(np.arctan2(dy, dx), t) 
-            ]  # range & bearing as columns
+            np.sqrt(dx**2 + dy**2), base.angdiff(np.arctan2(dy, dx), t)
+        ]  # range & bearing as columns
 
         if z.shape[0] == 1:
             return z[0]
@@ -586,7 +602,7 @@ class RangeBearingSensor(SensorBase):
 
         - ``sensor.Hx(q, id)`` is Jacobian for landmark ``id``
         - ``sensor.h(q, p)`` is Jacobian for landmark with coordinates ``p``
-        
+
         :seealso: :meth:`h` :meth:`Hp` :meth:`Hw`
         """
 
@@ -622,7 +638,7 @@ class RangeBearingSensor(SensorBase):
 
         - ``sensor.Hp(x, id)`` is Jacobian for landmark ``id``
         - ``sensor.Hp(x, p)`` is Jacobian for landmark with coordinates ``p``
-        
+
         :seealso: :meth:`h` :meth:`Hx` :meth:`Hw`
         """
         if base.isinteger(landmark):
@@ -658,7 +674,7 @@ class RangeBearingSensor(SensorBase):
         - ``sensor.Hw(x, p)`` is Jacobian for landmark with coordinates ``p``
 
         .. note:: ``x`` and ``landmark`` are not used to compute this.
-        
+
         :seealso: :meth:`h` :meth:`Hx` :meth:`Hp`
         """
         return np.eye(2)
@@ -679,7 +695,6 @@ class RangeBearingSensor(SensorBase):
 
         :seealso: :meth:`h` :meth:`Gx` :meth:`Gz`
         """
-
 
         range = z[0]
         bearing = z[1] + x[2]  # bearing angle in vehicle frame
@@ -742,15 +757,16 @@ class RangeBearingSensor(SensorBase):
             ])
         # fmt: on
 
+
 if __name__ == "__main__":
-    
+
     from roboticstoolbox import Bicycle, LandmarkMap, RangeBearingSensor
     from math import pi
+
     robot = Bicycle()
     map = LandmarkMap(20)
-    sensor = RangeBearingSensor(robot, map, range=(0.5, 20), angle=pi/4)
+    sensor = RangeBearingSensor(robot, map, range=(0.5, 20), angle=pi / 4)
     print(sensor.reading())
     print(sensor.visible())
     print(sensor.isvisible(3))
     print(sensor.isvisible(4))
-    

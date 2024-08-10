@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Robot import Robot
 from roboticstoolbox.robot.Link import Link
 from roboticstoolbox.robot.ETS import ETS
 from roboticstoolbox.robot.ET import ET
 from spatialmath import SE3
 
 
-class FrankieOmni(ERobot):
+class FrankieOmni(Robot):
     """
     Class that imports an Omnidirectional Frankie URDF model
 

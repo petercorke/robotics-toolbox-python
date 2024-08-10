@@ -2,8 +2,7 @@
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
-from numpy import disp
-from scipy import integrate
+
 from spatialmath.base.transforms2d import *
 from spatialmath.base.vectors import *
 from spatialmath.pose2d import SE2
@@ -40,7 +39,7 @@ class DistanceTransformPlanner(PlannerBase):
 
     The map is described by a 2D occupancy ``occgrid`` whose elements are zero
     if traversable of nonzero if untraversable, ie. an obstacle.
-    
+
     The cells are assumed to be unit squares. Crossing the cell horizontally or
     vertically is a travel distance of 1, and for the Euclidean distance
     measure, the crossing the cell diagonally is a distance of :math:`\sqrt{2}`.
@@ -106,7 +105,7 @@ class DistanceTransformPlanner(PlannerBase):
 
         return s
 
-    def plan(self, goal=None, animate=False, verbose=False):
+    def plan(self, goal=None, animate=False, summary=False):
         r"""
         Plan path using distance transform
 
@@ -135,7 +134,8 @@ class DistanceTransformPlanner(PlannerBase):
             self.occgrid.grid,
             goal=self._goal,
             metric=self._metric,
-            animate=animate
+            animate=animate,
+            summary=summary,
         )
 
     def next(self, position):
@@ -147,7 +147,7 @@ class DistanceTransformPlanner(PlannerBase):
         :raises RuntimeError: no plan has been computed
         :return: next robot position
         :rtype: ndarray(2)
-        
+
         Return the robot position that is one step closer to the goal. Called
         by :meth:`query` to find a path from start to goal.
 
@@ -215,7 +215,7 @@ class DistanceTransformPlanner(PlannerBase):
             line/surface handling.
         """
         fig = plt.figure()
-        ax = fig.gca(projection="3d")
+        ax = fig.add_subplot(111, projection="3d")
 
         distance = self._distancemap
         X, Y = np.meshgrid(np.arange(distance.shape[1]), np.arange(distance.shape[0]))
@@ -273,7 +273,7 @@ def distancexform(occgrid, goal, metric="cityblock", animate=False, summary=Fals
     # - other cells are inf
     # - goal is zero
 
-    goal = base.getvector(goal, 2, dtype=np.int)
+    goal = base.getvector(goal, 2, dtype=int)
 
     distance = occgrid.astype(np.float32)
     distance[occgrid > 0] = np.nan  # assign nan to obstacle cells

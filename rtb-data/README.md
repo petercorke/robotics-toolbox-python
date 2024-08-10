@@ -33,9 +33,9 @@ The Toolbox function `path_to_datafile(file)` will return an absolute
 `Path` to `file` which is relative to the root of the data package.  For example
 
 ```
-loadmat('data/map1.mat')   # read rtbdata/data/map1.mat
-loadmat('foo.dat')         # read ./foo.dat
-loadmat('~/foo.dat')       # read $HOME/foo.dat
+loadmat("data/map1.mat")   # read rtbdata/data/map1.mat
+loadmat("foo.dat")         # read ./foo.dat
+loadmat("~/foo.dat")       # read $HOME/foo.dat
 ```
 
 A matching local file takes precendence over a file in the data package.

@@ -4,6 +4,7 @@
 """
 
 import numpy as np
+
 # import scipy as sp
 from spatialmath import base
 import matplotlib.pyplot as plt
@@ -11,7 +12,6 @@ import matplotlib.pyplot as plt
 
 class ShapePlot:
     def __init__(self, shape, wireframe=True, **kwargs):
-
         self.shape = shape  # reference to the spatialgeom shape
         self.wireframe = wireframe
         self.args = kwargs
@@ -52,8 +52,7 @@ class ShapePlot:
 
 
 class EllipsePlot:
-    def __init__(self, robot, q, etype, opt="trans", centre=[0, 0, 0], scale=1):
-
+    def __init__(self, robot, q, etype, opt="trans", centre=[0, 0, 0], scale=1.0):
         super(EllipsePlot, self).__init__()
 
         try:
@@ -64,7 +63,7 @@ class EllipsePlot:
         except TypeError:
             if centre != "ee":
                 raise ValueError(
-                    "Centre must be a three vector or 'ee' meaning" "end-effector"
+                    "Centre must be a three vector or 'ee' meaningend-effector"
                 )
 
         self.ell = None
@@ -90,7 +89,11 @@ class EllipsePlot:
         self.make_ellipsoid()
 
         if self.ell is not None:
-            self.ax.collections.remove(self.ell)
+            self.ell.remove()
+            # print(type(self.ell))
+            # print(type(self.ax))
+            # assert True == False
+            # self.ax.collections.remove(self.ell)
 
         self.ell = self.ax.plot_wireframe(
             self.x, self.y, self.z, rstride=6, cstride=6, color="#2980b9", alpha=0.2
@@ -180,29 +183,21 @@ class EllipsePlot:
             A = J @ J.T
         elif self.opt == "rot":
             raise ValueError(
-                "Can not do rotational ellipse for a 2d robot plot." " Set opt='trans'"
+                "Can not do rotational ellipse for a 2d robot plot. Set opt='trans'"
             )
 
-        # if not self.vell:
-        #     # Do the extra step for the force ellipse
-        #     try:
-        #         A = np.linalg.inv(A)
-        #     except:
-        #         A = np.zeros((2,2))
+        # velocity ellipsoid is E = A^-1
+        # force ellipsoid is E = A
+        #
+        # rather than compute the inverse we can have base.ellipse()  do it for us
+        # using the inverted argument. For the velocity ellipse we already have the 
+        # inverse of E, it is A, so we set inverted=True.
 
         if isinstance(self.centre, str) and self.centre == "ee":
             centre = self.robot.fkine(self.q).A[:3, -1]
         else:
             centre = self.centre
 
-        # points on unit circle
-        # theta = np.linspace(0.0, 2.0 * np.pi, 50)
-        # y = np.array([np.cos(theta), np.sin(theta)])
-        # RVC2 p 602
-        # x = sp.linalg.sqrtm(A) @ y
-
-        x, y = base.ellipse(A, inverted=True, centre=centre[:2], scale=self.scale)
+        x, y = base.ellipse(A, inverted=self.vell, centre=centre[:2], scale=self.scale)
         self.x = x
         self.y = y
-        # = x[0,:] * self.scale + centre[0]
-        # self.y = x[1,:] * self.scale + centre[1]

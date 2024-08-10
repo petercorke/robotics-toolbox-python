@@ -39,7 +39,6 @@ class UR10(DHRobot):
     """  # noqa
 
     def __init__(self, symbolic=False):
-
         if symbolic:
             import spatialmath.base.symbolic as sym
 
@@ -59,7 +58,7 @@ class UR10(DHRobot):
 
         alpha = [pi / 2, zero, zero, pi / 2, -pi / 2, zero]
 
-        # mass data, no inertia available
+        # mass data
         mass = [7.1, 12.7, 4.27, 2.000, 2.000, 0.365]
         center_of_mass = [
             [0.021, 0, 0.027],
@@ -69,11 +68,38 @@ class UR10(DHRobot):
             [0.0, 0.007, 0.018],
             [0, 0, -0.026],
         ]
+
+        # inertia matrices for each link
+        inertia = [
+            np.array(
+                [[0.0341, 0, -0.0043], [0, 0.0353, 0.0001], [-0.0043, 0.0001, 0.0216]]
+            ),
+            np.array(
+                [[0.0281, 0.0001, -0.0156], [0.0001, 0.7707, 0], [-0.0156, 0, 0.7694]]
+            ),
+            np.array(
+                [[0.0101, 0.0001, 0.0092], [0.0001, 0.3093, 0], [0.0092, 0, 0.3065]]
+            ),
+            np.array(
+                [[0.0030, -0.0000, 0], [-0.0000, 0.0022, -0.0002], [0, -0.0002, 0.0026]]
+            ),
+            np.array(
+                [[0.0030, -0.0000, 0], [-0.0000, 0.0022, -0.0002], [0, -0.0002, 0.0026]]
+            ),
+            np.array([[0, 0, 0], [0, 0.0004, 0], [0, 0, 0.0003]]),
+        ]
+
         links = []
 
         for j in range(6):
             link = RevoluteDH(
-                d=d[j], a=a[j], alpha=alpha[j], m=mass[j], r=center_of_mass[j], G=1
+                d=d[j],
+                a=a[j],
+                alpha=alpha[j],
+                m=mass[j],
+                r=center_of_mass[j],
+                G=1,
+                I=inertia[j],
             )
             links.append(link)
 
@@ -93,7 +119,6 @@ class UR10(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     ur10 = UR10(symbolic=False)
     print(ur10)
     # print(ur10.dyntable())

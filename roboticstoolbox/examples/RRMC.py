@@ -10,7 +10,7 @@ import numpy as np
 import time
 
 env = PyPlot()
-env.launch('Panda Resolved-Rate Motion Control Example')
+env.launch("Panda Resolved-Rate Motion Control Example")
 
 panda = rtb.models.DH.Panda()
 panda.q = panda.qr
@@ -23,7 +23,6 @@ env.add(panda)
 dt = 0.05
 
 while not arrived:
-
     start = time.time()
     v, arrived = rtb.p_servo(panda.fkine(panda.q), Tep, 1)
     panda.qd = np.linalg.pinv(panda.jacobe(panda.q)) @ v

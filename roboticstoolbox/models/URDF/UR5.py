@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Robot import Robot
 from math import pi
 
 
-class UR5(ERobot):
+class UR5(Robot):
     """
     Class that imports a UR5 URDF model
 

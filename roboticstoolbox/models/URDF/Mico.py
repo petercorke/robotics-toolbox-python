@@ -2,10 +2,10 @@
 
 import numpy as np
 from roboticstoolbox.robot.Link import Link
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Robot import Robot
 
 
-class Mico(ERobot):
+class Mico(Robot):
     """
     Class that imports a Mico URDF model
 

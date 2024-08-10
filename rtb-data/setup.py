@@ -8,7 +8,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-release = "1.0.0"
+release = "1.1.0"
 
 # list all data folders here, to ensure they get packaged
 
@@ -22,7 +22,7 @@ data_folders = [
 
 def package_files(directory):
     paths = []
-    for (pathhere, _, filenames) in os.walk(directory):
+    for pathhere, _, filenames in os.walk(directory):
         for filename in filenames:
             paths.append(os.path.join("..", pathhere, filename))
     return paths

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Robot import Robot
 
 
-class KinovaGen3(ERobot):
+class KinovaGen3(Robot):
     """
     Class that imports a KinovaGen3 URDF model
 
@@ -41,13 +41,13 @@ class KinovaGen3(ERobot):
             manufacturer="Kinova",
             urdf_string=urdf_string,
             urdf_filepath=urdf_filepath,
-            # gripper_links=elinks[9]
+            gripper_links=links[10],
         )
 
         # self.qdlim = np.array([
         # 2.1750, 2.1750, 2.1750, 2.1750, 2.6100, 2.6100, 2.6100, 3.0, 3.0])
 
-        self.qr = np.array([np.pi, -0.3, 0, -1.6, 0, -1.0, np.pi / 2])
+        self.qr = np.deg2rad([0.0, 15.0, 180.0, 230.0, 0.0, 55.0, 90.0])
         self.qz = np.zeros(7)
 
         self.addconfiguration("qr", self.qr)
@@ -57,4 +57,16 @@ class KinovaGen3(ERobot):
 if __name__ == "__main__":  # pragma nocover
 
     robot = KinovaGen3()
+    robot.q = robot.qr
     print(robot)
+
+    from swift import Swift
+
+    env = Swift()
+    env.launch()
+    env.add(robot)
+    env.hold()
+
+    for link in robot.links:
+        print("\n")
+        print(link.isjoint)

@@ -3,9 +3,9 @@
 # The following code is based on code from Python Robotics
 # https://github.com/AtsushiSakai/PythonRobotics/tree/master/PathPlanning
 # RRTDubins planning
-# Author: Atsushi Sakai 
+# Author: Atsushi Sakai
 # Copyright (c) 2016 - 2022 Atsushi Sakai and other contributors: https://github.com/AtsushiSakai/PythonRobotics/contributors
-# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE 
+# Released under the MIT license: https://github.com/AtsushiSakai/PythonRobotics/blob/master/LICENSE
 
 import math
 from collections import namedtuple
@@ -25,7 +25,7 @@ from pgraph import DGraph
 
 
 class RRTPlanner(PlannerBase):
-    """
+    r"""
     Rapidly exploring tree planner
 
     :param map: occupancy grid
@@ -36,8 +36,6 @@ class RRTPlanner(PlannerBase):
     :type curvature: float, optional
     :param stepsize: spacing between points on the path, defaults to 0.2
     :type stepsize: float, optional
-    :param showsamples: shows vehicle polygons for all random samples, defaults to False
-    :type showsamples: bool, optional
     :param npoints: number of vertices in random tree, defaults to 50
     :type npoints: int, optional
 
@@ -57,7 +55,7 @@ class RRTPlanner(PlannerBase):
     the forward or backward direction.
 
     Polygons are used for obstacle avoidance:
-    
+
     - the environment is defined by a set of polygons represented by a :class:`PolygonMap`
     - the vehicle is defined by a single polygon specified by the ``polygon``
       argument to its constructor
@@ -70,7 +68,7 @@ class RRTPlanner(PlannerBase):
 
         # create polygonal obstacles
         map = PolygonMap(workspace=[0, 10])
-        map.add([(5, 50), (5, 6), (6, 6), (6, 50)]) 
+        map.add([(5, 50), (5, 6), (6, 6), (6, 50)])
         map.add([(5, 4), (5, -50), (6, -50), (6, 4)])
 
         # create outline polygon for vehicle
@@ -95,22 +93,20 @@ class RRTPlanner(PlannerBase):
 
     :seealso: :class:`DubinsPlanner` :class:`Vehicle` :class:`PlannerBase`
     """
+
     def __init__(
         self,
         map,
         vehicle,
         curvature=1.0,
         stepsize=0.2,
-        showsamples=False,
         npoints=50,
-        **kwargs
+        **kwargs,
     ):
-
         super().__init__(ndims=2, **kwargs)
 
         self.npoints = npoints
         self.map = map
-        self.showsamples = showsamples
 
         self.g = DGraph(metric="SE2")
 
@@ -127,12 +123,18 @@ class RRTPlanner(PlannerBase):
         # self.goal_yaw_th = np.deg2rad(1.0)
         # self.goal_xy_th = 0.5
 
-    def plan(self, goal, animate=True, search_until_npoints=True):
+    def plan(self, goal, showsamples=True, showvalid=True, animate=False):
         r"""
         Plan paths to goal using RRT
 
         :param goal: goal pose :math:`(x, y, \theta)`, defaults to previously set value
         :type goal: array_like(3), optional
+        :param showsamples: display position part of configurations overlaid on the map, defaults to True
+        :type showsamples: bool, optional
+        :param showvalid: display valid configurations as vehicle polygons overlaid on the map, defaults to False
+        :type showvalid: bool, optional
+        :param animate: update the display as configurations are tested, defaults to False
+        :type animate: bool, optional
 
         Compute a rapidly exploring random tree with its root at the ``goal``.
         The tree will have ``npoints`` vertices spread uniformly randomly over
@@ -141,6 +143,11 @@ class RRTPlanner(PlannerBase):
         For every new point added, a Dubins path is computed to the nearest
         vertex already in the graph.  Each configuration on that path, with
         spacing of ``stepsize``, is tested for obstacle intersection.
+
+        The configurations tested are displayed (translation only) if ``showsamples`` is
+        True.  The valid configurations are displayed as vehicle polygones if ``showvalid``
+        is True.  If ``animate`` is True these points are displayed during the search
+        process, otherwise a single figure is displayed at the end.
 
         :seealso: :meth:`query`
         """
@@ -152,14 +159,18 @@ class RRTPlanner(PlannerBase):
         v = self.g.add_vertex(coord=goal)
         v.path = None
 
+        if showsamples or showvalid:
+            self.map.plot()
+
         self.progress_start(self.npoints)
         count = 0
         while count < self.npoints:
-
             random_point = self.qrandom_free()
 
-            if self.showsamples:
+            if showsamples:
                 plt.plot(random_point[0], random_point[1], "ok", markersize=2)
+                if animate:
+                    plt.pause(0.02)
 
             vnearest, d = self.g.closest(random_point)
 
@@ -191,8 +202,13 @@ class RRTPlanner(PlannerBase):
             self.g.add_edge(vnew, vnearest, cost=pstatus.length)
             vnew.path = path
 
-            self.vehicle.polygon(random_point).plot(color="b", alpha=0.1)
-            plt.show()
+            if showvalid:
+                self.vehicle.polygon(random_point).plot(color="b", alpha=0.1)
+                if animate:
+                    plt.pause(0.02)
+
+        if (showvalid or showsamples) and not animate:
+            plt.show(block=False)
 
         self.progress_end()
 
@@ -306,7 +322,6 @@ class RRTPlanner(PlannerBase):
 
 
 if __name__ == "__main__":
-
     from roboticstoolbox.mobile.Vehicle import Bicycle
 
     # start and goal configuration

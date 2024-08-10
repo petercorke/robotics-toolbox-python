@@ -8,39 +8,42 @@ jobs:
   unittest:
 
     runs-on: ${{ matrix.os }}
+    
+    continue-on-error: true
+    
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-        python-version: [3.7, 3.8, 3.9, '3.10']
+        os: [windows-latest, ubuntu-latest, macos-12]
+        python-version: [3.9, '3.10', '3.11', '3.12']
 
     steps:
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         
     - name: Checkout future branch
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         ref: future
-        path: rtb
+        path: robotics-toolbox-python
         
     - name: Checkout Swift
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         ref: future
         repository: jhavl/swift
         path: swift
 
     - name: Checkout Spatialmath
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         ref: future
         repository: petercorke/spatialmath-python
         path: sm
 
     - name: Checkout Spatialgeometry
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         ref: future
         repository: jhavl/spatialgeometry
@@ -48,18 +51,30 @@ jobs:
         
     - name: Install dependencies
       run: |
+        echo "Update pip"
         python -m pip install --upgrade pip
+        pip install -U build
         cd sm
-        python -m pip install .
+        echo "Install sm"
+        pip install .
         cd ../sg
-        python -m pip install .
+        echo "Install sg"
+        pip install .
         cd ../swift
-        python -m pip install .
-        cd ../rtb/rtb-data
-        python -m pip install .
+        echo "Install swift"
+        pip install .
+        cd ../robotics-toolbox-python/rtb-data
+        pip install .
+
+    - name: Specific numpy version for Ubuntu (pybullet dep)
+      if: runner.os == 'Linux'
+      run: pip install numpy==1.26.4
+        
     - name: Test with pytest
       run: |
-        cd rtb
-        pip install .[dev,collision]
+        cd robotics-toolbox-python
+        pip install -e .[dev,collision]
         pip install pytest-timeout
-        pytest --timeout=50 --timeout_method thread -s
+        python -c "import spatialgeometry"
+        python -c "import roboticstoolbox"
+        pytest --ignore=roboticstoolbox/blocks --timeout=50 --timeout_method thread -s

@@ -10,10 +10,13 @@ Python Bug Planner
 from spatialmath import base
 from spatialmath.base.animate import *
 from scipy.ndimage import *
+
 # from matplotlib import cm
 import matplotlib.pyplot as plt
+
 # from matplotlib import animation
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
+
 
 class Bug2(PlannerBase):
     """
@@ -38,8 +41,8 @@ class Bug2(PlannerBase):
     :author: Kristian Gibson and Peter Corke, based on MATLAB version by Peter Corke
     :seealso: :class:`PlannerBase`
     """
-    def __init__(self, **kwargs):
 
+    def __init__(self, **kwargs):
         super().__init__(ndims=2, **kwargs)
 
         self.H = []  # hit points
@@ -48,7 +51,6 @@ class Bug2(PlannerBase):
         self._m_line = None
         self._edge = None
         self._k = None
-
 
     @property
     def m_line(self):
@@ -63,15 +65,24 @@ class Bug2(PlannerBase):
         return self._m_line
 
     # override query method of base class
-    def run(self, start=None, goal=None, animate=False, pause=0.001, trail=True, movie=None, **kwargs):
+    def run(
+        self,
+        start=None,
+        goal=None,
+        animate=False,
+        pause=0.001,
+        trail=True,
+        movie=None,
+        **kwargs,
+    ):
         """
         Find a path using Bug2 reactive navigation algorithm
-        
+
         :param start: starting position
         :type start: array_like(2)
         :param goal: goal position
         :type goal: array_like(2)
-        :param animate: show animation of robot moving over the map, 
+        :param animate: show animation of robot moving over the map,
             defaults to False
         :type animate: bool, optional
         :param movie: save animation as a movie, defaults to None. Is either
@@ -84,7 +95,7 @@ class Bug2(PlannerBase):
 
         Compute the path from ``start`` to ``goal`` assuming the robot is capable
         of 8-way motion from its current cell to the next.
-        
+
         .. note:: ``start`` and ``goal`` are given as (x,y) coordinates in the
               occupancy grid map, not as matrix row and column coordinates.
 
@@ -117,8 +128,8 @@ class Bug2(PlannerBase):
         path = robot
         h = None
 
-        trail_line, = plt.plot(0, 0, 'y.', label='robot path')
-        trailHead, = plt.plot(0, 0, 'ko', zorder=10)
+        (trail_line,) = plt.plot(0, 0, "y.", label="robot path")
+        (trailHead,) = plt.plot(0, 0, "ko", zorder=10)
 
         # iterate using the next() method until we reach the goal
         while True:
@@ -164,22 +175,21 @@ class Bug2(PlannerBase):
         Plots the m-line on the current axes.
         """
         if ls is None:
-            ls = 'k--'
+            ls = "k--"
 
         x_min, x_max = plt.gca().get_xlim()
         y_min, y_max = plt.gca().get_ylim()
         if self._m_line[1] == 0:
             # handle the case that the line is vertical
-            plt.plot([self._start[0], self._start[0]],
-                     [y_min, y_max], 'k--', label='m-line')
+            plt.plot(
+                [self._start[0], self._start[0]], [y_min, y_max], "k--", label="m-line"
+            )
         else:
             # regular line
-            x = np.array([
-                [x_min, 1],
-                [x_max, 1]  ])
+            x = np.array([[x_min, 1], [x_max, 1]])
             y = -x @ np.r_[self._m_line[0], self._m_line[2]]
             y = y / self._m_line[1]
-            plt.plot([x_min, x_max], y, ls, zorder=10, label='m-line')
+            plt.plot([x_min, x_max], y, ls, zorder=10, label="m-line")
 
     def next(self, position):
         """
@@ -240,14 +250,16 @@ class Bug2(PlannerBase):
                 # we are at the end of the list of edge points, we
                 # are back where we started.  Step 2.c test.
                 plt.show(block=True)
-                raise RuntimeError('robot is trapped')
+                raise RuntimeError("robot is trapped")
 
             # are we on the M-line now ?
             if abs(np.inner(np.r_[position, 1], self._m_line)) <= 0.5:
                 self.message(f"  {position}: crossed the M-line")
 
                 # are we closer than when we encountered the obstacle?
-                if base.norm(position - self._goal) < base.norm(self.H[-1] - self._goal):
+                if base.norm(position - self._goal) < base.norm(
+                    self.H[-1] - self._goal
+                ):
                     self._step = 1  # transition to step 1
                     self.message(f"  {position}: change to step 1")
                     return n
@@ -258,13 +270,15 @@ class Bug2(PlannerBase):
         return n
 
     def query(self):
-        raise NotImplementedError('This class has no query method')
+        raise NotImplementedError("This class has no query method")
 
     def plan(self):
-        raise NotImplementedError('This class has no plan method')
+        raise NotImplementedError("This class has no plan method")
+
 
 # Ported from Peter Corke's edgelist function found:
 # https://github.com/petercorke/toolbox-common-matlab/blob/master/edgelist.m
+
 
 #  these are directions of 8-neighbours in a clockwise direction
 # fmt: off
@@ -309,7 +323,7 @@ def edgelist(im, p, direction=1):
 
     - Coordinates are given and returned assuming the matrix is an image, so the
       indices are always in the form (x,y) or (column,row).
-    - ``im` is a binary image where 0 is assumed to be background, non-zero 
+    - ``im` is a binary image where 0 is assumed to be background, non-zero
       is an object.
     - ``p`` must be a point on the edge of the region.
     - The initial point is always the first and last element of the returned edgelist.
@@ -324,7 +338,6 @@ def edgelist(im, p, direction=1):
 
     """
     p = base.getvector(p, 2, dtype=int)
-    
     if direction > 0:
         neighbours = np.arange(start=0, stop=8, step=1)
     else:
@@ -333,22 +346,20 @@ def edgelist(im, p, direction=1):
     try:
         pix0 = im[p[1], p[0]]  # color of pixel we start at
     except:
-        raise ValueError('specified coordinate is not within image')
-
+        raise ValueError("specified coordinate is not within image")
 
     q = adjacent_point(im, p, pix0)
 
     # find an adjacent point outside the blob
     if q is None:
-        raise ValueError('no neighbour outside the blob')
+        raise ValueError("no neighbour outside the blob")
 
     d = None
     e = [p]  # initialize the edge list
-    dir = [] # initialize the direction list
+    dir = []  # initialize the direction list
     p0 = None
 
     while True:
-
         # find which direction is Q
         dq = q - p
         for kq in range(0, 8):
@@ -362,7 +373,6 @@ def edgelist(im, p, direction=1):
             k = (j + kq) % 8
             # if k > 7:
             #     k = k - 7
-            
 
             # compute coordinate of the k'th neighbour
             nk = p + _dirs[k]
@@ -380,18 +390,20 @@ def edgelist(im, p, direction=1):
         dir.append(k)
         # check if we are back where we started
         if p0 is None:
-                p0 = p  # make a note of where we started
+            p0 = p  # make a note of where we started
         else:
             if all(p == p0):
                 break
 
         # keep going, add this point to the edgelist
         e.append(p)
-    
+
     return e, dir
+
 
 # Ported from Peter Corke's adjacent_point function found:
 # https://github.com/petercorke/toolbox-common-matlab/blob/master/edgelist.m
+
 
 def adjacent_point(im, seed, pix0):
     """Find adjacent point
@@ -417,7 +429,7 @@ def adjacent_point(im, seed, pix0):
             if im[p[1], p[0]] != pix0:
                 return p
         except:
-            pass 
+            pass
 
     return None
 
@@ -433,11 +445,10 @@ def hom_line(p1, p2):
 
 
 if __name__ == "__main__":
-
     from roboticstoolbox import rtb_load_matfile
 
     vars = rtb_load_matfile("data/map1.mat")
-    map = vars['map']
+    map = vars["map"]
 
     bug2 = Bug2(occgrid=map)
     # bug.plan()

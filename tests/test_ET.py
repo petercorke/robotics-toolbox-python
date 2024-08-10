@@ -106,9 +106,7 @@ class TestET(unittest.TestCase):
 
         self.assertEqual(str(a), "SE3(1, 0, 0)")
         self.assertEqual(str(b), "SE3(-122.7°, 65.41°, -8.113°)")
-        self.assertEqual(
-            str(c), "SE3(1, 0, 0; -122.7°, 65.41°, -8.113°)"
-        )
+        self.assertEqual(str(c), "SE3(1, 0, 0; -122.7°, 65.41°, -8.113°)")
 
     def test_repr(self):
         rx = rtb.ET.Rx(1.543, jindex=5, flip=True, qlim=[-1, 1])

@@ -5,9 +5,9 @@
     <!-- Arguments -->
     <xacro:arg name="arm" default="gen3" />
     <xacro:arg name="dof" default="7" />
-    <xacro:arg name="vision" default="true" />
+    <xacro:arg name="vision" default="false" />
 
-    <xacro:arg name="gripper" default="" />
+    <xacro:arg name="gripper" default="robotiq_2f_85" />
 
     <xacro:arg name="sim" default="false" />
     <xacro:arg name="prefix" default="" />

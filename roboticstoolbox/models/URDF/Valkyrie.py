@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ERobot import ERobot, Link
+from roboticstoolbox.robot.Robot import Robot, Link
 
 
-class Valkyrie(ERobot):
+class Valkyrie(Robot):
     """
     Class that imports a NASA Valkyrie URDF model
 

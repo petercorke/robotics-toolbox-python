@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from spatialmath import base
 import roboticstoolbox as rtb
 
+
 class LandmarkMap:
     """
     Map of planar point landmarks
@@ -22,8 +23,8 @@ class LandmarkMap:
     :rtype: LandmarkMap
 
     A LandmarkMap object represents a rectangular 2D environment with a number
-    of point landmarks. 
-    
+    of point landmarks.
+
     The landmarks can be specified explicitly or be uniform randomly positioned
     inside a region defined by the workspace.  The workspace can be numeric:
 
@@ -45,7 +46,7 @@ class LandmarkMap:
         >>> map = LandmarkMap(20)
         >>> print(map)
         >>> print(map[3])  # coordinates of landmark 3
-    
+
     The object is an iterator that returns consecutive landmark coordinates.
 
     :Reference:
@@ -58,7 +59,6 @@ class LandmarkMap:
     """
 
     def __init__(self, map, workspace=10, verbose=True, seed=0):
-    
 
         try:
             self._workspace = workspace.workspace
@@ -77,14 +77,13 @@ class LandmarkMap:
             self._map = np.c_[x, y].T
 
         else:
-            raise ValueError('bad type for map')
-    
+            raise ValueError("bad type for map")
+
         self._verbose = verbose
 
-
     def __str__(self):
-    # s = M.char() is a string showing map parameters in 
-    # a compact human readable format. 
+        # s = M.char() is a string showing map parameters in
+        # a compact human readable format.
         ws = self._workspace
         s = f"LandmarkMap object with {self._nlandmarks} landmarks, workspace="
         s += f"({ws[0]}: {ws[1]}, {ws[2]}: {ws[3]})"
@@ -101,7 +100,6 @@ class LandmarkMap:
         :rtype: int
         """
         return self._nlandmarks
-
 
     @property
     def landmarks(self):
@@ -137,7 +135,7 @@ class LandmarkMap:
         """
         return self._map[:, k]
 
-    def plot(self, labels=False, block=False, **kwargs):
+    def plot(self, labels=False, block=None, **kwargs):
         """
         Plot landmark map
 
@@ -152,21 +150,21 @@ class LandmarkMap:
         """
 
         ax = base.plotvol2(self._workspace)
-        ax.set_aspect('equal')
+        ax.set_aspect("equal")
 
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
 
         if len(kwargs) == 0:
             kwargs = {
-                'linewidth': 0,
-                'marker': 'x',
-                'color': 'black',
-                'linestyle': 'None',
+                "linewidth": 0,
+                "marker": "x",
+                "color": "black",
+                "linestyle": "None",
             }
 
-        if 'label' not in kwargs:
-            kwargs['label'] = 'landmark'
+        if "label" not in kwargs:
+            kwargs["label"] = "landmark"
 
         # plt.plot(self._map[0,:], self._map[1,:], , **kwargs)
         if labels:
@@ -175,8 +173,9 @@ class LandmarkMap:
             labels = None
         base.plot_point(self._map, text=labels, **kwargs)
         plt.grid(True)
-        plt.show(block=block)
+        if block is not None:
+            plt.show(block=block)
+
 
 if __name__ == "__main__":
     import unittest
-

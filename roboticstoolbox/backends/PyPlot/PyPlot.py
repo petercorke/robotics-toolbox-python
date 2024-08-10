@@ -20,6 +20,7 @@ _pil = None
 try:
     import matplotlib
     import matplotlib.pyplot as plt
+
     # from mpl_toolkits.mplot3d import Axes3D
     from matplotlib.widgets import Slider
 
@@ -77,10 +78,18 @@ class PyPlot(Connector):
             )
 
     def __repr__(self):
-        s = f"PyPlot3D backend, t = {self.sim_time}, scene:"
+        s = ""
         for robot in self.robots:
-            s += f"\n  {robot.robot.name}"
-        return s
+            s += f"  robot: {robot.name}\n"
+        for ellipse in self.ellipses:
+            s += f"  ellipse: {ellipse}\n"
+        for shape in self.shapes:
+            s += f"  shape: {shape}\n"
+
+        if s == "":
+            return f"PyPlot3D backend, t = {self.sim_time}, empty scene"
+        else:
+            return f"PyPlot3D backend, t = {self.sim_time}, scene:\n" + s
 
     def launch(self, name=None, fig=None, limits=None, **kwargs):
         """
@@ -189,7 +198,7 @@ class PyPlot(Connector):
                 pass
             else:  # pragma: no cover
                 raise ValueError(
-                    "Invalid robot.control_type. " "Must be one of 'p', 'v', or 'a'"
+                    "Invalid robot.control_type. Must be one of 'p', 'v', or 'a'"
                 )
 
         # plt.ioff()
@@ -311,7 +320,11 @@ class PyPlot(Connector):
 
         super().add()
 
-        if isinstance(ob, rp.DHRobot) or isinstance(ob, rp.ERobot):
+        if (
+            isinstance(ob, rp.DHRobot)
+            or isinstance(ob, rp.ERobot)
+            or isinstance(ob, rp.Robot)
+        ):
             self.robots.append(
                 RobotPlot(
                     ob,
@@ -345,6 +358,7 @@ class PyPlot(Connector):
         plt.show(block=False)
 
         self._set_axes_equal()
+
         return id
 
     def remove(self, id):
@@ -402,9 +416,9 @@ class PyPlot(Connector):
                 )
 
         # make the background white, looks better than grey stipple
-        self.ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-        self.ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
-        self.ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        self.ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        self.ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        self.ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
         plt.gcf().canvas.draw()
 
         # render the frame and save as a PIL image in the list
@@ -558,11 +572,21 @@ class PyPlot(Connector):
 
             if robot.isrevolute(j):
                 slider = Slider(
-                    ax, "q" + str(j), qlim[0, j], qlim[1, j], np.degrees(q[j]), "% .1f°"
+                    ax=ax,
+                    label="q" + str(j),
+                    valmin=qlim[0, j],
+                    valmax=qlim[1, j],
+                    valinit=np.degrees(q[j]),
+                    valfmt="% .1f°",
                 )
             else:
                 slider = Slider(
-                    ax, "q" + str(j), qlim[0, j], qlim[1, j], robot.q[j], "% .1f"
+                    ax=ax,
+                    label="q" + str(j),
+                    valmin=qlim[0, j],
+                    valmax=qlim[1, j],
+                    valinit=robot.q[j],
+                    valfmt="% .1f",
                 )
 
             slider.on_changed(lambda x: update(x, text, robot))

@@ -142,8 +142,8 @@ Jm    =    0.0002
 B     =    0.0015 
 Tc    =       0.4(+)    -0.43(-) 
 G     =       -63 
-qlim  =      -2.8 to      2.8""",
-        )  # noqa
+qlim  =      -2.8 to      2.8""",  # noqa
+        )
 
         puma.links[0].dyn(indent=2)
 

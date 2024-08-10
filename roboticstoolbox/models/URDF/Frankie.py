@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import numpy as np
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Robot import Robot
 from spatialmath import SE3
 
 
-class Frankie(ERobot):
+class Frankie(Robot):
     """
     Class that imports a Frankie URDF model
 

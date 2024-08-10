@@ -127,7 +127,7 @@ class DHLink(Link):
     :type G: float
 
     :references:
-        - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
+        - Robotics, Vision & Control, P. Corke, Springer 2023, Chap 7.
 
     """
 
@@ -367,10 +367,7 @@ class DHLink(Link):
             qvar = f"q{self.id}"
         cls = self.__class__.__name__
         if self.isrevolute:
-            s = (
-                f"{cls}:   θ={qvar}{offset},  d={self.d}, "
-                f" a={self.a},  ⍺={self.alpha}"
-            )
+            s = f"{cls}:   θ={qvar}{offset},  d={self.d},  a={self.a},  ⍺={self.alpha}"
         elif self.isprismatic:
             s = (
                 f"{cls}:  θ={self.theta},  d={qvar}{offset}, "
@@ -383,11 +380,11 @@ class DHLink(Link):
         name = self.__class__.__name__
         args = []
         if self.isrevolute:
-            self._format(args, "d")
+            self._format_param(args, "d")
         else:
-            self._format(args, "theta", "θ")
-        self._format(args, "a")
-        self._format(args, "alpha", "⍺")
+            self._format_param(args, "theta", "θ")
+        self._format_param(args, "a")
+        self._format_param(args, "alpha", "⍺")
         args.extend(super()._params())
         return name + "(" + ", ".join(args) + ")"
 
@@ -749,7 +746,8 @@ class RevoluteDH(DHLink):
     :math:`\underbrace{\mathbf{T}_{rz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tz}(d_i) \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`
     where :math:`q_i` is the joint variable.
     :references:
-        - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
+        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
+
     :seealso: :func:`PrismaticDH`, :func:`DHLink`, :func:`RevoluteMDH`
     """  # noqa
 
@@ -813,7 +811,8 @@ class PrismaticDH(DHLink):
     :math:`\mathbf{T}_{rz}(\theta_i) \cdot \underbrace{\mathbf{T}_{tz}(q_i)}_{\mbox{variable}} \cdot \mathbf{T}_{tx}(a_i) \cdot \mathbf{T}_{rx}(\alpha_i)`
     where :math:`q_i` is the joint variable.
     :references:
-        - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
+        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
+
     :seealso: :func:`RevoluteDH`, :func:`DHLink`, :func:`PrismaticMDH`
     """  # noqa
 
@@ -883,7 +882,7 @@ class RevoluteMDH(DHLink):
     where :math:`q_i` is the joint variable.
 
     :references:
-        - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
+        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
     :seealso: :func:`PrismaticMDH`, :func:`DHLink`, :func:`RevoluteDH`
     """  # noqa
@@ -956,7 +955,7 @@ class PrismaticMDH(DHLink):
     where :math:`q_i` is the joint variable.
 
     :references:
-        - Robotics, Vision & Control, P. Corke, Springer 2011, Chap 7.
+        - Robotics, Vision & Control in Python, 3e, P. Corke, Springer 2023, Chap 7.
 
     :seealso: :func:`RevoluteMDH`, :func:`DHLink`, :func:`PrismaticDH`
     """  # noqa

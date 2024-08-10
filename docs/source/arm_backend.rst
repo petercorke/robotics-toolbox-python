@@ -8,5 +8,3 @@ physical robots.
    :maxdepth: 2
 
    arm_backend_pyplot
-   arm_backend_vpython
-   arm_backend_swift

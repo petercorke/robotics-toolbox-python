@@ -13,6 +13,7 @@ __all__ = [
     "backends",
     # robot
     "Robot",
+    "Robot2",
     "SerialLink",
     "DHRobot",
     "Link",
@@ -25,7 +26,6 @@ __all__ = [
     "PoELink",
     "PoEPrismatic",
     "PoERevolute",
-    "ERobot",
     "ELink",
     "ELink2",
     "Link",
@@ -40,6 +40,7 @@ __all__ = [
     # tools
     "null",
     "angle_axis",
+    "angle_axis_python",
     "p_servo",
     "Ticker",
     "quintic",
@@ -94,3 +95,9 @@ __all__ = [
     "EKF",
     "ParticleFilter",
 ]
+
+try:
+    import importlib.metadata
+    __version__ = importlib.metadata.version("roboticstoolbox-python")
+except:
+    pass

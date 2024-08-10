@@ -47,10 +47,16 @@ class PyPlot2(Connector):
             )
 
     def __repr__(self):
-        s = f"PyPlot2D backend, t = {self.sim_time}, scene:"
+        s = ""
         for robot in self.robots:
-            s += f"\n  {robot.name}"
-        return s
+            s += f"  robot: {robot.name}\n"
+        for ellipse in self.ellipses:
+            s += f"  ellipse: {ellipse}\n"
+
+        if s == "":
+            return f"PyPlot2D backend, t = {self.sim_time}, empty scene"
+        else:
+            return f"PyPlot2D backend, t = {self.sim_time}, scene:\n" + s
 
     def launch(self, name=None, limits=None, **kwargs):
         """
@@ -62,8 +68,9 @@ class PyPlot2(Connector):
 
         labels = ["X", "Y"]
 
-        if name is not None:
-            self.fig = plt.figure(name)
+        if name is not None and not _isnotebook():
+            # jupyter does weird stuff when figures have the same name
+            self.fig = plt.figure()
         else:
             self.fig = plt.figure()
 
@@ -172,7 +179,7 @@ class PyPlot2(Connector):
 
         super().add()
 
-        if isinstance(ob, rp.ERobot2):
+        if isinstance(ob, rp.Robot2):
             self.robots.append(RobotPlot2(ob, self, readonly, display, eeframe, name))
             self.robots[len(self.robots) - 1].draw()
 
@@ -228,7 +235,7 @@ class PyPlot2(Connector):
             else:  # pragma: no cover
                 # Should be impossible to reach
                 raise ValueError(
-                    "Invalid robot.control_type. " "Must be one of 'p', 'v', or 'a'"
+                    "Invalid robot.control_type. Must be one of 'p', 'v', or 'a'"
                 )
 
     def _update_robots(self):
@@ -337,16 +344,21 @@ class PyPlot2(Connector):
 
             if robot.isrevolute(j):
                 slider = Slider(
-                    self.axjoint[j],
-                    "q" + str(j),
-                    qlim[0, j],
-                    qlim[1, j],
-                    np.degrees(q[j]),
-                    "% .1f°",
+                    ax=self.axjoint[j],
+                    label="q" + str(j),
+                    valmin=qlim[0, j],
+                    valmax=qlim[1, j],
+                    valinit=np.degrees(q[j]),
+                    valfmt="% .1f°",
                 )
             else:
                 slider = Slider(
-                    self.axjoint[j], "q" + str(j), qlim[0, j], qlim[1, j], q[j], "% .1f"
+                    ax=self.axjoint[j],
+                    label="q" + str(j),
+                    valmin=qlim[0, j],
+                    valmax=qlim[1, j],
+                    valinit=q[j],
+                    valfmt="% .1f",
                 )
 
             slider.on_changed(lambda x: update(x, text, robot))

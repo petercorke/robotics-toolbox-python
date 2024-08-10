@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from roboticstoolbox.robot.ERobot import ERobot
+from roboticstoolbox.robot.Robot import Robot
 import numpy as np
 
 
-class PR2(ERobot):
+class PR2(Robot):
     def __init__(self):
 
         links, name, urdf_string, urdf_filepath = self.URDF_read(
@@ -29,6 +29,8 @@ class PR2(ERobot):
 
         self.addconfiguration("qr", self.qr)
         self.addconfiguration("qz", self.qz)
+
+        self.qdlim = 2.0 * np.ones(31)
 
 
 if __name__ == "__main__":  # pragma nocover

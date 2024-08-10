@@ -7,28 +7,31 @@ from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from roboticstoolbox.mobile.OccGrid import BinaryOccupancyGrid
 from collections import namedtuple
 
+
 def make_arc(dir, radius=1, npoints=20):
     points = []
 
-    if dir == 'S':
+    if dir == "S":
         points.append((0, 0))
         points.append((radius, 0))
 
-    elif dir == 'L':
-        for theta in np.linspace(0, np.pi/2, npoints):
+    elif dir == "L":
+        for theta in np.linspace(0, np.pi / 2, npoints):
             x = radius * np.sin(theta)
             y = radius * (1 - np.cos(theta))
             points.append((x, y))
 
-    elif dir == 'R':
-        for theta in np.linspace(0, np.pi/2, npoints):
+    elif dir == "R":
+        for theta in np.linspace(0, np.pi / 2, npoints):
             x = radius * np.sin(theta)
             y = radius * (-1 + np.cos(theta))
             points.append((x, y))
-    
+
     return np.array(points).T
 
+
 arcs = {}
+
 
 class LatticeVertex(DVertex):
     def __init__(self, move=None, pose=None, name=None):
@@ -41,8 +44,9 @@ class LatticeVertex(DVertex):
         xyt = self.coord
         ix = int(round(xyt[0]))
         iy = int(round(xyt[1]))
-        it = int(round(xyt[2]*2/np.pi))
+        it = int(round(xyt[2] * 2 / np.pi))
         return f"({ix:d},{iy:d},{it:d}), {self.name}"
+
 
 class LatticeEdge(Edge):
     def __init__(self, v1, v2, cost, pose, move):
@@ -57,11 +61,11 @@ class LatticeEdge(Edge):
         if configspace:
             # 3D plot
             theta0 = self.pose.theta()
-            if self.move == 'L':
+            if self.move == "L":
                 thetaf = theta0 + np.pi / 2
-            elif self.move == 'R':
+            elif self.move == "R":
                 thetaf = theta0 - np.pi / 2
-            elif self.move == 'S':
+            elif self.move == "S":
                 thetaf = theta0
             theta = np.linspace(theta0, thetaf, self.arc.shape[1])
             if unwrap:
@@ -130,31 +134,33 @@ class LatticePlanner(PlannerBase):
     :seealso: :meth:`plan` :meth:`query` :class:`PlannerBase`
     """
 
-    def __init__(self, costs=None, root=(0,0,0), **kwargs):
+    def __init__(self, costs=None, root=(0, 0, 0), **kwargs):
 
         global arcs
 
         super().__init__(ndims=3, **kwargs)
 
-        self.poses = [SE2(1, 0, 0), SE2(1, 1, np.pi/2), SE2(1, -1, -np.pi/2)]
-        self.moves = ['S', 'L', 'R']
+        self.poses = [SE2(1, 0, 0), SE2(1, 1, np.pi / 2), SE2(1, -1, -np.pi / 2)]
+        self.moves = ["S", "L", "R"]
         if costs is None:
-            costs = [1, np.pi/2, np.pi/2]
+            costs = [1, np.pi / 2, np.pi / 2]
         self.costs = costs
         self.root = root
-
 
         # create the set of possible moves
         for move in self.moves:
             arcs[move] = make_arc(move)
 
     def __str__(self):
-        s = super().__str__() + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
+        s = (
+            super().__str__()
+            + f"\n  curvature={self.curvature}, stepsize={self.stepsize}"
+        )
 
     def _icoord(self, xyt):
         ix = int(round(xyt[0]))
         iy = int(round(xyt[1]))
-        it = int(round(xyt[2]*2/np.pi))
+        it = int(round(xyt[2] * 2 / np.pi))
         return f"({ix:d},{iy:d},{it:d})"
 
     def plan(self, iterations=None, verbose=False, summary=False):
@@ -172,13 +178,15 @@ class LatticePlanner(PlannerBase):
         :seealso: :meth:`query`
         """
         if iterations is None and self.occgrid is None:
-            raise ValueError('iterations must be finite if no occupancy grid is specified')
+            raise ValueError(
+                "iterations must be finite if no occupancy grid is specified"
+            )
 
-        self.graph = DGraph(metric='SE2')
+        self.graph = DGraph(metric="SE2")
 
         # add root vertex to the graph, place it in the frontier
         v0 = LatticeVertex(pose=SE2(self.root))
-        self.graph.add_vertex(v0, name='0')
+        self.graph.add_vertex(v0, name="0")
         frontier = [v0]
 
         iteration = 0
@@ -187,7 +195,7 @@ class LatticePlanner(PlannerBase):
             newfrontier = []
             for vertex in frontier:
                 if verbose:
-                    print('EXPAND:', vertex.icoord())
+                    print("EXPAND:", vertex.icoord())
 
                 for pose, move, cost in zip(self.poses, self.moves, self.costs):
                     newpose = vertex.pose * pose
@@ -195,11 +203,11 @@ class LatticePlanner(PlannerBase):
                     # theta is guaranteed to be in range [-pi, pi)
 
                     if verbose:
-                        print('  MOVE', move, self._icoord(xyt))
+                        print("  MOVE", move, self._icoord(xyt))
 
                     if self.isoccupied(xyt[:2]):
                         if verbose:
-                            print('    is occupied')
+                            print("    is occupied")
                         continue
                     vclose, d = self.graph.closest(xyt)
 
@@ -213,9 +221,11 @@ class LatticePlanner(PlannerBase):
                         # vnew = LatticeVertex(move, newpose, name=f"{ix:d},{iy:d},{it:d}")
                         self.graph.add_vertex(vnew)
                         if verbose:
-                            print('    add to graph as', vnew.name)
+                            print("    add to graph as", vnew.name)
 
-                        edge = LatticeEdge(vertex, vnew, cost=cost, pose=vertex.pose, move=move)
+                        edge = LatticeEdge(
+                            vertex, vnew, cost=cost, pose=vertex.pose, move=move
+                        )
 
                         # connect it into the graph, add to frontier
                         vertex.connect(vnew, edge=edge)
@@ -226,8 +236,10 @@ class LatticePlanner(PlannerBase):
 
                         # connect it into the graph, don't add to frontier
                         if verbose:
-                            print('    already in graph, connect to', vclose.icoord())
-                        edge = LatticeEdge(vertex, vclose, cost=cost, pose=vertex.pose, move=move)
+                            print("    already in graph, connect to", vclose.icoord())
+                        edge = LatticeEdge(
+                            vertex, vclose, cost=cost, pose=vertex.pose, move=move
+                        )
                         vertex.connect(vclose, edge=edge)
 
             frontier = newfrontier
@@ -242,7 +254,7 @@ class LatticePlanner(PlannerBase):
                 break
         if summary:
             print(f"{self.graph.n} vertices and {self.graph.ne} edges created")
-            
+
     def query(self, start, goal):
         r"""
         Find a path through the lattice
@@ -273,17 +285,17 @@ class LatticePlanner(PlannerBase):
 
         vs, ds = self.graph.closest(start)
         if ds > 0.001:
-            raise ValueError('start configuration is not in the lattice')
+            raise ValueError("start configuration is not in the lattice")
         vg, dg = self.graph.closest(goal)
         if dg > 0.001:
-            raise ValueError('goal configuration is not in the lattice')
+            raise ValueError("goal configuration is not in the lattice")
 
         try:
             path, cost, _ = self.graph.path_Astar(vs, vg, verbose=False)
         except TypeError:
-            raise RuntimeError('no path found') from None
+            raise RuntimeError("no path found") from None
 
-        status = namedtuple('LatticeStatus', ['cost', 'segments', 'edges'])
+        status = namedtuple("LatticeStatus", ["cost", "segments", "edges"])
 
         segments = []
         edges = []
@@ -296,8 +308,8 @@ class LatticePlanner(PlannerBase):
 
     def plot(self, path=None, **kwargs):
         super().plot(**kwargs)
-        
-        if kwargs.get('configspace', False):
+
+        if kwargs.get("configspace", False):
 
             # 3D plot
             for k, vertex in enumerate(self.graph):
@@ -305,10 +317,10 @@ class LatticePlanner(PlannerBase):
                 # if k == 0:
                 #     plt.plot(vertex.coord[0], vertex.coord[1], vertex.coord[2], 'k>', markersize=10)
                 # else:
-                plt.plot(vertex.coord[0], vertex.coord[1], vertex.coord[2], 'bo')
+                plt.plot(vertex.coord[0], vertex.coord[1], vertex.coord[2], "bo")
 
             for edge in self.graph.edges():
-                edge.plot(color='k', **kwargs)
+                edge.plot(color="k", **kwargs)
 
             if path is not None:
                 for p, n in zip(path[:-1], path[1:]):
@@ -317,10 +329,10 @@ class LatticePlanner(PlannerBase):
                     vn, _ = self.graph.closest(n)
                     e = vp.edgeto(vn)
 
-                    #e.plot(color='b', linewidth=4)
-                    
-                    e.plot(color='k', linewidth=4)
-                    e.plot(color='yellow', linewidth=3, dashes=(4,4))
+                    # e.plot(color='b', linewidth=4)
+
+                    e.plot(color="k", linewidth=4)
+                    e.plot(color="yellow", linewidth=3, dashes=(4, 4))
         else:
             # 2D plot
             for k, vertex in enumerate(self.graph):
@@ -328,10 +340,10 @@ class LatticePlanner(PlannerBase):
                 # if k == 0:
                 #     plt.plot(vertex.coord[0], vertex.coord[1], 'k>', markersize=10)
                 # else:
-                plt.plot(vertex.coord[0], vertex.coord[1], 'bo')
+                plt.plot(vertex.coord[0], vertex.coord[1], "bo")
 
             for edge in self.graph.edges():
-                edge.plot(color='k')
+                edge.plot(color="k")
 
             if path is not None:
                 for p, n in zip(path[:-1], path[1:]):
@@ -340,18 +352,17 @@ class LatticePlanner(PlannerBase):
                     vn, _ = self.graph.closest(n)
                     e = vp.edgeto(vn)
 
-                    #e.plot(color='b', linewidth=4)
-                    
-                    e.plot(color='k', linewidth=4)
-                    e.plot(color='yellow', linewidth=3, dashes=(4,4))
+                    # e.plot(color='b', linewidth=4)
 
+                    e.plot(color="k", linewidth=4)
+                    e.plot(color="yellow", linewidth=3, dashes=(4, 4))
 
 
 if __name__ == "__main__":
 
     lattice = LatticePlanner()
     lattice.plan(iterations=6)
-    path = lattice.query(start=(0, 0, np.pi/2), goal=(1, 1, 0))
+    path = lattice.query(start=(0, 0, np.pi / 2), goal=(1, 1, 0))
     print(path)
 
     # og = BinaryOccupancyGrid(workspace=[-5, 5, -5, 5], value=False)
@@ -387,7 +398,6 @@ if __name__ == "__main__":
 
     # print(path)
     # print(status)
-
 
     # lattice.plot(path=path)
 
