@@ -23,6 +23,8 @@ from roboticstoolbox.mobile.OccGrid import BaseOccupancyGrid, BinaryOccupancyGri
 from roboticstoolbox.mobile.Animations import VehiclePolygon
 from colored import fg, attr
 
+from spatialmath.base.graphics import axes_logic
+
 try:
     from progress.bar import FillingCirclesBar
 

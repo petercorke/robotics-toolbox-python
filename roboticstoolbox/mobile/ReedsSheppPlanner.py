@@ -539,21 +539,5 @@ if __name__ == "__main__":
     path, status = reedsshepp.query(start, goal)
     print(status)
 
-    # px, py, pyaw, mode, clen = reeds_shepp_path_planning(
-    #     start_x, start_y, start_yaw, end_x, end_y, end_yaw, curvature, step_size)
-
-    # if show_animation:  # pragma: no cover
-    #     plt.cla()
-    #     plt.plot(px, py, label="final course " + str(mode))
-
-    #     # plotting
-    #     plot_arrow(start_x, start_y, start_yaw)
-    #     plot_arrow(end_x, end_y, end_yaw)
-
-    #     plt.legend()
-    #     plt.grid(True)
-    #     plt.axis("equal")
-    #     plt.show(block=True)
-
     reedsshepp.plot(path=path, direction=status.direction, configspace=True)
     plt.show(block=True)
