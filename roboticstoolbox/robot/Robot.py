@@ -1902,7 +1902,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 # ================= Robot2 Class ============================================== #
 # ============================================================================= #
 
-
+#if link != self._base_link: #keith needed this for z1 in ERobot somewhere
+                        
 class Robot2(BaseRobot[Link2]):
     def __init__(self, arg, **kwargs):
         if isinstance(arg, ETS2):
