@@ -51,7 +51,7 @@ jobs:
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           # unpacks default artifact into dist/
           name: artifact
