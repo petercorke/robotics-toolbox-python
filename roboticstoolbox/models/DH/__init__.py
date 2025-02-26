@@ -14,7 +14,9 @@ from roboticstoolbox.models.DH.LWR4 import LWR4
 from roboticstoolbox.models.DH.Sawyer import Sawyer
 from roboticstoolbox.models.DH.UR3 import UR3
 from roboticstoolbox.models.DH.UR5 import UR5
+from roboticstoolbox.models.DH.UR5e import UR5e
 from roboticstoolbox.models.DH.UR10 import UR10
+from roboticstoolbox.models.DH.UR20 import UR20
 from roboticstoolbox.models.DH.Mico import Mico
 from roboticstoolbox.models.DH.Jaco import Jaco
 from roboticstoolbox.models.DH.Baxter import Baxter
