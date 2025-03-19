@@ -1790,7 +1790,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                     v[j] = vJ
                     a[j] = Xup[j] * a_grav + SpatialAcceleration(s[j] * qddk[j])
                 else:
-                    jp = self.links[j].parent.jindex  # type: ignore
+                    parent_name = self.links[j].parent.name
+                    jp = next(i for i, link in enumerate(self.links) if link.name == parent_name)
                     v[j] = Xup[j] * v[jp] + vJ
                     a[j] = (
                         Xup[j] * a[jp] + SpatialAcceleration(s[j] * qddk[j]) + v[j] @ vJ
@@ -1804,7 +1805,8 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
                 Q[k, j] = sum(f[j].A * s[j])
 
                 if self.links[j].parent is not None:
-                    jp = self.links[j].parent.jindex  # type: ignore
+                    parent_name = self.links[j].parent.name
+                    jp = next(i for i, link in enumerate(self.links) if link.name == parent_name)
                     f[jp] = f[jp] + Xup[j] * f[j]
 
         if l == 1:
