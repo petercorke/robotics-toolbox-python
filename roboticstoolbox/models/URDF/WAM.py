@@ -33,7 +33,7 @@ class WAM(ERobot):
     def __init__(self):
 
         links, name, urdf_string, urdf_filepath = self.URDF_read(
-            "wam_description/barrett_model/robots/wam7.urdf.xacro"
+            "wam_description/urdf/wam7.urdf.xacro"
         )
 
         super().__init__(

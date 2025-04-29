@@ -1486,14 +1486,14 @@ class Robot(SceneNode, ABC, DynamicsMixin):
         self,
         q,
         backend=None,
-        block=False,
+        block=True,
         dt=0.050,
         limits=None,
         vellipse=False,
         fellipse=False,
         fig=None,
         movie=None,
-        loop=False,
+        loop=True,
         **kwargs,
     ):
         """
