@@ -1,0 +1,41 @@
+<!--
+ * COPYRIGHT (C) 2025
+ * University of New Mexico
+ *
+ * Author: Longsen Gao
+ * E-Mail: longsengao@gmail.com
+-->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find wam_description)/urdf/common.urdf.xacro"/>
+  <xacro:include filename="$(find wam_description)/urdf/components.urdf.xacro"/>
+
+  <xacro:macro name="wam_7dof" params="prefix xyz rpy">
+    <xacro:wam prefix="${prefix}" xyz="${xyz}" rpy="${rpy}"/>
+    <xacro:wam_wrist prefix="${prefix}"/>
+    <xacro:wam_wrist_palm_stump prefix="${prefix}"/>
+  </xacro:macro>
+
+  <xacro:macro name="wam_4dof" params="prefix parent_link xyz rpy">
+    <xacro:wam prefix="${prefix}" parent_link="${parent_link}" xyz="${xyz}" rpy="${rpy}"/>
+    <xacro:wam_stump prefix="${prefix}"/>
+  </xacro:macro>
+
+  <!-- upper arm only -->
+  <xacro:macro name="wam" params="prefix xyz rpy">
+    <!--<xacro:wam_base prefix="${prefix}" parent_link="${parent_link}" xyz="${xyz}" rpy="${rpy}"/>-->
+    <xacro:wam_shoulder_yaw prefix="${prefix}"/>
+    <xacro:wam_shoulder_pitch prefix="${prefix}"/>
+    <xacro:wam_upper_arm prefix="${prefix}"/>
+  </xacro:macro>
+
+  <!-- forearm with actuation "wrist" -->
+  <xacro:macro name="wam_wrist" params="prefix">
+    <xacro:wam_forearm prefix="${prefix}"/>
+    <xacro:wam_wrist_yaw prefix="${prefix}"/>
+    <xacro:wam_wrist_pitch prefix="${prefix}"/>
+    <xacro:wam_palm prefix="${prefix}"/>
+  </xacro:macro>
+
+</robot>

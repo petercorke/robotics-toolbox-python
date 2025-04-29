@@ -1,0 +1,40 @@
+<!--
+ * COPYRIGHT (C) 2025
+ * University of New Mexico
+ *
+ * Author: Longsen Gao
+ * E-Mail: longsengao@gmail.com
+-->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Directories -->
+  <xacro:property name="models_path" value="package://barrett_model/models" />
+  <xacro:property name="highResModelDirectory" value="${models_path}/meshes/splitModels" />
+
+  <!-- Constants -->
+  <xacro:property name="PI" value="3.1415926535897931" />
+
+  <!-- Gazebo macros -->
+  <xacro:macro name="gazebo_reference" params="name">
+    <gazebo reference="${name}">
+      <turnGravityOff>
+        false
+      </turnGravityOff>
+      <selfCollide>
+        true
+      </selfCollide>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Gazebo joint configuration -->
+  <xacro:macro name="gz_joint">
+    <provideFeedback>true</provideFeedback>
+    <implicitSpringDamper>true</implicitSpringDamper>
+    <!--<kp>0.0</kp>[> CFM <]-->
+    <!--<kd>0.0</kd>[> ERP <]-->
+    <!--<cfmDamping>true</cfmDamping>-->
+    <!--<dynamics damping="5.5" friction="1"/>-->
+  </xacro:macro>
+
+</robot>
