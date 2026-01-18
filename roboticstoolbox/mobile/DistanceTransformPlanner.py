@@ -2,7 +2,7 @@
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
-from numpy import disp
+
 from scipy import integrate
 from spatialmath.base.transforms2d import *
 from spatialmath.base.vectors import *
@@ -155,7 +155,7 @@ class DistanceTransformPlanner(PlannerBase):
         :seealso: :meth:`plan` :meth:`query`
         """
         if self.distancemap is None:
-            Error("No distance map computed, you need to plan.")
+            raise ValueError("No distance map computed, you need to plan.")
 
         directions = np.array(
             [
