@@ -155,7 +155,7 @@ class DistanceTransformPlanner(PlannerBase):
         :seealso: :meth:`plan` :meth:`query`
         """
         if self.distancemap is None:
-            Error("No distance map computed, you need to plan.")
+            raise ValueError("No distance map computed, you need to plan.")
 
         directions = np.array(
             [
