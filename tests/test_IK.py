@@ -841,6 +841,76 @@ class TestIK(unittest.TestCase):
         self.assertEqual(f, "")
 
 
+class TestCalcQnull(unittest.TestCase):
+    """Tests for _calc_qnull to verify null-space motion activation logic.
+
+    Regression tests for https://github.com/petercorke/robotics-toolbox-python/issues/499
+    The bug was a typo: `if λΣ > 0 or λΣ > 0:` instead of `if λΣ > 0 or λm > 0:`.
+    This caused null-space motion to be skipped when only km (manipulability
+    maximisation gain) was set and kq (joint limit avoidance gain) was zero.
+    """
+
+    def setUp(self):
+        from roboticstoolbox.robot.IK import _calc_qnull
+
+        self._calc_qnull = _calc_qnull
+        self.panda = rtb.models.Panda().ets()
+        self.q = np.array([0.5, -1.0, 0.3, -1.5, 0.2, 1.5, 0.5])
+        self.J = self.panda.jacob0(self.q)
+
+    def test_qnull_both_gains_zero(self):
+        """When both kq and km are zero, null-space motion should be zero."""
+        result = self._calc_qnull(
+            ets=self.panda, q=self.q, J=self.J,
+            λΣ=0.0, λm=0.0, ps=0.05, pi=0.3,
+        )
+        nt.assert_array_equal(result, np.zeros(self.panda.n))
+
+    def test_qnull_km_only(self):
+        """When only km > 0 (manipulability maximisation), null-space motion
+        should be non-zero. This is the regression test for issue #499."""
+        result = self._calc_qnull(
+            ets=self.panda, q=self.q, J=self.J,
+            λΣ=0.0, λm=1.0, ps=0.05, pi=0.3,
+        )
+        self.assertFalse(
+            np.allclose(result, 0),
+            "Null-space motion should be non-zero when km > 0, "
+            "even if kq == 0 (issue #499)",
+        )
+
+    def test_qnull_kq_only(self):
+        """When only kq > 0 (joint limit avoidance), _calc_qnull should run
+        without error and return a result with the correct shape."""
+        result = self._calc_qnull(
+            ets=self.panda, q=self.q, J=self.J,
+            λΣ=1.0, λm=0.0, ps=0.05, pi=0.3,
+        )
+        self.assertEqual(result.shape, (self.panda.n,))
+
+    def test_qnull_both_gains_positive(self):
+        """When both gains are positive, null-space motion should combine
+        joint limit avoidance and manipulability maximisation."""
+        result = self._calc_qnull(
+            ets=self.panda, q=self.q, J=self.J,
+            λΣ=1.0, λm=1.0, ps=0.05, pi=0.3,
+        )
+        self.assertEqual(result.shape, (self.panda.n,))
+
+    def test_qnull_km_only_matches_both_when_kq_inactive(self):
+        """When joint positions are far from limits (so joint limit gradient
+        is zero), km-only result should match the both-gains result."""
+        result_km = self._calc_qnull(
+            ets=self.panda, q=self.q, J=self.J,
+            λΣ=0.0, λm=1.0, ps=0.05, pi=0.3,
+        )
+        result_both = self._calc_qnull(
+            ets=self.panda, q=self.q, J=self.J,
+            λΣ=1.0, λm=1.0, ps=0.05, pi=0.3,
+        )
+        nt.assert_array_almost_equal(result_km, result_both, decimal=10)
+
+
 if __name__ == "__main__":
 
     unittest.main()
