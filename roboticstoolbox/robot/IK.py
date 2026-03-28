@@ -569,7 +569,7 @@ def _calc_qnull(
         qnull_grad += (1.0 / λm * Jm).flatten()
 
     # Calculate the null-space motion
-    if λΣ > 0 or λΣ > 0:
+    if λΣ > 0 or λm > 0:
         null_space = np.eye(ets.n) - np.linalg.pinv(J) @ J
         qnull = null_space @ qnull_grad
 
