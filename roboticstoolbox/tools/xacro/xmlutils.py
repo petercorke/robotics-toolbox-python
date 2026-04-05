@@ -31,6 +31,7 @@
 # Maintainer: Morgan Quigley <morgan@osrfoundation.org>
 
 import xml.dom.minidom
+from xml.sax.saxutils import quoteattr
 
 
 def first_child_element(elt):
@@ -120,9 +121,7 @@ def fixed_writexml(self, writer, indent="", addindent="", newl=""):   # pragma: 
     a_names = sorted(attrs.keys())
 
     for a_name in a_names:
-        writer.write(" %s=\"" % a_name)
-        xml.dom.minidom._write_data(writer, attrs[a_name].value)
-        writer.write("\"")
+        writer.write(" %s=%s" % (a_name, quoteattr(attrs[a_name].value)))
     if self.childNodes:
         if len(self.childNodes) == 1 \
            and self.childNodes[0].nodeType == xml.dom.minidom.Node.TEXT_NODE:
