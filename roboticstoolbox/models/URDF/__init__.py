@@ -7,6 +7,8 @@ from roboticstoolbox.models.URDF.UR10 import UR10
 from roboticstoolbox.models.URDF.Puma560 import Puma560
 from roboticstoolbox.models.URDF.px100 import px100
 from roboticstoolbox.models.URDF.px150 import px150
+from roboticstoolbox.models.URDF.RbKairosPlus import RbKairosPlus
+from roboticstoolbox.models.URDF.RbRoboutPlus import RbRoboutPlus
 from roboticstoolbox.models.URDF.rx150 import rx150
 from roboticstoolbox.models.URDF.rx200 import rx200
 from roboticstoolbox.models.URDF.vx300 import vx300
@@ -34,6 +36,8 @@ __all__ = [
     "Puma560",
     "px100",
     "px150",
+    "RbKairosPlus",
+    "RbRoboutPlus",
     "rx150",
     "rx200",
     "vx300",
