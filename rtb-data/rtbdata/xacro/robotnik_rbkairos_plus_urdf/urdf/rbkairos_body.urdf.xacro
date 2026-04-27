@@ -1,0 +1,211 @@
+<?xml version="1.0" ?>
+<robot
+  name="rbkairos"
+  xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:macro
+    name="rbkairos_body"
+    params="prefix:=robot_">
+    <!-- Robot mechanical and motor parameters -->
+
+    <xacro:property
+      name="wheel_radius"
+      value="0.127" />
+
+    <!-- BASE FOOTPRINT -->
+    <link name="${prefix}base_footprint">
+      <visual>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <box size="0.001 0.001 0.001" />
+        </geometry>
+      </visual>
+    </link>
+
+    <joint
+      name="${prefix}base_footprint_joint"
+      type="fixed">
+      <origin
+        xyz="0 0 ${wheel_radius}"
+        rpy="0 0 0" />
+      <!-- ${wheel_radius} property must be defined inside wheel description -->
+      <parent link="${prefix}base_footprint" />
+      <child link="${prefix}base_link" />
+    </joint>
+
+    <!-- BASE_LINK -->
+    <link name="${prefix}base_link">
+
+      <visual>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <mesh
+            filename="package://meshes/rbkairos_chassis.stl" />
+        </geometry>
+        <material name="darkgrey">
+          <color rgba="0.1 0.1 0.1 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0 " />
+        <geometry>
+          <mesh
+            filename="package://meshes/rbkairos_chassis.stl" />
+        </geometry>
+      </collision>
+    </link>
+
+    <gazebo reference="${prefix}base_link">
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+    <!-- TOP COVER -->
+    <link name="${prefix}top_cover">
+      <visual>
+        <origin
+          xyz="0 0 0.0065"
+          rpy="0 0 0" />
+        <geometry>
+          <mesh
+            filename="package://meshes/rbkairos_top_cover.stl" />
+        </geometry>
+        <material name="darkgrey">
+          <color rgba="0.5 0.5 0.5 1" />
+        </material>
+      </visual>
+    </link>
+
+    <joint
+      name="${prefix}top_cover_joint"
+      type="fixed">
+      <origin
+        xyz="0.0 0 0.56162"
+        rpy="0 0 0" />
+      <parent link="${prefix}base_link" />
+      <child link="${prefix}top_cover" />
+    </joint>
+
+    <!-- LOGO ROBOTNIK LEFT -->
+    <link name="${prefix}base_logo_left">
+      <visual>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <mesh
+            filename="package://meshes/robotnik_logo_chasis.stl" />
+        </geometry>
+        <material name="darkgrey">
+          <color rgba="0.5 0.5 0.5 1" />
+        </material>
+      </visual>
+    </link>
+
+    <joint
+      name="${prefix}base_logo_left_joint"
+      type="fixed">
+      <origin
+        xyz="0.0 0.2894 0.35562"
+        rpy="0 0 0" />
+      <parent link="${prefix}base_link" />
+      <child link="${prefix}base_logo_left" />
+    </joint>
+
+    <!-- LOGO ROBOTNIK RIGHT -->
+    <link name="${prefix}base_logo_right">
+      <visual>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <mesh
+            filename="package://meshes/robotnik_logo_chasis.stl" />
+        </geometry>
+        <material name="darkgrey">
+          <color rgba="0.5 0.5 0.5 1" />
+        </material>
+      </visual>
+    </link>
+
+    <joint
+      name="${prefix}base_logo_right_joint"
+      type="fixed">
+      <origin
+        xyz="0.0 -0.28931 0.35562"
+        rpy="0 0 ${pi}" />
+      <parent link="${prefix}base_link" />
+      <child link="${prefix}base_logo_right" />
+    </joint>
+
+    <!-- LOGO ROBOTNIK FRONT -->
+    <link name="${prefix}base_logo_front">
+      <visual>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <mesh
+            filename="package://meshes/robotnik_logo_chasis.stl" />
+        </geometry>
+        <material name="darkgrey">
+          <color rgba="0.5 0.5 0.5 1" />
+        </material>
+      </visual>
+    </link>
+
+    <joint
+      name="${prefix}base_logo_front_joint"
+      type="fixed">
+      <origin
+        xyz="0.345 0.0 0.0"
+        rpy="0 0 ${-pi/2}" />
+      <parent link="${prefix}base_link" />
+      <child link="${prefix}base_logo_front" />
+    </joint>
+
+    <!-- LOGO ROBOTNIK REAR -->
+    <link name="${prefix}base_logo_rear">
+      <visual>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <mesh
+            filename="package://meshes/robotnik_logo_chasis.stl" />
+        </geometry>
+        <material name="darkgrey">
+          <color rgba="0.5 0.5 0.5 1" />
+        </material>
+      </visual>
+    </link>
+
+    <joint
+      name="${prefix}base_logo_rear_joint"
+      type="fixed">
+      <origin
+        xyz="-0.345 0.0 0.0"
+        rpy="0 0 ${pi/2}" />
+      <parent link="${prefix}base_link" />
+      <child link="${prefix}base_logo_rear" />
+    </joint>
+
+    <!-- DOCKING CONTACT -->
+
+    <link name="${prefix}base_docking_contact" />
+
+    <joint
+      name="${prefix}base_docking_joint"
+      type="fixed">
+      <origin
+        xyz="0.35 0 0.09"
+        rpy="0 0 0" />
+      <parent link="${prefix}base_link" />
+      <child link="${prefix}base_docking_contact" />
+    </joint>
+  </xacro:macro>
+</robot>

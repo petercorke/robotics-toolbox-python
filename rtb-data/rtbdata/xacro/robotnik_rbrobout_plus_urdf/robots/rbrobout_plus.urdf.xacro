@@ -1,0 +1,115 @@
+<?xml version="1.0" ?>
+<robot
+  name="rbrobout_plus"
+  xmlns:xacro="http://wiki.ros.org/xacro">
+
+  <xacro:include
+    filename="$(find robotnik_rbrobout_plus_urdf)/urdf/rbrobout_base.urdf.xacro" />
+  <xacro:include
+    filename="$(find robotnik_rbrobout_plus_urdf)/urdf/rbrobout_top_cover.urdf.xacro" />
+
+  <xacro:include
+    filename="../../ur_description/urdf/common.gazebo.xacro" />
+ <xacro:include
+    filename="../../ur_description/urdf/ur.gazebo.xacro" />
+ <xacro:include
+    filename="../../ur_description/urdf/ur.transmission.xacro" />
+  <xacro:include
+    filename="../../ur_description/urdf/ur10.urdf.xacro" />
+
+  <xacro:include
+    filename="$(find robotnik_rbrobout_plus_urdf)/urdf/intel_realsense_d435.urdf.xacro" />
+  <xacro:include
+    filename="$(find robotnik_rbrobout_plus_urdf)/urdf/imu_plugin.urdf.xacro" />
+  <xacro:include
+    filename="$(find robotnik_rbrobout_plus_urdf)/urdf/vectornav.urdf.xacro" />
+  <xacro:include
+    filename="$(find robotnik_rbrobout_plus_urdf)/urdf/sick_s300.urdf.xacro" />
+
+  <!-- ARGUMENTS -->
+  <xacro:arg
+    name="namespace"
+    default="robot" />
+  <xacro:arg
+    name="prefix"
+    default="" />
+  <xacro:arg
+    name="gazebo_ignition"
+    default="false" />
+
+  <!-- RB-KAIROS -->
+  <xacro:rbrobout
+    prefix="$(arg prefix)"
+    gazebo_ignition="$(arg gazebo_ignition)"
+    namespace="$(arg namespace)" />
+  <xacro:top_cover
+    prefix="$(arg prefix)"
+    parent="$(arg prefix)base_link">
+    <origin
+      xyz="0 0 -0.1"
+      rpy="0 0 ${pi}" />
+  </xacro:top_cover>
+  <!-- ARMS -->
+  <xacro:ur10_robot
+    prefix="$(arg prefix)arm_"
+    joint_limited="false"
+    >
+  </xacro:ur10_robot>
+
+  <!-- Mount arm to robot top cover -->
+  <joint name="$(arg prefix)arm_mount_joint" type="fixed">
+    <parent link="$(arg prefix)top_cover_base_link" />
+    <child link="$(arg prefix)arm_base_link" />
+    <origin xyz="-0.76 0.0 0.98" rpy="0.0 0.0 ${pi}" />
+  </joint>
+
+  <!-- IMU -->
+  <xacro:sensor_vectornav
+    frame_prefix="$(arg prefix)imu_"
+    parent="$(arg prefix)base_link"
+    node_namespace="$(arg namespace)"
+    gazebo_ignition="$(arg gazebo_ignition)">
+    <origin
+      xyz="0.127 -0.129 0.212"
+      rpy="0 0 0" />
+  </xacro:sensor_vectornav>
+
+  <!-- LASERS -->
+  <xacro:sensor_sick_s300
+    frame_prefix="$(arg prefix)front_laser_"
+    parent="$(arg prefix)base_link"
+    node_namespace="$(arg namespace)"
+    node_name="front_laser"
+    gazebo_ignition="$(arg gazebo_ignition)"
+    max_angle="2.1"
+    min_angle="-2.1">
+    <origin
+      xyz="0.8 0.366 -0.06"
+      rpy="0 0 ${1/4*pi}" />
+  </xacro:sensor_sick_s300>
+  <xacro:sensor_sick_s300
+    frame_prefix="$(arg prefix)rear_laser_"
+    parent="$(arg prefix)base_link"
+    node_namespace="$(arg namespace)"
+    node_name="rear_laser"
+    gazebo_ignition="$(arg gazebo_ignition)"
+    max_angle="2.1"
+    min_angle="-2.1">
+    <origin
+      xyz="-0.8 -0.366 -0.06"
+      rpy="0 0 ${-3/4*pi}" />
+  </xacro:sensor_sick_s300>
+
+  <!-- CAMERAS -->
+  <xacro:sensor_intel_realsense_d435
+    frame_prefix="$(arg prefix)front_rgbd_camera_"
+    parent="$(arg prefix)base_link"
+    node_namespace="$(arg namespace)"
+    node_name="front_camera"
+    gazebo_ignition="$(arg gazebo_ignition)"
+    >
+    <origin
+      xyz="0.835 0 0.1555"
+      rpy="0 0 0" />
+  </xacro:sensor_intel_realsense_d435>
+</robot>

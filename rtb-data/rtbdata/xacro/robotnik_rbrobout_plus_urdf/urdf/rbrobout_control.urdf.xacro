@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:macro
+    name="rbrobout_gz_ignition_control"
+    params="namespace prefix">
+    <gazebo>
+      <plugin name="gz::sim::systems::PosePublisher" filename="libgz-sim-pose-publisher-system.so">
+        <publish_model_pose>true</publish_model_pose>
+        <publish_nested_model_pose>true</publish_nested_model_pose>
+      </plugin>
+      <plugin
+        name="gz_ros2_control::GazeboSimROS2ControlPlugin"
+        filename="gz_ros2_control-system">
+        <robot_param>robot_description</robot_param>
+        <robot_param_node>robot_state_publisher</robot_param_node>
+        <parameters>$(find robotnik_description)/simulators/gazebo_ignition/rbrobout/rbrobout_controller_params.yaml</parameters>
+        <ros>
+          <namespace>/${namespace}</namespace>
+        </ros>
+      </plugin>
+    </gazebo>
+
+    <xacro:macro
+      name="ros2_joint"
+      params="interface jmin jmax name">
+      <joint name="${name}">
+        <command_interface name="${interface}">
+          <param name="min">${jmin}</param>
+          <param name="max">${jmax}</param>
+        </command_interface>
+        <state_interface name="position" />
+        <state_interface name="velocity" />
+        <state_interface name="effort" />
+      </joint>
+    </xacro:macro>
+
+    <ros2_control
+      name="GazeboSystem"
+      type="system">
+      <hardware>
+        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      </hardware>
+
+      <xacro:ros2_joint
+        interface="velocity"
+        jmin="-10"
+        jmax="10"
+        name="${prefix}front_left_wheel_joint" />
+      <xacro:ros2_joint
+        interface="velocity"
+        jmin="-10"
+        jmax="10"
+        name="${prefix}front_right_wheel_joint" />
+      <xacro:ros2_joint
+        interface="velocity"
+        jmin="-20"
+        jmax="20"
+        name="${prefix}back_left_wheel_joint" />
+      <xacro:ros2_joint
+        interface="velocity"
+        jmin="-20"
+        jmax="20"
+        name="${prefix}back_right_wheel_joint" />
+    </ros2_control>
+  </xacro:macro>
+</robot>

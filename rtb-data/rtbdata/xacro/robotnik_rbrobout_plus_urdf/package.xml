@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-model
+  href="http://download.ros.org/schema/package_format3.xsd"
+  schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>robotnik_description</name>
+  <version>2.2.0</version>
+  <description>URDF description for Robotnik robots</description>
+
+  <maintainer email="ros-developers@robotnik.es">Robotnik Developers</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <url type="website">https://github.com/RobotnikAutomation/robot_description</url>
+  <url type="repository">https://github.com/RobotnikAutomation/robot_description.git</url>
+  <url type="bugtracker">https://github.com/RobotnikAutomation/robot_description/issues</url>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>robotnik_sensors</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>ur_description</exec_depend>
+  <exec_depend>xacro</exec_depend>
+
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
+  <test_depend>launch_testing_ros</test_depend>
+  <test_depend>liburdfdom-tools</test_depend>
+  <test_depend>ur_description</test_depend>
+  <test_depend>robotnik_sensors</test_depend>
+  <test_depend>xacro</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

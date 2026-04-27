@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<robot
+  name="lidar_2d_plugin"
+  xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:macro
+    name="lidar_2d_plugin"
+    params="node_namespace
+            node_name
+            gazebo_ignition
+            min_range
+            max_range
+            min_angle
+            max_angle
+            frame_link
+            rate
+            resolution
+            samples
+            ">
+    <xacro:if value="${gazebo_ignition}">
+      <gazebo reference="${frame_link}">
+        <sensor
+          type="gpu_lidar"
+          name="${node_name}">
+          <pose>0 0 0 0 0 0</pose>
+          <visualize>false</visualize>
+          <update_rate>${rate}</update_rate>
+          <lidar>
+            <scan>
+              <horizontal>
+                <samples>${samples}</samples>
+                <resolution>1</resolution>
+                <min_angle>${min_angle}</min_angle>
+                <max_angle>${max_angle}</max_angle>
+              </horizontal>
+            </scan>
+            <range>
+              <min>${min_range}</min>
+              <max>${max_range}</max>
+              <resolution>${resolution}</resolution>
+            </range>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.03</stddev>
+            </noise>
+          </lidar>
+
+          <topic>${node_namespace}/${node_name}/scan</topic>
+          <gz_frame_id>${frame_link}</gz_frame_id>
+        </sensor>
+      </gazebo>
+    </xacro:if>
+  </xacro:macro>
+</robot>

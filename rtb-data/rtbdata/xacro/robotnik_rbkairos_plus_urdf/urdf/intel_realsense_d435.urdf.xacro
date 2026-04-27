@@ -1,0 +1,206 @@
+<?xml version="1.0" ?>
+<robot
+  name="sensor_intel_realsense_d435"
+  xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:include
+    filename="$(find robotnik_rbkairos_plus_urdf)/urdf/depth_camera_plugin.urdf.xacro" />
+  <xacro:include
+    filename="$(find robotnik_rbkairos_plus_urdf)/urdf/irred_camera_plugin.urdf.xacro" />
+  <xacro:include
+    filename="$(find robotnik_rbkairos_plus_urdf)/urdf/camera_plugin.urdf.xacro" />
+
+  <xacro:macro
+    name="sensor_intel_realsense_d435"
+    params="frame_prefix
+            parent
+            *origin
+            gazebo_ignition:=false
+            node_name:=realsense_d435
+            node_namespace:=${None}
+            topic_prefix:=~/">
+    <!-- node_namespace is used from node_name if not set -->
+    <xacro:if value="${node_namespace == None}">
+      <xacro:property
+        name="node_namespace"
+        value="${node_name}" />
+    </xacro:if>
+
+    <!-- The following values are approximate, and the camera node
+     publishing TF values with actual calibrated camera extrinsic values -->
+    <xacro:property
+      name="d435_cam_depth_to_infra1_offset"
+      value="0.0" />
+    <xacro:property
+      name="d435_cam_depth_to_infra2_offset"
+      value="-0.050" />
+    <xacro:property
+      name="d435_cam_depth_to_color_offset"
+      value="0.015" />
+
+    <!-- The following values model the aluminum peripherial case for the
+    D435 camera, with the camera joint represented by the actual
+    peripherial camera tripod mount -->
+    <xacro:property
+      name="d435_cam_width"
+      value="0.090" />
+    <xacro:property
+      name="d435_cam_height"
+      value="0.025" />
+    <xacro:property
+      name="d435_cam_depth"
+      value="0.02505" />
+    <xacro:property
+      name="d435_cam_mount_from_center_offset"
+      value="0.0149" />
+
+    <!-- The following offset is relative the the physical D435 camera peripherial
+    camera tripod mount -->
+    <xacro:property
+      name="d435_cam_depth_px"
+      value="${d435_cam_mount_from_center_offset}" />
+    <xacro:property
+      name="d435_cam_depth_py"
+      value="0.0175" />
+    <xacro:property
+      name="d435_cam_depth_pz"
+      value="${d435_cam_height/2}" />
+
+    <joint
+      name="${frame_prefix}base_joint"
+      type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}" />
+      <child link="${frame_prefix}base_link" />
+    </joint>
+    <link name="${frame_prefix}base_link" />
+
+    <!-- camera body, with origin at bottom screw mount -->
+    <joint
+      name="${frame_prefix}joint"
+      type="fixed">
+      <parent link="${frame_prefix}base_link" />
+      <child link="${frame_prefix}link" />
+      <origin
+        xyz="0.01 0.02 0"
+        rpy="0 0 0" />
+      <child link="${frame_prefix}link" />
+    </joint>
+    <link name="${frame_prefix}link">
+      <!-- camera link is aligned with the infrared sensor 1 that is "in the middle of the camera", not the one in the edge -->
+      <visual>
+        <origin
+          xyz="${d435_cam_mount_from_center_offset} ${-d435_cam_depth_py} 0"
+          rpy="${radians(90)} 0 ${radians(90)}" />
+        <geometry>
+          <!-- <box size="${d435_cam_width} ${d435_cam_height} ${d435_cam_depth}"/> -->
+          <mesh
+            filename="package://meshes/intel_d435_color.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin
+          xyz="0 ${-d435_cam_depth_py} 0"
+          rpy="0 0 0" />
+        <geometry>
+          <box
+            size="${d435_cam_depth} ${d435_cam_width} ${d435_cam_height}" />
+        </geometry>
+      </collision>
+
+    </link>
+
+    <!-- Use the nominal extrinsics between camera frames if the calibrated extrinsics aren't being published. e.g. running the device in simulation  -->
+    <!-- camera depth joints and links -->
+    <joint
+      name="${frame_prefix}depth_joint"
+      type="fixed">
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <parent link="${frame_prefix}link" />
+      <child link="${frame_prefix}depth_frame" />
+    </joint>
+    <link name="${frame_prefix}depth_frame" />
+
+    <joint
+      name="${frame_prefix}depth_optical_joint"
+      type="fixed">
+      <origin
+        xyz="0 0 0"
+        rpy="${-radians(90)} 0 ${-radians(90)}" />
+      <parent link="${frame_prefix}depth_frame" />
+      <child link="${frame_prefix}depth_optical_frame" />
+    </joint>
+    <link name="${frame_prefix}depth_optical_frame" />
+
+    <!-- camera left IR joints and links -->
+    <joint
+      name="${frame_prefix}infra1_joint"
+      type="fixed">
+      <origin
+        xyz="0 ${d435_cam_depth_to_infra1_offset} 0"
+        rpy="0 0 0" />
+      <parent link="${frame_prefix}link" />
+      <child link="${frame_prefix}infra1_frame" />
+    </joint>
+    <link name="${frame_prefix}infra1_frame" />
+
+    <joint
+      name="${frame_prefix}infra1_optical_joint"
+      type="fixed">
+      <origin
+        xyz="0 0 0"
+        rpy="${-radians(90)} 0 ${-radians(90)}" />
+      <parent link="${frame_prefix}infra1_frame" />
+      <child link="${frame_prefix}infra1_optical_frame" />
+    </joint>
+    <link name="${frame_prefix}infra1_optical_frame" />
+
+    <!-- camera right IR joints and links -->
+    <joint
+      name="${frame_prefix}infra2_joint"
+      type="fixed">
+      <origin
+        xyz="0 ${d435_cam_depth_to_infra2_offset} 0"
+        rpy="0 0 0" />
+      <parent link="${frame_prefix}link" />
+      <child link="${frame_prefix}infra2_frame" />
+    </joint>
+    <link name="${frame_prefix}infra2_frame" />
+
+    <joint
+      name="${frame_prefix}infra2_optical_joint"
+      type="fixed">
+      <origin
+        xyz="0 0 0"
+        rpy="${-radians(90)} 0 ${-radians(90)}" />
+      <parent link="${frame_prefix}infra2_frame" />
+      <child link="${frame_prefix}infra2_optical_frame" />
+    </joint>
+    <link name="${frame_prefix}infra2_optical_frame" />
+
+    <!-- camera color joints and links -->
+    <joint
+      name="${frame_prefix}color_joint"
+      type="fixed">
+      <origin
+        xyz="0 ${d435_cam_depth_to_color_offset} 0"
+        rpy="0 0 0" />
+      <parent link="${frame_prefix}link" />
+      <child link="${frame_prefix}color_frame" />
+    </joint>
+    <link name="${frame_prefix}color_frame" />
+
+    <joint
+      name="${frame_prefix}color_optical_joint"
+      type="fixed">
+      <origin
+        xyz="0 0 0"
+        rpy="${-radians(90)} 0 ${-radians(90)}" />
+      <parent link="${frame_prefix}color_frame" />
+      <child link="${frame_prefix}color_optical_frame" />
+    </joint>
+    <link name="${frame_prefix}color_optical_frame" />
+
+  </xacro:macro>
+</robot>
