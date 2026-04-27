@@ -12,7 +12,7 @@ authors = [
 ]
 
 dependencies = [
-    "numpy>=1.17.4",
+    "numpy==1.26.4",
     "spatialmath-python>=1.1.5",
     "spatialgeometry>=1.0.0",
     "pgraph-python",
@@ -23,6 +23,10 @@ dependencies = [
     "rtb-data",
     "progress",
     "typing_extensions",
+    "qpsolvers",
+    "qpsolvers[open_source_solvers]",
+    "websockets==13.1",
+    "pybullet",
 ]
 
 license = { file = "LICENSE" }
