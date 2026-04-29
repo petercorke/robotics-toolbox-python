@@ -61,16 +61,6 @@ class TestModels(unittest.TestCase):
         r.qr
         r.qz
 
-    def test_RbKairosPlus(self):
-        r = rp.models.RbKairosPlus()
-        r.qr
-        r.qz
-
-    def test_RbRoboutPlus(self):
-        r = rp.models.RbRoboutPlus()
-        r.qr
-        r.qz
-
     def test_rx150(self):
         r = rp.models.rx150()
         r.qr
@@ -108,6 +98,16 @@ class TestModels(unittest.TestCase):
 
     def test_Mico(self):
         r = rp.models.Mico()
+        r.qr
+        r.qz
+
+    def test_RbKairosPlus(self):
+        r = rp.models.RbKairosPlus()
+        r.qr
+        r.qz
+
+    def test_RbRoboutPlus(self):
+        r = rp.models.RbRoboutPlus()
         r.qr
         r.qz
 

@@ -7,8 +7,6 @@ from roboticstoolbox.models.URDF.UR10 import UR10
 from roboticstoolbox.models.URDF.Puma560 import Puma560
 from roboticstoolbox.models.URDF.px100 import px100
 from roboticstoolbox.models.URDF.px150 import px150
-from roboticstoolbox.models.URDF.RbKairosPlus import RbKairosPlus
-from roboticstoolbox.models.URDF.RbRoboutPlus import RbRoboutPlus
 from roboticstoolbox.models.URDF.rx150 import rx150
 from roboticstoolbox.models.URDF.rx200 import rx200
 from roboticstoolbox.models.URDF.vx300 import vx300
@@ -25,6 +23,8 @@ from roboticstoolbox.models.URDF.Fetch import Fetch
 from roboticstoolbox.models.URDF.FetchCamera import FetchCamera
 from roboticstoolbox.models.URDF.Valkyrie import Valkyrie
 from roboticstoolbox.models.URDF.AL5D import AL5D
+from roboticstoolbox.models.URDF.RbKairosPlus import RbKairosPlus
+from roboticstoolbox.models.URDF.RbRoboutPlus import RbRoboutPlus
 
 __all__ = [
     "Panda",
@@ -36,8 +36,6 @@ __all__ = [
     "Puma560",
     "px100",
     "px150",
-    "RbKairosPlus",
-    "RbRoboutPlus",
     "rx150",
     "rx200",
     "vx300",
@@ -54,4 +52,6 @@ __all__ = [
     "FetchCamera",
     "Valkyrie",
     "AL5D",
+    "RbKairosPlus",
+    "RbRoboutPlus",
 ]
