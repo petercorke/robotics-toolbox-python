@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+<robot
+  name="imu_plugin"
+  xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:macro
+    name="imu_plugin"
+    params="node_namespace
+            node_name
+            gazebo_ignition
+            frame_link
+            rate">
+    <xacro:if value="${gazebo_ignition}">
+      <gazebo reference="${frame_link}">
+        <gravity>true</gravity>
+        <sensor
+          name="${node_name}_sensor"
+          type="imu">
+          <always_on>true</always_on>
+          <update_rate>${rate}</update_rate>
+          <visualize>true</visualize>
+
+          <imu>
+            <orientation>
+              <x>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-3</stddev>
+                </noise>
+              </x>
+              <y>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-3</stddev>
+                </noise>
+              </y>
+              <z>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-3</stddev>
+                </noise>
+              </z>
+            </orientation>
+            <angular_velocity>
+              <x>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-4</stddev>
+                </noise>
+              </x>
+              <y>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-4</stddev>
+                </noise>
+              </y>
+              <z>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>2e-4</stddev>
+                </noise>
+              </z>
+            </angular_velocity>
+            <linear_acceleration>
+              <x>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>1.7e-2</stddev>
+                </noise>
+              </x>
+              <y>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>1.7e-2</stddev>
+                </noise>
+              </y>
+              <z>
+                <noise type="gaussian">
+                  <mean>0.0</mean>
+                  <stddev>1.7e-2</stddev>
+                </noise>
+              </z>
+            </linear_acceleration>
+
+            <orientation_enabled>true</orientation_enabled>
+            <angular_velocity_enabled>
+              true
+            </angular_velocity_enabled>
+            <linear_acceleration_enabled>
+              true
+            </linear_acceleration_enabled>
+          </imu>
+
+          <topic>${node_namespace}/${node_name}/data</topic>
+          <gz_frame_id>${frame_link}</gz_frame_id>
+        </sensor>
+      </gazebo>
+    </xacro:if>
+  </xacro:macro>
+</robot>

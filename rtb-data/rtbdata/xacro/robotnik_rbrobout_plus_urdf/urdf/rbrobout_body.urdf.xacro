@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<robot
+  name="rbrobout"
+  xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:macro
+    name="rbrobout_body"
+    params="prefix:=robot_">
+    <!-- Robot mechanical and motor parameters -->
+
+    <xacro:property
+      name="wheel_radius"
+      value="0.127" />
+
+    <!-- BASE FOOTPRINT -->
+    <link name="${prefix}base_footprint">
+      <visual>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <box size="0.001 0.001 0.001" />
+        </geometry>
+      </visual>
+    </link>
+
+    <joint
+      name="${prefix}base_footprint_joint"
+      type="fixed">
+      <origin
+        xyz="0 0 ${wheel_radius}"
+        rpy="0 0 0" />
+      <!-- ${wheel_radius} property must be defined inside wheel description -->
+      <parent link="${prefix}base_footprint" />
+      <child link="${prefix}base_link" />
+    </joint>
+
+    <!-- BASE_LINK -->
+    <link name="${prefix}base_link">
+      <visual>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <mesh
+            filename="package://meshes/rbrobout_chassis.stl" />
+        </geometry>
+        <material name="darkgrey">
+          <color rgba="0.1 0.1 0.1 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0 " />
+        <geometry>
+          <mesh
+            filename="package://meshes/rbrobout_chassis.stl" />
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- DOCKING CONTACT -->
+    <link name="${prefix}base_docking_contact" />
+    <joint
+      name="${prefix}base_docking_joint"
+      type="fixed">
+      <origin
+        xyz="0.858 0.02 0.008"
+        rpy="0 0 0 " />
+      <parent link="${prefix}base_link" />
+      <child link="${prefix}base_docking_contact" />
+    </joint>
+  </xacro:macro>
+</robot>

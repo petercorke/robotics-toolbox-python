@@ -23,6 +23,8 @@ from roboticstoolbox.models.URDF.Fetch import Fetch
 from roboticstoolbox.models.URDF.FetchCamera import FetchCamera
 from roboticstoolbox.models.URDF.Valkyrie import Valkyrie
 from roboticstoolbox.models.URDF.AL5D import AL5D
+from roboticstoolbox.models.URDF.RbKairosPlus import RbKairosPlus
+from roboticstoolbox.models.URDF.RbRoboutPlus import RbRoboutPlus
 
 __all__ = [
     "Panda",
@@ -50,4 +52,6 @@ __all__ = [
     "FetchCamera",
     "Valkyrie",
     "AL5D",
+    "RbKairosPlus",
+    "RbRoboutPlus",
 ]

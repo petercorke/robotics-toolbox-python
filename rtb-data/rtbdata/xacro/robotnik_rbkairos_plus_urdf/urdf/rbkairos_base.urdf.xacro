@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<robot
+  name="rbkairos_base"
+  xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:include
+    filename="$(find robotnik_rbkairos_plus_urdf)/urdf/rbkairos_body.urdf.xacro" />
+  <xacro:include
+    filename="$(find robotnik_rbkairos_plus_urdf)/urdf/rbkairos_mecanum_wheel.urdf.xacro" />
+  <xacro:include
+    filename="$(find robotnik_rbkairos_plus_urdf)/urdf/rbkairos_control.urdf.xacro" />
+
+  <!-- WHEELS PROPERTIES -->
+  <xacro:property
+    name="wheel_offset_x"
+    value="0.21528" />
+  <xacro:property
+    name="wheel_offset_y"
+    value="0.2590" />
+  <xacro:property
+    name="wheel_offset_z"
+    value="0.0" />
+
+  <xacro:macro
+    name="rbkairos"
+    params="
+      prefix:=robot_
+      gazebo_ignition:=false
+      namespace:=''
+      ">
+    <xacro:property
+      name="hq"
+      value="true" />
+    <xacro:rbkairos_body prefix="${prefix}" />
+
+    <!-- WHEELS -->
+    <xacro:rbkairos_mecanum_wheel
+      prefix="${prefix}front_right_"
+      parent="${prefix}base_link"
+      reflect="false"
+      hq="true"
+      gazebo_ignition="${gazebo_ignition}"
+      xyz="${wheel_offset_x} -${wheel_offset_y} ${wheel_offset_z}" />
+    <xacro:rbkairos_mecanum_wheel
+      prefix="${prefix}front_left_"
+      parent="${prefix}base_link"
+      reflect="true"
+      hq="true"
+      gazebo_ignition="${gazebo_ignition}"
+      xyz="${wheel_offset_x} ${wheel_offset_y} ${wheel_offset_z}" />
+    <xacro:rbkairos_mecanum_wheel
+      prefix="${prefix}back_left_"
+      parent="${prefix}base_link"
+      reflect="false"
+      hq="true"
+      gazebo_ignition="${gazebo_ignition}"
+      xyz="-${wheel_offset_x} ${wheel_offset_y} ${wheel_offset_z}" />
+    <xacro:rbkairos_mecanum_wheel
+      prefix="${prefix}back_right_"
+      parent="${prefix}base_link"
+      reflect="true"
+      hq="true"
+      gazebo_ignition="${gazebo_ignition}"
+      xyz="-${wheel_offset_x} -${wheel_offset_y} ${wheel_offset_z}" />
+
+    <xacro:if value="$(arg gazebo_ignition)">
+      <xacro:rbkairos_gz_ignition_control
+        namespace="${namespace}"
+        prefix="${prefix}" />
+    </xacro:if>
+  </xacro:macro>
+</robot>

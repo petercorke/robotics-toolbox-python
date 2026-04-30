@@ -53,6 +53,12 @@ wx250s.base = sm.SE3.Tx(0.7) * sm.SE3.Ty(2.4)
 # j2n4s300.base = sm.SE3.Tx(1.2) * sm.SE3.Ty(0)
 # j2n4s300.q = j2n4s300.qr
 
+# # Robotnik robots
+rbkairos_plus = rp.models.RbKairosPlus()
+rbkairos_plus.base = sm.SE3.Tx(0.7) * sm.SE3.Ty(0.3)
+rbrobout_plus = rp.models.RbRoboutPlus()
+rbrobout_plus.base = sm.SE3.Tx(0.7) * sm.SE3.Ty(0.3)
+
 # Launch Sim
 env = swift.Swift()
 env.launch()
@@ -75,4 +81,6 @@ env.add(wx250)
 env.add(wx250s)
 
 # env.add(j2n4s300)
+env.add(rbkairos_plus)
+env.add(rbrobout_plus)
 env.hold()
