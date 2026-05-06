@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<robot
+  name="irred_camera_plugin"
+  xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:macro
+    name="irred_camera_plugin"
+    params="node_namespace
+            node_name
+            topic_prefix
+            gazebo_ignition
+            optical_frame
+            reference_frame
+            horizontal_fov
+            vertical_fov
+            video_width
+            video_height
+            min_depth
+            max_depth
+            rate
+            ">
+    <xacro:if value="${gazebo_ignition}">
+      <gazebo reference="${reference_frame}">
+        <sensor
+          name="${node_name}"
+          type="camera">
+          <camera name="${node_name}">
+            <horizontal_fov>
+              ${radians(horizontal_fov)}
+            </horizontal_fov>
+            <vertical_fov>
+              ${radians(float(vertical_fov))}
+            </vertical_fov>
+            <image>
+              <width>${video_width}</width>
+              <height>${video_height}</height>
+              <format>L_INT8</format>
+            </image>
+            <clip>
+              <near>${min_depth}</near>
+              <far>${max_depth}</far>
+            </clip>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.05</stddev>
+            </noise>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>${rate}</update_rate>
+          <visualize>false</visualize>
+
+          <topic>
+            ${node_namespace}/${node_name}/ired/image_raw
+          </topic>
+          <gz_frame_id>${optical_frame}</gz_frame_id>
+          <camera_info_topic>
+            ${node_namespace}/${node_name}/ired/camera_info
+          </camera_info_topic>
+        </sensor>
+      </gazebo>
+    </xacro:if>
+  </xacro:macro>
+</robot>

@@ -1,0 +1,107 @@
+<?xml version="1.0" ?>
+<robot
+  name="wheel"
+  xmlns:xacro="http://wiki.ros.org/xacro"
+  xmlns:gz="http://gazebosim.org/schema">
+  <xacro:macro
+    name="rbkairos_mecanum_wheel"
+    params="prefix parent xyz reflect hq gazebo_ignition:=false">
+    <xacro:property
+      name="mecanum_wheel_radius"
+      value="0.127" />
+    <xacro:property
+      name="mecanum_wheel_height"
+      value="0.087" />
+    <xacro:property
+      name="mecanum_wheel_mass"
+      value="6.5" />
+    <xacro:macro
+      name="cylinder_inertia"
+      params="m r h">
+      <!-- <inertia
+        ixx="${m*(3*r*r+h*h)/12}"
+        ixy="0"
+        ixz="0"
+        iyy="${m*r*r/2}"
+        iyz="0"
+        izz="${m*(3*r*r+h*h)/12}" /> -->
+    </xacro:macro>
+
+    <joint
+      name="${prefix}wheel_joint"
+      type="continuous">
+      <parent link="${parent}" />
+      <child link="${prefix}wheel_link" />
+      <origin
+        xyz="${xyz}"
+        rpy="0 0 0" />
+      <limit
+        effort="100000"
+        velocity="100" />
+      <axis xyz="0 1 0" />
+    </joint>
+
+    <link name="${prefix}wheel_link">
+      <visual>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <xacro:if value="${hq}">
+            <xacro:if value="${reflect}">
+              <mesh
+                filename="package://meshes/kairos_mecanum_wheel_1.dae" />
+            </xacro:if>
+            <xacro:unless value="${reflect}">
+              <mesh
+                filename="package://meshes/kairos_mecanum_wheel_2.dae" />
+            </xacro:unless>
+          </xacro:if>
+          <xacro:unless value="${hq}">
+            <cylinder
+              radius="${mecanum_wheel_radius}"
+              length="${mecanum_wheel_height}" />
+          </xacro:unless>
+        </geometry>
+
+        <material name="darkgrey">
+          <color rgba="0.2 0.2 0.2 1" />
+        </material>
+      </visual>
+
+      <collision>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <sphere radius="${mecanum_wheel_radius}" />
+        </geometry>
+      </collision>
+
+
+    </link>
+
+    <xacro:if value="${gazebo_ignition}">
+      <gazebo reference="${prefix}wheel_link">
+        <collision>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1.0</mu>
+                <mu2>0.0</mu2>
+                <xacro:if value="${reflect}">
+                  <fdir1
+                    gz:expressed_in="$(arg prefix)base_footprint">1 -1 0</fdir1>
+                </xacro:if>
+                <xacro:unless value="${reflect}">
+                  <fdir1
+                    gz:expressed_in="$(arg prefix)base_footprint">1 1 0</fdir1>
+                </xacro:unless>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+      </gazebo>
+    </xacro:if>
+  </xacro:macro>
+</robot>

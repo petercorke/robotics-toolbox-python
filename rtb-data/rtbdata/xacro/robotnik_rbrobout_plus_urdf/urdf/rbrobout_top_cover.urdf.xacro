@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<robot
+  name="rbrobout"
+  xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:macro
+    name="top_cover"
+    params="prefix parent *origin">
+    <joint
+      name="${prefix}top_cover_base_joint"
+      type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}" />
+      <child link="${prefix}top_cover_base_link" />
+    </joint>
+
+    <!-- BASE_LINK -->
+    <link name="${prefix}top_cover_base_link">
+      <visual>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <mesh
+            filename="package://meshes/rbrobout_top_cover.stl" />
+        </geometry>
+        <material name="darkgrey">
+          <color rgba="0.1 0.1 0.1 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0 " />
+        <geometry>
+          <mesh
+            filename="package://meshes/rbrobout_top_cover.stl" />
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+</robot>

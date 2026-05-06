@@ -101,6 +101,16 @@ class TestModels(unittest.TestCase):
         r.qr
         r.qz
 
+    def test_RbKairosPlus(self):
+        r = rp.models.RbKairosPlus()
+        r.qr
+        r.qz
+
+    def test_RbRoboutPlus(self):
+        r = rp.models.RbRoboutPlus()
+        r.qr
+        r.qz
+
     def test_ball(self):
         r = rp.models.DH.Ball()
         r.qz

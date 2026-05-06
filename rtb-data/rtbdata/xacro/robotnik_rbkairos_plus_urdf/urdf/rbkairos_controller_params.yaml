@@ -1,0 +1,11 @@
+/**:
+  controller_manager:
+    ros__parameters:
+      use_sim_time: true
+      update_rate: 50
+      joint_state_broadcaster:
+        type: joint_state_broadcaster/JointStateBroadcaster
+      robotnik_base_control:
+        type: robotnik_controllers/RBKairosController
+      joint_trajectory_controller:
+        type: joint_trajectory_controller/JointTrajectoryController
