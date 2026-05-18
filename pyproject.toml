@@ -12,7 +12,7 @@ authors = [
 ]
 
 dependencies = [
-    "numpy>=1.17.4",
+    "numpy",
     "spatialmath-python>=1.1.5",
     "spatialgeometry>=1.0.0",
     "pgraph-python",
@@ -23,6 +23,7 @@ dependencies = [
     "rtb-data",
     "progress",
     "typing_extensions",
+    "colored>2.0.0",
 ]
 
 license = { file = "LICENSE" }
@@ -54,11 +55,10 @@ classifiers = [
     # Pick your license as you wish (should match "license" above)
     "License :: OSI Approved :: MIT License",
     # Specify the Python versions you support here.
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 
@@ -104,30 +104,20 @@ rtbtool = "roboticstoolbox.bin.rtbtool:main"
 
 [build-system]
 
-requires = ["setuptools", "numpy>=2.0.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 
-[tool.setuptools]
+[tool.hatch.build.targets.wheel]
+packages = ["src/roboticstoolbox"]
 
-packages = [
-    "roboticstoolbox",
-    "roboticstoolbox.backends",
-    "roboticstoolbox.backends.PyPlot",
-    "roboticstoolbox.backends.swift",
-    "roboticstoolbox.bin",
-    "roboticstoolbox.blocks",
-    "roboticstoolbox.examples",
-    "roboticstoolbox.bin",
-    "roboticstoolbox.robot",
-    "roboticstoolbox.mobile",
-    "roboticstoolbox.models",
-    "roboticstoolbox.models.DH",
-    "roboticstoolbox.models.ETS",
-    "roboticstoolbox.models.URDF",
-    "roboticstoolbox.tools",
-    "roboticstoolbox.tools.urdf",
-    "roboticstoolbox.tools.xacro",
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src/roboticstoolbox",
+    "/tests",
+    "/README.md",
+    "/LICENSE",
+    "/pyproject.toml",
 ]
 
 
