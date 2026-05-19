@@ -91,6 +91,11 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
+        run: |
+          pip install git+https://github.com/petercorke/spatialgeometry.git@future
+          pip install git+https://github.com/petercorke/swift.git@future
+
       - name: Install docs dependencies
         run: |
           pip install .[docs]
