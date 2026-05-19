@@ -63,7 +63,7 @@ classifiers = [
 
 
 [project.urls]
-homepage = "https://github.com/petercorke/robotics-toolbox-python"
+homepage = "https://petercorke.github.io/robotics-toolbox-python/"
 documentation = "https://petercorke.github.io/robotics-toolbox-python/"
 repository = "https://github.com/petercorke/robotics-toolbox-python"
 
@@ -90,6 +90,7 @@ dev = [
     "roboticstoolbox-python[qp]",
     "pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'",
     "bdsim",
+    "ruff",
 ]
 
 qp = ["qpsolvers", "quadprog"]
@@ -128,38 +129,16 @@ sdist.include = [
 ]
 
 
-[tool.black]
-
+[tool.ruff]
 line-length = 88
-args = '--experimental-string-processing'
+exclude = [".git", "build", "dist", "docs", ".venv", ".tox"]
 
-include = '\.pyi?$'
-exclude = '''
+[tool.ruff.lint]
+ignore = ["F821", "E741", "E203"]
 
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | \.github
-    | _build
-    | buck-out
-    | build
-    | dist
-    | docs
-  )/
-)
-'''
-
-
-[tool.flake8]
-
-ignore = ['F821', 'W503', 'E741']
-max-line-length = 88
-extend-ignore = 'E203'
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
 
 
 [tool.cibuildwheel]
@@ -183,4 +162,4 @@ archs = ["AMD64"]
 
 
 [tool.coverage.run]
-omit = ["roboticstoolbox/examples/*", "test_*.py"]
+omit = ["src/roboticstoolbox/examples/*", "test_*.py"]
