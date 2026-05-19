@@ -138,14 +138,17 @@ static PyObject *frne(PyObject *self, PyObject *args) {
 
     // Create the gravity vector
     temp = PyIter_Next(igrav);
+    if (!temp) { PyErr_SetString(PyExc_ValueError, "gravity vector too short"); return NULL; }
     robot->gravity->x = PyFloat_AsDouble(temp);
     Py_DECREF(temp);
 
     temp = PyIter_Next(igrav);
+    if (!temp) { PyErr_SetString(PyExc_ValueError, "gravity vector too short"); return NULL; }
     robot->gravity->y = PyFloat_AsDouble(temp);
     Py_DECREF(temp);
 
     temp = PyIter_Next(igrav);
+    if (!temp) { PyErr_SetString(PyExc_ValueError, "gravity vector too short"); return NULL; }
     robot->gravity->z = PyFloat_AsDouble(temp);
     Py_DECREF(temp);
 
@@ -153,14 +156,17 @@ static PyObject *frne(PyObject *self, PyObject *args) {
     // Create the joint arrays
     for (int i = 0; i < njoints; i++) {
         temp = PyIter_Next(iq);
+        if (!temp) { PyErr_Format(PyExc_ValueError, "q iterator exhausted at element %d", i); return NULL; }
         q[i] = PyFloat_AsDouble(temp);
         Py_DECREF(temp);
 
         temp = PyIter_Next(iqd);
+        if (!temp) { PyErr_Format(PyExc_ValueError, "qd iterator exhausted at element %d", i); return NULL; }
         qd[i] = PyFloat_AsDouble(temp);
         Py_DECREF(temp);
 
         temp = PyIter_Next(iqdd);
+        if (!temp) { PyErr_Format(PyExc_ValueError, "qdd iterator exhausted at element %d", i); return NULL; }
         qdd[i] = PyFloat_AsDouble(temp);
         Py_DECREF(temp);
     }
@@ -168,6 +174,7 @@ static PyObject *frne(PyObject *self, PyObject *args) {
     // Create the fext array
     for (int i = 0; i < 6; i++) {
         temp = PyIter_Next(ifext);
+        if (!temp) { PyErr_Format(PyExc_ValueError, "fext iterator exhausted at element %d", i); return NULL; }
         fext[i] = PyFloat_AsDouble(temp);
         Py_DECREF(temp);
     }
@@ -194,7 +201,8 @@ static PyObject *frne(PyObject *self, PyObject *args) {
             rot_mat(l, l->theta, MEL(q,p,j)+l->offset, robot->dhtype);
             break;
         default:
-            perror("Invalid joint type %d (expecting 'R' or 'P')");
+            PyErr_Format(PyExc_ValueError, "Invalid joint type %d (expecting 'R' or 'P')", (int)l->jointtype);
+            return NULL;
         }
     }
 

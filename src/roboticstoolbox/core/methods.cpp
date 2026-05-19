@@ -171,7 +171,7 @@ extern "C"
 
                     if (et->isflip)
                     {
-                        tJ(Eigen::seq(0, 2), j) = -tJ(Eigen::seq(0, 5), j);
+                        tJ(Eigen::seq(0, 2), j) = -tJ(Eigen::seq(0, 2), j);
                     }
                 }
                 else if (et->axis == 4)
@@ -181,7 +181,7 @@ extern "C"
 
                     if (et->isflip)
                     {
-                        tJ(Eigen::seq(0, 2), j) = -tJ(Eigen::seq(0, 5), j);
+                        tJ(Eigen::seq(0, 2), j) = -tJ(Eigen::seq(0, 2), j);
                     }
                 }
                 else if (et->axis == 5)
@@ -191,7 +191,7 @@ extern "C"
 
                     if (et->isflip)
                     {
-                        tJ(Eigen::seq(0, 2), j) = -tJ(Eigen::seq(0, 5), j);
+                        tJ(Eigen::seq(0, 2), j) = -tJ(Eigen::seq(0, 2), j);
                     }
                 }
 
@@ -277,7 +277,7 @@ extern "C"
 
                     if (et->isflip)
                     {
-                        eJ(Eigen::seq(0, 2), j) = -eJ(Eigen::seq(0, 5), j);
+                        eJ(Eigen::seq(0, 2), j) = -eJ(Eigen::seq(0, 2), j);
                     }
                 }
                 else if (et->axis == 4)
@@ -287,7 +287,7 @@ extern "C"
 
                     if (et->isflip)
                     {
-                        eJ(Eigen::seq(0, 2), j) = -eJ(Eigen::seq(0, 5), j);
+                        eJ(Eigen::seq(0, 2), j) = -eJ(Eigen::seq(0, 2), j);
                     }
                 }
                 else if (et->axis == 5)
@@ -297,7 +297,7 @@ extern "C"
 
                     if (et->isflip)
                     {
-                        eJ(Eigen::seq(0, 2), j) = -eJ(Eigen::seq(0, 5), j);
+                        eJ(Eigen::seq(0, 2), j) = -eJ(Eigen::seq(0, 2), j);
                     }
                 }
 

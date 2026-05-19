@@ -8,11 +8,71 @@
 #include <Python.h>
 #include <math.h>
 #include <iostream>
+#include <functional>
 #include <Eigen/Dense>
-// #include <Eigen/QR>
-// #include <Eigen/Core>
-// #include <Eigen/LU>
-// #include <Eigen/SVD>
+
+// ---------------------------------------------------------------------------
+// Shared loop kernel — all five IK solvers use this.
+// The only difference between solvers is the "step" lambda, which receives
+// the current Jacobian J, error e, and scalar E and returns the dq update.
+// ---------------------------------------------------------------------------
+static void _IK_loop(
+    ETS *ets, Matrix4dc Tep,
+    MapVectorX q0, int ilimit, int slimit, double tol, int reject_jl,
+    MapVectorX q, int *it, int *search, int *solution, double *E,
+    Matrix6dc We,
+    std::function<VectorX(const Eigen::Map<Eigen::MatrixXd>&,
+                          const MapVectorX&, double)> step)
+{
+    double *np_Te = (double *)PyMem_RawCalloc(16, sizeof(double));
+    MapMatrix4dc Te(np_Te);
+    double *np_J = (double *)PyMem_RawCalloc(6 * ets->n, sizeof(double));
+    Eigen::Map<Eigen::MatrixXd> J(np_J, 6, ets->n);
+    double *np_e = (double *)PyMem_RawCalloc(6, sizeof(double));
+    MapVectorX e(np_e, 6);
+
+    if (q0.size() == ets->n)
+        q = q0;
+    else
+        _rand_q(ets, q);
+
+    int iter = 1;
+    while (*search <= slimit)
+    {
+        while (iter <= ilimit)
+        {
+            _ETS_fkine(ets, q.data(), (double *)NULL, NULL, Te);
+            _angle_axis(Te, Tep, e);
+            *E = 0.5 * e.transpose() * We * e;
+
+            if (*E < tol)
+            {
+                for (int i = 0; i < ets->n; i++)
+                    q(i) = std::fmod(q(i) + PI, PI_x2) - PI;
+                *solution = reject_jl ? _check_lim(ets, q) : 1;
+                break;
+            }
+
+            _ETS_jacob0(ets, q.data(), (double *)NULL, J);
+            q += step(J, e, *E);
+            iter++;
+        }
+
+        if (*solution)
+        {
+            *it += iter;
+            break;
+        }
+        *it += iter;
+        iter = 0;
+        (*search)++;
+        _rand_q(ets, q);
+    }
+
+    PyMem_RawFree(np_e);
+    PyMem_RawFree(np_Te);
+    PyMem_RawFree(np_J);
+}
 
 extern "C"
 {
@@ -23,132 +83,39 @@ extern "C"
         MapVectorX q, int *it, int *search, int *solution, double *E,
         MapVectorX we, int use_pinv, double pinv_damping)
     {
-        int iter = 1;
-
-        double *np_Te = (double *)PyMem_RawCalloc(16, sizeof(double));
-        MapMatrix4dc Te(np_Te);
-
-        double *np_J = (double *)PyMem_RawCalloc(6 * ets->n, sizeof(double));
-        MapMatrixJc J(np_J, 6, ets->n);
+        Matrix6dc We = (we.size() == 6) ? Matrix6dc(we.asDiagonal()) : Matrix6dc::Identity();
 
         double *np_Jw = (double *)PyMem_RawCalloc(ets->n * ets->n, sizeof(double));
         Eigen::Map<Eigen::MatrixXd> Jw(np_Jw, ets->n, ets->n);
 
-        double *np_e = (double *)PyMem_RawCalloc(6, sizeof(double));
-        MapVectorX e(np_e, 6);
-
-        Matrix6dc We;
-        double *np_pinv;
-        Eigen::Map<Eigen::MatrixXd> pinv(NULL, 0, 0);
-
+        double *np_pinv = nullptr;
+        Eigen::Map<Eigen::MatrixXd> pinv(nullptr, 0, 0);
         if (use_pinv)
         {
             np_pinv = (double *)PyMem_RawCalloc(ets->n * ets->n, sizeof(double));
             new (&pinv) Eigen::Map<Eigen::MatrixXd>(np_pinv, ets->n, ets->n);
         }
 
-        Eigen::MatrixXd Wn(ets->n, ets->n);
-        Eigen::MatrixXd EyeN = Eigen::MatrixXd::Identity(ets->n, ets->n);
-
         VectorX g(ets->n);
 
-        // Set we
-        if (we.size() == 6)
-        {
-            We = we.asDiagonal();
-        }
-        else
-        {
-            We = Matrix6dc::Identity();
-        }
-
-        // Set the first q0
-        if (q0.size() == ets->n)
-        {
-            q = q0;
-        }
-        else
-        {
-            _rand_q(ets, q);
-        }
-
-        // Global search up to slimit
-        while (*search <= slimit)
-        {
-
-            while (iter <= ilimit)
-            {
-                // Current pose Te
-                _ETS_fkine(ets, q.data(), (double *)NULL, NULL, Te);
-
-                // Angle axis error e
-                _angle_axis(Te, Tep, e);
-
-                // Squared error E
-                *E = 0.5 * e.transpose() * We * e;
-
-                if (*E < tol)
-                {
-                    // We have arrived
-
-                    // wrap q to +- pi
-                    for (int i = 0; i < ets->n; i++)
-                    {
-                        q(i) = std::fmod(q(i) + PI, PI_x2) - PI;
-                    }
-
-                    // Check for joint limit violation
-                    if (reject_jl)
-                    {
-                        *solution = _check_lim(ets, q);
-                    }
-                    else
-                    {
-                        *solution = 1;
-                    }
-
-                    break;
-                }
-
-                // Jacobian Matric J
-                _ETS_jacob0(ets, q.data(), (double *)NULL, J);
-
+        _IK_loop(ets, Tep, q0, ilimit, slimit, tol, reject_jl, q, it, search, solution, E, We,
+            [&](const Eigen::Map<Eigen::MatrixXd>& J, const MapVectorX& e, double) -> VectorX {
                 g = J.transpose() * We * e;
                 Jw = J.transpose() * We * J;
-
                 if (use_pinv)
                 {
                     Eigen::BDCSVD<Eigen::MatrixXd> svd(Jw, Eigen::ComputeFullU | Eigen::ComputeFullV);
-                    q += svd.solve(g);
+                    return svd.solve(g);
                 }
                 else
                 {
-                    q += Jw.colPivHouseholderQr().solve(g);
+                    return Jw.colPivHouseholderQr().solve(g);
                 }
+            });
 
-                iter += 1;
-            }
-
-            if (*solution)
-            {
-                *it += iter;
-                break;
-            }
-
-            *it += iter;
-            iter = 0;
-            *search += 1;
-            _rand_q(ets, q);
-        }
-
-        free(np_e);
-        free(np_Te);
-        free(np_J);
-
+        PyMem_RawFree(np_Jw);
         if (use_pinv)
-        {
-            free(np_pinv);
-        }
+            PyMem_RawFree(np_pinv);
     }
 
     void _IK_NR(
@@ -157,132 +124,34 @@ extern "C"
         MapVectorX q, int *it, int *search, int *solution, double *E,
         MapVectorX we, int use_pinv, double pinv_damping)
     {
-        int iter = 1;
-
-        double *np_Te = (double *)PyMem_RawCalloc(16, sizeof(double));
-        MapMatrix4dc Te(np_Te);
-
-        double *np_J = (double *)PyMem_RawCalloc(6 * ets->n, sizeof(double));
-        Eigen::Map<Eigen::MatrixXd> J(np_J, 6, ets->n);
-
-        double *np_e = (double *)PyMem_RawCalloc(6, sizeof(double));
-        MapVectorX e(np_e, 6);
-
-        Matrix6dc We;
-        double *np_J_pinv;
-        Eigen::Map<Eigen::MatrixXd> J_pinv(NULL, 0, 0);
-
         if (ets->n != 6)
-        {
             use_pinv = 1;
-        }
 
+        Matrix6dc We = (we.size() == 6) ? Matrix6dc(we.asDiagonal()) : Matrix6dc::Identity();
+
+        double *np_J_pinv = nullptr;
+        Eigen::Map<Eigen::MatrixXd> J_pinv(nullptr, 0, 0);
         if (use_pinv)
         {
             np_J_pinv = (double *)PyMem_RawCalloc(ets->n * 6, sizeof(double));
             new (&J_pinv) Eigen::Map<Eigen::MatrixXd>(np_J_pinv, ets->n, 6);
         }
 
-        Eigen::MatrixXd Wn(ets->n, ets->n);
-        Eigen::MatrixXd EyeN = Eigen::MatrixXd::Identity(ets->n, ets->n);
-
-        // Set we
-        if (we.size() == 6)
-        {
-            We = we.asDiagonal();
-        }
-        else
-        {
-            We = Matrix6dc::Identity();
-        }
-
-        // Set the first q0
-        if (q0.size() == ets->n)
-        {
-            q = q0;
-        }
-        else
-        {
-            _rand_q(ets, q);
-        }
-
-        // Global search up to slimit
-        while (*search <= slimit)
-        {
-
-            while (iter <= ilimit)
-            {
-                // Current pose Te
-                _ETS_fkine(ets, q.data(), (double *)NULL, NULL, Te);
-
-                // Angle axis error e
-                _angle_axis(Te, Tep, e);
-
-                // Squared error E
-                *E = 0.5 * e.transpose() * We * e;
-
-                if (*E < tol)
-                {
-                    // We have arrived
-
-                    // wrap q to +- pi
-                    for (int i = 0; i < ets->n; i++)
-                    {
-                        q(i) = std::fmod(q(i) + PI, PI_x2) - PI;
-                    }
-
-                    // Check for joint limit violation
-                    if (reject_jl)
-                    {
-                        *solution = _check_lim(ets, q);
-                    }
-                    else
-                    {
-                        *solution = 1;
-                    }
-
-                    break;
-                }
-
-                // Jacobian Matric J
-                _ETS_jacob0(ets, q.data(), (double *)NULL, J);
-
-                // robot.q += np.linalg.inv(J) @ e
-
+        _IK_loop(ets, Tep, q0, ilimit, slimit, tol, reject_jl, q, it, search, solution, E, We,
+            [&](const Eigen::Map<Eigen::MatrixXd>& J, const MapVectorX& e, double) -> VectorX {
                 if (use_pinv)
                 {
-                    // Work out the joint velocity qd
                     _pseudo_inverse(J, J_pinv, pinv_damping);
-                    q += J_pinv * e;
+                    return J_pinv * e;
                 }
                 else
                 {
-                    q += J.inverse() * e;
+                    return J.inverse() * e;
                 }
-
-                iter += 1;
-            }
-
-            if (*solution)
-            {
-                *it += iter;
-                break;
-            }
-
-            *it += iter;
-            iter = 0;
-            *search += 1;
-            _rand_q(ets, q);
-        }
-
-        free(np_e);
-        free(np_Te);
-        free(np_J);
+            });
 
         if (use_pinv)
-        {
-            free(np_J_pinv);
-        }
+            PyMem_RawFree(np_J_pinv);
     }
 
     void _IK_LM_Chan(
@@ -291,116 +160,16 @@ extern "C"
         MapVectorX q, int *it, int *search, int *solution, double *E,
         double lambda, MapVectorX we)
     {
-        int iter = 1;
-
-        // std::cout << Tep << "\n";
-        // std::cout << std::endl;
-
-        double *np_Te = (double *)PyMem_RawCalloc(16, sizeof(double));
-        MapMatrix4dc Te(np_Te);
-
-        double *np_J = (double *)PyMem_RawCalloc(6 * ets->n, sizeof(double));
-        Eigen::Map<Eigen::MatrixXd> J(np_J, 6, ets->n);
-
-        double *np_e = (double *)PyMem_RawCalloc(6, sizeof(double));
-        MapVectorX e(np_e, 6);
-
-        Matrix6dc We;
-
-        Eigen::MatrixXd Wn(ets->n, ets->n);
+        Matrix6dc We = (we.size() == 6) ? Matrix6dc(we.asDiagonal()) : Matrix6dc::Identity();
         Eigen::MatrixXd EyeN = Eigen::MatrixXd::Identity(ets->n, ets->n);
-
         VectorX g(ets->n);
 
-        // Set we
-        if (we.size() == 6)
-        {
-            We = we.asDiagonal();
-        }
-        else
-        {
-            We = Matrix6dc::Identity();
-        }
-
-        // Set the first q0
-        if (q0.size() == ets->n)
-        {
-            q = q0;
-        }
-        else
-        {
-            _rand_q(ets, q);
-        }
-
-        // Global search up to slimit
-        while (*search <= slimit)
-        {
-
-            while (iter <= ilimit)
-            {
-                // Current pose Te
-                _ETS_fkine(ets, q.data(), (double *)NULL, NULL, Te);
-
-                // Angle axis error e
-                _angle_axis(Te, Tep, e);
-
-                // Squared error E
-                *E = 0.5 * e.transpose() * We * e;
-
-                if (*E < tol)
-                {
-                    // We have arrived
-
-                    // wrap q to +- pi
-                    for (int i = 0; i < ets->n; i++)
-                    {
-                        q(i) = std::fmod(q(i) + PI, PI_x2) - PI;
-                    }
-
-                    // Check for joint limit violation
-                    if (reject_jl)
-                    {
-                        *solution = _check_lim(ets, q);
-                    }
-                    else
-                    {
-                        *solution = 1;
-                    }
-
-                    break;
-                }
-
-                // Jacobian Matric J
-                _ETS_jacob0(ets, q.data(), (double *)NULL, J);
-
-                // Weighting matrix Wn
-                Wn = lambda * *E * EyeN;
-
-                // The vector g
+        _IK_loop(ets, Tep, q0, ilimit, slimit, tol, reject_jl, q, it, search, solution, E, We,
+            [&](const Eigen::Map<Eigen::MatrixXd>& J, const MapVectorX& e, double Eval) -> VectorX {
+                Eigen::MatrixXd Wn = lambda * Eval * EyeN;
                 g = J.transpose() * We * e;
-
-                // Work out the joint velocity qd
-                q += (J.transpose() * We * J + Wn).inverse() * g;
-                // q += (J.transpose() * We * J + Wn).colPivHouseholderQr().solve(g);
-
-                iter += 1;
-            }
-
-            if (*solution)
-            {
-                *it += iter;
-                break;
-            }
-
-            *it += iter;
-            iter = 0;
-            *search += 1;
-            _rand_q(ets, q);
-        }
-
-        free(np_e);
-        free(np_Te);
-        free(np_J);
+                return (J.transpose() * We * J + Wn).inverse() * g;
+            });
     }
 
     void _IK_LM_Wampler(
@@ -409,109 +178,16 @@ extern "C"
         MapVectorX q, int *it, int *search, int *solution, double *E,
         double lambda, MapVectorX we)
     {
-        int iter = 1;
-
-        double *np_Te = (double *)PyMem_RawCalloc(16, sizeof(double));
-        MapMatrix4dc Te(np_Te);
-
-        double *np_J = (double *)PyMem_RawCalloc(6 * ets->n, sizeof(double));
-        Eigen::Map<Eigen::MatrixXd> J(np_J, 6, ets->n);
-
-        double *np_e = (double *)PyMem_RawCalloc(6, sizeof(double));
-        MapVectorX e(np_e, 6);
-
-        Matrix6dc We;
-
+        Matrix6dc We = (we.size() == 6) ? Matrix6dc(we.asDiagonal()) : Matrix6dc::Identity();
+        // Wn is constant across iterations for Wampler
         Eigen::MatrixXd Wn = lambda * Eigen::MatrixXd::Identity(ets->n, ets->n);
-
         VectorX g(ets->n);
 
-        // Set we
-        if (we.size() == 6)
-        {
-            We = we.asDiagonal();
-        }
-        else
-        {
-            We = Matrix6dc::Identity();
-        }
-
-        // Set the first q0
-        if (q0.size() == ets->n)
-        {
-            q = q0;
-        }
-        else
-        {
-            _rand_q(ets, q);
-        }
-
-        // Global search up to slimit
-        while (*search <= slimit)
-        {
-
-            while (iter <= ilimit)
-            {
-                // Current pose Te
-                _ETS_fkine(ets, q.data(), (double *)NULL, NULL, Te);
-
-                // Angle axis error e
-                _angle_axis(Te, Tep, e);
-
-                // Squared error E
-                *E = 0.5 * e.transpose() * We * e;
-
-                if (*E < tol)
-                {
-                    // We have arrived
-
-                    // wrap q to +- pi
-                    for (int i = 0; i < ets->n; i++)
-                    {
-                        q(i) = std::fmod(q(i) + PI, PI_x2) - PI;
-                    }
-
-                    // Check for joint limit violation
-                    if (reject_jl)
-                    {
-                        *solution = _check_lim(ets, q);
-                    }
-                    else
-                    {
-                        *solution = 1;
-                    }
-
-                    break;
-                }
-
-                // Jacobian Matric J
-                _ETS_jacob0(ets, q.data(), (double *)NULL, J);
-
-                // The vector g
+        _IK_loop(ets, Tep, q0, ilimit, slimit, tol, reject_jl, q, it, search, solution, E, We,
+            [&](const Eigen::Map<Eigen::MatrixXd>& J, const MapVectorX& e, double) -> VectorX {
                 g = J.transpose() * We * e;
-
-                // Work out the joint velocity qd
-                q += (J.transpose() * We * J + Wn).inverse() * g;
-                // q += (J.transpose() * We * J + Wn).colPivHouseholderQr().solve(g);
-
-                iter += 1;
-            }
-
-            if (*solution)
-            {
-                *it += iter;
-                break;
-            }
-
-            *it += iter;
-            iter = 0;
-            *search += 1;
-            _rand_q(ets, q);
-        }
-
-        free(np_e);
-        free(np_Te);
-        free(np_J);
+                return (J.transpose() * We * J + Wn).inverse() * g;
+            });
     }
 
     void _IK_LM_Sugihara(
@@ -520,113 +196,16 @@ extern "C"
         MapVectorX q, int *it, int *search, int *solution, double *E,
         double lambda, MapVectorX we)
     {
-        int iter = 1;
-
-        double *np_Te = (double *)PyMem_RawCalloc(16, sizeof(double));
-        MapMatrix4dc Te(np_Te);
-
-        double *np_J = (double *)PyMem_RawCalloc(6 * ets->n, sizeof(double));
-        Eigen::Map<Eigen::MatrixXd> J(np_J, 6, ets->n);
-
-        double *np_e = (double *)PyMem_RawCalloc(6, sizeof(double));
-        MapVectorX e(np_e, 6);
-
-        Matrix6dc We;
-
-        Eigen::MatrixXd Wn(ets->n, ets->n);
+        Matrix6dc We = (we.size() == 6) ? Matrix6dc(we.asDiagonal()) : Matrix6dc::Identity();
         Eigen::MatrixXd EyeN = Eigen::MatrixXd::Identity(ets->n, ets->n);
-
         VectorX g(ets->n);
 
-        // Set we
-        if (we.size() == 6)
-        {
-            We = we.asDiagonal();
-        }
-        else
-        {
-            We = Matrix6dc::Identity();
-        }
-
-        // Set the first q0
-        if (q0.size() == ets->n)
-        {
-            q = q0;
-        }
-        else
-        {
-            _rand_q(ets, q);
-        }
-
-        // Global search up to slimit
-        while (*search <= slimit)
-        {
-
-            while (iter <= ilimit)
-            {
-                // Current pose Te
-                _ETS_fkine(ets, q.data(), (double *)NULL, NULL, Te);
-
-                // Angle axis error e
-                _angle_axis(Te, Tep, e);
-
-                // Squared error E
-                *E = 0.5 * e.transpose() * We * e;
-
-                if (*E < tol)
-                {
-                    // We have arrived
-
-                    // wrap q to +- pi
-                    for (int i = 0; i < ets->n; i++)
-                    {
-                        q(i) = std::fmod(q(i) + PI, PI_x2) - PI;
-                    }
-
-                    // Check for joint limit violation
-                    if (reject_jl)
-                    {
-                        *solution = _check_lim(ets, q);
-                    }
-                    else
-                    {
-                        *solution = 1;
-                    }
-
-                    break;
-                }
-
-                // Jacobian Matric J
-                _ETS_jacob0(ets, q.data(), (double *)NULL, J);
-
-                // Weighting matrix Wn
-                Wn = *E * EyeN + lambda * EyeN;
-
-                // The vector g
+        _IK_loop(ets, Tep, q0, ilimit, slimit, tol, reject_jl, q, it, search, solution, E, We,
+            [&](const Eigen::Map<Eigen::MatrixXd>& J, const MapVectorX& e, double Eval) -> VectorX {
+                Eigen::MatrixXd Wn = (Eval + lambda) * EyeN;
                 g = J.transpose() * We * e;
-
-                // Work out the joint velocity qd
-                q += (J.transpose() * We * J + Wn).inverse() * g;
-                // q += (J.transpose() * We * J + Wn).colPivHouseholderQr().solve(g);
-
-                iter += 1;
-            }
-
-            if (*solution)
-            {
-                *it += iter;
-                break;
-            }
-
-            *it += iter;
-            iter = 0;
-            *search += 1;
-            _rand_q(ets, q);
-        }
-
-        free(np_e);
-        free(np_Te);
-        free(np_J);
+                return (J.transpose() * We * J + Wn).inverse() * g;
+            });
     }
 
     void _pseudo_inverse(Eigen::Map<Eigen::MatrixXd> J, Eigen::Map<Eigen::MatrixXd> J_pinv, double damping)
