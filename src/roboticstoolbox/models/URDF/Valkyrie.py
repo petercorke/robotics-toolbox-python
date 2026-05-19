@@ -78,7 +78,6 @@ class Valkyrie(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = Valkyrie("B")
     print(robot)
     env = robot.plot(np.zeros((robot.n,)))

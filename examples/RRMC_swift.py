@@ -22,7 +22,6 @@ env.add(panda)
 dt = 0.05
 
 while not arrived:
-
     v, arrived = rp.p_servo(panda.fkine(panda.q), Tep, 1)
     panda.qd = np.linalg.pinv(panda.jacobe(panda.q)) @ v
     env.step(dt)

@@ -228,7 +228,8 @@ class TestETS(unittest.TestCase):
         q2 = [y]
         ans6 = SE3.Rx(y) * tool
         nt.assert_almost_equal(
-            r2.fkine(q2, tool=tool).A, sympy.simplify(ans6.A)  # type: ignore
+            r2.fkine(q2, tool=tool).A,
+            sympy.simplify(ans6.A),  # type: ignore
         )
         # nt.assert_almost_equal(r2.fkine(q2, tool=tool), ans6)  # type: ignore
 

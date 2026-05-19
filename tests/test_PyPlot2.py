@@ -6,15 +6,16 @@
 # import numpy.testing as nt
 # import numpy as np
 import roboticstoolbox as rp
+
 # import spatialmath as sm
 import unittest
 
 
 class TestPyPlot(unittest.TestCase):
-
     def test_PyPlot(self):
         panda = rp.models.DH.Panda()
         from roboticstoolbox.backends.PyPlot import PyPlot2
+
         env = PyPlot2()
         env.launch()
         env.add(panda)
@@ -25,6 +26,7 @@ class TestPyPlot(unittest.TestCase):
     def test_PyPlot_invisible(self):
         panda = rp.models.DH.Panda()
         from roboticstoolbox.backends.PyPlot import PyPlot2
+
         env = PyPlot2()
         env.launch()
         env.add(panda, display=False)
@@ -35,11 +37,13 @@ class TestPyPlot(unittest.TestCase):
     def test_unimplemented(self):
         # TODO remove these as implemented
         from roboticstoolbox.backends.PyPlot import PyPlot2
+
         env = PyPlot2()
         env.reset()
 
         env.restart()
         env.remove()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

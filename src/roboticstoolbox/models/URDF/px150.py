@@ -52,6 +52,5 @@ class px150(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = px150()
     print(robot)

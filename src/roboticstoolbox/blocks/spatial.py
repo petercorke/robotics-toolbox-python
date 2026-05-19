@@ -236,7 +236,6 @@ class TR2T(FunctionBlock):
 
 
 if __name__ == "__main__":
-
     from pathlib import Path
 
     exec(

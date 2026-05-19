@@ -70,6 +70,5 @@ class Omni(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = Omni()
     print(robot)

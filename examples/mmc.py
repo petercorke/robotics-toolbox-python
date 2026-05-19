@@ -37,7 +37,6 @@ Tep = panda.fkine(panda.q) * sm.SE3(0.3, 0.2, 0.3)
 arrived = False
 
 while not arrived:
-
     # The pose of the Panda's end-effector
     Te = panda.fkine(panda.q)
 

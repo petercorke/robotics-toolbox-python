@@ -381,7 +381,7 @@ class BinaryOccupancyGrid(BaseOccupancyGrid):
 
         ncells = np.prod(self._grid.shape)
         nobs = self._grid.sum()
-        s += f", {nobs/ncells*100:.1f}% occupied"
+        s += f", {nobs / ncells * 100:.1f}% occupied"
         return s
 
     def isoccupied(self, p):
@@ -563,7 +563,6 @@ class PolygonMap(BaseMap):
 
 
 if __name__ == "__main__":
-
     # g = np.zeros((100, 100))
     # g[20:30, 50:80] = 1
 

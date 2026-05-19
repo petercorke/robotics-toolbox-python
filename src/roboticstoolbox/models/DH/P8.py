@@ -74,7 +74,6 @@ class P8(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = P8()
     print(robot)
 

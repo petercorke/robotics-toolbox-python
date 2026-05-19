@@ -38,7 +38,6 @@ Tep = panda.fkine(panda.q) * sm.SE3(0.3, 0.2, 0.3)
 arrived = False
 
 while not arrived:
-
     # The pose of the Panda's end-effector
     Te = panda.fkine(panda.q)
 
@@ -69,19 +68,21 @@ while not arrived:
 
     for i in range(n):
         if panda.q[i] - panda.qlim[0, i] <= pi:
-            b[i, 0] = -1 * \
-                np.power(((panda.q[i] - panda.qlim[0, i]) - pi), 2) \
+            b[i, 0] = (
+                -1
+                * np.power(((panda.q[i] - panda.qlim[0, i]) - pi), 2)
                 / np.power((ps - pi), 2)
+            )
         if panda.qlim[1, i] - panda.q[i] <= pi:
-            b[i, 0] = 1 * \
-                np.power(((panda.qlim[1, i] - panda.q[i]) - pi), 2) \
+            b[i, 0] = (
+                1
+                * np.power(((panda.qlim[1, i] - panda.q[i]) - pi), 2)
                 / np.power((ps - pi), 2)
+            )
 
     # Project the gradient of manipulability into the null-space of the
     # differential kinematics
-    null = (
-        np.eye(n) - np.linalg.pinv(Je) @ Je
-    ) @ (Jm - b)
+    null = (np.eye(n) - np.linalg.pinv(Je) @ Je) @ (Jm - b)
 
     # Solve for the joint velocities dq
     qd = np.linalg.pinv(Je) @ v + 1 / Y * null.flatten()

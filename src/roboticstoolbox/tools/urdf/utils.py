@@ -1,5 +1,5 @@
-"""Utilities for URDF parsing.
-"""
+"""Utilities for URDF parsing."""
+
 import numpy as np
 import spatialmath as sm
 
@@ -21,13 +21,13 @@ def parse_origin(node):
     """
     matrix = sm.SE3()
     rpy = np.array([0, 0, 0])
-    origin_node = node.find('origin')
+    origin_node = node.find("origin")
     if origin_node is not None:
-        if 'xyz' in origin_node.attrib:
-            t = np.fromstring(origin_node.attrib['xyz'], sep=' ')
+        if "xyz" in origin_node.attrib:
+            t = np.fromstring(origin_node.attrib["xyz"], sep=" ")
             matrix = sm.SE3(t)
-        if 'rpy' in origin_node.attrib:
-            rpy = np.fromstring(origin_node.attrib['rpy'], sep=' ')
+        if "rpy" in origin_node.attrib:
+            rpy = np.fromstring(origin_node.attrib["rpy"], sep=" ")
             matrix.A[:3, :3] = sm.SE3.RPY(rpy).R
 
     return matrix.A, rpy

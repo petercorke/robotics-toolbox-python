@@ -28,7 +28,6 @@ def rne(robot, q, qd, qdd):
     Q = np.zeros(n)
 
     for i, link in enumerate(robot.links):
-
         # Allocate the inertia
         I[i] = sm.SpatialInertia(link.m, link.r, link.I)
 
@@ -45,7 +44,6 @@ def rne(robot, q, qd, qdd):
 
     # Forward recursion
     for i, link in enumerate(robot.links):
-
         if link.jindex is None:
             qi = 0
             qdi = 0
@@ -74,7 +72,6 @@ def rne(robot, q, qd, qdd):
 
     # backward recursion
     for i in reversed(range(n)):
-
         link = robot.links[i]
 
         Q[i] = sum(f[i].A * s[i])
@@ -111,7 +108,6 @@ def rne_eff(robot, q, qd, qdd):
     Q = np.zeros(n)
 
     for i, link in enumerate(robot.links):
-
         # Allocate the inertia
         I[i] = sm.SpatialInertia(link.m, link.r, link.I)
 
@@ -128,7 +124,6 @@ def rne_eff(robot, q, qd, qdd):
 
     # Forward recursion
     for i, link in enumerate(robot.links):
-
         if link.jindex is None:
             qi = 0
             qdi = 0
@@ -157,7 +152,6 @@ def rne_eff(robot, q, qd, qdd):
 
     # backward recursion
     for i in reversed(range(n)):
-
         link = robot.links[i]
 
         Q[i] = sum(f[i].A * s[i])

@@ -1397,7 +1397,7 @@ class Joint(URDFType):
         if value is None:
             if self.joint_type in ["prismatic", "revolute"]:  # pragma nocover
                 raise ValueError(
-                    "Require joint limit for prismatic and " "revolute joints"
+                    "Require joint limit for prismatic and revolute joints"
                 )
         elif not isinstance(value, JointLimit):  # pragma nocover
             raise TypeError("Expected JointLimit type")
@@ -1642,7 +1642,7 @@ class URDF(URDFType):
 
         for x in self._materials:
             if x.name in self._material_map:
-                raise ValueError("Two materials with name {} " "found".format(x.name))
+                raise ValueError("Two materials with name {} found".format(x.name))
             self._material_map[x.name] = x
 
         # check for duplicate names
@@ -1956,8 +1956,9 @@ class URDF(URDFType):
             for joint in t.joints:
                 if joint.name not in self._joint_map:
                     raise ValueError(
-                        "Transmission {} has invalid joint name "
-                        "{}".format(t.name, joint.name)
+                        "Transmission {} has invalid joint name {}".format(
+                            t.name, joint.name
+                        )
                     )
 
     @classmethod

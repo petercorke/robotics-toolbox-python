@@ -81,7 +81,6 @@ class Baxter(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     baxter = Baxter("left")
     print(baxter.name, baxter.base)
     # baxter.plot(baxter.qz, block=False)

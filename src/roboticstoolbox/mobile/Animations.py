@@ -206,7 +206,6 @@ class VehiclePolygon(VehicleAnimationBase):
         """
         super().__init__()
         if isinstance(shape, str):
-
             # consider vehicle at origin, pointing along +ve x-axis
             h = 0.3
             t = 0.8  # start of head taper

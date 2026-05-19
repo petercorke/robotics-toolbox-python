@@ -52,6 +52,5 @@ class wx250s(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = wx250s()
     print(robot)

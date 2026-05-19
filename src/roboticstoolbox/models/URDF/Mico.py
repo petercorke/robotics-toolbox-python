@@ -64,6 +64,5 @@ class Mico(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = Mico()
     print(robot)

@@ -6,11 +6,15 @@
 
 import numpy as np
 import roboticstoolbox as rtb
-from spatialmath import *      # lgtm [py/polluting-import]
+from spatialmath import *  # lgtm [py/polluting-import]
 from math import pi
+
 # import matplotlib.pyplot as plt
 # from matplotlib import cm
-np.set_printoptions(linewidth=100, formatter={'float': lambda x: f"{x:8.4g}" if x > 1e-10 else f"{0:8.4g}"})
+np.set_printoptions(
+    linewidth=100,
+    formatter={"float": lambda x: f"{x:8.4g}" if x > 1e-10 else f"{0:8.4g}"},
+)
 
 block = False
 
@@ -38,7 +42,7 @@ p560.plot(p560.qn, block=block)
 # - the inertia or mass matrix $\mathbf{M}(\mathit{\ddot{q}})$ which is a function of joint configuration
 # - the centripetal and Coriolis or velocity term which is a function of joint configuration and rate
 # - the gravity load which is a function of joint configuration
-# 
+#
 # If the robot is not moving, that is $\mathit{q} = \mathit{\dot{q}} = 0$ then the equation becomes
 # $$
 # \mathbf{g}(\mathit{q}) = \mathit{\tau}
@@ -46,26 +50,26 @@ p560.plot(p560.qn, block=block)
 # where $\mathit{\tau}$ is the torque required for this condition $\mathit{q} = \mathit{\dot{q}} = 0$ to be true, that is, the torque required to stop the robot falling under its own weight.  The toolbox can compute this
 
 # In[4]:
-print('about to do coriolis')
+print("about to do coriolis")
 
 p560.gravload(p560.qn)
 
-print('done gravload')
+print("done gravload")
 
 # and it shows, as expected, that the shoulder is exerting significant torque to hold the arm up and stationary.
-# 
+#
 # The inertia matrix relates torque to joint acceleration and is the mass in a multi-dimensional version of Newton's second law $F = m a$.  In this configuration the inertia matrix is
 
 # In[5]:
 
 
 p560.inertia(p560.qn)
-print('done inertia')
+print("done inertia")
 
 # The diagonal elements $M_{jj}$ indicate the inertia experienced by the joint $j$, ie. Newton's second law for this joint is $\tau_j  = M_{jj} \ddot{q}_j$.
-# 
+#
 # The matrix is symmetric and the off-diagonal terms $M_{ij} = M_{ji}$ couple acceleration of one joint into a disturbance torque on another joint, ie.  $\tau_j = M_{ij} \ddot{q}_i$.
-# 
+#
 # The inertia matrix is a function of joint configuration, that is, the elements of the inertia matrix change as we vary the angles of joints 1 and 2, ie. $q_2$ and $q_3$.  It is this configuration varying inertia and coupling between joints that is a fundamental challenge for high-quality joint control.
 
 # In[6]:
@@ -73,13 +77,13 @@ print('done inertia')
 
 N = 100
 (Q2, Q3) = np.meshgrid(np.linspace(-pi, pi, N), np.linspace(-pi, pi, N))
-M11 = np.zeros((N,N))
-M12 = np.zeros((N,N))
+M11 = np.zeros((N, N))
+M12 = np.zeros((N, N))
 for i in range(N):
     for j in range(N):
-        M = p560.inertia(np.r_[0, Q2[i,j], Q3[i,j], 0, 0, 0])
-        M11[i,j] = M[0,0]
-        M12[i,j] = M[0,1]
+        M = p560.inertia(np.r_[0, Q2[i, j], Q3[i, j], 0, 0, 0])
+        M11[i, j] = M[0, 0]
+        M12[i, j] = M[0, 1]
 
 
 # The inertia "seen" by joint 1 varies as a function of $q_2$ and $q_3$ as shown below
@@ -103,7 +107,7 @@ for i in range(N):
 
 M11.max() / M11.min()
 
-print('done inertias')
+print("done inertias")
 
 # The coupling inertia between joints 1 and 2 also varies with configuration and we can plot that as well
 
@@ -119,7 +123,7 @@ print('done inertias')
 # plt.show(block=True)
 
 
-# The velocity terms are a bit harder to comprehend but they mean that rotation of one joint (and its link) can exert a torque on other joints.  Consider that the should joint is rotating at 1 rad/sec, then the torque will be 
+# The velocity terms are a bit harder to comprehend but they mean that rotation of one joint (and its link) can exert a torque on other joints.  Consider that the should joint is rotating at 1 rad/sec, then the torque will be
 
 # In[10]:
 
@@ -127,11 +131,11 @@ print('done inertias')
 qd = np.r_[0, 1, 0, 0, 0, 0]
 p560.coriolis(p560.qn, qd) @ qd
 
-print('done coriolis')
+print("done coriolis")
 
 
 # and we see that it exerts a torque on the waist and elbow joints.
-# 
+#
 # The algorithms to compute the various terms in the rigid-body equations of motion are based on the recursive Newton-Euler algorithm
 
 # In[ ]:
@@ -139,19 +143,19 @@ print('done coriolis')
 
 p560.rne(p560.qn, np.zeros((6,)), np.zeros((6,)))
 
-print('done rne')
+print("done rne")
 
 # which computes $\tau = \mbox{rne}(\mathit{q}, \mathit{\dot{q}}, \mathit{\dot{q}})$ and can accept additional arguments such as gravity or a wrench applied to the end-effector.  In the Toolbox this algorithm is implemented in C for maximum performance.
-# 
+#
 # The example above computes the gravity load, cross check it with the result computed earlier.
-# 
+#
 
 # We can rearrange the equations of motion as
 # $$
-# \mathit{\ddot{q}} = \mathbf{M}(\mathit{\ddot{q}})^{-1} \left\{ \mathit{\tau} - \mathbf{C}(\mathit{q}, \mathit{\dot{q}}) \mathit{\dot{q}} - \mathbf{g}(\mathit{q}) \right\} 
+# \mathit{\ddot{q}} = \mathbf{M}(\mathit{\ddot{q}})^{-1} \left\{ \mathit{\tau} - \mathbf{C}(\mathit{q}, \mathit{\dot{q}}) \mathit{\dot{q}} - \mathbf{g}(\mathit{q}) \right\}
 # $$
 # which is the joint acceleration for a robot in the state $(\mathit{q}, \mathit{\dot{q}})$ with an applied torque of $\mathit{\tau}$.
-# 
+#
 # If we integrate this we can compute the trajectory of the joint coordinates (and velocities) as a function of time
 
 # In[5]:
@@ -160,15 +164,15 @@ print('done rne')
 p560nf = p560.nofriction()
 tg = p560nf.fdyn(5, p560.qn, dt=0.05)
 
-print('done fdyn')
+print("done fdyn")
 
 
 # The first line needs some explanation.  The Toolbox can model two types of joint friction:
 # - viscous friction which is linearly related to joint velocity
 # - Coulomb friction which is **non-linearly** related to joint velocity
-# 
+#
 # Coulomb friction is a _harsh_ non-linearity and it causes the numerical integrator to take very small times steps, so the result will take many minutes to compute.  To speed things up, at the expense of some modeling fidelity, we set the Coulomb friction to zero, but retain the viscous friction.  The `nofriction()` method returns a clone of the robot with its friction parameters modified.
-# 
+#
 # The computed joint configuration trajectory is
 
 # In[ ]:

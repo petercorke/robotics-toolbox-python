@@ -19,7 +19,7 @@
 
 # Author: Ryu Woon Jung (Leon)
 
-from .robotis_def import *   # lgtm [py/polluting-import]
+from .robotis_def import *  # lgtm [py/polluting-import]
 
 
 class GroupBulkWrite:

@@ -1355,7 +1355,12 @@ class BaseLink(SceneNode, ABC):
         return dyn
 
     def _format_param(
-        self, l, name, symbol=None, ignorevalue=None, indices=None  # noqa
+        self,
+        l,
+        name,
+        symbol=None,
+        ignorevalue=None,
+        indices=None,  # noqa
     ):  # noqa  # pragma nocover
         # if value == ignorevalue then don't display it
 

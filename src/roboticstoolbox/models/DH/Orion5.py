@@ -87,6 +87,5 @@ class Orion5(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     orion = Orion5()
     print(orion)

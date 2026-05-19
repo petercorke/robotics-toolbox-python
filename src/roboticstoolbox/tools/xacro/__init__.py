@@ -42,8 +42,13 @@ import xml.dom.minidom
 
 from copy import deepcopy
 from .color import error, warning
-from .xmlutils import opt_attrs, reqd_attrs, first_child_element, \
-    next_sibling_element, replace_node
+from .xmlutils import (
+    opt_attrs,
+    reqd_attrs,
+    first_child_element,
+    next_sibling_element,
+    replace_node,
+)
 
 
 _basestr = str
@@ -58,7 +63,7 @@ substitution_args_context = {}
 filestack = []
 
 # The top level directory
-tld = ''
+tld = ""
 
 
 def push_file(filename):
@@ -89,18 +94,18 @@ def abs_filename_spec(filename_spec):
     """
     if not os.path.isabs(filename_spec):
         parent_filename = filestack[-1]
-        basedir = os.path.dirname(parent_filename) if parent_filename else '.'
+        basedir = os.path.dirname(parent_filename) if parent_filename else "."
         return os.path.join(basedir, filename_spec)
     return filename_spec  # pragma: no cover
 
 
 class YamlDictWrapper(dict):  # pragma: no cover
     """Wrapper class providing dotted access to dict items"""
+
     def __getattr__(self, item):
         try:
             result = super(YamlDictWrapper, self).__getitem__(item)
-            return YamlDictWrapper(result) \
-                if isinstance(result, dict) else result
+            return YamlDictWrapper(result) if isinstance(result, dict) else result
         except KeyError:
             raise XacroException("No such key: '{}'".format(item))
 
@@ -131,16 +136,29 @@ def load_yaml(filename):  # pragma: no cover
 # for discussion, see:
 # http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html
 global_symbols = {
-    '__builtins__': {
-        k: __builtins__[k] for k in [
-            'list', 'dict', 'map', 'len', 'str', 'float', 'int',
-            'True', 'False', 'min', 'max', 'round']}}
+    "__builtins__": {
+        k: __builtins__[k]
+        for k in [
+            "list",
+            "dict",
+            "map",
+            "len",
+            "str",
+            "float",
+            "int",
+            "True",
+            "False",
+            "min",
+            "max",
+            "round",
+        ]
+    }
+}
 
 # also define all math symbols and functions
 global_symbols.update(math.__dict__)
 # expose load_yaml and abs_filename
-global_symbols.update(
-    dict(load_yaml=load_yaml, abs_filename=abs_filename_spec))
+global_symbols.update(dict(load_yaml=load_yaml, abs_filename=abs_filename_spec))
 
 
 class XacroException(Exception):
@@ -158,8 +176,9 @@ class XacroException(Exception):
 
     def __str__(self):  # pragma: no cover
         items = [super(XacroException, self).__str__(), self.exc, self.suffix]
-        return ' '.join(
-            [s for s in [unicode(e) for e in items] if s not in ['', 'None']])
+        return " ".join(
+            [s for s in [unicode(e) for e in items] if s not in ["", "None"]]
+        )
 
 
 verbosity = 1
@@ -177,11 +196,12 @@ def check_attrs(tag, required, optional):
     result.extend(opt_attrs(tag, optional))
     allowed = required + optional
     extra = [
-        a for a in tag.attributes.keys()
-        if a not in allowed and not a.startswith("xmlns:")]
+        a
+        for a in tag.attributes.keys()
+        if a not in allowed and not a.startswith("xmlns:")
+    ]
     if extra:  # pragma: no cover
-        warning(
-            "%s: unknown attribute(s): %s" % (tag.nodeName, ', '.join(extra)))
+        warning("%s: unknown attribute(s): %s" % (tag.nodeName, ", ".join(extra)))
         if verbosity > 0:
             print_location(filestack)
     return result
@@ -197,26 +217,25 @@ class Macro(object):
 
 def eval_extension(s):  # pragma: no cover
 
-    if s == '$(cwd)':
+    if s == "$(cwd)":
         return os.getcwd()
 
-    if s.startswith('$(find'):
+    if s.startswith("$(find"):
         return tld
         # return '..'
 
-    if s.startswith('$(arg'):
-        s = s.replace('$(arg ', '')
+    if s.startswith("$(arg"):
+        s = s.replace("$(arg ", "")
         s = s[:-1]
-        return substitution_args_context['arg'][s]
+        return substitution_args_context["arg"][s]
 
     try:
         from roslaunch.substitution_args import resolve_args, ArgException
         from rospkg.common import ResourceNotFound
-        return resolve_args(
-            s, context=substitution_args_context, resolve_anon=False)
-    except ImportError:
 
-        return ''
+        return resolve_args(s, context=substitution_args_context, resolve_anon=False)
+    except ImportError:
+        return ""
         # raise XacroException("substitution args not supported: ", exc=e)
     except ArgException as e:
         raise XacroException("Undefined substitution argument", exc=e)
@@ -247,7 +266,7 @@ class Table(object):
             # (due to PEP515).
             # Here, we want to handle literals with underscores as plain
             # strings.
-            if '_' in value:
+            if "_" in value:
                 return value
             # order of types is important!
             for f in [int, float, lambda x: get_boolean_value(x, None)]:
@@ -261,20 +280,26 @@ class Table(object):
         # lazy evaluation
         if key in self.unevaluated:
             if key in self.recursive:
-                raise XacroException("recursive variable definition: %s" %
-                                     " -> ".join(self.recursive + [key]))
+                raise XacroException(
+                    "recursive variable definition: %s"
+                    % " -> ".join(self.recursive + [key])
+                )
             self.recursive.append(key)
-            self.table[key] = self._eval_literal(
-                eval_text(self.table[key], self))
+            self.table[key] = self._eval_literal(eval_text(self.table[key], self))
             self.unevaluated.remove(key)
             self.recursive.remove(key)
 
         # return evaluated result
         value = self.table[key]
-        if (verbosity > 2 and self.parent is None) or verbosity > 3:   # pragma: no cover # noqa
-            print("{indent}use {key}: {value} ({loc})".format(
-                indent=self.depth * ' ', key=key, value=value,
-                loc=filestack[-1]), file=sys.stderr)
+        if (
+            verbosity > 2 and self.parent is None
+        ) or verbosity > 3:  # pragma: no cover # noqa
+            print(
+                "{indent}use {key}: {value} ({loc})".format(
+                    indent=self.depth * " ", key=key, value=value, loc=filestack[-1]
+                ),
+                file=sys.stderr,
+            )
         return value
 
     def __getitem__(self, key):
@@ -295,23 +320,26 @@ class Table(object):
         if unevaluated and isinstance(value, _basestr):
             # literal evaluation failed: re-evaluate lazily at first access
             self.unevaluated.add(key)
-        elif key in self.unevaluated:   # pragma: no cover
+        elif key in self.unevaluated:  # pragma: no cover
             # all other types cannot be evaluated
             self.unevaluated.remove(key)
-        if (verbosity > 2 and self.parent is None) or verbosity > 3:   # pragma: no cover # noqa
-            print("{indent}set {key}: {value} ({loc})".format(
-                indent=self.depth * ' ', key=key, value=value,
-                loc=filestack[-1]), file=sys.stderr)
+        if (
+            verbosity > 2 and self.parent is None
+        ) or verbosity > 3:  # pragma: no cover # noqa
+            print(
+                "{indent}set {key}: {value} ({loc})".format(
+                    indent=self.depth * " ", key=key, value=value, loc=filestack[-1]
+                ),
+                file=sys.stderr,
+            )
 
     def __setitem__(self, key, value):
         self._setitem(key, value, unevaluated=True)
 
     def __contains__(self, key):
-        return \
-            key in self.table or \
-            (self.parent and key in self.parent)
+        return key in self.table or (self.parent and key in self.parent)
 
-    def __str__(self):    # pragma: no cover
+    def __str__(self):  # pragma: no cover
         s = unicode(self.table)
         if isinstance(self.parent, Table):
             s += "\n  parent: "
@@ -372,27 +400,27 @@ class QuickLexer(object):
             m = self.res[i].match(self.str)
             if m:
                 self.top = (i, m.group(0))
-                self.str = self.str[m.end():]
+                self.str = self.str[m.end() :]
                 return result
-        raise XacroException('invalid expression: ' + self.str)
+        raise XacroException("invalid expression: " + self.str)
 
 
 all_includes = []
-include_no_matches_msg = \
-    """Include tag's filename spec \"{}\" matched "\" no files."""
+include_no_matches_msg = """Include tag's filename spec \"{}\" matched "\" no files."""
 
 
 def get_include_files(filename_spec, symbols):
     try:
         filename_spec = abs_filename_spec(eval_text(filename_spec, symbols))
-    except XacroException as e:    # pragma: no cover
+    except XacroException as e:  # pragma: no cover
         if e.exc and isinstance(e.exc, NameError) and symbols is None:
             raise XacroException(
-                'variable filename is supported with in-order option only')
+                "variable filename is supported with in-order option only"
+            )
         else:
             raise
 
-    if re.search('[*[?]+', filename_spec):    # pragma: no cover
+    if re.search("[*[?]+", filename_spec):  # pragma: no cover
         # Globbing behaviour
         filenames = sorted(glob.glob(filename_spec))
         if len(filenames) == 0:
@@ -410,13 +438,15 @@ def get_include_files(filename_spec, symbols):
 def import_xml_namespaces(parent, attributes):
     """import all namespace declarations into parent"""
     for name, value in attributes.items():
-        if name.startswith('xmlns:'):
+        if name.startswith("xmlns:"):
             oldAttr = parent.getAttributeNode(name)
             if oldAttr and oldAttr.value != value:
-                warning("inconsistent namespace redefinitions for {name}:"   # pragma: no cover # noqa
-                        "\n old: {old}\n new: {new} ({new_file})".format(
-                            name=name, old=oldAttr.value, new=value,
-                            new_file=filestack[-1]))
+                warning(
+                    "inconsistent namespace redefinitions for {name}:"  # pragma: no cover # noqa
+                    "\n old: {old}\n new: {new} ({new_file})".format(
+                        name=name, old=oldAttr.value, new=value, new_file=filestack[-1]
+                    )
+                )
             else:
                 parent.setAttribute(name, value)
 
@@ -424,7 +454,8 @@ def import_xml_namespaces(parent, attributes):
 def process_include(elt, macros, symbols, func):
     included = []
     filename_spec, namespace_spec, optional = check_attrs(
-        elt, ['filename'], ['ns', 'optional'])
+        elt, ["filename"], ["ns", "optional"]
+    )
     if namespace_spec:
         try:
             namespace_spec = eval_text(namespace_spec, symbols)
@@ -432,15 +463,16 @@ def process_include(elt, macros, symbols, func):
             symbols[namespace_spec] = ns_symbols = PropertyNameSpace()
             macros = ns_macros
             symbols = ns_symbols
-        except TypeError:   # pragma: no cover
-            raise XacroException(
-                'namespaces are supported with in-order option only')
+        except TypeError:  # pragma: no cover
+            raise XacroException("namespaces are supported with in-order option only")
 
     optional = get_boolean_value(optional, None)
 
     if first_child_element(elt):
-        warning("Child elements of a <xacro:include> tag are ignored")   # pragma: no cover # noqa
-        if verbosity > 0:   # pragma: no cover
+        warning(
+            "Child elements of a <xacro:include> tag are ignored"
+        )  # pragma: no cover # noqa
+        if verbosity > 0:  # pragma: no cover
             print_location(filestack)
 
     for filename in get_include_files(filename_spec, symbols):
@@ -477,10 +509,13 @@ def is_valid_name(name):
     try:
         root = ast.parse(name)
 
-        if isinstance(root, ast.Module) and \
-           len(root.body) == 1 and isinstance(root.body[0], ast.Expr) and \
-           isinstance(
-               root.body[0].value, ast.Name) and root.body[0].value.id == name:
+        if (
+            isinstance(root, ast.Module)
+            and len(root.body) == 1
+            and isinstance(root.body[0], ast.Expr)
+            and isinstance(root.body[0].value, ast.Name)
+            and root.body[0].value.id == name
+        ):
             return True
     except SyntaxError:
         pass
@@ -488,7 +523,9 @@ def is_valid_name(name):
     return False
 
 
-re_macro_arg = re.compile(r'''\s*([^\s:=]+?):?=(\^\|?)?((?:(?:'[^']*')?[^\s'"]*?)*)(?:\s+|$)(.*)''')    # noqa
+re_macro_arg = re.compile(
+    r"""\s*([^\s:=]+?):?=(\^\|?)?((?:(?:'[^']*')?[^\s'"]*?)*)(?:\s+|$)(.*)"""
+)  # noqa
 #                           space   param    :=   ^|   <--      default      -->   space    rest        # noqa
 
 
@@ -514,21 +551,21 @@ def parse_macro_arg(s):
     else:
         # there is no default specified at all
         result = s.lstrip().split(None, 1)
-        return result[0], None, result[1] if len(result) > 1 else ''
+        return result[0], None, result[1] if len(result) > 1 else ""
 
 
 def grab_macro(elt, macros):
-    assert(elt.tagName == 'xacro:macro')
+    assert elt.tagName == "xacro:macro"
     remove_previous_comments(elt)
 
-    name, params = check_attrs(elt, ['name'], ['params'])
-    if name == 'call':
+    name, params = check_attrs(elt, ["name"], ["params"])
+    if name == "call":
         raise XacroException("Invalid use of macro name 'call'")
-    if name.find('.') != -1:   # pragma: no cover
+    if name.find(".") != -1:  # pragma: no cover
         raise XacroException(
-            "macro names must not contain '.' (reserved for "
-            "namespaces): %s" % name)
-    if name.startswith('xacro:'):
+            "macro names must not contain '.' (reserved for namespaces): %s" % name
+        )
+    if name.startswith("xacro:"):
         warning("macro names must not contain prefix 'xacro:': %s" % name)
         name = name[6:]  # drop 'xacro:' prefix
 
@@ -552,43 +589,44 @@ def grab_macro(elt, macros):
 
 
 def grab_property(elt, table):
-    assert(elt.tagName == 'xacro:property')
+    assert elt.tagName == "xacro:property"
     remove_previous_comments(elt)
 
     name, value, default, scope = check_attrs(
-        elt, ['name'], ['value', 'default', 'scope'])
+        elt, ["name"], ["value", "default", "scope"]
+    )
     if not is_valid_name(name):
+        raise XacroException("Property names must be valid python identifiers: " + name)
+    if value is not None and default is not None:  # pragma: no cover
         raise XacroException(
-            'Property names must be valid python identifiers: ' + name)
-    if value is not None and default is not None:   # pragma: no cover
-        raise XacroException(
-            'Property cannot define both a default and a value: ' + name)
+            "Property cannot define both a default and a value: " + name
+        )
 
     if default is not None:
-        if scope is not None:   # pragma: no cover
+        if scope is not None:  # pragma: no cover
             warning(
-                "%s: default property value can only be defined "
-                "on local scope" % name)
+                "%s: default property value can only be defined on local scope" % name
+            )
         if name not in table:
             value = default
-        else:   # pragma: no cover
+        else:  # pragma: no cover
             replace_node(elt, by=None)
             return
 
     if value is None:
-        name = '**' + name
+        name = "**" + name
         value = elt  # debug
 
     replace_node(elt, by=None)
 
-    if scope and scope == 'global':
+    if scope and scope == "global":
         target_table = table.root()
         unevaluated = False
-    elif scope and scope == 'parent':
+    elif scope and scope == "parent":
         if table.parent:
             target_table = table.parent
             unevaluated = False
-        else:   # pragma: no cover
+        else:  # pragma: no cover
             warning("%s: no parent scope at global scope " % name)
             return  # cannot store the value, no reason to evaluate it
     else:
@@ -604,10 +642,11 @@ def grab_property(elt, table):
 LEXER = QuickLexer(
     # multiple $ in a row, followed by { or (
     DOLLAR_DOLLAR_BRACE=r"^\$\$+(\{|\()",
-    EXPR=r"^\$\{[^\}]*\}",        # stuff starting with ${
-    EXTENSION=r"^\$\([^\)]*\)",   # stuff starting with $(
+    EXPR=r"^\$\{[^\}]*\}",  # stuff starting with ${
+    EXTENSION=r"^\$\([^\)]*\)",  # stuff starting with $(
     # any text w/o $ or  $ following any chars except {($  or  single $
-    TEXT=r"[^$]+|\$[^{($]+|\$$")
+    TEXT=r"[^$]+|\$[^{($]+|\$$",
+)
 
 
 # evaluate text and return typed value
@@ -617,11 +656,11 @@ def eval_text(text, symbols):
             return eval(eval_text(s, symbols), global_symbols, symbols)
         except Exception as e:
             # re-raise as XacroException to add more context
-            raise XacroException(exc=e,
-                                 suffix=os.linesep
-                                 + "when evaluating expression '%s'" % s)
+            raise XacroException(
+                exc=e, suffix=os.linesep + "when evaluating expression '%s'" % s
+            )
 
-    def handle_extension(s):   # pragma: no cover
+    def handle_extension(s):  # pragma: no cover
         return eval_extension("$(%s)" % eval_text(s, symbols))
 
     results = []
@@ -631,7 +670,7 @@ def eval_text(text, symbols):
         id = lex.peek()[0]
         if id == lex.EXPR:
             results.append(handle_expr(lex.next()[1][2:-1]))
-        elif id == lex.EXTENSION:   # pragma: no cover
+        elif id == lex.EXTENSION:  # pragma: no cover
             results.append(handle_extension(lex.next()[1][2:-1]))
         elif id == lex.TEXT:
             results.append(lex.next()[1])
@@ -642,7 +681,7 @@ def eval_text(text, symbols):
         return results[0]
     # otherwise join elements to a string
     else:
-        return ''.join(map(unicode, results))
+        return "".join(map(unicode, results))
 
 
 def eval_default_arg(forward_variable, default, symbols, macro):
@@ -650,24 +689,24 @@ def eval_default_arg(forward_variable, default, symbols, macro):
         return eval_text(default, symbols)
     try:
         return symbols[forward_variable]
-    except KeyError:   # pragma: no cover
+    except KeyError:  # pragma: no cover
         if default is not None:
             return eval_text(default, symbols)
         else:
             raise XacroException(
-                "Undefined property to forward: "
-                + forward_variable, macro=macro)
+                "Undefined property to forward: " + forward_variable, macro=macro
+            )
 
 
 def handle_dynamic_macro_call(node, macros, symbols):
-    name, = reqd_attrs(node, ['macro'])
-    if not name:   # pragma: no cover
+    (name,) = reqd_attrs(node, ["macro"])
+    if not name:  # pragma: no cover
         raise XacroException("xacro:call is missing the 'macro' attribute")
     name = unicode(eval_text(name, symbols))
 
     # remove 'macro' attribute and rename tag with resolved macro name
-    node.removeAttribute('macro')
-    node.tagName = 'xacro:' + name
+    node.removeAttribute("macro")
+    node.tagName = "xacro:" + name
     # forward to handle_macro_call
     handle_macro_call(node, macros, symbols)
     return True
@@ -675,7 +714,7 @@ def handle_dynamic_macro_call(node, macros, symbols):
 
 def resolve_macro(fullname, macros):
     # split name into namespaces and real name
-    namespaces = fullname.split('.')
+    namespaces = fullname.split(".")
     name = namespaces.pop(-1)
 
     def _resolve(namespaces, name, macros):
@@ -695,9 +734,9 @@ def resolve_macro(fullname, macros):
 
 
 def handle_macro_call(node, macros, symbols):
-    if node.tagName == 'xacro:call':
+    if node.tagName == "xacro:call":
         return handle_dynamic_macro_call(node, macros, symbols)
-    elif not node.tagName.startswith('xacro:'):
+    elif not node.tagName.startswith("xacro:"):
         return False  # no macro
 
     name = node.tagName[6:]  # drop 'xacro:' prefix
@@ -712,9 +751,8 @@ def handle_macro_call(node, macros, symbols):
     scoped = Table(symbols)  # new local name space for macro evaluation
     params = m.params[:]  # deep copy macro's params list
     for name, value in node.attributes.items():
-        if name not in params:   # pragma: no cover
-            raise XacroException(
-                "Invalid parameter \"%s\"" % unicode(name), macro=m)
+        if name not in params:  # pragma: no cover
+            raise XacroException('Invalid parameter "%s"' % unicode(name), macro=m)
         params.remove(name)
         scoped._setitem(name, eval_text(value, symbols), unevaluated=False)
         node.setAttribute(name, "")  # suppress second evaluation in eval_all()
@@ -725,39 +763,38 @@ def handle_macro_call(node, macros, symbols):
     # Fetch block parameters, in order
     block = first_child_element(node)
     for param in params[:]:
-        if param[0] == '*':
-            if not block:   # pragma: no cover
+        if param[0] == "*":
+            if not block:  # pragma: no cover
                 raise XacroException("Not enough blocks", macro=m)
             params.remove(param)
             scoped[param] = block
             block = next_sibling_element(block)
 
-    if block is not None:   # pragma: no cover
-        raise XacroException("Unused block \"%s\"" % block.tagName, macro=m)
+    if block is not None:  # pragma: no cover
+        raise XacroException('Unused block "%s"' % block.tagName, macro=m)
 
     # Try to load defaults for any remaining non-block parameters
     for param in params[:]:
         # block parameters are not supported for defaults
-        if param[0] == '*':   # pragma: no cover
+        if param[0] == "*":  # pragma: no cover
             continue
 
         # get default
         name, default = m.defaultmap.get(param, (None, None))
         if name is not None or default is not None:
             scoped._setitem(
-                param, eval_default_arg(
-                    name, default, symbols, m), unevaluated=False)
+                param, eval_default_arg(name, default, symbols, m), unevaluated=False
+            )
             params.remove(param)
 
     if params:
-        raise XacroException(
-            "Undefined parameters [%s]" % ",".join(params), macro=m)
+        raise XacroException("Undefined parameters [%s]" % ",".join(params), macro=m)
 
     try:
         eval_all(body, macros, scoped)
-    except Exception as e:   # pragma: no cover
+    except Exception as e:  # pragma: no cover
         # fill in macro call history for nice error reporting
-        if hasattr(e, 'macros'):
+        if hasattr(e, "macros"):
             e.macros.append(m)
         else:
             e.macros = [m]
@@ -784,9 +821,9 @@ def get_boolean_value(value, condition):
     """
     try:
         if isinstance(value, _basestr):
-            if value == 'true' or value == 'True':
+            if value == "true" or value == "True":
                 return True
-            elif value == 'false' or value == 'False':
+            elif value == "false" or value == "False":
                 return False
             else:
                 return bool(int(value))
@@ -794,12 +831,16 @@ def get_boolean_value(value, condition):
             return bool(value)
     except Exception:
         raise XacroException(
-            "Xacro conditional \"%s\" evaluated to \"%s\", "
-            "which is not a boolean expression." % (condition, value))
+            'Xacro conditional "%s" evaluated to "%s", '
+            "which is not a boolean expression." % (condition, value)
+        )
 
 
-_empty_text_node = xml.dom.minidom.getDOMImplementation().createDocument(
-    None, "dummy", None).createTextNode('\n\n')
+_empty_text_node = (
+    xml.dom.minidom.getDOMImplementation()
+    .createDocument(None, "dummy", None)
+    .createTextNode("\n\n")
+)
 
 
 def remove_previous_comments(node):
@@ -807,8 +848,11 @@ def remove_previous_comments(node):
     next = node.nextSibling
     previous = node.previousSibling
     while previous:
-        if previous.nodeType == xml.dom.Node.TEXT_NODE and \
-                previous.data.isspace() and previous.data.count('\n') <= 1:
+        if (
+            previous.nodeType == xml.dom.Node.TEXT_NODE
+            and previous.data.isspace()
+            and previous.data.count("\n") <= 1
+        ):
             # skip a single empty text node (max 1 newline)
             previous = previous.previousSibling
 
@@ -832,7 +876,7 @@ def eval_all(node, macros, symbols):
     """
     # evaluate the attributes
     for name, value in node.attributes.items():
-        if name.startswith('xacro:'):  # remove xacro:* attributes
+        if name.startswith("xacro:"):  # remove xacro:* attributes
             node.removeAttribute(name)
         else:
             result = unicode(eval_text(value, symbols))
@@ -840,7 +884,7 @@ def eval_all(node, macros, symbols):
 
     # remove xacro namespace definition
     try:
-        node.removeAttribute('xmlns:xacro')
+        node.removeAttribute("xmlns:xacro")
     except xml.dom.NotFoundErr:
         pass
 
@@ -848,19 +892,19 @@ def eval_all(node, macros, symbols):
     while node:
         next = node.nextSibling
         if node.nodeType == xml.dom.Node.ELEMENT_NODE:
-            if node.tagName == 'xacro:insert_block':
-                name, = check_attrs(node, ['name'], [])
+            if node.tagName == "xacro:insert_block":
+                (name,) = check_attrs(node, ["name"], [])
 
                 if ("**" + name) in symbols:
                     # Multi-block
-                    block = symbols['**' + name]
+                    block = symbols["**" + name]
                     content_only = True
                 elif ("*" + name) in symbols:
                     # Single block
-                    block = symbols['*' + name]
+                    block = symbols["*" + name]
                     content_only = False
-                else:   # pragma: no cover
-                    raise XacroException("Undefined block \"%s\"" % name)
+                else:  # pragma: no cover
+                    raise XacroException('Undefined block "%s"' % name)
 
                 # cloning block allows to insert the same block multiple times
                 block = block.cloneNode(deep=True)
@@ -868,48 +912,47 @@ def eval_all(node, macros, symbols):
                 eval_all(block, macros, symbols)
                 replace_node(node, by=block, content_only=content_only)
 
-            elif node.tagName == 'xacro:include':
+            elif node.tagName == "xacro:include":
                 process_include(node, macros, symbols, eval_all)
 
-            elif node.tagName == 'xacro:property':
+            elif node.tagName == "xacro:property":
                 grab_property(node, symbols)
 
-            elif node.tagName == 'xacro:macro':
+            elif node.tagName == "xacro:macro":
                 grab_macro(node, macros)
 
-            elif node.tagName == 'xacro:arg':
-                name, default = check_attrs(node, ['name', 'default'], [])
-                if name not in substitution_args_context['arg']:
-                    substitution_args_context['arg'][name] = eval_text(
-                        default, symbols)
+            elif node.tagName == "xacro:arg":
+                name, default = check_attrs(node, ["name", "default"], [])
+                if name not in substitution_args_context["arg"]:
+                    substitution_args_context["arg"][name] = eval_text(default, symbols)
 
                 remove_previous_comments(node)
                 replace_node(node, by=None)
 
-            elif node.tagName == 'xacro:element':
-                name = eval_text(
-                    *reqd_attrs(node, ['xacro:name']), symbols=symbols)
-                if not name:   # pragma: no cover
+            elif node.tagName == "xacro:element":
+                name = eval_text(*reqd_attrs(node, ["xacro:name"]), symbols=symbols)
+                if not name:  # pragma: no cover
                     raise XacroException("xacro:element: empty name")
 
-                node.removeAttribute('xacro:name')
+                node.removeAttribute("xacro:name")
                 node.nodeName = node.tagName = name
                 continue  # re-process the node with new tagName
 
-            elif node.tagName == 'xacro:attribute':
-                name, value = [eval_text(a, symbols) for a in reqd_attrs(
-                    node, ['name', 'value'])]
-                if not name:   # pragma: no cover
+            elif node.tagName == "xacro:attribute":
+                name, value = [
+                    eval_text(a, symbols) for a in reqd_attrs(node, ["name", "value"])
+                ]
+                if not name:  # pragma: no cover
                     raise XacroException("xacro:attribute: empty name")
 
                 node.parentNode.setAttribute(name, value)
                 replace_node(node, by=None)
 
-            elif node.tagName in ['xacro:if', 'xacro:unless']:
+            elif node.tagName in ["xacro:if", "xacro:unless"]:
                 remove_previous_comments(node)
-                cond, = check_attrs(node, ['value'], [])
+                (cond,) = check_attrs(node, ["value"], [])
                 keep = get_boolean_value(eval_text(cond, symbols), cond)
-                if node.tagName in ['unless', 'xacro:unless']:
+                if node.tagName in ["unless", "xacro:unless"]:
                     keep = not keep
 
                 if keep:
@@ -954,9 +997,9 @@ def parse(inp, filename=None):
     try:
         if isinstance(inp, _basestr):
             return xml.dom.minidom.parseString(inp)
-        elif hasattr(inp, 'read'):
+        elif hasattr(inp, "read"):
             return xml.dom.minidom.parse(inp)
-        return inp   # pragma: no cover
+        return inp  # pragma: no cover
 
     finally:
         if f:
@@ -965,10 +1008,10 @@ def parse(inp, filename=None):
 
 def process_doc(doc, mappings=None, **kwargs):
     global verbosity
-    verbosity = kwargs.get('verbosity', verbosity)
+    verbosity = kwargs.get("verbosity", verbosity)
 
     # set substitution args
-    substitution_args_context['arg'] = {} if mappings is None else mappings
+    substitution_args_context["arg"] = {} if mappings is None else mappings
 
     # if not yet defined: initialize filestack
     if not filestack:
@@ -978,21 +1021,21 @@ def process_doc(doc, mappings=None, **kwargs):
     symbols = Table()
 
     # apply xacro:targetNamespace as global xmlns (if defined)
-    targetNS = doc.documentElement.getAttribute('xacro:targetNamespace')
+    targetNS = doc.documentElement.getAttribute("xacro:targetNamespace")
     if targetNS:
-        doc.documentElement.removeAttribute('xacro:targetNamespace')
-        doc.documentElement.setAttribute('xmlns', targetNS)
+        doc.documentElement.removeAttribute("xacro:targetNamespace")
+        doc.documentElement.setAttribute("xmlns", targetNS)
 
     eval_all(doc.documentElement, macros, symbols)
 
     # reset substitution args
-    substitution_args_context['arg'] = {}
+    substitution_args_context["arg"] = {}
 
 
 def open_output(output_filename):
-    if output_filename is None:   # pragma: no cover
+    if output_filename is None:  # pragma: no cover
         return sys.stdout
-    else:   # pragma: no cover
+    else:  # pragma: no cover
         dir_name = os.path.dirname(output_filename)
         if dir_name:
             try:
@@ -1004,29 +1047,29 @@ def open_output(output_filename):
                 pass
 
         try:
-            return open(output_filename, 'w')
+            return open(output_filename, "w")
         except IOError as e:
             raise XacroException("Failed to open output:", exc=e)
 
 
 def print_location(filestack, err=None, file=sys.stderr):
-    macros = getattr(err, 'macros', []) if err else []
-    msg = 'when instantiating macro:'
-    for m in macros:   # pragma: no cover
-        name = m.body.getAttribute('name')
-        location = '(%s)' % m.history[-1][-1]
+    macros = getattr(err, "macros", []) if err else []
+    msg = "when instantiating macro:"
+    for m in macros:  # pragma: no cover
+        name = m.body.getAttribute("name")
+        location = "(%s)" % m.history[-1][-1]
         print(msg, name, location, file=file)
-        msg = 'instantiated from:'
+        msg = "instantiated from:"
 
-    msg = 'in file:' if macros else 'when processing file:'
+    msg = "in file:" if macros else "when processing file:"
     for f in reversed(filestack):
         if f is None:
-            f = 'string'
+            f = "string"
         print(msg, f, file=file)
-        msg = 'included from:'
+        msg = "included from:"
 
 
-def process_file(input_file_name, **kwargs):   # pragma: no cover
+def process_file(input_file_name, **kwargs):  # pragma: no cover
     """main processing pipeline"""
     # initialize file stack for error-reporting
     restore_filestack([input_file_name])
@@ -1036,13 +1079,16 @@ def process_file(input_file_name, **kwargs):   # pragma: no cover
     process_doc(doc, **kwargs)
 
     # add xacro auto-generated banner
-    banner = [xml.dom.minidom.Comment(c) for c in
-              [" %s " % ('=' * 83),
-               " |    This document was autogenerated by xacro from %-30s | "
-               % input_file_name,
-               " |    EDITING THIS FILE BY HAND IS NOT RECOMMENDED  %-30s | "
-               % "",
-               " %s " % ('=' * 83)]]
+    banner = [
+        xml.dom.minidom.Comment(c)
+        for c in [
+            " %s " % ("=" * 83),
+            " |    This document was autogenerated by xacro from %-30s | "
+            % input_file_name,
+            " |    EDITING THIS FILE BY HAND IS NOT RECOMMENDED  %-30s | " % "",
+            " %s " % ("=" * 83),
+        ]
+    ]
     first = doc.firstChild
     for comment in banner:
         doc.insertBefore(comment, first)
@@ -1050,20 +1096,20 @@ def process_file(input_file_name, **kwargs):   # pragma: no cover
     return doc
 
 
-def main(filename, tld_other=None):   # pragma: no cover
+def main(filename, tld_other=None):  # pragma: no cover
     opts = {
-        'output': None,
-        'just_deps': False,
-        'in_order': True,
-        'verbosity': 1,
-        'just_includes': False,
-        'mappings': {}
+        "output": None,
+        "just_deps": False,
+        "in_order": True,
+        "verbosity": 1,
+        "just_includes": False,
+        "mappings": {},
     }
 
     global tld
 
     if tld_other is None:
-        tld = '..'
+        tld = ".."
     else:
         tld = tld_other
 
@@ -1099,4 +1145,4 @@ def main(filename, tld_other=None):   # pragma: no cover
     if opts["output"]:
         out.close()
 
-    return doc.toprettyxml(indent='  ', **encoding)
+    return doc.toprettyxml(indent="  ", **encoding)

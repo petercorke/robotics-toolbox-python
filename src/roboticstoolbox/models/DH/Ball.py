@@ -83,6 +83,5 @@ def _fract(i):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     ball = Ball()
     print(ball)

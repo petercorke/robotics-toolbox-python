@@ -644,7 +644,6 @@ class VehicleBase(ABC):
 
         # initialize the graphics
         if animate and self._animation is not None:
-
             # setup the plot
             self._ax = base.plotvol2(self.workspace)
 
@@ -1740,7 +1739,6 @@ class VehicleTrailer(VehicleBase):
 
 
 if __name__ == "__main__":
-
     from roboticstoolbox import RandomPath
 
     import roboticstoolbox as rtb

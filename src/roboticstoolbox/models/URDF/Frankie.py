@@ -59,7 +59,6 @@ class Frankie(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = Frankie()
     print(robot)
 

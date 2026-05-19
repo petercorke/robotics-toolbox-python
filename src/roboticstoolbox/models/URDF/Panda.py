@@ -59,7 +59,6 @@ class Panda(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     r = Panda()
 
     r.qz

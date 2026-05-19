@@ -3,20 +3,19 @@ import time
 
 
 class Ticker(threading.Thread):  # pragma nocover
-
     def __init__(self, period):
         super().__init__()
 
         self.sem = threading.Semaphore(0)
         self.done = False
         self.period = period
-        print('in init', period)
+        print("in init", period)
 
     def wait(self):
         self.sem.acquire()
 
     def run(self):
-        print('in run', self.period)
+        print("in run", self.period)
         start = time.time()
         stop = start
         while not self.done:
@@ -49,6 +48,6 @@ if __name__ == "__main__":  # pragma nocover
         if i > 0:
             tsum += terr
             tmax = max(tmax, terr)
-        print('.', end='', flush=True)
+        print(".", end="", flush=True)
     t.stop()
-    print(f"\nmean = {tsum/(N-1):.2f}, max = {tmax:.2f}")
+    print(f"\nmean = {tsum / (N - 1):.2f}, max = {tmax:.2f}")

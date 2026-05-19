@@ -37,7 +37,7 @@ g2 = Mesh(
 g3 = Mesh(
     filename=str(path / "gimbal-ring3.stl"),
     color=[240, 103, 103],
-    scale=(1.1 ** 2 / 3,) * 3,
+    scale=(1.1**2 / 3,) * 3,
 )
 
 plane = Mesh(

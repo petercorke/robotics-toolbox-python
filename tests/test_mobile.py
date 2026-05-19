@@ -22,6 +22,7 @@ from roboticstoolbox.mobile.ReedsSheppPlanner import ReedsSheppPlanner
 
 # ======================================================================== #
 
+
 class TestReedsSheppPlanner(unittest.TestCase):
     def test_turn_around(self):
         start = (0, 0, 0)
@@ -31,11 +32,11 @@ class TestReedsSheppPlanner(unittest.TestCase):
         path, status = reedsshepp.query(start, goal)
 
         # Turns
-        self.assertEqual(status[0], ['L', 'R', 'L'])
+        self.assertEqual(status[0], ["L", "R", "L"])
         # Total length
         nt.assert_almost_equal(status[1], pi)
         # Segment lengths
-        nt.assert_array_almost_equal(status[2],[pi/3, -pi/3, pi/3])
+        nt.assert_array_almost_equal(status[2], [pi / 3, -pi / 3, pi / 3])
 
 
 # ======================================================================== #
@@ -286,7 +287,6 @@ class DriversTest(unittest.TestCase):
 
 
 class TestBicycle(unittest.TestCase):
-
     # def test_deriv(self):
     #     xv = np.r_[1, 2, pi/4]
 

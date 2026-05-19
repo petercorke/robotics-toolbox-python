@@ -35,9 +35,9 @@ from optparse import OptionParser, IndentedHelpFormatter
 from .color import colorize, message
 
 
-class ColoredOptionParser(OptionParser):   # pragma: no cover
+class ColoredOptionParser(OptionParser):  # pragma: no cover
     def error(self, message):
-        msg = colorize(message, 'red')
+        msg = colorize(message, "red")
         OptionParser.error(self, msg)
 
 
@@ -46,7 +46,7 @@ _original_wrap = textwrap.wrap
 
 def wrap_with_newlines(text, width, **kwargs):  # pragma: no cover
     result = []
-    for paragraph in text.split('\n'):
+    for paragraph in text.split("\n"):
         result.extend(_original_wrap(paragraph, width, **kwargs))
     return result
 
@@ -62,31 +62,49 @@ class IndentedHelpFormatterWithNL(IndentedHelpFormatter):  # pragma: no cover
         return result
 
 
-def process_args(argv, require_input=True):   # pragma: no cover
-    parser = ColoredOptionParser(usage="usage: %prog [options] <input>",
-                                 formatter=IndentedHelpFormatterWithNL())
-    parser.add_option("-o", dest="output", metavar="FILE",
-                      help="write output to FILE instead of stdout")
-    parser.add_option("--deps", action="store_true", dest="just_deps",
-                      help="print file dependencies")
+def process_args(argv, require_input=True):  # pragma: no cover
+    parser = ColoredOptionParser(
+        usage="usage: %prog [options] <input>", formatter=IndentedHelpFormatterWithNL()
+    )
     parser.add_option(
-        "--inorder", "-i", action="store_true", dest="in_order",
-        help="processing in read order (default, can be omitted)")
+        "-o",
+        dest="output",
+        metavar="FILE",
+        help="write output to FILE instead of stdout",
+    )
+    parser.add_option(
+        "--deps", action="store_true", dest="just_deps", help="print file dependencies"
+    )
+    parser.add_option(
+        "--inorder",
+        "-i",
+        action="store_true",
+        dest="in_order",
+        help="processing in read order (default, can be omitted)",
+    )
 
     # verbosity options
-    parser.add_option("-q", action="store_const", dest="verbosity", const=0,
-                      help="quiet operation, suppressing warnings")
-    parser.add_option("-v", action="count", dest="verbosity",
-                      help="increase verbosity")
-    parser.add_option("--verbosity", metavar='level', dest="verbosity",
-                      type='int',
-                      help=textwrap.dedent("""\
+    parser.add_option(
+        "-q",
+        action="store_const",
+        dest="verbosity",
+        const=0,
+        help="quiet operation, suppressing warnings",
+    )
+    parser.add_option("-v", action="count", dest="verbosity", help="increase verbosity")
+    parser.add_option(
+        "--verbosity",
+        metavar="level",
+        dest="verbosity",
+        type="int",
+        help=textwrap.dedent("""\
                       set verbosity level
                       0: quiet, suppressing warnings
                       1: default, showing warnings and error locations
                       2: show stack trace
                       3: log property definitions and usage on top level
-                      4: log property definitions and usage on all levels"""))
+                      4: log property definitions and usage on all levels"""),
+    )
 
     mappings = {}
     filtered_args = argv
@@ -96,7 +114,8 @@ def process_args(argv, require_input=True):   # pragma: no cover
     if options.in_order:
         message(
             "xacro: in-order processing became default in ROS Melodic. "
-            "You can drop the option.")
+            "You can drop the option."
+        )
     options.in_order = True
 
     if len(pos_args) != 1:

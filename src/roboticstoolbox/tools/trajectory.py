@@ -215,7 +215,7 @@ class Trajectory:
             ax.plot(self.t, self.s, **plotopts)
 
         if self.s.ndim > 1:
-            ax.legend([f"q{i+1}" for i in range(self.naxes)])
+            ax.legend([f"q{i + 1}" for i in range(self.naxes)])
 
         ax.grid(True)
         ax.set_xlim(0, max(self.t))
@@ -966,7 +966,6 @@ def mstraj(
             raise ValueError("Length of TSEG does not match number of viapoints")
 
     if tsegment is None:
-
         # This is unreachable, left just in case
         if qdmax is None:  # pragma nocover
             raise ValueError("qdmax must be given if tsegment is not")
@@ -1128,7 +1127,6 @@ def mstraj(
 
 
 if __name__ == "__main__":
-
     # t = quintic(0, 1, 50)
     # t.plot()
 

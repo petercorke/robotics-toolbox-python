@@ -47,6 +47,5 @@ class Planar3(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = Planar3()
     print(robot)

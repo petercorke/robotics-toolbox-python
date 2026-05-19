@@ -54,7 +54,6 @@ class Fetch(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = Fetch()
     print(robot)
 

@@ -61,6 +61,5 @@ class Planar_Y(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = Planar_Y()
     print(robot)

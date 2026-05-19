@@ -91,7 +91,6 @@ class Puma560(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = Puma560()
     print(robot)
 

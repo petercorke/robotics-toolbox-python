@@ -50,6 +50,5 @@ class AL5D(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = AL5D()
     print(robot)

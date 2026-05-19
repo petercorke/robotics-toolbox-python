@@ -15,7 +15,6 @@ from progress.bar import FillingCirclesBar
 
 
 class PGVertex(pgraph.UVertex):
-
     nvertices = 0  # reset this before each PGGraph build
 
     def __init__(self, type, **kwargs):
@@ -92,7 +91,6 @@ class PGEdge(pgraph.Edge):
 
 
 class PoseGraph:
-
     # properties
     #     graph
 
@@ -141,7 +139,6 @@ class PoseGraph:
             opener = open
 
         with opener(path, "r") as f:
-
             toroformat = False
             nlidar = 0
 
@@ -349,7 +346,6 @@ class PoseGraph:
 
         grid1d = occgrid.ravel
         for i in range(0, self.graph.n, 5):
-
             xy = self.scanxy(i)
             r, theta = self.scan(i)
             if maxrange is not None:
@@ -363,7 +359,6 @@ class PoseGraph:
             p1 = occgrid.w2g(xyt[:2])
 
             for p2 in occgrid.w2g(xy.T):
-
                 # all cells along the ray
                 try:
                     k = occgrid._line(p1, p2)
@@ -517,13 +512,12 @@ class PoseGraph:
             vertex.coord[2] = smb.angdiff(vertex.coord[2])
 
         dt = time.time() - t0
-        print(f"done in {dt*1e3:0.2f} msec.  Total cost {etotal:g}")
+        print(f"done in {dt * 1e3:0.2f} msec.  Total cost {etotal:g}")
 
         return etotal
 
 
 if __name__ == "__main__":
-
     pg = PoseGraph("data/pg1.g2o")
     pg.optimize(animate=True, retain=False)
 

@@ -94,7 +94,6 @@ def step():
 
     # For each collision in the scene
     for collision in collisions:
-
         # Form the velocity damper inequality contraint for each collision
         # object on the robot to the collision in the scene
         c_Ain, c_bin = panda.link_collision_damper(

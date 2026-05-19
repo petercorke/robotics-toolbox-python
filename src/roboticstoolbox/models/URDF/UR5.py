@@ -69,7 +69,6 @@ class UR5(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = UR5()
     print(robot)
     print(robot.ets())

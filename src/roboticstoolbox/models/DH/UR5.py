@@ -93,7 +93,6 @@ class UR5(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     ur5 = UR5(symbolic=False)
     print(ur5)
     # print(ur5.dyntable())

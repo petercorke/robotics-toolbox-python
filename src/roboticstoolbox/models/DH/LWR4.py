@@ -81,6 +81,5 @@ class LWR4(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = LWR4()
     print(robot)

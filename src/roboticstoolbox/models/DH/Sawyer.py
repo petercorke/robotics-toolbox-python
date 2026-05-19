@@ -81,6 +81,5 @@ class Sawyer(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     sawyer = Sawyer(symbolic=False)
     print(sawyer)

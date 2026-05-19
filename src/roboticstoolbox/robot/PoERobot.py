@@ -199,7 +199,7 @@ class PoERobot(Robot):
         s += "\n".join(["    " + repr(link) + "," for link in self])
         s += "\n    ],\n"
         s += f"    T0=SE3({np.array_repr(self.T0.A)}),\n"
-        s += f"    name=\"{self.name}\",\n"
+        s += f'    name="{self.name}",\n'
         s += ")"
         return s
 

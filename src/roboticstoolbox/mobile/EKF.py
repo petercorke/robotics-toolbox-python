@@ -1120,7 +1120,7 @@ class EKF:
             label = kwargs["label"]
             del kwargs["label"]
         else:
-            label = f"{confidence*100:.3g}% confidence"
+            label = f"{confidence * 100:.3g}% confidence"
 
         for k in np.linspace(0, nhist - 1, N):
             k = round(k)
@@ -1309,7 +1309,7 @@ class EKF:
                         centre=xm[i, :],
                         confidence=confidence,
                         inverted=True,
-                        label=f"{confidence*100:.3g}% confidence",
+                        label=f"{confidence * 100:.3g}% confidence",
                         **ellipse,
                     )
                 else:
@@ -1423,7 +1423,6 @@ class EKF:
 
 
 if __name__ == "__main__":
-
     from roboticstoolbox import *
 
     V = np.diag([0.02, np.deg2rad(0.5)]) ** 2

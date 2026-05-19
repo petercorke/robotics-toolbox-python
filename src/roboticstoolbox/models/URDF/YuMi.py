@@ -105,6 +105,5 @@ class YuMi(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = YuMi()
     print(robot)

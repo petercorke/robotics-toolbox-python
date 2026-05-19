@@ -13,17 +13,17 @@ def rtb_load_matfile(filename):
     :return: contents of mat data file
     :rtype: dict
 
-    Reads a MATLAB format *mat* file which can contain multiple variables, in 
+    Reads a MATLAB format *mat* file which can contain multiple variables, in
     a binary or ASCII format.  Returns a dict where the keys are the variable
     names and the values are NumPy arrays.
 
     .. note::
         - Uses SciPy ``io.loadmat`` to do the work.
-        - If the filename has no path component, eg. ``map1.mat`, it will be 
+        - If the filename has no path component, eg. ``map1.mat`, it will be
           first be looked for in the folder ``roboticstoolbox/data``.
         - MATLAB structs are converted to Python dicts, but extended so that
           elements can be accessed using dot notation.
-    
+
     :seealso: :func:`path_to_datafile`
     """
     from scipy.io import loadmat
@@ -37,7 +37,6 @@ def rtb_load_matfile(filename):
     # were a MATLAB struct, convert them to a namedtuple
     for key, value in data.items():
         if isinstance(value, mat_struct):
-
             # extend dict with a dot access method
             class dictx(dict):
                 def __getattr__(self, key):
@@ -50,8 +49,9 @@ def rtb_load_matfile(filename):
             for v in value._fieldnames:
                 d[v] = getattr(value, v)
             data[key] = d
-        
+
     return data
+
 
 def rtb_load_jsonfile(filename):
     """
@@ -68,14 +68,15 @@ def rtb_load_jsonfile(filename):
     names and the values are NumPy arrays.
 
     .. note::
-        - If the filename has no path component, eg. ``map1.mat`, it will be 
+        - If the filename has no path component, eg. ``map1.mat`, it will be
           first be looked for in the folder ``roboticstoolbox/data``.
-    
+
     :seealso: :func:`path_to_datafile`
     """
     import json
 
-    return rtb_load_data(filename, lambda f: json.load(open(f, 'r')))
+    return rtb_load_data(filename, lambda f: json.load(open(f, "r")))
+
 
 def rtb_load_data(filename, handler, **kwargs):
     """
@@ -97,14 +98,15 @@ def rtb_load_data(filename, handler, **kwargs):
 
         data = rtb_load_data('data/queensland.json', lambda f: json.load(open(f, 'r')))
 
-    
-    .. note:: If the filename has no path component, eg. ``foo.dat``, it will 
+
+    .. note:: If the filename has no path component, eg. ``foo.dat``, it will
         first be looked for in the folder ``roboticstoolbox/data``.
 
     :seealso: :func:`path_to_datafile`
     """
     path = rtb_path_to_datafile(filename, local=False)
     return handler(path, **kwargs)
+
 
 def rtb_path_to_datafile(*filename, local=True):
     """
@@ -147,18 +149,17 @@ def rtb_path_to_datafile(*filename, local=True):
 
     rtbdata = importlib.import_module("rtbdata")
     root = Path(rtbdata.__path__[0])
-    
+
     path = root / filename
     if path.exists():
         return path.resolve()
     else:
         raise ValueError(f"file {filename} not found locally or in rtbdata")
 
-if __name__ == "__main__":
 
-    house = rtb_load_matfile("data/house.mat");
+if __name__ == "__main__":
+    house = rtb_load_matfile("data/house.mat")
     a = rtb_loadmat("map1.mat")
     print(a)
     a = rtb_loadmat("data/map1.mat")
     print(a)
-

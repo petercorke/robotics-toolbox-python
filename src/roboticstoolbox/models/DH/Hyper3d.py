@@ -77,7 +77,6 @@ class Hyper3d(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     hyper = Hyper3d(N=10, symbolic=False)
     print(hyper)
 

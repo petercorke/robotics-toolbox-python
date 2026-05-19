@@ -225,7 +225,6 @@ class PyPlot2(Connector):
                 pass  # pragma: no cover
 
             elif robot.control_type == "v":
-
                 for i in range(robot.n):
                     robot.q[i] += robot.qd[i] * (dt / 1000)
 

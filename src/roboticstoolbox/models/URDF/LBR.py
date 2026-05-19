@@ -55,6 +55,5 @@ class LBR(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = LBR()
     print(robot)

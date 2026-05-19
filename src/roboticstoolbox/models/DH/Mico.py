@@ -98,6 +98,5 @@ class Mico(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     mico = Mico(symbolic=False)
     print(mico)

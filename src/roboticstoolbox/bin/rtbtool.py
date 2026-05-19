@@ -24,7 +24,6 @@ import sys
 from importlib.metadata import version
 
 
-
 try:
     from colored import fg, bg, attr
 
@@ -43,15 +42,17 @@ import matplotlib.pyplot as plt  # lgtm [py/unused-import]
 
 from spatialmath import *  # lgtm [py/polluting-import]
 from spatialmath.base import *
-import spatialmath.base as smb 
+import spatialmath.base as smb
 from spatialmath.base import sym
 
 from spatialgeometry import *  # lgtm [py/polluting-import]
 
 from roboticstoolbox import *  # lgtm [py/unused-import]
+
 # load some robot models
 puma = models.DH.Puma560()
 panda = models.DH.Panda()
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser("Robotics Toolbox shell")
@@ -65,10 +66,8 @@ def parse_arguments():
         default="neutral",
         help="specify terminal color scheme (neutral, lightbg, nocolor, linux), linux is for dark mode",
     )
-    parser.add_argument("--confirmexit", "-x", default=False,
-        help="confirm exit")
-    parser.add_argument("--prompt", "-p", default="(rtb) >>> ",
-        help="input prompt")
+    parser.add_argument("--confirmexit", "-x", default=False, help="confirm exit")
+    parser.add_argument("--prompt", "-p", default="(rtb) >>> ", help="input prompt")
     parser.add_argument(
         "--resultprefix",
         "-r",
@@ -91,8 +90,10 @@ def parse_arguments():
         help="do not display the result of assignments",
     )
     parser.add_argument(
-        "--book", default=False, action="store_true",
-        help="use defaults as per RVC book"
+        "--book",
+        default=False,
+        action="store_true",
+        help="use defaults as per RVC book",
     )
     parser.add_argument(
         "--ansi",
@@ -129,6 +130,7 @@ def parse_arguments():
 
     return args
 
+
 def make_banner():
     # banner template
     # https://patorjk.com/software/taag/#p=display&f=Cybermedium&t=Robotics%20Toolbox%0A
@@ -139,7 +141,7 @@ def make_banner():
     |  \ |__| |__] |__|  |  | |___ ___]     |  |__| |__| |___ |__] |__| _/\_
 
     for Python"""
-    
+
     versions = []
     versions.append(f"RTB=={version('roboticstoolbox-python')}")
     versions.append(f"SMTB=={version('spatialmath-python')}")
@@ -174,13 +176,14 @@ def make_banner():
 
     print(fg("yellow") + banner + attr(0))
 
+
 def startup():
     plt.ion()
+
 
 def main():
 
     args = parse_arguments()
-
 
     # setup defaults
     np.set_printoptions(
@@ -209,7 +212,6 @@ def main():
         mpl.use(args.backend)
 
     # build the banner, import * packages and their versions
-
 
     if args.banner:
         banner = make_banner()
@@ -268,7 +270,6 @@ def main():
         ]
     else:
         code.append("plt.ion()")
-
 
     c.InteractiveShellApp.exec_lines = code
     IPython.start_ipython(config=c, user_ns=globals())

@@ -164,7 +164,7 @@ class BaseET:
             # Check if symbolic
             eta_str = f"{self.eta}"
         elif self.isrotation and self.eta is not None:
-            eta_str = f"{self.eta * (180.0/pi):.4g}°"
+            eta_str = f"{self.eta * (180.0 / pi):.4g}°"
         elif not self.iselementary:
             if isinstance(self, ET):
                 T = self.A()

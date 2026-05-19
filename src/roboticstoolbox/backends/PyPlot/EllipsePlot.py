@@ -190,7 +190,7 @@ class EllipsePlot:
         # force ellipsoid is E = A
         #
         # rather than compute the inverse we can have base.ellipse()  do it for us
-        # using the inverted argument. For the velocity ellipse we already have the 
+        # using the inverted argument. For the velocity ellipse we already have the
         # inverse of E, it is A, so we set inverted=True.
 
         if isinstance(self.centre, str) and self.centre == "ee":

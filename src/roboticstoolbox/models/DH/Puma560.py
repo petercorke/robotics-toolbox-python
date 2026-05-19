@@ -293,8 +293,7 @@ class Puma560(DHRobot):
             with np.errstate(invalid="raise"):
                 try:
                     Psi = np.arccos(
-                        (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2)
-                        / (2.0 * a2 * r)
+                        (a2**2 - d4**2 - a3**2 + V114**2 + Pz**2) / (2.0 * a2 * r)
                     )
                 except FloatingPointError:
                     return "Out of reach"
@@ -315,7 +314,6 @@ class Puma560(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     puma = Puma560(symbolic=False)
     print(puma)
     print(puma.dynamics())

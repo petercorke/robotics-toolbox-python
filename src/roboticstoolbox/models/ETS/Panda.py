@@ -65,6 +65,5 @@ class Panda(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = Panda()
     print(robot)

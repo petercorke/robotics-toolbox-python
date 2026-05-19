@@ -143,7 +143,7 @@ class VehicleDriverBase(ABC):
         delta_heading = base.angdiff(goal_heading, self._veh._x[2])
         print(
             f"t={self._veh._t:.1f}, pos=({self._veh._x[0]:.1f}, {self._veh._x[1]:.1f}), ",
-            f"goal_heading={goal_heading*180/pi:.1f}, delta_heading={delta_heading*180/pi:.1f}",
+            f"goal_heading={goal_heading * 180 / pi:.1f}, delta_heading={delta_heading * 180 / pi:.1f}",
         )
 
         return np.r_[self._speed, self._headinggain * delta_heading]
@@ -371,7 +371,6 @@ class PurePursuit(VehicleDriverBase):
 # ========================================================================= #
 
 if __name__ == "__main__":
-
     # import unittest
 
     import roboticstoolbox as rtb

@@ -121,10 +121,16 @@ class IRB140(DHRobot):
                 qlim=[-220 * deg, 60 * deg],
             ),
             RevoluteDH(
-                d=d4, a=0, alpha=pi / 2, qlim=[-200 * deg, 200 * deg]  # alpha=-pi/2,
+                d=d4,
+                a=0,
+                alpha=pi / 2,
+                qlim=[-200 * deg, 200 * deg],  # alpha=-pi/2,
             ),
             RevoluteDH(
-                d=0, a=0, alpha=-pi / 2, qlim=[-120 * deg, 120 * deg]  # alpha=pi/2,
+                d=0,
+                a=0,
+                alpha=-pi / 2,
+                qlim=[-120 * deg, 120 * deg],  # alpha=pi/2,
             ),
             RevoluteDH(d=d6, a=0, alpha=0, qlim=[-400 * deg, 400 * deg]),  # alpha=pi/2,
         ]
@@ -149,6 +155,5 @@ class IRB140(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = IRB140()
     print(robot)

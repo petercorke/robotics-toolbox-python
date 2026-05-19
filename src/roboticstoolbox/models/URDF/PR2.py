@@ -34,7 +34,6 @@ class PR2(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     r = PR2()
 
     # i = 0

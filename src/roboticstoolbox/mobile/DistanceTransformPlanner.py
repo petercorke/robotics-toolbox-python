@@ -220,7 +220,11 @@ class DistanceTransformPlanner(PlannerBase):
         distance = self._distancemap
         X, Y = np.meshgrid(np.arange(distance.shape[1]), np.arange(distance.shape[0]))
         surf = ax.plot_surface(
-            X, Y, distance, linewidth=1, antialiased=False  # cmap='gray',
+            X,
+            Y,
+            distance,
+            linewidth=1,
+            antialiased=False,  # cmap='gray',
         )
 
         if path is not None:

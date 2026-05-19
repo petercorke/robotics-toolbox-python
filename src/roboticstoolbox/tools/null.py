@@ -7,7 +7,7 @@ import numpy as np
 
 
 def null(A, atol=1e-13, rtol=0):
-    '''
+    """
     Compute an approximate basis for the nullspace of A.
 
     The algorithm used by this function is based on the singular value
@@ -38,7 +38,7 @@ def null(A, atol=1e-13, rtol=0):
         zero.
     :rtype ns: ndarray
 
-    '''
+    """
 
     A = np.atleast_2d(A)
     u, s, vh = np.linalg.svd(A)

@@ -35,7 +35,7 @@ class Planar2(Robot2):
 
         super().__init__([l0, l1, l2], name="Planar2", comment="Planar 2D manipulator")
 
-        self.qb = np.array([0, np.pi/2])
+        self.qb = np.array([0, np.pi / 2])
         self.qz = np.zeros(2)
 
         self.addconfiguration("qz", self.qz)
@@ -43,7 +43,6 @@ class Planar2(Robot2):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = Planar2()
     print(robot)
 

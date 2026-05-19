@@ -68,7 +68,6 @@ dt = 0.05
 gain = np.array([1, 1, 1, 1.6, 1.6, 1.6])
 
 while not arrivedl or not arrivedr:
-
     vl, arrivedl = rtb.p_servo(la.fkine(r.q), lTep, gain=gain, threshold=0.001)
     vr, arrivedr = rtb.p_servo(ra.fkine(r.q), rTep, gain=gain, threshold=0.001)
 

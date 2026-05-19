@@ -3,7 +3,6 @@
 @author: Peter Corke
 """
 
-
 # from math import pi
 import numpy as np
 from roboticstoolbox import DHRobot, RevoluteDH
@@ -78,7 +77,6 @@ class Hyper(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     hyper = Hyper(N=10, symbolic=False)
     print(hyper)
 

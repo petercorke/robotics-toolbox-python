@@ -29,7 +29,6 @@ import warnings
 
 
 class DynamicsMixin:
-
     # --------------------------------------------------------------------- #
     def dynamics(self: RobotProto):
         """
@@ -339,7 +338,6 @@ class DynamicsMixin:
             _printProgressBar(0, prefix="Progress:", suffix="complete", length=60)
 
         while integrator.status == "running":
-
             # step the integrator, calls _fdyn multiple times
             integrator.step()
 
@@ -677,7 +675,6 @@ class DynamicsMixin:
 
         tf = []
         for j, link in enumerate(self.links):
-
             # compute inertia for this joint
             zero = np.zeros((self.n))
             qdd = np.zeros((self.n))
@@ -1154,7 +1151,6 @@ class DynamicsMixin:
             Ct = np.zeros((q.shape[0], 6, 6))
 
             for k, (qk, qdk) in enumerate(zip(q, qd)):
-
                 if Ji is None:
                     Ja = self.jacob0_analytical(q[0, :], representation)
                     if pinv:
@@ -1367,7 +1363,6 @@ class DynamicsMixin:
         xdd = np.zeros((q.shape[0], self.n))
 
         for k, (qk, xdk, wk) in enumerate(zip(q, xd, w)):
-
             Ja = self.jacob0_analytical(qk, representation=representation)
             if pinv:
                 Ji = np.linalg.pinv(Ja)
@@ -1620,7 +1615,6 @@ def _printProgressBar(
 
 
 if __name__ == "__main__":  # pragma nocover
-
     import roboticstoolbox as rtb
 
     puma = rtb.models.DH.Puma560()

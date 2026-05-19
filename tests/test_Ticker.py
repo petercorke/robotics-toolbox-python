@@ -8,9 +8,8 @@ import unittest
 
 
 class TestTicker(unittest.TestCase):
-
     def test_ticker(self):
-        self.skipTest('Not working on windows or mac')
+        self.skipTest("Not working on windows or mac")
 
         t = Ticker(0.1)
 

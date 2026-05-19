@@ -7,6 +7,7 @@ from spatialmath import base
 pi2 = base.pi() / 2
 deg = base.pi() / sympy.Integer("180")
 
+
 # PROGRESS
 # subs2z does a bad thing in first phase, 2 subs it shouldnt make
 class DHFactor(ET):
@@ -104,7 +105,6 @@ class DHFactor(ET):
         nchanges = 0
 
         for i in range(len(self)):
-
             this = self[i]
             if this.isjoint or this.isrevolute:
                 continue
@@ -457,7 +457,6 @@ class DHFactor(ET):
         # For each ET in the object, display it, data comes from properties
         # which come from the named tuple
         for et in self:
-
             s = f"{et.axis}("
             if et.isjoint:
                 if q is not None:

@@ -49,6 +49,5 @@ class UR3(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = UR3()
     print(robot)

@@ -753,7 +753,6 @@ class PlannerBase(ABC):
             if start is not None:
                 ax.plot(start[0], start[1], start[2], label="start", **start_marker)
             if goal is not None:
-
                 if path is not None and unwrap:
                     theta = theta[-1]
                 else:

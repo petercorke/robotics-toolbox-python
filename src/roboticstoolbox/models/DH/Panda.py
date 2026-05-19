@@ -174,6 +174,5 @@ class Panda(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     panda = Panda()
     print(panda)

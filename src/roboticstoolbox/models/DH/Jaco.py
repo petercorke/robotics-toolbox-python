@@ -98,6 +98,5 @@ class Jaco(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     jaco = Jaco(symbolic=False)
     print(jaco)

@@ -55,7 +55,6 @@ class KinovaGen3(Robot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     robot = KinovaGen3()
     robot.q = robot.qr
     print(robot)

@@ -29,7 +29,6 @@ def set_joint(j, value):
 j = 0
 for link in panda.links:
     if link.isjoint:
-
         # We use a lambda as the callback function from Swift
         # j=j is used to set the value of j rather than the variable j
         # We use the HTML unicode format for the degree sign in the unit arg

@@ -18,21 +18,20 @@ _ros = None
 rospy = None
 
 
-def _import_ros():     # pragma nocover
+def _import_ros():  # pragma nocover
     import importlib
+
     global rospy
     try:
-        ros = importlib.import_module('rospy')
+        ros = importlib.import_module("rospy")
     except ImportError:
-        print(
-            '\nYou must have ROS installed')
+        print("\nYou must have ROS installed")
         raise
 
 
 class ROS(Connector):  # pragma nocover
-    """
+    """ """
 
-    """
     def __init__(self):
         super(ROS, self).__init__()
 
@@ -43,15 +42,14 @@ class ROS(Connector):  # pragma nocover
     #
 
     def launch(self, roscore=False, ros_master_uri=None, ros_ip=None):
-        """
-        """
+        """ """
 
         super().launch()
 
         # Launch roscore in seperate process
         if roscore:
-            print('Launching ROS core\n')
-            self.roscore = subprocess.Popen('roscore')
+            print("Launching ROS core\n")
+            self.roscore = subprocess.Popen("roscore")
 
             # Give it some time to launch
             time.sleep(1)
@@ -65,32 +63,27 @@ class ROS(Connector):  # pragma nocover
         v = VelPub(rtb.models.Panda())
 
     def step(self, dt=0.05):
-        """
-        """
+        """ """
 
         super().step
 
     def reset(self):
-        """
-        """
+        """ """
 
         super().reset
 
     def restart(self):
-        """
-        """
+        """ """
 
         super().restart
 
     def close(self):
-        """
-        """
+        """ """
 
         super().close()
 
     def hold(self):
-        """
-        """
+        """ """
 
         super().hold()
 
@@ -98,10 +91,8 @@ class ROS(Connector):  # pragma nocover
     #  Methods to interface with the robots created in other environemnts
     #
 
-    def add(
-            self, ob):
-        """
-        """
+    def add(self, ob):
+        """ """
 
         super().add()
 
@@ -120,9 +111,8 @@ class ROS(Connector):  # pragma nocover
 
 
 class VelPub:
-
     def __init__(self, robot):
-        rospy.init_node('RTB_VelocityPublisher')
+        rospy.init_node("RTB_VelocityPublisher")
         self.robot = robot
         self.v = np.zeros(robot.n)
 

@@ -759,7 +759,6 @@ class RangeBearingSensor(SensorBase):
 
 
 if __name__ == "__main__":
-
     from roboticstoolbox import Bicycle, LandmarkMap, RangeBearingSensor
     from math import pi
 

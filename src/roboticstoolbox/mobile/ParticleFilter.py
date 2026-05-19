@@ -5,7 +5,7 @@ Python EKF Planner
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 
-Based on code by Paul Newman, Oxford University, 
+Based on code by Paul Newman, Oxford University,
 http://www.robots.ox.ac.uk/~pnewman
 """
 

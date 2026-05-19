@@ -19,8 +19,8 @@
 
 # Author: Ryu Woon Jung (Leon)
 
-from .protocol1_packet_handler import *   # lgtm [py/polluting-import]
-from .protocol2_packet_handler import *   # lgtm [py/polluting-import]
+from .protocol1_packet_handler import *  # lgtm [py/polluting-import]
+from .protocol2_packet_handler import *  # lgtm [py/polluting-import]
 
 
 def PacketHandler(protocol_version):

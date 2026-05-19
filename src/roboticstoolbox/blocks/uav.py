@@ -370,7 +370,6 @@ class MultiRotor(ContinuousBlock):
         b1s = self.b1s
 
         for i in range(0, self.nrotors):  # for each rotor
-
             # Relative motion
             Vr = np.cross(o, self.D[:, i]) + v
             mu = sqrt(np.sum(Vr[0:2] ** 2)) / (
@@ -833,9 +832,7 @@ class MultiRotorPlot(GraphicsBlock):
         for i in range(0, self.nrotors):
             hub[:, i] = F @ (z + R @ self.D[:, i])  # points in the inertial frame
 
-            q = (
-                self.flapscale
-            )  # Flapping angle scaling for output display - makes it easier to see what flapping is occurring
+            q = self.flapscale  # Flapping angle scaling for output display - makes it easier to see what flapping is occurring
             # Rotor -> Plot frame
             Rr = np.array(
                 [
@@ -886,7 +883,6 @@ class MultiRotorPlot(GraphicsBlock):
 
 
 if __name__ == "__main__":
-
     from quad_model import quadrotor
 
     # m = MultiRotorMixer(model=quadrotor)

@@ -143,6 +143,5 @@ class Stanford(DHRobot):
 
 
 if __name__ == "__main__":  # pragma nocover
-
     stanford = Stanford()
     print(stanford)

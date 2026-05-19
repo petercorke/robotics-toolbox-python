@@ -48,10 +48,16 @@ class KR5(DHRobot):
         # Updated values form ARTE git. Old values left as comments
 
         L1 = RevoluteDH(
-            a=0.18, d=0.4, alpha=-pi / 2, qlim=[-155 * deg, 155 * deg]  # alpha=pi / 2,
+            a=0.18,
+            d=0.4,
+            alpha=-pi / 2,
+            qlim=[-155 * deg, 155 * deg],  # alpha=pi / 2,
         )
         L2 = RevoluteDH(
-            a=0.6, d=0, alpha=0, qlim=[-180 * deg, 65 * deg]  # d=0.135,  # alpha=pi,
+            a=0.6,
+            d=0,
+            alpha=0,
+            qlim=[-180 * deg, 65 * deg],  # d=0.135,  # alpha=pi,
         )
         L3 = RevoluteDH(
             a=0.12,
@@ -66,7 +72,10 @@ class KR5(DHRobot):
             qlim=[-350 * deg, 350 * deg],
         )
         L5 = RevoluteDH(
-            a=0.0, d=0.0, alpha=pi / 2, qlim=[-130 * deg, 130 * deg]  # alpha=-pi / 2,
+            a=0.0,
+            d=0.0,
+            alpha=pi / 2,
+            qlim=[-130 * deg, 130 * deg],  # alpha=-pi / 2,
         )
         L6 = RevoluteDH(a=0, d=-0.115, alpha=pi, qlim=[-350 * deg, 350 * deg])
 

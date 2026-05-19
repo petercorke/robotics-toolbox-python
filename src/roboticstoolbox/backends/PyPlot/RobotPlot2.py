@@ -7,23 +7,30 @@
 from roboticstoolbox.backends.PyPlot.RobotPlot import RobotPlot
 import numpy as np
 from spatialmath import SE2
-class RobotPlot2(RobotPlot):
 
+
+class RobotPlot2(RobotPlot):
     def __init__(
-            self, robot, env, readonly, display=True,
-            eeframe=True, name=True, options=None):
+        self, robot, env, readonly, display=True, eeframe=True, name=True, options=None
+    ):
 
         super().__init__(
-            robot, env, readonly, display=display,
-            jointaxes=False, shadow=False, eeframe=eeframe, name=name
+            robot,
+            env,
+            readonly,
+            display=display,
+            jointaxes=False,
+            shadow=False,
+            eeframe=eeframe,
+            name=name,
         )
 
         defaults = {
-            'robot': {'color': '#E16F6D', 'linewidth': 5},
-            'jointlabels': {},
-            'eex': {'color': '#F84752', 'linewidth': 2}, # '#EE9494'
-            'eey': {'color': '#BADA55', 'linewidth': 2}, # '#93E7B0'
-            'eelength': 0.06,
+            "robot": {"color": "#E16F6D", "linewidth": 5},
+            "jointlabels": {},
+            "eex": {"color": "#F84752", "linewidth": 2},  # '#EE9494'
+            "eey": {"color": "#BADA55", "linewidth": 2},  # '#93E7B0'
+            "eelength": 0.06,
         }
 
         if options is not None:
@@ -43,7 +50,7 @@ class RobotPlot2(RobotPlot):
 
         # compute all link frames
         T = self.robot.fkine_all(self.robot.q)
-        
+
         # draw all the line segments for the noodle plot
         for i, segment in enumerate(self.segments):
             linkframes = []
@@ -54,8 +61,8 @@ class RobotPlot2(RobotPlot):
                     linkframes.append(T[link.number])
             points = np.array([linkframe.t for linkframe in linkframes])
 
-            self.links[i].set_xdata(points[:,0])
-            self.links[i].set_ydata(points[:,1])
+            self.links[i].set_xdata(points[:, 0])
+            self.links[i].set_ydata(points[:, 1])
 
         ## Draw the end-effectors
 
@@ -67,10 +74,9 @@ class RobotPlot2(RobotPlot):
             self.eeframes = []
 
         if self.eeframe:
-            len = self.options['eelength']
+            len = self.options["eelength"]
             Tjx = SE2(len, 0)
             Tjy = SE2(0, len)
-
 
             # add new ee coordinate frame
             for link in self.robot.ee_links:
@@ -80,8 +86,8 @@ class RobotPlot2(RobotPlot):
                 Tex = Te * Tjx
                 Tey = Te * Tjy
 
-                xaxis = self._plot_quiver(Te.t, Tex.t, self.options['eex'])
-                yaxis = self._plot_quiver(Te.t, Tey.t, self.options['eey'])
+                xaxis = self._plot_quiver(Te.t, Tex.t, self.options["eex"])
+                yaxis = self._plot_quiver(Te.t, Tey.t, self.options["eey"])
 
                 self.eeframes.extend([xaxis, yaxis])
 
@@ -101,24 +107,17 @@ class RobotPlot2(RobotPlot):
 
         # Plot robot name
         if self.showname:
-            self.name = self.ax.text(
-                Tb.t[0] + 0.05, Tb.t[1], self.robot.name)
+            self.name = self.ax.text(Tb.t[0] + 0.05, Tb.t[1], self.robot.name)
 
         # Initialize the robot links
         self.links = []
         for i in range(len(self.segments)):
-            line,  = self.ax.plot(
-                0, 0, **self.options['robot'])
+            (line,) = self.ax.plot(0, 0, **self.options["robot"])
             self.links.append(line)
-        
+
         self.eeframes = []
 
     def _plot_quiver(self, p0, p1, options):
         # draw arrow from p0 (tail) to p1 (head)
-        qv = self.ax.quiver(
-            p0[0], p0[1],
-            p1[0] - p0[0],
-            p1[1] - p0[1],
-            **options
-        )
+        qv = self.ax.quiver(p0[0], p0[1], p1[0] - p0[0], p1[1] - p0[1], **options)
         return qv

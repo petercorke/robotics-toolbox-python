@@ -3,8 +3,7 @@
 """
 
 
-class Element:     # pragma nocover
-
+class Element:  # pragma nocover
     TX = 0
     TY = 1
     TZ = 2
@@ -28,15 +27,11 @@ class Element:     # pragma nocover
     dhModified = (RX, 0), (TX, 0), (RZ, 1), (TZ, 1)
 
     def __init__(
-            self,
-            elementIn=None,
-            stringIn=None,
-            eltype=None,
-            constant=None,
-            sign=0):
+        self, elementIn=None, stringIn=None, eltype=None, constant=None, sign=0
+    ):
 
-        self.var = None         # eg. q1, for joint var types
-        self.symconst = None    # eg. L1, for lengths
+        self.var = None  # eg. q1, for joint var types
+        self.symconst = None  # eg. L1, for lengths
 
         # DH parameters, only set if type is DH_STANDARD/MODIFIED
         self.theta = None
@@ -48,11 +43,10 @@ class Element:     # pragma nocover
 
         if stringIn:
             if elementIn or eltype or constant:
-                raise ValueError(
-                    "if parsing a string, string must be the only input")
+                raise ValueError("if parsing a string, string must be the only input")
             i = None
-            sType = stringIn[0:2]     # Tx, Rx etc
-            sRest = stringIn[2:]       # the argument including brackets
+            sType = stringIn[0:2]  # Tx, Rx etc
+            sRest = stringIn[2:]  # the argument including brackets
 
             if not (sRest[-1] == ")" and sRest[0] == "("):
                 raise ValueError("brackets")
@@ -66,18 +60,18 @@ class Element:     # pragma nocover
             if not match:
                 raise ValueError("bad transform name: " + sType)
 
-            sRest = sRest[1:-1]     # get the argument from between brackets
+            sRest = sRest[1:-1]  # get the argument from between brackets
 
             # handle an optional minus sign
             negative = ""
 
-            if sRest[0] == '-':
+            if sRest[0] == "-":
                 negative = "-"
                 sRest = sRest[1]
 
             if sRest[0] == "q":
                 self.var = negative + sRest
-            elif sRest[0] == 'L':
+            elif sRest[0] == "L":
                 self.symconst = negative + sRest
             else:
                 try:
@@ -104,7 +98,7 @@ class Element:     # pragma nocover
         if eltype:
             self.eltype = eltype
             if constant:
-                self.constant = constant    # eg. 90, for angles
+                self.constant = constant  # eg. 90, for angles
             if sign < 0:
                 self.negate()
 
@@ -115,12 +109,18 @@ class Element:     # pragma nocover
                 print("Rule " + str(i) + ": " + str(Element.rules[i]))
 
     def istrans(self):
-        return (self.eltype == self.TX) or (self.eltype == self.TY) \
+        return (
+            (self.eltype == self.TX)
+            or (self.eltype == self.TY)
             or (self.eltype == self.TZ)
+        )
 
     def isrot(self):
-        return (self.eltype == self.RX) or (self.eltype == self.RY) or \
-            (self.eltype == self.RZ)
+        return (
+            (self.eltype == self.RX)
+            or (self.eltype == self.RY)
+            or (self.eltype == self.RZ)
+        )
 
     def isjoint(self):
         return self.var is not None
@@ -150,8 +150,7 @@ class Element:     # pragma nocover
                 return s1 + "+" + s2
 
     def add(self, e):
-        if self.eltype != Element.DH_STANDARD and \
-                self.eltype != Element.DH_MODIFIED:
+        if self.eltype != Element.DH_STANDARD and self.eltype != Element.DH_MODIFIED:
             raise ValueError("wrong element type " + str(self))
         print("  adding: " + str(self) + " += " + str(e))
         if e.eltype == self.RZ:
@@ -191,12 +190,24 @@ class Element:     # pragma nocover
             raise ValueError("bad DH type")
 
         match = (self.eltype == dhFactors[i][0]) and not (
-            (dhFactors[i][1] == 0) and self.isjoint())
+            (dhFactors[i][1] == 0) and self.isjoint()
+        )
 
         if verbose > 0:
-            print(" matching " + str(self) + " (i=" + str(i) + ") " +
-                  " to " + self.typeName[dhFactors[i][0]] + "<" +
-                  str(dhFactors[i][1]) + ">" + " -> " + str(match))
+            print(
+                " matching "
+                + str(self)
+                + " (i="
+                + str(i)
+                + ") "
+                + " to "
+                + self.typeName[dhFactors[i][0]]
+                + "<"
+                + str(dhFactors[i][1])
+                + ">"
+                + " -> "
+                + str(match)
+            )
         return match
 
     def merge(self, e):
@@ -230,32 +241,46 @@ class Element:     # pragma nocover
 
         if dhWhich == Element.DH_STANDARD:
             # order = [2, 0, 3, 4, 0, 1]
-            if self.eltype == Element.TZ and next.eltype == Element.TX or \
-                    self.eltype == Element.TX and next.eltype == Element.RX \
-                    and next.isjoint() or \
-                    self.eltype == Element.TY and next.eltype == Element.RY \
-                    and next.isjoint() or \
-                    self.eltype == Element.TZ and next.eltype == Element.RZ \
-                    and next.isjoint() or \
-                    not self.isjoint() and self.eltype == Element.RX and \
-                    next.eltype == Element.TX or \
-                    not self.isjoint() and self.eltype == Element.RY and \
-                    next.eltype == Element.TY or \
-                    not self.isjoint() and not next.isjoint() and \
-                    self.eltype == Element.TZ and \
-                    next.eltype == Element.RZ or \
-                    self.eltype == Element.TY and \
-                    next.eltype == Element.TZ or \
-                    self.eltype == Element.TY and next.eltype == Element.TX:
+            if (
+                self.eltype == Element.TZ
+                and next.eltype == Element.TX
+                or self.eltype == Element.TX
+                and next.eltype == Element.RX
+                and next.isjoint()
+                or self.eltype == Element.TY
+                and next.eltype == Element.RY
+                and next.isjoint()
+                or self.eltype == Element.TZ
+                and next.eltype == Element.RZ
+                and next.isjoint()
+                or not self.isjoint()
+                and self.eltype == Element.RX
+                and next.eltype == Element.TX
+                or not self.isjoint()
+                and self.eltype == Element.RY
+                and next.eltype == Element.TY
+                or not self.isjoint()
+                and not next.isjoint()
+                and self.eltype == Element.TZ
+                and next.eltype == Element.RZ
+                or self.eltype == Element.TY
+                and next.eltype == Element.TZ
+                or self.eltype == Element.TY
+                and next.eltype == Element.TX
+            ):
                 print("Swap: " + self + " <-> " + next)
                 return True
         elif dhWhich == Element.DH_MODIFIED:
-            if self.eltype == Element.RX and next.eltype == Element.TX or \
-                    self.eltype == Element.RY and \
-                    next.eltype == Element.TY or \
-                    self.eltype == Element.RZ and \
-                    next.eltype == Element.TZ or \
-                    self.eltype == Element.TZ and next.eltype == Element.TX:
+            if (
+                self.eltype == Element.RX
+                and next.eltype == Element.TX
+                or self.eltype == Element.RY
+                and next.eltype == Element.TY
+                or self.eltype == Element.RZ
+                and next.eltype == Element.TZ
+                or self.eltype == Element.TZ
+                and next.eltype == Element.TX
+            ):
                 print("Swap: " + self + " <-> " + next)
                 return True
         else:
@@ -279,18 +304,25 @@ class Element:     # pragma nocover
                     s[i] = "+"
                 if s[0] == "+":
                     s.pop(0)
-        s = "".join(s)    # lgtm [py/unused-local-variable]
+        s = "".join(s)  # lgtm [py/unused-local-variable]
 
-    '''
+    """
     Return a string representation of the parameters (argument)
     of the element, which can be a number, symbolic constant,
     or a joint variable.
-    '''
+    """
+
     def argString(self):
         s = ""
 
-        if self.eltype == Element.RX or Element.RY or Element.RZ or \
-                Element.TX or Element.TY or Element.TZ:
+        if (
+            self.eltype == Element.RX
+            or Element.RY
+            or Element.RZ
+            or Element.TX
+            or Element.TY
+            or Element.TZ
+        ):
             if self.var:
                 s = self.var
             if self.symconst:
@@ -301,9 +333,9 @@ class Element:     # pragma nocover
             # constants always displayed with a sign character
             if self.constant != 0.0:
                 if self.constant >= 0.0:
-                    s = s + "+" + '{0:.3f}'.format(self.constant)
+                    s = s + "+" + "{0:.3f}".format(self.constant)
                 else:
-                    s = s + '{0:.3f}'.format(self.constant)
+                    s = s + "{0:.3f}".format(self.constant)
         elif self.eltype == Element.DH_STANDARD or Element.DH_MODIFIED:
             # theta, d, a, alpha
             # theta
@@ -311,12 +343,12 @@ class Element:     # pragma nocover
                 # revolute joint
                 s = s + self.var
                 if self.offset >= 0:
-                    s = s + "+" + '{0:.3f}'.format(self.offset)
+                    s = s + "+" + "{0:.3f}".format(self.offset)
                 elif self.offset < 0:
-                    s = s + '{0:.3f}'.format(self.offset)
+                    s = s + "{0:.3f}".format(self.offset)
             else:
                 # prismatic joint
-                s = s + '{0:.3f}'.format(self.theta)
+                s = s + "{0:.3f}".format(self.theta)
             s = s + ", "
 
             # d
@@ -331,7 +363,7 @@ class Element:     # pragma nocover
             s = s + ", "
 
             # alpha
-            s = s + '{0:.3f}'.format(self.alpha)
+            s = s + "{0:.3f}".format(self.alpha)
         else:
             raise ValueError("bad Element type")
         return s

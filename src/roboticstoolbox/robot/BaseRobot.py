@@ -2171,7 +2171,8 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     # --------------------------------------------------------------------- #
 
     def _get_graphical_backend(
-        self, backend: Union[L["swift", "pyplot", "pyplot2"], None] = None  # noqa
+        self,
+        backend: Union[L["swift", "pyplot", "pyplot2"], None] = None,  # noqa
     ) -> Union[Swift, PyPlot, PyPlot2]:
         default = self.default_backend
 

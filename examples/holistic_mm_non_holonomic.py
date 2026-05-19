@@ -112,7 +112,6 @@ env.step()
 
 
 while not arrived:
-
     arrived, frankie.qd = step_robot(frankie, wTep.A)
     env.step(dt)
 

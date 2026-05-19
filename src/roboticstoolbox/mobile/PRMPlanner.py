@@ -3,6 +3,7 @@ Python PRM
 @Author: Peter Corke, original MATLAB code and Python version
 @Author: Kristian Gibson, initial MATLAB port
 """
+
 # from multiprocessing.sharedctypes import Value
 # from numpy import disp
 # from scipy import integrate
