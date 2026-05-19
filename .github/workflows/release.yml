@@ -1,0 +1,111 @@
+# Build wheels for all platforms and publish to PyPI.
+# Triggered on GitHub release creation or manually via workflow_dispatch.
+#
+# Uses OIDC trusted publishing — no stored PyPI token required.
+# macOS uses macos-14 (arm64); cibuildwheel cross-compiles x86_64 as well
+# (see [tool.cibuildwheel.macos] archs in pyproject.toml).
+# Check for latest cibuildwheel: https://github.com/pypa/cibuildwheel/releases
+
+name: Release
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # macos-14 = arm64; cibuildwheel also cross-compiles x86_64 (see pyproject.toml)
+        os: [ubuntu-latest, windows-latest, macos-14]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU (Linux aarch64 emulation)
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.23.3  # pin; update to latest on each release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  build_pyodide:
+    name: Build Pyodide (wasm32) wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Pyodide wheel
+        uses: pypa/cibuildwheel@v2.23.3
+        env:
+          CIBW_PLATFORM: pyodide
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-pyodide
+          path: ./wheelhouse/*.whl
+
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build sdist
+        run: pipx run build --sdist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  smoke_test:
+    name: Smoke-test Linux wheel
+    needs: build_wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-ubuntu-latest-*
+          merge-multiple: true
+          path: wheelhouse
+
+      - name: Install wheel (pulls all deps from PyPI)
+        run: pip install --find-links wheelhouse roboticstoolbox-python
+
+      - name: Smoke test
+        run: python -c "import roboticstoolbox; print('OK', roboticstoolbox.__version__)"
+
+  upload_pypi:
+    needs: [build_wheels, build_pyodide, build_sdist, smoke_test]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # required for OIDC trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
