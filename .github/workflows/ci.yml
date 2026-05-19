@@ -20,6 +20,22 @@ env:
   QT_QPA_PLATFORM: offscreen
 
 jobs:
+  test-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package (core, no swift)
+        run: pip install .[dev]
+
+      - name: Test (core)
+        run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -39,16 +55,10 @@ jobs:
           cache: pip
 
       - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
-        if: runner.os != 'Windows'
         run: |
+            pip install "websockets<11"
             pip install git+https://github.com/petercorke/spatialgeometry.git@future
             pip install git+https://github.com/petercorke/swift.git@future
-
-      - name: Install spatialgeometry + swift from PyPI (Windows temporary)
-        if: runner.os == 'Windows'
-        run: |
-            pip install "numpy<2"
-            pip install spatialgeometry swift-sim
 
       - name: Install package
         run: pip install .[dev]
@@ -57,7 +67,7 @@ jobs:
         run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
 
   coverage:
-    needs: test
+    needs: [test-core, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -69,6 +79,7 @@ jobs:
 
       - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
         run: |
+          pip install "websockets<11"
           pip install git+https://github.com/petercorke/spatialgeometry.git@future
           pip install git+https://github.com/petercorke/swift.git@future
 
@@ -83,7 +94,7 @@ jobs:
           files: ./coverage.xml
 
   docs:
-    needs: test
+    needs: [test-core, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -95,6 +106,7 @@ jobs:
 
       - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
         run: |
+          pip install "websockets<11"
           pip install git+https://github.com/petercorke/spatialgeometry.git@future
           pip install git+https://github.com/petercorke/swift.git@future
 

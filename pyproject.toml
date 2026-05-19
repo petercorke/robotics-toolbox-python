@@ -12,14 +12,13 @@ authors = [
 ]
 
 dependencies = [
-    "numpy",
+    "numpy<2",
     "spatialmath-python>=1.1.5",
     "spatialgeometry>=1.0.0",
     "pgraph-python",
     "scipy",
     "matplotlib",
     "ansitable",
-    "swift-sim>=1.0.0",
     "rtb-data",
     "progress",
     "typing_extensions",
@@ -70,11 +69,26 @@ repository = "https://github.com/petercorke/robotics-toolbox-python"
 
 [project.optional-dependencies]
 
+swift = ["swift-sim>=1.0.0", "websockets<11"]
+
 # pybullet has no arm64 wheel; on Apple Silicon install manually:
 #   CC=/usr/bin/clang CXX=/usr/bin/clang++ \
 #   CFLAGS="-Wno-error -Wno-implicit-function-declaration" \
 #   pip install pybullet
+bullet = ["pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'"]
+
+# Backward-compatible alias for previous extra name.
 collision = [
+    "pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'",
+]
+
+qp = ["qpsolvers", "quadprog"]
+
+all = [
+    "swift-sim>=1.0.0",
+    "websockets<11",
+    "qpsolvers",
+    "quadprog",
     "pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'",
 ]
 
@@ -82,16 +96,17 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-timeout",
+    "pytest-nbmake",
     "pyyaml",
     "sympy",
-    "roboticstoolbox-python[qp]",
+    "qpsolvers",
+    "quadprog",
     "bdsim",
     "ruff",
 ]
 
+# Backward-compatible alias; notebook tooling is included in "dev".
 nb = ["pytest-nbmake"]
-
-qp = ["qpsolvers", "quadprog"]
 
 docs = [
     "sphinx",
@@ -112,7 +127,7 @@ rtbtool = "roboticstoolbox.bin.rtbtool:main"
 
 [build-system]
 
-requires = ["scikit-build-core>=0.9", "numpy"]
+requires = ["scikit-build-core>=0.9", "numpy<2"]
 build-backend = "scikit_build_core.build"
 
 

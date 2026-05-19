@@ -57,7 +57,12 @@ wheel-pyodide: .FORCE
 	@echo "Pyodide wheel written to dist/"
 
 upload: .FORCE
+	$(eval VERSION := $(shell python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])"))
+	@echo "Uploading version $(VERSION) to PyPI"
 	twine upload dist/*
+	git tag -a v$(VERSION) -m "Release v$(VERSION)"
+	git push origin v$(VERSION)
+	@echo "Tagged and pushed v$(VERSION)"
 
 clean: .FORCE
 	(cd docs; make clean)

@@ -100,7 +100,11 @@ pip3 install roboticstoolbox-python
 
 Available options are:
 
-- `collision` install collision checking with [pybullet](https://pybullet.org)
+- `swift` install [Swift](https://github.com/jhavl/swift), a web-based visualizer
+- `qp` install quadratic-programming IK dependencies (`qpsolvers`, `quadprog`)
+- `bullet` install collision checking with [pybullet](https://pybullet.org)
+- `collision` alias of `bullet` (backward compatibility)
+- `all` install `swift`, `qp`, and `bullet`
 
 Put the options in a comma separated list like
 
@@ -108,8 +112,45 @@ Put the options in a comma separated list like
 pip3 install roboticstoolbox-python[optionlist]
 ```
 
-[Swift](https://github.com/jhavl/swift), a web-based visualizer, is
-installed as part of Robotics Toolbox.
+If you want the Swift visualizer, install the `swift` extra.
+
+Install matrix:
+
+- Core only
+
+```shell script
+pip3 install roboticstoolbox-python
+```
+
+- Swift visualizer only
+
+```shell script
+pip3 install roboticstoolbox-python[swift]
+```
+
+- QP solver dependencies only
+
+```shell script
+pip3 install roboticstoolbox-python[qp]
+```
+
+- Bullet collision dependencies only
+
+```shell script
+pip3 install roboticstoolbox-python[bullet]
+```
+
+- Everything (swift + qp + bullet)
+
+```shell script
+pip3 install roboticstoolbox-python[all]
+```
+
+- Multiple extras explicitly
+
+```shell script
+pip3 install roboticstoolbox-python[swift,qp,bullet]
+```
 
 ### From GitHub
 
