@@ -159,5 +159,8 @@ archs = ["AMD64"]
 # the toolchain file automatically from the PYODIDE environment.
 
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
 [tool.coverage.run]
 omit = ["src/roboticstoolbox/examples/*", "test_*.py"]
