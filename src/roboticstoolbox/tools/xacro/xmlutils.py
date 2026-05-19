@@ -125,7 +125,11 @@ def fixed_writexml(
 
     for a_name in a_names:
         writer.write(' %s="' % a_name)
-        xml.dom.minidom._write_data(writer, attrs[a_name].value)
+        # Python 3.13 changed minidom._write_data signature to require `attr`.
+        try:
+            xml.dom.minidom._write_data(writer, attrs[a_name].value)
+        except TypeError:
+            xml.dom.minidom._write_data(writer, attrs[a_name].value, True)
         writer.write('"')
     if self.childNodes:
         if (

@@ -31,8 +31,8 @@ class TestReedsSheppPlanner(unittest.TestCase):
         reedsshepp = ReedsSheppPlanner(curvature=1.0, stepsize=0.1)
         path, status = reedsshepp.query(start, goal)
 
-        # Turns
-        self.assertEqual(status[0], ["L", "R", "L"])
+        # Turns: LRL and RLR are mirror-symmetric, equal-cost solutions.
+        self.assertIn(status[0], (["L", "R", "L"], ["R", "L", "R"]))
         # Total length
         nt.assert_almost_equal(status[1], pi)
         # Segment lengths
