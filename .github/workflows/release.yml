@@ -13,6 +13,9 @@ on:
     types: [created]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}

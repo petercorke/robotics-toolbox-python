@@ -14,15 +14,20 @@ on:
   pull_request:
     branches: [main, future]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        # Windows temporarily disabled: spatialgeometry.scene missing from source build.
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
+        exclude:
+          - os: windows-latest
+            python-version: "3.13"
     steps:
       - uses: actions/checkout@v4
 
@@ -32,9 +37,16 @@ jobs:
           cache: pip
 
       - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
+        if: runner.os != 'Windows'
         run: |
             pip install git+https://github.com/petercorke/spatialgeometry.git@future
             pip install git+https://github.com/petercorke/swift.git@future
+
+      - name: Install spatialgeometry + swift from PyPI (Windows temporary)
+        if: runner.os == 'Windows'
+        run: |
+            pip install "numpy<2"
+            pip install spatialgeometry swift-sim
 
       - name: Install package
         run: pip install .[dev]
