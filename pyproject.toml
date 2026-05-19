@@ -70,7 +70,13 @@ repository = "https://github.com/petercorke/robotics-toolbox-python"
 
 [project.optional-dependencies]
 
-collision = ["pybullet"]
+# pybullet has no arm64 wheel; on Apple Silicon install manually:
+#   CC=/usr/bin/clang CXX=/usr/bin/clang++ \
+#   CFLAGS="-Wno-error -Wno-implicit-function-declaration" \
+#   pip install pybullet
+collision = [
+    "pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'",
+]
 
 dev = [
     "black",
@@ -81,7 +87,7 @@ dev = [
     "sympy",
     "qpsolvers",
     "quadprog",
-    "pybullet",
+    "pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'",
     "bdsim",
 ]
 
@@ -104,20 +110,18 @@ rtbtool = "roboticstoolbox.bin.rtbtool:main"
 
 [build-system]
 
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["scikit-build-core>=0.9", "numpy"]
+build-backend = "scikit_build_core.build"
 
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/roboticstoolbox"]
-
-[tool.hatch.build.targets.sdist]
-include = [
-    "/src/roboticstoolbox",
-    "/tests",
-    "/README.md",
-    "/LICENSE",
-    "/pyproject.toml",
+[tool.scikit-build]
+wheel.packages = ["src/roboticstoolbox"]
+sdist.include = [
+    "src/roboticstoolbox",
+    "tests",
+    "CMakeLists.txt",
+    "README.md",
+    "LICENSE",
 ]
 
 
@@ -157,36 +161,22 @@ extend-ignore = 'E203'
 
 [tool.cibuildwheel]
 
-# Will cause the wheel to be installed with `pip install <wheel_file>[dev,collision]`
-# test-extras = ["dev", "collision"]
-# test-requires = "pytest"
-# test-command = "pytest {project}/tests"
-
-manylinux-x86_64-image = "manylinux2014"
-manylinux-aarch64-image = "manylinux2014"
-
-# Build CPython
-build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*"]
-
-# Disable building musllinux wheels on all platforms
+build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
 skip = ["pp*", "*musllinux*"]
 
-
 [tool.cibuildwheel.macos]
-
-# Build `x86_64` and `arm64` wheels on an Intel runner.
-# Note that the `arm64` wheel cannot be tested in this configuration.
 archs = ["x86_64", "arm64"]
 
 [tool.cibuildwheel.linux]
-
-# On an Linux Intel runner with qemu installed, build Intel and ARM wheels
 archs = ["x86_64", "aarch64"]
 
 [tool.cibuildwheel.windows]
+archs = ["AMD64"]
 
-# On an Windows Intel runner build wheels
-archs = ["AMD64", "x86"]
+[tool.cibuildwheel.pyodide]
+# Pyodide (wasm32-emscripten) — used by JupyterLite
+# cibuildwheel manages the Emscripten SDK; scikit-build-core picks up
+# the toolchain file automatically from the PYODIDE environment.
 
 
 [tool.coverage.run]
