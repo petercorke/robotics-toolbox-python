@@ -6,8 +6,8 @@ import time
 from spatialmath import SE3
 import spatialmath.base as smb
 
-from bdsim.components import TransferBlock, FunctionBlock, SourceBlock
-from bdsim.graphics import GraphicsBlock
+from bdsim.block_types import GraphicsBlock, ContinuousBlock, FunctionBlock, SourceBlock
+
 
 from roboticstoolbox import quintic_func, trapezoidal_func
 
@@ -15,7 +15,7 @@ from roboticstoolbox import quintic_func, trapezoidal_func
 Robot blocks:
 - have inputs and outputs
 - are a subclass of ``FunctionBlock`` |rarr| ``Block`` for kinematics and have no states
-- are a subclass of ``TransferBlock`` |rarr| ``Block`` for dynamics and have states
+- are a subclass of ``ContinuousBlock`` |rarr| ``Block`` for dynamics and have states
 
 """
 # The constructor of each class ``MyClass`` with a ``@block`` decorator becomes a method ``MYCLASS()`` of the BlockDiagram instance.
@@ -423,7 +423,7 @@ class ArmPlot(GraphicsBlock):
 
 
 class JTraj(SourceBlock):
-    """
+    r"""
     :blockname:`JTRAJ`
 
     Joint-space trajectory
@@ -660,7 +660,7 @@ class CTraj(SourceBlock):
 
 
 class CirclePath(SourceBlock):
-    """
+    r"""
     :blockname:`CIRCLEPATH`
 
     Circular motion.
@@ -834,7 +834,7 @@ class Trapezoidal(SourceBlock):
 
 
 class Traj(FunctionBlock):
-    """
+    r"""
     :blockname:`TRAJ`
 
     Vector trajectory
@@ -1317,7 +1317,7 @@ class Inertia_X(FunctionBlock):
 # ------------------------------------------------------------------------ #
 
 
-class FDyn(TransferBlock):
+class FDyn(ContinuousBlock):
     r"""
     :blockname:`FDYN`
 
@@ -1416,7 +1416,7 @@ class FDyn(TransferBlock):
 # ------------------------------------------------------------------------ #
 
 
-class FDyn_X(TransferBlock):
+class FDyn_X(ContinuousBlock):
     r"""
     :blockname:`FDYN_X`
 
@@ -1482,7 +1482,7 @@ class FDyn_X(TransferBlock):
         :type velcomp: bool
         :param representation: task-space representation, defaults to "rpy/xyz"
         :type representation: str
-    
+
         :param blockargs: |BlockOptions|
         :type blockargs: dict
         """

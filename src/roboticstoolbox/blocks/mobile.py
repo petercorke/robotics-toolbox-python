@@ -6,13 +6,13 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 import time
 
-from bdsim.components import TransferBlock
-from bdsim.graphics import GraphicsBlock
+from bdsim.block_types import GraphicsBlock, ContinuousBlock
 
 from roboticstoolbox import mobile
 
+
 # ------------------------------------------------------------------------ #
-class Bicycle(TransferBlock):
+class Bicycle(ContinuousBlock):
     r"""
     :blockname:`BICYCLE`
 
@@ -100,7 +100,7 @@ class Bicycle(TransferBlock):
             )
             self._x0 = x0
 
-        self.inport_names(("v", "$\gamma$"))
+        self.inport_names(("v", r"$\gamma$"))
         self.outport_names(("q",))
         self.state_names(("x", "y", r"$\theta$"))
 
@@ -112,7 +112,7 @@ class Bicycle(TransferBlock):
 
 
 # ------------------------------------------------------------------------ #
-class Unicycle(TransferBlock):
+class Unicycle(ContinuousBlock):
     r"""
     :blockname:`UNICYCLE`
 
@@ -154,6 +154,7 @@ class Unicycle(TransferBlock):
     :seealso: :class:`~roboticstoolbox.mobile.Vehicle.Unicycle` :class:`Bicycle` :class:`DiffSteer`
 
     """
+
     nin = 2
     nout = 1
     inlabels = ("v", "ω")
@@ -221,8 +222,8 @@ class Unicycle(TransferBlock):
 
 
 # ------------------------------------------------------------------------ #
-class DiffSteer(TransferBlock):
-    """
+class DiffSteer(ContinuousBlock):
+    r"""
     :blockname:`DIFFSTEER`
 
     Differential steer vehicle model
@@ -372,6 +373,8 @@ class VehiclePlot(GraphicsBlock):
         square=True,
         init=None,
         scale="auto",
+        shape=None,
+        size=None,
         polyargs={},
         **blockargs,
     ):
@@ -388,6 +391,10 @@ class VehiclePlot(GraphicsBlock):
         :type init: callable, optional
         :param scale: scale of plot, defaults to "auto"
         :type scale: list or str, optional
+        :param shape: shape of vehicle, passed to animation, defaults to None
+        :type shape: array_like, optional
+        :param size: size of vehicle, passed to animation, defaults to None
+        :type size: float or array_like, optional
         :param polyargs: arguments passed to :meth:`Animation.Polygon`
         :type polyargs: dict
         :param blockargs: |BlockOptions|
@@ -398,6 +405,9 @@ class VehiclePlot(GraphicsBlock):
             - The ``init`` function is called after the axes are initialized
               and can be used to draw application specific detail on the
               plot. In the example below, this is the dot and star.
+            - If an ``animation`` object is not provided then a default polygon animation is
+              created.  It's size and shape can be set by the ``size`` and ``shape`` parameters, which are passed to the animation object,
+              or a dictionary of arguments ``polyargs`` which is passed to the default animation object.
             - A dynamic trail, showing path to date can be animated if
               the option ``path`` is set to a linestyle.
         """
@@ -417,6 +427,10 @@ class VehiclePlot(GraphicsBlock):
                 scale = scale * 2
         self.scale = scale
         self.labels = labels
+
+        polyargs.update(
+            {k: v for k, v in [("shape", shape), ("scale", size)] if v is not None}
+        )
 
         if animation is None:
             animation = mobile.VehiclePolygon(**polyargs)

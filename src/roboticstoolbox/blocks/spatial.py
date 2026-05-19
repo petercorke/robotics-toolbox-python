@@ -6,8 +6,7 @@ import time
 from spatialmath import SE3
 import spatialmath.base as smb
 
-from bdsim.components import TransferBlock, FunctionBlock, SourceBlock
-from bdsim.graphics import GraphicsBlock
+from bdsim.block_types import FunctionBlock
 
 from roboticstoolbox import quintic_func, trapezoidal_func
 
@@ -60,7 +59,7 @@ class Tr2Delta(FunctionBlock):
         super().__init__(**blockargs)
 
         self.inport_names(("T1", "T2"))
-        self.outport_names(("$\delta$",))
+        self.outport_names((r"$\delta$",))
 
     def output(self, t, inports, x):
         return [smb.tr2delta(inports[0].A, inports[1].A)]
@@ -112,7 +111,7 @@ class Delta2Tr(FunctionBlock):
         """
         super().__init__(**blockargs)
 
-        self.inport_names(("$\delta$",))
+        self.inport_names((r"$\delta$",))
         self.outport_names(("T",))
 
     def output(self, t, inports, x):
