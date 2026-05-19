@@ -9,6 +9,7 @@ import unittest
 import os
 import spatialgeometry as sg
 from spatialmath.base import tr2jac
+from tests.marks import skip_no_pybullet
 
 # from spatialmath import SE3
 
@@ -828,6 +829,7 @@ class TestRobot(unittest.TestCase):
         with self.assertRaises(ValueError):
             r.jacobm(axes="abcdef")  # type: ignore
 
+    @skip_no_pybullet
     def test_collided2(self):
         p = rtb.models.Panda()
         s0 = sg.Cuboid([0.01, 0.01, 0.01], pose=p.fkine(p.q))
@@ -858,6 +860,7 @@ class TestRobot(unittest.TestCase):
         nt.assert_almost_equal(Ain, a1, decimal=4)
         nt.assert_almost_equal(Bin, a2, decimal=4)
 
+    @skip_no_pybullet
     def test_link_collision_damper(self):
         r = rtb.models.Panda()
 

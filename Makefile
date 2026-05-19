@@ -4,15 +4,16 @@ BLUE=\033[0;34m
 BLACK=\033[0;30m
 
 help:
-	@echo "$(BLUE) make test          - run all unit tests"
-	@echo " make coverage       - run unit tests and coverage report"
-	@echo " make docs           - build Sphinx documentation"
-	@echo " make docupdate      - upload Sphinx documentation to GitHub pages"
-	@echo " make dist           - build native wheel + sdist"
-	@echo " make wheel-pyodide  - build wasm32/emscripten wheel via pyodide-build"
-	@echo " make upload         - upload to PyPI"
-	@echo " make clean          - remove dist and docs build files"
-	@echo " make help           - this message$(BLACK)"
+	@echo "$(BLUE) make test           - run all unit tests"
+	@echo " make test-notebooks  - run notebook smoke tests (requires pytest-nbmake)"
+	@echo " make coverage        - run unit tests and coverage report"
+	@echo " make docs            - build Sphinx documentation"
+	@echo " make docupdate       - upload Sphinx documentation to GitHub pages"
+	@echo " make dist            - build native wheel + sdist"
+	@echo " make wheel-pyodide   - build wasm32/emscripten wheel via pyodide-build"
+	@echo " make upload          - upload to PyPI"
+	@echo " make clean           - remove dist and docs build files"
+	@echo " make help            - this message$(BLACK)"
 
 
 
@@ -26,7 +27,12 @@ else
 endif
 
 test:
+	python -c "import tomllib, sys; tomllib.load(open('pyproject.toml','rb')); print('pyproject.toml OK')"
 	pytest tests/ --ignore=tests/test_blocks.py
+
+test-notebooks:
+	MPLBACKEND=Agg pytest --nbmake \
+	  $(shell find docs/notebooks -name '*.ipynb' ! -name 'Untitled*.ipynb')
 
 coverage:
 	coverage run --omit=\*/test_\* -m unittest
@@ -47,7 +53,7 @@ dist: .FORCE
 	python -m build
 
 wheel-pyodide: .FORCE
-	pyodide build
+	conda run -n dev pyodide build
 	@echo "Pyodide wheel written to dist/"
 
 upload: .FORCE

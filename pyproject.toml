@@ -82,14 +82,17 @@ dev = [
     "black",
     "pytest",
     "pytest-cov",
+    "pytest-timeout",
+    "pytest-nbmake",
     "flake8",
     "pyyaml",
     "sympy",
-    "qpsolvers",
-    "quadprog",
+    "roboticstoolbox-python[qp]",
     "pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'",
     "bdsim",
 ]
+
+qp = ["qpsolvers", "quadprog"]
 
 docs = [
     "sphinx",
