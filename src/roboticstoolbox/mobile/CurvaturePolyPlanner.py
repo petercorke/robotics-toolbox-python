@@ -56,7 +56,7 @@ def costfunc(x, start, goal):
 
 class CurvaturePolyPlanner(PlannerBase):
     def __init__(self, curvature=None):
-        """
+        r"""
         Continuous curvature path planner
 
         :param curvature: , defaults to None

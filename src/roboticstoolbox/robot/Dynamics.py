@@ -10,6 +10,7 @@ so must be subclassed by ``DHRobot`` class.
 
 :todo: perhaps these should be abstract properties, methods of this calss
 """
+
 from collections import namedtuple
 from typing import Any, Callable, Dict, Union
 import numpy as np
@@ -42,8 +43,7 @@ class DynamicsMixin:
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
         >>> robot = rtb.models.DH.Puma560()
-        >>> robot.links[2].dyntable()
-        >>> robot.dyntable()
+        >>> robot.dynamics()
 
         """
         unicode = rtb_get_param("unicode")
@@ -219,7 +219,7 @@ class DynamicsMixin:
             - current joint coordinates (n,)
             - current joint velocity (n,)
             - args, optional keyword arguments can be specified, these are
-            passed in from the ``targs`` kewyword argument.
+              passed in from the ``targs`` keyword argument.
 
         The function must return a Numpy array (n,) of joint forces/torques.
 
@@ -290,11 +290,11 @@ class DynamicsMixin:
             to set this friction to zero.
         - If the function is not specified then zero force/torque is
             applied to the manipulator joints.
-        - Interpolation is performed using `ScipY integrate.ode
-            <https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.ode.html>`
+        - Interpolation is performed using
+          `SciPy integrate.ode <https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.ode.html>`_
         - The SciPy RK45 integrator is used by default
-        - Interpolation is performed using `SciPy interp1
-            <https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html>`
+        - Interpolation is performed using
+          `SciPy interp1d <https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html>`_
 
         See Also
         --------
@@ -981,7 +981,7 @@ class DynamicsMixin:
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
         >>> puma = rtb.models.DH.Puma560()
-        >>> puma.inertia_x(puma.qz)
+        >>> puma.inertia_x(puma.qn)
 
         Notes
         -----
@@ -1108,7 +1108,7 @@ class DynamicsMixin:
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
         >>> puma = rtb.models.DH.Puma560()
-        >>> puma.coriolis_x(puma.qz, 0.5 * np.ones((6,)))
+        >>> puma.coriolis_x(puma.qn, 0.5 * np.ones((6,)))
 
         Notes
         -----
@@ -1237,7 +1237,7 @@ class DynamicsMixin:
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
         >>> puma = rtb.models.DH.Puma560()
-        >>> puma.gravload_x(puma.qz)
+        >>> puma.gravload_x(puma.qn)
 
         Notes
         -----
@@ -1341,13 +1341,6 @@ class DynamicsMixin:
         -------
         accel
             Operational space accelerations of the end-effector
-
-        Examples
-        --------
-        .. runblock:: pycon
-        >>> import roboticstoolbox as rtb
-        >>> puma = rtb.models.DH.Puma560()
-        >>> puma.accel_x(puma.qz, 0.5 * np.ones(6), np.zeros(6))
 
         Notes
         -----

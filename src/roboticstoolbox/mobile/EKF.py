@@ -82,10 +82,12 @@ class EKF:
 
         At each iteration of the EKF:
 
-        -  invoke the step method of the ``robot``
+        - invoke the step method of the ``robot``
+
           - obtains the next control input from the driver agent, and apply it
             as the vehicle control input
           - the vehicle returns a noisy odometry estimate
+
         - the state prediction is computed
         - the true pose is used to determine a noisy sensor observation
         - the state is corrected, new landmarks are added to the map

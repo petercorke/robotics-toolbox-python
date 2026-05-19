@@ -233,7 +233,7 @@ class Trajectory:
             ax.set_xlim(0, max(self.t))
 
             if self.istime:
-                ax.set_ylabel("$\dot{{q}}(t)$", **textopts)
+                ax.set_ylabel(r"$\dot{{q}}(t)$", **textopts)
             else:
                 ax.set_ylabel("$dq/dk$", **textopts)
 
@@ -244,7 +244,7 @@ class Trajectory:
             ax.set_xlim(0, max(self.t))
 
             if self.istime:
-                ax.set_ylabel(f"$\ddot{{q}}(t)$", **textopts)
+                ax.set_ylabel(rf"$\ddot{{q}}(t)$", **textopts)
                 ax.set_xlabel("t (seconds)")
             else:
                 ax.set_ylabel("$d^2q/dk^2$", **textopts)
@@ -354,7 +354,7 @@ def quintic(q0, qf, t, qd0=0, qdf=0):
 
 
 def quintic_func(q0, qf, T, qd0=0, qdf=0):
-    """
+    r"""
     Quintic scalar polynomial as a function
 
     :param q0: initial value

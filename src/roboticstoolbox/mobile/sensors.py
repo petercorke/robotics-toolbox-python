@@ -204,6 +204,7 @@ class SensorBase(ABC):
 
 # ======================================================================== #
 
+
 # visibility function, for one id, or return list of visible
 # covar can be 2x2 or (2,)
 # .W property
@@ -221,7 +222,6 @@ class RangeBearingSensor(SensorBase):
         seed=0,
         **kwargs,
     ):
-
         r"""
         Range and bearing angle sensor
 
@@ -380,8 +380,8 @@ class RangeBearingSensor(SensorBase):
               reading
             - If ``animate`` option is set then show a line from the vehicle to
               the landmark
-                - If ``animate`` option set and the angular and distance limits
-                  are set then display the sensor field of view as a polygon.
+            - If ``animate`` option set and the angular and distance limits
+              are set then display the sensor field of view as a polygon.
 
         :seealso: :meth:`h`
         """

@@ -772,7 +772,6 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         Various measures are supported:
 
         | Measure           |       Description                               |
-        |-------------------|-------------------------------------------------|
         | ``"yoshikawa"``   | Volume of the velocity ellipsoid, *distance*    |
         |                   | from singularity [Yoshikawa85]_                 |
         | ``"invcondition"``| Inverse condition number of Jacobian, isotropy  |
@@ -1034,12 +1033,19 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         The derivative of an analytical Jacobian can be obtained by setting
         ``representation`` as
 
-        |``representation``   |       Rotational representation     |
-        |---------------------|-------------------------------------|
-        |``'rpy/xyz'``        |   RPY angular rates in XYZ order    |
-        |``'rpy/zyx'``        |   RPY angular rates in XYZ order    |
-        |``'eul'``            |   Euler angular rates in ZYZ order  |
-        |``'exp'``            |   exponential coordinate rates      |
+        .. list-table::
+           :header-rows: 1
+
+           * - ``representation``
+             - Rotational representation
+           * - ``'rpy/xyz'``
+             - RPY angular rates in XYZ order
+           * - ``'rpy/zyx'``
+             - RPY angular rates in ZYX order
+           * - ``'eul'``
+             - Euler angular rates in ZYZ order
+           * - ``'exp'``
+             - exponential coordinate rates
 
 
         References
@@ -1243,7 +1249,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         world frame which connect the line of length distance between the
         shapes. If the distance is negative then the shapes are collided.
 
-        Attributes
+        Parameters
         ----------
         shape
             The shape to compare distance to
@@ -1293,7 +1299,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         ``iscollided(shape)`` checks if this robot and shape have collided
 
-        Attributes
+        Parameters
         ----------
         shape
             The shape to compare distance to
@@ -1331,7 +1337,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         ``collided(shape)`` checks if this robot and shape have collided
 
-        Attributes
+        Parameters
         ----------
         shape
             The shape to compare distance to
@@ -1369,7 +1375,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         the joint limits of the robot to be specified. See examples/mmc.py
         for use case
 
-        Attributes
+        Parameters
         ----------
         ps
             The minimum angle (in radians) in which the joint is
@@ -1393,7 +1399,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
 
         if n is None:
             n = self.n
-        
+
         if q is None:
             q = np.copy(self.q)
 
@@ -1428,7 +1434,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         make it impossible for the robot to run into a collision. Requires
         See examples/neo.py for use case
 
-        Attributes
+        Parameters
         ----------
         ds
             The minimum distance in which a joint is allowed to
@@ -1544,7 +1550,7 @@ class Robot(BaseRobot[Link], RobotKinematicsMixin):
         make it impossible for the robot to run into a line of sight.
         See examples/fetch_vision.py for use case
 
-        Attributes
+        Parameters
         ----------
         camera
             The camera link, either as a robotic link or SE3

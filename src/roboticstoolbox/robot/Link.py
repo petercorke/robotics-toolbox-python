@@ -476,8 +476,8 @@ class BaseLink(SceneNode, ABC):
         Examples
         --------
         .. runblock:: pycon
-        >>> from roboticstoolbox import Link, ETS
-        >>> link = Link( ET.tz(0.333) * ET.Rx(90, 'deg') * ETS.Rz() )
+        >>> from roboticstoolbox import Link, ET, ETS
+        >>> link = Link( ET.tz(0.333) * ET.Rx(90, 'deg') * ET.Rz() )
         >>> print(link.v)
 
         """
@@ -1238,9 +1238,6 @@ class BaseLink(SceneNode, ABC):
         ----------
         indent
             indent each line by this many spaces
-        :type indent: int
-        :return: The string representation of the link dynamics
-        :rtype: string
 
         Examples
         --------

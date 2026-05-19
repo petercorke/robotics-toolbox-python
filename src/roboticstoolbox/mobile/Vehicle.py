@@ -943,7 +943,7 @@ class VehicleBase(ABC):
 
 
         The :math:`(x,y)` trajectory from the simulation history is plotted as
-        :math:`x` vs :math:`y.
+        :math:`x` vs :math:`y`.
 
         :seealso: :meth:`run` :meth:`plot_xyt`
         """
@@ -1110,7 +1110,7 @@ class Bicycle(VehicleBase):
         return v * np.r_[cos(theta), sin(theta), tan(gamma) / self.l]
 
     def u_limited(self, u):
-        """
+        r"""
         Apply vehicle velocity, acceleration and steering limits
 
         :param u: Desired vehicle inputs :math:`(v, \gamma)`
@@ -1206,7 +1206,7 @@ class Unicycle(VehicleBase):
         return np.r_[v * cos(theta), v * sin(theta), vdiff / self._W]
 
     def u_limited(self, u):
-        """
+        r"""
         Apply vehicle velocity, acceleration and steering limits
 
         :param u: Desired vehicle inputs :math:`(v, \omega)`
@@ -1268,7 +1268,7 @@ class DiffSteer(Unicycle):
         self._v_prev_R = [0]
 
     def u_limited(self, u):
-        """
+        r"""
         Apply vehicle velocity and acceleration limits
 
         :param u: Desired vehicle inputs :math:`(v_L, v_R)`
@@ -1501,7 +1501,7 @@ class VehicleTrailer(VehicleBase):
         return s
 
     def polygon(self, q):
-        """
+        r"""
         Bounding polygons at vehicle configuration
 
         :param q: vehicle configuration :math:`(x, y, \theta, \delta_i, \cdots)`

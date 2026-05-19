@@ -14,7 +14,7 @@ def xplot(
     stack=False,
     **kwargs,
 ):
-    """
+    r"""
     Plot trajectory data
 
     :param x: trajectory, one row per timestep

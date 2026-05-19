@@ -50,7 +50,6 @@ from roboticstoolbox.tools.params import rtb_get_param
 from roboticstoolbox.backends.PyPlot import PyPlot, PyPlot2
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 
-
 if TYPE_CHECKING:
     from matplotlib.cm import Color  # pragma nocover
 else:
@@ -1105,9 +1104,9 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
         >>> puma = rtb.models.DH.Puma560()
-        >>> puma.prismaticjoints()
+        >>> puma.prismaticjoints
         >>> stanford = rtb.models.DH.Stanford()
-        >>> stanford.prismaticjoints()
+        >>> stanford.prismaticjoints
 
         Notes
         -----
@@ -1138,9 +1137,9 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
         >>> puma = rtb.models.DH.Puma560()
-        >>> puma.revolutejoints()
+        >>> puma.revolutejoints
         >>> stanford = rtb.models.DH.Stanford()
-        >>> stanford.revolutejoints()
+        >>> stanford.revolutejoints
 
         Notes
         -----
@@ -1798,7 +1797,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
         >>> puma = rtb.models.DH.Puma560()
-        >>> puma.revolutejoints()
+        >>> puma.revolutejoints
         >>> stanford = rtb.models.DH.Stanford()
         >>> stanford.isrevolute(1)
 
@@ -1824,7 +1823,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         .. runblock:: pycon
         >>> import roboticstoolbox as rtb
         >>> puma = rtb.models.DH.Puma560()
-        >>> puma.prismaticjoints()
+        >>> puma.prismaticjoints
         >>> stanford = rtb.models.DH.Stanford()
         >>> stanford.isprismatic(1)
 
@@ -2047,7 +2046,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         >>> cm = robot.linkcolormap("inferno")
         >>> print(cm(range(6))) # cm(i) is 3rd color in colormap
         >>> cm = robot.linkcolormap(
-        >>>     ['red', 'g', (0,0.5,0), '#0f8040', 'yellow', 'cyan'])
+        ...     ['red', 'g', (0,0.5,0), '#0f8040', 'yellow', 'cyan'])
         >>> print(cm(range(6)))
 
         Notes
@@ -2055,10 +2054,9 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         - Colormaps have 4-elements: red, green, blue, alpha (RGBA)
         - Names of supported colors and colormaps are defined in the
           matplotlib documentation.
-            - `Specifying colors
-            <https://matplotlib.org/3.1.0/tutorials/colors/colors.html#sphx-glr-tutorials-colors-colors-py>`_
-            - `Colormaps
-            <https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html#sphx-glr-tutorials-colors-colormaps-py>`_
+
+          - `Specifying colors <https://matplotlib.org/3.1.0/tutorials/colors/colors.html>`_
+          - `Colormaps <https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html>`_
 
         """  # noqa
 
@@ -2257,7 +2255,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         If ``q`` (m,n) representing a joint-space trajectory it will create an
         animation with a pause of ``dt`` seconds between each frame.
 
-        Attributes
+        Parameters
         ----------
         q
             The joint configuration of the robot.
@@ -2403,7 +2401,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         ``robot.fellipse(q)`` creates a force ellipsoid for the robot at
         pose ``q``. The ellipsoid is centered at the origin.
 
-        Attributes
+        Parameters
         ----------
         q
             The joint configuration of the robot.
@@ -2455,7 +2453,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         ``robot.vellipse(q)`` creates a force ellipsoid for the robot at
         pose ``q``. The ellipsoid is centered at the origin.
 
-        Attributes
+        Parameters
         ----------
         q
             The joint configuration of the robot.
@@ -2510,7 +2508,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         ``robot.plot_ellipse(ellipsoid)`` displays the ellipsoid.
 
-        Attributes
+        Parameters
         ----------
         ellipse
             the ellipsoid to plot
@@ -2581,7 +2579,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         ``robot.plot_fellipse(vellipse)`` specifies a custon ellipse to plot.
 
-        Attributes
+        Parameters
         ----------
         q
             The joint configuration of the robot
@@ -2800,7 +2798,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             If not set then:
             - For revolute joints they are assumed to be [-pi, +pi]
             - For prismatic joint they are assumed unknown and an error
-                occurs.
+              occurs.
 
         """
 

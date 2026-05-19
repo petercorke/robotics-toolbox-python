@@ -43,7 +43,7 @@ class RobotKinematicsMixin:
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is an ``SE3`` instance with ``m`` values.
 
-        Attributes
+        Parameters
         ----------
         q
             Joint coordinates
@@ -280,23 +280,34 @@ class RobotKinematicsMixin:
         --------
         This method computes the manipulator Hessian in the ``start`` frame.  If
         we take the time derivative of the differential kinematic relationship
+
         .. math::
+
             \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
             \alpha &= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}
+
         where
+
         .. math::
+
             \dmat{J} = \mat{H} \dvec{q}
+
         and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
         Hessian tensor.
 
         The elements of the Hessian are
+
         .. math::
+
             \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
+
         where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
         of the spatial velocity vector.
 
         Similarly, we can write
+
         .. math::
+
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
         Examples
@@ -382,23 +393,34 @@ class RobotKinematicsMixin:
         --------
         This method computes the manipulator Hessian in the ``end`` frame.  If
         we take the time derivative of the differential kinematic relationship
+
         .. math::
+
             \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
             \alpha &= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}
+
         where
+
         .. math::
+
             \dmat{J} = \mat{H} \dvec{q}
+
         and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
         Hessian tensor.
 
         The elements of the Hessian are
+
         .. math::
+
             \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
+
         where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
         of the spatial velocity vector.
 
         Similarly, we can write
+
         .. math::
+
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
         Examples
@@ -517,12 +539,19 @@ class RobotKinematicsMixin:
         End-effector spatial velocity :math:`\nu = (v_x, v_y, v_z, \omega_x, \omega_y, \omega_z)^T`
         is related to joint velocity by :math:`{}^{E}\!\nu = \mathbf{J}_m(q) \dot{q}`.
 
-        |``representation``   |       Rotational representation     |
-        |---------------------|-------------------------------------|
-        |``'rpy/xyz'``        |   RPY angular rates in XYZ order    |
-        |``'rpy/zyx'``        |   RPY angular rates in XYZ order    |
-        |``'eul'``            |   Euler angular rates in ZYZ order  |
-        |``'exp'``            |   exponential coordinate rates      |
+        .. list-table::
+           :header-rows: 1
+
+           * - ``representation``
+             - Rotational representation
+           * - ``'rpy/xyz'``
+             - RPY angular rates in XYZ order
+           * - ``'rpy/zyx'``
+             - RPY angular rates in ZYX order
+           * - ``'eul'``
+             - Euler angular rates in ZYZ order
+           * - ``'exp'``
+             - exponential coordinate rates
 
         Examples
         --------

@@ -965,7 +965,7 @@ class ETS(BaseETS):
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is an ``SE3`` instance with ``m`` values.
 
-        Attributes
+        Parameters
         ----------
         q
             Joint coordinates
@@ -1035,7 +1035,7 @@ class ETS(BaseETS):
         If ``q`` has multiple rows (mxn), it is considered a trajectory and the
         result is an ``SE3`` instance with ``m`` values.
 
-        Attributes
+        Parameters
         ----------
         q
             Joint coordinates
@@ -1365,23 +1365,34 @@ class ETS(BaseETS):
         --------
         This method computes the manipulator Hessian in the base frame.  If
         we take the time derivative of the differential kinematic relationship
+
         .. math::
+
             \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
             \alpha &= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}
+
         where
+
         .. math::
+
             \dmat{J} = \mat{H} \dvec{q}
+
         and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
         Hessian tensor.
 
         The elements of the Hessian are
+
         .. math::
+
             \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
+
         where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
         of the spatial velocity vector.
 
         Similarly, we can write
+
         .. math::
+
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
         Examples
@@ -1472,23 +1483,34 @@ class ETS(BaseETS):
         --------
         This method computes the manipulator Hessian in the end-effector frame.  If
         we take the time derivative of the differential kinematic relationship
+
         .. math::
+
             \nu    &= \mat{J}(\vec{q}) \dvec{q} \\
             \alpha &= \dmat{J} \dvec{q} + \mat{J} \ddvec{q}
+
         where
+
         .. math::
+
             \dmat{J} = \mat{H} \dvec{q}
+
         and :math:`\mat{H} \in \mathbb{R}^{6\times n \times n}` is the
         Hessian tensor.
 
         The elements of the Hessian are
+
         .. math::
+
             \mat{H}_{i,j,k} =  \frac{d^2 u_i}{d q_j d q_k}
+
         where :math:`u = \{t_x, t_y, t_z, r_x, r_y, r_z\}` are the elements
         of the spatial velocity vector.
 
         Similarly, we can write
+
         .. math::
+
             \mat{J}_{i,j} = \frac{d u_i}{d q_j}
 
         Examples
