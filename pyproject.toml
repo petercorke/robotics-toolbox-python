@@ -89,9 +89,7 @@ dev = [
     "ruff",
 ]
 
-nb = [
-    "pytest-nbmake",
-]
+nb = ["pytest-nbmake"]
 
 qp = ["qpsolvers", "quadprog"]
 
