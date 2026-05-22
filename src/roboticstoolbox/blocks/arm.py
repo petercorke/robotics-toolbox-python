@@ -376,6 +376,7 @@ class ArmPlot(GraphicsBlock):
     nin = 1
     nout = 0
     inlabels = ("q",)
+    AXES_POLICY = "subplot"
 
     def __init__(self, robot=None, q0=None, backend=None, **blockargs):
         """
@@ -406,12 +407,22 @@ class ArmPlot(GraphicsBlock):
         # super().reset()
         # if state.options.graphics:
         super().start(simstate)
-        self.fig = self.create_figure(simstate)
+
+        if not self._enabled:
+            return
+
+        assert self.fig is not None
         self.env = self.robot.plot(
-            self.q0, backend=self.backend, fig=self.fig, block=False
+            self.q0,
+            backend=self.backend,
+            fig=self.fig,
+            block=False,
         )
 
     def step(self, t, inports):
+        if not self._enabled:
+            return
+
         # update the robot plot
         self.robot.q = inports[0]
         self.env.step()
@@ -514,19 +525,14 @@ class JTraj(SourceBlock):
         self.qd0 = qd0
         self.qdf = qf
 
-        # call start now, so that output works when called by compile
-        # set T to 1 just for now
-        if T is None:
-            self.T = 1
-        self.T = T
+        self.coeffs = None  # indicate that coefficients have not been computed yet
 
-        # valid value, to allow compile to call output() before start()
-        self.start(None)
+        self.T = T
 
     def start(self, simstate):
         if self.T is None:
             # use simulation tmax
-            self.T = simstate.T
+            self.T = simstate.tf
 
         tscal = self.T
         self.tscal = tscal
@@ -559,6 +565,11 @@ class JTraj(SourceBlock):
         )
 
     def output(self, t, inports, x):
+        if self.coeffs is None:
+            # called from compile before start() is called
+            n = len(self.q0)
+            return [np.zeros(n), np.zeros(n), np.zeros(n)]
+
         tscal = self.tscal
         ts = t / tscal
         tt = np.array([ts**5, ts**4, ts**3, ts**2, ts, 1]).T

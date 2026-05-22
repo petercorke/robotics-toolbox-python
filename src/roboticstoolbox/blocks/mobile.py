@@ -360,6 +360,8 @@ class VehiclePlot(GraphicsBlock):
 
     nin = 1
     nout = 0
+    AXES_POLICY = "subplot"
+    TIMESTAMP = True
 
     inlabels = ("q",)
 
@@ -373,7 +375,7 @@ class VehiclePlot(GraphicsBlock):
         square=True,
         init=None,
         scale="auto",
-        shape=None,
+        shape="car",
         size=None,
         polyargs={},
         **blockargs,
@@ -442,16 +444,19 @@ class VehiclePlot(GraphicsBlock):
     def start(self, simstate):
         super().start(simstate)
 
+        if not self._enabled:
+            return
+
         # create the plot
         # super().reset()
         # create the figures
-        self.fig = self.create_figure(simstate)
-        self.ax = self.fig.add_subplot(111)
+        assert self.fig is not None and self.ax is not None
 
         if self.square:
             self.ax.set_aspect("equal")
         print("done")
 
+        self.ax.set_axisbelow(True)  # keeps grid beneath artists
         self.ax.grid(True)
         self.ax.set_xlabel(self.labels[0])
         self.ax.set_ylabel(self.labels[1])
@@ -473,6 +478,9 @@ class VehiclePlot(GraphicsBlock):
         # plt.show(block=False)
 
     def step(self, t, inports):
+        if not self._enabled:
+            return
+
         # inputs are set
         xyt = inports[0]
 

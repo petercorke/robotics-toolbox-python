@@ -636,6 +636,8 @@ class MultiRotorPlot(GraphicsBlock):
     nin = 1
     nout = 0
     inlabels = ("x",)
+    AXES_POLICY = "delegate"
+    TIMESTAMP = True
 
     # Based on code lovingly coded by Paul Pounds, first coded 17/4/02
     # version 2 2004 added scaling and ground display
@@ -660,6 +662,7 @@ class MultiRotorPlot(GraphicsBlock):
     nin = 1
     nout = 0
     inlabels = ("x",)
+    TIMESTAMP = True
 
     def __init__(
         self,
@@ -693,6 +696,11 @@ class MultiRotorPlot(GraphicsBlock):
         self.flapscale = flapscale
 
     def start(self, simstate):
+        super().start(simstate)
+
+        if not self._enabled:
+            return
+
         quad = self.model
 
         # vehicle dimensons
@@ -713,7 +721,7 @@ class MultiRotorPlot(GraphicsBlock):
             ]
 
         # draw ground
-        self.fig = self.create_figure(simstate)
+        assert self.fig is not None
         # no axes in the figure, create a 3D axes
         self.ax = self.fig.add_subplot(111, projection="3d", proj_type=self.projection)
 
@@ -768,9 +776,10 @@ class MultiRotorPlot(GraphicsBlock):
         plt.draw()
         plt.show(block=False)
 
-        super().start(simstate)
-
     def step(self, t, inports):
+        if not self._enabled:
+            return
+
         def plot3(h, x, y, z):
             h.set_data_3d(x, y, z)
             # h.set_data(x, y)
@@ -832,7 +841,9 @@ class MultiRotorPlot(GraphicsBlock):
         for i in range(0, self.nrotors):
             hub[:, i] = F @ (z + R @ self.D[:, i])  # points in the inertial frame
 
-            q = self.flapscale  # Flapping angle scaling for output display - makes it easier to see what flapping is occurring
+            q = (
+                self.flapscale
+            )  # Flapping angle scaling for output display - makes it easier to see what flapping is occurring
             # Rotor -> Plot frame
             Rr = np.array(
                 [
