@@ -516,7 +516,7 @@ class MultiRotorMixer(FunctionBlock):
 
     nin = 4
     nout = 1
-    inlabels = ("𝛕r", "𝛕p", "𝛕y", "T")
+    inlabels = ("τr", "τp", "τy", "T")
     outlabels = ("ω",)
 
     def __init__(self, model=None, wmax=1000, wmin=5, **blockargs):
@@ -636,7 +636,7 @@ class MultiRotorPlot(GraphicsBlock):
     nin = 1
     nout = 0
     inlabels = ("x",)
-    AXES_POLICY = "delegate"
+    PLOT3D = True
     TIMESTAMP = True
 
     # Based on code lovingly coded by Paul Pounds, first coded 17/4/02
@@ -659,15 +659,10 @@ class MultiRotorPlot(GraphicsBlock):
     # 5 Pitch angle in rad
     # 6 Roll angle in rad
 
-    nin = 1
-    nout = 0
-    inlabels = ("x",)
-    TIMESTAMP = True
-
     def __init__(
         self,
         model,
-        scale=[-2, 2, -2, 2, 10],
+        scale=None,
         flapscale=1,
         projection="ortho",
         **blockargs,
@@ -686,6 +681,10 @@ class MultiRotorPlot(GraphicsBlock):
         """
         if model is None:
             raise ValueError("no model provided")
+        if scale is None:
+            scale = (-2, 2, -2, 2, 10)
+        else:
+            scale = tuple(scale)
 
         super().__init__(nin=1, **blockargs)
         self.type = "quadrotorplot"
@@ -722,8 +721,8 @@ class MultiRotorPlot(GraphicsBlock):
 
         # draw ground
         assert self.fig is not None
-        # no axes in the figure, create a 3D axes
-        self.ax = self.fig.add_subplot(111, projection="3d", proj_type=self.projection)
+        assert self.ax is not None
+        self.ax.set_proj_type(self.projection)
 
         # ax.set_aspect('equal')
         self.ax.set_xlabel("X")
@@ -773,10 +772,11 @@ class MultiRotorPlot(GraphicsBlock):
         self.a1s = np.zeros((self.nrotors,))
         self.b1s = np.zeros((self.nrotors,))
 
-        plt.draw()
-        plt.show(block=False)
+        # plt.draw()
+        # plt.show(block=False)
 
     def step(self, t, inports):
+
         if not self._enabled:
             return
 

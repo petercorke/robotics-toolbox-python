@@ -376,7 +376,7 @@ class ArmPlot(GraphicsBlock):
     nin = 1
     nout = 0
     inlabels = ("q",)
-    AXES_POLICY = "subplot"
+    PLOT3D = True
 
     def __init__(self, robot=None, q0=None, backend=None, **blockargs):
         """
@@ -412,10 +412,12 @@ class ArmPlot(GraphicsBlock):
             return
 
         assert self.fig is not None
+        assert self.ax is not None
         self.env = self.robot.plot(
             self.q0,
             backend=self.backend,
             fig=self.fig,
+            ax=self.ax,
             block=False,
         )
 
@@ -706,12 +708,12 @@ class CirclePath(SourceBlock):
 
     def __init__(
         self,
-        radius=1,
+        radius: float = 1,
         centre=(0, 0, 0),
         pose=None,
-        frequency=1,
-        unit="rps",
-        phase=0,
+        frequency: float = 1,
+        unit: str = "rps",
+        phase: float | None = None,
         **blockargs,
     ):
         """
@@ -730,6 +732,8 @@ class CirclePath(SourceBlock):
         :param blockargs: |BlockOptions|
         :type blockargs: dict
         """
+        if phase is None:
+            phase = 0
 
         # TODO
         # flag to rotate the frame rather than just translate it
