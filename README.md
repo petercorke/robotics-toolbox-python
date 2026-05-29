@@ -162,6 +162,36 @@ cd robotics-toolbox-python
 pip3 install -e .
 ```
 
+### Build a JupyterLite/Pyodide wasm wheel (cp313)
+
+This project includes a reproducible wasm wheel build target aligned to current
+JupyterLite runtimes based on Python 3.13.
+
+Build using cibuildwheel's Pyodide platform:
+
+```shell script
+make wheel-pyodide
+```
+
+Optionally pin the Pyodide runtime family to match your JupyterLite deployment:
+
+```shell script
+PYODIDE_VERSION=0.28.3 make wheel-pyodide
+```
+
+The target writes to `dist/` and runs `make wheel-pyodide-check`, which validates
+the wheel filename contains:
+
+- `cp313-cp313`
+- `wasm32`
+- `pyemscripten_<major>_<minor>` or `pyodide_<major>_<minor>`
+
+To inspect the produced artifact path:
+
+```shell script
+ls -1 dist/*wasm32*.whl
+```
+
 <br>
 
 <a id='3'></a>

@@ -11,6 +11,7 @@
 import os
 import sys
 import re
+from datetime import date
 
 # Defined relative to configuration directory which is where this file conf.py lives
 sys.path.append(os.path.abspath("exts"))
@@ -18,11 +19,12 @@ sys.path.append(os.path.abspath("exts"))
 # -------- Project information -------------------------------------------------------#
 
 project = "Robotics Toolbox for Python"
-copyright = "2023, Jesse Haviland and Peter Corke"
+copyright = f"{date.today().year}, Jesse Haviland and Peter Corke"
 author = "Jesse Haviland and Peter Corke"
 
 # Parse version number out of pyproject.toml
-with open("../../pyproject.toml", encoding="utf-8") as f:
+_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+with open(os.path.join(_root, "pyproject.toml"), encoding="utf-8") as f:
     pyproject_src = f.read()
     m = re.search(r'^version\s*=\s*"([0-9.]*)"', pyproject_src, re.MULTILINE)
     version = m.group(1) if m else "unknown"
@@ -110,7 +112,6 @@ latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     "papersize": "a4paper",
     "fncychap": "\\usepackage{fncychap}",
-    "maketitle": "blah blah blah",
 }
 
 # Use RVC book notation for maths
@@ -174,7 +175,6 @@ napoleon_custom_sections = ["Synopsis"]
 # -------- Options AutoSummary -------------------------------------------------------#
 
 # autodoc_default_flags = ["members"]
-autosummary_generate = True
 
 # -------- rst_epilog: shared substitutions available in all RST/docstrings ------#
 
@@ -219,13 +219,13 @@ favicons = [
     {
         "rel": "android-chrome",
         "sizes": "192x192",
-        "static-file": "android-chrome-192x192.png ",
+        "static-file": "android-chrome-192x192.png",
         "type": "image/png",
     },
     {
         "rel": "android-chrome",
         "sizes": "512x512",
-        "static-file": "android-chrome-512x512.png ",
+        "static-file": "android-chrome-512x512.png",
         "type": "image/png",
     },
 ]

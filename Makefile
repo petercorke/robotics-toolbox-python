@@ -10,7 +10,8 @@ help:
 	@echo " make docs            - build Sphinx documentation"
 	@echo " make docupdate       - upload Sphinx documentation to GitHub pages"
 	@echo " make dist            - build native wheel + sdist"
-	@echo " make wheel-pyodide   - build wasm32/emscripten wheel via pyodide-build"
+	@echo " make wheel-pyodide   - build wasm32/emscripten wheel for Pyodide/JupyterLite"
+	@echo " make wheel-pyodide-check - verify wasm wheel tags from filename"
 	@echo " make upload          - upload to PyPI"
 	@echo " make clean           - remove dist and docs build files"
 	@echo " make help            - this message$(BLACK)"
@@ -52,9 +53,40 @@ dist: .FORCE
 	$(MAKE) test
 	python -m build
 
+PYODIDE_BUILD ?= cp313-*
+
 wheel-pyodide: .FORCE
-	conda run -n dev pyodide build
-	@echo "Pyodide wheel written to dist/"
+	@echo "Building Pyodide wheel with selector $(PYODIDE_BUILD)"
+	@if [ -n "$(PYODIDE_VERSION)" ]; then \
+		echo "Using Pyodide runtime $(PYODIDE_VERSION)"; \
+		conda run -n dev env CIBW_PLATFORM=pyodide CIBW_BUILD=$(PYODIDE_BUILD) CIBW_PYODIDE_VERSION=$(PYODIDE_VERSION) python -m cibuildwheel --output-dir dist; \
+	else \
+		echo "Using cibuildwheel default Pyodide runtime (set PYODIDE_VERSION=... to pin)"; \
+		conda run -n dev env CIBW_PLATFORM=pyodide CIBW_BUILD=$(PYODIDE_BUILD) python -m cibuildwheel --output-dir dist; \
+	fi
+	@$(MAKE) wheel-pyodide-check
+
+wheel-pyodide-check: .FORCE
+	@wheel=$$(ls -1 dist/*cp313-cp313*wasm32*.whl 2>/dev/null | head -n 1); \
+	if [ -z "$$wheel" ]; then \
+		wheel=$$(ls -1 dist/*wasm32*.whl 2>/dev/null | head -n 1); \
+	fi; \
+	if [ -z "$$wheel" ]; then \
+		echo "No wasm wheel found under dist/."; \
+		exit 1; \
+	fi; \
+	name=$$(basename "$$wheel"); \
+	echo "Built wheel: $$name"; \
+	echo "Path: $$wheel"; \
+	if ! echo "$$name" | grep -Eq "cp313-cp313-.*wasm32[.]whl$$"; then \
+		echo "Wheel tag check failed: expected cp313-cp313 and wasm32 in filename."; \
+		exit 1; \
+	fi; \
+	if ! echo "$$name" | grep -Eq "pyemscripten_[0-9]+_[0-9]+" && ! echo "$$name" | grep -Eq "pyodide_[0-9]+_[0-9]+"; then \
+		echo "Wheel tag check failed: expected pyemscripten_<major>_<minor> or pyodide_<major>_<minor> tag in filename."; \
+		exit 1; \
+	fi; \
+	echo "Wheel tags look compatible with current cp313 runtime contract."
 
 upload: .FORCE
 	$(eval VERSION := $(shell python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])"))

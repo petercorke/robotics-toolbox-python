@@ -12,7 +12,7 @@ authors = [
 ]
 
 dependencies = [
-    "numpy<2",
+    "numpy",
     "spatialmath-python>=1.1.5",
     "spatialgeometry>=1.0.0",
     "pgraph-python",
@@ -127,7 +127,7 @@ rtbtool = "roboticstoolbox.bin.rtbtool:main"
 
 [build-system]
 
-requires = ["scikit-build-core>=0.9", "numpy<2"]
+requires = ["scikit-build-core>=0.9", "numpy"]
 build-backend = "scikit_build_core.build"
 
 
@@ -157,7 +157,7 @@ indent-style = "space"
 [tool.cibuildwheel]
 
 build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
-skip = ["pp*", "*musllinux*"]
+skip = ["*musllinux*"]
 
 [tool.cibuildwheel.macos]
 archs = ["x86_64", "arm64"]
