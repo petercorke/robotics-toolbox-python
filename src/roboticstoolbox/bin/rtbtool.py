@@ -21,8 +21,8 @@ import IPython
 import argparse
 from pathlib import Path
 import sys
+import os
 from importlib.metadata import version
-
 
 try:
     from colored import fg, bg, attr
@@ -32,6 +32,9 @@ try:
 except ImportError:
     # print('colored not found')
     _colored = False
+    fg = lambda *args, **kwargs: ""
+    bg = lambda *args, **kwargs: ""
+    attr = lambda *args, **kwargs: ""
 
 # imports for use by IPython and user
 import math
@@ -39,6 +42,7 @@ from math import pi  # lgtm [py/unused-import]
 import numpy as np
 from scipy import linalg, optimize
 import matplotlib.pyplot as plt  # lgtm [py/unused-import]
+import matplotlib as mpl
 
 from spatialmath import *  # lgtm [py/polluting-import]
 from spatialmath.base import *
@@ -48,10 +52,6 @@ from spatialmath.base import sym
 from spatialgeometry import *  # lgtm [py/polluting-import]
 
 from roboticstoolbox import *  # lgtm [py/unused-import]
-
-# load some robot models
-puma = models.DH.Puma560()
-panda = models.DH.Panda()
 
 
 def parse_arguments():
@@ -75,6 +75,12 @@ def parse_arguments():
         help="execution result prefix, include {} for execution count number",
     )
     parser.add_argument(
+        "--reload",
+        default=False,
+        action="store_true",
+        help="enable autoreload of any imported modules, same as IPython's builtin %%autoreload 2",
+    )
+    parser.add_argument(
         "-b",
         "--no-banner",
         dest="banner",
@@ -87,7 +93,7 @@ def parse_arguments():
         "-a",
         default=False,
         action="store_true",
-        help="do not display the result of assignments",
+        help="display the result of assignments",
     )
     parser.add_argument(
         "--book",
@@ -135,7 +141,7 @@ def make_banner():
     # banner template
     # https://patorjk.com/software/taag/#p=display&f=Cybermedium&t=Robotics%20Toolbox%0A
 
-    banner = f"""\
+    banner = r"""\
     ____ ____ ___  ____ ___ _ ____ ____    ___ ____ ____ _    ___  ____ _  _
     |__/ |  | |__] |  |  |  | |    [__      |  |  | |  | |    |__] |  |  \/
     |  \ |__| |__] |__|  |  | |___ ___]     |  |__| |__| |___ |__] |__| _/\_
@@ -174,7 +180,12 @@ def make_banner():
 
     """
 
-    print(fg("yellow") + banner + attr(0))
+    return banner
+
+
+def examples_path():
+    # Repository layout: <root>/src/roboticstoolbox/bin/rtbtool.py
+    return Path(__file__).resolve().parents[3] / "examples"
 
 
 def startup():
@@ -199,6 +210,18 @@ def main():
         args.ansi = False
         args.examples = True
 
+    if args.examples:
+        path = examples_path()
+        if path.exists() and path.is_dir():
+            print(f"Changing working directory to {path}")
+            os.chdir(path)
+        else:
+            print(f"Examples directory not found: {path}")
+
+    # load some robot models after argument handling to avoid import-time side effects
+    puma = models.DH.Puma560()
+    panda = models.DH.Panda()
+
     # set default backend for Robot.plot
     if args.swift:
         Robot.default_backend = "swift"
@@ -215,7 +238,7 @@ def main():
 
     if args.banner:
         banner = make_banner()
-        print(banner)
+        print(fg("yellow") + banner + attr(0))
 
     if args.showassign and args.banner:
         print(
@@ -271,8 +294,13 @@ def main():
     else:
         code.append("plt.ion()")
 
+    if args.reload:
+        code = ["%load_ext autoreload", "%autoreload 2"] + code
+
     c.InteractiveShellApp.exec_lines = code
-    IPython.start_ipython(config=c, user_ns=globals())
+    namespace = {k: v for k, v in globals().items() if not k.startswith("__")}
+    namespace.update({"puma": puma, "panda": panda})
+    IPython.start_ipython(config=c, user_ns=namespace)
 
 
 if __name__ == "__main__":
