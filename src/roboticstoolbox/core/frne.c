@@ -276,7 +276,7 @@ static PyObject *init(PyObject *self, PyObject *args) {
         l->A =      PyFloat_AsDouble(PyIter_Next(iter_L));
         l->theta =  PyFloat_AsDouble(PyIter_Next(iter_L));
         l->D =      PyFloat_AsDouble(PyIter_Next(iter_L));
-        l->jointtype =  (DHType)PyFloat_AsDouble(PyIter_Next(iter_L));
+        l->jointtype =  (Sigma)PyFloat_AsDouble(PyIter_Next(iter_L));
         l->offset = PyFloat_AsDouble(PyIter_Next(iter_L));
         l->m =      PyFloat_AsDouble(PyIter_Next(iter_L));
         l->rbar->x =   PyFloat_AsDouble(PyIter_Next(iter_L));
