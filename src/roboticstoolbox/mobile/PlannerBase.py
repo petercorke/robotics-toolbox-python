@@ -884,17 +884,20 @@ class PlannerBase(ABC):
             # add colorbar
             scalar_mappable_c_map = cm.ScalarMappable(cmap=c_map, norm=norm)
             if colorbar is True:
-                plt.colorbar(
+                ax.figure.colorbar(
                     scalar_mappable_c_map,
+                    ax=ax,
                     # shrink=0.75,
                     # aspect=20 * 0.75,
                     label="Distance",
                 )
 
             elif isinstance(colorbar, dict):
+                cb_kwargs = dict(colorbar)
                 if "label" not in colorbar:
-                    colorbar["label"] = "Distance"
-                plt.colorbar(scalar_mappable_c_map, **colorbar)
+                    cb_kwargs["label"] = "Distance"
+                cb_kwargs.setdefault("ax", ax)
+                ax.figure.colorbar(scalar_mappable_c_map, **cb_kwargs)
             # overlay obstacles
             c_map = mpl.colors.ListedColormap(colors)
             self.occgrid.plot(image, cmap=c_map, zorder=1)

@@ -293,8 +293,8 @@ class RandomPath(VehicleDriverBase):
 
         # update the goal marker
         if self._goal_marker is not None:
-            self._goal_marker.set_xdata(self._goal[0])
-            self._goal_marker.set_ydata(self._goal[1])
+            self._goal_marker.set_xdata([self._goal[0]])
+            self._goal_marker.set_ydata([self._goal[1]])
 
 
 # ========================================================================= #

@@ -21,7 +21,16 @@ from roboticstoolbox.mobile.PlannerBase import PlannerBase
 from roboticstoolbox.mobile.DubinsPlanner import DubinsPlanner
 
 # from roboticstoolbox.mobile.OccupancyGrid import OccupancyGrid
-from pgraph import DGraph
+try:
+    from pgraph import DGraph
+except ImportError:
+
+    class DGraph:  # pragma: no cover
+        def __init__(self, *args, **kwargs):
+            raise ImportError(
+                "RRTPlanner requires optional dependency 'pgraph'. "
+                "Install it with: pip install pgraph-python"
+            )
 
 
 class RRTPlanner(PlannerBase):
@@ -117,13 +126,13 @@ class RRTPlanner(PlannerBase):
             else:
                 curvature = 1
 
-        print("curvature", curvature)
+        # print("curvature", curvature)
         self.dubins = DubinsPlanner(curvature=curvature, stepsize=stepsize)
 
         # self.goal_yaw_th = np.deg2rad(1.0)
         # self.goal_xy_th = 0.5
 
-    def plan(self, goal, showsamples=True, showvalid=True, animate=False):
+    def plan(self, goal, showsamples=True, showvalid=True, animate=False, block=None):
         r"""
         Plan paths to goal using RRT
 
@@ -208,7 +217,8 @@ class RRTPlanner(PlannerBase):
                     plt.pause(0.02)
 
         if (showvalid or showsamples) and not animate:
-            plt.show(block=False)
+            if block is not None:
+                plt.show(block=block)
 
         self.progress_end()
 

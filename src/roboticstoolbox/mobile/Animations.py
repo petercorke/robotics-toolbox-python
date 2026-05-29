@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from matplotlib import patches, colors
 import matplotlib.transforms as mtransforms
 
-from spatialmath import SE2, base
+from spatialmath import SE2, base, Polygon2
 from roboticstoolbox import rtb_load_data
 
 
@@ -243,8 +243,10 @@ class VehiclePolygon(VehicleAnimationBase):
             else:
                 raise ValueError("unknown vehicle shape name")
 
-        elif isinstance(shape, np.ndarray) and shape.shape[1] == 2:
+        elif isinstance(shape, np.ndarray) and shape.shape[0] == 2:
             self._coords = shape
+        elif isinstance(shape, Polygon2):
+            self._coords = shape.vertices()
         else:
             raise TypeError("unknown shape argument")
         self._coords *= scale

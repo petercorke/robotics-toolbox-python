@@ -1,4 +1,16 @@
-from pgraph import DGraph, DVertex, Edge
+try:
+    from pgraph import DGraph, DVertex, Edge
+except ImportError:
+    class _PGraphMissing:  # pragma: no cover
+        def __init__(self, *args, **kwargs):
+            raise ImportError(
+                "LatticePlanner requires optional dependency 'pgraph'. "
+                "Install it with: pip install pgraph-python"
+            )
+
+    DGraph = _PGraphMissing
+    DVertex = _PGraphMissing
+    Edge = _PGraphMissing
 import numpy as np
 from spatialmath import SE2
 import matplotlib.pyplot as plt

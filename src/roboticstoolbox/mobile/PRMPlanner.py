@@ -16,7 +16,18 @@ from spatialmath.base.vectors import *
 from scipy.ndimage import *
 from matplotlib import cm, pyplot as plt
 from roboticstoolbox.mobile.PlannerBase import PlannerBase
-from pgraph import UGraph
+
+try:
+    from pgraph import UGraph
+except ImportError:
+
+    class UGraph:  # pragma: no cover
+        def __init__(self, *args, **kwargs):
+            raise ImportError(
+                "PRMPlanner requires optional dependency 'pgraph'. "
+                "Install it with: pip install pgraph-python"
+            )
+
 
 # from progress.bar import FillingCirclesBar
 

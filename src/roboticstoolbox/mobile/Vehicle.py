@@ -6,6 +6,7 @@ Python Vehicle
 
 from abc import ABC, abstractmethod
 import warnings
+import sys
 from math import pi, sin, cos, tan
 import numpy as np
 from scipy import interpolate
@@ -19,6 +20,71 @@ from matplotlib import animation
 from spatialmath import SE2, base
 from roboticstoolbox.mobile.drivers import VehicleDriverBase
 from roboticstoolbox.mobile.Animations import VehiclePolygon
+
+
+def _isnotebook():
+    """
+    Determine if code is being run from a Jupyter notebook or JupyterLite.
+    """
+    if sys.platform == "emscripten":
+        return True
+
+    if "ipykernel" in sys.modules or "google.colab" in sys.modules:
+        return True
+
+    try:
+        get_ipython_fn = globals().get("get_ipython", None)
+        if callable(get_ipython_fn):
+            shell = get_ipython_fn().__class__.__name__
+            if shell == "ZMQInteractiveShell":
+                return True
+        return False
+    except Exception:
+        return False
+
+
+def _refresh_animation_frame(fig, dt, pause):
+    """
+    Refresh animation for desktop and notebook backends.
+
+    Notebook inline backends do not always animate with ``plt.pause`` alone,
+    so we explicitly draw and re-display the figure there.
+    """
+    if fig is None:
+        return
+
+    if not pause:
+        try:
+            fig.canvas.draw_idle()
+            fig.canvas.flush_events()
+        except Exception:
+            pass
+        return
+
+    if _isnotebook():
+        try:
+            fig.canvas.draw_idle()
+            fig.canvas.flush_events()
+        except Exception:
+            pass
+
+        backend = plt.get_backend().lower()
+        if (
+            "inline" in backend
+            or "matplotlib_inline" in backend
+            or sys.platform == "emscripten"
+        ):
+            try:
+                import importlib
+
+                ipdisplay = importlib.import_module("IPython.display")
+                ipdisplay.clear_output(wait=True)
+                ipdisplay.display(fig)
+                return
+            except Exception:
+                pass
+
+    plt.pause(dt)
 
 
 class Trailer:
@@ -131,13 +197,9 @@ class VehicleBase(ABC):
         self._v_prev = [0]
 
         self._polygon = polygon
-        if animation is not None:
-            if isinstance(animation, str):
-                animation = VehiclePolygon(animation)
-            self._animation = animation
-        elif polygon is not None:
-            self._animation = VehiclePolygon(polygon)
-
+        if isinstance(animation, str):
+            animation = VehiclePolygon(animation)
+        self._animation = animation
         self._ax = None
 
         if control is not None:
@@ -727,8 +789,9 @@ class VehicleBase(ABC):
             self.plot(self._x)
             # if self._timer is not None:
             #     self._timer.set_text(f"t = {self._t:.2f}")
-            if pause:
-                plt.pause(self._dt)
+            _refresh_animation_frame(
+                self._ax.figure if self._ax else None, self._dt, pause
+            )
             # plt.show(block=False)
             # pass
 
@@ -1642,8 +1705,9 @@ class VehicleTrailer(VehicleBase):
                 trailer._animation.update(x)  # show trailer
             # if self._timer is not None:
             #     self._timer.set_text(f"t = {self._t:.2f}")
-            if pause:
-                plt.pause(self.dt)
+            _refresh_animation_frame(
+                self.vehicle._ax.figure if self.vehicle._ax else None, self.dt, pause
+            )
             # plt.show(block=False)
             # pass
 

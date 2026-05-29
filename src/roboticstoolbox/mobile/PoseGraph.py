@@ -1,7 +1,18 @@
 # PoseGraph Pose graph
 
 import roboticstoolbox as rtb
-import pgraph
+import types
+try:
+    import pgraph
+except ImportError:
+    class _PGraphMissing:  # pragma: no cover
+        def __init__(self, *args, **kwargs):
+            raise ImportError(
+                "PoseGraph requires optional dependency 'pgraph'. "
+                "Install it with: pip install pgraph-python"
+            )
+
+    pgraph = types.SimpleNamespace(UVertex=_PGraphMissing, Edge=_PGraphMissing, UGraph=_PGraphMissing)
 from spatialmath import SE2
 import spatialmath.base as smb
 import matplotlib.pyplot as plt
