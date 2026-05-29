@@ -284,7 +284,7 @@ class DHRobot(Robot):
         s += str(table)
 
         # show tool and base
-        if self._tool is not None or self._tool is not None:
+        if tool is not None or base is not None:
             table = ANSITable(
                 Column("", colalign=">"),
                 Column("", colalign="<"),
