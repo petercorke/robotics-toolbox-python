@@ -35,8 +35,8 @@ from spatialmath.base.argcheck import (
 )
 
 from ansitable import ANSITable, Column
-from swift import Swift
 from spatialgeometry import SceneNode
+from roboticstoolbox.backends.Connector import Connector
 
 from roboticstoolbox.fknm import Robot_link_T
 import roboticstoolbox as rtb
@@ -189,6 +189,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         self.scene_children = [self.links[0]]  # type: ignore
 
         self._default_backend = None
+        self._active_plot_env = None
 
     # --------------------------------------------------------------------- #
     # --------- Private Methods ------------------------------------------- #
@@ -2173,62 +2174,51 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
     def _get_graphical_backend(
         self,
         backend: Union[L["swift", "pyplot", "pyplot2"], None] = None,  # noqa
-    ) -> Union[Swift, PyPlot, PyPlot2]:
-        default = self.default_backend
+    ) -> Connector:
+        import sys
+        from roboticstoolbox.backends import load_backend
 
-        # figure out the right default
-        if backend is None:
-            if isinstance(self, rtb.DHRobot):
-                default = "pyplot"
-            elif isinstance(self, rtb.Robot2):
-                default = "pyplot2"
-            elif isinstance(self, rtb.Robot):
-                if self.hasgeometry:
-                    default = "swift"
-                else:
-                    default = "pyplot"
-
+        # Resolve which backend name to use
         if backend is not None:
             using_backend = backend.lower()
         else:
-            using_backend = backend
+            # In JupyterLite/Pyodide, only pyplot/pyplot2 are available
+            if sys.platform == "emscripten":
+                if isinstance(self, rtb.Robot2):
+                    using_backend = "pyplot2"
+                else:
+                    using_backend = "pyplot"
+            else:
+                # Infer from robot type and robot-level default override
+                using_backend = self.default_backend
+                if using_backend is None:
+                    if isinstance(self, rtb.DHRobot):
+                        using_backend = "pyplot"
+                    elif isinstance(self, rtb.Robot2):
+                        using_backend = "pyplot2"
+                    elif isinstance(self, rtb.Robot):
+                        using_backend = "swift" if self.hasgeometry else "pyplot"
+                    else:
+                        using_backend = "pyplot"
 
-        # Find the right backend, modules are imported here on an as needs
-        # basis
-        if using_backend == "swift" or default == "swift":  # pragma nocover
-            # swift was requested, is it installed?
+        # swift is optional; fall back to pyplot with a helpful message
+        if using_backend == "swift":  # pragma nocover
             if isinstance(self, rtb.DHRobot):
                 raise NotImplementedError(
                     "Plotting in Swift is not implemented for DHRobots yet"
                 )
             try:
-                # yes, use it
-                from roboticstoolbox.backends.swift import Swift
-
-                env = Swift()
-                return env
+                return load_backend("swift")
             except ModuleNotFoundError:
-                if using_backend == "swift":
-                    print("Swift is not installed, install it using pip or conda")
+                if backend is not None:
+                    # user explicitly asked for swift
+                    print(
+                        "Swift is not installed. "
+                        "Install it with: pip install swift-sim"
+                    )
                 using_backend = "pyplot"
 
-        if using_backend is None:
-            using_backend = default
-
-        if using_backend == "pyplot":
-            from roboticstoolbox.backends.PyPlot import PyPlot
-
-            env = PyPlot()
-
-        elif using_backend == "pyplot2":
-            from roboticstoolbox.backends.PyPlot import PyPlot2
-
-            env = PyPlot2()
-
-        else:
-            raise ValueError("unknown backend", backend)  # pragma nocover
-
-        return env
+        return load_backend(using_backend)
 
     def plot(
         self,
@@ -2243,7 +2233,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         movie: Union[str, None] = None,
         loop: bool = False,
         **kwargs,
-    ) -> Union[Swift, PyPlot, PyPlot2]:
+    ) -> Connector:
         """
         Graphical display and animation
 
@@ -2303,6 +2293,19 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         name
             (Plot Option) Plot the name of the robot near its base
             (this option is for 'pyplot' only)
+        render_mode
+            (Plot Option) Rendering mode for matplotlib backends:
+            ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``.
+            If omitted, an environment-appropriate mode is selected.
+        inline_every_n
+            (Plot Option) In notebook-inline mode, push one rendered frame
+            every N simulation steps. Larger N reduces output load.
+        inline_format
+            (Plot Option) In notebook-inline mode, frame format:
+            ``'svg'`` (default) or ``'png'``.
+        inline_dpi
+            (Plot Option) DPI for PNG inline frames only; ignored when
+            ``inline_format='svg'``.
 
         Returns
         -------
@@ -2329,25 +2332,38 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         env = self._get_graphical_backend(backend)
 
+        launch_kwargs = {}
+        for key in ("render_mode", "inline_every_n", "inline_format", "inline_dpi"):
+            if key in kwargs:
+                launch_kwargs[key] = kwargs.pop(key)
+
         q = np.array(getmatrix(q, (None, self.n)))
         self.q = q[0, :]
 
         # Add the self to the figure in readonly mode
         if q.shape[0] == 1:
-            env.launch(name=self.name + " Plot", limits=limits, fig=fig)
+            env.launch(
+                name=self.name + " Plot", limits=limits, fig=fig, **launch_kwargs
+            )
         else:
-            env.launch(name=self.name + " Trajectory Plot", limits=limits, fig=fig)
+            env.launch(
+                name=self.name + " Trajectory Plot",
+                limits=limits,
+                fig=fig,
+                **launch_kwargs,
+            )
 
         env.add(self, readonly=True, **kwargs)
+        self._active_plot_env = env
 
         if vellipse:
-            vell = self.vellipse(q[0], centre="ee")
+            vell = self.vellipse(q[0], centre="ee", add=False)
             env.add(vell)
         else:
             vell = None
 
         if fellipse:
-            fell = self.fellipse(q[0], centre="ee")
+            fell = self.fellipse(q[0], centre="ee", add=False)
             env.add(fell)
         else:
             fell = None
@@ -2394,13 +2410,14 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         q: ArrayLike,
         opt: L["trans", "rot"] = "trans",  # noqa
         unit: L["rad", "deg"] = "rad",  # noqa
-        centre: Union[L["ee"], ArrayLike] = [0, 0, 0],  # noqa
+        centre: Union[L["ee"], ArrayLike] = "ee",  # noqa
+        add: bool = True,
     ) -> EllipsePlot:
         """
         Create a force ellipsoid object for plotting with PyPlot
 
         ``robot.fellipse(q)`` creates a force ellipsoid for the robot at
-        pose ``q``. The ellipsoid is centered at the origin.
+        pose ``q``. By default the ellipsoid is centered at the end-effector.
 
         Parameters
         ----------
@@ -2426,7 +2443,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         - By default the ellipsoid related to translational motion is
             drawn.  Use ``opt='rot'`` to draw the rotational velocity
             ellipsoid.
-        - By default the ellipsoid is drawn at the origin.  The option
+        - By default the ellipsoid is drawn at the end-effector.  The option
             ``centre`` allows its origin to set to set to the specified
             3-vector, or the string "ee" ensures it is drawn at the
             end-effector position.
@@ -2438,6 +2455,10 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         q = getunit(q, unit)
         ell = EllipsePlot(self, q, "f", opt, centre=centre)
+
+        if add:
+            self._maybe_add_ellipse_to_active_env(ell)
+
         return ell
 
     def vellipse(
@@ -2445,14 +2466,15 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         q: ArrayLike,
         opt: L["trans", "rot"] = "trans",  # noqa
         unit: L["rad", "deg"] = "rad",  # noqa
-        centre: Union[L["ee"], ArrayLike] = [0, 0, 0],  # noqa
+        centre: Union[L["ee"], ArrayLike] = "ee",  # noqa
         scale: float = 0.1,
+        add: bool = True,
     ) -> EllipsePlot:
         """
         Create a velocity ellipsoid object for plotting with PyPlot
 
         ``robot.vellipse(q)`` creates a force ellipsoid for the robot at
-        pose ``q``. The ellipsoid is centered at the origin.
+        pose ``q``. By default the ellipsoid is centered at the end-effector.
 
         Parameters
         ----------
@@ -2480,7 +2502,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         - By default the ellipsoid related to translational motion is
             drawn.  Use ``opt='rot'`` to draw the rotational velocity
             ellipsoid.
-        - By default the ellipsoid is drawn at the origin.  The option
+        - By default the ellipsoid is drawn at the end-effector.  The option
             ``centre`` allows its origin to set to set to the specified
             3-vector, or the string "ee" ensures it is drawn at the
             end-effector position.
@@ -2492,7 +2514,28 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
 
         q = getunit(q, unit)
         ell = EllipsePlot(self, q, "v", opt, centre=centre, scale=scale)
+
+        if add:
+            self._maybe_add_ellipse_to_active_env(ell)
+
         return ell
+
+    def _maybe_add_ellipse_to_active_env(self, ellipse: EllipsePlot) -> None:
+        """
+        Add ellipse to the most recently active PyPlot environment, if available.
+        """
+        env = self._active_plot_env
+        if env is None:
+            return
+
+        if type(env).__name__ not in ("PyPlot", "PyPlot2"):
+            return
+
+        try:
+            env.add(ellipse)
+        except Exception:
+            # Environment may be stale/closed; ignore in this convenience path.
+            pass
 
     def plot_ellipse(
         self,
@@ -2503,7 +2546,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         eeframe: bool = True,
         shadow: bool = True,
         name: bool = True,
-    ):
+    ) -> PyPlot:
         """
         Plot the an ellipsoid
 
@@ -2565,7 +2608,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         fellipse: Union[EllipsePlot, None] = None,
         limits: Union[ArrayLike, None] = None,
         opt: L["trans", "rot"] = "trans",  # noqa
-        centre: Union[L["ee"], ArrayLike] = [0, 0, 0],  # noqa
+        centre: Union[L["ee"], ArrayLike] = "ee",  # noqa
         jointaxes: bool = True,
         eeframe: bool = True,
         shadow: bool = True,
@@ -2640,8 +2683,8 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             )
 
         if fellipse is None and q is not None:
-            fellipse = self.fellipse(q, opt=opt, centre=centre)
-        else:
+            fellipse = self.fellipse(q, opt=opt, centre=centre, add=False)
+        elif fellipse is None:
             raise ValueError("Must specify either q or fellipse")  # pragma: nocover
 
         return self.plot_ellipse(
@@ -2661,7 +2704,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         vellipse: Union[EllipsePlot, None] = None,
         limits: Union[ArrayLike, None] = None,
         opt: L["trans", "rot"] = "trans",  # noqa
-        centre: Union[L["ee"], ArrayLike] = [0, 0, 0],  # noqa
+        centre: Union[L["ee"], ArrayLike] = "ee",  # noqa
         jointaxes: bool = True,
         eeframe: bool = True,
         shadow: bool = True,
@@ -2734,9 +2777,9 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             )
 
         if vellipse is None and q is not None:
-            vellipse = self.vellipse(q=q, opt=opt, centre=centre)
-        else:
-            raise ValueError("Must specify either q or fellipse")  # pragma: nocover
+            vellipse = self.vellipse(q=q, opt=opt, centre=centre, add=False)
+        elif vellipse is None:
+            raise ValueError("Must specify either q or vellipse")  # pragma: nocover
 
         return self.plot_ellipse(
             vellipse,
@@ -2756,7 +2799,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         vellipse: bool = False,
         fellipse: bool = False,
         backend: Union[L["pyplot", "pyplot2"], None] = None,  # noqa
-    ) -> Union[PyPlot, PyPlot2]:
+    ) -> Connector:
         """
         Graphical teach pendant
 
@@ -2811,7 +2854,7 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
         # Make an empty 3D figure
         env = self._get_graphical_backend(backend)
 
-        if isinstance(env, Swift):  # pragma: nocover
+        if type(env).__name__ == "Swift":  # pragma: nocover
             raise TypeError("teach() not supported for Swift backend")
 
         # Add the self to the figure in readonly mode
@@ -2825,15 +2868,16 @@ class BaseRobot(SceneNode, DynamicsMixin, ABC, Generic[LinkType]):
             # shadow=shadow,
             # name=name,
         )
+        self._active_plot_env = env
 
         env._add_teach_panel(self, q)
 
         if vellipse:
-            vell = self.vellipse(q, centre="ee", scale=0.5)
+            vell = self.vellipse(q, centre="ee", scale=0.5, add=False)
             env.add(vell)
 
         if fellipse:
-            fell = self.fellipse(q, centre="ee")
+            fell = self.fellipse(q, centre="ee", add=False)
             env.add(fell)
 
         # Keep the plot open

@@ -1467,6 +1467,40 @@ class TestDHRobot(unittest.TestCase):
         e = panda.plot(panda.qr, block=False, fellipse=True, backend="pyplot")
         e.close()
 
+    def test_vellipse_autoads_and_centres_on_ee(self):
+        puma = rp.models.DH.Puma560()
+        env = puma.plot(puma.qn, block=False, backend="pyplot")
+
+        ell = puma.vellipse(puma.qn, "trans")
+
+        self.assertTrue(any(e is ell for e in env.ellipses))
+
+        # Trigger draw so x/y/z are available for center check
+        env.step()
+
+        ee = puma.fkine(puma.qn).t
+        center = np.array([np.mean(ell.x), np.mean(ell.y), np.mean(ell.z)])
+        nt.assert_allclose(center, ee, atol=0.05)
+
+        env.close()
+
+    def test_fellipse_autoads_and_centres_on_ee(self):
+        puma = rp.models.DH.Puma560()
+        env = puma.plot(puma.qn, block=False, backend="pyplot")
+
+        ell = puma.fellipse(puma.qn, "trans")
+
+        self.assertTrue(any(e is ell for e in env.ellipses))
+
+        # Trigger draw so x/y/z are available for center check
+        env.step()
+
+        ee = puma.fkine(puma.qn).t
+        center = np.array([np.mean(ell.x), np.mean(ell.y), np.mean(ell.z)])
+        nt.assert_allclose(center, ee, atol=0.05)
+
+        env.close()
+
     def test_str(self):
         r0 = rp.models.DH.Puma560()
         r1 = rp.models.DH.Panda()

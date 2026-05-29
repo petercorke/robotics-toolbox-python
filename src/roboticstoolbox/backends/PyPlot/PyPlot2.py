@@ -9,9 +9,15 @@ from roboticstoolbox.backends.Connector import Connector
 from roboticstoolbox.backends.PyPlot.RobotPlot2 import RobotPlot2
 from roboticstoolbox.backends.PyPlot.EllipsePlot import EllipsePlot
 import time
+import io
+import sys
 from spatialmath import SE2
 
 _mpl = False
+_ipy_display = None
+_ipy_image = None
+_ipy_svg = None
+_ipy_clear_output = None
 
 try:
     import matplotlib
@@ -31,6 +37,14 @@ try:
 except ImportError:  # pragma nocover
     pass
 
+try:
+    from IPython.display import display as _ipy_display
+    from IPython.display import Image as _ipy_image
+    from IPython.display import SVG as _ipy_svg
+    from IPython.display import clear_output as _ipy_clear_output
+except ImportError:  # pragma nocover
+    pass
+
 
 class PyPlot2(Connector):
     def __init__(self):
@@ -39,6 +53,13 @@ class PyPlot2(Connector):
         self.robots = []
         self.ellipses = []
         self.sim_time = 0
+        self.render_mode = "window"
+        self.inline_every_n = 1
+        self.inline_format = "svg"
+        self.inline_dpi = None
+        self._inline_step_count = 0
+        self._inline_display_handle = None
+        self._inline_is_jl = False
 
         if not _mpl:  # pragma nocover
             raise ImportError(
@@ -62,9 +83,35 @@ class PyPlot2(Connector):
         """
         env = launch() launchs a blank 2D matplotlib figure
 
+        Optional keyword arguments
+        --------------------------
+        render_mode
+            One of ``'window'``, ``'notebook-widget'``, or ``'notebook-inline'``.
+        inline_every_n
+            Push one inline frame every N simulation steps (inline mode only).
+        inline_format
+            Inline frame format: ``'svg'`` (default) or ``'png'``.
+        inline_dpi
+            DPI for PNG inline frames only. Ignored for SVG.
+
         """
 
         super().launch()
+
+        self.render_mode = _resolve_render_mode(kwargs.get("render_mode"))
+        self.inline_every_n = max(1, int(kwargs.get("inline_every_n", 1)))
+        self.inline_format = kwargs.get("inline_format", "svg")
+        if self.inline_format not in ["png", "svg"]:
+            raise ValueError("inline_format must be either 'png' or 'svg'")
+        inline_dpi = kwargs.get("inline_dpi", None)
+        if inline_dpi is not None:
+            inline_dpi = float(inline_dpi)
+            if inline_dpi <= 0:
+                raise ValueError("inline_dpi must be > 0")
+        self.inline_dpi = inline_dpi
+        self._inline_step_count = 0
+        self._inline_display_handle = None
+        self._inline_is_jl = sys.platform == "emscripten"
 
         labels = ["X", "Y"]
 
@@ -95,8 +142,22 @@ class PyPlot2(Connector):
 
         self.ax.axis("equal")
 
-        plt.ion()
-        plt.show()
+        # In inline notebook mode (notably JupyterLite), keeping this figure
+        # registered with pyplot can trigger repeated auto-display of blank
+        # Figure reprs. Detach it and drive rendering via _push_inline_frame().
+        if self.render_mode == "notebook-inline":
+            plt.close(self.fig)
+
+        if self.render_mode == "window":
+            plt.ion()
+            plt.show()
+        else:
+            if self.render_mode == "notebook-inline":
+                plt.ioff()
+            else:
+                plt.ion()
+            if self.render_mode != "notebook-inline":
+                self.fig.canvas.draw()
 
         # Set the signal handler and a 0.1 second plot updater
         # signal.signal(signal.SIGALRM, self._plot_handler)
@@ -126,13 +187,18 @@ class PyPlot2(Connector):
         self._draw_robots()
         # plt.ion()
 
-        if _isnotebook():
-            plt.draw()
-            self.fig.canvas.draw()
-            time.sleep(dt)
-        else:
+        if self.render_mode == "window":
             plt.draw()
             plt.pause(dt)
+        elif self.render_mode == "notebook-widget":
+            plt.draw()
+            self.fig.canvas.draw_idle()
+            time.sleep(dt)
+        else:
+            if self._inline_step_count % self.inline_every_n == 0:
+                self._push_inline_frame()
+            self._inline_step_count += 1
+            time.sleep(dt)
 
         self._update_robots()
 
@@ -187,6 +253,13 @@ class PyPlot2(Connector):
             ob.ax = self.ax
             self.ellipses.append(ob)
             self.ellipses[len(self.ellipses) - 1].draw2()
+
+        if self.render_mode == "notebook-inline":
+            # Push a frame immediately so static ellipse plots render without step().
+            self._push_inline_frame()
+        else:
+            plt.draw()
+            plt.show(block=False)
 
     def remove(self):
         """
@@ -250,6 +323,35 @@ class PyPlot2(Connector):
         for i in range(len(self.ellipses)):
             self.ellipses[i].draw2()
 
+    def _push_inline_frame(self):
+        # Push a snapshot into notebook output for inline animation.
+        if _ipy_display is None:
+            return
+
+        buf = io.BytesIO()
+        if self.inline_format == "svg":
+            if _ipy_svg is None:
+                return
+            self.fig.savefig(buf, format="svg")
+            frame = _ipy_svg(data=buf.getvalue().decode("utf-8"))
+        else:
+            if _ipy_image is None:
+                return
+            self.fig.savefig(buf, format="png", dpi=self.inline_dpi)
+            frame = _ipy_image(data=buf.getvalue())
+
+        if self._inline_is_jl and _ipy_clear_output is not None:
+            _ipy_clear_output(wait=True)
+            _ipy_display(frame)
+            return
+
+        if self._inline_display_handle is None:
+            self._inline_display_handle = _ipy_display(frame, display_id=True)
+        elif hasattr(self._inline_display_handle, "update"):
+            self._inline_display_handle.update(frame)
+        else:
+            _ipy_display(frame)
+
     # def _plot_handler(self, sig, frame):
     #     plt.pause(0.001)
 
@@ -281,6 +383,15 @@ class PyPlot2(Connector):
                     robot.q[j] = np.radians(self.sjoint[j].val)
                 else:
                     robot.q[j] = self.sjoint[j].val
+
+            teach_vellipse = getattr(self, "_teach_vellipse", None)
+            if teach_vellipse is not None:
+                teach_vellipse.q = robot.q
+
+            teach_fellipse = getattr(self, "_teach_fellipse", None)
+            if teach_fellipse is not None:
+                teach_fellipse.q = robot.q
+
             text_trans(text, robot.q)
 
         fig.subplots_adjust(left=0.38)
@@ -368,15 +479,22 @@ class PyPlot2(Connector):
 
 def _isnotebook():
     """
-    Determine if code is being run from a Jupyter notebook
+    Determine if code is being run from a Jupyter notebook or JupyterLite
 
-    ``_isnotebook`` is True if running Jupyter notebook, else False
+    ``_isnotebook`` is True if running Jupyter notebook, JupyterLite, or similar, else False
 
     :references:
 
         - https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-
         is-executed-in-the-ipython-notebook/39662359#39662359
     """
+    import sys
+
+    # Check if running in Pyodide/JupyterLite
+    if sys.platform == "emscripten":
+        return True
+
+    # Fall back to checking IPython shell type
     try:
         shell = get_ipython().__class__.__name__
         if shell == "ZMQInteractiveShell":
@@ -387,3 +505,22 @@ def _isnotebook():
             return False  # Other type (?)
     except NameError:
         return False  # Probably standard Python interpreter
+
+
+def _resolve_render_mode(render_mode=None):
+    if render_mode is not None:
+        if render_mode not in ["window", "notebook-widget", "notebook-inline"]:
+            raise ValueError(
+                "render_mode must be one of 'window', "
+                "'notebook-widget', or 'notebook-inline'"
+            )
+        return render_mode
+
+    if not _isnotebook():
+        return "window"
+
+    backend = matplotlib.get_backend().lower()
+    if "ipympl" in backend or "widget" in backend or "nbagg" in backend:
+        return "notebook-widget"
+
+    return "notebook-inline"

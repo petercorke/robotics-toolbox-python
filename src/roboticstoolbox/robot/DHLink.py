@@ -13,7 +13,6 @@ from spatialmath import SE3
 from typing import List, Union
 from functools import wraps
 from numpy import ndarray, cos, sin, array
-from spatialgeometry import Shape
 from copy import deepcopy
 
 # _eps = np.finfo(np.float64).eps

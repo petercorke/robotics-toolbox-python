@@ -4,6 +4,7 @@
 """
 
 import numpy as np
+import warnings
 
 # import scipy as sp
 from spatialmath import base
@@ -68,10 +69,18 @@ class EllipsePlot:
 
         self.ell = None
         self.robot = robot
-        self.opt = opt
+        self.opt = str(opt).lower()
         self.centre = centre
         self.ax = None
         self.scale = scale
+        self._valid_opt = self.opt in ("trans", "rot")
+
+        if not self._valid_opt:
+            warnings.warn(
+                f"Invalid ellipse opt={opt!r}. Expected 'trans' or 'rot'; ellipse will not be drawn.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
 
         if q is None:
             self.q = robot.q
@@ -86,7 +95,9 @@ class EllipsePlot:
             self.name = "Force Ellipse"
 
     def draw(self):
-        self.make_ellipsoid()
+        ok = self.make_ellipsoid()
+        if not ok:
+            return
 
         if self.ell is not None:
             self.ell.remove()
@@ -100,7 +111,9 @@ class EllipsePlot:
         )
 
     def draw2(self):
-        self.make_ellipsoid2()
+        ok = self.make_ellipsoid2()
+        if not ok:
+            return
 
         if self.ell is not None:
             self.ell[0].set_data(self.x, self.y)
@@ -134,16 +147,27 @@ class EllipsePlot:
 
         """
 
+        if not self._valid_opt:
+            return False
+
         if self.opt == "trans":
-            J = self.robot.jacobe(self.q)[3:, :]
+            J = self.robot.jacobe(self.q)[:3, :]
             A = J @ J.T
         elif self.opt == "rot":
-            J = self.robot.jacobe(self.q)[:3, :]
+            J = self.robot.jacobe(self.q)[3:, :]
             A = J @ J.T
 
         if not self.vell:
             # Do the extra step for the force ellipse
-            A = np.linalg.inv(A)
+            try:
+                A = np.linalg.inv(A)
+            except np.linalg.LinAlgError:
+                warnings.warn(
+                    "Force ellipsoid is singular at this configuration; skipping ellipse draw.",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
+                return False
 
         if isinstance(self.centre, str) and self.centre == "ee":
             centre = self.robot.fkine(self.q).t
@@ -152,6 +176,13 @@ class EllipsePlot:
 
         # find the rotation matrix and radii of the axes
         U, s, rotation = np.linalg.svd(A)
+        if np.any(s <= 0):
+            warnings.warn(
+                "Ellipsoid matrix is not positive definite; skipping ellipse draw.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            return False
         radii = 1.0 / np.sqrt(s)
 
         # points on unit sphere
@@ -171,6 +202,7 @@ class EllipsePlot:
         self.x = x * self.scale + centre[0]
         self.y = y * self.scale + centre[1]
         self.z = z * self.scale + centre[2]
+        return True
 
     def make_ellipsoid2(self):
         """
@@ -178,13 +210,19 @@ class EllipsePlot:
 
         """
 
+        if not self._valid_opt:
+            return False
+
         if self.opt == "trans":
             J = self.robot.jacob0(self.q)[:2, :]
             A = J @ J.T
         elif self.opt == "rot":
-            raise ValueError(
-                "Can not do rotational ellipse for a 2d robot plot. Set opt='trans'"
+            warnings.warn(
+                "Cannot draw rotational ellipse for a 2D robot plot; skipping ellipse draw.",
+                RuntimeWarning,
+                stacklevel=2,
             )
+            return False
 
         # velocity ellipsoid is E = A^-1
         # force ellipsoid is E = A
@@ -198,6 +236,18 @@ class EllipsePlot:
         else:
             centre = self.centre
 
-        x, y = base.ellipse(A, inverted=self.vell, centre=centre[:2], scale=self.scale)
+        try:
+            x, y = base.ellipse(
+                A, inverted=self.vell, centre=centre[:2], scale=self.scale
+            )
+        except np.linalg.LinAlgError:
+            warnings.warn(
+                "Ellipse is singular at this configuration; skipping ellipse draw.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            return False
+
         self.x = x
         self.y = y
+        return True
