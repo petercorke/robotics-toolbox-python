@@ -3,6 +3,31 @@ import sys
 import importlib
 
 
+def _candidate_rtbdata_roots():
+    """
+    Yield candidate roots where the ``rtbdata`` tree may exist.
+    """
+    roots = []
+
+    # Primary source: installed/importable rtbdata package.
+    rtbdata = importlib.import_module("rtbdata")
+    roots.append(Path(rtbdata.__path__[0]))
+
+    # Dev fallback: local sibling checkout at <repo>/rtb-data/rtbdata.
+    repo_root = Path(__file__).resolve().parents[3]
+    local_rtbdata = repo_root / "rtb-data" / "rtbdata"
+    if local_rtbdata.exists():
+        roots.append(local_rtbdata)
+
+    # Preserve order while removing duplicates.
+    seen = set()
+    for root in roots:
+        root = root.resolve()
+        if root not in seen:
+            seen.add(root)
+            yield root
+
+
 def rtb_load_matfile(filename):
     """
     Load toolbox mat format data file
@@ -145,16 +170,13 @@ def rtb_path_to_datafile(*filename, local=True):
         if p.exists():
             return p
 
-    # otherwise, look for it in rtbdata
+    # otherwise, look for it in rtbdata locations
+    for root in _candidate_rtbdata_roots():
+        path = root / filename
+        if path.exists():
+            return path.resolve()
 
-    rtbdata = importlib.import_module("rtbdata")
-    root = Path(rtbdata.__path__[0])
-
-    path = root / filename
-    if path.exists():
-        return path.resolve()
-    else:
-        raise ValueError(f"file {filename} not found locally or in rtbdata")
+    raise ValueError(f"file {filename} not found locally or in rtbdata")
 
 
 if __name__ == "__main__":
