@@ -14,4 +14,5 @@ kinematic or kino-dynamic models.  They provide methods to:
    mobile-vehicle-bicycle
    mobile-vehicle-unicycle
    mobile-vehicle-diffsteer
+   mobile-vehicle-vehicle
    mobile-vehicle-base

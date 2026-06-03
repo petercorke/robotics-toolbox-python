@@ -10,6 +10,7 @@ import numpy.testing as nt
 
 # import sympy
 import pytest
+from tests.marks import skip_no_qp
 
 test_tol = 1e-5
 
@@ -311,6 +312,7 @@ class TestIK(unittest.TestCase):
 
         self.assertGreater(test_tol, E)
 
+    @skip_no_qp
     def test_IK_QP1(self):
 
         q0 = np.array(
@@ -343,6 +345,7 @@ class TestIK(unittest.TestCase):
 
         self.assertGreater(test_tol, E)
 
+    @skip_no_qp
     def test_IK_QP2(self):
 
         q0 = np.array(
@@ -375,6 +378,7 @@ class TestIK(unittest.TestCase):
 
         self.assertGreater(test_tol, E)
 
+    @skip_no_qp
     def test_IK_QP3(self):
 
         tol = 1e-6
@@ -530,6 +534,7 @@ class TestIK(unittest.TestCase):
 
         self.assertGreater(test_tol, E)
 
+    @skip_no_qp
     def test_ets_ikine_QP1(self):
 
         q0 = np.array(
@@ -562,6 +567,7 @@ class TestIK(unittest.TestCase):
 
         self.assertGreater(test_tol, E)
 
+    @skip_no_qp
     def test_ets_ikine_QP2(self):
 
         q0 = np.array(
@@ -842,5 +848,4 @@ class TestIK(unittest.TestCase):
 
 
 if __name__ == "__main__":
-
     unittest.main()

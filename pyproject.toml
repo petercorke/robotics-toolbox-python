@@ -4,7 +4,7 @@ name = "roboticstoolbox-python"
 
 description = "A Python library for robotics education and research"
 
-version = "1.1.1"
+version = "1.2.0"
 
 authors = [
     { name = "Jesse Haviland", email = "j.haviland@qut.edu.au" },
@@ -12,24 +12,26 @@ authors = [
 ]
 
 dependencies = [
-    "numpy>=1.17.4",
-    "spatialmath-python>=1.1.5",
-    "spatialgeometry>=1.0.0",
+    "numpy",
+    # "spatialmath-python>=1.1.5",
+    "spatialmath-python @ git+https://github.com/petercorke/spatialmath-python.git@good",
+    # "spatialgeometry>=1.0.0",
+    "spatialgeometry @ git+https://github.com/petercorke/spatialgeometry.git@future",
     "pgraph-python",
     "scipy",
     "matplotlib",
     "ansitable",
-    "swift-sim>=1.0.0",
     "rtb-data",
     "progress",
     "typing_extensions",
+    "colored>2.0.0",
 ]
 
 license = { file = "LICENSE" }
 
 readme = "README.md"
 
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 
 keywords = [
     "python",
@@ -54,36 +56,59 @@ classifiers = [
     # Pick your license as you wish (should match "license" above)
     "License :: OSI Approved :: MIT License",
     # Specify the Python versions you support here.
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 
 [project.urls]
-homepage = "https://github.com/petercorke/robotics-toolbox-python"
+homepage = "https://petercorke.github.io/robotics-toolbox-python/"
 documentation = "https://petercorke.github.io/robotics-toolbox-python/"
 repository = "https://github.com/petercorke/robotics-toolbox-python"
 
 
 [project.optional-dependencies]
 
-collision = ["pybullet"]
+swift = ["swift-sim>=1.0.0", "websockets<11"]
+
+# pybullet has no arm64 wheel; on Apple Silicon install manually:
+#   CC=/usr/bin/clang CXX=/usr/bin/clang++ \
+#   CFLAGS="-Wno-error -Wno-implicit-function-declaration" \
+#   pip install pybullet
+bullet = ["pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'"]
+
+# Backward-compatible alias for previous extra name.
+collision = [
+    "pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'",
+]
+
+qp = ["qpsolvers", "quadprog"]
+
+all = [
+    "swift-sim>=1.0.0",
+    "websockets<11",
+    "qpsolvers",
+    "quadprog",
+    "pybullet; platform_machine != 'arm64' or sys_platform != 'darwin'",
+]
 
 dev = [
-    "black",
     "pytest",
     "pytest-cov",
-    "flake8",
+    "pytest-timeout",
+    "pytest-nbmake",
     "pyyaml",
     "sympy",
     "qpsolvers",
     "quadprog",
-    "pybullet",
     "bdsim",
+    "ruff",
 ]
+
+# Backward-compatible alias; notebook tooling is included in "dev".
+nb = ["pytest-nbmake"]
 
 docs = [
     "sphinx",
@@ -104,101 +129,55 @@ rtbtool = "roboticstoolbox.bin.rtbtool:main"
 
 [build-system]
 
-requires = ["setuptools", "oldest-supported-numpy"]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core>=0.9", "numpy"]
+build-backend = "scikit_build_core.build"
 
 
-[tool.setuptools]
-
-packages = [
-    "roboticstoolbox",
-    "roboticstoolbox.backends",
-    "roboticstoolbox.backends.PyPlot",
-    "roboticstoolbox.backends.swift",
-    "roboticstoolbox.bin",
-    "roboticstoolbox.blocks",
-    "roboticstoolbox.examples",
-    "roboticstoolbox.bin",
-    "roboticstoolbox.robot",
-    "roboticstoolbox.mobile",
-    "roboticstoolbox.models",
-    "roboticstoolbox.models.DH",
-    "roboticstoolbox.models.ETS",
-    "roboticstoolbox.models.URDF",
-    "roboticstoolbox.tools",
-    "roboticstoolbox.tools.urdf",
-    "roboticstoolbox.tools.xacro",
+[tool.scikit-build]
+wheel.packages = ["src/roboticstoolbox"]
+sdist.include = [
+    "src/roboticstoolbox",
+    "tests",
+    "CMakeLists.txt",
+    "README.md",
+    "LICENSE",
 ]
 
 
-[tool.black]
-
+[tool.ruff]
 line-length = 88
-target_version = ['py37']
-args = '--experimental-string-processing'
+exclude = [".git", "build", "dist", "docs", ".venv", ".tox"]
 
-include = '\.pyi?$'
-exclude = '''
+[tool.ruff.lint]
+ignore = ["F821", "E741", "E203"]
 
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | \.github
-    | _build
-    | buck-out
-    | build
-    | dist
-    | docs
-  )/
-)
-'''
-
-
-[tool.flake8]
-
-ignore = ['F821', 'W503', 'E741']
-max-line-length = 88
-extend-ignore = 'E203'
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
 
 
 [tool.cibuildwheel]
 
-# Will cause the wheel to be installed with `pip install <wheel_file>[dev,collision]`
-# test-extras = ["dev", "collision"]
-# test-requires = "pytest"
-# test-command = "pytest {project}/tests"
-
-manylinux-x86_64-image = "manylinux2014"
-manylinux-aarch64-image = "manylinux2014"
-
-# Build CPython 3.7 - 3.11
-build = ["cp37-*", "cp38-*", "cp39-*", "cp310-*", "cp311-*"]
-
-# Disable building musllinux wheels on all platforms
-skip = ["pp*", "*musllinux*"]
-
+build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+skip = ["*musllinux*"]
 
 [tool.cibuildwheel.macos]
-
-# Build `x86_64` and `arm64` wheels on an Intel runner.
-# Note that the `arm64` wheel cannot be tested in this configuration.
 archs = ["x86_64", "arm64"]
 
 [tool.cibuildwheel.linux]
-
-# On an Linux Intel runner with qemu installed, build Intel and ARM wheels
 archs = ["x86_64", "aarch64"]
 
 [tool.cibuildwheel.windows]
+archs = ["AMD64"]
 
-# On an Windows Intel runner build wheels
-archs = ["AMD64", "x86"]
+[tool.cibuildwheel.pyodide]
+# Pyodide (wasm32-emscripten) — used by JupyterLite
+# cibuildwheel manages the Emscripten SDK; scikit-build-core picks up
+# the toolchain file automatically from the PYODIDE environment.
 
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
 
 [tool.coverage.run]
-omit = ["roboticstoolbox/examples/*", "test_*.py"]
+omit = ["src/roboticstoolbox/examples/*", "test_*.py"]

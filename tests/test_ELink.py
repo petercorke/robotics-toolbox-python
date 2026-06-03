@@ -11,6 +11,7 @@ import spatialgeometry as gm
 import unittest
 import spatialmath as sm
 from roboticstoolbox.robot.Link import BaseLink
+from tests.marks import skip_no_pybullet
 
 
 class TestLink(unittest.TestCase):
@@ -175,6 +176,7 @@ qlim  =      -2.8 to      2.8""",  # noqa
         with self.assertRaises(TypeError):
             l0.B = [1, 2]  # type: ignore
 
+    @skip_no_pybullet
     def test_collision(self):
         p = rtb.models.Panda()
         link = p.links[1]
@@ -213,6 +215,7 @@ qlim  =      -2.8 to      2.8""",  # noqa
     #     with self.assertRaises(TypeError):
     #         l0.geometry = 1  # type: ignore
 
+    @skip_no_pybullet
     def test_dist(self):
         s0 = gm.Cuboid([1, 1, 1], pose=sm.SE3(0, 0, 0))
         s1 = gm.Cuboid([1, 1, 1], pose=sm.SE3(3, 0, 0))
@@ -227,6 +230,7 @@ qlim  =      -2.8 to      2.8""",  # noqa
         self.assertAlmostEqual(d1, 2.44)  # type: ignore
         self.assertAlmostEqual(d2, None)  # type: ignore
 
+    @skip_no_pybullet
     def test_collided(self):
         s0 = gm.Cuboid([1, 1, 1], pose=sm.SE3(0, 0, 0))
         s1 = gm.Cuboid([1, 1, 1], pose=sm.SE3(3, 0, 0))
@@ -275,6 +279,7 @@ qlim  =      -2.8 to      2.8""",  # noqa
         with self.assertRaises(ValueError):
             link.qlim = [1.0, 2.0]
 
+    @skip_no_pybullet
     def test_set_collision(self):
         e1 = rtb.ETS(rtb.ET.Ry())
         link = rtb.Link(e1)
@@ -285,6 +290,7 @@ qlim  =      -2.8 to      2.8""",  # noqa
 
         self.assertEqual(link.collision[0], s1)
 
+    @skip_no_pybullet
     def test_set_collision2(self):
         e1 = rtb.ETS(rtb.ET.Ry())
         link = rtb.Link(e1)

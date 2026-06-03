@@ -1,0 +1,130 @@
+# Run tests, coverage, and build docs across all supported platforms
+# Triggers on pushes/PRs to main and the active dev branch.
+#
+# spatialgeometry and swift-sim are installed from GitHub HEAD because the
+# current PyPI releases were compiled against NumPy 1.x and crash under 2.x.
+# Once numpy-2-compatible releases are published, remove those two steps and
+# use plain `pip install .[dev]`.
+
+name: CI
+
+on:
+  push:
+    branches: [main, future]
+  pull_request:
+    branches: [main, future]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  MPLBACKEND: Agg
+  QT_QPA_PLATFORM: offscreen
+
+jobs:
+  test-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package (core, no swift)
+        run: pip install .[dev]
+
+      - name: Test (core)
+        run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        exclude:
+          - os: windows-latest
+            python-version: "3.13"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
+        run: |
+            pip install "websockets<11"
+            pip install git+https://github.com/petercorke/spatialgeometry.git@future
+            pip install git+https://github.com/petercorke/swift.git@future
+
+      - name: Install package
+        run: pip install .[dev]
+
+      - name: Test
+        run: pytest tests/ --ignore=tests/test_blocks.py --timeout=50 --timeout_method=thread -q
+
+  coverage:
+    needs: [test-core, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
+        run: |
+          pip install "websockets<11"
+          pip install git+https://github.com/petercorke/spatialgeometry.git@future
+          pip install git+https://github.com/petercorke/swift.git@future
+
+      - name: Install package
+        run: pip install .[dev]
+
+      - name: Run coverage
+        run: pytest tests/ --ignore=tests/test_blocks.py --cov=src/roboticstoolbox --cov-report=xml:coverage.xml -q
+
+      - uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+
+  docs:
+    needs: [test-core, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
+        run: |
+          pip install "websockets<11"
+          pip install git+https://github.com/petercorke/spatialgeometry.git@future
+          pip install git+https://github.com/petercorke/swift.git@future
+
+      - name: Install docs dependencies
+        run: |
+          pip install .[docs]
+          pip install git+https://github.com/petercorke/sphinx-autorun.git sympy
+          sudo apt-get install -y graphviz
+
+      - name: Build docs
+        # TODO: add -W once warning count reaches zero
+        run: |
+          cd docs && make SPHINXOPTS="--keep-going" html
+          touch build/html/.nojekyll
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/build/html

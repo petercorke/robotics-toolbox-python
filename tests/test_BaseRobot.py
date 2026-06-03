@@ -10,7 +10,6 @@ from roboticstoolbox import Link, ETS, ET, Robot
 from spatialmath import SE3
 import unittest
 from copy import deepcopy
-from swift import Swift
 
 from roboticstoolbox.robot.Robot import BaseRobot
 
@@ -623,7 +622,8 @@ class TestBaseRobot(unittest.TestCase):
 
         be = r._get_graphical_backend()
 
-        self.assertTrue(isinstance(be, Swift))
+        # swift is optional; default backend falls back to PyPlot if unavailable.
+        self.assertIn(type(be).__name__, ["Swift", "PyPlot"])
 
     def test_teach(self):
         robot = rtb.models.ETS.Panda()
