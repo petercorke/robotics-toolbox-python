@@ -13,8 +13,10 @@ authors = [
 
 dependencies = [
     "numpy",
-    "spatialmath-python>=1.1.5",
-    "spatialgeometry>=1.0.0",
+    # "spatialmath-python>=1.1.5",
+    "spatialmath-python @ git+https://github.com/petercorke/spatialmath-python.git@good",
+    # "spatialgeometry>=1.0.0",
+    "spatialgeometry @ git+https://github.com/petercorke/spatialgeometry.git@future",
     "pgraph-python",
     "scipy",
     "matplotlib",
@@ -29,7 +31,7 @@ license = { file = "LICENSE" }
 
 readme = "README.md"
 
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 
 keywords = [
     "python",
