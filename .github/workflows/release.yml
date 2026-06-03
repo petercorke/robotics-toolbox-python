@@ -45,6 +45,7 @@ jobs:
   build_pyodide:
     name: Build Pyodide (wasm32) wheel
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -53,9 +54,10 @@ jobs:
         env:
           CIBW_PLATFORM: pyodide
           CIBW_BUILD: cp313-*
-          CIBW_PYODIDE_VERSION: ${{ vars.PYODIDE_VERSION }}
+          CIBW_PYODIDE_VERSION: ${{ vars.PYODIDE_VERSION || '0.27.5' }}
 
       - uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: wheels-pyodide
           path: ./wheelhouse/*.whl
@@ -96,7 +98,7 @@ jobs:
         run: python -c "import roboticstoolbox; print('OK', roboticstoolbox.__version__)"
 
   upload_pypi:
-    needs: [build_wheels, build_pyodide, build_sdist, smoke_test]
+    needs: [build_wheels, build_sdist, smoke_test]
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
