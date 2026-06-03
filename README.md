@@ -8,7 +8,7 @@
 [![Anaconda version](https://anaconda.org/conda-forge/roboticstoolbox-python/badges/version.svg)](https://anaconda.org/conda-forge/roboticstoolbox-python)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/roboticstoolbox-python.svg)
 
-[![Build Status](https://github.com/petercorke/robotics-toolbox-python/workflows/Test/badge.svg?branch=main)](https://github.com/petercorke/robotics-toolbox-python/actions?query=workflow%3ATest)
+[![Build Status](https://github.com/petercorke/robotics-toolbox-python/workflows/CI/badge.svg?branch=main)](https://github.com/petercorke/robotics-toolbox-python/actions?query=workflow%3ACI)
 [![Coverage](https://codecov.io/gh/petercorke/robotics-toolbox-python/branch/main/graph/badge.svg)](https://codecov.io/gh/petercorke/robotics-toolbox-python)
 [![PyPI - Downloads](https://img.shields.io/pypi/dw/roboticstoolbox-python)](https://pypistats.org/packages/roboticstoolbox-python)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
