@@ -42,25 +42,23 @@ jobs:
           name: wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
-  build_pyodide:
-    name: Build Pyodide (wasm32) wheel
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build Pyodide wheel
-        uses: pypa/cibuildwheel@v2.23.3
-        env:
-          CIBW_PLATFORM: pyodide
-          CIBW_BUILD: cp313-*
-          CIBW_PYODIDE_VERSION: ${{ vars.PYODIDE_VERSION || '0.27.5' }}
-
-      - uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: wheels-pyodide
-          path: ./wheelhouse/*.whl
+  # build_pyodide:
+  #   name: Build Pyodide (wasm32) wheel
+  #   runs-on: ubuntu-latest
+  #   continue-on-error: true
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Build Pyodide wheel
+  #       uses: pypa/cibuildwheel@v2.23.3
+  #       env:
+  #         CIBW_PLATFORM: pyodide
+  #         CIBW_BUILD: cp313-*
+  #         CIBW_PYODIDE_VERSION: ${{ vars.PYODIDE_VERSION || '0.27.5' }}
+  #     - uses: actions/upload-artifact@v4
+  #       if: success()
+  #       with:
+  #         name: wheels-pyodide
+  #         path: ./wheelhouse/*.whl
 
   build_sdist:
     name: Build source distribution
