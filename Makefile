@@ -1,6 +1,7 @@
 .FORCE:
 
 BLUE=\033[0;34m
+TOML_IMPORT = import sys; tomllib = __import__('tomllib' if sys.version_info >= (3, 11) else 'tomli')
 BLACK=\033[0;30m
 
 help:
@@ -28,7 +29,7 @@ else
 endif
 
 test:
-	python -c "import tomllib, sys; tomllib.load(open('pyproject.toml','rb')); print('pyproject.toml OK')"
+	python -c "$(TOML_IMPORT); tomllib.load(open('pyproject.toml','rb')); print('pyproject.toml OK')"
 	pytest tests/ --ignore=tests/test_blocks.py
 
 test-notebooks:
@@ -89,7 +90,7 @@ wheel-pyodide-check: .FORCE
 	echo "Wheel tags look compatible with current cp313 runtime contract."
 
 upload: .FORCE
-	$(eval VERSION := $(shell python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])"))
+	$(eval VERSION := $(shell python -c "$(TOML_IMPORT); print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])"))
 	@echo "Uploading version $(VERSION) to PyPI"
 	twine upload dist/*
 	git tag -a v$(VERSION) -m "Release v$(VERSION)"
