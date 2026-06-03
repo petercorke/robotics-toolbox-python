@@ -54,6 +54,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
+      - name: Shorten TEMP path (Windows — avoids MAX_PATH breach during C++ compile)
+        if: runner.os == 'Windows'
+        run: |
+          New-Item -ItemType Directory -Force -Path C:\T | Out-Null
+          "TEMP=C:\T" >> $env:GITHUB_ENV
+          "TMP=C:\T"  >> $env:GITHUB_ENV
+
       - name: Install spatialgeometry + swift from source (NumPy 2 compatible)
         run: |
             pip install "websockets<11"
