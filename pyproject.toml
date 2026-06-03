@@ -98,7 +98,6 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-timeout",
-    "pytest-nbmake",
     "pyyaml",
     "sympy",
     "qpsolvers",
