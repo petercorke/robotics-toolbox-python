@@ -60,7 +60,7 @@ jobs:
           echo "PYODIDE_VERSION=${{ vars.PYODIDE_VERSION || '0.27.5' }}"
 
       - name: Build Pyodide wheel
-        uses: pypa/cibuildwheel@v2.23.3
+        uses: pypa/cibuildwheel@v3.4.1
         env:
           CIBW_PLATFORM: pyodide
           CIBW_BUILD_VERBOSITY: 2
