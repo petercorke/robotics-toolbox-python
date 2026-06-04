@@ -18,21 +18,24 @@ env:
 
 jobs:
   build_wheels:
-    name: Build wheels on ${{ matrix.os }}
+    name: Build wheels on ${{ matrix.os }} (${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # macos-14 = arm64; cibuildwheel also cross-compiles x86_64 (see pyproject.toml)
-        os: [ubuntu-latest, windows-latest, macos-14]
+        include:
+          - os: ubuntu-latest
+            arch: x86_64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+          - os: windows-latest
+            arch: x86_64
+          - os: macos-latest
+            arch: arm64
+          - os: macos-13
+            arch: x86_64
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up QEMU (Linux aarch64 emulation)
-        if: runner.os == 'Linux'
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.23.3  # pin; update to latest on each release
@@ -42,23 +45,34 @@ jobs:
           name: wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
-  # build_pyodide:
-  #   name: Build Pyodide (wasm32) wheel
-  #   runs-on: ubuntu-latest
-  #   continue-on-error: true
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Build Pyodide wheel
-  #       uses: pypa/cibuildwheel@v2.23.3
-  #       env:
-  #         CIBW_PLATFORM: pyodide
-  #         CIBW_BUILD: cp313-*
-  #         CIBW_PYODIDE_VERSION: ${{ vars.PYODIDE_VERSION || '0.27.5' }}
-  #     - uses: actions/upload-artifact@v4
-  #       if: success()
-  #       with:
-  #         name: wheels-pyodide
-  #         path: ./wheelhouse/*.whl
+  build_pyodide:
+    name: Build Pyodide (wasm32) wheel
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Diagnostics
+        run: |
+          python3 --version
+          pip3 --version
+          pip3 show cibuildwheel 2>/dev/null || echo "cibuildwheel not installed locally (normal)"
+          echo "PYODIDE_VERSION=${{ vars.PYODIDE_VERSION || '0.27.5' }}"
+
+      - name: Build Pyodide wheel
+        uses: pypa/cibuildwheel@v2.23.3
+        env:
+          CIBW_PLATFORM: pyodide
+          CIBW_BUILD: cp313-*
+          CIBW_ENABLE: pyodide
+          CIBW_PYODIDE_VERSION: ${{ vars.PYODIDE_VERSION || '0.27.5' }}
+          CIBW_BUILD_VERBOSITY: 2
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: wheels-pyodide
+          path: ./wheelhouse/*.whl
 
   build_sdist:
     name: Build source distribution
