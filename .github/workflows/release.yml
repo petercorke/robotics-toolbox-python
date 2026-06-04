@@ -107,7 +107,7 @@ jobs:
         run: python -c "import roboticstoolbox; print('OK', roboticstoolbox.__version__)"
 
   upload_pypi:
-    needs: [build_wheels, build_sdist, smoke_test]
+    needs: [build_wheels, build_pyodide, build_sdist, smoke_test]
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
