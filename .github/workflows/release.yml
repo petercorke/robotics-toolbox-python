@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.23.3  # pin; update to latest on each release
+        uses: pypa/cibuildwheel@v3.4.1
 
       - uses: actions/upload-artifact@v4
         with:
@@ -63,7 +63,6 @@ jobs:
         uses: pypa/cibuildwheel@v3.4.1
         env:
           CIBW_PLATFORM: pyodide
-          CIBW_BUILD_VERBOSITY: 2
 
       - uses: actions/upload-artifact@v4
         if: success()
