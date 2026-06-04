@@ -161,7 +161,7 @@ build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
 skip = ["*musllinux*"]
 
 [tool.cibuildwheel.macos]
-archs = ["auto"]  # native arch only; macos-latest=arm64, macos-13=x86_64 (separate runners)
+archs = ["auto"]  # arm64 only from macos-latest; x86_64 EOL
 
 [tool.cibuildwheel.linux]
 archs = ["auto"]  # native arch only; arm64 uses ubuntu-24.04-arm runner (no QEMU)
