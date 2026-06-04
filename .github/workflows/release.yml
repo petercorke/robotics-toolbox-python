@@ -63,8 +63,6 @@ jobs:
         uses: pypa/cibuildwheel@v2.23.3
         env:
           CIBW_PLATFORM: pyodide
-          CIBW_BUILD: cp313-*
-          CIBW_ENABLE: pyodide
           CIBW_PYODIDE_VERSION: ${{ vars.PYODIDE_VERSION || '0.27.5' }}
           CIBW_BUILD_VERBOSITY: 2
 
