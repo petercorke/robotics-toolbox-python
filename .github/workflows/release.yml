@@ -145,6 +145,8 @@ jobs:
         run: rm -f dist/*pyodide*.whl
 
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip_existing: true
 
   upload_pyodide_asset:
     name: Attach Pyodide wheel to GitHub release
