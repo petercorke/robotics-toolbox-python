@@ -23,6 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Check version
+        # Skip check on manual workflow_dispatch runs (no release tag exists)
+        if: github.event_name == 'release'
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           PKG=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
